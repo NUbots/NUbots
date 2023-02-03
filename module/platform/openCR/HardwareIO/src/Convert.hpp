@@ -30,8 +30,14 @@ namespace module::platform::openCR {
         uint8_t voltage(float voltage);
 
         // Convert position readings between control table values and actual values
-        float position(uint8_t id, uint32_t position, NUgus& robot);
-        uint32_t position(uint8_t id, float position, NUgus& robot);
+        float position(uint8_t id,
+                       uint32_t position,
+                       std::array<int8_t, 20> servo_direction,
+                       std::array<double, 20> servo_offset);
+        uint32_t position(uint8_t id,
+                          float position,
+                          std::array<int8_t, 20> servo_direction,
+                          std::array<double, 20> servo_offset);
 
         // Convert velocity readings between control table values and actual values
         float velocity(int32_t velocity);
@@ -55,7 +61,7 @@ namespace module::platform::openCR {
         float fsrForce(const uint16_t& value);
         float fsrCentre(const bool& left, const uint8_t& value);
 
-    }  // namespace module::platform::openCR::convert
+    }  // namespace convert
 
 }  // namespace module::platform::openCR
 

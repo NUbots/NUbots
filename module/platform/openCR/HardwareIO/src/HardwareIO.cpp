@@ -217,20 +217,21 @@ namespace module::platform::openCR {
                     }
 
                     // Pack our data
-                    data1[i].data.velocityPGain = nugus.convertPGain(servoState[i].velocityPGain);
-                    data1[i].data.velocityIGain = nugus.convertIGain(servoState[i].velocityIGain);
-                    data1[i].data.velocityDGain = nugus.convertDGain(servoState[i].velocityDGain);
-                    data1[i].data.positionPGain = nugus.convertPGain(servoState[i].positionPGain);
-                    data1[i].data.positionIGain = nugus.convertIGain(servoState[i].positionIGain);
+                    data1[i].data.velocityPGain = convert::PGain(servoState[i].velocityPGain);
+                    data1[i].data.velocityIGain = convert::IGain(servoState[i].velocityIGain);
+                    data1[i].data.velocityDGain = convert::DGain(servoState[i].velocityDGain);
+                    data1[i].data.positionPGain = convert::PGain(servoState[i].positionPGain);
+                    data1[i].data.positionIGain = convert::IGain(servoState[i].positionIGain);
 
-                    data2[i].data.feedforward1stGain  = nugus.convertFFGain(servoState[i].feedforward1stGain);
-                    data2[i].data.feedforward2ndGain  = nugus.convertFFGain(servoState[i].feedforward2ndGain);
-                    data2[i].data.goalPWM             = nugus.convertPWM(servoState[i].goalPWM);
-                    data2[i].data.goalCurrent         = nugus.convertCurrent(servoState[i].goalCurrent);
-                    data2[i].data.goalVelocity        = nugus.convertVelocity(servoState[i].goalVelocity);
-                    data2[i].data.profileAcceleration = nugus.convertFFGain(servoState[i].profileAcceleration);
-                    data2[i].data.profileVelocity     = nugus.convertFFGain(servoState[i].profileVelocity);
-                    data2[i].data.goalPosition        = nugus.convertPosition(i, servoState[i].goalPosition);
+                    data2[i].data.feedforward1stGain  = convert::FFGain(servoState[i].feedforward1stGain);
+                    data2[i].data.feedforward2ndGain  = convert::FFGain(servoState[i].feedforward2ndGain);
+                    data2[i].data.goalPWM             = convert::PWM(servoState[i].goalPWM);
+                    data2[i].data.goalCurrent         = convert::current(servoState[i].goalCurrent);
+                    data2[i].data.goalVelocity        = convert::velocity(servoState[i].goalVelocity);
+                    data2[i].data.profileAcceleration = convert::FFGain(servoState[i].profileAcceleration);
+                    data2[i].data.profileVelocity     = convert::FFGain(servoState[i].profileVelocity);
+                    data2[i].data.goalPosition =
+                        convert::position(i, servoState[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
                 }
 
                 opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(
@@ -568,20 +569,20 @@ namespace module::platform::openCR {
         // Button Left = 0x04
         opencrState.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
-        opencrState.gyro = Eigen::Vector3f(nugus.convertGyro(data.gyro[2]),   // X
-                                           nugus.convertGyro(data.gyro[1]),   // Y
-                                           nugus.convertGyro(data.gyro[0]));  // Z
+        opencrState.gyro = Eigen::Vector3f(convert::gyro(data.gyro[2]),   // X
+                                           convert::gyro(data.gyro[1]),   // Y
+                                           convert::gyro(data.gyro[0]));  // Z
 
-        opencrState.acc = Eigen::Vector3f(nugus.convertAcc(data.acc[0]),   // X
-                                          nugus.convertAcc(data.acc[1]),   // Y
-                                          nugus.convertAcc(data.acc[2]));  // Z
+        opencrState.acc = Eigen::Vector3f(convert::acc(data.acc[0]),   // X
+                                          convert::acc(data.acc[1]),   // Y
+                                          convert::acc(data.acc[2]));  // Z
 
         // Command send/receive errors only
         opencrState.alertFlag   = bool(packet.alert);
         opencrState.errorNumber = uint8_t(packet.error);
 
         // Work out a battery charged percentage
-        batteryState.currentVoltage = nugus.convertVoltage(data.voltage);
+        batteryState.currentVoltage = convert::voltage(data.voltage);
         float percentage            = std::max(0.0f,
                                     (batteryState.currentVoltage - batteryState.flatVoltage)
                                         / (batteryState.chargedVoltage - batteryState.flatVoltage));
@@ -633,12 +634,13 @@ namespace module::platform::openCR {
 
         servoState[packet.id].torqueEnabled   = (data.torqueEnable == 1);
         servoState[packet.id].errorFlags      = data.hardwareErrorStatus;
-        servoState[packet.id].presentPWM      = nugus.convertPWM(data.presentPWM);
-        servoState[packet.id].presentCurrent  = nugus.convertCurrent(data.presentCurrent);
-        servoState[packet.id].presentVelocity = nugus.convertVelocity(data.presentVelocity);
-        servoState[packet.id].presentPosition = nugus.convertPosition(packet.id, data.presentPosition);
-        servoState[packet.id].voltage         = nugus.convertVoltage(data.presentVoltage);
-        servoState[packet.id].temperature     = nugus.convertTemperature(data.presentTemperature);
+        servoState[packet.id].presentPWM      = convert::PWM(data.presentPWM);
+        servoState[packet.id].presentCurrent  = convert::current(data.presentCurrent);
+        servoState[packet.id].presentVelocity = convert::velocity(data.presentVelocity);
+        servoState[packet.id].presentPosition =
+            convert::position(packet.id, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
+        servoState[packet.id].voltage     = convert::voltage(data.presentVoltage);
+        servoState[packet.id].temperature = convert::temperature(data.presentTemperature);
     }
 
     /**
@@ -732,12 +734,13 @@ namespace module::platform::openCR {
                 servo.error_flags = servoState[i].errorFlags;
 
                 // Present Data
-                servo.present_position = nugus.convertPosition(i, servoState[i].presentPosition);
-                servo.present_speed    = nugus.convertVelocity(i, servoState[i].presentSpeed);
+                servo.present_position =
+                    convert::position(i, servoState[i].presentPosition, nugus.servo_direction, nugus.servo_offset);
+                servo.present_speed = convert::velocity(i, servoState[i].presentSpeed);
 
                 // Diagnostic Information
-                servo.voltage     = nugus.convertVoltage(servoState[i].voltage);
-                servo.temperature = nugus.convertTemperature(servoState[i].temperature);
+                servo.voltage     = convert::voltage(servoState[i].voltage);
+                servo.temperature = convert::temperature(servoState[i].temperature);
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                 if (servo.voltage <= batteryState.chargedVoltage) {
@@ -747,7 +750,6 @@ namespace module::platform::openCR {
         }
 
         /* FSRs data */
-        /// @todo ask whats going on with this not being included
 
         return sensors;
     }

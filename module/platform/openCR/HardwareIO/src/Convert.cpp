@@ -96,21 +96,24 @@ namespace module::platform::openCR {
             return uint8_t(utility::math::clamp(9.5f, voltage * 10.f, 16.0f));
         }
 
-        // takes in a refernce to the robot we're working with to allow it to access servo_direction
-        float position(uint8_t id, uint32_t position, NUgus& robot) {
+        float position(uint8_t id,
+                       uint32_t position,
+                       std::array<int8_t, 20> servo_direction,
+                       std::array<double, 20> servo_offset) {
             // Base unit: 0.088 degrees = 0.0015358897 rad
             // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
-            return utility::math::angle::normalizeAngle((utility::math::clamp(uint32_t(0), position, uint32_t(4095))
-                                                         * 0.0015358897f * robot::servo_direction[id])
-                                                        + servo_offset[id]);
+            return utility::math::angle::normalizeAngle(
+                (utility::math::clamp(uint32_t(0), position, uint32_t(4095)) * 0.0015358897f * servo_direction[id])
+                + servo_offset[id]);
         }
 
-        // takes in a refernce to the robot we're working with to allow it to access servo_direction
-        uint32_t position(uint8_t id, float position, NUgus& robot) {
+        uint32_t position(uint8_t id,
+                          float position,
+                          std::array<int8_t, 20> servo_direction,
+                          std::array<double, 20> servo_offset) {
             // Base unit: 0.088 degrees = 0.0015358897 rad
             // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
-            float angle =
-                utility::math::angle::normalizeAngle((position - NUgus::servo_offset[id]) * robot::servo_direction[id]);
+            float angle = utility::math::angle::normalizeAngle((position - servo_offset[id]) * servo_direction[id]);
 
             return uint32_t(utility::math::clamp(0.0f, angle / 0.0015358897f, 4095.0f));
         }
