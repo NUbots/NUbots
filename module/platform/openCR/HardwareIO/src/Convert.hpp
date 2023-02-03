@@ -1,10 +1,9 @@
-#ifndef MODULE_PLATFORM_OPENCR_NUGUS_HPP
-#define MODULE_PLATFORM_OPENCR_NUGUS_HPP
+#ifndef MODULE_PLATFORM_OPENCR_CONVERT_HPP
+#define MODULE_PLATFORM_OPENCR_CONVERT_HPP
 
 #include <array>
 #include <stdexcept>
 
-// #include "dynamixel/v2/DynamixelServo.h"
 #include "dynamixel/v2/OpenCR.h"
 
 namespace module::platform::openCR {
@@ -60,4 +59,4 @@ namespace module::platform::openCR {
 
 }  // namespace module::platform::openCR
 
-#endif  // MODULE_PLATFOR_OPENCR_NUGUS_HPP
+#endif  // MODULE_PLATFOR_OPENCR_CONVERT_HPP

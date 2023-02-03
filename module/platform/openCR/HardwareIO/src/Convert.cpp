@@ -3,6 +3,7 @@
 #include "NUgus.hpp"
 
 #include "utility/math/angle.hpp"
+#include "utility/math/comparison.hpp"
 
 namespace module::platform::openCR {
 

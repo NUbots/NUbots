@@ -1,8 +1,5 @@
 #include "NUgus.hpp"
 
-#include "utility/math/angle.hpp"
-#include "utility/math/comparison.hpp"
-
 namespace module::platform::openCR {
 
     NUgus::NUgus()
@@ -27,6 +24,5 @@ namespace module::platform::openCR {
         , L_ANKLE_ROLL(uint8_t(ID::L_ANKLE_ROLL))
         , HEAD_YAW(uint8_t(ID::HEAD_YAW))
         , HEAD_PITCH(uint8_t(ID::HEAD_PITCH)) {}
-
 
 }  // namespace module::platform::openCR
