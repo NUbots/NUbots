@@ -156,6 +156,10 @@ namespace module::platform::openCR {
         uint16_t convertDGain(float d_gain) const;
         float convertFFGain(uint16_t ff_gain) const;
         uint16_t convertFFGain(float ff_gain) const;
+
+        // Convert FSR readings
+        float convertFsrForce(const uint16_t& value);
+        float convertFsrCentre(const bool& left, const uint8_t& value);
     };
 
 #pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data

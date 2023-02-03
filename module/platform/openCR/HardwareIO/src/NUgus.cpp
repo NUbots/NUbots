@@ -183,4 +183,25 @@ namespace module::platform::openCR {
         return uint16_t(ff_gain * 4.0f);
     }
 
+    float convertFsrForce(const uint16_t& value) {
+        // Base unit: 1mN = 0.001N
+        return value * 0.001;
+    }
+
+    float convertFsrCentre(const bool& left, const uint8_t& value) {
+        if (value == 0xFF) {
+            // Return NaN if there is no centre
+            return std::numeric_limits<float>::quiet_NaN();
+        }
+        // Flips right foot coordinates to match robot coords
+        // See:
+        // http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
+        if (left) {
+            // This normalises the value between -1 and 1
+            return double(value - 127) / 127.0;
+        }
+        // This normalises the value between -1 and 1
+        return double(127 - value) / 127.0;
+    }
+
 }  // namespace module::platform::openCR
