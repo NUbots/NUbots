@@ -115,51 +115,6 @@ namespace module::platform::openCR {
                     uint8_t(ID::HEAD_YAW),         uint8_t(ID::HEAD_PITCH)};
         }
 
-        // Convert gyroscope readings between control table values and actual values
-        float convertGyro(int16_t gyro) const;
-        int16_t convertGyro(float gyro) const;
-
-        // Convert accelerometer readings between control table values and actual values
-        float convertAcc(int16_t gyro) const;
-        int16_t convertAcc(float gyro) const;
-
-        // Convert PWM readings between control table values and actual values
-        int16_t convertPWM(int16_t pwm) const;
-
-        // Convert temperature readings between control table values and actual values
-        float convertTemperature(uint8_t temp) const;
-        uint8_t convertTemperature(float temp) const;
-
-        // Convert voltage readings between control table values and actual values
-        float convertVoltage(uint8_t voltage) const;
-        float convertVoltage(uint16_t voltage) const;
-        uint8_t convertVoltage(float voltage) const;
-
-        // Convert position readings between control table values and actual values
-        float convertPosition(uint8_t id, uint32_t position) const;
-        uint32_t convertPosition(uint8_t id, float position) const;
-
-        // Convert velocity readings between control table values and actual values
-        float convertVelocity(int32_t velocity) const;
-        int32_t convertVelocity(float velocity) const;
-
-        // Convert current readings between control table values and actual values
-        float convertCurrent(int16_t current) const;
-        int16_t convertCurrent(float current) const;
-
-        // Convert P, I, D, and feed-forward gain readings between control table values and actual values
-        float convertPGain(uint16_t p_gain) const;
-        uint16_t convertPGain(float p_gain) const;
-        float convertIGain(uint16_t i_gain) const;
-        uint16_t convertIGain(float i_gain) const;
-        float convertDGain(uint16_t d_gain) const;
-        uint16_t convertDGain(float d_gain) const;
-        float convertFFGain(uint16_t ff_gain) const;
-        uint16_t convertFFGain(float ff_gain) const;
-
-        // Convert FSR readings
-        float convertFsrForce(const uint16_t& value);
-        float convertFsrCentre(const bool& left, const uint8_t& value);
     };
 
 #pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
