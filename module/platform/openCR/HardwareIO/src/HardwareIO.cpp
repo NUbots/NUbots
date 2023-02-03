@@ -2,6 +2,7 @@
 
 #include <fmt/format.h>
 
+#include "Convert.hpp"
 #include "dynamixel/v2/Dynamixel.hpp"
 
 #include "extension/Configuration.hpp"
@@ -10,6 +11,7 @@
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
+#include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::platform::openCR {
@@ -736,7 +738,7 @@ namespace module::platform::openCR {
                 // Present Data
                 servo.present_position =
                     convert::position(i, servoState[i].presentPosition, nugus.servo_direction, nugus.servo_offset);
-                servo.present_speed = convert::velocity(i, servoState[i].presentSpeed);
+                servo.present_speed = convert::velocity(i, servoState[i].presentVelocity);
 
                 // Diagnostic Information
                 servo.voltage     = convert::voltage(servoState[i].voltage);
