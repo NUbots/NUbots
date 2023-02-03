@@ -669,7 +669,8 @@ namespace module::platform::openCR {
         sensors.battery = batteryState.currentVoltage;
 
         /* Servos data */
-        /// @todo fill this in next, see cm740 for how it was done before
+        /// @todo unfuck the names of the servo fields. all fucked up between versions
+        /// or just even wrong straight up
         for (int i = 0; i < 20; i++) {
             // Get a reference to the servo we are populating
             RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
@@ -681,20 +682,13 @@ namespace module::platform::openCR {
             // Gain
             // RawSensors only takes PID but the v2 protocol has more options
             // so we assing the velocity gain to the sensor message
-            servo.p_gain = servoState[i].velocityPGain;
-            servo.i_gain = servoState[i].velocityIGain;
-            servo.d_gain = servoState[i].velocityDGain;
-
-            // Torque
-            // The v2 protocol doesn't really have an equivalent for this to we
-            // just zero it until we find a better replacement.
-            /// @todo Fill the torque field with something appropriate.
-            /// Condsider https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#pwm-limit36
-            servo.torque = NULL;
+            servo.velocity_p_gain = servoState[i].velocityPGain;
+            servo.velocity_i_gain = servoState[i].velocityIGain;
+            servo.velocity_d_gain = servoState[i].velocityDGain;
 
             // Targets
-            servo.goal_position = servoState[i].goalPosition;
-            servo.moving_speed  = servoState[i].presentVelocity;
+            servo.goal_position    = servoState[i].goalPosition;
+            servo.profile_velocity = servoState[i].presentVelocity;
 
 
             // If we are faking this hardware, simulate its motion
@@ -724,10 +718,10 @@ namespace module::platform::openCR {
 
                 // Store our simulated values
                 servo.present_position = servoState[i].presentPosition;
-                servo.present_speed    = servoState[i].goalPosition;
-                servo.load             = NULL;  // doesn't exist in v2 protocol
-                servo.voltage          = servoState[i].voltage;
-                servo.temperature      = servoState[i].temperature;
+                servo.goal_position    = servoState[i].goalPosition;
+                // servo.load             = 0;  // doesn't exist in v2 protocol
+                servo.voltage     = servoState[i].voltage;
+                servo.temperature = servoState[i].temperature;
             }
 
             // If we are using real data, get it from the packet
