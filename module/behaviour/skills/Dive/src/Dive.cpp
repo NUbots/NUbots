@@ -32,9 +32,11 @@ namespace module::behaviour::skills {
         });
 
         on<Trigger<message::behaviour::Dive>>().then([this](const message::behaviour::Dive& dive) {
-            dive_left = dive.left;
-            updatePriority(cfg.dive_priority);
+            dive_left          = dive.left;
+            time_since_message = NUClear::clock::now();
+            update_priority(cfg.dive_priority);
         });
+
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
             subsumption_id,
@@ -43,20 +45,30 @@ namespace module::behaviour::skills {
                 0,
                 {LimbID::HEAD, LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
             [this](const std::set<LimbID>& /*unused*/) {
+                // Don't attempt another dive unless a certain amount of time has passed
+                if (std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - time_since_message)
+                        .count()
+                    < cfg.message_timeout) {
+                    update_priority(0);
+                    return;
+                }
                 if (dive_left) {
-                    emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
-                                                               std::vector<std::string>({"DiveLeft.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        subsumption_id,
+                        std::vector<std::string>({"Stand.yaml", "DiveLeft.yaml"})));
                 }
                 else {
-                    emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
-                                                               std::vector<std::string>({"DiveRight.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        subsumption_id,
+                        std::vector<std::string>({"Stand.yaml", "DiveRight.yaml"})));
                 }
             },
-            [this](const std::set<LimbID>& /*unused*/) { updatePriority(0); },
-            [this](const std::set<ServoID>& /*unused*/) { updatePriority(0); }}));
+            [this](const std::set<LimbID>& /*unused*/) { update_priority(0); },
+            [this](const std::set<ServoID>& /*unused*/) { update_priority(0); }}));
     }
 
-    void Dive::updatePriority(const float& priority) {
+    void Dive::update_priority(const float& priority) {
+        NUClear::log("Execute Dive");
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 

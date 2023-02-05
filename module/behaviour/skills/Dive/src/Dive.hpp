@@ -33,11 +33,21 @@ namespace module::behaviour::skills {
             Config() = default;
             /// @brief  Dive priority in the subsumption system
             float dive_priority = 0.0f;
+
+            /// @brief Time between kick command message and kicking before kick is discarded (milliseconds)
+            int message_timeout = 0;
         } cfg;
 
+        /// @brief Determines the direction of the dive
         bool dive_left = true;
 
-        void updatePriority(const float& priority);
+        /// @brief Time when the last kick command message was received
+        NUClear::clock::time_point time_since_message{NUClear::clock::now()};
+
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
+
 
     public:
         /// @brief Called by the powerplant to build and setup the Dive reactor.

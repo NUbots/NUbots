@@ -434,7 +434,6 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::find(const std::shared_ptr<const FilteredBall>& ball) {
-        log<NUClear::WARN>("Here");
         if (ball && ball->rBTt.y() < 0.0) {
             emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(true)));
         }
@@ -445,14 +444,11 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::dive(const std::shared_ptr<const FilteredBall>& ball) {
         float yaw_angle = std::atan2(ball->rBTt.y(), ball->rBTt.x());
-        log<NUClear::WARN>(yaw_angle);
         if (yaw_angle < 0) {
-            log<NUClear::WARN>("LEFT");
-            emit(std::make_unique<Dive>(true));
+            emit(std::make_unique<Dive>(false));
         }
         else {
-            log<NUClear::WARN>("RIGHT");
-            emit(std::make_unique<Dive>(false));
+            emit(std::make_unique<Dive>(true));
         }
     }
 
