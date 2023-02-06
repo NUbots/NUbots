@@ -86,6 +86,46 @@ namespace module::localisation {
                 }
             }
         }
+
+        /**
+         * @brief Fills the surrounding cells with a decreasing occupancy value from 1 for a user-specified range.
+         * @param map The pre-filled Map
+         * @param range The range for the surrounding cells
+         */
+        void fill_surrounding_cells(int range) {
+            int rows = map.rows();
+            int cols = map.cols();
+            for (int y = 0; y < rows; y++) {
+                for (int x = 0; x < cols; x++) {
+                    if (map(y, x) == 1) {
+                        for (int i = 1; i <= range; i++) {
+                            double value = 1.0 * (range - i) / range;
+
+                            if (x - i >= 0) {
+                                if (map(y, x - i) < value) {
+                                    map(y, x - i) = value;
+                                }
+                            }
+                            if (x + i < cols) {
+                                if (map(y, x + i) < value) {
+                                    map(y, x + i) = value;
+                                }
+                            }
+                            if (y - i >= 0) {
+                                if (map(y - i, x) < value) {
+                                    map(y - i, x) = value;
+                                }
+                            }
+                            if (y + i < rows) {
+                                if (map(y + i, x) < value) {
+                                    map(y + i, x) = value;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     };
 
 
