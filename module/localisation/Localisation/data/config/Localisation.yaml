@@ -3,3 +3,12 @@ log_level: DEBUG
 
 # Size of each cell in m
 grid_size: 0.01
+
+# Number of particles
+num_particles: 100
+
+initial_state: [0.0, 0.0, 0.0]
+
+initial_covariance: [0.01, 0.01, 0.01]
+
+process_noise: [0.005, 0.005, 0.0001]

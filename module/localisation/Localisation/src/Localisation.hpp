@@ -23,20 +23,27 @@
 #include "utility/math/stats/resample/stratified.hpp"
 #include "utility/math/stats/resample/systematic.hpp"
 #include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
+
 
 namespace module::localisation {
 
     // Particle struct
     struct Particle {
         Eigen::Matrix<double, 3, 1> state;
-        double weight;
+        double weight = 1.0;
     };
 
     class Localisation : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief  THe size of the grid cells in the occupancy grid [m]
             double grid_size;
+            /// @brief The number of particles to use in the particle filter
+            int num_particles = 0;
+            /// @brief The uncertainty in the process model
+            Eigen::Matrix<double, 3, 1> process_noise;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
@@ -54,7 +61,7 @@ namespace module::localisation {
         Eigen::Matrix<double, 3, 1> state = Eigen::Matrix<double, 3, 1>::Zero();
 
         /// @brief The covariance matrix of the robot's state
-        Eigen::Matrix<double, 3, 3> covariance = 0.005 * Eigen::Matrix<double, 3, 3>::Identity();
+        Eigen::Matrix<double, 3, 3> covariance = Eigen::Matrix<double, 3, 3>::Identity();
 
         /// @brief Status of walk engine
         bool walk_engine_enabled = false;
@@ -62,13 +69,15 @@ namespace module::localisation {
         /// @brief Status of if the robot is falling
         bool falling = false;
 
-        int num_particles = 100;
+        /// @brief The particles used in the particle filter
+        std::vector<Particle> particles;
+
 
     public:
         /// @brief Called by the powerplant to build and setup the Localisation reactor.
         explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
 
-        Eigen::Vector3d ray2cartesian(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw, Eigen::Isometry3d Hwf);
+        Eigen::Vector2d ray2field(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
 
         /// @brief Get the occupancy value of a cell in the map
         /// @param observation The observation (x, y) in the map
@@ -85,6 +94,18 @@ namespace module::localisation {
         /// @brief Get the weight of a particle given a set of observations
         double calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
                                 const std::vector<Eigen::Vector2d>& observations);
+
+        /// @brief Perform a time update on the particles
+        void time_update();
+
+        /// @brief Generates a random sample from a 1-D array using the Eigen library
+        /// @param particles Vector of particles to be resampled
+        /// @param size Output size (int or tuple of ints)
+        /// @return The randomly generated sample of particles
+        void resample(std::vector<Particle>& particles);
+
+        /// @brief Add some noise to the particles to compensate for the fact that we don't have a perfect model
+        void add_noise();
     };
 
 
