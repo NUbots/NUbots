@@ -213,45 +213,32 @@ namespace module::localisation {
                     auto uPCw             = point.cast<double>();
                     auto rPCc             = ray2field(uPCw, Hcw);
                     field_point_observations.push_back(rPCc);
-                    auto cell = observation_relative(test_state, rPCc);
-                    emit(graph("Observation points [m]:", rPCc.x(), rPCc.y()));
-                    emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
+                    if (log_level <= NUClear::DEBUG) {
+                        auto cell = observation_relative(test_state, rPCc);
+                        emit(graph("Observation points [m]:", rPCc.x(), rPCc.y()));
+                        emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
+                    }
                 }
 
-                log<NUClear::DEBUG>("Number of particles: ", particles.size());
                 for (int i = 0; i < cfg.num_particles; i++) {
                     // Calculate the weight the particle
                     particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
-                    auto particle_cell  = observation_relative(particles[i].state, Eigen::Vector2d(0.0, 0.0));
-                    emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
-                    log<NUClear::DEBUG>("Particle before resample ",
-                                        i,
-                                        "with state: ",
-                                        particles[i].state.transpose(),
-                                        " weight: ",
-                                        particles[i].weight);
+                    if (log_level <= NUClear::DEBUG) {
+                        auto particle_cell = observation_relative(particles[i].state, Eigen::Vector2d(0.0, 0.0));
+                        emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
+                    }
                 }
 
-                // // Perform time update on all the particles
-                // if (walk_engine_enabled && !falling) {
-                //     time_update();
-                // }
+                // Perform time update on all the particles
+                if (walk_engine_enabled && !falling) {
+                    time_update();
+                }
 
-                // // Add noise to the particles
+                // Add noise to the particles
                 add_noise();
 
-                // // Resample
+                // Resample
                 resample(particles);
-
-                // log particles
-                // for (int i = 0; i < cfg.num_particles; i++) {
-                //     log<NUClear::DEBUG>("Particle after resample ",
-                //                         i,
-                //                         "with state: ",
-                //                         particles[i].state.transpose(),
-                //                         " weight: ",
-                //                         particles[i].weight);
-                // }
 
                 // Calculate the mean state
                 Eigen::Vector3d state_mean = Eigen::Vector3d::Zero();
@@ -270,7 +257,6 @@ namespace module::localisation {
                 position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
                 field->position        = position.matrix();
 
-                // log<NUClear::DEBUG>("State: ", state.x(), ", ", state.y(), ", ", state.z());
                 emit(graph("State", state.x(), state.y(), state.z()));
                 emit(field);
             });
@@ -353,39 +339,33 @@ namespace module::localisation {
         }
     }
 
-
     void Localisation::resample(std::vector<Particle>& particles) {
-        // Normalize the weights
-        double weight_sum = 0.0;
-        for (const Particle& particle : particles) {
-            weight_sum += particle.weight;
+        std::vector<double> weights(particles.size());
+        for (int i = 0; i < particles.size(); i++) {
+            weights[i] = particles[i].weight;
+        }
+        double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
+        if (weight_sum == 0) {
+            std::cout << "All weights are zero, cannot resample" << std::endl;
+            return;
+        }
+        for (int i = 0; i < weights.size(); i++) {
+            weights[i] /= weight_sum;
+        }
+        std::vector<Particle> resampled_particles(particles.size());
+        std::random_device rd;
+        std::mt19937 generator(rd());
+        std::discrete_distribution<> distribution(weights.begin(), weights.end());
+        for (int i = 0; i < particles.size(); i++) {
+            int index              = distribution(generator);
+            resampled_particles[i] = particles[index];
         }
 
-        std::vector<double> cumulative_weights;
-        cumulative_weights.reserve(particles.size());
-        double cumulative_weight = 0.0;
-        for (const Particle& particle : particles) {
-            cumulative_weight += particle.weight / weight_sum;
-            cumulative_weights.push_back(cumulative_weight);
-        }
+        log<NUClear::DEBUG>("Unsampled particles");
+        log_particles(particles, 10);
+        log<NUClear::DEBUG>("Resampled particles");
+        log_particles(resampled_particles, 10);
 
-        // Generate resampled particles
-        std::vector<Particle> resampled_particles;
-        resampled_particles.reserve(particles.size());
-        std::mt19937 gen(std::random_device{}());
-        std::uniform_real_distribution<> dist(0.0, 1.0 / particles.size());
-        double random_number = dist(gen);
-        int index            = 0;
-        for (int i = 0; i < particles.size(); ++i) {
-            double beta = random_number + i * (1.0 / particles.size());
-            while (beta > cumulative_weights[index]) {
-                beta -= cumulative_weights[index];
-                index = (index + 1) % particles.size();
-            }
-            Particle resampled_particle = particles[index];
-            resampled_particle.weight   = 1.0;
-            resampled_particles.push_back(resampled_particle);
-        }
         particles = resampled_particles;
     }
 
@@ -395,6 +375,20 @@ namespace module::localisation {
         MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), process_noise);
         for (auto& particle : particles) {
             particle.state += multivariate.sample();
+        }
+    }
+
+    void Localisation::log_particles(const std::vector<Particle>& particles, int number) {
+        if (number == -1) {
+            number = particles.size();
+        }
+        for (int i = 0; i < number; i++) {
+            log<NUClear::DEBUG>("Particle ",
+                                i,
+                                "with state: ",
+                                particles[i].state.transpose(),
+                                " weight: ",
+                                particles[i].weight);
         }
     }
 }  // namespace module::localisation
