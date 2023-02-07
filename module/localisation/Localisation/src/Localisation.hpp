@@ -43,7 +43,7 @@ namespace module::localisation {
             /// @brief The number of particles to use in the particle filter
             int num_particles = 0;
             /// @brief The uncertainty in the process model
-            Eigen::Matrix<double, 3, 1> process_noise;
+            Eigen::Matrix<double, 3, 3> process_noise;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
@@ -106,6 +106,9 @@ namespace module::localisation {
 
         /// @brief Add some noise to the particles to compensate for the fact that we don't have a perfect model
         void add_noise();
+
+        /// @brief Log a list of particles
+        void log_particles(const std::vector<Particle>& particles, int number = -1);
     };
 
 

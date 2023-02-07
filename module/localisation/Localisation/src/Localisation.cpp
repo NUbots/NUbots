@@ -36,12 +36,14 @@ namespace module::localisation {
             this->log_level   = config["log_level"].as<NUClear::LogLevel>();
             cfg.grid_size     = config["grid_size"].as<double>();
             cfg.num_particles = config["num_particles"].as<int>();
-            cfg.process_noise = config["process_noise"].as<Expression>();
 
             // Initial state and covariance
             state                               = config["initial_state"].as<Expression>();
             Eigen::Vector3d covariance_diagonal = config["initial_covariance"].as<Expression>();
             covariance.diagonal() << covariance_diagonal;
+
+            Eigen::Vector3d process_noise_diagonal = config["process_noise"].as<Expression>();
+            cfg.process_noise.diagonal() << process_noise_diagonal;
 
             // Initialise the particles
             MultivariateNormal<double, 3> multivariate(state, covariance);
@@ -325,17 +327,16 @@ namespace module::localisation {
         log<NUClear::DEBUG>("Time since last time update: ", dt);
         last_time_update_time = current_time;
 
-        for (auto particle : particles) {
-            // Update the state of the particle
+        for (int i = 0; i < particles.size(); i++) {
             double delta_x     = walk_command.x() * dt;
             double delta_y     = walk_command.y() * dt;
             double delta_theta = walk_command.z() * dt;
 
-            particle.state.x() = particle.state.x() + delta_x * cos(particle.state.z() + delta_theta)
-                                 - delta_y * sin(particle.state.z() + delta_theta);
-            particle.state.y() = particle.state.y() + delta_y * cos(particle.state.z() + delta_theta)
-                                 + delta_x * sin(particle.state.z() + delta_theta);
-            particle.state.z() = particle.state.z() + delta_theta;
+            particles[i].state.x() = particles[i].state.x() + delta_x * cos(particles[i].state.z() + delta_theta)
+                                     - delta_y * sin(particles[i].state.z() + delta_theta);
+            particles[i].state.y() = particles[i].state.y() + delta_y * cos(particles[i].state.z() + delta_theta)
+                                     + delta_x * sin(particles[i].state.z() + delta_theta);
+            particles[i].state.z() = particles[i].state.z() + delta_theta;
         }
     }
 
@@ -370,11 +371,11 @@ namespace module::localisation {
     }
 
     void Localisation::add_noise() {
-        Eigen::Matrix<double, 3, 3> process_noise;
-        process_noise.diagonal() << cfg.process_noise;
-        MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), process_noise);
+        MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), cfg.process_noise);
         for (auto& particle : particles) {
-            particle.state += multivariate.sample();
+            auto noise = multivariate.sample();
+            log<NUClear::DEBUG>("Adding noise: ", noise.transpose());
+            particle.state += noise;
         }
     }
 
