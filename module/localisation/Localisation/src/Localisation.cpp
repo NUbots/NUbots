@@ -206,9 +206,16 @@ namespace module::localisation {
         on<Trigger<VisionLines>, With<FieldDescription>, With<Sensors>>().then(
             "Vision Lines",
             [this](const VisionLines& line_points, const FieldDescription& fd, const Sensors& sensors) {
+                auto current_time = NUClear::clock::now();
+                auto dt =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(current_time - last_measurement_update_time)
+                        .count()
+                    * 1e-9;
+                log<NUClear::DEBUG>("dt: ", dt);
+                last_measurement_update_time = current_time;
+
                 /* Perform measurement correction */
                 // Identify the line points on the field
-                Eigen::Vector3d test_state(0.0, 0.0, 0.0);
                 std::vector<Eigen::Vector2d> field_point_observations;
                 for (auto point : line_points.points) {
                     Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
@@ -216,7 +223,7 @@ namespace module::localisation {
                     auto rPCc             = ray2field(uPCw, Hcw);
                     field_point_observations.push_back(rPCc);
                     if (log_level <= NUClear::DEBUG) {
-                        auto cell = observation_relative(test_state, rPCc);
+                        auto cell = observation_relative(state, rPCc);
                         emit(graph("Observation points [m]:", rPCc.x(), rPCc.y()));
                         emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
                     }
@@ -362,11 +369,6 @@ namespace module::localisation {
             resampled_particles[i] = particles[index];
         }
 
-        log<NUClear::DEBUG>("Unsampled particles");
-        log_particles(particles, 10);
-        log<NUClear::DEBUG>("Resampled particles");
-        log_particles(resampled_particles, 10);
-
         particles = resampled_particles;
     }
 
@@ -374,7 +376,7 @@ namespace module::localisation {
         MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), cfg.process_noise);
         for (auto& particle : particles) {
             auto noise = multivariate.sample();
-            log<NUClear::DEBUG>("Adding noise: ", noise.transpose());
+            // log<NUClear::DEBUG>("Adding noise: ", noise.transpose());
             particle.state += noise;
         }
     }
