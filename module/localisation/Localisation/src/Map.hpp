@@ -99,27 +99,35 @@ namespace module::localisation {
                 for (int x = 0; x < cols; x++) {
                     if (map(y, x) == 1) {
                         for (int i = 1; i <= range; i++) {
-                            double value = 1.0 * (range - i) / range;
+                            double value = (1.0 * (range - i) / range) * 0.5;
 
                             if (x - i >= 0) {
                                 if (map(y, x - i) < value) {
                                     map(y, x - i) = value;
+                                }
+                                if (y - i >= 0 && map(y - i, x - i) < value) {
+                                    map(y - i, x - i) = value;
+                                }
+                                if (y + i < rows && map(y + i, x - i) < value) {
+                                    map(y + i, x - i) = value;
                                 }
                             }
                             if (x + i < cols) {
                                 if (map(y, x + i) < value) {
                                     map(y, x + i) = value;
                                 }
-                            }
-                            if (y - i >= 0) {
-                                if (map(y - i, x) < value) {
-                                    map(y - i, x) = value;
+                                if (y - i >= 0 && map(y - i, x + i) < value) {
+                                    map(y - i, x + i) = value;
+                                }
+                                if (y + i < rows && map(y + i, x + i) < value) {
+                                    map(y + i, x + i) = value;
                                 }
                             }
-                            if (y + i < rows) {
-                                if (map(y + i, x) < value) {
-                                    map(y + i, x) = value;
-                                }
+                            if (y - i >= 0 && map(y - i, x) < value) {
+                                map(y - i, x) = value;
+                            }
+                            if (y + i < rows && map(y + i, x) < value) {
+                                map(y + i, x) = value;
                             }
                         }
                     }

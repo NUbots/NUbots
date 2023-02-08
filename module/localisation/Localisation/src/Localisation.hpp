@@ -109,6 +109,9 @@ namespace module::localisation {
 
         /// @brief Log a list of particles
         void log_particles(const std::vector<Particle>& particles, int number = -1);
+
+        /// @brief Add noisy particles to the particle filter, replacing the worst particles
+        void add_noisy_particles();
     };
 
 

@@ -147,7 +147,7 @@ namespace module::localisation {
             fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
 
             // Fill the surrounding cells close to the field lines
-            fieldline_map.fill_surrounding_cells(0.2 / cfg.grid_size);
+            fieldline_map.fill_surrounding_cells(0.1 / cfg.grid_size);
 
             // --------------------- TEMPORARY: REMOVE LATER ---------------------
             // Open a file in write mode
@@ -206,14 +206,6 @@ namespace module::localisation {
         on<Trigger<VisionLines>, With<FieldDescription>, With<Sensors>>().then(
             "Vision Lines",
             [this](const VisionLines& line_points, const FieldDescription& fd, const Sensors& sensors) {
-                auto current_time = NUClear::clock::now();
-                auto dt =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(current_time - last_measurement_update_time)
-                        .count()
-                    * 1e-9;
-                log<NUClear::DEBUG>("dt: ", dt);
-                last_measurement_update_time = current_time;
-
                 /* Perform measurement correction */
                 // Identify the line points on the field
                 std::vector<Eigen::Vector2d> field_point_observations;
@@ -284,9 +276,9 @@ namespace module::localisation {
 
 
     double Localisation::get_occupancy(const Eigen::Vector2i observation) {
-        if (observation.x() < 0 || observation.x() >= fieldline_map.map.cols() || observation.y() < 0
-            || observation.y() >= fieldline_map.map.rows()) {
-            return 0;
+        if (observation.x() < 0 || observation.x() >= fieldline_map.map.rows() || observation.y() < 0
+            || observation.y() >= fieldline_map.map.cols()) {
+            return -1;
         }
         else {
             return fieldline_map.map(observation.x(), observation.y());
@@ -313,16 +305,33 @@ namespace module::localisation {
     double Localisation::calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
                                           const std::vector<Eigen::Vector2d>& observations) {
         double weight = 0;
+
+        double n_observations = observations.size();
+
         for (auto observation : observations) {
             // Get the position of the observation in the map for this particle
             Eigen::Vector2i map_position = observation_relative(particle, observation);
 
-            // Get the occupancy of the observation
             double occupancy = get_occupancy(map_position);
 
-            // Add the occupancy to the weight of the particle
-            weight += occupancy;
+
+            // If the occupancy is -1 then the observation is outside the map
+            if (occupancy == -1) {
+                // Reduce the weight of the particle by the 1 / number of observations
+                weight -= (1.0 / n_observations);
+            }
+            else if (occupancy == 1) {
+                // Add the occupancy to the weight of the particle such that the best possible weight is n_observations,
+                // since occupancy is in the range [0,1]
+                weight += occupancy / n_observations;
+            }
         }
+
+        log<NUClear::DEBUG>("weight: ", weight);
+
+
+        weight = std::max(weight, 0.0);
+
         return weight;
     }
 
@@ -348,6 +357,10 @@ namespace module::localisation {
     }
 
     void Localisation::resample(std::vector<Particle>& particles) {
+
+        // log<NUClear::DEBUG>("Unsampled particles: ");
+        // log_particles(particles, 10);
+
         std::vector<double> weights(particles.size());
         for (int i = 0; i < particles.size(); i++) {
             weights[i] = particles[i].weight;
@@ -369,6 +382,10 @@ namespace module::localisation {
             resampled_particles[i] = particles[index];
         }
 
+
+        // log<NUClear::DEBUG>("Resampled particles: ");
+        // log_particles(resampled_particles, 10);
+
         particles = resampled_particles;
     }
 
@@ -376,7 +393,6 @@ namespace module::localisation {
         MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), cfg.process_noise);
         for (auto& particle : particles) {
             auto noise = multivariate.sample();
-            // log<NUClear::DEBUG>("Adding noise: ", noise.transpose());
             particle.state += noise;
         }
     }
