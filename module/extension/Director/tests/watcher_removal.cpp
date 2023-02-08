@@ -48,18 +48,24 @@ namespace {
 
             on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back(t.msg); });
 
-            on<Provide<SimpleTask<3>>>().then([this](const SimpleTask<3>& t) {
-                emit<Task>(std::make_unique<SimpleTask<1>>(t.msg));
-                events.push_back(t.msg);
-            });
+            on<Provide<SimpleTask<3>>, Needs<SimpleTask<1>>>().then(
+                [this](const SimpleTask<3>& t) { emit<Task>(std::make_unique<SimpleTask<1>>(t.msg)); });
 
             /**************
              * TEST STEPS *
              **************/
+            static int counter = 0;
             // SimpleTask<0> takes ahold of SimpleTask<1> and SimpleTask<2>
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting first task");
-                emit<Task>(std::make_unique<SimpleTask<0>>("first task"), 1);
+                if (counter == 0) {
+                    events.push_back("emitting first task");
+                    emit<Task>(std::make_unique<SimpleTask<0>>("first task"), 1);
+                    counter++;
+                }
+                else {
+                    events.push_back("stopping first task");
+                    emit<Task>(std::make_unique<SimpleTask<0>>(nullptr));
+                }
             });
 
             // SimpleTask<3> needs SimpleTask<1>, so it will watch
@@ -68,16 +74,11 @@ namespace {
                 emit<Task>(std::make_unique<SimpleTask<3>>("watcher task"), 0);
             });
 
-            // Make SimpleTask<0> stop requesting SimpleTask<1>, so SimpleTask<3> takes over
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("cancelling first task");
-                emit<Task>(std::make_unique<SimpleTask<0>>(nullptr));
-            });
-
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<3>>());
+                emit(std::make_unique<Step<1>>());
+                emit(std::make_unique<Step<2>>());
             });
         }
     };
@@ -96,7 +97,7 @@ TEST_CASE("Test that a watcher can take over from another provider", "[director]
     std::vector<std::string> expected = {"emitting first task",
                                          "first task",
                                          "emitting watcher",
-                                         "cancelling first task",
+                                         "stopping first task",
                                          "watcher task"};
 
     // Make an info print the diff in an easy to read way if we fail
