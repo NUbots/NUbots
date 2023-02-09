@@ -11,14 +11,13 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            float timeout_threshold       = 0.0;
+            float ball_timeout_threshold  = 0.0;
             float ball_distance_threshold = 0.0;
             float ball_angle_threshold    = 0.0;
-            bool align                    = false;
             float target_angle_threshold  = 0.0;
-            std::string kick_leg          = "";
         } cfg;
 
+        enum KickLeg { AUTO, LEFT, RIGHT } kick_leg{};
         /// @brief True if a Kick task has been requested, false otherwise. Resets to false when the Kick task is Done.
         bool kicking = false;
 

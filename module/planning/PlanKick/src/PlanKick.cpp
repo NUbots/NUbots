@@ -10,6 +10,7 @@
 #include "message/skill/Kick.hpp"
 
 #include "utility/input/LimbID.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::planning {
 
@@ -18,18 +19,18 @@ namespace module::planning {
     using message::planning::KickTo;
     using message::skill::Kick;
     using utility::input::LimbID;
+    using utility::support::Expression;
 
     PlanKick::PlanKick(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("PlanKick.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PlanKick.yaml
             this->log_level             = config["log_level"].as<NUClear::LogLevel>();
-            cfg.timeout_threshold       = config["timeout_threshold"].as<float>();
+            cfg.ball_timeout_threshold  = config["timeout_threshold"].as<float>();
             cfg.ball_distance_threshold = config["ball_distance_threshold"].as<float>();
             cfg.ball_angle_threshold    = config["ball_angle_threshold"].as<float>();
-            cfg.align                   = config["align"].as<bool>();
             cfg.target_angle_threshold  = config["target_angle_threshold"].as<float>();
-            cfg.kick_leg                = config["kick_leg"].as<std::string>();
+            kick_leg                    = config["kick_leg"].as<KickLeg>();
         });
 
         on<Provide<KickTo>, Trigger<FilteredBall>, Needs<Kick>>().then(
@@ -49,7 +50,7 @@ namespace module::planning {
                 // If the ball measurement is old, then don't do anything
                 auto time_difference = std::chrono::duration_cast<std::chrono::milliseconds>(
                     NUClear::clock::now() - ball.time_of_measurement);
-                if (time_difference.count() >= cfg.timeout_threshold) {
+                if (time_difference.count() >= cfg.ball_timeout_threshold) {
                     emit<Task>(std::make_unique<Idle>());
                     return;
                 }
@@ -69,33 +70,20 @@ namespace module::planning {
                 float align_angle = std::abs(std::atan2(kick.rPTt.y(), kick.rPTt.x()));
 
                 // Don't kick if we should align but we're not aligned to the target
-                if (cfg.align && align_angle > cfg.target_angle_threshold) {
+                if (align_angle > cfg.target_angle_threshold) {
                     emit<Task>(std::make_unique<Idle>());
                     return;
                 }
 
                 // ALL CHECKS PASSED, KICK!
-                // Set kicking flag so we don't keep trying to kick
-                if (!kicking) {
-                    kicking = true;
-                }
+                kicking = true;
 
-                // Check if config specifies a leg
-                if (cfg.kick_leg == "left") {  // can only kick with left
-                    emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
-                    return;
-                }
-                else if (cfg.kick_leg == "right") {  // can only kick with right
-                    emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG));
-                    return;
-                }
-
-                // Else determine leg based on ball position
-                // If the ball is more to the left, then kick with the left leg
-                if (ball.rBTt.y() > 0.0) {
+                // If the kick leg is forced left, kick left
+                // If the kick leg is auto, kick with left leg if ball is more to the left
+                if (kick_leg == LEFT || (kick_leg == AUTO && ball.rBTt.y() > 0.0)) {
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
                 }
-                else {  // ball is more to the right
+                else {  // kick leg is forced right or ball is more to the right and kick leg is auto
                     emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG));
                 }
             });
