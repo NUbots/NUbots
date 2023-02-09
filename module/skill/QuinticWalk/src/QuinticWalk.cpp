@@ -325,58 +325,50 @@ namespace module::skill {
         // ****DIRECTOR MOTION***
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
-        // TODO: Change below to a loop
         //  Legs
-        auto left_leg                             = std::make_unique<LeftLegIK>();
-        auto right_leg                            = std::make_unique<RightLegIK>();
-        left_leg->time                            = time;
-        right_leg->time                           = time;
-        left_leg->Htl                             = Htl.cast<double>().matrix();
-        right_leg->Htr                            = Htr.cast<double>().matrix();
-        left_leg->servos[ServoID::L_HIP_YAW]      = ServoState(current_config.jointGains[ServoID::L_HIP_YAW], 100);
-        left_leg->servos[ServoID::L_HIP_ROLL]     = ServoState(current_config.jointGains[ServoID::L_HIP_ROLL], 100);
-        left_leg->servos[ServoID::L_HIP_PITCH]    = ServoState(current_config.jointGains[ServoID::L_HIP_PITCH], 100);
-        left_leg->servos[ServoID::L_KNEE]         = ServoState(current_config.jointGains[ServoID::L_KNEE], 100);
-        left_leg->servos[ServoID::L_ANKLE_PITCH]  = ServoState(current_config.jointGains[ServoID::L_ANKLE_PITCH], 100);
-        left_leg->servos[ServoID::L_ANKLE_ROLL]   = ServoState(current_config.jointGains[ServoID::L_ANKLE_ROLL], 100);
-        right_leg->servos[ServoID::R_HIP_YAW]     = ServoState(current_config.jointGains[ServoID::R_HIP_YAW], 100);
-        right_leg->servos[ServoID::R_HIP_ROLL]    = ServoState(current_config.jointGains[ServoID::R_HIP_ROLL], 100);
-        right_leg->servos[ServoID::R_HIP_PITCH]   = ServoState(current_config.jointGains[ServoID::R_HIP_PITCH], 100);
-        right_leg->servos[ServoID::R_KNEE]        = ServoState(current_config.jointGains[ServoID::R_KNEE], 100);
-        right_leg->servos[ServoID::R_ANKLE_PITCH] = ServoState(current_config.jointGains[ServoID::R_ANKLE_PITCH], 100);
-        right_leg->servos[ServoID::R_ANKLE_ROLL]  = ServoState(current_config.jointGains[ServoID::R_ANKLE_ROLL], 100);
+        auto left_leg   = std::make_unique<LeftLegIK>();
+        auto right_leg  = std::make_unique<RightLegIK>();
+        left_leg->time  = time;
+        right_leg->time = time;
+        left_leg->Htl   = Htl.cast<double>().matrix();
+        right_leg->Htr  = Htr.cast<double>().matrix();
+        // Arms
+        auto left_arm  = std::make_unique<LeftArm>();
+        auto right_arm = std::make_unique<RightArm>();
 
+        // Loop to set the servo states
+        for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
+            // Set the legs
+            if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
+                if (id % 2 == 0) {
+                    // right legs
+                    right_leg->servos[id] = ServoState(current_config.jointGains[ServoID(id)], 100);
+                }
+                else {
+                    // left legs
+                    left_leg->servos[id] = ServoState(current_config.jointGains[ServoID(id)], 100);
+                }
+            }
+            // Set the arms
+            if (id < ServoID::R_HIP_YAW) {
+                if (id % 2 == 0) {
+                    // right arms
+                    right_arm->servos[id] = ServoCommand(time,
+                                                         current_config.arm_positions[ServoID(id)].second,
+                                                         ServoState(current_config.jointGains[ServoID(id)], 100));
+                }
+                else {
+                    // left arms
+                    left_arm->servos[id] = ServoCommand(time,
+                                                        current_config.arm_positions[ServoID(id)].second,
+                                                        ServoState(current_config.jointGains[ServoID(id)], 100));
+                }
+            }
+        }
 
         emit<Task>(left_leg, 0, false, "quintic left leg");
         emit<Task>(right_leg, 0, false, "quintic right leg");
 
-        // Arms
-        auto left_arm  = std::make_unique<LeftArm>();
-        auto right_arm = std::make_unique<RightArm>();
-        left_arm->servos[ServoID::L_SHOULDER_PITCH] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::L_SHOULDER_PITCH].second,
-                         ServoState(current_config.jointGains[ServoID::L_SHOULDER_PITCH], 100));
-        left_arm->servos[ServoID::L_SHOULDER_ROLL] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::L_SHOULDER_ROLL].second,
-                         ServoState(current_config.jointGains[ServoID::L_SHOULDER_ROLL], 100));
-        left_arm->servos[ServoID::L_ELBOW] = ServoCommand(time,
-                                                          current_config.arm_positions[ServoID::L_ELBOW].second,
-                                                          ServoState(current_config.jointGains[ServoID::L_ELBOW], 100));
-
-        right_arm->servos[ServoID::R_SHOULDER_PITCH] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_SHOULDER_PITCH].second,
-                         ServoState(current_config.jointGains[ServoID::R_SHOULDER_PITCH], 100));
-        right_arm->servos[ServoID::R_SHOULDER_ROLL] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_SHOULDER_ROLL].second,
-                         ServoState(current_config.jointGains[ServoID::R_SHOULDER_ROLL], 100));
-        right_arm->servos[ServoID::R_ELBOW] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_ELBOW].second,
-                         ServoState(current_config.jointGains[ServoID::R_ELBOW], 100));
         emit<Task>(left_arm);
         emit<Task>(right_arm);
 
