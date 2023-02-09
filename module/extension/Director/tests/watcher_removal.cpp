@@ -54,18 +54,10 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            static int counter = 0;
             // SimpleTask<0> takes ahold of SimpleTask<1> and SimpleTask<2>
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                if (counter == 0) {
-                    events.push_back("emitting first task");
-                    emit<Task>(std::make_unique<SimpleTask<0>>("first task"), 1);
-                    counter++;
-                }
-                else {
-                    events.push_back("stopping first task");
-                    emit<Task>(std::make_unique<SimpleTask<0>>(nullptr));
-                }
+                events.push_back("emitting first task");
+                emit<Task>(std::make_unique<SimpleTask<0>>("first task"), 1);
             });
 
             // SimpleTask<3> needs SimpleTask<1>, so it will watch
@@ -74,11 +66,16 @@ namespace {
                 emit<Task>(std::make_unique<SimpleTask<3>>("watcher task"), 0);
             });
 
+            // Remove SimpleTask<0> so SimpleTask<3> can take over
+            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+                events.push_back("removing first task");
+                emit<Task>(std::make_unique<SimpleTask<0>>(nullptr));
+            });
+
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
-                emit(std::make_unique<Step<1>>());
-                emit(std::make_unique<Step<2>>());
+                emit(std::make_unique<Step<3>>());
             });
         }
     };
@@ -97,7 +94,7 @@ TEST_CASE("Test that a watcher can take over from another provider", "[director]
     std::vector<std::string> expected = {"emitting first task",
                                          "first task",
                                          "emitting watcher",
-                                         "stopping first task",
+                                         "removing first task",
                                          "watcher task"};
 
     // Make an info print the diff in an easy to read way if we fail
