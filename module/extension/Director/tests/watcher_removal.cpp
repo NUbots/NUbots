@@ -69,7 +69,7 @@ namespace {
             // Remove SimpleTask<0> so SimpleTask<3> can take over
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 events.push_back("removing first task");
-                emit<Task>(std::make_unique<SimpleTask<0>>(nullptr));
+                emit<Task>(std::unique_ptr<SimpleTask<0>>(nullptr));
             });
 
             on<Startup>().then([this] {
