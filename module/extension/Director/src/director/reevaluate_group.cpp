@@ -36,7 +36,7 @@ namespace module::extension {
         std::vector<std::shared_ptr<BehaviourTask>> watchers = group.watchers;
 
         // Sort the interested parties by priority with highest first
-        std::sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
+        std::stable_sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
             return challenge_priority(b, a);
         });
 
