@@ -29,6 +29,7 @@ namespace {
 
     struct PrimaryTask {};
     struct SecondaryTask {};
+    struct TertiaryTask {};
 
     struct SubTask {
         SubTask(const std::string& msg_) : msg(msg_) {}
@@ -55,6 +56,8 @@ namespace {
 
             on<Provide<SecondaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("secondary task")); });
 
+            on<Provide<TertiaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("tertiary task")); });
+
             /**************
              * TEST STEPS *
              **************/
@@ -70,8 +73,14 @@ namespace {
                 emit<Task>(std::make_unique<SecondaryTask>());
             });
 
-            // Remove PrimaryTask so SecondaryTask can take over
+            // Tertiary needs SubTask, so it will watch
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+                events.push_back("emitting tertiary task");
+                emit<Task>(std::make_unique<TertiaryTask>());
+            });
+
+            // Remove PrimaryTask so SecondaryTask can take over
+            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
                 events.push_back("removing primary task");
                 emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
             });
@@ -80,13 +89,15 @@ namespace {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
                 emit(std::make_unique<Step<3>>());
+                emit(std::make_unique<Step<4>>());
             });
         }
     };
 
 }  // namespace
 
-TEST_CASE("Test that a watcher can take over from another provider", "[director][remove][watcher]") {
+TEST_CASE("Test that a lower priority secondary watcher does not take over from the higher priority watcher",
+          "[director][remove][watcher][double]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -98,6 +109,7 @@ TEST_CASE("Test that a watcher can take over from another provider", "[director]
     std::vector<std::string> expected = {"emitting primary task",
                                          "primary task",
                                          "emitting secondary task",
+                                         "emitting tertiary task",
                                          "removing primary task",
                                          "secondary task"};
 
