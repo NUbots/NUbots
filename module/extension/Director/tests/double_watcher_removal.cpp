@@ -79,7 +79,7 @@ namespace {
                 emit<Task>(std::make_unique<TertiaryTask>());
             });
 
-            // Remove PrimaryTask so SecondaryTask can take over
+            // Remove PrimaryTask so SecondaryTask can take over since Secondary was looking first
             on<Trigger<Step<4>>, Priority::LOW>().then([this] {
                 events.push_back("removing primary task");
                 emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
