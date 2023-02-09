@@ -37,7 +37,7 @@ namespace module::extension {
 
         // Sort the interested parties by priority with highest first
         std::sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
-            return !challenge_priority(a, b);
+            return challenge_priority(b, a);
         });
 
         // Store our initial task to see if it changed later
