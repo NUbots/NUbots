@@ -88,6 +88,36 @@ namespace module::localisation {
         }
 
         /**
+         * @brief Add a rectangular cross to the map with specified origin, radius and line width
+         * @param origin The origin (x,y) of the circle
+         * @param radius The radius of the circle
+         * @param inner_width The width of the circle line
+         */
+        void add_cross(const int X0, const int Y0, const int radius, const int inner_width) {
+            for (int i = Y0 - radius; i <= Y0 + radius; i++) {
+                if (i >= 0 && i < map.rows()) {
+                    int width   = inner_width / 2;
+                    int start_x = X0 - width;
+                    int end_x   = X0 + width;
+                    if (start_x >= 0 && end_x < map.cols()) {
+                        map.block(i, start_x, 1, end_x - start_x + 1) = Eigen::MatrixXd::Ones(1, end_x - start_x + 1);
+                    }
+                }
+            }
+
+            for (int i = X0 - radius; i <= X0 + radius; i++) {
+                if (i >= 0 && i < map.cols()) {
+                    int width   = inner_width / 2;
+                    int start_y = Y0 - width;
+                    int end_y   = Y0 + width;
+                    if (start_y >= 0 && end_y < map.rows()) {
+                        map.block(start_y, i, end_y - start_y + 1, 1) = Eigen::MatrixXd::Ones(end_y - start_y + 1, 1);
+                    }
+                }
+            }
+        }
+
+        /**
          * @brief Fills the surrounding cells with a decreasing occupancy value from 1 for a user-specified range.
          * @param map The pre-filled Map
          * @param range The range for the surrounding cells

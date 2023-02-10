@@ -41,13 +41,12 @@ namespace module::localisation {
             /// @brief  THe size of the grid cells in the occupancy grid [m]
             double grid_size;
             /// @brief The number of particles to use in the particle filter
-            int num_particles = 0;
+            int n_particles = 0;
             /// @brief The uncertainty in the process model
             Eigen::Matrix<double, 3, 3> process_noise;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
-        NUClear::clock::time_point last_measurement_update_time;
 
         static constexpr int TIME_UPDATE_FREQUENCY = 10;
 
@@ -77,6 +76,12 @@ namespace module::localisation {
         /// @brief Called by the powerplant to build and setup the Localisation reactor.
         explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
 
+        /// @brief Converts a unit vector of point from the camera in world space to a (x,y) point relative to the robot
+        /// on
+        /// the field plane
+        /// @param uPCw unit vector from the camera to the field point in world space
+        /// @param Hcw the camera to world transform
+        /// @return the field point measurement (x,y) relative to the robot
         Eigen::Vector2d ray2field(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
 
         /// @brief Get the occupancy value of a cell in the map
@@ -92,26 +97,36 @@ namespace module::localisation {
                                              const Eigen::Vector2d observation);
 
         /// @brief Get the weight of a particle given a set of observations
+        /// @param particle The state of the particle (x,y,theta)
+        /// @param observations The observations (x, y) in the robot's coordinate frame [m]
+        /// @return The weight of the particle
         double calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
                                 const std::vector<Eigen::Vector2d>& observations);
 
+        /// @brief Get the current mean (state) of the robot
+        // @return The current mean (state) of the robot
+        Eigen::Matrix<double, 3, 1> get_mean();
+
+        /// @brief Get the current covariance matrix of the robot's state
+        // @return The current covariance matrix of the robot's state
+        Eigen::Matrix<double, 3, 3> get_covariance();
+
         /// @brief Perform a time update on the particles
+        /// @param walk_command The walk command (dx, dy, dtheta)
+        /// @param dt The time since the last time update
         void time_update();
 
         /// @brief Generates a random sample from a 1-D array using the Eigen library
         /// @param particles Vector of particles to be resampled
         /// @param size Output size (int or tuple of ints)
         /// @return The randomly generated sample of particles
-        void resample(std::vector<Particle>& particles);
+        void resample();
 
         /// @brief Add some noise to the particles to compensate for the fact that we don't have a perfect model
         void add_noise();
 
         /// @brief Log a list of particles
-        void log_particles(const std::vector<Particle>& particles, int number = -1);
-
-        /// @brief Add noisy particles to the particle filter, replacing the worst particles
-        void add_noisy_particles();
+        void log_particles(int number = -1);
     };
 
 

@@ -33,9 +33,9 @@ namespace module::localisation {
     Localisation::Localisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Localisation.yaml").then([this](const Configuration& config) {
-            this->log_level   = config["log_level"].as<NUClear::LogLevel>();
-            cfg.grid_size     = config["grid_size"].as<double>();
-            cfg.num_particles = config["num_particles"].as<int>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.grid_size   = config["grid_size"].as<double>();
+            cfg.n_particles = config["n_particles"].as<int>();
 
             // Initial state and covariance
             state                               = config["initial_state"].as<Expression>();
@@ -47,8 +47,8 @@ namespace module::localisation {
 
             // Initialise the particles
             MultivariateNormal<double, 3> multivariate(state, covariance);
-            for (int i = 0; i < cfg.num_particles; i++) {
-                particles.push_back(Particle(multivariate.sample(), 1.0 / cfg.num_particles));
+            for (int i = 0; i < cfg.n_particles; i++) {
+                particles.push_back(Particle(multivariate.sample(), 1.0 / cfg.n_particles));
             }
         });
 
@@ -132,11 +132,31 @@ namespace module::localisation {
                                         centre_line_width,
                                         line_width);
 
-            // TODO: Add centre cross in centre of field
+            // Add left penalty cross in centre of penalty area
+            int left_penalty_cross_x0 =
+                (fd.dimensions.border_strip_min_width + fd.dimensions.penalty_mark_distance) / cfg.grid_size;
+            int left_penalty_cross_y0 =
+                (fd.dimensions.border_strip_min_width + fd.dimensions.field_width / 2) / cfg.grid_size;
+            int left_penalty_cross_width = 0.1 / cfg.grid_size;
+            fieldline_map.add_cross(left_penalty_cross_x0, left_penalty_cross_y0, left_penalty_cross_width, line_width);
 
-            // TODO: Add left penalty cross in centre of penalty area
+            // Add right penalty cross in centre of penalty area
+            int right_penalty_cross_x0 = (fd.dimensions.border_strip_min_width + fd.dimensions.field_length
+                                          - fd.dimensions.penalty_mark_distance)
+                                         / cfg.grid_size;
+            int right_penalty_cross_y0    = left_penalty_cross_y0;
+            int right_penalty_cross_width = 0.1 / cfg.grid_size;
+            fieldline_map.add_cross(right_penalty_cross_x0,
+                                    right_penalty_cross_y0,
+                                    right_penalty_cross_width,
+                                    line_width);
 
-            // TODO: Add right penalty cross in centre of penalty area
+            // Add centre cross in centre of field
+            int centre_cross_x0 =
+                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size;
+            int centre_cross_y0    = left_penalty_cross_y0;
+            int centre_cross_width = 0.1 / cfg.grid_size;
+            fieldline_map.add_cross(centre_cross_x0, centre_cross_y0, centre_cross_width, line_width);
 
             // Add centre circle
             int centre_circle_x0 =
@@ -166,9 +186,8 @@ namespace module::localisation {
                 }
             }
 
-            // Set the update times to now
-            last_time_update_time        = NUClear::clock::now();
-            last_measurement_update_time = NUClear::clock::now();
+            // Set the time update time to now
+            last_time_update_time = NUClear::clock::now();
         });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
@@ -182,18 +201,18 @@ namespace module::localisation {
                                walk_command.z());
         });
 
-        on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
+        on<Trigger<EnableWalkEngineCommand>>().then([this]() {
             walk_engine_enabled     = true;
             const auto current_time = NUClear::clock::now();
             last_time_update_time   = current_time;
         });
 
-        on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
+        on<Trigger<DisableWalkEngineCommand>>().then([this]() {
             walk_command        = Eigen::Vector3d::Zero();
             walk_engine_enabled = false;
         });
 
-        on<Trigger<StopCommand>>().then([this](const StopCommand& command) {
+        on<Trigger<StopCommand>>().then([this]() {
             walk_command        = Eigen::Vector3d::Zero();
             walk_engine_enabled = false;
             log<NUClear::INFO>("Stop command received");
@@ -203,71 +222,56 @@ namespace module::localisation {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        on<Trigger<VisionLines>, With<FieldDescription>, With<Sensors>>().then(
-            "Vision Lines",
-            [this](const VisionLines& line_points, const FieldDescription& fd, const Sensors& sensors) {
-                /* Perform measurement correction */
-                // Identify the line points on the field
-                std::vector<Eigen::Vector2d> field_point_observations;
-                for (auto point : line_points.points) {
-                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
-                    auto uPCw             = point.cast<double>();
-                    auto rPCc             = ray2field(uPCw, Hcw);
-                    field_point_observations.push_back(rPCc);
-                    if (log_level <= NUClear::DEBUG) {
-                        auto cell = observation_relative(state, rPCc);
-                        emit(graph("Observation points [m]:", rPCc.x(), rPCc.y()));
-                        emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
-                    }
+        on<Trigger<VisionLines>>().then("Vision Lines", [this](const VisionLines& line_points) {
+            // Convert the unit vectors from vision to points on field plane
+            std::vector<Eigen::Vector2d> field_point_observations;
+            for (auto point : line_points.points) {
+                Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
+                auto uPCw             = point.cast<double>();
+                auto rPCc             = ray2field(uPCw, Hcw);
+                field_point_observations.push_back(rPCc);
+                if (log_level <= NUClear::DEBUG) {
+                    auto cell = observation_relative(state, rPCc);
+                    emit(graph("Observation points [m]:", rPCc.x(), rPCc.y()));
+                    emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
                 }
+            }
 
-                for (int i = 0; i < cfg.num_particles; i++) {
-                    // Calculate the weight the particle
-                    particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
-                    if (log_level <= NUClear::DEBUG) {
-                        auto particle_cell = observation_relative(particles[i].state, Eigen::Vector2d(0.0, 0.0));
-                        emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
-                    }
+            // Calculate the weight of each particle based on the observations
+            for (int i = 0; i < cfg.n_particles; i++) {
+                particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
+                if (log_level <= NUClear::DEBUG) {
+                    auto particle_cell = observation_relative(particles[i].state, Eigen::Vector2d(0.0, 0.0));
+                    emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
                 }
+            }
 
-                // Perform time update on all the particles
-                if (walk_engine_enabled && !falling) {
-                    time_update();
-                }
+            // Perform time update on all the particles if the walk engine is enabled and the robot is not falling
+            if (walk_engine_enabled && !falling) {
+                time_update();
+            }
 
-                // Add noise to the particles
-                add_noise();
+            // Add noise to the particles
+            add_noise();
 
-                // Resample
-                resample(particles);
+            // Resample the particles
+            resample();
 
-                // Calculate the mean state
-                Eigen::Vector3d state_mean = Eigen::Vector3d::Zero();
-                for (int i = 0; i < cfg.num_particles; i++) {
-                    state_mean.x() += particles[i].state.x();
-                    state_mean.y() += particles[i].state.y();
-                    state_mean.z() += particles[i].state.z();
-                }
-                state_mean /= cfg.num_particles;
-                state = state_mean;
+            // Calculate the state and covariance
+            state = get_mean();
+            // covariance = get_covariance();
 
-                // Build and emit the field message
-                auto field(std::make_unique<Field>());
-                Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
-                position.translation() = Eigen::Vector2d(state.x(), state.y());
-                position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
-                field->position        = position.matrix();
-
-                emit(graph("State", state.x(), state.y(), state.z()));
-                emit(field);
-            });
+            // Build and emit the field message
+            auto field(std::make_unique<Field>());
+            Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
+            position.translation() = Eigen::Vector2d(state.x(), state.y());
+            position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
+            field->position        = position.matrix();
+            emit(field);
+        });
     }
 
-    /// @brief Converts a unit vector of point from the camera in world space to a (x,y) point relative to the robot on
-    /// the field plane
-    /// @param uPCw unit vector from the camera to the field point in world space
-    /// @param Hcw the camera to world transform
-    /// @return the field point measurement (x,y) relative to the robot
+
     Eigen::Vector2d Localisation::ray2field(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw) {
         auto Hwc             = Hcw.inverse();
         Eigen::Vector3d rPCw = uPCw * std::abs(Hwc.translation().z() / uPCw.z());
@@ -301,49 +305,51 @@ namespace module::localisation {
         return Eigen::Vector2i(x_map, y_map);
     }
 
-    /// @brief Get the weight of a particle given a set of observations
     double Localisation::calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
                                           const std::vector<Eigen::Vector2d>& observations) {
-        double weight = 0;
-
+        double weight         = 0;
         double n_observations = observations.size();
 
         for (auto observation : observations) {
             // Get the position of the observation in the map for this particle
             Eigen::Vector2i map_position = observation_relative(particle, observation);
 
+            // Get the occupancy value of the observation at this position in the map
             double occupancy = get_occupancy(map_position);
 
-
-            // If the occupancy is -1 then the observation is outside the map
+            // If the occupancy is -1 then the observation is outside the map, penalise the particle
             if (occupancy == -1) {
                 // Reduce the weight of the particle by the 1 / number of observations
                 weight -= (1.0 / n_observations);
             }
             else if (occupancy == 1) {
-                // Add the occupancy to the weight of the particle such that the best possible weight is n_observations,
-                // since occupancy is in the range [0,1]
                 weight += occupancy / n_observations;
             }
         }
-
-        log<NUClear::DEBUG>("weight: ", weight);
-
 
         weight = std::max(weight, 0.0);
 
         return weight;
     }
 
-    void Localisation::time_update() {
+    Eigen::Vector3d Localisation::get_mean() {
+        Eigen::Vector3d mean = Eigen::Vector3d::Zero();
+        for (int i = 0; i < cfg.n_particles; i++) {
+            mean.x() += particles[i].state.x();
+            mean.y() += particles[i].state.y();
+            mean.z() += particles[i].state.z();
+        }
+        return mean / cfg.n_particles;
+    }
 
+
+    void Localisation::time_update() {
         using namespace std::chrono;
         const auto current_time = NUClear::clock::now();
         const double dt         = duration_cast<duration<double>>(current_time - last_time_update_time).count();
-        log<NUClear::DEBUG>("Time since last time update: ", dt);
-        last_time_update_time = current_time;
+        last_time_update_time   = current_time;
 
-        for (int i = 0; i < particles.size(); i++) {
+        for (size_t i = 0; i < particles.size(); i++) {
             double delta_x     = walk_command.x() * dt;
             double delta_y     = walk_command.y() * dt;
             double delta_theta = walk_command.z() * dt;
@@ -356,13 +362,9 @@ namespace module::localisation {
         }
     }
 
-    void Localisation::resample(std::vector<Particle>& particles) {
-
-        // log<NUClear::DEBUG>("Unsampled particles: ");
-        // log_particles(particles, 10);
-
+    void Localisation::resample() {
         std::vector<double> weights(particles.size());
-        for (int i = 0; i < particles.size(); i++) {
+        for (size_t i = 0; i < particles.size(); i++) {
             weights[i] = particles[i].weight;
         }
         double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
@@ -370,21 +372,17 @@ namespace module::localisation {
             std::cout << "All weights are zero, cannot resample" << std::endl;
             return;
         }
-        for (int i = 0; i < weights.size(); i++) {
+        for (size_t i = 0; i < weights.size(); i++) {
             weights[i] /= weight_sum;
         }
         std::vector<Particle> resampled_particles(particles.size());
         std::random_device rd;
         std::mt19937 generator(rd());
         std::discrete_distribution<> distribution(weights.begin(), weights.end());
-        for (int i = 0; i < particles.size(); i++) {
+        for (size_t i = 0; i < particles.size(); i++) {
             int index              = distribution(generator);
             resampled_particles[i] = particles[index];
         }
-
-
-        // log<NUClear::DEBUG>("Resampled particles: ");
-        // log_particles(resampled_particles, 10);
 
         particles = resampled_particles;
     }
@@ -397,11 +395,11 @@ namespace module::localisation {
         }
     }
 
-    void Localisation::log_particles(const std::vector<Particle>& particles, int number) {
-        if (number == -1) {
-            number = particles.size();
+    void Localisation::log_particles(int n_particles) {
+        if (n_particles == -1) {
+            n_particles = particles.size();
         }
-        for (int i = 0; i < number; i++) {
+        for (int i = 0; i < n_particles; i++) {
             log<NUClear::DEBUG>("Particle ",
                                 i,
                                 "with state: ",
@@ -410,4 +408,6 @@ namespace module::localisation {
                                 particles[i].weight);
         }
     }
+
+
 }  // namespace module::localisation
