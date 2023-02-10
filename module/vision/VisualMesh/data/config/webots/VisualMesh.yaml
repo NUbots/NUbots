@@ -9,11 +9,11 @@
 
 cameras:
   left_camera:
-    concurrent: 2
+    concurrent: 10
     network: config/networks/WebotsNetwork.yaml
     engine: cpu
     cache_directory: "" # unneeded for cpu engine
     classifier:
       height: [0.5, 1.0]
-      max_distance: 15
-      intersection_tolerance: 0.25
+      max_distance: 5
+      intersection_tolerance: 0.1
