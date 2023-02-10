@@ -191,8 +191,12 @@ namespace module::localisation {
         });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
-            walk_engine_enabled = true;
-            walk_command        = wc.command;
+            if (!walk_engine_enabled) {
+                const auto current_time = NUClear::clock::now();
+                last_time_update_time   = current_time;
+                walk_engine_enabled     = true;
+            }
+            walk_command = wc.command;
             log<NUClear::INFO>("Walk command received: ",
                                walk_command.x(),
                                ", ",
@@ -222,52 +226,61 @@ namespace module::localisation {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        on<Trigger<VisionLines>>().then("Vision Lines", [this](const VisionLines& line_points) {
-            // Convert the unit vectors from vision to points on field plane
-            std::vector<Eigen::Vector2d> field_point_observations;
-            for (auto point : line_points.points) {
-                Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
-                auto uPCw             = point.cast<double>();
-                auto rPCc             = ray2field(uPCw, Hcw);
-                field_point_observations.push_back(rPCc);
-                if (log_level <= NUClear::DEBUG) {
-                    auto cell = observation_relative(state, rPCc);
-                    emit(graph("Observation points [m]:", rPCc.x(), rPCc.y()));
-                    emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
-                }
-            }
-
-            // Calculate the weight of each particle based on the observations
-            for (int i = 0; i < cfg.n_particles; i++) {
-                particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
-                if (log_level <= NUClear::DEBUG) {
-                    auto particle_cell = observation_relative(particles[i].state, Eigen::Vector2d(0.0, 0.0));
-                    emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
-                }
-            }
-
-            // Perform time update on all the particles if the walk engine is enabled and the robot is not falling
-            if (walk_engine_enabled && !falling) {
+        on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this]() {
+            if (walk_engine_enabled) {
                 time_update();
             }
+        });
 
-            // Add noise to the particles
-            add_noise();
+        on<Trigger<VisionLines>>().then("Vision Lines", [this](const VisionLines& line_points) {
+            if (!falling) {
+                // Convert the unit vectors from vision to points on field plane
+                std::vector<Eigen::Vector2d> field_point_observations;
+                for (auto point : line_points.points) {
+                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
+                    auto uPCw             = point.cast<double>();
+                    auto rPCc             = ray2field(uPCw, Hcw);
+                    field_point_observations.push_back(rPCc);
+                    if (log_level <= NUClear::DEBUG) {
+                        auto cell = observation_relative(state, rPCc);
+                        emit(graph("Observation points [m]:", rPCc.x(), rPCc.y()));
+                        emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
+                    }
+                }
 
-            // Resample the particles
-            resample();
+                // Calculate the weight of each particle based on the observations
+                for (int i = 0; i < cfg.n_particles; i++) {
+                    particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
+                    if (log_level <= NUClear::DEBUG) {
+                        auto particle_cell = observation_relative(particles[i].state, Eigen::Vector2d(0.0, 0.0));
+                        emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
+                    }
+                }
 
-            // Calculate the state and covariance
-            state = get_mean();
-            // covariance = get_covariance();
+                // Add noise to the particles
+                add_noise();
 
-            // Build and emit the field message
-            auto field(std::make_unique<Field>());
-            Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
-            position.translation() = Eigen::Vector2d(state.x(), state.y());
-            position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
-            field->position        = position.matrix();
-            emit(field);
+                // Resample the particles
+                resample();
+
+                // Time update
+                if (walk_engine_enabled) {
+                    // time_update();
+                }
+
+
+                // Calculate the state and covariance
+                state = get_mean();
+                // covariance = get_covariance();
+
+                // Build and emit the field message
+                auto field(std::make_unique<Field>());
+                Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
+                position.translation() = Eigen::Vector2d(state.x(), state.y());
+                position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
+                field->position        = position.matrix();
+                emit(field);
+            }
         });
     }
 
