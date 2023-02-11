@@ -26,8 +26,7 @@ import { Stage } from '../three'
 import { Canvas } from '../three'
 import { Three } from '../three'
 
-storiesOf('component.three', module)
-  .addDecorator(fullscreen)
+fullscreen(storiesOf('component.three', module))
   .add('renders static scene', () => {
     return <BoxVisualiser />
   })
