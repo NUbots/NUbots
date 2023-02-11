@@ -126,6 +126,7 @@ message RawSensors {
         float  voltage               = 18;
         float  temperature           = 19;
         float  profile_acceleration  = 20;
+        // Replaces "Moving speed" from v1 protocol, basically just the set speed.
         float  profile_velocity      = 21;
     };
 

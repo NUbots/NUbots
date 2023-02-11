@@ -93,7 +93,8 @@ namespace module::platform::openCR {
             float goalVelocity        = 0.0f;
             float goalPosition        = 0.0f;
             float profileAcceleration = 0.0f;
-            float profileVelocity     = 0.0f;
+            /// @brief replaces "Moving speed" from v1 protocol, basically just the set speed.
+            float profileVelocity = 0.0f;
 
             // Values that are either simulated or read
             float presentPWM      = 0.0f;

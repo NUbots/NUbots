@@ -680,15 +680,13 @@ namespace module::platform::openCR {
             servo.torque_enabled = servoState[i].torqueEnabled;
 
             // Gain
-            // RawSensors only takes PID but the v2 protocol has more options
-            // so we assing the velocity gain to the sensor message
             servo.velocity_p_gain = servoState[i].velocityPGain;
             servo.velocity_i_gain = servoState[i].velocityIGain;
             servo.velocity_d_gain = servoState[i].velocityDGain;
 
             // Targets
             servo.goal_position    = servoState[i].goalPosition;
-            servo.profile_velocity = servoState[i].presentVelocity;
+            servo.profile_velocity = servoState[i].profileVelocity;
 
 
             // If we are faking this hardware, simulate its motion
@@ -696,7 +694,7 @@ namespace module::platform::openCR {
                 // Work out how fast we should be moving
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
                 float movingSpeed =
-                    (servoState[i].presentVelocity == 0 ? 5.236 : servoState[i].presentVelocity) / UPDATE_FREQUENCY;
+                    (servoState[i].profileVelocity == 0 ? 5.236 : servoState[i].profileVelocity) / UPDATE_FREQUENCY;
 
                 // Get our offset for this servo and apply it
                 // The values are now between -pi and pi around the servos axis
@@ -718,10 +716,9 @@ namespace module::platform::openCR {
 
                 // Store our simulated values
                 servo.present_position = servoState[i].presentPosition;
-                servo.goal_position    = servoState[i].goalPosition;
-                // servo.load             = 0;  // doesn't exist in v2 protocol
-                servo.voltage     = servoState[i].voltage;
-                servo.temperature = servoState[i].temperature;
+                servo.present_velocity = servoState[i].presentVelocity;
+                servo.voltage          = servoState[i].voltage;
+                servo.temperature      = servoState[i].temperature;
             }
 
             // If we are using real data, get it from the packet
@@ -732,7 +729,7 @@ namespace module::platform::openCR {
                 // Present Data
                 servo.present_position =
                     convert::position(i, servoState[i].presentPosition, nugus.servo_direction, nugus.servo_offset);
-                servo.present_speed = convert::velocity(i, servoState[i].presentVelocity);
+                servo.present_velocity = convert::velocity(i, servoState[i].presentVelocity);
 
                 // Diagnostic Information
                 servo.voltage     = convert::voltage(servoState[i].voltage);
