@@ -319,7 +319,7 @@ namespace module::behaviour::strategy {
     void KeyboardWalk::walk_toggle() {
         if (moving) {
             // emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
-            // Walk toggle is not working with director
+            // NOTE: Need to eventually emit a nullptr so Walk task is removed from the tree
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
             // emit<Task>(std::unique_ptr<Walk>(nullptr));
             moving = false;

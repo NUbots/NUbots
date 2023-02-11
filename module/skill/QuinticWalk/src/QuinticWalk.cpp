@@ -232,6 +232,7 @@ namespace module::skill {
                 }
 
                 // TODO: Add description of this block. ****Formerly Main Walking loop***
+                // NOTE: Check for stability state and emit nullptr somewhere in here
                 const float dt = get_time_delta();
                 // see if the walk engine has new goals for us
                 if (walk_engine.update_state(dt, current_orders)) {
