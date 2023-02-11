@@ -669,8 +669,6 @@ namespace module::platform::openCR {
         sensors.battery = batteryState.currentVoltage;
 
         /* Servos data */
-        /// @todo unfuck the names of the servo fields. all fucked up between versions
-        /// or just even wrong straight up
         for (int i = 0; i < 20; i++) {
             // Get a reference to the servo we are populating
             RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
