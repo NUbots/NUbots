@@ -50,7 +50,8 @@ namespace {
 
             on<Provide<PrimaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("primary task")); });
 
-            on<Provide<TertiaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("tertiary task")); });
+            on<Provide<TertiaryTask>, Needs<SubTask>>().then(
+                [this] { emit<Task>(std::make_unique<SubTask>("tertiary task")); });
 
             on<Provide<SubTask>, Needs<SubSubTask>>().then(
                 [this](const SubTask& t) { emit<Task>(std::make_unique<SubSubTask>(t.msg)); });
