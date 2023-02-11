@@ -193,10 +193,12 @@ namespace module::platform::openCR {
                                                   servoState.cend(),
                                                   [](const ServoState& servo) -> bool { return servo.dirty; });
             if (servos_dirty) {
+                // Write data is split into two components
                 std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, 20> data1;
                 std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
 
                 for (uint i = 0; i < servoState.size(); ++i) {
+                    // Servo ID is sequential
                     data1[i].id = i;
                     data2[i].id = i;
 
@@ -281,6 +283,7 @@ namespace module::platform::openCR {
                                                     uint16_t(OpenCR::Address::LED),
                                                     sizeof(OpenCRReadData)));
 
+            // Get FSR data??
 
             // TODO: Find a way to gather received data and combine into a Sensors message for emitting
         });
@@ -377,6 +380,7 @@ namespace module::platform::openCR {
 
         // When we receive data back from the OpenCR it will arrive here
         // Run a state machine to handle reception of packet header and data
+        // If a packet is successfully emitted then we emit a StatusReturn message
         on<IO>(opencr.native_handle(), IO::READ).then([this] {
             enum class Phases : uint8_t { IDLE, HEADER_SYNC, PREAMBLE, DATA, FINISH, TIMEOUT };
 

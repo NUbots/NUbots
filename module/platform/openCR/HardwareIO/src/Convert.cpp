@@ -9,6 +9,12 @@ namespace module::platform::openCR {
 
     namespace convert {
 
+        /**
+         * @todo properly name and comment these functions. Copied accross from
+         * old code but it's horribly documented. The overloading of param/return
+         * types is what implies whether its a forward or backward conversion.
+         */
+
         float gyro(int16_t gyro) {
             // Range: -32800 - +32800 = -2000dps - +2000dps
             //
