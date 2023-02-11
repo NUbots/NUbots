@@ -49,11 +49,13 @@ namespace {
 
             on<Provide<PrimaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("primary task")); });
 
-            on<Provide<SubTask>>().then([this](const SubTask& t) { emit<Task>(std::make_unique<SubSubTask>(t.msg)); });
+            on<Provide<SubTask>, Needs<SubSubTask>>().then(
+                [this](const SubTask& t) { emit<Task>(std::make_unique<SubSubTask>(t.msg)); });
 
             on<Provide<SubSubTask>>().then([this](const SubSubTask& t) { events.push_back(t.msg); });
 
-            on<Provide<SecondaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("secondary task")); });
+            on<Provide<SecondaryTask>, Needs<SubTask>>().then(
+                [this] { emit<Task>(std::make_unique<SubTask>("secondary task")); });
 
             /**************
              * TEST STEPS *
@@ -61,19 +63,19 @@ namespace {
             // PrimaryTask takes ahold of SubTask and SubSubTask
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 events.push_back("emitting primary task");
-                emit<Task>(std::make_unique<PrimaryTask>());
+                emit<Task>(std::make_unique<PrimaryTask>(), 1);
             });
 
             // SecondaryTask needs SubTask, so it will watch
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 events.push_back("emitting secondary task");
-                emit<Task>(std::make_unique<SecondaryTask>());
+                emit<Task>(std::make_unique<SecondaryTask>(), 0);
             });
 
             // Remove PrimaryTask so SecondaryTask can take over
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 events.push_back("removing primary task");
-                emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
+                emit<Task>(std::unique_ptr<PrimaryTask>(nullptr), 1);
             });
 
             on<Startup>().then([this] {
