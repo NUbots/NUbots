@@ -731,7 +731,11 @@ namespace module::platform::openCR {
                 // Present Data
                 servo.present_position =
                     convert::position(i, servoState[i].presentPosition, nugus.servo_direction, nugus.servo_offset);
-                servo.present_velocity = convert::velocity(i, servoState[i].presentVelocity);
+                // warning: no idea if the conversion below is correct, just trusting the existing
+                // conversion functions in the branch. Whatever is happening it's very different to
+                // the solution in the CM740 hwIO (which does make sense). Probably need to test IRL
+                // to understand what's going on.
+                servo.present_velocity = convert::velocity(servoState[i].presentVelocity);
 
                 // Diagnostic Information
                 servo.voltage     = convert::voltage(servoState[i].voltage);
@@ -745,6 +749,7 @@ namespace module::platform::openCR {
         }
 
         /* FSRs data */
+
 
         return sensors;
     }
