@@ -30,7 +30,7 @@ namespace module::planning {
             cfg.ball_distance_threshold = config["ball_distance_threshold"].as<float>();
             cfg.ball_angle_threshold    = config["ball_angle_threshold"].as<float>();
             cfg.target_angle_threshold  = config["target_angle_threshold"].as<float>();
-            kick_leg                    = config["kick_leg"].as<KickLeg>();
+            cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
         on<Provide<KickTo>, Trigger<FilteredBall>, Needs<Kick>>().then(
@@ -80,7 +80,7 @@ namespace module::planning {
 
                 // If the kick leg is forced left, kick left
                 // If the kick leg is auto, kick with left leg if ball is more to the left
-                if (kick_leg == LEFT || (kick_leg == AUTO && ball.rBTt.y() > 0.0)) {
+                if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && ball.rBTt.y() > 0.0)) {
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
                 }
                 else {  // kick leg is forced right or ball is more to the right and kick leg is auto
