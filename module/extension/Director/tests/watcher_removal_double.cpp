@@ -28,8 +28,8 @@
 namespace {
 
     struct PrimaryTask {};
-    struct TertiaryTask {};
     struct SecondaryTask {};
+    struct TertiaryTask {};
 
     struct SubTask {
         SubTask(const std::string& msg_) : msg(msg_) {}
@@ -50,9 +50,6 @@ namespace {
 
             on<Provide<PrimaryTask>>().then([this] { emit<Task>(std::make_unique<SubTask>("primary task")); });
 
-            on<Provide<TertiaryTask>, Needs<SubTask>>().then(
-                [this] { emit<Task>(std::make_unique<SubTask>("tertiary task")); });
-
             on<Provide<SubTask>, Needs<SubSubTask>>().then(
                 [this](const SubTask& t) { emit<Task>(std::make_unique<SubSubTask>(t.msg)); });
 
@@ -60,6 +57,9 @@ namespace {
 
             on<Provide<SecondaryTask>, Needs<SubTask>>().then(
                 [this] { emit<Task>(std::make_unique<SubTask>("secondary task")); });
+
+            on<Provide<TertiaryTask>, Needs<SubTask>>().then(
+                [this] { emit<Task>(std::make_unique<SubTask>("tertiary task")); });
 
             /**************
              * TEST STEPS *

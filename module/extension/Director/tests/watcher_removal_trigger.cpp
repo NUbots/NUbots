@@ -28,7 +28,6 @@
 namespace {
 
     struct PrimaryTask {};
-    struct PrimaryPrimaryTask {};
     struct SecondaryTask {};
     struct TriggerTest {};
 
