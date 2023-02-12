@@ -19,7 +19,7 @@
  syntax = "proto3";
 
  package message.skill;
-
+ import "Vector.proto";
  /**
   * Tell the head where to look in world space.
   * This command is interpreted such that the robot will use IMU data to fixate
@@ -28,9 +28,7 @@
   */
  message Look {
      /// Target head yaw in radians, intorso space
-     float yaw = 1;
-     /// Target head pitch in radians, in torso space
-     float pitch = 2;
+     vec3 rPCc = 1;
      /// If true, smooth the goal angle using exponential smoothing
-     bool smooth = 3;
+     bool smooth = 2;
  }

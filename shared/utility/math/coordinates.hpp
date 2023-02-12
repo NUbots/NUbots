@@ -81,6 +81,11 @@ namespace utility::math::coordinates {
         return cartesianCoordinates;
     }
 
+    template <typename T, typename U = typename T::Scalar>
+    [[nodiscard]] inline Eigen::Matrix<U, 2, 1> screen_angular_from_object_direction(const Eigen::MatrixBase<T>& v) {
+        return {std::atan2(v.y(), v.x()), std::atan2(v.z(), v.x())};
+    }
+
 }  // namespace utility::math::coordinates
 
 

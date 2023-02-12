@@ -2,10 +2,13 @@
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
+#include "extension/behaviour/Script.hpp"
 
+#include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
 #include "message/actuation/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/FilteredBall.hpp"
 #include "message/skill/Look.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -15,10 +18,15 @@
 namespace module::skill {
 
     using extension::Configuration;
+    using extension::behaviour::Script;
+    using extension::behaviour::ScriptRequest;
     using message::actuation::HeadIK;
+    using message::actuation::LimbsSequence;
     using message::actuation::ServoState;
     using message::input::Sensors;
+    using message::localisation::FilteredBall;
     using utility::input::ServoID;
+    using utility::math::coordinates::screen_angular_from_object_direction;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::nusight::graph;
 
@@ -32,17 +40,14 @@ namespace module::skill {
             cfg.head_torque      = config["head_torque"].as<float>();
         });
 
-        on<Startup>().then([this] { emit<Task>(std::make_unique<message::skill::Look>(-0.5, 0.0, true)); });
-
         on<Provide<message::skill::Look>, Needs<HeadIK>, Trigger<Sensors>>().then(
             [this](const message::skill::Look& look, const Sensors& sensors) {
-                log<NUClear::WARN>("looking...");
-                emit(graph("Look Goal Angles", look.yaw, look.pitch));
-
                 // Set the requested angles and the current head angles for smoothing
-                const Eigen::Vector2d requested_angles(look.yaw, look.pitch);
+                const Eigen::Vector2d requested_angles(screen_angular_from_object_direction(look.rPCc.normalized()));
                 Eigen::Vector2d current_angles(sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].present_position,
                                                sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position);
+
+                emit(graph("Look Goal Angles", requested_angles.x(), requested_angles.y()));
 
                 // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
                 // locking on to the target
