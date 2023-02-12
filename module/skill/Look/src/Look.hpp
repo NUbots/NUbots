@@ -16,6 +16,7 @@ namespace module::skill {
             float head_torque      = 0.0;
         } cfg;
 
+        /// @brief Whether to smooth the head movements
         bool smooth = false;
 
     public:

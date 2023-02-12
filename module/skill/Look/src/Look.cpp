@@ -42,8 +42,10 @@ namespace module::skill {
 
         on<Provide<message::skill::Look>, Needs<HeadIK>, Trigger<Sensors>>().then(
             [this](const message::skill::Look& look, const Sensors& sensors) {
-                // Set the requested angles and the current head angles for smoothing
-                const Eigen::Vector2d requested_angles(screen_angular_from_object_direction(look.rPCc.normalized()));
+                // Convert the look direction into angle requests
+                Eigen::Vector2d requested_angles(screen_angular_from_object_direction(look.rPCc.normalized()));
+
+                // Get the current angles using servo sensors information
                 Eigen::Vector2d current_angles(sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].present_position,
                                                sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position);
 

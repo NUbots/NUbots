@@ -2,15 +2,15 @@
 
 ## Description
 
-Moves the head to the requested position, taking into account smoothing.
+Moves the head so that the robot is looking in a given direction, with the option for smoothing.
 
 ## Usage
 
-Include this module to move the head.
+Include this module to make the robot look in the given direction.
 
 ## Consumes
 
-- `message::skill::Look` a Task requesting to look somewhere
+- `message::skill::Look` a Task requesting to look in a direction
 - `message::input::Sensors` to get the current head angles for smoothing
 
 ## Emits
@@ -19,4 +19,4 @@ Include this module to move the head.
 
 ## Dependencies
 
-- The coordinates utility for spherical to cartesian conversion
+- The coordinates utility
