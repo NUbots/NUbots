@@ -3,7 +3,7 @@
 ## Description
 
 A strategy module that handles relaxing when falling and getting up when we hit the ground and have settled.
-Ensures that the GetUp planner has higher priority than the FallingRelax planner so it doesn't fail during GetUp.
+Ensures that getting up has higher priority than falling planner so it doesn't try to relax while getting up.
 
 It is recommended that this task be given higher priority than any other running provider in the system so nothing can interrupt it.
 
@@ -17,5 +17,5 @@ Emit a `message::strategy::FallRecovery` Task in order to activate this module's
 
 ## Emits
 
-- `message::planning::PlanGetUp` to activate the Get Up planner
-- `message::planning::PlanFallingRelax` to activate the FallingRelax planner
+- `message::planning::GetUpWhenFalling` to activate the get up planner
+- `message::planning::RelaxWhenFalling` to activate a relax planner
