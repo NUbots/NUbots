@@ -14,4 +14,6 @@ nuclear_role(
   # Planners
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
 )
