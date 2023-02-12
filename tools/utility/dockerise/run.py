@@ -78,7 +78,7 @@ def run(func, image):
         # Binaries containing 'webots' should be given the hostname 'webots'
         # to ensure the config files are chosen correctly
         if kwargs["command"] == "run":
-            binary = kwargs["args"][0]  # the binary name is the first argument in the run command
+            binary = kwargs["role"]
             hostname = "webots" if re.search("webots", binary) else "docker"
         else:
             hostname = "docker"
