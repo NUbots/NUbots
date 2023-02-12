@@ -9,7 +9,7 @@
 namespace module::strategy {
 
     using message::planning::GetUpWhenFallen;
-    using message::strategy::RelaxWhenFalling;
+    using message::planning::RelaxWhenFalling;
     using FallRecoveryTask = message::strategy::FallRecovery;
 
     FallRecovery::FallRecovery(std::unique_ptr<NUClear::Environment> environment)
