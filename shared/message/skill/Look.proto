@@ -16,15 +16,15 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.skill;
- import "Vector.proto";
+package message.skill;
+import "Vector.proto";
 
-    /// A message telling the robot to look in the given direction
-  message Look {
-     /// Vector from the camera to the point to look at, in camera space
-     vec3 rPCc = 1;
-     /// If true, smooth the goal angle using exponential smoothing
-     bool smooth = 2;
- }
+/// A message telling the robot to look in the given direction
+message Look {
+    /// Vector from the camera to the point to look at, in camera space
+    vec3 rPCc = 1;
+    /// If true, smooth the goal angle using exponential smoothing
+    bool smooth = 2;
+}
