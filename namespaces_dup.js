@@ -518,7 +518,14 @@ var namespaces_dup =
         [ "compressed_fourcc", "ImageCompressor_8cpp.html#afa7b1154bdb52d97496fec4212007474", null ]
       ] ],
       [ "planning", null, [
-        [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ]
+        [ "FallingRelaxPlanner", "classmodule_1_1planning_1_1FallingRelaxPlanner.html", "classmodule_1_1planning_1_1FallingRelaxPlanner" ],
+        [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ],
+        [ "State", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164", [
+          [ "STABLE", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164a32987cdf8a725702042ab18f5c700905", null ],
+          [ "UNSTABLE", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164ad3582680e9ce6bdf2e9791926bd99d5f", null ],
+          [ "FALLING", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164a4f9d4539ac1e11a251e2afe022eba4e6", null ]
+        ] ],
+        [ "smooth", "FallingRelaxPlanner_8cpp.html#a4c6f0a0466f10006eeb81ee3a9759002", null ]
       ] ],
       [ "platform", null, [
         [ "cm740", null, [

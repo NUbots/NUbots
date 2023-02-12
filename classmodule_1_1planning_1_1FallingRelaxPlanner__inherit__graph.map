@@ -1,0 +1,5 @@
+<map id="module::planning::FallingRelaxPlanner" name="module::planning::FallingRelaxPlanner">
+<area shape="rect" id="node1" title=" " alt="" coords="5,169,191,211"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="19,80,177,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="31,5,165,32"/>
+</map>

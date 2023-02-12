@@ -206,6 +206,8 @@ var hierarchy =
     [ "module::output::compressor::vaapi::operation::markers::SOS_Monochrome", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html", null ],
     [ "module::output::ImageCompressor::CompressorContext", "structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext.html", null ],
     [ "module::output::ImageCompressor::CompressorContext::Compressor", "structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext_1_1Compressor.html", null ],
+    [ "module::planning::FallingRelaxPlanner::Config", "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html", null ],
+    [ "module::planning::FallingRelaxPlanner::Config::Levels", "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config_1_1Levels.html", null ],
     [ "module::planning::GetUpPlanner::Config", "structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html", null ],
     [ "module::platform::cm740::Convert", "structmodule_1_1platform_1_1cm740_1_1Convert.html", null ],
     [ "module::platform::cm740::HardwareIO::Config", "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html", null ],
@@ -236,6 +238,7 @@ var hierarchy =
       [ "extension::behaviour::BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", [
         [ "module::actuation::Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", null ],
         [ "module::actuation::Servos", "classmodule_1_1actuation_1_1Servos.html", null ],
+        [ "module::planning::FallingRelaxPlanner", "classmodule_1_1planning_1_1FallingRelaxPlanner.html", null ],
         [ "module::planning::GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", null ],
         [ "module::skill::GetUp", "classmodule_1_1skill_1_1GetUp.html", null ],
         [ "module::skill::KickScript", "classmodule_1_1skill_1_1KickScript.html", null ]

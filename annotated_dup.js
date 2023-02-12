@@ -228,6 +228,7 @@ var annotated_dup =
         [ "Overview", "classmodule_1_1output_1_1Overview.html", "classmodule_1_1output_1_1Overview" ]
       ] ],
       [ "planning", null, [
+        [ "FallingRelaxPlanner", "classmodule_1_1planning_1_1FallingRelaxPlanner.html", "classmodule_1_1planning_1_1FallingRelaxPlanner" ],
         [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ]
       ] ],
       [ "platform", null, [
