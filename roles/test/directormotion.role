@@ -13,4 +13,5 @@ nuclear_role(
   skill::GetUp
   # Planners
   planning::GetUpPlanner
+  planning::FallingRelaxPlanner
 )
