@@ -21,7 +21,7 @@ syntax = "proto3";
 package message.strategy;
 
 /**
- * Emit a PlanGetUp Task in order to tell the GetUpPlanner to start monitoring the robot's state and get it up if it
- * falls.
+ * A task that will tell behaviour to manage the falling and getting up state of the system.
+ * This includes ensuring the robot will relax its limbs when it is falling, and get up if it has fallen.
  */
 message FallRecovery {}
