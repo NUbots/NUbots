@@ -224,6 +224,8 @@ namespace module::platform::openCR {
                     data1[i].data.velocityPGain = convert::PGain(servoState[i].velocityPGain);
                     data1[i].data.velocityIGain = convert::IGain(servoState[i].velocityIGain);
                     data1[i].data.velocityDGain = convert::DGain(servoState[i].velocityDGain);
+                    // Warning this might be wrong since the conversion functions might be implicitly for velocity gain
+                    // only.
                     data1[i].data.positionPGain = convert::PGain(servoState[i].positionPGain);
                     data1[i].data.positionIGain = convert::IGain(servoState[i].positionIGain);
 

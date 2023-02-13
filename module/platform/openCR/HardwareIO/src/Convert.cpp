@@ -151,38 +151,38 @@ namespace module::platform::openCR {
         }
 
 
-        float pGain(uint16_t p_gain) {
+        float PGain(uint16_t p_gain) {
             return float(p_gain / 128.0f);
         }
 
-        uint16_t pGain(float p_gain) {
+        uint16_t PGain(float p_gain) {
             return uint16_t(p_gain * 128.0f);
         }
 
 
-        float iGain(uint16_t i_gain) {
+        float IGain(uint16_t i_gain) {
             return i_gain / 65536.0f;
         }
 
-        uint16_t iGain(float i_gain) {
+        uint16_t IGain(float i_gain) {
             return uint16_t(i_gain * 65536.0f);
         }
 
 
-        float dGain(uint16_t d_gain) {
+        float DGain(uint16_t d_gain) {
             return d_gain / 18.0f;
         }
 
-        uint16_t dGain(float d_gain) {
+        uint16_t DGain(float d_gain) {
             return uint16_t(d_gain * 18.0f);
         }
 
 
-        float ffGain(uint16_t ff_gain) {
+        float FFGain(uint16_t ff_gain) {
             return ff_gain / 4.0f;
         }
 
-        uint16_t ffGain(float ff_gain) {
+        uint16_t FFGain(float ff_gain) {
             return uint16_t(ff_gain * 4.0f);
         }
 
