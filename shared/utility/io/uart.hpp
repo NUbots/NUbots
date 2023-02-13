@@ -2,6 +2,15 @@
 #define UTILITY_IO_UART_HPP
 
 #include <string>
+//
+// #include <cerrno>
+// #include <cstring>
+// #include <fcntl.h>
+// #include <linux/serial.h>
+// #include <stdexcept>
+// #include <sys/ioctl.h>
+#include <termios.h>
+#include <unistd.h>
 
 namespace utility::io {
 
@@ -88,9 +97,13 @@ namespace utility::io {
          * @param data the structure to read in to
          *
          * @return the number of bytes that were actually read, or -1 if fail. See ::read
+         *
+         * @note Implementation in header file to stop the compiler from optimising it away
          */
         template <typename T>
-        ssize_t read(T& data);
+        ssize_t read(T& data) {
+            return ::read(fd, static_cast<void*>(&data), sizeof(T));
+        }
 
         /**
          * @brief Write bytes to the uart
@@ -108,9 +121,13 @@ namespace utility::io {
          * @param data the data to write
          *
          * @return the number of bytes that were written
+         *
+         * @note Implementation in header file to stop the compiler from optimising it away
          */
         template <typename T>
-        ssize_t write(const T& data);
+        ssize_t write(const T& data) {
+            return ::write(fd, static_cast<const void*>(&data), sizeof(T));
+        }
 
         /**
          * @brief Open the uart for the given file descriptor. Closes any currently open file.
