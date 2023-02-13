@@ -2,14 +2,6 @@
 #define UTILITY_IO_UART_HPP
 
 #include <string>
-//
-// #include <cerrno>
-// #include <cstring>
-// #include <fcntl.h>
-// #include <linux/serial.h>
-// #include <stdexcept>
-// #include <sys/ioctl.h>
-#include <termios.h>
 #include <unistd.h>
 
 namespace utility::io {
