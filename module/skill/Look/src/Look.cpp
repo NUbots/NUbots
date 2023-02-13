@@ -29,8 +29,10 @@ namespace module::skill {
     using utility::math::coordinates::screen_angular_from_object_direction;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::nusight::graph;
+    using LookTask = message::skill::Look
 
-    Look::Look(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+        Look::Look(std::unique_ptr<NUClear::Environment> environment)
+        : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Look.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Look.yaml
@@ -40,8 +42,8 @@ namespace module::skill {
             cfg.head_torque      = config["head_torque"].as<float>();
         });
 
-        on<Provide<message::skill::Look>, Needs<HeadIK>, Trigger<Sensors>>().then(
-            [this](const message::skill::Look& look, const Sensors& sensors) {
+        on<Provide<LookTask>, Needs<HeadIK>, Trigger<Sensors>>().then(
+            [this](const LookTask& look, const Sensors& sensors) {
                 // Convert the look direction into angle requests
                 Eigen::Vector2d requested_angles(screen_angular_from_object_direction(look.rPCc.normalized()));
 
