@@ -541,8 +541,8 @@ var namespaces_dup =
       ] ],
       [ "skill", null, [
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
-        [ "KickScript", "classmodule_1_1skill_1_1KickScript.html", "classmodule_1_1skill_1_1KickScript" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
+        [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
         [ "LookTask", "Look_8cpp.html#a49b53a010c7aa2cf44e9eb16c18872cd", null ],
         [ "current_angles", "Look_8cpp.html#a0aa5798134ceba5b129468f654320dba", null ],
