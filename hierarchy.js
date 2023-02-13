@@ -218,6 +218,7 @@ var hierarchy =
     [ "module::platform::Webots::CameraContext", "structmodule_1_1platform_1_1Webots_1_1CameraContext.html", null ],
     [ "module::platform::Webots::ServoState", "structmodule_1_1platform_1_1Webots_1_1ServoState.html", null ],
     [ "module::skill::GetUp::Config", "structmodule_1_1skill_1_1GetUp_1_1Config.html", null ],
+    [ "module::skill::Look::Config", "structmodule_1_1skill_1_1Look_1_1Config.html", null ],
     [ "module::support::logging::DataLogging::DataLog", "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html", null ],
     [ "module::support::logging::DataPlayback::Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", null ],
     [ "module::support::logging::Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", null ],
@@ -242,6 +243,7 @@ var hierarchy =
         [ "module::planning::GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", null ],
         [ "module::skill::GetUp", "classmodule_1_1skill_1_1GetUp.html", null ],
         [ "module::skill::KickScript", "classmodule_1_1skill_1_1KickScript.html", null ],
+        [ "module::skill::Look", "classmodule_1_1skill_1_1Look.html", null ],
         [ "module::strategy::FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],

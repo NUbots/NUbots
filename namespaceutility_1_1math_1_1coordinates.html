@@ -190,6 +190,10 @@ template&lt;typename T , typename U  = typename T::Scalar&gt; </td></tr>
 template&lt;typename T , typename U  = typename T::Scalar&gt; </td></tr>
 <tr class="memitem:a609b54a1e798004b615df0bbf1e63243"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; U, 3, 1 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>reciprocalSphericalToCartesian</b> (const Eigen::MatrixBase&lt; T &gt; &amp;reciprocalSphericalCoordinates)</td></tr>
 <tr class="separator:a609b54a1e798004b615df0bbf1e63243"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01e89eb3bda815a486ee7a0823a74f05"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a01e89eb3bda815a486ee7a0823a74f05"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; T, 2, 1 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1math_1_1coordinates.html#a01e89eb3bda815a486ee7a0823a74f05">screen_angular_from_object_direction</a> (const Eigen::Matrix&lt; T, 3, 1 &gt; &amp;v)</td></tr>
+<tr class="memdesc:a01e89eb3bda815a486ee7a0823a74f05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the given vector from a cartesian direction vector to a 2d screen angular coordinates.  <a href="namespaceutility_1_1math_1_1coordinates.html#a01e89eb3bda815a486ee7a0823a74f05">More...</a><br /></td></tr>
+<tr class="separator:a01e89eb3bda815a486ee7a0823a74f05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a208468c2d587343fa313ce096bd670f1"><td class="memTemplParams" colspan="2"><a id="a208468c2d587343fa313ce096bd670f1"></a>
 template&lt;typename T , typename U  = typename T::Scalar&gt; </td></tr>
 <tr class="memitem:a208468c2d587343fa313ce096bd670f1"><td class="memTemplItemLeft" align="right" valign="top">Eigen::Matrix&lt; U, 3, 1 &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>sphericalToCartesian</b> (const Eigen::MatrixBase&lt; T &gt; &amp;sphericalCoordinates)</td></tr>
@@ -198,13 +202,57 @@ template&lt;typename T , typename U  = typename T::Scalar&gt; </td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions to convert between coordinate representations. </p>
 <p>(r,phi,theta) represent radial distance, bearing (counter-clockwise from x-axis in xy-plane) and elevation (measured from the xy plane) (in radians) </p><dl class="section author"><dt>Author</dt><dd>Alex Biddulph </dd></dl>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="a01e89eb3bda815a486ee7a0823a74f05"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01e89eb3bda815a486ee7a0823a74f05">&#9670;&nbsp;</a></span>screen_angular_from_object_direction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Matrix&lt;T, 2, 1&gt; utility::math::coordinates::screen_angular_from_object_direction </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Matrix&lt; T, 3, 1 &gt; &amp;&#160;</td>
+          <td class="paramname"><em>v</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Converts the given vector from a cartesian direction vector to a 2d screen angular coordinates. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>scalar template for the vectors </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">v</td><td>The cartesian direction vector </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The screen angular coordinates </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>math</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1math_1_1coordinates.html">coordinates</a></li>
-    <li class="footer">Generated on Mon Feb 13 2023 00:20:34 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Feb 13 2023 10:37:01 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -241,7 +241,8 @@ var annotated_dup =
       ] ],
       [ "skill", null, [
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
-        [ "KickScript", "classmodule_1_1skill_1_1KickScript.html", "classmodule_1_1skill_1_1KickScript" ]
+        [ "KickScript", "classmodule_1_1skill_1_1KickScript.html", "classmodule_1_1skill_1_1KickScript" ],
+        [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ]
       ] ],
       [ "strategy", null, [
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ]

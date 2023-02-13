@@ -542,7 +542,24 @@ var namespaces_dup =
       [ "skill", null, [
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "KickScript", "classmodule_1_1skill_1_1KickScript.html", "classmodule_1_1skill_1_1KickScript" ],
-        [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ]
+        [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
+        [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
+        [ "LookTask", "Look_8cpp.html#a49b53a010c7aa2cf44e9eb16c18872cd", null ],
+        [ "current_angles", "Look_8cpp.html#a0aa5798134ceba5b129468f654320dba", null ],
+        [ "emit", "Look_8cpp.html#a999e94c2bdeec1e46fd45766c08cd2b5", null ],
+        [ "emit< Task >", "Look_8cpp.html#ac22873820090b293c80108d94e2edacf", null ],
+        [ "if", "Look_8cpp.html#ae8ec497efcbf35a9f49665ef58fe1385", null ],
+        [ "on< Provide< LookTask >, Needs< HeadIK >, Trigger< Sensors > >", "Look_8cpp.html#a12021801f8770ccbd5444f86911a1fdf", null ],
+        [ "current_angles", "Look_8cpp.html#a077240da8b4ed56d4b6661f6f1de0d8f", null ],
+        [ "head_gain", "Look_8cpp.html#ac2e9d4289badfa321c003a82a8600402", null ],
+        [ "head_ik", "Look_8cpp.html#aa6c575682061b1cd9e4438f608e66446", null ],
+        [ "head_torque", "Look_8cpp.html#a8dc2a05658620cc1b26a069d6bee094a", null ],
+        [ "sensors", "Look_8cpp.html#ac754279fb906f9d6deb6d4f747f83c95", null ],
+        [ "servos", "Look_8cpp.html#a7bd4504f48860427d7ad0379fe18902d", null ],
+        [ "smooth", "Look_8cpp.html#ad36ebe8c3fe4c8c9c12ac2778efe9666", null ],
+        [ "smoothing_factor", "Look_8cpp.html#a52cfb63a1726096a46475d4f1a030996", null ],
+        [ "time", "Look_8cpp.html#a045822021bef72a777bb3d254c2019cd", null ],
+        [ "uPCt", "Look_8cpp.html#ac29cde40114725f7051abd1a3c248aee", null ]
       ] ],
       [ "strategy", null, [
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
@@ -735,6 +752,7 @@ var namespaces_dup =
           [ "cartesianToReciprocalSpherical", "namespaceutility_1_1math_1_1coordinates.html#af411658f783b5709d8a8c4c56fd82218", null ],
           [ "cartesianToSpherical", "namespaceutility_1_1math_1_1coordinates.html#ad41104ac1ba92d65d37c1a53871ce779", null ],
           [ "reciprocalSphericalToCartesian", "namespaceutility_1_1math_1_1coordinates.html#a609b54a1e798004b615df0bbf1e63243", null ],
+          [ "screen_angular_from_object_direction", "namespaceutility_1_1math_1_1coordinates.html#a01e89eb3bda815a486ee7a0823a74f05", null ],
           [ "sphericalToCartesian", "namespaceutility_1_1math_1_1coordinates.html#a208468c2d587343fa313ce096bd670f1", null ]
         ] ],
         [ "euler", null, [
