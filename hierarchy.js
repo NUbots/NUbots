@@ -241,7 +241,8 @@ var hierarchy =
         [ "module::planning::FallingRelaxPlanner", "classmodule_1_1planning_1_1FallingRelaxPlanner.html", null ],
         [ "module::planning::GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", null ],
         [ "module::skill::GetUp", "classmodule_1_1skill_1_1GetUp.html", null ],
-        [ "module::skill::KickScript", "classmodule_1_1skill_1_1KickScript.html", null ]
+        [ "module::skill::KickScript", "classmodule_1_1skill_1_1KickScript.html", null ],
+        [ "module::strategy::FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],
       [ "module::behaviour::Controller", "classmodule_1_1behaviour_1_1Controller.html", null ],

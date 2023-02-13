@@ -1,10 +1,11 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,165,347,207"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,195,347,236"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="437,5,585,47"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="437,71,585,112"/>
 <area shape="rect" id="node5" href="$classmodule_1_1planning_1_1FallingRelaxPlanner.html" title=" " alt="" coords="419,136,604,177"/>
 <area shape="rect" id="node6" href="$classmodule_1_1planning_1_1GetUpPlanner.html" title=" " alt="" coords="395,202,628,229"/>
 <area shape="rect" id="node7" href="$classmodule_1_1skill_1_1GetUp.html" title=" " alt="" coords="434,253,589,279"/>
 <area shape="rect" id="node8" href="$classmodule_1_1skill_1_1KickScript.html" title=" " alt="" coords="422,303,601,330"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,173,140,199"/>
+<area shape="rect" id="node9" href="$classmodule_1_1strategy_1_1FallRecovery.html" title=" " alt="" coords="400,354,623,381"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,202,140,229"/>
 </map>

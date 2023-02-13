@@ -544,6 +544,10 @@ var namespaces_dup =
         [ "KickScript", "classmodule_1_1skill_1_1KickScript.html", "classmodule_1_1skill_1_1KickScript" ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ]
       ] ],
+      [ "strategy", null, [
+        [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
+        [ "FallRecoveryTask", "FallRecovery_8cpp.html#a4a627b96cd02d6e31d1c95f7671b327c", null ]
+      ] ],
       [ "support", null, [
         [ "configuration", null, [
           [ "GlobalConfig", "classmodule_1_1support_1_1configuration_1_1GlobalConfig.html", "classmodule_1_1support_1_1configuration_1_1GlobalConfig" ],
