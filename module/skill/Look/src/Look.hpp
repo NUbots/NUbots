@@ -16,7 +16,8 @@ namespace module::skill {
             float head_torque      = 0.0;
         } cfg;
 
-        /// @brief Whether to smooth the head movements
+        /// @brief Store whether we are smoothing the head movements from the previous run, to help with transitioning
+        /// between smoothing and not smoothing. Smoothing is given by the message.
         bool smooth = false;
 
     public:
