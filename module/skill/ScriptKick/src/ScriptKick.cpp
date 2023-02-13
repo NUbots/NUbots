@@ -1,4 +1,4 @@
-#include "KickScript.hpp"
+#include "ScriptKick.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -18,11 +18,11 @@ namespace module::skill {
     using message::skill::Kick;
     using utility::input::LimbID;
 
-    KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
+    ScriptKick::ScriptKick(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file KickScript.yaml
+        on<Configuration>("ScriptKick.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file ScriptKick.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
