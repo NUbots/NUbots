@@ -12,6 +12,19 @@ namespace module {
         on<Configuration>("PlanLook.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PlanLook.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["search_timeout"].as<double>()));
+            cfg.goal_search_timeout = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["search_timeout"].as<double>()));
+            cfg.field_search_timeout = duration_cast<NUClear::clock::duration>(
+                std::chrono::duration<double>(config["search_timeout"].as<double>()));
+            cfg.fixation_time = config["fixation_time"].as<float>();
+
+            // Create vector of search positions
+            for (const auto& search_position : config["search_positions"].config) {
+                cfg.search_positions.push_back(search_position.as<Expression>());
+            }
         });
 
         on<Provide<FindFeatures>, Optional<With<FilteredBall>>, Optional<With<Goals>>>().then(
@@ -47,6 +60,18 @@ namespace module {
                 // Either we need to search for the ball, goals or we're not looking for anything in particular so we
                 // just search around in general
                 if (search_ball || search_goals || search_field || search_anything) {
+                    log<NUClear::TRACE>("Searching. Ball",
+                                        search_ball,
+                                        ": goals",
+                                        search_goals,
+                                        ": field",
+                                        search_field,
+                                        ": any",
+                                        search_anything);
+                    // If the search has completed one run of the pattern, then a field search has just been done
+                    if (search_field && search_idx == cfg.search_positions.size()) {
+                        last_field_search = NUClear::clock::now();
+                    }
                     emit<Task>(std::make_unique<LookSearch>());
                 }
                 else {  // keep watching the ball
@@ -77,6 +102,9 @@ namespace module {
             // Reset the search position index if at end of list
             search_idx = search_idx == cfg.search_positions.size() ? 0 : search_index;
         });
+
+        // When starting a LookSearch, start from the first look position
+        on<Start<LookSearch>>().then([this] { search_idx = 0; });
     }
 
 }  // namespace module

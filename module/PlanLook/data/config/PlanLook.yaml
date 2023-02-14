@@ -1,2 +1,18 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
+
+# How long to wait until looking for the ball again (seconds)
+ball_search_timeout: 2
+# How long to wait until looking for the goals again (seconds)
+goal_search_timeout: 3
+# How long to wait until looking over the field again (seconds)
+field_search_timeout: 3
+
+# Time lingering at each position in search (seconds)
+fixation_time: 2
+
+# List of positions for search
+min_yaw: &min_yaw -0.7
+max_yaw: &max_yaw 0.7
+min_pitch: &min_pitch -0.4
+search_positions: [[*min_yaw, *min_pitch], [0, *min_pitch], [*max_yaw, *min_pitch], [0, *min_pitch]]
