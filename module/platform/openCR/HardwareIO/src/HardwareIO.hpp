@@ -109,7 +109,7 @@ namespace module::platform::openCR {
         OpenCRState opencrState;
 
         /// @brief Our state for our servos for variables we send to it
-        std::array<ServoState, 20> servoState;
+        std::array<ServoState, 20> servoStates;
 
         /// @brief Our state for our battery
         Battery batteryState;

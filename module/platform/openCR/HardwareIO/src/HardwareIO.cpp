@@ -45,7 +45,7 @@ namespace module::platform::openCR {
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
                 nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
-                servoState[i].simulated  = config["servos"][i]["simulated"].as<bool>();
+                servoStates[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
         });
 
@@ -189,55 +189,55 @@ namespace module::platform::openCR {
             // SYNC_WRITE (write the same memory addresses on all devices)
             // We need to do 2 sync writes here.
             // We always write to all servos if at least one of them is dirty
-            const bool servos_dirty = std::any_of(servoState.cbegin(),
-                                                  servoState.cend(),
+            const bool servos_dirty = std::any_of(servoStates.cbegin(),
+                                                  servoStates.cend(),
                                                   [](const ServoState& servo) -> bool { return servo.dirty; });
             if (servos_dirty) {
                 // Write data is split into two components
                 std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, 20> data1;
                 std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
 
-                for (uint i = 0; i < servoState.size(); ++i) {
+                for (uint i = 0; i < servoStates.size(); ++i) {
                     // Servo ID is sequential
                     data1[i].id = i;
                     data2[i].id = i;
 
                     // Clear our dirty flag
-                    servoState[i].dirty = false;
+                    servoStates[i].dirty = false;
 
                     // If our torque should be disabled then we disable our torque
-                    if (servoState[i].torqueEnabled
-                        && (std::isnan(servoState[i].goalPosition) || servoState[i].goalCurrent == 0)) {
-                        servoState[i].torqueEnabled = false;
-                        data1[i].data.torqueEnable  = 0;
+                    if (servoStates[i].torqueEnabled
+                        && (std::isnan(servoStates[i].goalPosition) || servoStates[i].goalCurrent == 0)) {
+                        servoStates[i].torqueEnabled = false;
+                        data1[i].data.torqueEnable   = 0;
                     }
                     else {
                         // If our torque was disabled but is now enabled
-                        if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
-                            && servoState[i].goalCurrent != 0) {
-                            servoState[i].torqueEnabled = true;
-                            data1[i].data.torqueEnable  = 1;
+                        if (!servoStates[i].torqueEnabled && !std::isnan(servoStates[i].goalPosition)
+                            && servoStates[i].goalCurrent != 0) {
+                            servoStates[i].torqueEnabled = true;
+                            data1[i].data.torqueEnable   = 1;
                         }
                     }
 
                     // Pack our data
-                    data1[i].data.velocityPGain = convert::PGain(servoState[i].velocityPGain);
-                    data1[i].data.velocityIGain = convert::IGain(servoState[i].velocityIGain);
-                    data1[i].data.velocityDGain = convert::DGain(servoState[i].velocityDGain);
+                    data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
+                    data1[i].data.velocityIGain = convert::IGain(servoStates[i].velocityIGain);
+                    data1[i].data.velocityDGain = convert::DGain(servoStates[i].velocityDGain);
                     // Warning this might be wrong since the conversion functions might be implicitly for velocity gain
                     // only.
-                    data1[i].data.positionPGain = convert::PGain(servoState[i].positionPGain);
-                    data1[i].data.positionIGain = convert::IGain(servoState[i].positionIGain);
+                    data1[i].data.positionPGain = convert::PGain(servoStates[i].positionPGain);
+                    data1[i].data.positionIGain = convert::IGain(servoStates[i].positionIGain);
 
-                    data2[i].data.feedforward1stGain  = convert::FFGain(servoState[i].feedforward1stGain);
-                    data2[i].data.feedforward2ndGain  = convert::FFGain(servoState[i].feedforward2ndGain);
-                    data2[i].data.goalPWM             = convert::PWM(servoState[i].goalPWM);
-                    data2[i].data.goalCurrent         = convert::current(servoState[i].goalCurrent);
-                    data2[i].data.goalVelocity        = convert::velocity(servoState[i].goalVelocity);
-                    data2[i].data.profileAcceleration = convert::FFGain(servoState[i].profileAcceleration);
-                    data2[i].data.profileVelocity     = convert::FFGain(servoState[i].profileVelocity);
+                    data2[i].data.feedforward1stGain  = convert::FFGain(servoStates[i].feedforward1stGain);
+                    data2[i].data.feedforward2ndGain  = convert::FFGain(servoStates[i].feedforward2ndGain);
+                    data2[i].data.goalPWM             = convert::PWM(servoStates[i].goalPWM);
+                    data2[i].data.goalCurrent         = convert::current(servoStates[i].goalCurrent);
+                    data2[i].data.goalVelocity        = convert::velocity(servoStates[i].goalVelocity);
+                    data2[i].data.profileAcceleration = convert::FFGain(servoStates[i].profileAcceleration);
+                    data2[i].data.profileVelocity     = convert::FFGain(servoStates[i].profileVelocity);
                     data2[i].data.goalPosition =
-                        convert::position(i, servoState[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
+                        convert::position(i, servoStates[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
                 }
 
                 opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(
@@ -293,7 +293,8 @@ namespace module::platform::openCR {
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
-                float diff = utility::math::angle::difference(command.position, servoState[command.id].presentPosition);
+                float diff =
+                    utility::math::angle::difference(command.position, servoStates[command.id].presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
@@ -305,20 +306,20 @@ namespace module::platform::openCR {
                 }
 
                 // Update our internal state
-                if (servoState[command.id].velocityPGain != command.gain
-                    || servoState[command.id].velocityIGain != command.gain * 0
-                    || servoState[command.id].velocityDGain != command.gain * 0
-                    || servoState[command.id].goalVelocity != speed
-                    || servoState[command.id].goalPosition != command.position) {
+                if (servoStates[command.id].velocityPGain != command.gain
+                    || servoStates[command.id].velocityIGain != command.gain * 0
+                    || servoStates[command.id].velocityDGain != command.gain * 0
+                    || servoStates[command.id].goalVelocity != speed
+                    || servoStates[command.id].goalPosition != command.position) {
 
-                    servoState[command.id].dirty = true;
+                    servoStates[command.id].dirty = true;
 
-                    servoState[command.id].velocityPGain = command.gain;
-                    servoState[command.id].velocityIGain = command.gain * 0;
-                    servoState[command.id].velocityDGain = command.gain * 0;
+                    servoStates[command.id].velocityPGain = command.gain;
+                    servoStates[command.id].velocityIGain = command.gain * 0;
+                    servoStates[command.id].velocityDGain = command.gain * 0;
 
-                    servoState[command.id].goalVelocity = speed;
-                    servoState[command.id].goalPosition = command.position;
+                    servoStates[command.id].goalVelocity = speed;
+                    servoStates[command.id].goalPosition = command.position;
                 }
             }
         });
@@ -640,15 +641,15 @@ namespace module::platform::openCR {
     void HardwareIO::processServoData(const StatusReturn& packet) {
         const DynamixelServoReadData data = *(reinterpret_cast<const DynamixelServoReadData*>(packet.data.data()));
 
-        servoState[packet.id].torqueEnabled   = (data.torqueEnable == 1);
-        servoState[packet.id].errorFlags      = data.hardwareErrorStatus;
-        servoState[packet.id].presentPWM      = convert::PWM(data.presentPWM);
-        servoState[packet.id].presentCurrent  = convert::current(data.presentCurrent);
-        servoState[packet.id].presentVelocity = convert::velocity(data.presentVelocity);
-        servoState[packet.id].presentPosition =
+        servoStates[packet.id].torqueEnabled   = (data.torqueEnable == 1);
+        servoStates[packet.id].errorFlags      = data.hardwareErrorStatus;
+        servoStates[packet.id].presentPWM      = convert::PWM(data.presentPWM);
+        servoStates[packet.id].presentCurrent  = convert::current(data.presentCurrent);
+        servoStates[packet.id].presentVelocity = convert::velocity(data.presentVelocity);
+        servoStates[packet.id].presentPosition =
             convert::position(packet.id, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
-        servoState[packet.id].voltage     = convert::voltage(data.presentVoltage);
-        servoState[packet.id].temperature = convert::temperature(data.presentTemperature);
+        servoStates[packet.id].voltage     = convert::voltage(data.presentVoltage);
+        servoStates[packet.id].temperature = convert::temperature(data.presentTemperature);
     }
 
     /**
@@ -681,67 +682,67 @@ namespace module::platform::openCR {
 
 
             // Booleans
-            servo.torque_enabled = servoState[i].torqueEnabled;
+            servo.torque_enabled = servoStates[i].torqueEnabled;
 
             // Gain
-            servo.velocity_p_gain = servoState[i].velocityPGain;
-            servo.velocity_i_gain = servoState[i].velocityIGain;
-            servo.velocity_d_gain = servoState[i].velocityDGain;
+            servo.velocity_p_gain = servoStates[i].velocityPGain;
+            servo.velocity_i_gain = servoStates[i].velocityIGain;
+            servo.velocity_d_gain = servoStates[i].velocityDGain;
 
             // Targets
-            servo.goal_position    = servoState[i].goalPosition;
-            servo.profile_velocity = servoState[i].profileVelocity;
+            servo.goal_position    = servoStates[i].goalPosition;
+            servo.profile_velocity = servoStates[i].profileVelocity;
 
 
             // If we are faking this hardware, simulate its motion
-            if (servoState[i].simulated) {
+            if (servoStates[i].simulated) {
                 // Work out how fast we should be moving
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
                 float movingSpeed =
-                    (servoState[i].profileVelocity == 0 ? 5.236 : servoState[i].profileVelocity) / UPDATE_FREQUENCY;
+                    (servoStates[i].profileVelocity == 0 ? 5.236 : servoStates[i].profileVelocity) / UPDATE_FREQUENCY;
 
                 // Get our offset for this servo and apply it
                 // The values are now between -pi and pi around the servos axis
                 auto offset  = nugus.servo_offset[i];
-                auto present = utility::math::angle::normalizeAngle(servoState[i].presentPosition - offset);
-                auto goal    = utility::math::angle::normalizeAngle(servoState[i].goalPosition - offset);
+                auto present = utility::math::angle::normalizeAngle(servoStates[i].presentPosition - offset);
+                auto goal    = utility::math::angle::normalizeAngle(servoStates[i].goalPosition - offset);
 
                 // We have reached our destination
                 if (std::abs(present - goal) < movingSpeed) {
-                    servoState[i].presentPosition = servoState[i].goalPosition;
-                    servoState[i].presentVelocity = 0;
+                    servoStates[i].presentPosition = servoStates[i].goalPosition;
+                    servoStates[i].presentVelocity = 0;
                 }
                 // We have to move towards our destination at moving speed
                 else {
-                    servoState[i].presentPosition = utility::math::angle::normalizeAngle(
+                    servoStates[i].presentPosition = utility::math::angle::normalizeAngle(
                         (present + movingSpeed * (goal > present ? 1 : -1)) + offset);
-                    servoState[i].presentVelocity = movingSpeed;
+                    servoStates[i].presentVelocity = movingSpeed;
                 }
 
                 // Store our simulated values
-                servo.present_position = servoState[i].presentPosition;
-                servo.present_velocity = servoState[i].presentVelocity;
-                servo.voltage          = servoState[i].voltage;
-                servo.temperature      = servoState[i].temperature;
+                servo.present_position = servoStates[i].presentPosition;
+                servo.present_velocity = servoStates[i].presentVelocity;
+                servo.voltage          = servoStates[i].voltage;
+                servo.temperature      = servoStates[i].temperature;
             }
 
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.error_flags = servoState[i].errorFlags;
+                servo.error_flags = servoStates[i].errorFlags;
 
                 // Present Data
                 servo.present_position =
-                    convert::position(i, servoState[i].presentPosition, nugus.servo_direction, nugus.servo_offset);
+                    convert::position(i, servoStates[i].presentPosition, nugus.servo_direction, nugus.servo_offset);
                 // warning: no idea if the conversion below is correct, just trusting the existing
                 // conversion functions in the branch. Whatever is happening it's very different to
                 // the solution in the CM740 hwIO (which does make sense). Probably need to test IRL
                 // to understand what's going on.
-                servo.present_velocity = convert::velocity(servoState[i].presentVelocity);
+                servo.present_velocity = convert::velocity(servoStates[i].presentVelocity);
 
                 // Diagnostic Information
-                servo.voltage     = convert::voltage(servoState[i].voltage);
-                servo.temperature = convert::temperature(servoState[i].temperature);
+                servo.voltage     = convert::voltage(servoStates[i].voltage);
+                servo.temperature = convert::temperature(servoStates[i].temperature);
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                 if (servo.voltage <= batteryState.chargedVoltage) {
