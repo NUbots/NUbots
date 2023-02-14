@@ -652,9 +652,6 @@ namespace module::platform::openCR {
         servoStates[packet.id].temperature = convert::temperature(data.presentTemperature);
     }
 
-    /**
-     * @brief Creates a RawSensors message based on the current recorded states from the other processes.
-     */
     RawSensors HardwareIO::constructSensors() {
         RawSensors sensors;
 

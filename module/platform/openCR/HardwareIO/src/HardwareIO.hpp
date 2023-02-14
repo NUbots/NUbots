@@ -35,6 +35,7 @@ namespace module::platform::openCR {
         enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA };
         std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
 
+        /// @see opencrState
         struct OpenCRState {
             bool dirty = false;
 
@@ -58,6 +59,7 @@ namespace module::platform::openCR {
             uint8_t errorNumber = 0;
         };
 
+        /// @see batteryState
         struct Battery {
             float chargedVoltage = 0.0f;
             float nominalVoltage = 0.0f;
@@ -67,15 +69,16 @@ namespace module::platform::openCR {
             bool dirty           = false;
         };
 
+        /// @see servoStates
         struct ServoState {
-            // True if we need to write new values to the hardware
+            /// @brief True if we need to write new values to the hardware
             bool dirty = false;
 
-            // Current error state of the servo
+            /// @brief Current error state of the servo
             uint8_t errorFlags = 0;
 
-            // True if we simulate where we think the servos should be
-            // Note that we still write the commands to hardware
+            /// @brief True if we simulate where we think the servos should be
+            /// @note that we still write the commands to hardware
             bool simulated = false;
 
             bool torqueEnabled = true;
@@ -105,18 +108,47 @@ namespace module::platform::openCR {
             float temperature     = 0.0f;
         };
 
-        /// @brief Our state for our OpenCR for variables we send to it
+        /**
+         * @brief Our state for our OpenCR for variables we send to it
+         * Written to by processOpenCRData() and Read by constructSensors()
+         */
         OpenCRState opencrState;
 
-        /// @brief Our state for our servos for variables we send to it
+        /**
+         * @brief Our state for our servos for variables we send to it
+         * Written to by processServoData() and Read by constructSensors()
+         */
         std::array<ServoState, 20> servoStates;
 
-        /// @brief Our state for our battery
+        /**
+         * @brief Our state for our battery
+         * Written to by processOpenCRData() and Read by constructSensors()
+         */
         Battery batteryState;
 
+        /**
+         * @brief Reads information from an OpenCR packet and logs the model and firmware version.
+         * @param packet a preprocessed OpenCR packet
+         */
         void processModelInformation(const message::platform::StatusReturn& packet);
+
+        /**
+         * @brief Reads information from an OpenCR packet and populates opencrState and batteryState
+         * @param packet a preprocessed OpenCR packet
+        */
         void processOpenCRData(const message::platform::StatusReturn& packet);
+
+        /**
+         * @brief Reads information from an OpenCR packet and populates servoStates
+         * @param packet a preprocessed OpenCR packet
+         * @note Although we do a Sync Write to all servos, data is returned one by one
+        */
         void processServoData(const message::platform::StatusReturn& packet);
+
+        /**
+         * @brief Reads info from the state variables and processes it into a RawSensors message
+         * @return A RawSensors message created from the current state variables
+        */
         message::platform::RawSensors constructSensors();
     };
 
