@@ -227,12 +227,6 @@ namespace module::localisation {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        // on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this]() {
-        //     if (walk_engine_enabled) {
-        //         time_update();
-        //     }
-        // });
-
         on<Trigger<VisionLines>>().then("Vision Lines", [this](const VisionLines& line_points) {
             if (!falling) {
                 // Convert the unit vectors from vision to points on field plane
@@ -377,9 +371,12 @@ namespace module::localisation {
         last_time_update_time   = current_time;
 
         for (size_t i = 0; i < particles.size(); i++) {
-            double delta_x     = walk_command.x() * dt;
-            double delta_y     = walk_command.y() * dt;
-            double delta_theta = walk_command.z() * dt;
+            double scaling_factor_x     = 1.0;
+            double scaling_factor_y     = 1.0;
+            double scaling_factor_theta = 0.6;
+            double delta_x              = walk_command.x() * dt * scaling_factor_x;
+            double delta_y              = walk_command.y() * dt * scaling_factor_y;
+            double delta_theta          = walk_command.z() * dt * scaling_factor_theta;
 
             particles[i].state.x() = particles[i].state.x() + delta_x * cos(particles[i].state.z() + delta_theta)
                                      - delta_y * sin(particles[i].state.z() + delta_theta);
