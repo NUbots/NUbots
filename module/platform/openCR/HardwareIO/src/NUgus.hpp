@@ -189,14 +189,16 @@ namespace module::platform::openCR {
     };
 #pragma pack(pop)  // Stop bitpacking our results
 
-    // Document indirect addresses used for sequential read/writing
-    enum class DynamixelIndirect : uint16_t {
-        SERVO_READ_ADDRESS     = uint16_t(MX64::Address::INDIRECT_ADDRESS_1_L),
-        SERVO_READ_LOCATION    = uint16_t(MX64::Address::INDIRECT_DATA_1),
-        SERVO_WRITE_ADDRESS_1  = uint16_t(MX64::Address::INDIRECT_ADDRESS_18_L),
-        SERVO_WRITE_ADDRESS_2  = uint16_t(MX64::Address::INDIRECT_ADDRESS_29_L),
-        SERVO_WRITE_LOCATION_1 = uint16_t(MX64::Address::INDIRECT_DATA_18),
-        SERVO_WRITE_LOCATION_2 = uint16_t(MX64::Address::INDIRECT_DATA_29)
+    /// @brief Document addresses used for read/writing to dynamixel devices, especially
+    /// where indirect addressing is used.
+    enum class AddressBook : uint16_t {
+        SERVO_READ_ADDRESS    = uint16_t(DynamixelServo::Address::INDIRECT_ADDRESS_1_L),
+        SERVO_READ            = uint16_t(DynamixelServo::Address::INDIRECT_DATA_1),
+        SERVO_WRITE_ADDRESS_1 = uint16_t(DynamixelServo::Address::INDIRECT_ADDRESS_18_L),
+        SERVO_WRITE_ADDRESS_2 = uint16_t(DynamixelServo::Address::INDIRECT_ADDRESS_29_L),
+        SERVO_WRITE_1         = uint16_t(DynamixelServo::Address::INDIRECT_DATA_18),
+        SERVO_WRITE_2         = uint16_t(DynamixelServo::Address::INDIRECT_DATA_29),
+        FSR_READ              = uint16_t(FSR::Address::FSR1_L)
     };
 
 }  // namespace module::platform::openCR

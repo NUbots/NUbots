@@ -87,7 +87,8 @@ namespace module::platform::openCR {
             }
 
             opencr.write(
-                dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(MX64::Address::STATUS_RETURN_LEVEL), data));
+                dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::STATUS_RETURN_LEVEL),
+                                                             data));
 
             // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been
             // configured before)
@@ -96,7 +97,8 @@ namespace module::platform::openCR {
             }
 
             opencr.write(
-                dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(MX64::Address::RETURN_DELAY_TIME), data));
+                dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::RETURN_DELAY_TIME),
+                                                             data));
 
             // Set up indirect addressing for read addresses
             std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>, 20> read_data;
@@ -104,28 +106,28 @@ namespace module::platform::openCR {
             for (int i = 0; i < 20; ++i) {
                 read_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>(
                     i,
-                    {uint16_t(MX64::Address::TORQUE_ENABLE),
-                     uint16_t(MX64::Address::HARDWARE_ERROR_STATUS),
-                     uint16_t(MX64::Address::PRESENT_PWM_L),
-                     uint16_t(MX64::Address::PRESENT_PWM_H),
-                     uint16_t(MX64::Address::PRESENT_CURRENT_L),
-                     uint16_t(MX64::Address::PRESENT_CURRENT_H),
-                     uint16_t(MX64::Address::PRESENT_VELOCITY_L),
-                     uint16_t(MX64::Address::PRESENT_VELOCITY_2),
-                     uint16_t(MX64::Address::PRESENT_VELOCITY_3),
-                     uint16_t(MX64::Address::PRESENT_VELOCITY_H),
-                     uint16_t(MX64::Address::PRESENT_POSITION_L),
-                     uint16_t(MX64::Address::PRESENT_POSITION_2),
-                     uint16_t(MX64::Address::PRESENT_POSITION_3),
-                     uint16_t(MX64::Address::PRESENT_POSITION_H),
-                     uint16_t(MX64::Address::PRESENT_INPUT_VOLTAGE_L),
-                     uint16_t(MX64::Address::PRESENT_INPUT_VOLTAGE_H),
-                     uint16_t(MX64::Address::PRESENT_TEMPERATURE)});
+                    {uint16_t(DynamixelServo::Address::TORQUE_ENABLE),
+                     uint16_t(DynamixelServo::Address::HARDWARE_ERROR_STATUS),
+                     uint16_t(DynamixelServo::Address::PRESENT_PWM_L),
+                     uint16_t(DynamixelServo::Address::PRESENT_PWM_H),
+                     uint16_t(DynamixelServo::Address::PRESENT_CURRENT_L),
+                     uint16_t(DynamixelServo::Address::PRESENT_CURRENT_H),
+                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_L),
+                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_2),
+                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_3),
+                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_H),
+                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_L),
+                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_2),
+                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_3),
+                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_H),
+                     uint16_t(DynamixelServo::Address::PRESENT_INPUT_VOLTAGE_L),
+                     uint16_t(DynamixelServo::Address::PRESENT_INPUT_VOLTAGE_H),
+                     uint16_t(DynamixelServo::Address::PRESENT_TEMPERATURE)});
             }
 
-            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 17>, 20>(
-                uint16_t(DynamixelIndirect::SERVO_READ_ADDRESS),
-                read_data));
+            opencr.write(
+                dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 17>, 20>(uint16_t(AddressBook::SERVO_READ_ADDRESS),
+                                                                              read_data));
 
             // Set up indirect addressing for write addresses
             std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>, 20> write_data1;
@@ -134,51 +136,51 @@ namespace module::platform::openCR {
             for (int i = 0; i < 20; ++i) {
                 write_data1[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>(
                     i,
-                    {uint16_t(MX64::Address::TORQUE_ENABLE),
-                     uint16_t(MX64::Address::VELOCITY_I_GAIN_L),
-                     uint16_t(MX64::Address::VELOCITY_I_GAIN_H),
-                     uint16_t(MX64::Address::VELOCITY_P_GAIN_L),
-                     uint16_t(MX64::Address::VELOCITY_P_GAIN_H),
-                     uint16_t(MX64::Address::VELOCITY_D_GAIN_L),
-                     uint16_t(MX64::Address::VELOCITY_D_GAIN_H),
-                     uint16_t(MX64::Address::POSITION_I_GAIN_L),
-                     uint16_t(MX64::Address::POSITION_I_GAIN_H),
-                     uint16_t(MX64::Address::POSITION_P_GAIN_L),
-                     uint16_t(MX64::Address::POSITION_P_GAIN_H)});
+                    {uint16_t(DynamixelServo::Address::TORQUE_ENABLE),
+                     uint16_t(DynamixelServo::Address::VELOCITY_I_GAIN_L),
+                     uint16_t(DynamixelServo::Address::VELOCITY_I_GAIN_H),
+                     uint16_t(DynamixelServo::Address::VELOCITY_P_GAIN_L),
+                     uint16_t(DynamixelServo::Address::VELOCITY_P_GAIN_H),
+                     uint16_t(DynamixelServo::Address::VELOCITY_D_GAIN_L),
+                     uint16_t(DynamixelServo::Address::VELOCITY_D_GAIN_H),
+                     uint16_t(DynamixelServo::Address::POSITION_I_GAIN_L),
+                     uint16_t(DynamixelServo::Address::POSITION_I_GAIN_H),
+                     uint16_t(DynamixelServo::Address::POSITION_P_GAIN_L),
+                     uint16_t(DynamixelServo::Address::POSITION_P_GAIN_H)});
 
                 write_data2[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>>(
                     i,
-                    {uint16_t(MX64::Address::FEEDFORWARD_1ST_GAIN_L),
-                     uint16_t(MX64::Address::FEEDFORWARD_1ST_GAIN_H),
-                     uint16_t(MX64::Address::FEEDFORWARD_2ND_GAIN_L),
-                     uint16_t(MX64::Address::FEEDFORWARD_2ND_GAIN_H),
-                     uint16_t(MX64::Address::GOAL_PWM_L),
-                     uint16_t(MX64::Address::GOAL_PWM_H),
-                     uint16_t(MX64::Address::GOAL_CURRENT_L),
-                     uint16_t(MX64::Address::GOAL_CURRENT_H),
-                     uint16_t(MX64::Address::GOAL_VELOCITY_L),
-                     uint16_t(MX64::Address::GOAL_VELOCITY_2),
-                     uint16_t(MX64::Address::GOAL_VELOCITY_3),
-                     uint16_t(MX64::Address::GOAL_VELOCITY_H),
-                     uint16_t(MX64::Address::PROFILE_ACCELERATION_L),
-                     uint16_t(MX64::Address::PROFILE_ACCELERATION_2),
-                     uint16_t(MX64::Address::PROFILE_ACCELERATION_3),
-                     uint16_t(MX64::Address::PROFILE_ACCELERATION_H),
-                     uint16_t(MX64::Address::PROFILE_VELOCITY_L),
-                     uint16_t(MX64::Address::PROFILE_VELOCITY_2),
-                     uint16_t(MX64::Address::PROFILE_VELOCITY_3),
-                     uint16_t(MX64::Address::PROFILE_VELOCITY_H),
-                     uint16_t(MX64::Address::GOAL_POSITION_L),
-                     uint16_t(MX64::Address::GOAL_POSITION_2),
-                     uint16_t(MX64::Address::GOAL_POSITION_3),
-                     uint16_t(MX64::Address::GOAL_POSITION_H)});
+                    {uint16_t(DynamixelServo::Address::FEEDFORWARD_1ST_GAIN_L),
+                     uint16_t(DynamixelServo::Address::FEEDFORWARD_1ST_GAIN_H),
+                     uint16_t(DynamixelServo::Address::FEEDFORWARD_2ND_GAIN_L),
+                     uint16_t(DynamixelServo::Address::FEEDFORWARD_2ND_GAIN_H),
+                     uint16_t(DynamixelServo::Address::GOAL_PWM_L),
+                     uint16_t(DynamixelServo::Address::GOAL_PWM_H),
+                     uint16_t(DynamixelServo::Address::GOAL_CURRENT_L),
+                     uint16_t(DynamixelServo::Address::GOAL_CURRENT_H),
+                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_L),
+                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_2),
+                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_3),
+                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_H),
+                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_L),
+                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_2),
+                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_3),
+                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_H),
+                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_L),
+                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_2),
+                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_3),
+                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_H),
+                     uint16_t(DynamixelServo::Address::GOAL_POSITION_L),
+                     uint16_t(DynamixelServo::Address::GOAL_POSITION_2),
+                     uint16_t(DynamixelServo::Address::GOAL_POSITION_3),
+                     uint16_t(DynamixelServo::Address::GOAL_POSITION_H)});
             }
 
             opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 11>, 20>(
-                uint16_t(DynamixelIndirect::SERVO_WRITE_ADDRESS_1),
+                uint16_t(AddressBook::SERVO_WRITE_ADDRESS_1),
                 write_data1));
             opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(
-                uint16_t(DynamixelIndirect::SERVO_WRITE_ADDRESS_2),
+                uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
                 write_data2));
         });
 
@@ -247,10 +249,10 @@ namespace module::platform::openCR {
                 }
 
                 opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(
-                    uint16_t(DynamixelIndirect::SERVO_WRITE_LOCATION_1),
+                    uint16_t(AddressBook::SERVO_WRITE_1),
                     data1));
                 opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, 20>(
-                    uint16_t(DynamixelIndirect::SERVO_WRITE_LOCATION_2),
+                    uint16_t(AddressBook::SERVO_WRITE_2),
                     data2));
             }
 
@@ -280,7 +282,7 @@ namespace module::platform::openCR {
             for (int i = 0; i < 20; ++i) {
                 packet_queue[i].push_back(PacketTypes::SERVO_DATA);
             }
-            opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(DynamixelIndirect::SERVO_READ_LOCATION),
+            opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(AddressBook::SERVO_READ),
                                                             sizeof(DynamixelServoReadData),
                                                             nugus.servo_ids()));
 
@@ -299,7 +301,7 @@ namespace module::platform::openCR {
             packet_queue[uint8_t(NUgus::ID::R_FSR)].push_back(PacketTypes::FSR_DATA);
             packet_queue[uint8_t(NUgus::ID::L_FSR)].push_back(PacketTypes::FSR_DATA);
             // Read from the first data address
-            opencr.write(dynamixel::v2::SyncReadCommand<2>(uint16_t(FSR::Address::FSR1_L),
+            opencr.write(dynamixel::v2::SyncReadCommand<2>(uint16_t(AddressBook::FSR_READ),
                                                            sizeof(FSRReadData),
                                                            nugus.fsr_ids()));
 
