@@ -300,12 +300,11 @@ namespace module::platform::openCR {
             // SYNC_READ from both FSRs
             packet_queue[uint8_t(NUgus::ID::R_FSR)].push_back(PacketTypes::FSR_DATA);
             packet_queue[uint8_t(NUgus::ID::L_FSR)].push_back(PacketTypes::FSR_DATA);
-            // Read from the first data address
             opencr.write(dynamixel::v2::SyncReadCommand<2>(uint16_t(AddressBook::FSR_READ),
                                                            sizeof(FSRReadData),
                                                            nugus.fsr_ids()));
 
-            // TODO: Find a way to gather received data and combine into a Sensors message for emitting
+            emit(std::make_unique<RawSensors>(constructSensors()));
         });
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
