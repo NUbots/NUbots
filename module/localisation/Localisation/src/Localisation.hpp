@@ -48,7 +48,7 @@ namespace module::localisation {
 
         NUClear::clock::time_point last_time_update_time;
 
-        static constexpr int TIME_UPDATE_FREQUENCY = 10;
+        static constexpr int TIME_UPDATE_FREQUENCY = 50;
 
         /// @brief The occupancy grid map of the field lines
         Map fieldline_map;

@@ -153,7 +153,8 @@ namespace module::localisation {
 
             // Add centre cross in centre of field
             int centre_cross_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size;
+                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size
+                + line_width / 2;
             int centre_cross_y0    = left_penalty_cross_y0;
             int centre_cross_width = 0.1 / cfg.grid_size;
             fieldline_map.add_cross(centre_cross_x0, centre_cross_y0, centre_cross_width, line_width);
@@ -167,7 +168,7 @@ namespace module::localisation {
             fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
 
             // Fill the surrounding cells close to the field lines
-            fieldline_map.fill_surrounding_cells(0.1 / cfg.grid_size);
+            fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
 
             // --------------------- TEMPORARY: REMOVE LATER ---------------------
             // Open a file in write mode
@@ -226,11 +227,11 @@ namespace module::localisation {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this]() {
-            if (walk_engine_enabled) {
-                time_update();
-            }
-        });
+        // on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this]() {
+        //     if (walk_engine_enabled) {
+        //         time_update();
+        //     }
+        // });
 
         on<Trigger<VisionLines>>().then("Vision Lines", [this](const VisionLines& line_points) {
             if (!falling) {
@@ -257,20 +258,24 @@ namespace module::localisation {
                     }
                 }
 
+                // Time update
+                if (walk_engine_enabled) {
+                    time_update();
+                }
+
                 // Add noise to the particles
                 add_noise();
 
                 // Resample the particles
                 resample();
 
-                // Time update
-                if (walk_engine_enabled) {
-                    // time_update();
-                }
-
 
                 // Calculate the state and covariance
                 state = get_mean();
+
+                auto state_cell = observation_relative(state, Eigen::Vector2d(0.0, 0.0));
+                emit(graph("State", state_cell.x(), state_cell.y()));
+
                 // covariance = get_covariance();
 
                 // Build and emit the field message
@@ -324,19 +329,28 @@ namespace module::localisation {
         double n_observations = observations.size();
 
         for (auto observation : observations) {
+            // Get the position of the particle in the map
+            Eigen::Vector2i particle_position = observation_relative(particle, Eigen::Vector2d(0.0, 0.0));
+            double particle_occupancy         = get_occupancy(particle_position);
+
+
             // Get the position of the observation in the map for this particle
             Eigen::Vector2i map_position = observation_relative(particle, observation);
 
             // Get the occupancy value of the observation at this position in the map
-            double occupancy = get_occupancy(map_position);
+            double observation_occupancy = get_occupancy(map_position);
 
             // If the occupancy is -1 then the observation is outside the map, penalise the particle
-            if (occupancy == -1) {
+            if (particle_occupancy == -1) {
+                // Weight is 0
+                weight = 0;
+            }
+            else if (observation_occupancy == -1) {
                 // Reduce the weight of the particle by the 1 / number of observations
                 weight -= (1.0 / n_observations);
             }
-            else if (occupancy == 1) {
-                weight += occupancy / n_observations;
+            else if (observation_occupancy == 1) {
+                weight += observation_occupancy / n_observations;
             }
         }
 
@@ -382,7 +396,7 @@ namespace module::localisation {
         }
         double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
         if (weight_sum == 0) {
-            std::cout << "All weights are zero, cannot resample" << std::endl;
+            log<NUClear::WARN>("All weights are zero, cannot resample");
             return;
         }
         for (size_t i = 0; i < weights.size(); i++) {

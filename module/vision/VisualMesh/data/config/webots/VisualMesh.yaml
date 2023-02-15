@@ -9,7 +9,7 @@
 
 cameras:
   left_camera:
-    concurrent: 10
+    concurrent: 4
     network: config/networks/WebotsNetwork.yaml
     engine: cpu
     cache_directory: "" # unneeded for cpu engine

@@ -5,10 +5,10 @@ log_level: DEBUG
 grid_size: 0.01
 
 # Number of particles
-n_particles: 1000
+n_particles: 5000
 
 initial_state: [0, 0, 0]
 
-initial_covariance: [0.00001, 0.00001, 0.00001]
+initial_covariance: [0.1, 0.1, 0.1]
 
-process_noise: [0.0175, 0.0175, 0.025]
+process_noise: [0.025, 0.025, 0.025]
