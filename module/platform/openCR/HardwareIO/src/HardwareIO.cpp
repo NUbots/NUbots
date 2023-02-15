@@ -37,10 +37,16 @@ namespace module::platform::openCR {
             packet_wait = config["opencr"]["packet_wait"];
 
             // Initialise packet_queue map
+            // OpenCR
             packet_queue[uint8_t(NUgus::ID::OPENCR)] = std::vector<PacketTypes>();
+            // Servos
             for (int i = 0; i < 20; ++i) {
                 packet_queue[i] = std::vector<PacketTypes>();
             }
+            // FSRs
+            packet_queue[uint8_t(NUgus::ID::R_FSR)] = std::vector<PacketTypes>();
+            packet_queue[uint8_t(NUgus::ID::L_FSR)] = std::vector<PacketTypes>();
+
 
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
@@ -285,7 +291,17 @@ namespace module::platform::openCR {
                                                     uint16_t(OpenCR::Address::LED),
                                                     sizeof(OpenCRReadData)));
 
-            // Get FSR data??
+            /**
+             * Not really sure if any of this is correct, just one big massive guess
+             */
+            // Get FSR data
+            // SYNC_READ from both FSRs
+            packet_queue[uint8_t(NUgus::ID::R_FSR)].push_back(PacketTypes::FSR_DATA);
+            packet_queue[uint8_t(NUgus::ID::L_FSR)].push_back(PacketTypes::FSR_DATA);
+            // Read from the first data address
+            opencr.write(dynamixel::v2::SyncReadCommand<2>(uint16_t(FSR::Address::FSR1_L),
+                                                           sizeof(FSRReadData),
+                                                           nugus.fsr_ids()));
 
             // TODO: Find a way to gather received data and combine into a Sensors message for emitting
         });
@@ -370,6 +386,9 @@ namespace module::platform::openCR {
 
                     // Handles servo data
                     case PacketTypes::SERVO_DATA: processServoData(packet); break;
+
+                    // Handles FSR data
+                    case PacketTypes::FSR_DATA: processFSRData(packet); break;
 
                     // What is this??
                     default: log<NUClear::WARN>("Unknown packet data received"); break;
@@ -650,6 +669,11 @@ namespace module::platform::openCR {
             convert::position(packet.id, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
         servoStates[packet.id].voltage     = convert::voltage(data.presentVoltage);
         servoStates[packet.id].temperature = convert::temperature(data.presentTemperature);
+    }
+
+    void HardwareIO::processFSRData(const StatusReturn& packet) {
+        // process packet once we know the structure
+        return;
     }
 
     RawSensors HardwareIO::constructSensors() {

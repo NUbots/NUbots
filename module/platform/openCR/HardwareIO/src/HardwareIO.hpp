@@ -32,7 +32,7 @@ namespace module::platform::openCR {
         uint32_t packet_wait;
 
         // Maps device IDs to expected packet data
-        enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA };
+        enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA, FSR_DATA };
         std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
 
         /// @see opencrState
@@ -108,6 +108,16 @@ namespace module::platform::openCR {
             float temperature     = 0.0f;
         };
 
+        /// @see fsrStates
+        struct FSRState {
+            uint16_t fsr1;
+            uint16_t fsr2;
+            uint16_t fsr3;
+            uint16_t fsr4;
+            uint8_t centreX;
+            uint8_t centreY;
+        };
+
         /**
          * @brief Our state for our OpenCR for variables we send to it
          * Written to by processOpenCRData() and Read by constructSensors()
@@ -127,6 +137,12 @@ namespace module::platform::openCR {
         Battery batteryState;
 
         /**
+         * @brief Our state for the 2 force sensitive resistors, stored as Right Left
+         * Written to by processFSRData and Read by constructSensors()
+         */
+        std::array<FSRState, 2> fsrStates;
+
+        /**
          * @brief Reads information from an OpenCR packet and logs the model and firmware version.
          * @param packet a preprocessed OpenCR packet
          */
@@ -135,20 +151,27 @@ namespace module::platform::openCR {
         /**
          * @brief Reads information from an OpenCR packet and populates opencrState and batteryState
          * @param packet a preprocessed OpenCR packet
-        */
+         */
         void processOpenCRData(const message::platform::StatusReturn& packet);
 
         /**
          * @brief Reads information from an OpenCR packet and populates servoStates
          * @param packet a preprocessed OpenCR packet
          * @note Although we do a Sync Write to all servos, data is returned one by one
-        */
+         */
         void processServoData(const message::platform::StatusReturn& packet);
+
+        /**
+         * @brief Reads information from an OpenCR packet and populares fsrStates
+         * @param packet a preprocessed OpenCR packet
+         * @note we sync write to both FSRs but data is returned one by one
+         */
+        void processFSRData(const message::platform::StatusReturn& packet);
 
         /**
          * @brief Reads info from the state variables and processes it into a RawSensors message
          * @return A RawSensors message created from the current state variables
-        */
+         */
         message::platform::RawSensors constructSensors();
     };
 
