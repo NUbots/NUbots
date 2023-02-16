@@ -49,11 +49,6 @@ namespace module::planning {
             }
         });
 
-        on<Startup>().then([this] {
-            // emit<Script>(std::make_unique<BodySequence>(), ScriptRequest("Stand.yaml"));
-            emit<Task>(std::make_unique<LookForFeatures>(true, false, true));
-        });
-
         on<Provide<LookForFeatures>,
            Uses<LookSearch>,
            Optional<With<FilteredBall>>,
