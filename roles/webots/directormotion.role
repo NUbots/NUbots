@@ -3,6 +3,18 @@ nuclear_role(
   extension::FileWatcher
   support::SignalCatcher
   support::logging::ConsoleLogHandler
+  # Config
+  support::configuration::SoccerConfig
+  actuation::KinematicsConfiguration
+  # Sensors
+  input::SensorFilter
+  platform::Webots
+  # Vision
+  vision::VisualMesh
+  vision::GreenHorizonDetector
+  vision::BallDetector
+  # Localisation
+  localisation::BallFilter
   # Director
   extension::Director
   # Servos
@@ -11,7 +23,9 @@ nuclear_role(
   # Skills
   skill::ScriptKick
   skill::GetUp
+  skill::Look
   # Planners
+  planning::PlanLook
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
