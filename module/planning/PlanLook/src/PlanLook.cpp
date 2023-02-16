@@ -2,7 +2,10 @@
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
+#include "extension/behaviour/Script.hpp"
 
+#include "message/actuation/Limbs.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/FilteredBall.hpp"
 #include "message/planning/LookForFeatures.hpp"
 #include "message/skill/Look.hpp"
@@ -14,6 +17,10 @@
 namespace module::planning {
 
     using extension::Configuration;
+    using extension::behaviour::Script;
+    using extension::behaviour::ScriptRequest;
+    using message::actuation::LimbsSequence;
+    using message::input::Sensors;
     using message::localisation::FilteredBall;
     using message::planning::LookForFeatures;
     using message::planning::LookSearch;
@@ -51,42 +58,48 @@ namespace module::planning {
            Uses<LookSearch>,
            Optional<With<FilteredBall>>,
            Optional<With<Goals>>,
+           With<Sensors>,
            Every<90, Per<std::chrono::seconds>>>()
             .then([this](const LookForFeatures& look_for_features,
                          const Uses<LookSearch>& look_search,
                          const std::shared_ptr<const FilteredBall>& ball,
-                         const std::shared_ptr<const Goals>& goals) {
+                         const std::shared_ptr<const Goals>& goals,
+                         const Sensors& sensors) {
                 // If a search pattern has completed, set the last time we searched the field to now
                 if (look_search.done) {
                     last_field_search = NUClear::clock::now();
                 }
 
+                // SEARCH ALGORITHM
                 // if we have seen no ball or goals, search
                 // if we haven't seen the ball or goals in a while, search
                 // if it's been too long since a field search, search
                 // if we're not looking for anything in particular, search
                 // otherwise we've seen balls and goals and field, just keep looking at the ball
+                // but if we don't care about the ball, look at the goals
+                // but if we don't care about ball and goals, then just search
 
-                // Do we need to look for the ball?
+                // Do we need to look for the ball? if we want to look for the ball and haven't seen it in a while
                 bool search_ball =
                     look_for_features.ball
                     && (ball == nullptr
                         || (ball && NUClear::clock::now() - ball->time_of_measurement > cfg.ball_search_timeout));
 
-                // Do we need to look for the goals?
+                // Do we need to look for the goals? if we want to look for goals and we haven't seen them in a while
                 bool search_goals = look_for_features.goals
                                     && (goals == nullptr
                                         || (goals && !goals->goals.empty()
                                             && NUClear::clock::now() - goals->timestamp > cfg.goal_search_timeout));
 
-                // Do we need to look at the field?
-                // todo: wait long enough for one full search of the field
+                // Do we need to look at the field? if we want to look over the field and it's been long enough since a
+                // full search of the field was conducted
                 bool search_field =
                     look_for_features.field && (NUClear::clock::now() - last_field_search > cfg.field_search_timeout);
 
-                // If we're not looking for anything in particular, just search
+                // If we're not looking for anything in particular, just look around in general
                 bool search_anything = !look_for_features.ball && !look_for_features.goals;
 
+                // Log what we're searching for
                 log<NUClear::TRACE>("Searching. Ball",
                                     search_ball,
                                     ": goals",
@@ -97,12 +110,22 @@ namespace module::planning {
                                     search_anything);
 
                 // Either we need to search for the ball, goals, field or we're not looking for anything in particular
-                // so we just search around in general
+                // so we search around
                 if (search_ball || search_goals || search_field || search_anything) {
                     emit<Task>(std::make_unique<LookSearch>());
                 }
-                else {  // keep watching the ball
-                    emit<Task>(std::make_unique<Look>(ball->rBCc.cast<double>(), false));
+                else if (look_for_features.ball && ball) {  // keep watching the ball if we aren't searching
+                    emit<Task>(std::make_unique<Look>(ball->rBCt.cast<double>(), true));
+                }
+                else if (look_for_features.goals && goals) {  // if we don't want the ball, then watch the goals
+                    // Convert goal measurement to cartesian coordinates
+                    Eigen::Vector3d rGCc = sphericalToCartesian(goals->goals[0].measurements[0].srGCc.cast<double>());
+                    // Convert to torso space
+                    Eigen::Vector3d rGCt = Eigen::Isometry3d(sensors.Htw * goals->Hcw.inverse()).rotation() * rGCc;
+                    emit<Task>(std::make_unique<Look>(rGCt, true));
+                }
+                else {  // if there isn't anything to focus on, just search
+                    emit<Task>(std::make_unique<LookSearch>());
                 }
             });
 
@@ -125,10 +148,17 @@ namespace module::planning {
             // of cfg.search_positions
             if (time_since_last_search_moved > cfg.search_fixation_time) {
                 // Send command for look position
-                Eigen::Vector3d rPCc = Eigen::Vector3d(1.0,
-                                                       std::tan(cfg.search_positions[search_idx][0]),
-                                                       std::tan(cfg.search_positions[search_idx][1]));
-                emit<Task>(std::make_unique<Look>(rPCc, true));
+                double yaw   = cfg.search_positions[search_idx][0];
+                double pitch = cfg.search_positions[search_idx][1];
+
+                // Make a vector pointing straight forwards and rotate it by the pitch and yaw
+                // Pitch is negative since down is positive in servo space
+                Eigen::Vector3d uPCt = (Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())
+                                        * Eigen::AngleAxisd(-pitch, Eigen::Vector3d::UnitY()))
+                                           .toRotationMatrix()
+                                       * Eigen::Vector3d::UnitX();
+
+                emit<Task>(std::make_unique<Look>(uPCt, false));
 
                 // Move to next search position in list
                 search_last_moved = NUClear::clock::now();
