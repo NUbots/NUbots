@@ -42,43 +42,30 @@ namespace module::skill {
             cfg.head_torque      = config["head_torque"].as<float>();
         });
 
-        on<Provide<LookTask>, Needs<HeadIK>, Trigger<Sensors>>().then(
-            [this](const LookTask& look, const Sensors& sensors) {
-                // Convert the look direction into angle requests
-                Eigen::Vector2d requested_angles(screen_angular_from_object_direction(look.rPCc.normalized()));
+        on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
+            // Normalise the look vector
+            Eigen::Vector3d req_uPCt = look.rPCt.normalized();
 
-                // Get the current angles using servo sensors information
-                Eigen::Vector2d current_angles(sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].present_position,
-                                               sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position);
+            // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
+            // locking on to the target
+            if (smooth == false && look.smooth == true) {
+                uPCt = req_uPCt;
+            }
+            smooth = look.smooth;
 
-                emit(graph("Look Goal Angles", requested_angles.x(), requested_angles.y()));
+            // If smoothing requested, smooth requested angles with exponential filter
+            uPCt = smooth ? (cfg.smoothing_factor * req_uPCt + (1 - cfg.smoothing_factor) * uPCt) : req_uPCt;
 
-                // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
-                // locking on to the target
-                if (smooth == false && look.smooth == true) {
-                    current_angles = requested_angles;
-                }
-                smooth = look.smooth;
+            // Create the HeadIK message
+            auto head_ik  = std::make_unique<HeadIK>();
+            head_ik->time = NUClear::clock::now();
+            head_ik->uPCt = uPCt;
 
-                // If smoothing requested, smooth requested angles with exponential filter
-                current_angles =
-                    smooth ? (cfg.smoothing_factor * requested_angles + (1 - cfg.smoothing_factor) * current_angles)
-                           : requested_angles;
+            head_ik->servos[ServoID::HEAD_YAW]   = ServoState(cfg.head_gain, cfg.head_torque);
+            head_ik->servos[ServoID::HEAD_PITCH] = ServoState(cfg.head_gain, cfg.head_torque);
 
-                // Get look vector from angles
-                const Eigen::Vector3d uPCt =
-                    sphericalToCartesian(Eigen::Vector3d(1, current_angles.x(), current_angles.y()));
-
-                // Create the HeadIK message
-                auto head_ik  = std::make_unique<HeadIK>();
-                head_ik->time = NUClear::clock::now();
-                head_ik->uPCt = uPCt;
-
-                head_ik->servos[ServoID::HEAD_YAW]   = ServoState(cfg.head_gain, cfg.head_torque);
-                head_ik->servos[ServoID::HEAD_PITCH] = ServoState(cfg.head_gain, cfg.head_torque);
-
-                emit<Task>(head_ik);
-            });
+            emit<Task>(head_ik);
+        });
     }
 
 }  // namespace module::skill

@@ -6,4 +6,4 @@ head_gain: 10.0
 head_torque: 100.0
 
 # Smoothing factor for goal angle to reduce look judder and oscillation, https://en.wikipedia.org/wiki/Exponential_smoothing
-smoothing_factor: 0.1
+smoothing_factor: 0.01
