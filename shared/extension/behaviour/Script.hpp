@@ -115,7 +115,10 @@ namespace extension::behaviour {
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<Sequence> msg,
                          std::vector<ScriptRequest> scripts,
-                         const NUClear::clock::time_point& start = NUClear::clock::now()) {
+                         const NUClear::clock::time_point& start = NUClear::clock::now(),
+                         const int& priority                     = 0,
+                         const bool& optional                    = false,
+                         const std::string& name                 = "") {
             // First script begins at start time
             auto time = start;
 
@@ -143,7 +146,7 @@ namespace extension::behaviour {
             }
 
             // Emit the sequence of servos as a Task
-            ::extension::behaviour::Task<Sequence>::emit(powerplant, msg);
+            ::extension::behaviour::Task<Sequence>::emit(powerplant, msg, priority, optional, name);
         }
 
         /// @brief Emits a single ScriptRequest which is then sent through to the multi Script version above
@@ -154,8 +157,11 @@ namespace extension::behaviour {
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<Sequence> msg,
                          ScriptRequest script,
-                         const NUClear::clock::time_point& start = NUClear::clock::now()) {
-            emit(powerplant, msg, std::vector<ScriptRequest>{script}, start);
+                         const NUClear::clock::time_point& start = NUClear::clock::now(),
+                         const int& priority                     = 0,
+                         const bool& optional                    = false,
+                         const std::string& name                 = "") {
+            emit(powerplant, msg, std::vector<ScriptRequest>{script}, start, priority, optional, name);
         }
     };
 }  // namespace extension::behaviour
