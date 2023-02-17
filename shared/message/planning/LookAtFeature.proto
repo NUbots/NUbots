@@ -20,14 +20,11 @@ syntax = "proto3";
 
 package message.planning;
 
-// Task indicating to look for features in the environment
-message LookForFeatures {
-    /// Set to true if the robot should look for the ball
-    bool ball = 1;
-    /// Set to true if the robot should look for the goals
-    bool goals = 2;
-    /// Set to true if the robot should look around at the field lines
-    bool field = 3;
-}
+/// Task requesting to look at the ball
+message LookAtBall {}
 
-message LookSearch {}
+/// Task requesting to look at the goal
+message LookAtGoals {}
+
+/// Task requesting to look around the environment
+message LookAround {}
