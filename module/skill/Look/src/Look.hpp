@@ -1,6 +1,7 @@
 #ifndef MODULE_SKILL_LOOK_HPP
 #define MODULE_SKILL_LOOK_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -19,6 +20,9 @@ namespace module::skill {
         /// @brief Store whether we are smoothing the head movements from the previous run, to help with transitioning
         /// between smoothing and not smoothing. Smoothing is given by the message.
         bool smooth = false;
+
+        /// @brief Last goal vector, used for smoothing
+        Eigen::Vector3d uPCt = Eigen::Vector3d::Zero();
 
     public:
         /// @brief Called by the powerplant to build and setup the Look reactor.
