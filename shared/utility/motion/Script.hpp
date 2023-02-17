@@ -106,7 +106,7 @@ namespace utility::motion {
         }
     }
 
-    /// @brief Creates sequences of servos from the script files given
+    /// @brief Creates sequences of servos from the script requests given
     /// @param scripts Sequence of scripts to run
     /// @param start When the first script should start executing. Default is now.
     /// @return Sequence message which will be filled with sequences of servos and can then be emitted as a
@@ -120,11 +120,11 @@ namespace utility::motion {
         // First script begins at start time
         auto time = start;
 
-        // Loop through all given scripts and add to the Sequence Task
+        // Loop through all given scripts and add to the Sequence message
         for (const auto& script : scripts) {
             // Load the script to a vector of Frame structs
             auto frames = load(script.name).as<std::vector<Frame>>();
-            // time will be incremented through each frame
+            // Time will be incremented through each frame
             // Loop over the frames and add them as sequences of servos into the Sequence message
             for (const auto& frame : frames) {
                 // This frame should finish after frame.duration time has passed
@@ -147,7 +147,8 @@ namespace utility::motion {
         return msg;
     }
 
-    /// @brief Emits a script function with one script which is then sent through to the multi script version above
+    /// @brief Emits a script function with one script request which is then sent through to the multi script version
+    /// above
     /// @param script Script to run
     /// @param start When the script should start executing. Default is now.
     /// @return Sequence message which will be filled with sequences of servos.
@@ -176,7 +177,7 @@ namespace utility::motion {
     }
 
     /// @brief Accepts a string and converts it into a ScriptRequest, and uses the ScriptRequest function above
-    /// @param scripts Script name to run
+    /// @param script Script name to run
     /// @param start When the script should start executing. Default is now.
     /// @return Sequence message which will be filled with sequences of servos.
     template <typename Sequence>
