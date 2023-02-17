@@ -23,7 +23,7 @@ import "Vector.proto";
 
 /// A message telling the robot to look in the given direction
 message Look {
-    /// Vector from the torso to the point to look at, in torso space
+    /// Vector from the camera to the point to look at, in torso space
     vec3 rPCt = 1;
     /// If true, smooth the goal angle using exponential smoothing
     bool smooth = 2;
