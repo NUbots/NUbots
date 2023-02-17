@@ -14,7 +14,7 @@ search_fixation_time: 2
 # List of positions for search
 min_yaw: &min_yaw -0.7
 max_yaw: &max_yaw 0.7
-min_pitch: &min_pitch -0.63
+min_pitch: &min_pitch 0.63 # note that the pitch servo rotates down for positive
 max_pitch: &max_pitch 0.0
 search_positions:
   [

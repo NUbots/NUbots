@@ -138,8 +138,8 @@ namespace module::planning {
                 std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - search_last_moved)
                     .count();
 
-            // Robot will move through the search positions, and linger for fixation_time. Once
-            // fixation_time time has passed, send a new head command for the next position in the list
+            // Robot will move through the search positions, and linger for search_fixation_time. Once
+            // search_fixation_time time has passed, send a new head command for the next position in the list
             // of cfg.search_positions
             if (time_since_last_search_moved > cfg.search_fixation_time) {
                 // Send command for look position
@@ -147,9 +147,8 @@ namespace module::planning {
                 double pitch = cfg.search_positions[search_idx][1];
 
                 // Make a vector pointing straight forwards and rotate it by the pitch and yaw
-                // Pitch is negative since down is positive in servo space
                 Eigen::Vector3d uPCt = (Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())
-                                        * Eigen::AngleAxisd(-pitch, Eigen::Vector3d::UnitY()))
+                                        * Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()))
                                            .toRotationMatrix()
                                        * Eigen::Vector3d::UnitX();
 
