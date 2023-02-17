@@ -16,18 +16,18 @@
  *
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.planning;
+package message.planning;
 
- // Task indicating to look for features in the environment
- message LookForFeatures {
-   /// Set to true if the robot should look for the ball
+// Task indicating to look for features in the environment
+message LookForFeatures {
+    /// Set to true if the robot should look for the ball
     bool ball = 1;
     /// Set to true if the robot should look for the goals
     bool goals = 2;
     /// Set to true if the robot should look around at the field lines
     bool field = 3;
- }
+}
 
- message LookSearch {}
+message LookSearch {}
