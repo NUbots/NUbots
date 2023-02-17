@@ -9,8 +9,11 @@ nuclear_role(
   actuation::Kinematics
   actuation::Servos
   # Skills
-  skill::KickScript
+  skill::ScriptKick
   skill::GetUp
   # Planners
   planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
 )
