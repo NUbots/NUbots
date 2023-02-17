@@ -15,7 +15,6 @@ namespace module::planning {
             NUClear::clock::duration ball_search_timeout{};
             NUClear::clock::duration goal_search_timeout{};
             NUClear::clock::duration field_search_timeout{};
-
             float search_fixation_time = 0.0f;
             std::vector<Eigen::Vector2d> search_positions{};
         } cfg;
