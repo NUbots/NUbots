@@ -25,7 +25,6 @@ nuclear_role(
   skill::GetUp
   skill::Look
   # Planners
-  planning::PlanLook
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
