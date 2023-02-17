@@ -112,8 +112,8 @@ namespace utility::motion {
     /// @return Sequence message which will be filled with sequences of servos and can then be emitted as a
     /// Task.
     template <typename Sequence>
-    static std::unique_ptr<Sequence> script(const std::vector<ScriptRequest> scripts,
-                                            NUClear::clock::time_point start = NUClear::clock::now()) {
+    static std::unique_ptr<Sequence> load_script(const std::vector<ScriptRequest> scripts,
+                                                 NUClear::clock::time_point start = NUClear::clock::now()) {
         // Create sequence message
         auto msg = std::make_unique<Sequence>();
 
@@ -152,9 +152,9 @@ namespace utility::motion {
     /// @param start When the script should start executing. Default is now.
     /// @return Sequence message which will be filled with sequences of servos.
     template <typename Sequence>
-    static std::unique_ptr<Sequence> script(const ScriptRequest script,
-                                            NUClear::clock::time_point start = NUClear::clock::now()) {
-        return script<Sequence>(std::vector<ScriptRequest>{script}, start);
+    static std::unique_ptr<Sequence> load_script(const ScriptRequest script,
+                                                 NUClear::clock::time_point start = NUClear::clock::now()) {
+        return load_script<Sequence>(std::vector<ScriptRequest>{script}, start);
     }
 
     /// @brief Accepts a vector of strings and converts them into a ScriptRequest, and uses the ScriptRequest
@@ -163,8 +163,8 @@ namespace utility::motion {
     /// @param start When the script should start executing. Default is now.
     /// @return Sequence message which will be filled with sequences of servos.
     template <typename Sequence>
-    static std::unique_ptr<Sequence> script(const std::vector<std::string> scripts,
-                                            NUClear::clock::time_point start = NUClear::clock::now()) {
+    static std::unique_ptr<Sequence> load_script(const std::vector<std::string> scripts,
+                                                 NUClear::clock::time_point start = NUClear::clock::now()) {
         // Convert the vector of strings into a vector of ScriptRequests
         std::vector<ScriptRequest> script_requests;
         for (const auto& script : scripts) {
@@ -172,7 +172,7 @@ namespace utility::motion {
         }
 
         // Call the function above
-        return script<Sequence>(script_requests, start);
+        return load_script<Sequence>(script_requests, start);
     }
 
     /// @brief Accepts a string and converts it into a ScriptRequest, and uses the ScriptRequest function above
@@ -180,9 +180,9 @@ namespace utility::motion {
     /// @param start When the script should start executing. Default is now.
     /// @return Sequence message which will be filled with sequences of servos.
     template <typename Sequence>
-    static std::unique_ptr<Sequence> script(const std::string script,
-                                            NUClear::clock::time_point start = NUClear::clock::now()) {
-        return script<Sequence>(std::vector<ScriptRequest>{script}, start);
+    static std::unique_ptr<Sequence> load_script(const std::string script,
+                                                 NUClear::clock::time_point start = NUClear::clock::now()) {
+        return load_script<Sequence>(std::vector{ScriptRequest(script)}, start);
     }
 
 }  // namespace utility::motion

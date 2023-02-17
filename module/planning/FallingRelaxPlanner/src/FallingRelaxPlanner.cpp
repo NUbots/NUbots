@@ -18,7 +18,7 @@ namespace module::planning {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::planning::RelaxWhenFalling;
-    using utility::motion::script;
+    using utility::motion::load_script;
     using utility::support::Expression;
 
     double smooth(double value, double new_value, double alpha) {
@@ -107,7 +107,7 @@ namespace module::planning {
                                        : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
                                                                             : "STABLE");
                     emit(std::make_unique<Stability>(Stability::FALLING));
-                    emit<Task>(script<BodySequence>("Relax.yaml"));
+                    emit<Task>(load_script<BodySequence>("Relax.yaml"));
                 }
             }
             else {

@@ -15,7 +15,7 @@ namespace module::skill {
     using message::actuation::LimbsSequence;
     using message::skill::Kick;
     using utility::input::LimbID;
-    using utility::motion::script;
+    using utility::motion::load_script;
 
     ScriptKick::ScriptKick(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -38,10 +38,10 @@ namespace module::skill {
             }
 
             if (kick.leg == LimbID::RIGHT_LEG) {
-                emit<Task>(script<LimbsSequence>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"}));
+                emit<Task>(load_script<LimbsSequence>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"}));
             }
             else {  // LEFT_LEG
-                emit<Task>(script<LimbsSequence>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"}));
+                emit<Task>(load_script<LimbsSequence>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"}));
             }
         });
     }
