@@ -12,8 +12,6 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
-  # Director
-  extension::Director
   # Platform
   input::SensorFilter
   platform::Webots
@@ -29,7 +27,8 @@ nuclear_role(
   # Motion motion::QuinticWalk
   motion::HeadController
   motion::ScriptEngine
-
+  # Director
+  extension::Director
   # Behaviour behaviour::Controller
   behaviour::skills::Getup
   behaviour::skills::Stand
