@@ -42,7 +42,7 @@ file(GLOB_RECURSE scripts "${PROJECT_BINARY_DIR}/scripts/*")
 
 foreach(script ${scripts})
   set(SCRIPT_FILES
-  ${SCRIPT_FILES} ${script}
-  CACHE INTERNAL "A list of all script files" FORCE
+      ${SCRIPT_FILES} ${script}
+      CACHE INTERNAL "A list of all script files" FORCE
   )
 endforeach()
