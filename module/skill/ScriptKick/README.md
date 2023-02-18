@@ -1,4 +1,4 @@
-# KickScript
+# ScriptKick
 
 ## Description
 
