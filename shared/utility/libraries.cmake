@@ -36,3 +36,13 @@ target_compile_features(nuclear_utility PUBLIC cxx_std_17)
 
 # Add the scripts directory to the build directory
 file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/skill/scripts" DESTINATION ${PROJECT_BINARY_DIR})
+
+# Add the scripts to the script files variable for the install script
+file(GLOB_RECURSE scripts "${PROJECT_BINARY_DIR}/scripts/*")
+
+foreach(script ${scripts})
+  set(SCRIPT_FILES
+  ${SCRIPT_FILES} ${script}
+  CACHE INTERNAL "A list of all script files" FORCE
+  )
+endforeach()
