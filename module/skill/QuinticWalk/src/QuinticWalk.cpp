@@ -158,7 +158,6 @@ namespace module::skill {
             load_quintic_walk(cfg, goalie_config);
         });
 
-        // TODO: Move into Provide or Start?
         on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
             first_run       = true;
@@ -169,7 +168,7 @@ namespace module::skill {
             walk_engine.reset();
         });
 
-        // NEW START: Runs every time the Walk provider starts (wasn't running)
+        // Runs every time the Walk provider starts (wasn't running)
         on<Start<Walk>, With<Behaviour::State>>().then([this](const Behaviour::State& behaviour) {
             walk_engine.reset();
             if (behaviour == Behaviour::State::GOALIE_WALK) {
@@ -184,21 +183,20 @@ namespace module::skill {
             imu_reaction.enable(current_config.imu_active);
         });
 
+        // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] {
             const float dt = get_time_delta();
             current_orders.setZero();
             walk_engine.update_state(dt, current_orders);
         });
 
-        // NEW MAIN LOOP - Calculates joint goals and emits....
+        // MAIN LOOP
         on<Provide<Walk>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
             .then([this](const Walk& walk) {
-                // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
-                // walkCommand)****
                 emit(std::make_unique<Stability>(Stability::DYNAMIC));
                 // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
                 // a double step factor 2 since the order distance is only for a single step, not double step
@@ -231,19 +229,14 @@ namespace module::skill {
                         current_config.max_step_xy / factor));
                 }
 
-                // TODO: Add description of this block. ****Formerly Main Walking loop***
-                // NOTE: Check for stability state and emit nullptr somewhere in here
                 const float dt = get_time_delta();
                 // see if the walk engine has new goals for us
                 if (walk_engine.update_state(dt, current_orders)) {
                     calculate_joint_goals();
                 }
-                else {
-                    emit<Task>(std::make_unique<Idle>());
-                }
             });
 
-        // Stand Reaction - Set walk_engine commands to zero, check walk_engine state, Set stability state
+        // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
         on<Provide<Walk>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
@@ -271,7 +264,6 @@ namespace module::skill {
             std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
 
         if (dt == 0.0f) {
-            // log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));
             dt = 0.001f;
         }
 
@@ -323,7 +315,7 @@ namespace module::skill {
         // Get desired transform for right foot {r}
         const Eigen::Isometry3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
 
-        // ****DIRECTOR MOTION***
+        // ****DIRECTOR MOTION****
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
         //  Legs
