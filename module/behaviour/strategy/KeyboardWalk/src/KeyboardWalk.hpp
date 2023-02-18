@@ -47,7 +47,7 @@ namespace module::behaviour::strategy {
         FATAL_COLOURS = 6
     };
 
-    class KeyboardWalk : public ::extension::behaviour::BehaviourReactor {
+    class KeyboardWalk : public NUClear::Reactor {
     private:
         static constexpr const float DIFF     = 0.01f;
         static constexpr const float ROT_DIFF = 0.1f;
