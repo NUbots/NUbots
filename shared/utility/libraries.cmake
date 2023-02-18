@@ -33,3 +33,6 @@ add_custom_command(
 target_sources(nuclear_utility PRIVATE "${CMAKE_BINARY_DIR}/recordings")
 
 target_compile_features(nuclear_utility PUBLIC cxx_std_17)
+
+# Add the scripts directory to the build directory
+file(COPY "${nuclear_utility}/skill/scripts" DESTINATION ${PROJECT_BINARY_DIR})

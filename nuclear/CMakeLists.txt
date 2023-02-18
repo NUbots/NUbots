@@ -91,9 +91,6 @@ add_subdirectory("roles")
 # Add the subdirectory for module. This must be after roles as roles determines which modules to build
 add_subdirectory("module")
 
-# Add the scripts directory to the build directory
-file(COPY "${PROJECT_SOURCE_DIR}/shared/scripts" DESTINATION ${PROJECT_BINARY_DIR})
-
 if(BUILD_TESTS)
   add_subdirectory(tests)
 endif(BUILD_TESTS)
