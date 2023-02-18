@@ -12,7 +12,9 @@ namespace module::planning {
 
     using extension::Configuration;
 
-    using message::planning::Pivot;
+    using message::localisation::FilteredBall;
+    using message::planning::TurnAroundBall;
+    using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
     using message::skill::Walk;
 
@@ -50,22 +52,21 @@ namespace module::planning {
         // Pivoting around a fixed point - could be self (rotating on the spot) or rotating around a ball
         // Very basic functionality currently - could be improved to mathematically determine walk command
         // using a maximum velocity and any pivot point.
-        on<Provide<Pivot>, Needs<Walk>>().then([this](const Pivot& pivot) {
+        on<Provide<TurnOnSpot>, Needs<Walk>>().then([this](const TurnOnSpot& turn_on_spot) {
             // Determine the direction of rotation
-            int sign = pivot.clockwise ? -1 : 1;
+            int sign = turn_on_spot.clockwise ? -1 : 1;
 
-            // Pivoting on the spot
-            if (pivot.rPTt == Eigen::Vector3f::Zero()) {
-                emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(0.0, 0.0, sign * cfg.pivot_speed)));
-            }
-            else {  // must be pivoting around the ball - assume it is directly in front
-                emit<Task>(std::make_unique<Walk>(
-                    Eigen::Vector3f(0.0, -sign * cfg.pivot_ball_speed_y, sign * cfg.pivot_speed)));
-            }
+            // Turn on the spot
+            emit<Task>(
+                std::make_unique<Walk>(Eigen::Vector3f(0.0, -sign * cfg.pivot_ball_speed_y, sign * cfg.pivot_speed)));
         });
 
-        // Note: walk to ready is not here, in favour of just emitting a Walk task directly from the strategy for ready
-        // state - then the config values can be in that module, which is where ppl are more likely to look for them
-    }
+        on<Provide<TurnAroundBall>, Needs<Walk>>().then([this](const TurnAroundBall& turn_around_ball) {
+            // Determine the direction of rotation
+            int sign = turn_around_ball.clockwise ? -1 : 1;
 
+            // Turn around the ball
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(0.0, 0.0, sign * cfg.pivot_speed)));
+        });
+    }
 }  // namespace module::planning

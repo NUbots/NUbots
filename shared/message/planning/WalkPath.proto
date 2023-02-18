@@ -27,10 +27,14 @@
     fvec3 rPTt = 1;
  }
 
- /// Pivot around something - can refer to pivoting around a ball to align with the desired kick direction, or pivoting on the spot
- message Pivot {
-    /// The point to pivot around, relative to the torso
-    fvec3 rPTt = 1;
-    /// Direction to pivot in
+/// Turn on the spot in the given direction
+ message TurnOnSpot {
+    /// Direction to turn
     bool clockwise = 2;
+ }
+
+ /// Turn around the ball in the given direction
+ message TurnAroundBall {
+      /// Direction to turn
+      bool clockwise = 2;
  }
