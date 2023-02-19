@@ -33,17 +33,11 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Trigger<FilteredBall>, Needs<Kick>>().then(
+        on<Provide<KickTo>, Trigger<FilteredBall>>().then(
             [this](const KickTo& kick, const RunInfo& info, const FilteredBall& ball) {
                 // If the kicking subtask is done, then we are no longer kicking
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
                     kicking = false;
-                }
-
-                // If we're already kicking, don't do anything
-                if (kicking) {
-                    emit<Task>(std::make_unique<Idle>());
-                    return;
                 }
 
                 // CHECK IF BALL IS BALL MEASUREMENT IS RECENT ENOUGH
@@ -51,7 +45,6 @@ namespace module::planning {
                 auto time_difference = std::chrono::duration_cast<std::chrono::milliseconds>(
                     NUClear::clock::now() - ball.time_of_measurement);
                 if (time_difference.count() >= cfg.ball_timeout_threshold) {
-                    emit<Task>(std::make_unique<Idle>());
                     return;
                 }
 
@@ -62,7 +55,6 @@ namespace module::planning {
 
                 // Need to be near the ball to consider kicking it
                 if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
-                    emit<Task>(std::make_unique<Idle>());
                     return;
                 }
 
@@ -71,11 +63,18 @@ namespace module::planning {
 
                 // Don't kick if we should align but we're not aligned to the target
                 if (align_angle > cfg.target_angle_threshold) {
+                    return;
+                }
+
+                // If the kick conditions are not met, the function will have returned with no Tasks, ending the kick
+                // Otherwise, the kick conditions are met and we need to check if we are already kicking
+                // If we are already kicking, then only emit Idle to keep the previous Kick Task running
+                if (kicking) {
                     emit<Task>(std::make_unique<Idle>());
                     return;
                 }
 
-                // ALL CHECKS PASSED, KICK!
+                // All checks passed, and we aren't already kicking - KICK!
                 kicking = true;
 
                 // If the kick leg is forced left, kick left
