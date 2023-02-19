@@ -40,9 +40,7 @@ file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/skill/scripts" DESTINATION ${PRO
 # Add the scripts to the script files variable for the install script
 file(GLOB_RECURSE scripts "${PROJECT_BINARY_DIR}/scripts/*")
 
-foreach(script ${scripts})
-  set(SCRIPT_FILES
-      ${SCRIPT_FILES} ${script}
-      CACHE INTERNAL "A list of all script files" FORCE
-  )
-endforeach()
+set(SCRIPT_FILES
+    ${scripts}
+    CACHE INTERNAL "A list of all script files" FORCE
+)
