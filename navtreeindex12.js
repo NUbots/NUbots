@@ -1,5 +1,10 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1motion_1_1WalkingParameter.html#a7c338b6db2bcaef4be4f6f3b4ee34539":[1,0,2,5,13,1],
+"structmodule_1_1motion_1_1WalkingParameter.html#a84464717a8e9427636fceafaf927f506":[1,0,2,5,13,23],
+"structmodule_1_1motion_1_1WalkingParameter.html#a91b329b6f62ae1f27f9da313bb91bf1b":[1,0,2,5,13,14],
+"structmodule_1_1motion_1_1WalkingParameter.html#a9c596e271fc8b50a9ea0d85493e82d31":[1,0,2,5,13,17],
+"structmodule_1_1motion_1_1WalkingParameter.html#aac6c8ca575cedadc03d87edef46f5473":[1,0,2,5,13,11],
 "structmodule_1_1motion_1_1WalkingParameter.html#ac099160e4c62ed58998ca93b4219a1f1":[1,0,2,5,13,16],
 "structmodule_1_1motion_1_1WalkingParameter.html#ac13ac3ec5c21607b8464186e042ab0d4":[1,0,2,5,13,27],
 "structmodule_1_1motion_1_1WalkingParameter.html#ac304ad258ccc7c1e6981150b75e528e1":[1,0,2,5,13,18],
@@ -157,6 +162,11 @@ var NAVTREEINDEX12 =
 "structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a8f0384d1fc29494dbe44c602dc738924":[1,0,2,8,1,0,0],
 "structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#ad0caf0fb886580bf5cd25239efcdf01c":[1,0,2,8,1,0,2],
 "structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#ae6292a1612a41789e1e440cbdab51a0c":[1,0,2,8,1,0,4],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html":[1,0,2,8,2,0],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#a0626a27c9b8bf9cb87df28983ab4cfd4":[1,0,2,8,2,0,2],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#a3e96d3ffc77171e20bab7b429d8c27a0":[1,0,2,8,2,0,0],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#ac9c22d37fe3e89e25243ba6f1feb4b4d":[1,0,2,8,2,0,3],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#ae130ed2ee381f2d821f58579329b9081":[1,0,2,8,2,0,1],
 "structmodule_1_1platform_1_1Webots_1_1CameraContext.html":[1,0,2,9,1,0],
 "structmodule_1_1platform_1_1Webots_1_1CameraContext.html#a7a3ccaea7203a58a11edb3150fd3a659":[1,0,2,9,1,0,2],
 "structmodule_1_1platform_1_1Webots_1_1CameraContext.html#aacc16712dff38c94e32ace20c9fdc177":[1,0,2,9,1,0,3],
@@ -239,15 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1skill_1_1GetUp_1_1Config.html":[1,0,2,10,0,0],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a0b884c2783ede8e642e43608795d5141":[1,0,2,10,0,0,0],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a3a86a658256d6e5c777bd7769455a104":[1,0,2,10,0,0,1],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#a49e9e9f4e9a7a0a1146494b50c8b0b0d":[1,0,2,10,0,0,5],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#aba4174336d5dde2b3f0c4ff0707ac046":[1,0,2,10,0,0,4],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#ace5193553ff4dc88c1665fb6af33b481":[1,0,2,10,0,0,2],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#afa18443b6bb3d7a83d3a7b1d2dc524d5":[1,0,2,10,0,0,3],
-"structmodule_1_1skill_1_1Look_1_1Config.html":[1,0,2,10,1,0],
-"structmodule_1_1skill_1_1Look_1_1Config.html#a424bf993615a006af07d97f0a523497a":[1,0,2,10,1,0,0],
-"structmodule_1_1skill_1_1Look_1_1Config.html#a733b1c413238944ae7006b908ce3fefc":[1,0,2,10,1,0,2],
-"structmodule_1_1skill_1_1Look_1_1Config.html#ae0180a11f87c07d2c869a2be246f43e7":[1,0,2,10,1,0,1],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[1,0,2,12,1,1,0],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[1,0,2,12,1,1,0,5],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[1,0,2,12,1,1,0,3]
+"structmodule_1_1skill_1_1GetUp_1_1Config.html#a49e9e9f4e9a7a0a1146494b50c8b0b0d":[1,0,2,10,0,0,5]
 };

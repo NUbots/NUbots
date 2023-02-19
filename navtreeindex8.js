@@ -1,5 +1,10 @@
 var NAVTREEINDEX8 =
 {
+"namespaceutility_1_1math_1_1transform.html#af1243f5dc0b8e9acb053d94666693811":[0,0,5,7,8,0],
+"namespaceutility_1_1math_1_1transform.html#af7042c608073e606812c834636b88935":[0,0,5,7,8,10],
+"namespaceutility_1_1strutil.html":[0,0,5,12],
+"namespaceutility_1_1strutil.html#a1b307f6c0cd8b2c8eb3413cb9966856b":[0,0,5,12,13],
+"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956":[0,0,5,12,2],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956a0086c73c90c261db630b4dc8aea09bcf":[0,0,5,12,2,3],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956a08d0012388564e95c3b4a7407cf04965":[0,0,5,12,2,6],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956a1955bdc302911f376074eb9b02e56639":[0,0,5,12,2,5],
@@ -244,10 +249,5 @@ var NAVTREEINDEX8 =
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html":[1,0,3,0,0,0],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a14ca8bb2c0558f55aa92b525c4bd6767":[1,0,3,0,0,0,2],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a7325b6091386271d087ab70e20734509":[1,0,3,0,0,0,0],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7":[1,0,3,0,0,0,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html":[1,0,3,0,0,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#a96aea758637de7091dbad998b0a969c3":[1,0,3,0,0,1,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#ad02dc9609e3af81f7b92b854a8f5f438":[1,0,3,0,0,1,0],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html":[1,0,3,0,0,2],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html#a1bfc7bfd8a87c8ada601b1f82b9cac4f":[1,0,3,0,0,2,0]
+"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7":[1,0,3,0,0,0,1]
 };

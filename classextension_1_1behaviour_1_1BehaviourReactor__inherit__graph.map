@@ -1,12 +1,13 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,220,347,261"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,245,347,287"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="437,5,585,47"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="437,71,585,112"/>
 <area shape="rect" id="node5" href="$classmodule_1_1planning_1_1FallingRelaxPlanner.html" title=" " alt="" coords="419,136,604,177"/>
 <area shape="rect" id="node6" href="$classmodule_1_1planning_1_1GetUpPlanner.html" title=" " alt="" coords="395,202,628,229"/>
-<area shape="rect" id="node7" href="$classmodule_1_1skill_1_1GetUp.html" title=" " alt="" coords="434,253,589,279"/>
-<area shape="rect" id="node8" href="$classmodule_1_1skill_1_1Look.html" title=" " alt="" coords="439,303,584,330"/>
-<area shape="rect" id="node9" href="$classmodule_1_1skill_1_1ScriptKick.html" title=" " alt="" coords="422,354,601,381"/>
-<area shape="rect" id="node10" href="$classmodule_1_1strategy_1_1FallRecovery.html" title=" " alt="" coords="400,405,623,431"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,227,140,254"/>
+<area shape="rect" id="node7" href="$classmodule_1_1planning_1_1PlanLook.html" title=" " alt="" coords="410,253,613,279"/>
+<area shape="rect" id="node8" href="$classmodule_1_1skill_1_1GetUp.html" title=" " alt="" coords="434,303,589,330"/>
+<area shape="rect" id="node9" href="$classmodule_1_1skill_1_1Look.html" title=" " alt="" coords="439,354,584,381"/>
+<area shape="rect" id="node10" href="$classmodule_1_1skill_1_1ScriptKick.html" title=" " alt="" coords="422,405,601,431"/>
+<area shape="rect" id="node11" href="$classmodule_1_1strategy_1_1FallRecovery.html" title=" " alt="" coords="400,455,623,482"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,253,140,279"/>
 </map>

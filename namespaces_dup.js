@@ -520,6 +520,7 @@ var namespaces_dup =
       [ "planning", null, [
         [ "FallingRelaxPlanner", "classmodule_1_1planning_1_1FallingRelaxPlanner.html", "classmodule_1_1planning_1_1FallingRelaxPlanner" ],
         [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ],
+        [ "PlanLook", "classmodule_1_1planning_1_1PlanLook.html", "classmodule_1_1planning_1_1PlanLook" ],
         [ "State", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164", [
           [ "STABLE", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164a32987cdf8a725702042ab18f5c700905", null ],
           [ "UNSTABLE", "FallingRelaxPlanner_8cpp.html#a57f0c06ec0b95f8846f192caee896164ad3582680e9ce6bdf2e9791926bd99d5f", null ],

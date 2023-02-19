@@ -1,5 +1,10 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#acf8a301553c5fab7bfff16a7968f6b8e":[1,0,2,3,9,2,6],
+"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#ada61384e49c2536411433562f7d36afb":[1,0,2,3,9,2,4],
+"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#af2764fe7184d8594f1d63235d74dab45":[1,0,2,3,9,2,3],
+"structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html":[1,0,2,3,9,3],
+"structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a00e6db1251d4ef8527ea2c90b2f116d3":[1,0,2,3,9,3,1],
 "structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a1813885366e814ce68f97c6ac0383f91":[1,0,2,3,9,3,3],
 "structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a340176cfc0c38b13cb596822a8694285":[1,0,2,3,9,3,4],
 "structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html#a3e67bad3cec8d8727d21caa336efdf5f":[1,0,2,3,9,3,10],
@@ -244,10 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1motion_1_1WalkingParameter.html#a6863d150e634850b2dce16c1254f3ed2":[1,0,2,5,13,13],
 "structmodule_1_1motion_1_1WalkingParameter.html#a71a69c274ff668e466393549a5b34b9b":[1,0,2,5,13,10],
 "structmodule_1_1motion_1_1WalkingParameter.html#a72ddbe8a7c1531ffdd6a05c9a7ba2482":[1,0,2,5,13,3],
-"structmodule_1_1motion_1_1WalkingParameter.html#a74bd26c87ab6786f03f3d74313636388":[1,0,2,5,13,2],
-"structmodule_1_1motion_1_1WalkingParameter.html#a7c338b6db2bcaef4be4f6f3b4ee34539":[1,0,2,5,13,1],
-"structmodule_1_1motion_1_1WalkingParameter.html#a84464717a8e9427636fceafaf927f506":[1,0,2,5,13,23],
-"structmodule_1_1motion_1_1WalkingParameter.html#a91b329b6f62ae1f27f9da313bb91bf1b":[1,0,2,5,13,14],
-"structmodule_1_1motion_1_1WalkingParameter.html#a9c596e271fc8b50a9ea0d85493e82d31":[1,0,2,5,13,17],
-"structmodule_1_1motion_1_1WalkingParameter.html#aac6c8ca575cedadc03d87edef46f5473":[1,0,2,5,13,11]
+"structmodule_1_1motion_1_1WalkingParameter.html#a74bd26c87ab6786f03f3d74313636388":[1,0,2,5,13,2]
 };

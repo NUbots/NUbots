@@ -70,6 +70,11 @@ var NAVTREEINDEX5 =
 "classmodule_1_1planning_1_1GetUpPlanner.html#a4b42340c7ab67ffe6b7602575cfbfc94":[1,0,2,8,1,3],
 "classmodule_1_1planning_1_1GetUpPlanner.html#a847be3e6f18c7db8a3aaa63c1bd8670f":[1,0,2,8,1,4],
 "classmodule_1_1planning_1_1GetUpPlanner.html#afa1511ac9dc5633466274a582382ede2":[1,0,2,8,1,1],
+"classmodule_1_1planning_1_1PlanLook.html":[1,0,2,8,2],
+"classmodule_1_1planning_1_1PlanLook.html#a0e7e4760528d1570c67aaa0013cf48ad":[1,0,2,8,2,2],
+"classmodule_1_1planning_1_1PlanLook.html#a33931342e093f8624303c07960e4b0b9":[1,0,2,8,2,1],
+"classmodule_1_1planning_1_1PlanLook.html#a4a6899b9a5b49b198a4f1f3d463a4303":[1,0,2,8,2,4],
+"classmodule_1_1planning_1_1PlanLook.html#a992d8d83c5714b0a8c9d83ff89415d52":[1,0,2,8,2,3],
 "classmodule_1_1platform_1_1Webots.html":[1,0,2,9,1],
 "classmodule_1_1platform_1_1Webots.html#a0e3aeeed4dc3662ec83d8bfcb3250a2a":[1,0,2,9,1,30],
 "classmodule_1_1platform_1_1Webots.html#a13e4c3a6a31e38e55a64b12bd61411c1":[1,0,2,9,1,12],
@@ -244,10 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#aa66567c7755e6e6d00e1f7a66e111b85":[1,0,2,14,0,4,1],
 "classutility_1_1io_1_1uart.html":[1,0,5,4,0],
 "classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5":[1,0,5,4,0,7],
-"classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05":[1,0,5,4,0,6],
-"classutility_1_1io_1_1uart.html#a234ce99884102680eb4e26ab7dbb12c7":[1,0,5,4,0,16],
-"classutility_1_1io_1_1uart.html#a28face5c2423de44135feff13a911302":[1,0,5,4,0,15],
-"classutility_1_1io_1_1uart.html#a4b64a29a05078f63330e0610f78d1025":[1,0,5,4,0,1],
-"classutility_1_1io_1_1uart.html#a575335d772428e6cac047da73fc15c90":[1,0,5,4,0,9],
-"classutility_1_1io_1_1uart.html#a583cecd2d46723b9f6dc0e0f63955039":[1,0,5,4,0,8]
+"classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05":[1,0,5,4,0,6]
 };
