@@ -1,4 +1,3 @@
-# TODO: Update this README for Director - L.C
 # QuinticWalk
 
 ## Description
@@ -24,9 +23,6 @@ Include this module to allow to robot to walk.
 ## Dependencies
 
 - Eigen
-
 - KinematicsModel
-
 - Sensors
-
 - `utility::motion::splines::*`
