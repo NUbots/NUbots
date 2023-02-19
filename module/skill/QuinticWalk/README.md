@@ -3,27 +3,23 @@
 
 ## Description
 
-Open loop walk engine that uses quintic splines to create trajectories. [Created by Bit-Bots.](https://github.com/bit-bots/bitbots_motion). Based off code by Quentin "Leph" Rouxel and Team Rhoban.
+Open loop walk engine that uses quintic splines to create trajectories.
 
 ## Usage
 
-- Send a `WalkCommand` of the form (x meters/second, y meters/second, radians/second) to give the QuinticWalk a direction to go in.
+Include this module to allow to robot to walk.
 
-- Use `EnableWalkEngineCommand` to enable the walk.
+## Consumes
 
-- Use `DisableWalkEngineCommand` to disable the walk.
-
-- Use `StopCommand` to stop the walk.
-
-- Will stop when `ExecuteGetup` is sent
-
-- Will be able to walk again during get up if it receives a `KillGetup`
-
-- Config values can be changed in `QuinticWalk.yaml`.
+- `message::skill::Walk` containing a vector with the desired velocity target.
 
 ## Emits
 
-`message::behaviour::ServoCommand`
+- `message::behaviour::state::Stability` to update the stability when starting and finishing getting up.
+- `message::actuation::LeftLegIK` containing left leg motion information.
+- `message::actuation::RightLegIK` containing right leg motion information.
+- `message::actuation::LeftArm` containing left arm servo commands.
+- `message::actuation::RightArm` containing right arm servo commands.
 
 ## Dependencies
 
@@ -32,7 +28,5 @@ Open loop walk engine that uses quintic splines to create trajectories. [Created
 - KinematicsModel
 
 - Sensors
-
-- InverseKinematics
 
 - `utility::motion::splines::*`
