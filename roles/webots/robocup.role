@@ -7,6 +7,14 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   actuation::KinematicsConfiguration
+
+  # Director
+  # extension::Director
+
+  # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
+  # Skill
+  # skill::QuinticWalk
+
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
@@ -35,16 +43,9 @@ nuclear_role(
   behaviour::skills::Stand
   behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
-
-  # Director
-  # extension::Director
-
-  # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
-  # Skill
-  skill::QuinticWalk
   # Motion
   motion::ScriptEngine
-  # motion::QuinticWalk
+  motion::QuinticWalk
   motion::HeadController
   # Data logger
   support::logging::DataLogging
