@@ -6,7 +6,7 @@ Open loop walk engine that uses quintic splines to create trajectories.
 
 ## Usage
 
-Include this module to allow to robot to walk.
+Include this module to allow the robot to walk.
 
 ## Consumes
 
