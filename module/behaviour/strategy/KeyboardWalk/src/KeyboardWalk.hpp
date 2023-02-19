@@ -32,8 +32,6 @@
 
 #include <nuclear>
 
-#include "extension/Behaviour.hpp"
-
 #include "utility/input/LimbID.hpp"
 
 namespace module::behaviour::strategy {
