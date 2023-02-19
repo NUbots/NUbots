@@ -14,7 +14,7 @@ Include this module to allow the robot to walk.
 
 ## Emits
 
-- `message::behaviour::state::Stability` to update the stability when starting and finishing getting up.
+- `message::behaviour::state::Stability` to update the system's stability state based on the walk engine state.
 - `message::actuation::LeftLegIK` containing left leg motion information.
 - `message::actuation::RightLegIK` containing right leg motion information.
 - `message::actuation::LeftArm` containing left arm servo commands.
