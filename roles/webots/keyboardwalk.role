@@ -21,16 +21,10 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
-  # Director
-  # extension::Director
-
-  # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
-  # Skill
-  # skill::QuinticWalk
-  # Motion motion::QuinticWalk
   motion::HeadController
   motion::ScriptEngine
-  Behaviour behaviour::Controller
+  # Behaviour
+  behaviour::Controller
   behaviour::skills::Getup
   behaviour::skills::Stand
   behaviour::skills::KickScript

@@ -25,18 +25,17 @@ namespace module::skill {
     using extension::Configuration;
 
     using message::actuation::KinematicsModel;
+    using message::actuation::LeftArm;
     using message::actuation::LeftLegIK;
+    using message::actuation::RightArm;
     using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
+    using message::actuation::ServoState;
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::skill::Walk;
 
-    using message::actuation::LeftArm;
-    using message::actuation::RightArm;
-    using message::actuation::ServoState;
-    using message::behaviour::state::Stability;
     using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;

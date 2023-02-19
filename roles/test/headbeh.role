@@ -21,8 +21,6 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
-  # Director
-  # extension::Director
   # Behaviour
   behaviour::Controller
   behaviour::skills::Stand

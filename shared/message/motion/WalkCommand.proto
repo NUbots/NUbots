@@ -39,7 +39,7 @@ message StopCommand {
     uint64 subsumption_id = 1;
 }
 
-message Walk {
+message NewWalkCommand {
     vec3 velocity_target = 1;
 }
 

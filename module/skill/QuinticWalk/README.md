@@ -10,15 +10,15 @@ Include this module to allow to robot to walk.
 
 ## Consumes
 
-- `message::skill::Walk` containing a vector with the desired velocity target.
+- `message::skill::Walk` A Task requesting to walk, containing a vector with the desired velocity target.
 
 ## Emits
 
 - `message::behaviour::state::Stability` to update the stability when starting and finishing getting up.
-- `message::actuation::LeftLegIK` containing left leg motion information.
-- `message::actuation::RightLegIK` containing right leg motion information.
-- `message::actuation::LeftArm` containing left arm servo commands.
-- `message::actuation::RightArm` containing right arm servo commands.
+- `message::actuation::LeftLegIK` Task requesting the left leg is moved using Inverse Kinematics, containing left leg motion information.
+- `message::actuation::RightLegIK` Task requesting the right leg is moved using Inverse Kinematics, containing right leg motion information.
+- `message::actuation::LeftArm` Task requesting the left arm is moved using Inverse Kinematics, containing left arm servo commands.
+- `message::actuation::RightArm` Task requesting the right arm is moved using Inverse Kinematics, containing right arm servo commands.
 
 ## Dependencies
 
