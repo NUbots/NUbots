@@ -1,8 +1,5 @@
 var NAVTREEINDEX4 =
 {
-"classmodule_1_1localisation_1_1BallFilter.html#a7bb28c884ea8de57e36e04a7f390c8cb":[1,0,2,4,0,3],
-"classmodule_1_1localisation_1_1BallFilter.html#aa212e5940da03f8f9fe86242f1214a88":[1,0,2,4,0,2],
-"classmodule_1_1localisation_1_1BallLocalisation.html":[1,0,2,4,1],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a083f58d77fbc44eebdeeea80efbed85e":[1,0,2,4,1,4],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a1b74f959a8666a57fe02c9f877dc4c71":[1,0,2,4,1,0],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a6f0b273950b925ce88e8ef9801770f96":[1,0,2,4,1,2],
@@ -249,5 +246,8 @@ var NAVTREEINDEX4 =
 "classmodule_1_1network_1_1PlotJuggler.html#af853b7601a9e1c38dadf696a71d8064e":[1,0,2,6,2,0],
 "classmodule_1_1output_1_1ImageCompressor.html":[1,0,2,7,2],
 "classmodule_1_1output_1_1ImageCompressor.html#a202726ce18481d9d41f93c075f5a625f":[1,0,2,7,2,6],
-"classmodule_1_1output_1_1ImageCompressor.html#a63c0584df93f5b561edc78b80c7a46a2":[1,0,2,7,2,2]
+"classmodule_1_1output_1_1ImageCompressor.html#a63c0584df93f5b561edc78b80c7a46a2":[1,0,2,7,2,2],
+"classmodule_1_1output_1_1ImageCompressor.html#a652c1e1c8503a65f6837b0eedc5333af":[1,0,2,7,2,7],
+"classmodule_1_1output_1_1ImageCompressor.html#a9ea14d5377315a7c673e322c98759ed1":[1,0,2,7,2,5],
+"classmodule_1_1output_1_1ImageCompressor.html#aad25ab5effa6bb33b2e01a1b925e5c0f":[1,0,2,7,2,1]
 };

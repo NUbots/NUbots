@@ -1,7 +1,13 @@
 var NAVTREEINDEX8 =
 {
-"namespaceutility_1_1math_1_1transform.html#af1243f5dc0b8e9acb053d94666693811":[0,0,5,7,8,0],
-"namespaceutility_1_1math_1_1transform.html#af7042c608073e606812c834636b88935":[0,0,5,7,8,10],
+"namespaceutility_1_1motion.html":[0,0,5,8],
+"namespaceutility_1_1motion.html#a1a926a4e3335a834f99de4c80a0f0b03":[0,0,5,8,8],
+"namespaceutility_1_1motion.html#a28c1d9a56af71ecba96a88e15459e1d6":[0,0,5,8,5],
+"namespaceutility_1_1motion.html#a4e28288c541c1d9e19947258564f92e7":[0,0,5,8,10],
+"namespaceutility_1_1motion.html#aa2669102361fc3a1b137b680d608425e":[0,0,5,8,6],
+"namespaceutility_1_1motion.html#ace20fd80ea5adb9cd92b71eddb8567b2":[0,0,5,8,11],
+"namespaceutility_1_1motion.html#aee2199e03971e5a8d0163edc960409cf":[0,0,5,8,7],
+"namespaceutility_1_1motion.html#af926b18a4a287cfe5e956df33d583761":[0,0,5,8,9],
 "namespaceutility_1_1strutil.html":[0,0,5,12],
 "namespaceutility_1_1strutil.html#a1b307f6c0cd8b2c8eb3413cb9966856b":[0,0,5,12,13],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956":[0,0,5,12,2],
@@ -243,11 +249,5 @@ var NAVTREEINDEX8 =
 "structCM740_1_1Types_1_1ServoValues.html#a8d6414ad72d82aab7a75e2fb4a41e6e0":[1,0,0,0,5,1],
 "structCM740_1_1Types_1_1ServoValues.html#a928c420d9e13d05106a6b9f40355d837":[1,0,0,0,5,7],
 "structCM740_1_1Types_1_1ServoValues.html#aabfa618fc9f1c778776197450e61e04c":[1,0,0,0,5,5],
-"structCM740_1_1Types_1_1ServoValues.html#ad0bf18dd779599b731796a740bee1394":[1,0,0,0,5,6],
-"structCM740_1_1Types_1_1ServoValues.html#ad795cb6076fb37380b2440075a5982a0":[1,0,0,0,5,0],
-"structCM740_1_1Types_1_1ServoValues.html#af9f9978a89f93d1b008ea0ca787b12b3":[1,0,0,0,5,4],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html":[1,0,3,0,0,0],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a14ca8bb2c0558f55aa92b525c4bd6767":[1,0,3,0,0,0,2],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a7325b6091386271d087ab70e20734509":[1,0,3,0,0,0,0],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7":[1,0,3,0,0,0,1]
+"structCM740_1_1Types_1_1ServoValues.html#ad0bf18dd779599b731796a740bee1394":[1,0,0,0,5,6]
 };

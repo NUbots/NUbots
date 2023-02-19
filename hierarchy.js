@@ -44,8 +44,6 @@ var hierarchy =
     [ "extension::behaviour::commands::RootType< T >", "structextension_1_1behaviour_1_1commands_1_1RootType.html", null ],
     [ "extension::behaviour::commands::WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", null ],
     [ "extension::behaviour::Done", "structextension_1_1behaviour_1_1Done.html", null ],
-    [ "extension::behaviour::Frame", "structextension_1_1behaviour_1_1Frame.html", null ],
-    [ "extension::behaviour::Frame::Target", "structextension_1_1behaviour_1_1Frame_1_1Target.html", null ],
     [ "extension::behaviour::GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", null ],
     [ "extension::behaviour::Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
     [ "extension::behaviour::information::InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", [
@@ -53,8 +51,6 @@ var hierarchy =
     ] ],
     [ "extension::behaviour::ProviderBase< T, classification >", "structextension_1_1behaviour_1_1ProviderBase.html", null ],
     [ "extension::behaviour::RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", null ],
-    [ "extension::behaviour::Script< Sequence >", "structextension_1_1behaviour_1_1Script.html", null ],
-    [ "extension::behaviour::ScriptRequest", "structextension_1_1behaviour_1_1ScriptRequest.html", null ],
     [ "extension::behaviour::Task< T >", "structextension_1_1behaviour_1_1Task.html", null ],
     [ "extension::behaviour::Uses< Provider >", "structextension_1_1behaviour_1_1Uses.html", [
       [ "extension::behaviour::Needs< Provider >", "structextension_1_1behaviour_1_1Needs.html", null ]
@@ -378,6 +374,10 @@ var hierarchy =
     [ "utility::math::stats::resample::Stratified< Scalar >", "structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html", null ],
     [ "utility::math::stats::resample::Systematic< Scalar >", "structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html", null ],
     [ "utility::motion::Balancer", "classutility_1_1motion_1_1Balancer.html", null ],
+    [ "utility::motion::Frame", "structutility_1_1motion_1_1Frame.html", null ],
+    [ "utility::motion::Frame::Target", "structutility_1_1motion_1_1Frame_1_1Target.html", null ],
+    [ "utility::motion::Script< Sequence >", "structutility_1_1motion_1_1Script.html", null ],
+    [ "utility::motion::ScriptRequest", "structutility_1_1motion_1_1ScriptRequest.html", null ],
     [ "utility::motion::splines::Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", null ],
     [ "utility::motion::splines::Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", null ],
     [ "utility::motion::splines::Polynom< Scalar >", "classutility_1_1motion_1_1splines_1_1Polynom.html", null ],
@@ -407,11 +407,11 @@ var hierarchy =
     [ "utility::vision::Pixel", "structutility_1_1vision_1_1Pixel.html", null ],
     [ "module::input::VirtualLoadSensor< float >", "classmodule_1_1input_1_1VirtualLoadSensor.html", null ],
     [ "YAML::convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", null ],
-    [ "YAML::convert<::extension::behaviour::Frame >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_01_4.html", null ],
-    [ "YAML::convert<::extension::behaviour::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_1_1Target_01_4.html", null ],
-    [ "YAML::convert<::extension::behaviour::Script< Sequence > >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Script_3_01Sequence_01_4_01_4.html", null ],
     [ "YAML::convert<::extension::Script >", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html", null ],
     [ "YAML::convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", null ],
     [ "YAML::convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", null ],
-    [ "YAML::convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", null ]
+    [ "YAML::convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", null ],
+    [ "YAML::convert<::utility::motion::Frame >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html", null ],
+    [ "YAML::convert<::utility::motion::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4.html", null ],
+    [ "YAML::convert<::utility::motion::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4.html", null ]
 ];

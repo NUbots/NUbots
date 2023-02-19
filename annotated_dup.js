@@ -20,7 +20,7 @@ var annotated_dup =
       [ "UART", "classCM740_1_1UART.html", "classCM740_1_1UART" ]
     ] ],
     [ "extension", null, [
-      [ "behaviour", "namespaceextension_1_1behaviour.html", [
+      [ "behaviour", null, [
         [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", [
           [ "BehaviourTask", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask" ],
           [ "CausingExpression", "structextension_1_1behaviour_1_1commands_1_1CausingExpression.html", "structextension_1_1behaviour_1_1commands_1_1CausingExpression" ],
@@ -36,15 +36,12 @@ var annotated_dup =
         [ "BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", "classextension_1_1behaviour_1_1BehaviourReactor" ],
         [ "Causing", "structextension_1_1behaviour_1_1Causing.html", "structextension_1_1behaviour_1_1Causing" ],
         [ "Done", "structextension_1_1behaviour_1_1Done.html", null ],
-        [ "Frame", "structextension_1_1behaviour_1_1Frame.html", "structextension_1_1behaviour_1_1Frame" ],
         [ "GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", "structextension_1_1behaviour_1_1GroupInfo" ],
         [ "Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
         [ "Needs", "structextension_1_1behaviour_1_1Needs.html", "structextension_1_1behaviour_1_1Needs" ],
         [ "Provide", "structextension_1_1behaviour_1_1Provide.html", null ],
         [ "ProviderBase", "structextension_1_1behaviour_1_1ProviderBase.html", "structextension_1_1behaviour_1_1ProviderBase" ],
         [ "RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", "structextension_1_1behaviour_1_1RunInfo" ],
-        [ "Script", "structextension_1_1behaviour_1_1Script.html", "structextension_1_1behaviour_1_1Script" ],
-        [ "ScriptRequest", "structextension_1_1behaviour_1_1ScriptRequest.html", "structextension_1_1behaviour_1_1ScriptRequest" ],
         [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
         [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
         [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
@@ -369,7 +366,7 @@ var annotated_dup =
           [ "MultivariateNormal", "structutility_1_1math_1_1stats_1_1MultivariateNormal.html", "structutility_1_1math_1_1stats_1_1MultivariateNormal" ]
         ] ]
       ] ],
-      [ "motion", null, [
+      [ "motion", "namespaceutility_1_1motion.html", [
         [ "splines", null, [
           [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
           [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
@@ -379,7 +376,10 @@ var annotated_dup =
           [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
           [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ]
         ] ],
-        [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ]
+        [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ],
+        [ "Frame", "structutility_1_1motion_1_1Frame.html", "structutility_1_1motion_1_1Frame" ],
+        [ "Script", "structutility_1_1motion_1_1Script.html", "structutility_1_1motion_1_1Script" ],
+        [ "ScriptRequest", "structutility_1_1motion_1_1ScriptRequest.html", "structutility_1_1motion_1_1ScriptRequest" ]
       ] ],
       [ "nbs", null, [
         [ "Decoder", "classutility_1_1nbs_1_1Decoder.html", "classutility_1_1nbs_1_1Decoder" ],
@@ -414,13 +414,13 @@ var annotated_dup =
     ] ],
     [ "YAML", null, [
       [ "convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4" ],
-      [ "convert<::extension::behaviour::Frame >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_01_4" ],
-      [ "convert<::extension::behaviour::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_1_1Target_01_4" ],
-      [ "convert<::extension::behaviour::Script< Sequence > >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Script_3_01Sequence_01_4_01_4" ],
       [ "convert<::extension::Script >", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4" ],
       [ "convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4" ],
       [ "convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4" ],
-      [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ]
+      [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
+      [ "convert<::utility::motion::Frame >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4" ],
+      [ "convert<::utility::motion::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4" ],
+      [ "convert<::utility::motion::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4" ]
     ] ],
     [ "Joystick", "classJoystick.html", "classJoystick" ],
     [ "JoystickEvent", "classJoystickEvent.html", "classJoystickEvent" ],

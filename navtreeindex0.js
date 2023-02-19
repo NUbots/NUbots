@@ -2,7 +2,6 @@ var NAVTREEINDEX0 =
 {
 "Action_8hpp.html#aa2c2b0b91b7e566e5acd49bdaee5cb92":[0,0,5,1,5],
 "Action_8hpp.html#ac679ce55897954cb2e800bad7c07a644":[0,0,5,1,4],
-"Balance_8cpp.html#a28c1d9a56af71ecba96a88e15459e1d6":[0,0,5,8,2],
 "BallFilter_8cpp.html#a4ad6316274fd8f0b673332247c525d36":[0,0,2,4,6],
 "BallFilter_8cpp.html#a7378478e3724029be976cb9a4af37da3":[0,0,2,4,8],
 "BallFilter_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d":[0,0,2,4,9],
@@ -177,8 +176,6 @@ var NAVTREEINDEX0 =
 "RobotParticleLocalisation_8cpp.html#aad0bb3dc95ad54474ec44e2ee759aa03":[0,0,2,4,11],
 "ScriptRunner_8cpp.html#a1dc0a64fc9ccd09606e8468329b82216":[0,0,2,1,3,6],
 "ScriptRunner_8cpp.html#ae48948b22587fc92330708238823b701":[0,0,2,1,3,5],
-"Script_8hpp.html#a16765e7ef6a14c78ee0b454ddd05be0f":[0,0,1,9],
-"Script_8hpp.html#a4aa852c55712c180ac0fbfbd21460690":[0,0,1,8],
 "SensorFilter_8cpp.html#a66ff2afda835b6c72dc80d4fd3d3c397":[0,0,2,3,56],
 "ServoID_8cpp.html#a11209a4933e52343c652ddd60c0d4d62":[0,0,5,4,4],
 "SignalCatcher_8cpp.html#a624c5a0cc6f409de2f6a7540b3b36e09":[0,0,2,12,6],
@@ -249,5 +246,8 @@ var NAVTREEINDEX0 =
 "Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454faa81c619cc8cb0fa68ff01e355ea09d97":[0,0,5,15,5,3],
 "Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fab09405a95d431d2112b894344dba5ae6":[0,0,5,15,5,1],
 "Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fab9318c254f6b4de290a8f9e1ec4aa4a1":[0,0,5,15,5,4],
-"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fabc4388bab0f32c41491038ce7ce94144":[0,0,5,15,5,8]
+"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fabc4388bab0f32c41491038ce7ce94144":[0,0,5,15,5,8],
+"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fadee2c0ec3c4a07c44ffcf716e335cb5a":[0,0,5,15,5,7],
+"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fae0fd5cfa5090cdd8fee4f94f487867d8":[0,0,5,15,5,21],
+"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454faee214728e63d516ea5bd6abb8d72c501":[0,0,5,15,5,6]
 };

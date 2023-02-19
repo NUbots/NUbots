@@ -1,8 +1,5 @@
 var NAVTREEINDEX5 =
 {
-"classmodule_1_1output_1_1ImageCompressor.html#a652c1e1c8503a65f6837b0eedc5333af":[1,0,2,7,2,7],
-"classmodule_1_1output_1_1ImageCompressor.html#a9ea14d5377315a7c673e322c98759ed1":[1,0,2,7,2,5],
-"classmodule_1_1output_1_1ImageCompressor.html#aad25ab5effa6bb33b2e01a1b925e5c0f":[1,0,2,7,2,1],
 "classmodule_1_1output_1_1ImageCompressor.html#abb3292c28a120489f83162277c09cc47":[1,0,2,7,2,4],
 "classmodule_1_1output_1_1ImageCompressor.html#adee0dc26ceb56b6900916fdca4a63afb":[1,0,2,7,2,3],
 "classmodule_1_1output_1_1Overview.html":[1,0,2,7,3],
@@ -249,5 +246,8 @@ var NAVTREEINDEX5 =
 "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#aa66567c7755e6e6d00e1f7a66e111b85":[1,0,2,14,0,4,1],
 "classutility_1_1io_1_1uart.html":[1,0,5,4,0],
 "classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5":[1,0,5,4,0,7],
-"classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05":[1,0,5,4,0,6]
+"classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05":[1,0,5,4,0,6],
+"classutility_1_1io_1_1uart.html#a234ce99884102680eb4e26ab7dbb12c7":[1,0,5,4,0,16],
+"classutility_1_1io_1_1uart.html#a28face5c2423de44135feff13a911302":[1,0,5,4,0,15],
+"classutility_1_1io_1_1uart.html#a4b64a29a05078f63330e0610f78d1025":[1,0,5,4,0,1]
 };

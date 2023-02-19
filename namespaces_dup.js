@@ -44,7 +44,26 @@ var namespaces_dup =
       [ "calculateChecksum", "UART_8cpp.html#a92808ba5e8f839a4d595ad774f568e35", null ]
     ] ],
     [ "extension", null, [
-      [ "behaviour", "namespaceextension_1_1behaviour.html", "namespaceextension_1_1behaviour" ],
+      [ "behaviour", null, [
+        [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", "namespaceextension_1_1behaviour_1_1commands" ],
+        [ "information", null, [
+          [ "InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", "classextension_1_1behaviour_1_1information_1_1InformationSource" ]
+        ] ],
+        [ "BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", "classextension_1_1behaviour_1_1BehaviourReactor" ],
+        [ "Causing", "structextension_1_1behaviour_1_1Causing.html", "structextension_1_1behaviour_1_1Causing" ],
+        [ "Done", "structextension_1_1behaviour_1_1Done.html", null ],
+        [ "GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", "structextension_1_1behaviour_1_1GroupInfo" ],
+        [ "Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
+        [ "Needs", "structextension_1_1behaviour_1_1Needs.html", "structextension_1_1behaviour_1_1Needs" ],
+        [ "Provide", "structextension_1_1behaviour_1_1Provide.html", null ],
+        [ "ProviderBase", "structextension_1_1behaviour_1_1ProviderBase.html", "structextension_1_1behaviour_1_1ProviderBase" ],
+        [ "RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", "structextension_1_1behaviour_1_1RunInfo" ],
+        [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
+        [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
+        [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
+        [ "Uses", "structextension_1_1behaviour_1_1Uses.html", "structextension_1_1behaviour_1_1Uses" ],
+        [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ]
+      ] ],
       [ "Configuration", "structextension_1_1Configuration.html", "structextension_1_1Configuration" ],
       [ "ExecuteScript", "structextension_1_1ExecuteScript.html", "structextension_1_1ExecuteScript" ],
       [ "ExecuteScriptByName", "structextension_1_1ExecuteScriptByName.html", "structextension_1_1ExecuteScriptByName" ],
@@ -52,8 +71,8 @@ var namespaces_dup =
       [ "FileWatcherReady", "structextension_1_1FileWatcherReady.html", null ],
       [ "FileWatchRequest", "structextension_1_1FileWatchRequest.html", "structextension_1_1FileWatchRequest" ],
       [ "Script", "structextension_1_1Script.html", "structextension_1_1Script" ],
-      [ "ServoID", "Script_8hpp.html#a4aa852c55712c180ac0fbfbd21460690", null ],
-      [ "operator+", "Script_8hpp.html#a16765e7ef6a14c78ee0b454ddd05be0f", null ]
+      [ "ServoID", "extension_2Script_8hpp.html#a4aa852c55712c180ac0fbfbd21460690", null ],
+      [ "operator+", "extension_2Script_8hpp.html#a16765e7ef6a14c78ee0b454ddd05be0f", null ]
     ] ],
     [ "module", null, [
       [ "actuation", null, [
@@ -816,29 +835,7 @@ var namespaces_dup =
         [ "roundUp", "comparison_8hpp.html#a75da193963fbe74dc2a6e535d6c04912", null ],
         [ "sgn", "comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d", null ]
       ] ],
-      [ "motion", null, [
-        [ "splines", null, [
-          [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
-          [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
-          [ "Polynom", "classutility_1_1motion_1_1splines_1_1Polynom.html", "classutility_1_1motion_1_1splines_1_1Polynom" ],
-          [ "SmoothSpline", "classutility_1_1motion_1_1splines_1_1SmoothSpline.html", "classutility_1_1motion_1_1splines_1_1SmoothSpline" ],
-          [ "Spline", "classutility_1_1motion_1_1splines_1_1Spline.html", "classutility_1_1motion_1_1splines_1_1Spline" ],
-          [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
-          [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ],
-          [ "Trajectories", "TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef", null ],
-          [ "Vector3fQuadruple", "TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34", null ],
-          [ "diffInv", "Footstep_8cpp.html#a5e5892b709f9e29c5777e3afa5297bf6", null ],
-          [ "operator<<", "Polynom_8hpp.html#a6db93f0d85aee6035e22097b31ba1fb1", null ],
-          [ "poseAdd", "Footstep_8cpp.html#a4d9e21dbf59a7fcb43d36b86b2c02ef6", null ],
-          [ "trajectories_init", "TrajectoryUtils_8hpp.html#acba54f0f4522861817101d7fe9143d4e", null ],
-          [ "trajectories_support_foot_state", "TrajectoryUtils_8hpp.html#a748c4e4b798d740908e5f87e217a207a", null ],
-          [ "trajectories_trunk_foot_pos", "TrajectoryUtils_8hpp.html#a055aaa07356b7911a25d490bd6c2b096", null ],
-          [ "trajectoriesTrunkFootAcc", "TrajectoryUtils_8hpp.html#a6e949a419d9136bea530f34b334755bc", null ],
-          [ "trajectoriesTrunkFootVel", "TrajectoryUtils_8hpp.html#a4900dbba8900d90675b9c6aeec5ea7d4", null ]
-        ] ],
-        [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ],
-        [ "LimbID", "Balance_8cpp.html#a28c1d9a56af71ecba96a88e15459e1d6", null ]
-      ] ],
+      [ "motion", "namespaceutility_1_1motion.html", "namespaceutility_1_1motion" ],
       [ "nbs", null, [
         [ "Decoder", "classutility_1_1nbs_1_1Decoder.html", "classutility_1_1nbs_1_1Decoder" ],
         [ "Encoder", "classutility_1_1nbs_1_1Encoder.html", "classutility_1_1nbs_1_1Encoder" ],
@@ -991,12 +988,12 @@ var namespaces_dup =
     ] ],
     [ "YAML", null, [
       [ "convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4" ],
-      [ "convert<::extension::behaviour::Frame >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_01_4" ],
-      [ "convert<::extension::behaviour::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Frame_1_1Target_01_4" ],
-      [ "convert<::extension::behaviour::Script< Sequence > >", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1behaviour_1_1Script_3_01Sequence_01_4_01_4" ],
       [ "convert<::extension::Script >", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4" ],
       [ "convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4" ],
       [ "convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4" ],
-      [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ]
+      [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
+      [ "convert<::utility::motion::Frame >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4" ],
+      [ "convert<::utility::motion::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4" ],
+      [ "convert<::utility::motion::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4" ]
     ] ]
 ];

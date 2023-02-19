@@ -1,0 +1,508 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: utility::motion Namespace Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('namespaceutility_1_1motion.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#func-members">Functions</a>  </div>
+  <div class="headertitle">
+<div class="title">utility::motion Namespace Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1motion_1_1Balancer.html">Balancer</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1motion_1_1Frame.html">Frame</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One <a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> to run, with name of the script and a duration modifier to speed up or slow down the <a class="el" href="structutility_1_1motion_1_1Script.html">Script</a>.  <a href="structutility_1_1motion_1_1ScriptRequest.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:a28c1d9a56af71ecba96a88e15459e1d6"><td class="memItemLeft" align="right" valign="top"><a id="a28c1d9a56af71ecba96a88e15459e1d6"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>LimbID</b> = <a class="el" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a></td></tr>
+<tr class="separator:a28c1d9a56af71ecba96a88e15459e1d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:aa2669102361fc3a1b137b680d608425e"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#aa2669102361fc3a1b137b680d608425e">get_platform</a> (const std::string &amp;hostname)</td></tr>
+<tr class="memdesc:aa2669102361fc3a1b137b680d608425e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumes the hostname is of the form &lt;platform_name&gt;&lt;robot_number&gt; and returns &lt;platform_name&gt;.  <a href="namespaceutility_1_1motion.html#aa2669102361fc3a1b137b680d608425e">More...</a><br /></td></tr>
+<tr class="separator:aa2669102361fc3a1b137b680d608425e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee2199e03971e5a8d0163edc960409cf"><td class="memItemLeft" align="right" valign="top">static YAML::Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#aee2199e03971e5a8d0163edc960409cf">load</a> (const std::string &amp;script)</td></tr>
+<tr class="memdesc:aee2199e03971e5a8d0163edc960409cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">If a robot-specific script exists, load the YAML file as a script. If not, loads the platform-specific script. If neither exist, throws a runtime error.  <a href="namespaceutility_1_1motion.html#aee2199e03971e5a8d0163edc960409cf">More...</a><br /></td></tr>
+<tr class="separator:aee2199e03971e5a8d0163edc960409cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a926a4e3335a834f99de4c80a0f0b03"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:a1a926a4e3335a834f99de4c80a0f0b03"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#a1a926a4e3335a834f99de4c80a0f0b03">load_script</a> (const <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a> script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:a1a926a4e3335a834f99de4c80a0f0b03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits a script function with one script request which is then sent through to the multi script version above.  <a href="namespaceutility_1_1motion.html#a1a926a4e3335a834f99de4c80a0f0b03">More...</a><br /></td></tr>
+<tr class="separator:a1a926a4e3335a834f99de4c80a0f0b03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af926b18a4a287cfe5e956df33d583761"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:af926b18a4a287cfe5e956df33d583761"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#af926b18a4a287cfe5e956df33d583761">load_script</a> (const std::string script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:af926b18a4a287cfe5e956df33d583761"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts a string and converts it into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above.  <a href="namespaceutility_1_1motion.html#af926b18a4a287cfe5e956df33d583761">More...</a><br /></td></tr>
+<tr class="separator:af926b18a4a287cfe5e956df33d583761"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e28288c541c1d9e19947258564f92e7"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:a4e28288c541c1d9e19947258564f92e7"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#a4e28288c541c1d9e19947258564f92e7">load_script</a> (const std::vector&lt; <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a> &gt; scripts, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:a4e28288c541c1d9e19947258564f92e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates sequences of servos from the script requests given.  <a href="namespaceutility_1_1motion.html#a4e28288c541c1d9e19947258564f92e7">More...</a><br /></td></tr>
+<tr class="separator:a4e28288c541c1d9e19947258564f92e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#ace20fd80ea5adb9cd92b71eddb8567b2">load_script</a> (const std::vector&lt; std::string &gt; scripts, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts a vector of strings and converts them into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above.  <a href="namespaceutility_1_1motion.html#ace20fd80ea5adb9cd92b71eddb8567b2">More...</a><br /></td></tr>
+<tr class="separator:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><dl class="section author"><dt>Author</dt><dd>Ysobel Sims </dd></dl>
+</div><h2 class="groupheader">Function Documentation</h2>
+<a id="aa2669102361fc3a1b137b680d608425e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2669102361fc3a1b137b680d608425e">&#9670;&nbsp;</a></span>get_platform()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::string utility::motion::get_platform </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>hostname</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Assumes the hostname is of the form &lt;platform_name&gt;&lt;robot_number&gt; and returns &lt;platform_name&gt;. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">hostname</td><td>The hostname of the device the program is running on. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The platform name. </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">System</td><td>error when the platform cannot be extracted from the hostname. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aee2199e03971e5a8d0163edc960409cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aee2199e03971e5a8d0163edc960409cf">&#9670;&nbsp;</a></span>load()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static YAML::Node utility::motion::load </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>script</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>If a robot-specific script exists, load the YAML file as a script. If not, loads the platform-specific script. If neither exist, throws a runtime error. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">script</td><td>The name of the script to run. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The script contents in the form off a YAML node </dd></dl>
+<dl class="exception"><dt>Exceptions</dt><dd>
+  <table class="exception">
+    <tr><td class="paramname">Runtime</td><td>error when the script doesn't exist. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a1a926a4e3335a834f99de4c80a0f0b03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1a926a4e3335a834f99de4c80a0f0b03">&#9670;&nbsp;</a></span>load_script() <span class="overload">[1/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sequence &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a>&#160;</td>
+          <td class="paramname"><em>script</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">NUClear::clock::time_point&#160;</td>
+          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Emits a script function with one script request which is then sent through to the multi script version above. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">script</td><td><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> to run </td></tr>
+    <tr><td class="paramname">start</td><td>When the script should start executing. Default is now. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Sequence message which will be filled with sequences of servos. </dd></dl>
+
+</div>
+</div>
+<a id="af926b18a4a287cfe5e956df33d583761"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af926b18a4a287cfe5e956df33d583761">&#9670;&nbsp;</a></span>load_script() <span class="overload">[2/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sequence &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td>(</td>
+          <td class="paramtype">const std::string&#160;</td>
+          <td class="paramname"><em>script</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">NUClear::clock::time_point&#160;</td>
+          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Accepts a string and converts it into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">script</td><td><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> name to run </td></tr>
+    <tr><td class="paramname">start</td><td>When the script should start executing. Default is now. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Sequence message which will be filled with sequences of servos. </dd></dl>
+
+</div>
+</div>
+<a id="a4e28288c541c1d9e19947258564f92e7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4e28288c541c1d9e19947258564f92e7">&#9670;&nbsp;</a></span>load_script() <span class="overload">[3/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sequence &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a> &gt;&#160;</td>
+          <td class="paramname"><em>scripts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">NUClear::clock::time_point&#160;</td>
+          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates sequences of servos from the script requests given. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">scripts</td><td>Sequence of scripts to run </td></tr>
+    <tr><td class="paramname">start</td><td>When the first script should start executing. Default is now. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Sequence message which will be filled with sequences of servos and can then be emitted as a Task. </dd></dl>
+
+</div>
+</div>
+<a id="ace20fd80ea5adb9cd92b71eddb8567b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace20fd80ea5adb9cd92b71eddb8567b2">&#9670;&nbsp;</a></span>load_script() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sequence &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::string &gt;&#160;</td>
+          <td class="paramname"><em>scripts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">NUClear::clock::time_point&#160;</td>
+          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Accepts a vector of strings and converts them into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">scripts</td><td><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> names to run </td></tr>
+    <tr><td class="paramname">start</td><td>When the script should start executing. Default is now. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Sequence message which will be filled with sequences of servos. </dd></dl>
+
+</div>
+</div>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1motion.html">motion</a></li>
+    <li class="footer">Generated on Sun Feb 19 2023 21:02:30 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

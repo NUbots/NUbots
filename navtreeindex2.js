@@ -1,8 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"classCM740_1_1UART.html#a28c5c0a992917831697d7bdd671ae4fe":[1,0,0,9,9],
-"classCM740_1_1UART.html#a435e6729ca7bcd1abdc1e36080ee9a98":[1,0,0,9,5],
-"classCM740_1_1UART.html#a8e19a70fbd3c791010873d0bae235529":[1,0,0,9,13],
 "classCM740_1_1UART.html#a8f094816bf528c0e3e8c9432ce1283ef":[1,0,0,9,8],
 "classCM740_1_1UART.html#aa8df2dca7607d9a858e953a7ba17d720":[1,0,0,9,15],
 "classCM740_1_1UART.html#aad9a470127f861db18c9cc9827d7876f":[1,0,0,9,14],
@@ -249,5 +246,8 @@ var NAVTREEINDEX2 =
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a9a12ad8086709c2ea2e229e68903723e":[1,0,2,1,2,2,1],
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aa03a7b3351b7e2bf842d613a0ec2576a":[1,0,2,1,2,2,33],
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aa93f334db3a3460d131d57f911ab9944":[1,0,2,1,2,2,14],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aaec52983c0731627ec71243b03e88462":[1,0,2,1,2,2,17]
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aaec52983c0731627ec71243b03e88462":[1,0,2,1,2,2,17],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#abe20cefbd3cc81fc4acec8fd522fa557":[1,0,2,1,2,2,34],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ac7abdaee4e3ff48dfa23b4915e70ba10":[1,0,2,1,2,2,30],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aca46f3b4192a109a83da15adb92a6211":[1,0,2,1,2,2,7]
 };

@@ -1,16 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#aba4174336d5dde2b3f0c4ff0707ac046":[1,0,2,10,0,0,4],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#ace5193553ff4dc88c1665fb6af33b481":[1,0,2,10,0,0,2],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#afa18443b6bb3d7a83d3a7b1d2dc524d5":[1,0,2,10,0,0,3],
-"structmodule_1_1skill_1_1Look_1_1Config.html":[1,0,2,10,1,0],
-"structmodule_1_1skill_1_1Look_1_1Config.html#a424bf993615a006af07d97f0a523497a":[1,0,2,10,1,0,0],
-"structmodule_1_1skill_1_1Look_1_1Config.html#a733b1c413238944ae7006b908ce3fefc":[1,0,2,10,1,0,2],
-"structmodule_1_1skill_1_1Look_1_1Config.html#ae0180a11f87c07d2c869a2be246f43e7":[1,0,2,10,1,0,1],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[1,0,2,12,1,1,0],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[1,0,2,12,1,1,0,5],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[1,0,2,12,1,1,0,3],
-"structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a4fca8e9ef113b8886fd51b8bf20ca033":[1,0,2,12,1,1,0,2],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a5ed0f1772127394c1b591a7b15733192":[1,0,2,12,1,1,0,1],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a9a2af932fad21e76f284a1150c7e4d9a":[1,0,2,12,1,1,0,4],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#af29f728ae238a77caf753e88e99f4ec7":[1,0,2,12,1,1,0,0],
@@ -249,5 +238,16 @@ var NAVTREEINDEX13 =
 "structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html":[1,0,5,5,3,0,0],
 "structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#a02da430d6476d129b0d286683f3581a0":[1,0,5,5,3,0,0,1],
 "structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#a21d0aefbb5e5fb4e12a1e5d169b17b28":[1,0,5,5,3,0,0,3],
-"structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#a250671c541928b11fbba8194e9031c05":[1,0,5,5,3,0,0,2]
+"structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#a250671c541928b11fbba8194e9031c05":[1,0,5,5,3,0,0,2],
+"structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#ae30be3368e1246984cea521820fdc155":[1,0,5,5,3,0,0,0],
+"structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#aeeaba1ee41033debd646d9d0c47f7c2a":[1,0,5,5,3,0,0,4],
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html":[1,0,5,5,3,0,1],
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a0cb8883452c81676d02a73bbe15f05e1":[1,0,5,5,3,0,1,2],
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a109ecaa7668cf2103598c26088bae44e":[1,0,5,5,3,0,1,0],
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a121e6521adf9960f609f9c3a676026ea":[1,0,5,5,3,0,1,4],
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a47357060b51ba3bd4a84fdc1ad97aebb":[1,0,5,5,3,0,1,5],
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a7ad7c28624b01d74e44d535619ed5610":[1,0,5,5,3,0,1,1],
+"structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a8bcd0d821e496fdcc393d9847a892f34":[1,0,5,5,3,0,1,3],
+"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html":[1,0,5,5,3,0,2],
+"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a0c49b5064ce01ef70243553e6326d393":[1,0,5,5,3,0,2,1]
 };

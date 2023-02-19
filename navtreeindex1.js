@@ -1,8 +1,5 @@
 var NAVTREEINDEX1 =
 {
-"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fadee2c0ec3c4a07c44ffcf716e335cb5a":[0,0,5,15,5,7],
-"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454fae0fd5cfa5090cdd8fee4f94f487867d8":[0,0,5,15,5,21],
-"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454faee214728e63d516ea5bd6abb8d72c501":[0,0,5,15,5,6],
 "Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454faf8f0fef1d2e4a47f2b3f280e7b5d86d9":[0,0,5,15,5,11],
 "Vision_8hpp.html#ae92e4aa86a8915b98ca63cf3c73d5d46":[0,0,5,15,65],
 "Vision_8hpp.html#af01eb8b8a6b004c4b8907800b69da152":[0,0,5,15,4],
@@ -249,5 +246,8 @@ var NAVTREEINDEX1 =
 "classCM740_1_1UART.html":[1,0,0,9],
 "classCM740_1_1UART.html#a016e12a58f3acff1e62cc572eabc0e99":[1,0,0,9,3],
 "classCM740_1_1UART.html#a151e467f4578689ef5a2c6044d070724":[1,0,0,9,12],
-"classCM740_1_1UART.html#a254b0701c2f587a5f6b0fdd8b13ea13a":[1,0,0,9,2]
+"classCM740_1_1UART.html#a254b0701c2f587a5f6b0fdd8b13ea13a":[1,0,0,9,2],
+"classCM740_1_1UART.html#a28c5c0a992917831697d7bdd671ae4fe":[1,0,0,9,9],
+"classCM740_1_1UART.html#a435e6729ca7bcd1abdc1e36080ee9a98":[1,0,0,9,5],
+"classCM740_1_1UART.html#a8e19a70fbd3c791010873d0bae235529":[1,0,0,9,13]
 };
