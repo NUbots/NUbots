@@ -36,8 +36,10 @@ nuclear_role(
   behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
 
-  # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
+  # Director
+  # extension::Director
 
+  # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
   # Skill
   skill::QuinticWalk
   # Motion
