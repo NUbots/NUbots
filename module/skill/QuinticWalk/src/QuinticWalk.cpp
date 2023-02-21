@@ -196,6 +196,7 @@ namespace module::skill {
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
             .then([this](const Walk& walk) {
+                // TODO: Set this based on the walk engine state
                 emit(std::make_unique<Stability>(Stability::DYNAMIC));
                 // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
                 // a double step factor 2 since the order distance is only for a single step, not double step
@@ -229,7 +230,9 @@ namespace module::skill {
                 }
 
                 const float dt = get_time_delta();
-                // see if the walk engine has new goals for us
+                // If the walk engine has new goals, call the calculate_joint_goals function,
+                // which will emit the tasks for the limbs.
+                // If there are no new goals, no tasks are emitted, removing child tasks from the director tree.
                 if (walk_engine.update_state(dt, current_orders)) {
                     calculate_joint_goals();
                 }
@@ -314,7 +317,7 @@ namespace module::skill {
         // Get desired transform for right foot {r}
         const Eigen::Isometry3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
 
-        // ****DIRECTOR MOTION****
+        // ****Create limb tasks****
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
         //  Legs
