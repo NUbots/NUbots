@@ -364,8 +364,8 @@ namespace module::skill {
         emit<Task>(left_leg, 0, false, "quintic left leg");
         emit<Task>(right_leg, 0, false, "quintic right leg");
 
-        emit<Task>(left_arm);
-        emit<Task>(right_arm);
+        emit<Task>(left_arm, 0, false, "quintic left arm");
+        emit<Task>(right_arm, 0, false, "quintic right arm");
 
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
