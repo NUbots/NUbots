@@ -39,11 +39,11 @@ namespace module::localisation {
         /// @brief Stores configuration values
         struct Config {
             /// @brief  THe size of the grid cells in the occupancy grid [m]
-            double grid_size;
+            double grid_size = 0.0;
             /// @brief The number of particles to use in the particle filter
             int n_particles = 0;
             /// @brief The uncertainty in the process model
-            Eigen::Matrix<double, 3, 3> process_noise;
+            Eigen::Matrix<double, 3, 3> process_noise = Eigen::Matrix<double, 3, 3>::Zero();
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
@@ -52,7 +52,7 @@ namespace module::localisation {
         Map fieldline_map;
 
         /// @brief The current walk command (dx, dy, dtheta)
-        Eigen::Matrix<double, 3, 1> walk_command;
+        Eigen::Matrix<double, 3, 1> walk_command = Eigen::Matrix<double, 3, 1>::Zero();
 
         /// @brief The state (x,y,theta) of the robot
         Eigen::Matrix<double, 3, 1> state = Eigen::Matrix<double, 3, 1>::Zero();
