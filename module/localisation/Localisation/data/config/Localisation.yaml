@@ -11,4 +11,4 @@ initial_state: [0, 0, 0]
 
 initial_covariance: [0.1, 0.1, 0.1]
 
-process_noise: [0.025, 0.025, 0.025]
+process_noise: [0.01, 0.01, 0.01]
