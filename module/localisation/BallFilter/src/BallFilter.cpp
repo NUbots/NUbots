@@ -65,6 +65,7 @@ namespace module::localisation {
                 auto ball = std::make_unique<FilteredBall>();
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 ball->rBTt                = Htc * filtered_rBCc;
+                ball->rBCt                = Htc.rotation() * filtered_rBCc;
                 ball->rBCc                = filtered_rBCc;
                 ball->time_of_measurement = NUClear::clock::now();
 
