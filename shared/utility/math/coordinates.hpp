@@ -81,13 +81,16 @@ namespace utility::math::coordinates {
         return cartesianCoordinates;
     }
 
-    /// @brief Converts the given vector from a cartesian direction vector to a 2d screen angular coordinates
-    /// @tparam T scalar template for the vectors
-    /// @param v The cartesian direction vector
-    /// @return The screen angular coordinates
-    template <typename T>
-    [[nodiscard]] inline Eigen::Matrix<T, 2, 1> screen_angular_from_object_direction(const Eigen::Matrix<T, 3, 1>& v) {
-        return {std::atan2(v.y(), v.x()), std::atan2(v.z(), v.x())};
+    template <typename T, typename U = typename T::Scalar>
+    [[nodiscard]] inline Eigen::Matrix<U, 2, 1> cartesianToPolar(const Eigen::MatrixBase<T>& cartesianCoordinates) {
+        const U x = cartesianCoordinates.x();
+        const U y = cartesianCoordinates.y();
+        Eigen::Matrix<U, 2, 1> result;
+
+        result.x() = std::sqrt(x * x + y * y);  // r
+        result.y() = std::atan2(y, x);          // theta
+
+        return result;
     }
 
 }  // namespace utility::math::coordinates

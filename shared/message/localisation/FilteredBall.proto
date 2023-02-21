@@ -24,15 +24,12 @@ import "Vector.proto";
 import "google/protobuf/timestamp.proto";
 
 message FilteredBall {
-    /// Ball's filtered cartesian position measured in torso space {t} from the torso {T}
+    /// Ball's filtered cartesian position measured in torso space {t}
     fvec3 rBTt = 1;
 
-    /// Ball's filtered cartesian position measured in camera space {c} from the camera {C}
+    /// Ball's filtered cartesian position measured in camera space {t}
     fvec3 rBCc = 2;
 
-    /// Ball's filtered cartesian position measured in torso space {t} from the camera {C}
-    fvec3 rBCt = 3;
-
     /// Time the ball measurement was taken
-    google.protobuf.Timestamp time_of_measurement = 4;
+    google.protobuf.Timestamp time_of_measurement = 3;
 }

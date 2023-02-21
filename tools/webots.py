@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import glob
 import multiprocessing
 import os
 import random
@@ -8,7 +9,6 @@ import subprocess
 import sys
 import textwrap
 from datetime import datetime
-from glob import glob
 from pathlib import Path
 from subprocess import DEVNULL
 
@@ -97,9 +97,10 @@ def register(command):
 
 
 def get_cmake_flags(roles_to_build):
+    roles_dir = os.path.join(b.project_dir, "roles")
+    roles_glob = os.path.join(roles_dir, "*.role")
 
-    # Find all available roles
-    available_roles = glob(os.path.join(b.project_dir, "roles", "**", "*.role"), recursive=True)
+    available_roles = [Path(role_path).stem for role_path in glob.glob(roles_glob)]
 
     # Ensure that all the roles requested are available
     for role in roles_to_build:

@@ -1,27 +1,28 @@
-#include "ScriptKick.hpp"
+#include "KickScript.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
+#include "extension/behaviour/Script.hpp"
 
 #include "message/actuation/Limbs.hpp"
 #include "message/skill/Kick.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/motion/Script.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
+    using extension::behaviour::Script;
+    using extension::behaviour::ScriptRequest;
     using message::actuation::LimbsSequence;
     using message::skill::Kick;
     using utility::input::LimbID;
-    using utility::motion::load_script;
 
-    ScriptKick::ScriptKick(std::unique_ptr<NUClear::Environment> environment)
+    KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("ScriptKick.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file ScriptKick.yaml
+        on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file KickScript.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
@@ -38,10 +39,12 @@ namespace module::skill {
             }
 
             if (kick.leg == LimbID::RIGHT_LEG) {
-                emit<Task>(load_script<LimbsSequence>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"}));
+                emit<Script>(std::make_unique<LimbsSequence>(),
+                             std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickRight.yaml"}, {"Stand.yaml"}});
             }
             else {  // LEFT_LEG
-                emit<Task>(load_script<LimbsSequence>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"}));
+                emit<Script>(std::make_unique<LimbsSequence>(),
+                             std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickLeft.yaml"}, {"Stand.yaml"}});
             }
         });
     }

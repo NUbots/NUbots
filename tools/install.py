@@ -115,7 +115,6 @@ def run(target, local, user, config, toolchain, **kwargs):
 
     # If there is only a single file then the b script returns this as a string rather than a list
     config_files = b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]
-    config_files += b.cmake_cache["SCRIPT_FILES"]
     config_files = config_files if isinstance(config_files, list) else [config_files]
 
     # Get list of config files
