@@ -7,8 +7,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   platform::cm740::HardwareIO
   behaviour::tools::ScriptTuner
-  # Director
-  # extension::Director
+  behaviour::Controller
   network::NUClearNet
   network::NetworkForwarder
   output::Overview

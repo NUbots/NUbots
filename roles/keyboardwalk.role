@@ -13,19 +13,12 @@ nuclear_role(
   # Hardware Interface
   platform::cm740::HardwareIO
   input::SensorFilter
-
-  # Director
-  # extension::Director
-
-  # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
-  # Skill
-  # skill::QuinticWalk
-
   # Motion
   motion::QuinticWalk
   motion::ScriptEngine
   motion::HeadController
-  Behaviour behaviour::Controller
+  # Behaviour
+  behaviour::Controller
   behaviour::skills::Stand
   # behaviour::skills::FallingRelax
   behaviour::skills::Getup

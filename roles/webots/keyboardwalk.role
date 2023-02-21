@@ -18,9 +18,8 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::PlotJuggler
-  # Servos
-  actuation::Kinematics
-  actuation::Servos
+  # Motion
+  motion::QuinticWalk
   motion::HeadController
   motion::ScriptEngine
   # Behaviour
