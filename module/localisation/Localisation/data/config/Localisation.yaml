@@ -9,6 +9,6 @@ n_particles: 5000
 
 initial_state: [0, 0, 0]
 
-initial_covariance: [0.1, 0.1, 0.1]
+initial_covariance: [5, 5, 0.1]
 
-process_noise: [0.01, 0.01, 0.01]
+process_noise: [0.001, 0.001, 0.005]
