@@ -14,25 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2017 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.localisation;
+package message.strategy;
 
-import "Vector.proto";
-import "google/protobuf/timestamp.proto";
-
-message FilteredBall {
-    /// Ball's filtered cartesian position measured in torso space {t} from the torso {T}
-    fvec3 rBTt = 1;
-
-    /// Ball's filtered cartesian position measured in camera space {c} from the camera {C}
-    fvec3 rBCc = 2;
-
-    /// Ball's filtered cartesian position measured in torso space {t} from the camera {C}
-    fvec3 rBCt = 3;
-
-    /// Time the ball measurement was taken
-    google.protobuf.Timestamp time_of_measurement = 4;
-}
+/**
+ * A task that will tell behaviour to manage the falling and getting up state of the system.
+ * This includes ensuring the robot will relax its limbs when it is falling, and get up if it has fallen.
+ */
+message FallRecovery {}
