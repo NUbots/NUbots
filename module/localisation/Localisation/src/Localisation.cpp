@@ -22,9 +22,6 @@ namespace module::localisation {
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
 
-    using utility::input::ServoID;
-    using utility::math::coordinates::cartesianToPolar;
-    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -168,7 +165,7 @@ namespace module::localisation {
             int centre_circle_r = (fd.dimensions.center_circle_diameter / 2) / cfg.grid_size;
             fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
 
-            // Fill the surrounding cells close to the field lines
+            // Fill the surrounding cells close to the field lines with decreasing occupancy values
             fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
 
             // --------------------- TEMPORARY: REMOVE LATER ---------------------
@@ -263,8 +260,10 @@ namespace module::localisation {
                 covariance = compute_covariance();
 
                 if (log_level <= NUClear::DEBUG) {
-                    auto state_cell = observation_relative(state, Eigen::Vector2d(0.0, 0.0));
+                    auto state_cell     = observation_relative(state, Eigen::Vector2d(0.0, 0.0));
+                    auto direction_cell = observation_relative(state, Eigen::Vector2d(0.5, 0.0));
                     emit(graph("State", state_cell.x(), state_cell.y()));
+                    emit(graph("State Direction", direction_cell.x(), direction_cell.y()));
                 }
 
                 // Build and emit the field message
