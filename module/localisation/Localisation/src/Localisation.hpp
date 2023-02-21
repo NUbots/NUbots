@@ -103,11 +103,11 @@ namespace module::localisation {
 
         /// @brief Get the current mean (state) of the robot
         // @return The current mean (state) of the robot
-        Eigen::Matrix<double, 3, 1> get_mean();
+        Eigen::Matrix<double, 3, 1> compute_mean();
 
         /// @brief Get the current covariance matrix of the robot's state
         // @return The current covariance matrix of the robot's state
-        Eigen::Matrix<double, 3, 3> get_covariance();
+        Eigen::Matrix<double, 3, 3> compute_covariance();
 
         /// @brief Perform a time update on the particles
         /// @param walk_command The walk command (dx, dy, dtheta)

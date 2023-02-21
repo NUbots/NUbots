@@ -129,7 +129,7 @@ namespace module::localisation {
                 for (int x = 0; x < cols; x++) {
                     if (map(y, x) == 1) {
                         for (int i = 1; i <= range; i++) {
-                            double value = (1.0 * (range - i) / range) * 0.25;
+                            double value = (1.0 * (range - i) / range) * 0.5;
 
                             if (x - i >= 0) {
                                 if (map(y, x - i) < value) {
