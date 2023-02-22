@@ -48,7 +48,7 @@ namespace module::skill {
 
             std::map<utility::input::ServoID, float> jointGains{};
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
-        } normal_config{}, goalie_config{};
+        } normal_cfg{}, goalie_cfg{};
 
         static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);
 
