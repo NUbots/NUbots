@@ -27,8 +27,7 @@ namespace module::skill {
         static constexpr int UPDATE_FREQUENCY = 200;
 
     private:
-        // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-        // ReactionHandle update_handle{};
+        // Reaction handle for the imu reaction, disabling when not moving will save unnecessary CPU
         ReactionHandle imu_reaction{};
 
         void calculate_joint_goals();
@@ -59,7 +58,6 @@ namespace module::skill {
 
         Eigen::Vector3f current_orders = Eigen::Vector3f::Zero();
         bool is_left_support           = true;
-        bool falling                   = false;
         bool first_run                 = true;
 
         NUClear::clock::time_point last_update_time{};
