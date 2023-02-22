@@ -1,6 +1,6 @@
 # A list of files to load, if this list is empty it will instead look at the arguments on the command line
 # So you can call ./binary a.nbs b.nbs c.nbs etc
-files: ["/home/lachlan/code/NUbots/recordings/webots_robocup/20220920T09_20_13.nbs"]
+files: []
 
 # What should we do when we finish playing back
 # Options are:
@@ -15,7 +15,7 @@ buffer_time: 1500
 # You can put any messages that are emitted in the system here and they will be played back
 # The below ones are just the most common and here as an example
 messages:
-  message.output.CompressedImage: true
-  message.vision.FildLines: true
+  message.output.CompressedImage: false
+  message.vision.FieldLines: false
   message.input.Sensors: false
-  message.platform.RawSensors: true
+  message.platform.RawSensors: false
