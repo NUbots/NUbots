@@ -162,7 +162,6 @@ namespace module::skill {
             first_run       = true;
             current_orders.setZero();
             is_left_support  = true;
-            falling          = false;
             last_update_time = NUClear::clock::now();
             walk_engine.reset();
         });
