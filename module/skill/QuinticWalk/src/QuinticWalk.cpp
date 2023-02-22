@@ -187,6 +187,7 @@ namespace module::skill {
             const float dt = get_time_delta();
             current_orders.setZero();
             walk_engine.update_state(dt, current_orders);
+            imu_reaction.enable(false);
         });
 
         // MAIN LOOP
