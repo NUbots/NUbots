@@ -1,13 +1,13 @@
-log_level: DEBUG
+log_level: WARN
 
 output:
-  directory: recordings
+  directory: log
   split_size: 5 * GiB
 
 # You can put any messages that is emitted in the system here and it will be logged
 # The below ones are just the most common and here as an example
 messages:
-  message.output.CompressedImage: true
-  message.vision.FieldLines: true
+  message.output.CompressedImage: false
+  message.vision.FieldLines: false
   message.input.Sensors: false
   message.platform.RawSensors: false
