@@ -272,6 +272,7 @@ namespace module::localisation {
                 position.translation() = Eigen::Vector2d(state.x(), state.y());
                 position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
                 field->position        = position.matrix();
+                field->covariance      = covariance;
                 emit(field);
             }
         });
