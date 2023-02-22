@@ -44,6 +44,12 @@ namespace module::localisation {
             int n_particles = 0;
             /// @brief The uncertainty in the process model
             Eigen::Matrix<double, 3, 3> process_noise = Eigen::Matrix<double, 3, 3>::Zero();
+            /// @brief The scaling factor for odometry x velocity
+            double scale_x = 0.0;
+            /// @brief The scaling factor for odometry y velocity
+            double scale_y = 0.0;
+            /// @brief The scaling factor for odometry theta velocity
+            double scale_theta = 0.0;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
@@ -75,12 +81,11 @@ namespace module::localisation {
         explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Converts a unit vector of point from the camera in world space to a (x,y) point relative to the robot
-        /// on
-        /// the field plane
+        /// on the field plane
         /// @param uPCw unit vector from the camera to the field point in world space
         /// @param Hcw the camera to world transform
         /// @return the field point measurement (x,y) relative to the robot
-        Eigen::Vector2d ray2field(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
+        Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
 
         /// @brief Get the occupancy value of a cell in the map
         /// @param observation The observation (x, y) in the map

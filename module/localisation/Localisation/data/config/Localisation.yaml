@@ -4,6 +4,11 @@ log_level: DEBUG
 # Size of each cell in m
 grid_size: 0.01
 
+# Scaling factors for odometry updates
+scale_x: 1
+scale_y: 1
+scale_theta: 0.6
+
 # Number of particles
 n_particles: 1500
 

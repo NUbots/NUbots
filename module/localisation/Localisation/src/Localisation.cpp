@@ -34,6 +34,11 @@ namespace module::localisation {
             cfg.grid_size   = config["grid_size"].as<double>();
             cfg.n_particles = config["n_particles"].as<int>();
 
+            // Odometry scaling
+            cfg.scale_x     = config["scale_x"].as<double>();
+            cfg.scale_y     = config["scale_y"].as<double>();
+            cfg.scale_theta = config["scale_theta"].as<double>();
+
             // Initial state and covariance
             state                               = config["initial_state"].as<Expression>();
             Eigen::Vector3d covariance_diagonal = config["initial_covariance"].as<Expression>();
@@ -234,11 +239,10 @@ namespace module::localisation {
                     auto uPCw             = point.cast<double>();
                     // TODO: Transform the measurements into a frame which is on the field plane below the robot
                     // with x pointing forwards and y pointing left of the robot
-                    auto rPCw = ray2field(uPCw, Hcw);
+                    auto rPCw = ray_to_field_plane(uPCw, Hcw);
                     field_point_observations.push_back(rPCw);
                     if (log_level <= NUClear::DEBUG) {
                         auto cell = observation_relative(state, rPCw);
-                        emit(graph("Observation points [m]:", rPCw.x(), rPCw.y()));
                         emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
                     }
                 }
@@ -260,10 +264,11 @@ namespace module::localisation {
                 covariance = compute_covariance();
 
                 if (log_level <= NUClear::DEBUG) {
-                    auto state_cell     = observation_relative(state, Eigen::Vector2d(0.0, 0.0));
+                    auto state_cell = observation_relative(state, Eigen::Vector2d(0.0, 0.0));
+                    emit(graph("State (x,y)", state_cell.x(), state_cell.y()));
+                    // Emit the cell 0.5m in front of the robot to show the direction the robot is facing
                     auto direction_cell = observation_relative(state, Eigen::Vector2d(0.5, 0.0));
-                    emit(graph("State", state_cell.x(), state_cell.y()));
-                    emit(graph("State Direction", direction_cell.x(), direction_cell.y()));
+                    emit(graph("State (theta)", direction_cell.x(), direction_cell.y()));
                 }
 
                 // Build and emit the field message
@@ -279,7 +284,7 @@ namespace module::localisation {
     }
 
 
-    Eigen::Vector2d Localisation::ray2field(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw) {
+    Eigen::Vector2d Localisation::ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw) {
         auto Hwc             = Hcw.inverse();
         Eigen::Vector3d rPCw = uPCw * std::abs(Hwc.translation().z() / uPCw.z());
         return rPCw.head(2);
@@ -299,7 +304,6 @@ namespace module::localisation {
 
     Eigen::Vector2i Localisation::observation_relative(const Eigen::Matrix<double, 3, 1> particle,
                                                        const Eigen::Vector2d observation) {
-
         // Calculate the position of observation relative to the field [m]
         double c       = cos(particle(2));
         double s       = sin(particle(2));
@@ -371,7 +375,6 @@ namespace module::localisation {
         return cov_matrix;
     }
 
-
     void Localisation::time_update() {
         // Calculate the time since the last time update
         using namespace std::chrono;
@@ -379,16 +382,12 @@ namespace module::localisation {
         const double dt         = duration_cast<duration<double>>(current_time - last_time_update_time).count();
         last_time_update_time   = current_time;
 
-        // Update the particles using the walk command and the time since the last time update
+        // Update the particles using the walk command and the time since the last time update, with some tunable
+        // scaling
         for (size_t i = 0; i < particles.size(); i++) {
-            // TODO: Move to config if we want scaling factors
-            double scaling_factor_x     = 1.0;
-            double scaling_factor_y     = 1.0;
-            double scaling_factor_theta = 0.6;
-            double delta_x              = walk_command.x() * dt * scaling_factor_x;
-            double delta_y              = walk_command.y() * dt * scaling_factor_y;
-            double delta_theta          = walk_command.z() * dt * scaling_factor_theta;
-
+            double delta_x         = walk_command.x() * dt * cfg.scale_x;
+            double delta_y         = walk_command.y() * dt * cfg.scale_y;
+            double delta_theta     = walk_command.z() * dt * cfg.scale_theta;
             particles[i].state.x() = particles[i].state.x() + delta_x * cos(particles[i].state.z() + delta_theta)
                                      - delta_y * sin(particles[i].state.z() + delta_theta);
             particles[i].state.y() = particles[i].state.y() + delta_y * cos(particles[i].state.z() + delta_theta)
@@ -405,6 +404,8 @@ namespace module::localisation {
         double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
         if (weight_sum == 0) {
             log<NUClear::WARN>("All weights are zero, cannot resample");
+            // Add some more noise to the particles
+            add_noise();
             return;
         }
         // Normalise the weights so that they sum to 1
@@ -429,20 +430,5 @@ namespace module::localisation {
             particle.state += noise;
         }
     }
-
-    void Localisation::log_particles(int n_particles) {
-        if (n_particles == -1) {
-            n_particles = particles.size();
-        }
-        for (int i = 0; i < n_particles; i++) {
-            log<NUClear::DEBUG>("Particle ",
-                                i,
-                                "with state: ",
-                                particles[i].state.transpose(),
-                                " weight: ",
-                                particles[i].weight);
-        }
-    }
-
 
 }  // namespace module::localisation
