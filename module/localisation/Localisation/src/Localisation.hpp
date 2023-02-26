@@ -38,32 +38,34 @@ namespace module::localisation {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief  THe size of the grid cells in the occupancy grid [m]
+            /// @brief Size of the grid cells in the occupancy grid [m]
             double grid_size = 0.0;
-            /// @brief The number of particles to use in the particle filter
+            /// @brief Number of particles to use in the particle filter
             int n_particles = 0;
-            /// @brief The uncertainty in the process model
+            /// @brief Uncertainty in the process model
             Eigen::Matrix<double, 3, 3> process_noise = Eigen::Matrix<double, 3, 3>::Zero();
-            /// @brief The scaling factor for odometry x velocity
+            /// @brief Scaling factor for odometry x velocity
             double scale_x = 0.0;
-            /// @brief The scaling factor for odometry y velocity
+            /// @brief Scaling factor for odometry y velocity
             double scale_y = 0.0;
-            /// @brief The scaling factor for odometry theta velocity
+            /// @brief Scaling factor for odometry theta velocity
             double scale_theta = 0.0;
+            /// @brief Bool to enable/disable saving the generated map as a csv file
+            bool save_map = false;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
 
-        /// @brief The occupancy grid map of the field lines
+        /// @brief Occupancy grid map of the field lines
         Map fieldline_map;
 
-        /// @brief The current walk command (dx, dy, dtheta)
+        /// @brief Current walk command (dx, dy, dtheta)
         Eigen::Matrix<double, 3, 1> walk_command = Eigen::Matrix<double, 3, 1>::Zero();
 
-        /// @brief The state (x,y,theta) of the robot
+        /// @brief State (x,y,theta) of the robot
         Eigen::Matrix<double, 3, 1> state = Eigen::Matrix<double, 3, 1>::Zero();
 
-        /// @brief The covariance matrix of the robot's state
+        /// @brief Covariance matrix of the robot's state
         Eigen::Matrix<double, 3, 3> covariance = Eigen::Matrix<double, 3, 3>::Identity();
 
         /// @brief Status of walk engine
@@ -72,7 +74,7 @@ namespace module::localisation {
         /// @brief Status of if the robot is falling
         bool falling = false;
 
-        /// @brief The particles used in the particle filter
+        /// @brief Particles used in the particle filter
         std::vector<Particle> particles;
 
 

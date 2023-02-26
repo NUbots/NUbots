@@ -39,6 +39,8 @@ namespace module::localisation {
             cfg.scale_y     = config["scale_y"].as<double>();
             cfg.scale_theta = config["scale_theta"].as<double>();
 
+            cfg.save_map = config["save_map"].as<bool>();
+
             // Initial state and covariance
             state                               = config["initial_state"].as<Expression>();
             Eigen::Vector3d covariance_diagonal = config["initial_covariance"].as<Expression>();
@@ -173,19 +175,20 @@ namespace module::localisation {
             // Fill the surrounding cells close to the field lines with decreasing occupancy values
             fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
 
-            // --------------------- TEMPORARY: REMOVE LATER ---------------------
-            // Open a file in write mode
-            std::ofstream file("config/matrix.csv");
-            // Write the matrix to the file
-            file << fieldline_map.map;
-            // Close the file
-            file.close();
+            // Save the map to a csv file
+            if (cfg.save_map) {
+                std::ofstream file("recordings/fieldline_map.csv");
+                file << fieldline_map.map;
+                file.close();
+            }
 
-            // For all points in the map with an occupancy value of 1, display them on graph
-            for (int i = 0; i < fieldline_map.map.rows(); i++) {
-                for (int j = 0; j < fieldline_map.map.cols(); j++) {
-                    if (fieldline_map.map(i, j) == 1) {
-                        emit(graph("Fieldline Map", i, j));
+            if (log_level <= NUClear::DEBUG) {
+                // For all points in the map with an occupancy value of 1, display them on graph
+                for (int i = 0; i < fieldline_map.map.rows(); i++) {
+                    for (int j = 0; j < fieldline_map.map.cols(); j++) {
+                        if (fieldline_map.map(i, j) == 1) {
+                            emit(graph("Field Line Map", i, j));
+                        }
                     }
                 }
             }
@@ -217,7 +220,6 @@ namespace module::localisation {
         on<Trigger<StopCommand>>().then([this]() {
             walk_command        = Eigen::Vector3d::Zero();
             walk_engine_enabled = false;
-            log<NUClear::INFO>("Stop command received");
         });
 
         on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
@@ -357,10 +359,10 @@ namespace module::localisation {
 
     Eigen::Vector3d Localisation::compute_mean() {
         Eigen::Vector3d mean = Eigen::Vector3d::Zero();
-        for (int i = 0; i < cfg.n_particles; i++) {
-            mean.x() += particles[i].state.x();
-            mean.y() += particles[i].state.y();
-            mean.z() += particles[i].state.z();
+        for (const auto& particle : particles) {
+            mean.x() += particle.state.x();
+            mean.y() += particle.state.y();
+            mean.z() += particle.state.z();
         }
         return mean / cfg.n_particles;
     }
