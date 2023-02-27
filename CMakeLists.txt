@@ -126,6 +126,63 @@ if(BUILD_TESTS)
   add_subdirectory(${NUCLEAR_SHARED_DIR}/tests)
 endif()
 
+# Generate VSCode launch configurations
+find_package(PythonInterp 3 REQUIRED)
+list(JOIN NUCLEAR_ROLES " " launch_roles)
+add_custom_command(
+  OUTPUT "${PROJECT_SOURCE_DIR}/.vscode/launch.json"
+  COMMAND
+    ${PYTHON_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
+    "${PROJECT_SOURCE_DIR}" "-b" "${PROJECT_BINARY_DIR}" "-l" "${PROJECT_SOURCE_DIR}/.vscode/launch.json" "-a"
+    "${USE_ASAN}" "${launch_roles}"
+  DEPENDS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py"
+  USES_TERMINAL
+  COMMENT "Generating VSCode launch configurations"
+)
+add_custom_target(generate_launch_configurations ALL DEPENDS "${PROJECT_SOURCE_DIR}/.vscode/launch.json")
+
+# Allow selection of subcontroller for conditional build
+set(SUBCONTROLLER "OPENCR" CACHE STRING "Select what subcontroller to build for" FORCE)
+# Set the possible values of subcontroller for cmake-gui
+set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OPENCR" "CM740" "NUSENSE")
+
+# ~~~
+# Don't know why this doesn't work so leaving it here for future reference.
+# Intent was to be able to centrally identify files which are included/excluded
+# based on subcontroller. Instead, adding `return()` statements to each
+# individual file mentioned below.
+# ~~~
+# # Collect relevant directories for each subcontroller
+# set(OPENCR "module/platform/openCR/HardwareIO")
+# set(CM740 "module/platform/cm740/HardwareIO" "module/platform/cm740/HardwareSimulator")
+# # Loop through all directories and exclude if they don't match subcontroller
+# foreach(OPENCR_DIR, CM740_DIR, NUSENSE_DIR IN ZIP_LISTS OPENCR, CM740, NUSENSE)
+#   if(EXISTS OPENCR_DIR AND NOT SUBCONTROLLER STREQUAL OPENCR)
+#     add_subdirectory(OPENCR_DIR EXCLUDE_FROM_ALL)
+#   endif()
+#   if(EXISTS CM740_DIR AND NOT SUBCONTROLLER STREQUAL CM740)
+#     add_subdirectory(CM740_DIR EXCLUDE_FROM_ALL)
+#   endif()
+#   if(EXISTS NUSENSE_DIR AND NOT SUBCONTROLLER STREQUAL NUSENSE)
+#     add_subdirectory(NUSENSE_DIR EXCLUDE_FROM_ALL)
+#   endif()
+# endforeach()
+
+# Generate VSCode launch configurations
+find_package(PythonInterp 3 REQUIRED)
+list(JOIN NUCLEAR_ROLES " " launch_roles)
+add_custom_command(
+  OUTPUT "${PROJECT_SOURCE_DIR}/.vscode/launch.json"
+  COMMAND
+    ${PYTHON_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
+    "${PROJECT_SOURCE_DIR}" "-b" "${PROJECT_BINARY_DIR}" "-l" "${PROJECT_SOURCE_DIR}/.vscode/launch.json" "-a"
+    "${USE_ASAN}" "${launch_roles}"
+  DEPENDS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py"
+  USES_TERMINAL
+  COMMENT "Generating VSCode launch configurations"
+)
+add_custom_target(generate_launch_configurations ALL DEPENDS "${PROJECT_SOURCE_DIR}/.vscode/launch.json")
+
 # Allow selection of subcontroller for conditional build
 set(SUBCONTROLLER "OPENCR" CACHE STRING "Select what subcontroller to build for" FORCE)
 # Set the possible values of subcontroller for cmake-gui

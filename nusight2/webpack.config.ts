@@ -81,7 +81,7 @@ export function getClientConfig({
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  plugins: ['postcss-import', 'postcss-url'],
+                  plugins: ['postcss-import', 'postcss-url', 'tailwindcss'],
                 },
               },
             },
