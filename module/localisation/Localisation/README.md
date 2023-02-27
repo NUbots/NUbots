@@ -1,14 +1,16 @@
 # Localisation
 
 ## Description
+
 A particle filter based localization method for estimating the robot's position and orientation (x, y, theta) in
 field space, which relies solely on field line observations.
 
 ## Usage
 
-Include this module to allow the robot to estimate is (x, y, theta) state on the field.
+Include this module to allow the robot to estimate its state (x, y, theta) on the field.
 
 ## Consumes
+
 - `message::vision::FieldLines` uses the field line observations from FieldLineDetector module
 
 ## Emits
