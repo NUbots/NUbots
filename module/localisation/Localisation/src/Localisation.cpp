@@ -9,11 +9,6 @@ namespace module::localisation {
 
     using extension::Configuration;
 
-    using VisionGoal  = message::vision::Goal;
-    using VisionGoals = message::vision::Goals;
-    using message::support::FieldDescription;
-    using VisionLines = message::vision::FieldLines;
-    using message::input::Sensors;
     using message::localisation::Field;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
@@ -21,11 +16,12 @@ namespace module::localisation {
     using message::motion::KillGetup;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
+    using message::support::FieldDescription;
+    using message::vision::FieldLines;
 
     using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
     using utility::support::Expression;
-
 
     Localisation::Localisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -226,7 +222,7 @@ namespace module::localisation {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        on<Trigger<VisionLines>>().then("Particle Filter", [this](const VisionLines& line_points) {
+        on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             if (!falling) {
                 // Time update
                 time_update();
@@ -236,8 +232,8 @@ namespace module::localisation {
 
                 // Convert the unit vectors from vision to points on field plane
                 std::vector<Eigen::Vector2d> field_point_observations;
-                for (auto point : line_points.points) {
-                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
+                for (auto point : field_lines.points) {
+                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
                     auto uPCw             = point.cast<double>();
                     // TODO: Transform the measurements into a frame which is on the field plane below the robot
                     // with x pointing forwards and y pointing left of the robot

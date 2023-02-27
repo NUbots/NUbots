@@ -5,23 +5,14 @@
 
 #include "Map.hpp"
 
-#include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 #include "message/vision/FieldLines.hpp"
-#include "message/vision/Goal.hpp"
 
-#include "utility/input/ServoID.hpp"
-#include "utility/math/coordinates.hpp"
 #include "utility/math/stats/multivariate.hpp"
-#include "utility/math/stats/resample/multinomial.hpp"
-#include "utility/math/stats/resample/resample.hpp"
-#include "utility/math/stats/resample/residual.hpp"
-#include "utility/math/stats/resample/stratified.hpp"
-#include "utility/math/stats/resample/systematic.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
