@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import os
-from glob import glob
 
 from termcolor import cprint
 
 import b
 from utility.dockerise import run_on_docker
+from utility.roles import all_role_names
 from utility.shell import WrapPty
 
 
@@ -25,13 +25,7 @@ def register(command):
         default=False,
         help="Run the specified program using valgrind",
     )
-
-    # Find all role files
-    fnames = glob(os.path.join(b.project_dir, "roles", "**", "*.role"), recursive=True)
-    # Strip everything from file paths except role name and subdirectory in roles/
-    roles = [os.path.splitext(f.replace(os.path.join(b.project_dir, "roles", ""), ""))[0] for f in fnames]
-
-    command.add_argument("role", help="The role to run", choices=roles)
+    command.add_argument("role", help="The role to run", choices=all_role_names())
     command.add_argument("args", nargs="*", help="Any arguments that should be used for the execution")
 
 
