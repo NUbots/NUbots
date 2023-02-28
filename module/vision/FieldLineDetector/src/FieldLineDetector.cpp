@@ -46,8 +46,8 @@ namespace module::vision {
             // Get some indices to partition
             std::vector<int> indices(horizon.mesh->indices.size());
             std::iota(indices.begin(), indices.end(), 0);
-            // Partition the indices such that the ball points that have ball points surrounding them are removed,
-            // and then resize the vector to remove those points
+            // Partition the indices such that the field line points that have field line points surrounding them are
+            // removed, and then resize the vector to remove those points
             auto boundary = utility::vision::visualmesh::partition_points(
                 indices.begin(),
                 indices.end(),
@@ -75,7 +75,8 @@ namespace module::vision {
                                                                                         true);
             clusters.resize(std::distance(clusters.begin(), green_boundary));
             log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
-            // Create the FieldLines message, which will contain a FieldLine for every cluster that is a valid ball
+            // Create the FieldLines message, which will contain a FieldLine for every cluster that is a valid field
+            // line
             auto lines = std::make_unique<FieldLines>();
 
             lines->id        = horizon.id;         // camera id
