@@ -250,7 +250,7 @@ namespace module::input {
 
                     // Average time per sensor reading
                     double deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(
-                                        sensors.back()->time_stamp - sensors.front()->time_stamp)
+                                        sensors.back()->timestamp - sensors.front()->timestamp)
                                         .count()
                                     / static_cast<double>(sensors.size());
 
@@ -355,7 +355,7 @@ namespace module::input {
                          ************************************************/
 
                         // Set our timestamp to when the data was read
-                        sensors->timestamp = input.time_stamp;
+                        sensors->timestamp = input.timestamp;
 
                         sensors->voltage = input.battery;
 
@@ -674,12 +674,11 @@ namespace module::input {
                         // Calculate our time offset from the last read then update the filter's time
                         /* using namespace std::chrono */ {
                             using namespace std::chrono;
-                            const double deltaT =
-                                std::max(duration_cast<duration<double>>(
-                                             input.time_stamp
-                                             - (previousSensors ? previousSensors->timestamp : input.time_stamp))
-                                             .count(),
-                                         0.0);
+                            const double deltaT = std::max(
+                                duration_cast<duration<double>>(
+                                    input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
+                                    .count(),
+                                0.0);
 
                             // Time update
                             switch (motionFilter.time(deltaT)) {

@@ -127,7 +127,7 @@ message RawSensors {
         float  temperature           = 19;
         float  profile_acceleration  = 20;
         // Replaces "Moving speed" from v1 protocol, basically just the set speed.
-        float  profile_velocity      = 21;
+        float profile_velocity = 21;
     };
 
     /// Set of all the servos on the robot
@@ -154,7 +154,7 @@ message RawSensors {
         Servo head_tilt        = 20;
     }
 
-    google.protobuf.Timestamp time_stamp           = 1;  // Timestamp when our data were taken
+    google.protobuf.Timestamp timestamp            = 1;  // Timestamp when our data were taken
     uint32                    platform_error_flags = 2;
     LEDPanel                  led_panel            = 3;
     HeadLED                   head_led             = 4;

@@ -681,7 +681,7 @@ namespace module::platform::openCR {
         RawSensors sensors;
 
         // Timestamp when this message was created (data itsself could be old)
-        sensors.time_stamp = NUClear::clock::now();
+        sensors.timestamp = NUClear::clock::now();
 
         /* OpenCR data */
         sensors.platform_error_flags = RawSensors::Error::OK;
