@@ -18,8 +18,9 @@
  */
 syntax = "proto3";
 
-package message.behaviour;
+package message.skill;
 
-message Dive {
-    bool left = 1;
-}
+/**
+ * Emit a Dive Task in order to tell the system to perform the appropriate dive action for it's current situation
+ */
+message Dive {}

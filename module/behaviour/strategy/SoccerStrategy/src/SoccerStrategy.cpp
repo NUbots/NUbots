@@ -26,7 +26,6 @@
 #include "extension/Script.hpp"
 
 #include "message/actuation/BodySide.hpp"
-#include "message/behaviour/Dive.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
 #include "message/input/GameEvents.hpp"
@@ -53,7 +52,6 @@ namespace module::behaviour::strategy {
     using extension::Configuration;
 
     using message::behaviour::Behaviour;
-    using message::behaviour::Dive;
     using message::behaviour::MotionCommand;
     using message::behaviour::Nod;
     using message::input::GameEvents;
@@ -369,10 +367,6 @@ namespace module::behaviour::strategy {
                 current_state = Behaviour::State::SEARCH_FOR_BALL;
                 // current_state = Behaviour::State::GOALIE_WALK;
             }
-            else if (ball && cfg.is_goalie && ball->rBTt.norm() < cfg.goalie_max_ball_distance) {
-                // We are goalie and the ball is close enough for defensive action
-                dive(ball);
-            }
             else if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
                 // We are not goalie or the ball is close enough, request walk planner to walk to the ball if
                 // ball has been seen recently
@@ -439,16 +433,6 @@ namespace module::behaviour::strategy {
         }
         else {
             emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(false)));
-        }
-    }
-
-    void SoccerStrategy::dive(const std::shared_ptr<const FilteredBall>& ball) {
-        float yaw_angle = std::atan2(ball->rBTt.y(), ball->rBTt.x());
-        if (yaw_angle < 0) {
-            emit(std::make_unique<Dive>(false));
-        }
-        else {
-            emit(std::make_unique<Dive>(true));
         }
     }
 

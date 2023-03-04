@@ -1,8 +1,0 @@
-# Controls the minimum log level that NUClear log will display
-log_level: DEBUG
-
-# Priority in subsumption system when a dive is requested
-dive_priority: 5
-
-# Time between dive command message and kicking before can be done again(milliseconds)
-message_timeout: 3000

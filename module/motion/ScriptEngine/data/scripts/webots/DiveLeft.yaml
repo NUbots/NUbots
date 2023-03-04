@@ -162,7 +162,7 @@
       position: -0.242428154
       gain: 10
       torque: 100
-- duration: 500
+- duration: 1000
   targets:
     - id: R_SHOULDER_ROLL
       position: -0.176259071
@@ -319,7 +319,7 @@
       gain: 10
       torque: 100
     - id: L_HIP_ROLL
-      position: 0.0475650169
+      position: 0.5
       gain: 10
       torque: 100
     - id: L_HIP_YAW
