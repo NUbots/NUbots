@@ -23,10 +23,30 @@ namespace module::extension {
 
     using ::extension::behaviour::GroupInfo;
 
-    GroupInfo Director::_get_group_info(const uint64_t& /*reaction_id*/, const std::type_index& type) {
+    GroupInfo Director::_get_group_info(const uint64_t& reaction_id, const std::type_index& type) {
         std::lock_guard<std::recursive_mutex> lock(director_mutex);
+
         if (groups.contains(type)) {
-            return GroupInfo{groups.at(type).done, groups.at(type).active_task != nullptr};
+            // Check if the task is active
+            if (groups.at(type).active_task != nullptr) {
+                // Check if the task is being run by this reaction
+                if (groups.at(type).active_task->requester_id == reaction_id) {
+                    return GroupInfo{GroupInfo::RunState::RUNNING, groups.at(type).done};
+                }
+            }
+
+            // Check if this task is in the reaction's task list
+            // If it is, then it is waiting to be run
+            if (providers.contains(reaction_id)) {
+                for (const auto& task : providers.at(reaction_id)->group.subtasks) {
+                    if (task->type == type) {
+                        return GroupInfo{GroupInfo::RunState::QUEUED, groups.at(type).done};
+                    }
+                }
+            }
+
+            // Not running or queued, so it must not have been requested yet
+            return GroupInfo{GroupInfo::RunState::NO_TASK, groups.at(type).done};
         }
         else {
             throw std::runtime_error("No group with the requested type");

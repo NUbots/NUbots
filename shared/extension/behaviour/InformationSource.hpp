@@ -52,8 +52,20 @@ namespace extension::behaviour {
      * Provides information about the current state of a provider group
      */
     struct GroupInfo {
+        enum RunState {
+            /// The group has not emitted the task
+            NO_TASK,
+            /// The group is running the task
+            RUNNING,
+            /// The group has the task queued
+            QUEUED
+        };
+
+        /// The current run state of the group
+        RunState run_state;
+
+        /// Whether the task is done or not, regardless of if this provider group is running it
         bool done;
-        bool running;
     };
 
 }  // namespace extension::behaviour

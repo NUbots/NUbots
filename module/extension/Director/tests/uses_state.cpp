@@ -19,6 +19,7 @@
 
 #include <catch.hpp>
 #include <nuclear>
+#include <string>
 
 #include "Director.hpp"
 #include "TestBase.hpp"
@@ -27,108 +28,68 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct PrimaryTask {
-        PrimaryTask(const bool run) : run_subtask(run) {}
-        bool run_subtask = false;
-    };
-
-    struct SecondaryTask {
-        SecondaryTask(const bool run) : run_subtask(run) {}
-        bool run_subtask = false;
-    };
-
+    struct PrimaryTask {};
+    struct SecondaryTask {};
     struct SubTask {};
 
     std::vector<std::string> events;
 
     class TestReactor : public TestBase<TestReactor> {
     public:
+        /// Print the subtask state
+        std::string decode_run_state(GroupInfo::RunState state) {
+            switch (state) {
+                case GroupInfo::RunState::NO_TASK: return "NO_TASK";
+                case GroupInfo::RunState::RUNNING: return "RUNNING";
+                case GroupInfo::RunState::QUEUED: return "QUEUED";
+                default: return "ERROR";
+            }
+        }
+
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
             : TestBase<TestReactor>(std::move(environment)) {
 
-            on<Provide<PrimaryTask>, Uses<SubTask>>().then(
-                [this](const PrimaryTask& primary, const Uses<SubTask>& subtask) {
-                    // Run the subtask if requested
-                    if (primary.run_subtask) {
-                        events.push_back("emitting subtask");
-                        emit<Task>(std::make_unique<SubTask>());
-                    }
 
-                    // Check the state of the subtask
-                    if (subtask.running) {
-                        events.push_back("primary subtask running");
-                    }
-                    else if (subtask.queued) {
-                        events.push_back("primary subtask queued");
-                    }
-                    else {
-                        events.push_back("primary subtask not running");
-                    }
-
-                    if (subtask.done) {
-                        events.push_back("primary subtask done");
-                    }
-                    else {
-                        events.push_back("primary subtask not done");
-                    }
-                });
-
-            on<Provide<SecondaryTask>, Uses<SubTask>>().then(
-                [this](const SecondaryTask& secondary, const Uses<SubTask>& subtask) {
-                    if (secondary.run_subtask) {
-                        events.push_back("emitting subtask");
-                        emit<Task>(std::make_unique<SubTask>());
-                    }
-
-                    if (subtask.running) {
-                        events.push_back("secondary subtask running");
-                    }
-                    else if (subtask.queued) {
-                        events.push_back("secondary subtask queued");
-                    }
-                    else {
-                        events.push_back("secondary subtask not running");
-                    }
-
-                    if (subtask.done) {
-                        events.push_back("secondary subtask done");
-                    }
-                    else {
-                        events.push_back("secondary subtask not done");
-                    }
-                });
-
-            on<Provide<SubTask>>().then([this] {
-                events.push_back("subtask executed");
-                emit<Task>(std::make_unique<Done>());
+            on<Provide<PrimaryTask>, Uses<SubTask>>().then([this](const Uses<SubTask>& subtask) {
+                events.push_back("primary task subtask run state: " + decode_run_state(subtask.run_state));
+                events.push_back("emitting subtask");
+                emit<Task>(std::make_unique<SubTask>());
             });
+
+            on<Provide<SecondaryTask>, Uses<SubTask>>().then([this](const Uses<SubTask>& subtask) {
+                events.push_back("secondary task subtask run state: " + decode_run_state(subtask.run_state));
+                events.push_back("emitting subtask");
+                emit<Task>(std::make_unique<SubTask>());
+            });
+
+            on<Provide<SubTask>>().then([this] { events.push_back("subtask executed"); });
 
             /**************
              * TEST STEPS *
              **************/
-            // Start the primary task without emitting a subtask to get a non-running subtask state
+            // Start the primary task, subtask will initially not be running
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 events.push_back("emitting primary task");
-                emit<Task>(std::make_unique<PrimaryTask>(false), 1);
+                emit<Task>(std::make_unique<PrimaryTask>(), 1);
             });
 
-            // Run the primary task with emitting a subtask to get a running subtask state
+            // Run the primary task again, subtask will now be running
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting primary task");
-                emit<Task>(std::make_unique<PrimaryTask>(true), 1);
+                events.push_back("emitting primary task again");
+                emit<Task>(std::make_unique<PrimaryTask>(), 1);
             });
 
-            // Run the primary task again to detect the Done subtask
+            // Run the secondary task with lower priority than the primary task
+            // This should give a queued subtask state on the next run
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("emitting primary task");
-                emit<Task>(std::make_unique<PrimaryTask>(true), 1);
+                events.push_back("emitting secondary task");
+                emit<Task>(std::make_unique<SecondaryTask>());
             });
 
-            // Run the secondary task with emitting a subtask, with lower priority than the primary task
-            // This should give a queued subtask state
+            // Run the secondary task again to get the queued state
             on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                events.push_back("emitting secondary task");
-                emit<Task>(std::make_unique<SecondaryTask>(true));
+                events.push_back("emitting secondary task again");
+                emit<Task>(std::make_unique<SecondaryTask>());
             });
 
             // Remove the primary task to detect a running subtask on the secondary task
@@ -137,12 +98,19 @@ namespace {
                 emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
             });
 
-            on<Startup>().then([this] {  //
+            // Run the secondary task again to see the running state
+            on<Trigger<Step<6>>, Priority::LOW>().then([this] {
+                events.push_back("emitting secondary task again");
+                emit<Task>(std::make_unique<SecondaryTask>());
+            });
+
+            on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
                 emit(std::make_unique<Step<3>>());
                 emit(std::make_unique<Step<4>>());
                 emit(std::make_unique<Step<5>>());
+                emit(std::make_unique<Step<6>>());
             });
         }
 
@@ -150,7 +118,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that the Uses state information is correct", "[director][uses][state]") {
+TEST_CASE("Test that the Uses run state information is correct", "[director][uses][state]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -159,16 +127,28 @@ TEST_CASE("Test that the Uses state information is correct", "[director][uses][s
     powerplant.install<TestReactor>();
     powerplant.start();
 
-    std::vector<std::string> expected = {"emitting primary task",      "primary subtask not running",
-                                         "primary subtask not done",   "emitting primary task",
-                                         "emitting subtask",           "primary subtask running",
-                                         "primary subtask not done",   "subtask executed",
-                                         "emitting primary task",      "emitting subtask",
-                                         "primary subtask running",    "primary subtask done",
-                                         "emitting secondary task",    "secondary subtask not running",
-                                         "secondary subtask not done", "removing primary task",
-                                         "emitting subtask",           "secondary subtask running",
-                                         "secondary subtask not done", "subtask executed"};
+    std::vector<std::string> expected = {
+        "emitting primary task",
+        "primary task subtask run state: NO_TASK",
+        "emitting subtask",
+        "subtask executed",
+        "emitting primary task again",
+        "primary task subtask run state: RUNNING",
+        "emitting subtask",
+        "subtask executed",
+        "emitting secondary task",
+        "secondary task subtask run state: NO_TASK",
+        "emitting subtask",
+        "emitting secondary task again",
+        "secondary task subtask run state: QUEUED",
+        "emitting subtask",
+        "removing primary task",
+        "subtask executed",
+        "emitting secondary task again",
+        "secondary task subtask run state: RUNNING",
+        "emitting subtask",
+        "subtask executed",
+    };
 
     // Make an info print the diff in an easy to read way if we fail
     INFO(util::diff_string(expected, events));
