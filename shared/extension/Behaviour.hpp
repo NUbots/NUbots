@@ -214,6 +214,7 @@ namespace extension::behaviour {
     struct Uses {
 
         bool done;
+        bool running;
 
         template <typename DSL>
         static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::Reaction& r) {
@@ -222,7 +223,8 @@ namespace extension::behaviour {
 
             auto data = std::make_shared<Uses<Provider>>();
 
-            data->done = group_info.done;
+            data->done    = group_info.done;
+            data->running = group_info.running;
 
             return data;
         }

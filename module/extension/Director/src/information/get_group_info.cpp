@@ -26,7 +26,7 @@ namespace module::extension {
     GroupInfo Director::_get_group_info(const uint64_t& /*reaction_id*/, const std::type_index& type) {
         std::lock_guard<std::recursive_mutex> lock(director_mutex);
         if (groups.contains(type)) {
-            return GroupInfo{groups.at(type).done};
+            return GroupInfo{groups.at(type).done, groups.at(type).active_task != nullptr};
         }
         else {
             throw std::runtime_error("No group with the requested type");

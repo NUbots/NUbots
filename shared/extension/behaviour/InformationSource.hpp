@@ -53,6 +53,7 @@ namespace extension::behaviour {
      */
     struct GroupInfo {
         bool done;
+        bool running;
     };
 
 }  // namespace extension::behaviour
