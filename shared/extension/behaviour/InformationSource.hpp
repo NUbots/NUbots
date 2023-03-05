@@ -106,10 +106,13 @@ namespace extension::behaviour::information {
          *
          * @param reaction_id the reaction id of the reaction that is asking for data
          * @param type the type of the provider group group to get information about
+         * @param root_type the secondary type to use if this is a root task
          *
          * @return a GroupInfo struct containing information about the current group
          */
-        virtual GroupInfo _get_group_info(const uint64_t& reaction_id, const std::type_index& type) = 0;
+        virtual GroupInfo _get_group_info(const uint64_t& reaction_id,
+                                          const std::type_index& type,
+                                          const std::type_index& root_type) = 0;
 
     public:
         virtual ~InformationSource() = default;
@@ -141,11 +144,14 @@ namespace extension::behaviour::information {
          *
          * @param reaction_id the reaction id of the reaction that is asking for data
          * @param type the type of the group to get the info for
+         * @param root_type the secondary type to use if this is a root task
          *
          * @return the group info object containing information about the requested group
          */
-        static inline GroupInfo get_group_info(const uint64_t& reaction_id, const std::type_index& type) {
-            return source->_get_group_info(reaction_id, type);
+        static inline GroupInfo get_group_info(const uint64_t& reaction_id,
+                                               const std::type_index& type,
+                                               const std::type_index& root_type) {
+            return source->_get_group_info(reaction_id, type, root_type);
         }
     };
 

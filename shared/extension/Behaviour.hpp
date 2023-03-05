@@ -218,7 +218,9 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::Reaction& r) {
 
-            auto group_info = information::InformationSource::get_group_info(r.id, typeid(Provider));
+            auto group_info = information::InformationSource::get_group_info(r.id,
+                                                                             typeid(Provider),
+                                                                             typeid(commands::RootType<Provider>));
 
             auto data = std::make_shared<Uses<Provider>>();
 
