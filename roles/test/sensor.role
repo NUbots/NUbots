@@ -12,5 +12,4 @@ nuclear_role(
   platform::cm740::HardwareIO
   input::SensorFilter
   output::Overview
-  support::logging::DataPlayback
 )

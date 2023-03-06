@@ -16,6 +16,5 @@ buffer_time: 1500
 # The below ones are just the most common and here as an example
 messages:
   message.output.CompressedImage: false
-  message.vision.FieldLines: false
   message.input.Sensors: false
   message.platform.RawSensors: true
