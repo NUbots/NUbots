@@ -228,26 +228,24 @@ namespace module::localisation {
                 // Add noise to the particles
                 add_noise();
 
-                // Convert the unit vectors from vision to points on field plane
+                // Project the field line observations (uPCr) onto the field plane
                 std::vector<Eigen::Vector2d> field_point_observations;
                 for (auto point : field_lines.points) {
-                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
-                    auto uPCw             = point.cast<double>();
-                    // TODO: Transform the measurements into a frame which is on the field plane below the robot
-                    // with x pointing forwards and y pointing left of the robot
-                    auto rPCw = ray_to_field_plane(uPCw, Hcw);
-                    field_point_observations.push_back(rPCw);
+                    Eigen::Isometry3d Hcr = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
+                    auto uPCr             = point.cast<double>();
+                    auto rPCr             = ray_to_field_plane(uPCr, Hcr);
+                    field_point_observations.push_back(rPCr);
                     if (log_level <= NUClear::DEBUG) {
-                        auto cell = observation_relative(state, rPCw);
+                        auto cell = position_in_map(state, rPCr);
                         emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
                     }
                 }
 
-                // Calculate the weight of each particle based on the field line observations
+                // Calculate the weight of each particle based on the observations occupancy values
                 for (int i = 0; i < cfg.n_particles; i++) {
                     particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
                     if (log_level <= NUClear::DEBUG) {
-                        auto particle_cell = observation_relative(particles[i].state, Eigen::Vector2d(0.0, 0.0));
+                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector2d(0.0, 0.0));
                         emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
                     }
                 }
@@ -260,10 +258,10 @@ namespace module::localisation {
                 covariance = compute_covariance();
 
                 if (log_level <= NUClear::DEBUG) {
-                    auto state_cell = observation_relative(state, Eigen::Vector2d(0.0, 0.0));
+                    auto state_cell = position_in_map(state, Eigen::Vector2d(0.0, 0.0));
                     emit(graph("State (x,y)", state_cell.x(), state_cell.y()));
-                    // Emit the cell 0.5m in front of the robot to show the direction the robot is facing
-                    auto direction_cell = observation_relative(state, Eigen::Vector2d(0.5, 0.0));
+                    // Emit the cell 0.5m in front of the robot to visualise the direction the robot is facing
+                    auto direction_cell = position_in_map(state, Eigen::Vector2d(0.5, 0.0));
                     emit(graph("State (theta)", direction_cell.x(), direction_cell.y()));
                 }
 
@@ -280,23 +278,26 @@ namespace module::localisation {
     }
 
 
-    Eigen::Vector2d RobotLocalisation::ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw) {
-        auto Hwc             = Hcw.inverse();
-        Eigen::Vector3d rPCw = uPCw * std::abs(Hwc.translation().z() / uPCw.z());
-        return rPCw.head(2);
+    Eigen::Vector2d RobotLocalisation::ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcr) {
+        // Project the field line points onto the field plane
+        auto Hrc             = Hcr.inverse();
+        Eigen::Vector3d rPCr = uPCr * std::abs(Hrc.translation().z() / uPCr.z());
+        return rPCr.head(2);
     }
 
-    Eigen::Vector2i RobotLocalisation::observation_relative(const Eigen::Matrix<double, 3, 1> particle,
-                                                            const Eigen::Vector2d observation) {
-        // Calculate the position of observation relative to the field [m]
-        double c       = cos(particle(2));
-        double s       = sin(particle(2));
-        double x_field = observation(0) * c - observation(1) * s + particle(0);
-        double y_field = observation(0) * s + observation(1) * c + particle(1);
+    Eigen::Vector2i RobotLocalisation::position_in_map(const Eigen::Matrix<double, 3, 1> particle,
+                                                       const Eigen::Vector2d rPRr) {
+        // Create transform from robot {r} to field {f} space
+        Eigen::Isometry2d Hfr;
+        Hfr.translation() = Eigen::Vector2d(particle(0), particle(1));
+        Hfr.linear()      = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
 
-        // Get the associated position in the map [x, y]
-        int x_map = fieldline_map.get_length() / 2 - std::round(y_field / cfg.grid_size);
-        int y_map = fieldline_map.get_width() / 2 + std::round(x_field / cfg.grid_size);
+        // Transform the observations from robot space {r} to field space {f}
+        Eigen::Vector2d rPFf = Hfr * rPRr;
+
+        // Get the associated position/index in the map [x, y]
+        int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
+        int y_map = fieldline_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size);
 
         return Eigen::Vector2i(x_map, y_map);
     }
@@ -306,13 +307,13 @@ namespace module::localisation {
         double weight         = 0;
         double n_observations = observations.size();
 
-        for (auto observation : observations) {
-            // Get the position of the particle in the map to check if robot is on the field [x, y]
-            Eigen::Vector2i particle_position = observation_relative(particle, Eigen::Vector2d(0.0, 0.0));
+        for (auto rORr : observations) {
+            // Get the position of this particle in the map, which we use to check if robot is on the field [x, y]
+            Eigen::Vector2i particle_position = position_in_map(particle, Eigen::Vector2d(0.0, 0.0));
             double particle_occupancy = fieldline_map.get_occupancy_value(particle_position.x(), particle_position.y());
 
             // Get the position of the observation in the map for this particle [x, y]
-            Eigen::Vector2i map_position = observation_relative(particle, observation);
+            Eigen::Vector2i map_position = position_in_map(particle, rORr);
 
             // Get the occupancy value of the observation at this position in the map
             double observation_occupancy = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
@@ -367,7 +368,7 @@ namespace module::localisation {
         last_time_update_time   = current_time;
 
         // Update the particles using the walk command and the time since the last time update, with some tunable
-        // scaling
+        // scaling on the walk command velocities
         for (size_t i = 0; i < particles.size(); i++) {
             double delta_x         = walk_command.x() * dt * cfg.scale_x;
             double delta_y         = walk_command.y() * dt * cfg.scale_y;

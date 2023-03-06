@@ -79,12 +79,11 @@ namespace module::localisation {
         /// @return the field point measurement (x,y) relative to the robot
         Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
 
-        /// @brief Transform the observation from the robot's coordinate frame into the map's coordinate frame
+        /// @brief Transform a point in the robot's coordinate frame into an index in the map
         /// @param particle The state of the particle (x,y,theta)
-        /// @param observation The observation (x, y) in the robot's coordinate frame [m]
+        /// @param rPRr The point (x, y) in the robot frame {r} [m]
         /// @return The observation location (x, y) in the map
-        Eigen::Vector2i observation_relative(const Eigen::Matrix<double, 3, 1> particle,
-                                             const Eigen::Vector2d observation);
+        Eigen::Vector2i position_in_map(const Eigen::Matrix<double, 3, 1> particle, const Eigen::Vector2d rPRr);
 
         /// @brief Get the weight of a particle given a set of observations
         /// @param particle The state of the particle (x,y,theta)
