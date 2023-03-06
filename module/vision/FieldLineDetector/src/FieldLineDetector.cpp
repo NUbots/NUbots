@@ -7,7 +7,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
@@ -20,7 +19,6 @@ namespace module::vision {
 
     using extension::Configuration;
 
-    using message::support::FieldDescription;
     using message::vision::FieldLines;
     using message::vision::GreenHorizon;
 
