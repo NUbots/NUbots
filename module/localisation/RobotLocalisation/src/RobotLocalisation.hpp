@@ -3,8 +3,6 @@
 
 #include <nuclear>
 
-#include "Map.hpp"
-
 #include "message/localisation/Field.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
@@ -12,6 +10,7 @@
 #include "message/support/nusight/DataPoint.hpp"
 #include "message/vision/FieldLines.hpp"
 
+#include "utility/localisation/OccupancyMap.hpp"
 #include "utility/math/stats/multivariate.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -48,7 +47,7 @@ namespace module::localisation {
         NUClear::clock::time_point last_time_update_time;
 
         /// @brief Occupancy grid map of the field lines
-        Map fieldline_map;
+        OccupancyMap fieldline_map;
 
         /// @brief Current walk command (dx, dy, dtheta)
         Eigen::Matrix<double, 3, 1> walk_command = Eigen::Matrix<double, 3, 1>::Zero();
@@ -79,11 +78,6 @@ namespace module::localisation {
         /// @param Hcw the camera to world transform
         /// @return the field point measurement (x,y) relative to the robot
         Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
-
-        /// @brief Get the occupancy value of a cell in the map
-        /// @param observation The observation (x, y) in the map
-        /// @return The occupancy value of the cell
-        double get_occupancy(const Eigen::Vector2i observation);
 
         /// @brief Transform the observation from the robot's coordinate frame into the map's coordinate frame
         /// @param particle The state of the particle (x,y,theta)

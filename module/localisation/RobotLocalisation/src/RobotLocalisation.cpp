@@ -171,15 +171,16 @@ namespace module::localisation {
             // Save the map to a csv file
             if (cfg.save_map) {
                 std::ofstream file("recordings/fieldline_map.csv");
-                file << fieldline_map.map;
+                file << fieldline_map.get_map();
                 file.close();
             }
 
             if (log_level <= NUClear::DEBUG) {
                 // For all points in the map with an occupancy value of 1, display them on graph
-                for (int i = 0; i < fieldline_map.map.rows(); i++) {
-                    for (int j = 0; j < fieldline_map.map.cols(); j++) {
-                        if (fieldline_map.map(i, j) == 1) {
+                Eigen::MatrixXd fieldline_map_data = fieldline_map.get_map();
+                for (int i = 0; i < fieldline_map_data.rows(); i++) {
+                    for (int j = 0; j < fieldline_map_data.cols(); j++) {
+                        if (fieldline_map_data(i, j) == 1) {
                             emit(graph("Field Line Map", i, j));
                         }
                     }
@@ -285,18 +286,6 @@ namespace module::localisation {
         return rPCw.head(2);
     }
 
-
-    double RobotLocalisation::get_occupancy(const Eigen::Vector2i observation) {
-        // Check if the observation is within the map
-        if (observation.x() < 0 || observation.x() >= fieldline_map.map.rows() || observation.y() < 0
-            || observation.y() >= fieldline_map.map.cols()) {
-            return -1;
-        }
-        else {
-            return fieldline_map.map(observation.x(), observation.y());
-        }
-    }
-
     Eigen::Vector2i RobotLocalisation::observation_relative(const Eigen::Matrix<double, 3, 1> particle,
                                                             const Eigen::Vector2d observation) {
         // Calculate the position of observation relative to the field [m]
@@ -306,8 +295,8 @@ namespace module::localisation {
         double y_field = observation(0) * s + observation(1) * c + particle(1);
 
         // Get the associated position in the map [x, y]
-        int x_map = fieldline_map.map.rows() / 2 - std::round(y_field / cfg.grid_size);
-        int y_map = fieldline_map.map.cols() / 2 + std::round(x_field / cfg.grid_size);
+        int x_map = fieldline_map.get_length() / 2 - std::round(y_field / cfg.grid_size);
+        int y_map = fieldline_map.get_width() / 2 + std::round(x_field / cfg.grid_size);
 
         return Eigen::Vector2i(x_map, y_map);
     }
@@ -320,13 +309,13 @@ namespace module::localisation {
         for (auto observation : observations) {
             // Get the position of the particle in the map to check if robot is on the field [x, y]
             Eigen::Vector2i particle_position = observation_relative(particle, Eigen::Vector2d(0.0, 0.0));
-            double particle_occupancy         = get_occupancy(particle_position);
+            double particle_occupancy = fieldline_map.get_occupancy_value(particle_position.x(), particle_position.y());
 
             // Get the position of the observation in the map for this particle [x, y]
             Eigen::Vector2i map_position = observation_relative(particle, observation);
 
             // Get the occupancy value of the observation at this position in the map
-            double observation_occupancy = get_occupancy(map_position);
+            double observation_occupancy = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
 
             // If the particle_occupancy is -1 then the robot is outside the map, penalise the particle
             if (particle_occupancy == -1) {
