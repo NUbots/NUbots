@@ -1,5 +1,5 @@
- <!-- PlotJuggler Layout for Robot Localisation, shows a map of the field, the robot's position/heading and the field lines observations from the robot's estimated position and orientation. -->
 <?xml version='1.0' encoding='UTF-8'?>
+ <!-- PlotJuggler Layout for Robot Localisation, shows a map of the field, the robot's position/heading and the field lines observations from the robot's estimated position and orientation. -->
 <root>
  <tabbed_widget name="Main Window" parent="main_window">
   <Tab tab_name="tab1" containers="1">
