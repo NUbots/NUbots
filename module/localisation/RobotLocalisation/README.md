@@ -2,7 +2,7 @@
 
 ## Description
 
-A particle filter based localization method for estimating the robot's position and orientation (x, y, theta) in
+A particle filter based localisation method for estimating the robot's position and orientation (x, y, theta) in
 field space, which relies solely on field line observations.
 
 ## Usage
