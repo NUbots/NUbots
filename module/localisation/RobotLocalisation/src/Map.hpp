@@ -7,7 +7,7 @@ namespace module::localisation {
 
     class Map {
     public:
-        // Map data
+        /// @brief Eigen matrix which stores the map data
         Eigen::MatrixXd map;
 
         /**

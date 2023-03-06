@@ -1,5 +1,5 @@
-#ifndef MODULE_LOCALISATION_LOCALISATION_HPP
-#define MODULE_LOCALISATION_LOCALISATION_HPP
+#ifndef MODULE_LOCALISATION_ROBOTLOCALISATION_HPP
+#define MODULE_LOCALISATION_ROBOTLOCALISATION_HPP
 
 #include <nuclear>
 
@@ -25,7 +25,7 @@ namespace module::localisation {
         double weight = 1.0;
     };
 
-    class Localisation : public NUClear::Reactor {
+    class RobotLocalisation : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
         struct Config {
@@ -70,8 +70,8 @@ namespace module::localisation {
 
 
     public:
-        /// @brief Called by the powerplant to build and setup the Localisation reactor.
-        explicit Localisation(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
+        explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Converts a unit vector of point from the camera in world space to a (x,y) point relative to the robot
         /// on the field plane
@@ -112,20 +112,16 @@ namespace module::localisation {
         /// @param dt The time since the last time update
         void time_update();
 
-        /// @brief Generates a random sample from a 1-D array using the Eigen library
+        /// @brief Resample the particles based on their weights
         /// @param particles Vector of particles to be resampled
-        /// @param size Output size (int or tuple of ints)
-        /// @return The randomly generated sample of particles
+        /// @return The resampled particles
         void resample();
 
         /// @brief Add some noise to the particles to compensate for the fact that we don't have a perfect model
+        /// @param particles Vector of particles to be resampled
+        /// @return The particles with noise added
         void add_noise();
-
-        /// @brief Log a list of particles
-        void log_particles(int number = -1);
     };
-
-
 }  // namespace module::localisation
 
-#endif  // MODULE_LOCALISATION_LOCALISATION_HPP
+#endif  // MODULE_LOCALISATION_ROBOTLOCALISATION_HPP

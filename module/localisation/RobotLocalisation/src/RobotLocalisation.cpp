@@ -1,4 +1,4 @@
-#include "Localisation.hpp"
+#include "RobotLocalisation.hpp"
 
 #include <Eigen/Dense>
 #include <fstream>
@@ -23,9 +23,10 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    Localisation::Localisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    RobotLocalisation::RobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
 
-        on<Configuration>("Localisation.yaml").then([this](const Configuration& config) {
+        on<Configuration>("RobotLocalisation.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.grid_size   = config["grid_size"].as<double>();
             cfg.n_particles = config["n_particles"].as<int>();
@@ -278,14 +279,14 @@ namespace module::localisation {
     }
 
 
-    Eigen::Vector2d Localisation::ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw) {
+    Eigen::Vector2d RobotLocalisation::ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw) {
         auto Hwc             = Hcw.inverse();
         Eigen::Vector3d rPCw = uPCw * std::abs(Hwc.translation().z() / uPCw.z());
         return rPCw.head(2);
     }
 
 
-    double Localisation::get_occupancy(const Eigen::Vector2i observation) {
+    double RobotLocalisation::get_occupancy(const Eigen::Vector2i observation) {
         // Check if the observation is within the map
         if (observation.x() < 0 || observation.x() >= fieldline_map.map.rows() || observation.y() < 0
             || observation.y() >= fieldline_map.map.cols()) {
@@ -296,8 +297,8 @@ namespace module::localisation {
         }
     }
 
-    Eigen::Vector2i Localisation::observation_relative(const Eigen::Matrix<double, 3, 1> particle,
-                                                       const Eigen::Vector2d observation) {
+    Eigen::Vector2i RobotLocalisation::observation_relative(const Eigen::Matrix<double, 3, 1> particle,
+                                                            const Eigen::Vector2d observation) {
         // Calculate the position of observation relative to the field [m]
         double c       = cos(particle(2));
         double s       = sin(particle(2));
@@ -311,8 +312,8 @@ namespace module::localisation {
         return Eigen::Vector2i(x_map, y_map);
     }
 
-    double Localisation::calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
-                                          const std::vector<Eigen::Vector2d>& observations) {
+    double RobotLocalisation::calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
+                                               const std::vector<Eigen::Vector2d>& observations) {
         double weight         = 0;
         double n_observations = observations.size();
 
@@ -349,7 +350,7 @@ namespace module::localisation {
         return weight;
     }
 
-    Eigen::Vector3d Localisation::compute_mean() {
+    Eigen::Vector3d RobotLocalisation::compute_mean() {
         Eigen::Vector3d mean = Eigen::Vector3d::Zero();
         for (const auto& particle : particles) {
             mean.x() += particle.state.x();
@@ -359,7 +360,7 @@ namespace module::localisation {
         return mean / cfg.n_particles;
     }
 
-    Eigen::Matrix<double, 3, 3> Localisation::compute_covariance() {
+    Eigen::Matrix<double, 3, 3> RobotLocalisation::compute_covariance() {
         Eigen::Matrix<double, 3, 3> cov_matrix = Eigen::Matrix<double, 3, 3>::Zero();
         for (const auto& particle : particles) {
             const Eigen::Matrix<double, 3, 1> deviation = particle.state - state;
@@ -369,7 +370,7 @@ namespace module::localisation {
         return cov_matrix;
     }
 
-    void Localisation::time_update() {
+    void RobotLocalisation::time_update() {
         // Calculate the time since the last time update
         using namespace std::chrono;
         const auto current_time = NUClear::clock::now();
@@ -390,7 +391,7 @@ namespace module::localisation {
         }
     }
 
-    void Localisation::resample() {
+    void RobotLocalisation::resample() {
         std::vector<double> weights(particles.size());
         for (size_t i = 0; i < particles.size(); i++) {
             weights[i] = particles[i].weight;
@@ -417,7 +418,7 @@ namespace module::localisation {
         particles = resampled_particles;
     }
 
-    void Localisation::add_noise() {
+    void RobotLocalisation::add_noise() {
         MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), cfg.process_noise);
         for (auto& particle : particles) {
             auto noise = multivariate.sample();
