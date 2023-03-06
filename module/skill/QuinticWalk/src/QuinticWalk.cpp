@@ -92,11 +92,11 @@ namespace module::skill {
         for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
             // Sets the leg gains
             if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
-                cfg.jointGains[id] = config["gains"]["legs"].as<float>();
+                cfg.jointGains[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
             }
             // Sets the arm gains
             if (id < ServoID::R_HIP_YAW) {
-                cfg.jointGains[id] = config["gains"]["arms"].as<float>();
+                cfg.jointGains[id] = ServoState(config["gains"]["arms"].as<float>());
             }
         }
 
@@ -197,7 +197,12 @@ namespace module::skill {
            Single>()
             .then([this](const Walk& walk) {
                 // TODO: Set this based on the walk engine state
-                emit(std::make_unique<Stability>(Stability::DYNAMIC));
+                if (walk_engine.get_state() == WalkEngineState::IDLE) {
+                    emit(std::make_unique<Stability>(Stability::STANDING));
+                }
+                else {
+                    emit(std::make_unique<Stability>(Stability::DYNAMIC));
+                }
                 // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
                 // a double step factor 2 since the order distance is only for a single step, not double step
                 const float factor             = (1.0f / (current_cfg.params.freq)) * 0.5f;
@@ -332,32 +337,24 @@ namespace module::skill {
         auto right_arm = std::make_unique<RightArm>();
 
         // Loop to set the servo states
-        for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
+        for (int id = 0; id < ServoID::NUMBER_OF_SERVOS - 2; ++id) {
             // Set the legs
-            if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
-                if (id % 2 == 0) {
-                    // right legs
-                    right_leg->servos[id] = ServoState(current_cfg.jointGains[ServoID(id)], 100);
-                }
-                else {
-                    // left legs
-                    left_leg->servos[id] = ServoState(current_cfg.jointGains[ServoID(id)], 100);
-                }
+            if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right legs
+                right_leg->servos[id] = current_cfg.jointGains[ServoID(id)]
             }
-            // Set the arms
-            if (id < ServoID::R_HIP_YAW) {
-                if (id % 2 == 0) {
-                    // right arms
-                    right_arm->servos[id] = ServoCommand(time,
-                                                         current_cfg.arm_positions[ServoID(id)].second,
-                                                         ServoState(current_cfg.jointGains[ServoID(id)], 100));
-                }
-                else {
-                    // left arms
-                    left_arm->servos[id] = ServoCommand(time,
-                                                        current_cfg.arm_positions[ServoID(id)].second,
-                                                        ServoState(current_cfg.jointGains[ServoID(id)], 100));
-                }
+            else if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left legs
+
+                left_leg->servos[id] = current_cfg.jointGains[ServoID(id)];
+            }
+            else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right arms
+                right_arm->servos[id] = ServoCommand(time,
+                                                     current_cfg.arm_positions[ServoID(id)].second,
+                                                     ServoState(current_cfg.jointGains[ServoID(id)], 100));
+            }
+            else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left arms
+                left_arm->servos[id] = ServoCommand(time,
+                                                    current_cfg.arm_positions[ServoID(id)].second,
+                                                    ServoState(current_cfg.jointGains[ServoID(id)], 100));
             }
         }
 

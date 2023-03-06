@@ -45,7 +45,7 @@ namespace module::skill {
 
             utility::motion::WalkingParameter params{};
 
-            std::map<utility::input::ServoID, float> jointGains{};
+            std::map<utility::input::ServoID, ServoState> jointGains{};
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
         } normal_cfg{}, goalie_cfg{};
 
