@@ -30,21 +30,17 @@ namespace module::localisation {
             cfg.grid_size   = config["grid_size"].as<double>();
             cfg.n_particles = config["n_particles"].as<int>();
 
-            // Odometry scaling
+            // Odometry scaling factors
             cfg.scale_x     = config["scale_x"].as<double>();
             cfg.scale_y     = config["scale_y"].as<double>();
             cfg.scale_theta = config["scale_theta"].as<double>();
 
             cfg.save_map = config["save_map"].as<bool>();
 
-            // Initial state and covariance
-            state                               = config["initial_state"].as<Expression>();
-            Eigen::Vector3d covariance_diagonal = config["initial_covariance"].as<Expression>();
-            covariance.diagonal() << covariance_diagonal;
-
-            // Process noise
-            Eigen::Vector3d process_noise_diagonal = config["process_noise"].as<Expression>();
-            cfg.process_noise.diagonal() << process_noise_diagonal;
+            // Initial state, covariance and process noise
+            state                        = config["initial_state"].as<Expression>();
+            covariance.diagonal()        = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
+            cfg.process_noise.diagonal() = Eigen::Vector3d(config["process_noise"].as<Expression>());
 
             // Initialise the particles with a multivariate normal distribution
             MultivariateNormal<double, 3> multivariate(state, covariance);
