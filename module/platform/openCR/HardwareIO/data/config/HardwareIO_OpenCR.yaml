@@ -1,3 +1,6 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
 battery:
   charged_voltage: 16.8
   nominal_voltage: 14.8
