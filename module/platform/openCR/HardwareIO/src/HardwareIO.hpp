@@ -109,14 +109,14 @@ namespace module::platform::openCR {
         };
 
         /// @see fsrStates
-        struct FSRState {
-            uint16_t fsr1;
-            uint16_t fsr2;
-            uint16_t fsr3;
-            uint16_t fsr4;
-            uint8_t centreX;
-            uint8_t centreY;
-        };
+        // struct FSRState {
+        //     uint16_t fsr1;
+        //     uint16_t fsr2;
+        //     uint16_t fsr3;
+        //     uint16_t fsr4;
+        //     uint8_t centreX;
+        //     uint8_t centreY;
+        // };
 
         /**
          * @brief Our state for our OpenCR for variables we send to it
@@ -140,7 +140,7 @@ namespace module::platform::openCR {
          * @brief Our state for the 2 force sensitive resistors, stored as Right Left
          * Written to by processFSRData and Read by constructSensors()
          */
-        std::array<FSRState, 2> fsrStates;
+        // std::array<FSRState, 2> fsrStates;
 
         /**
          * @brief Reads information from an OpenCR packet and logs the model and firmware version.
@@ -166,7 +166,7 @@ namespace module::platform::openCR {
          * @param packet a preprocessed OpenCR packet
          * @note we sync write to both FSRs but data is returned one by one
          */
-        void processFSRData(const message::platform::StatusReturn& packet);
+        // void processFSRData(const message::platform::StatusReturn& packet);
 
         /**
          * @brief Reads info from the state variables and processes it into a RawSensors message

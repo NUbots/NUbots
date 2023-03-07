@@ -58,8 +58,8 @@ namespace module::platform::openCR {
         uint16_t FFGain(float ff_gain);
 
         // Convert FSR readings
-        float fsrForce(const uint16_t& value);
-        float fsrCentre(const bool& left, const uint8_t& value);
+        // float fsrForce(const uint16_t& value);
+        // float fsrCentre(const bool& left, const uint8_t& value);
 
     }  // namespace convert
 

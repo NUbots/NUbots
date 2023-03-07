@@ -80,8 +80,8 @@ namespace module::platform::openCR {
         MX106 L_ANKLE_ROLL;
         MX64 HEAD_YAW;
         MX64 HEAD_PITCH;
-        FSR R_FSR;
-        FSR L_FSR;
+        // FSR R_FSR;
+        // FSR L_FSR;
 
         constexpr DynamixelDevice& operator[](const ID& id) {
             switch (id) {
@@ -106,8 +106,8 @@ namespace module::platform::openCR {
                 case ID::L_ANKLE_ROLL: return L_ANKLE_ROLL;
                 case ID::HEAD_YAW: return HEAD_YAW;
                 case ID::HEAD_PITCH: return HEAD_PITCH;
-                case ID::R_FSR: return R_FSR;
-                case ID::L_FSR: return L_FSR;
+                // case ID::R_FSR: return R_FSR;
+                // case ID::L_FSR: return L_FSR;
                 default: throw std::runtime_error("Unknown device id");
             }
         }
@@ -122,9 +122,9 @@ namespace module::platform::openCR {
                     uint8_t(ID::HEAD_YAW),         uint8_t(ID::HEAD_PITCH)};
         }
 
-        constexpr std::array<uint8_t, 2> fsr_ids() const {
-            return {uint8_t(ID::R_FSR), uint8_t(ID::L_FSR)};
-        }
+        // constexpr std::array<uint8_t, 2> fsr_ids() const {
+        //     return {uint8_t(ID::R_FSR), uint8_t(ID::L_FSR)};
+        // }
     };
 
 #pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
@@ -179,14 +179,14 @@ namespace module::platform::openCR {
      * @brief Structure of data that comes from the Force Sensitive Resistors
      * @note This is a potentially out of date placeholder
      */
-    struct FSRReadData {
-        uint16_t fsr1;
-        uint16_t fsr2;
-        uint16_t fsr3;
-        uint16_t fsr4;
-        uint8_t centreX;
-        uint8_t centreY;
-    };
+    // struct FSRReadData {
+    //     uint16_t fsr1;
+    //     uint16_t fsr2;
+    //     uint16_t fsr3;
+    //     uint16_t fsr4;
+    //     uint8_t centreX;
+    //     uint8_t centreY;
+    // };
 #pragma pack(pop)  // Stop bitpacking our results
 
     /// @brief Document addresses used for read/writing to dynamixel devices, especially
