@@ -314,7 +314,7 @@ namespace module::platform::openCR {
             // opencr.write(dynamixel::v2::SyncReadCommand<2>(uint16_t(AddressBook::FSR_READ),
             //                                                sizeof(FSRReadData),
             //                                                nugus.fsr_ids()));
-            
+
             // Our final sensor output
             auto sensors = std::make_unique<RawSensors>();
             *sensors     = constructSensors();
@@ -708,10 +708,14 @@ namespace module::platform::openCR {
     void HardwareIO::processServoData(const StatusReturn& packet) {
         const DynamixelServoReadData data = *(reinterpret_cast<const DynamixelServoReadData*>(packet.data.data()));
 
-        servoStates[packet.id].torqueEnabled   = (data.torqueEnable == 1);
-        servoStates[packet.id].errorFlags      = data.hardwareErrorStatus;
-        servoStates[packet.id].presentPWM      = convert::PWM(data.presentPWM);
-        servoStates[packet.id].presentCurrent  = convert::current(data.presentCurrent);
+        servoStates[packet.id].torqueEnabled  = (data.torqueEnable == 1);
+        servoStates[packet.id].errorFlags     = data.hardwareErrorStatus;
+        servoStates[packet.id].presentPWM     = convert::PWM(data.presentPWM);
+        servoStates[packet.id].presentCurrent = convert::current(data.presentCurrent);
+        // warning: no idea if the conversion below is correct, just trusting the existing
+        // conversion functions in the branch. Whatever is happening it's very different to
+        // the solution in the CM740 hwIO (which does make sense). Probably need to test IRL
+        // to understand what's going on.
         servoStates[packet.id].presentVelocity = convert::velocity(data.presentVelocity);
         servoStates[packet.id].presentPosition =
             convert::position(packet.id, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
@@ -802,17 +806,12 @@ namespace module::platform::openCR {
                 servo.error_flags = servoStates[i].errorFlags;
 
                 // Present Data
-                servo.present_position =
-                    convert::position(i, servoStates[i].presentPosition, nugus.servo_direction, nugus.servo_offset);
-                // warning: no idea if the conversion below is correct, just trusting the existing
-                // conversion functions in the branch. Whatever is happening it's very different to
-                // the solution in the CM740 hwIO (which does make sense). Probably need to test IRL
-                // to understand what's going on.
-                servo.present_velocity = convert::velocity(servoStates[i].presentVelocity);
+                servo.present_position = servoStates[i].presentPosition;
+                servo.present_velocity = servoStates[i].presentVelocity;
 
                 // Diagnostic Information
-                servo.voltage     = convert::voltage(servoStates[i].voltage);
-                servo.temperature = convert::temperature(servoStates[i].temperature);
+                servo.voltage     = servoStates[i].voltage;
+                servo.temperature = servoStates[i].temperature;
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                 if (servo.voltage <= batteryState.chargedVoltage) {
