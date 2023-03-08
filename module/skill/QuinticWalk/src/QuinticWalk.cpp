@@ -96,7 +96,7 @@ namespace module::skill {
             }
             // Sets the arm gains
             if (id < ServoID::R_HIP_YAW) {
-                cfg.jointGains[id] = ServoState(config["gains"]["arms"].as<float>());
+                cfg.jointGains[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
             }
         }
 
