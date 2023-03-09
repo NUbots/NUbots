@@ -369,15 +369,15 @@ namespace module::localisation {
 
         // Update the particles using the walk command and the time since the last time update, with some tunable
         // scaling on the walk command velocities
-        for (size_t i = 0; i < particles.size(); i++) {
-            double delta_x         = walk_command.x() * dt * cfg.scale_x;
-            double delta_y         = walk_command.y() * dt * cfg.scale_y;
-            double delta_theta     = walk_command.z() * dt * cfg.scale_theta;
-            particles[i].state.x() = particles[i].state.x() + delta_x * cos(particles[i].state.z() + delta_theta)
-                                     - delta_y * sin(particles[i].state.z() + delta_theta);
-            particles[i].state.y() = particles[i].state.y() + delta_y * cos(particles[i].state.z() + delta_theta)
-                                     + delta_x * sin(particles[i].state.z() + delta_theta);
-            particles[i].state.z() = particles[i].state.z() + delta_theta;
+        for (auto& particle : particles) {
+            double delta_x     = walk_command.x() * dt * cfg.scale_x;
+            double delta_y     = walk_command.y() * dt * cfg.scale_y;
+            double delta_theta = walk_command.z() * dt * cfg.scale_theta;
+            particle.state.x() = particle.state.x() + delta_x * cos(particle.state.z() + delta_theta)
+                                 - delta_y * sin(particle.state.z() + delta_theta);
+            particle.state.y() = particle.state.y() + delta_y * cos(particle.state.z() + delta_theta)
+                                 + delta_x * sin(particle.state.z() + delta_theta);
+            particle.state.z() = particle.state.z() + delta_theta;
         }
     }
 
@@ -394,8 +394,8 @@ namespace module::localisation {
             return;
         }
         // Normalise the weights so that they sum to 1
-        for (size_t i = 0; i < weights.size(); i++) {
-            weights[i] /= weight_sum;
+        for (auto& weight : weights) {
+            weight /= weight_sum;
         }
         std::vector<Particle> resampled_particles(particles.size());
         std::default_random_engine gen;
@@ -411,8 +411,7 @@ namespace module::localisation {
     void RobotLocalisation::add_noise() {
         MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), cfg.process_noise);
         for (auto& particle : particles) {
-            auto noise = multivariate.sample();
-            particle.state += noise;
+            particle.state += multivariate.sample();
         }
     }
 
