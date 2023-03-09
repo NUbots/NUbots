@@ -44,6 +44,22 @@ namespace module::input {
 
         utility::math::filter::UKF<double, MotionModel> motionFilter{};
 
+        /// @brief Imu filter initial state [roll, pitch]
+        Eigen::Vector2d imu_state = Eigen::Vector2d::Zero();
+        /// @brief Imu filter initial covariance matrix
+        Eigen::Matrix2d P = Eigen::Matrix2d::Identity();
+        /// @brief Measurement noise  covariances
+        Eigen::Matrix2d R = 0.01 * Eigen::Matrix2d::Identity();
+        /// @brief Process noise covariance
+        Eigen::Matrix2d Q = 0.001 * Eigen::Matrix2d::Identity();
+
+        /// @brief Runs a Kalman filter for roll and pitch using accelerometer and gyroscope measurements
+        /// @param gyro Gyroscope measurements
+        /// @param acc Accelerometer measurements
+        /// @param dt Time since the last update
+        /// @return Updates imu_state and P with the new state and covariance
+        void run_imu_filter(Eigen::Vector3d gyro, Eigen::Vector3d acc, const double dt);
+
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
             Value value = Value::UNKNOWN;
