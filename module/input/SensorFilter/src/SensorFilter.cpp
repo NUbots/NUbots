@@ -592,13 +592,6 @@ namespace module::input {
                          *             Motion (IMU+Odometry)            *
                          ************************************************/
 
-                        using namespace std::chrono;
-                        const double deltaT = std::max(
-                            duration_cast<duration<double>>(
-                                input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
-                                .count(),
-                            0.0);
-
                         // Gyroscope measurement update
                         motionFilter.measure(sensors->gyroscope,
                                              config.motionFilter.noise.measurement.gyroscope,
@@ -677,6 +670,12 @@ namespace module::input {
 
                         // Calculate our time offset from the last read then update the filter's time
                         /* using namespace std::chrono */ {
+                            using namespace std::chrono;
+                            const double deltaT = std::max(
+                                duration_cast<duration<double>>(
+                                    input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
+                                    .count(),
+                                0.0);
 
                             // Time update
                             switch (motionFilter.time(deltaT)) {
@@ -774,9 +773,6 @@ namespace module::input {
                                 }
                             }
 
-                            // Run simple kalman filter for orientation
-                            run_imu_filter(sensors->gyroscope, sensors->accelerometer, deltaT);
-
                             /************************************************
                              *       Construct Odometry Output (Htw)        *
                              ************************************************/
@@ -784,16 +780,15 @@ namespace module::input {
                             const auto o = MotionModel<double>::StateVec(motionFilter.get());
 
                             // Map from world to torso coordinates (Rtw)
-                            Eigen::Isometry3d Hwt;  // = Eigen::Isometry3d(input.odometry_ground_truth.Htw).inverse();
-                            Hwt.linear() = (Eigen::AngleAxisd(imu_state(0), Eigen::Vector3d::UnitX())
-                                            * Eigen::AngleAxisd(imu_state(1), Eigen::Vector3d::UnitY()))
-                                               .toRotationMatrix();
+                            Eigen::Isometry3d Hwt;
+                            Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
                             // Remove the yaw component of the rotation
                             Hwt.linear() =
                                 Eigen::AngleAxisd(-std::atan2(Hwt(1, 0), Hwt(0, 0)), Eigen::Vector3d::UnitZ())
                                     .toRotationMatrix()
                                 * Hwt.linear();
+
 
                             sensors->Htw = Hwt.inverse().matrix();
 
@@ -858,23 +853,4 @@ namespace module::input {
                     })
                 .disable();
     }
-
-    void SensorFilter::run_imu_filter(Eigen::Vector3d gyro, Eigen::Vector3d acc, const double dt) {
-        // Time update: update the state prediction based on the gyroscope data
-        imu_state += dt * gyro.head(2);
-        // Update the covariance matrix based on the process noise
-        P += Q * dt;
-        // Compute the roll and pitch angles from the accelerometer data
-        Eigen::Vector2d measurements;
-        // acc             = acc.normalized();
-        measurements(0) = std::atan2(acc.y(), acc.z());                                            // roll
-        measurements(1) = std::atan2(-acc.x(), std::sqrt(acc.y() * acc.y() + acc.z() * acc.z()));  // pitch
-        // Compute the Kalman gain
-        Eigen::Matrix2d K = P * (P + R).inverse();
-        // Measurement update: update the state prediction based on the accelerometer data
-        imu_state += K * (measurements - imu_state);
-        // Update the covariance matrix based on the measurement
-        P = (Eigen::Matrix2d::Identity() - K) * P;
-    }
-
 }  // namespace module::input
