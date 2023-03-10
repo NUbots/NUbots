@@ -72,16 +72,16 @@ namespace module::localisation {
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
         explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief Converts a unit vector of point from the camera in world space to a (x,y) point relative to the robot
+        /// @brief Converts a unit vector of point from the camera in robot space to a (x,y) point relative to the robot
         /// on the field plane
-        /// @param uPCw unit vector from the camera to the field point in world space
-        /// @param Hcw the camera to world transform
+        /// @param uPCr unit vector from the camera to the field point in robot space
+        /// @param Hcr the camera to robot space transform
         /// @return the field point measurement (x,y) relative to the robot
-        Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
+        Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcr);
 
         /// @brief Transform a point in the robot's coordinate frame into an index in the map
         /// @param particle The state of the particle (x,y,theta)
-        /// @param rPRr The point (x, y) in the robot frame {r} [m]
+        /// @param rPRr The field point (x, y) in robot space {r} [m]
         /// @return The observation location (x, y) in the map
         Eigen::Vector2i position_in_map(const Eigen::Matrix<double, 3, 1> particle, const Eigen::Vector2d rPRr);
 
