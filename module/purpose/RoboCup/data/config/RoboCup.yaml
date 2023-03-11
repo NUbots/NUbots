@@ -1,8 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
-# For the robot play normally without listening to GameController
-force_play: false
+# For the robot playing normally without listening to GameController
+force_playing: false
 
 # Force the robot to play as if it's a penalty shootout without listening to GameController
 force_penalty_shootout: false

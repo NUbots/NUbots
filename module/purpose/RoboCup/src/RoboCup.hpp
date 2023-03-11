@@ -36,7 +36,7 @@ namespace module::purpose {
 
         /// @brief Stores configuration values
         struct Config {
-            bool force_play             = false;
+            bool force_playing          = false;
             bool force_penalty_shootout = false;
             Position position{};
         } cfg;
