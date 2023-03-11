@@ -229,7 +229,7 @@ namespace module::skill {
                 const float dt = get_time_delta();
                 // If the walk engine has new goals, call the calculate_joint_goals function,
                 // which will emit the tasks for the limbs.
-                // If there are no new goals, no tasks are emitted, removing child tasks from the director tree.
+                // If there are no new goals, no tasks are emitted, removing child tasks from the Director tree.
                 if (walk_engine.update_state(dt, current_orders)) {
                     calculate_joint_goals();
                 }
