@@ -28,6 +28,38 @@ namespace utility::platform {
     using message::platform::RawSensors;
     using utility::input::ServoID;
 
+    std::string make_error_string(const std::string& src, const uint error_code) {
+        std::stringstream s;
+
+        s << "Error on ";
+        s << src;
+        s << ":";
+
+        if ((error_code & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
+            s << " Input Voltage ";
+        }
+        if ((error_code & RawSensors::Error::ANGLE_LIMIT) != 0u) {
+            s << " Angle Limit ";
+        }
+        if ((error_code & RawSensors::Error::OVERHEATING) != 0u) {
+            s << " Overheating ";
+        }
+        if ((error_code & RawSensors::Error::OVERLOAD) != 0u) {
+            s << " Overloaded ";
+        }
+        if ((error_code & RawSensors::Error::INSTRUCTION) != 0u) {
+            s << " Bad Instruction ";
+        }
+        if ((error_code & RawSensors::Error::CORRUPT_DATA) != 0u) {
+            s << " Corrupt Data ";
+        }
+        if ((error_code & RawSensors::Error::TIMEOUT) != 0u) {
+            s << " Timeout ";
+        }
+
+        return s.str();
+    }
+
     inline const RawSensors::Servo& getRawServo(ServoID servoId, const RawSensors& sensors) {
 
         switch (servoId.value) {

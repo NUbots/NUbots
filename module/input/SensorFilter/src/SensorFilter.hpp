@@ -27,12 +27,24 @@
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
+#include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/math/filter/UKF.hpp"
 
 
 namespace module::input {
+
+    using message::actuation::BodySide;
+    using message::actuation::KinematicsModel;
+    using message::input::Sensors;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonLeftUp;
+    using message::platform::ButtonMiddleDown;
+    using message::platform::ButtonMiddleUp;
+    using message::platform::RawSensors;
 
     /**
      * @author Jade Fountain
@@ -151,7 +163,12 @@ namespace module::input {
                     {FootDownMethod::FSR, 60.0f},
                 };
             } footDown;
-        } config;
+        } cfg;
+
+        /// @brief Update the sensors message with raw sensor data
+        void update_raw_sensors(std::unique_ptr<Sensors>& sensors,
+                                const std::shared_ptr<const Sensors>& previous_sensors,
+                                const RawSensors& raw_sensors);
 
     private:
         // Current state of the button pushes
