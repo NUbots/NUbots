@@ -182,12 +182,7 @@ namespace module::skill {
         });
 
         // Runs every time the Walk task is removed from the director tree
-        on<Stop<Walk>>().then([this] {
-            const float dt = get_time_delta();
-            current_orders.setZero();
-            walk_engine.update_state(dt, current_orders);
-            imu_reaction.enable(false);
-        });
+        on<Stop<Walk>>().then([this] { imu_reaction.enable(false); });
 
         // MAIN LOOP
         on<Provide<Walk>,
