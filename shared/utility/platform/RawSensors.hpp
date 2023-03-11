@@ -60,6 +60,34 @@ namespace utility::platform {
         return s.str();
     }
 
+    std::string make_servo_error_string(const RawSensors::Servo& servo, const uint32_t servo_id) {
+        std::stringstream s;
+        s << "Error on Servo " << (servo_id + 1) << " (" << static_cast<ServoID>(servo_id) << "):";
+
+        if (RawSensors::Error::INPUT_VOLTAGE != 0u) {
+            s << " Input Voltage - " << servo.voltage;
+        }
+        if (RawSensors::Error::ANGLE_LIMIT != 0u) {
+            s << " Angle Limit - " << servo.present_position;
+        }
+        if (RawSensors::Error::OVERHEATING != 0u) {
+            s << " Overheating - " << servo.temperature;
+        }
+        if (RawSensors::Error::OVERLOAD != 0u) {
+            s << " Overloaded - " << servo.load;
+        }
+        if (RawSensors::Error::INSTRUCTION != 0u) {
+            s << " Bad Instruction ";
+        }
+        if (RawSensors::Error::CORRUPT_DATA != 0u) {
+            s << " Corrupt Data ";
+        }
+        if (RawSensors::Error::TIMEOUT != 0u) {
+            s << " Timeout ";
+        }
+        return s.str();
+    }
+
     inline const RawSensors::Servo& getRawServo(ServoID servoId, const RawSensors& sensors) {
 
         switch (servoId.value) {

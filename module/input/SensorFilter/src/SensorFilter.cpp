@@ -295,16 +295,13 @@ namespace module::input {
                                        const KinematicsModel& kinematics_model) {
                                     auto sensors = std::make_unique<Sensors>();
 
-                                    // Raw Sensors Update
                                     update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
-                                    // Kinematics Update
                                     update_kinematics(sensors, kinematics_model, raw_sensors);
 
-                                    // Odometry Update
                                     update_odometry_ukf(sensors, previous_sensors, raw_sensors);
 
-                                    // Debug
+                                    // Debug sensor filter
                                     if (log_level <= NUClear::DEBUG) {
                                         debug_sensor_filter(sensors, raw_sensors);
                                     }
@@ -319,20 +316,19 @@ namespace module::input {
                                           const RawSensors& raw_sensors) {
         // Set our timestamp to when the data was read
         sensors->timestamp = raw_sensors.timestamp;
-        sensors->voltage   = raw_sensors.voltage;
 
-        // This checks for an error on the platform and reports it
+        // Update the current battery voltage of the whole robot
+        sensors->voltage = raw_sensors.voltage;
+
+        // Check for errors on the platform and FSRs
         if (raw_sensors.platform_error_flags != RawSensors::Error::OK) {
             NUClear::log<NUClear::WARN>(
                 utility::platform::make_error_string("Platform", raw_sensors.platform_error_flags));
         }
-
-        // Output errors on the FSRs
         if (raw_sensors.fsr.left.error_flags != RawSensors::Error::OK) {
             NUClear::log<NUClear::WARN>(
                 utility::platform::make_error_string("Left FSR", raw_sensors.fsr.left.error_flags));
         }
-
         if (raw_sensors.fsr.right.error_flags != RawSensors::Error::OK) {
             NUClear::log<NUClear::WARN>(
                 utility::platform::make_error_string("Right FSR", raw_sensors.fsr.right.error_flags));
@@ -345,32 +341,7 @@ namespace module::input {
 
             // Check for an error on the servo and report it
             if (error != RawSensors::Error::OK) {
-                std::stringstream s;
-                s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
-
-                if ((error & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
-                    s << " Input Voltage - " << original.voltage;
-                }
-                if ((error & RawSensors::Error::ANGLE_LIMIT) != 0u) {
-                    s << " Angle Limit - " << original.present_position;
-                }
-                if ((error & RawSensors::Error::OVERHEATING) != 0u) {
-                    s << " Overheating - " << original.temperature;
-                }
-                if ((error & RawSensors::Error::OVERLOAD) != 0u) {
-                    s << " Overloaded - " << original.load;
-                }
-                if ((error & RawSensors::Error::INSTRUCTION) != 0u) {
-                    s << " Bad Instruction ";
-                }
-                if ((error & RawSensors::Error::CORRUPT_DATA) != 0u) {
-                    s << " Corrupt Data ";
-                }
-                if ((error & RawSensors::Error::TIMEOUT) != 0u) {
-                    s << " Timeout ";
-                }
-
-                NUClear::log<NUClear::WARN>(s.str());
+                NUClear::log<NUClear::WARN>(utility::platform::make_servo_error_string(original, id));
             }
             // If current Sensors message for this servo has an error and we have a previous sensors
             // message available, then we use our previous sensor values with some updates
@@ -407,14 +378,6 @@ namespace module::input {
                                             original.voltage,
                                             static_cast<float>(original.temperature));
             }
-
-            // We assume that the accelerometer and gyroscope are oriented to conform with the standard
-            // coordinate system x-axis out the front of the robot y-axis to the left z-axis up
-            //
-            // For the accelerometer the orientation should be as follows
-            // x axis reports a +1g acceleration when robot is laying on its back
-            // y axis reports a +1g acceleration when robot is laying on its right side
-            // z axis reports a +1g acceleration when robot is vertical
 
             // If we have a previous sensors and our platform has errors then reuse our last sensor value
             if ((raw_sensors.platform_error_flags != 0u) && previous_sensors) {
@@ -461,55 +424,41 @@ namespace module::input {
             sensors->Htx[entry.first] = entry.second.matrix();
         }
 
-        // Update the centre of mass and inertia tensor
+        // Update centre of mass and inertia tensor
         sensors->rMTt           = calculateCentreOfMass(kinematics_model, sensors->Htx);
         sensors->inertia_tensor = calculateInertialTensor(kinematics_model, sensors->Htx);
 
-        // Update the foot down information
+        // Determine if feet are on the ground using the selected method
         sensors->feet.resize(2);
         sensors->feet[BodySide::RIGHT].down = true;
         sensors->feet[BodySide::LEFT].down  = true;
 
-        // Calculate values needed for Z_HEIGHT method
+        // Calculate Z distance between feet in torso space {t} and determine which foot is lower
         const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
         const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
         const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
         const Eigen::Vector3d rRLl  = Hlr.translation();
         switch (cfg.footDown.method()) {
             case FootDownMethod::Z_HEIGHT:
-                // Right foot is below left foot in left foot space
                 if (rRLl.z() < -cfg.footDown.threshold()) {
-                    sensors->feet[BodySide::RIGHT].down = true;
-                    sensors->feet[BodySide::LEFT].down  = false;
+                    sensors->feet[BodySide::LEFT].down = false;
                 }
-                // Right foot is above left foot in left foot space
                 else if (rRLl.z() > cfg.footDown.threshold()) {
                     sensors->feet[BodySide::RIGHT].down = false;
-                    sensors->feet[BodySide::LEFT].down  = true;
-                }
-                // Right foot and left foot are roughly the same height in left foot space
-                else {
-                    sensors->feet[BodySide::RIGHT].down = true;
-                    sensors->feet[BodySide::LEFT].down  = true;
                 }
                 break;
             case FootDownMethod::FSR:
-                // For a foot to be on the ground we want a minimum of 2 diagonally opposite studs
-                // in contact with the ground
-                // So fsr1 and fsr3, or fsr2 and fsr4
-                //
-                // A FSR is in contact with the ground if its value is greater than the certainty
-                // threshold
-
-                sensors->feet[BodySide::LEFT].down = (((raw_sensors.fsr.left.fsr1 > cfg.footDown.threshold())
-                                                       && (raw_sensors.fsr.left.fsr3 > cfg.footDown.threshold()))
-                                                      || ((raw_sensors.fsr.left.fsr2 > cfg.footDown.threshold())
-                                                          && (raw_sensors.fsr.left.fsr4 > cfg.footDown.threshold())));
-
-                sensors->feet[BodySide::RIGHT].down = (((raw_sensors.fsr.right.fsr1 > cfg.footDown.threshold())
-                                                        && (raw_sensors.fsr.right.fsr3 > cfg.footDown.threshold()))
-                                                       || ((raw_sensors.fsr.right.fsr2 > cfg.footDown.threshold())
-                                                           && (raw_sensors.fsr.right.fsr4 > cfg.footDown.threshold())));
+                // Determine if any two diagonally opposite FSRs are in contact with the ground, which is either fsr1
+                // and fsr3, or fsr2 and fsr4. A FSR is in contact with the ground if its value is greater than the
+                // certainty threshold
+                sensors->feet[BodySide::LEFT].down = (raw_sensors.fsr.left.fsr1 > cfg.footDown.threshold()
+                                                      && raw_sensors.fsr.left.fsr3 > cfg.footDown.threshold())
+                                                     || (raw_sensors.fsr.left.fsr2 > cfg.footDown.threshold()
+                                                         && raw_sensors.fsr.left.fsr4 > cfg.footDown.threshold());
+                sensors->feet[BodySide::RIGHT].down = (raw_sensors.fsr.right.fsr1 > cfg.footDown.threshold()
+                                                       && raw_sensors.fsr.right.fsr3 > cfg.footDown.threshold())
+                                                      || (raw_sensors.fsr.right.fsr2 > cfg.footDown.threshold()
+                                                          && raw_sensors.fsr.right.fsr4 > cfg.footDown.threshold());
                 break;
             default: log<NUClear::WARN>("Unknown foot down method"); break;
         }
@@ -638,49 +587,59 @@ namespace module::input {
             }
         }
 
-        /************************************************
-         *       Torso CoM Position in World (rMWw)     *
-         ************************************************/
-        bool update_done = false;
+        // If the filter is not reliable, just use previous sensors
+        if (reset_filter.load() && previous_sensors) {
+            sensors->Htw = previous_sensors->Htw;
+            sensors->Hgt = previous_sensors->Hgt;
+            return;
+        }
+        else {
 
-        for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
-            const bool& foot_down      = sensors->feet[side].down;
-            const bool& prev_foot_down = previous_foot_down[side];
+            /************************************************
+             *       Torso CoM Position in World (rMWw)     *
+             ************************************************/
+            bool update_done = false;
 
-            // Get the Foot to Torso transform for this foot
-            const Eigen::Isometry3d Htf(
-                sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+            for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                const bool& foot_down      = sensors->feet[side].down;
+                const bool& prev_foot_down = previous_foot_down[side];
 
-            // Calculate our current Foot to CoM vector for this foot
-            const Eigen::Vector3d current_rMFt = Htf.translation() + sensors->rMTt.head<3>();
+                // Get the Foot to Torso transform for this foot
+                const Eigen::Isometry3d Htf(
+                    sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
-            // We just put this foot on the ground (i.e. it wasn't on the ground in the last time
-            // step)
-            if (foot_down && !prev_foot_down) {
-                // Update our Foot to CoM vector for this foot
-                rMFt[side]               = current_rMFt;
-                previous_foot_down[side] = true;
-            }
-            // Our foot is on the ground and was also on the ground in the last time step
-            else if (foot_down && prev_foot_down) {
-                // If both feet are on the ground then we don't need to do another update
-                if (!update_done) {
-                    // The difference between our current and previous Foot to torso CoM vectors is
-                    // how much our torso has moved in the last time step in torso space We need to
-                    // rotate this into world space to update our current Torso CoM position
-                    const Eigen::Quaterniond& Rwt     = MotionModel<double>::StateVec(motionFilter.get()).Rwt;
-                    const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
-                    const Eigen::Quaterniond q(Eigen::Vector4d(rMFt_update.x(), rMFt_update.y(), rMFt_update.z(), 0.0));
-                    rTWw += (Rwt * q * Rwt.conjugate()).vec();
+                // Calculate our current Foot to CoM vector for this foot
+                const Eigen::Vector3d current_rMFt = Htf.translation() + sensors->rMTt.head<3>();
 
-                    // Make sure we don't do another update
-                    update_done = true;
+                // We just put this foot on the ground (i.e. it wasn't on the ground in the last time
+                // step)
+                if (foot_down && !prev_foot_down) {
+                    // Update our Foot to CoM vector for this foot
+                    rMFt[side]               = current_rMFt;
+                    previous_foot_down[side] = true;
                 }
-                previous_foot_down[side] = true;
-                rMFt[side]               = current_rMFt;
-            }
-            else {
-                previous_foot_down[side] = false;
+                // Our foot is on the ground and was also on the ground in the last time step
+                else if (foot_down && prev_foot_down) {
+                    // If both feet are on the ground then we don't need to do another update
+                    if (!update_done) {
+                        // The difference between our current and previous Foot to torso CoM vectors is
+                        // how much our torso has moved in the last time step in torso space We need to
+                        // rotate this into world space to update our current Torso CoM position
+                        const Eigen::Quaterniond& Rwt     = MotionModel<double>::StateVec(motionFilter.get()).Rwt;
+                        const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
+                        const Eigen::Quaterniond q(
+                            Eigen::Vector4d(rMFt_update.x(), rMFt_update.y(), rMFt_update.z(), 0.0));
+                        rTWw += (Rwt * q * Rwt.conjugate()).vec();
+
+                        // Make sure we don't do another update
+                        update_done = true;
+                    }
+                    previous_foot_down[side] = true;
+                    rMFt[side]               = current_rMFt;
+                }
+                else {
+                    previous_foot_down[side] = false;
+                }
             }
 
             /************************************************
@@ -697,8 +656,6 @@ namespace module::input {
             Hwt.linear() =
                 Eigen::AngleAxisd(-std::atan2(Hwt(1, 0), Hwt(0, 0)), Eigen::Vector3d::UnitZ()).toRotationMatrix()
                 * Hwt.linear();
-
-
             sensors->Htw = Hwt.inverse().matrix();
 
 
@@ -710,18 +667,7 @@ namespace module::input {
             Rwt.translation() = Eigen::Vector3d::Zero();
             Eigen::Isometry3d Rgt(Eigen::AngleAxisd(-Rwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
                                   * Rwt);
-            // sensors->Hgt : Mat size [4x4] (default identity)
-            // createRotationZ : Mat size [3x3]
-            // Rwt : Mat size [3x3]
             sensors->Hgt = Rgt.matrix();
-
-            // Filter is not reliable, just use previous sensors
-            if (reset_filter.load()) {
-                if (previous_sensors) {
-                    sensors->Htw = previous_sensors->Htw;
-                    sensors->Hgt = previous_sensors->Hgt;
-                }
-            }
         }
     }
 
@@ -754,13 +700,9 @@ namespace module::input {
         }
 
         // Graph the raw accelerometer and gyroscope data
-        if (log_level <= NUClear::DEBUG) {
-            emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
-            emit(graph("Accelerometer",
-                       sensors->accelerometer.x(),
-                       sensors->accelerometer.y(),
-                       sensors->accelerometer.z()));
-        }
+        emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
+        emit(
+            graph("Accelerometer", sensors->accelerometer.x(), sensors->accelerometer.y(), sensors->accelerometer.z()));
 
         // Graph the foot down sensors state for each foot
         emit(graph(fmt::format("Sensor/Foot Down/{}/Left", std::string(cfg.footDown.method())),
