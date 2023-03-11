@@ -188,7 +188,7 @@ namespace module::skill {
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
             .then([this](const Walk& walk) {
-                // TODO: Set this based on the walk engine state
+                // Set the robot stability value based on the walk engine state
                 if (walk_engine.get_state() == WalkEngineState::IDLE) {
                     emit(std::make_unique<Stability>(Stability::STANDING));
                 }
