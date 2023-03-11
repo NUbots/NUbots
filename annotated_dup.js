@@ -164,7 +164,10 @@ var annotated_dup =
         [ "BallFilter", "classmodule_1_1localisation_1_1BallFilter.html", "classmodule_1_1localisation_1_1BallFilter" ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
+        [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
         [ "OdometryLocalisation", "classmodule_1_1localisation_1_1OdometryLocalisation.html", "classmodule_1_1localisation_1_1OdometryLocalisation" ],
+        [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ],
+        [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html", "classmodule_1_1localisation_1_1RobotLocalisation" ],
         [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "RobotParticleLocalisation", "classmodule_1_1localisation_1_1RobotParticleLocalisation.html", "classmodule_1_1localisation_1_1RobotParticleLocalisation" ]
       ] ],
@@ -281,6 +284,7 @@ var annotated_dup =
           [ "VisualMeshRunner", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner" ]
         ] ],
         [ "BallDetector", "classmodule_1_1vision_1_1BallDetector.html", "classmodule_1_1vision_1_1BallDetector" ],
+        [ "FieldLineDetector", "classmodule_1_1vision_1_1FieldLineDetector.html", "classmodule_1_1vision_1_1FieldLineDetector" ],
         [ "GoalDetector", "classmodule_1_1vision_1_1GoalDetector.html", "classmodule_1_1vision_1_1GoalDetector" ],
         [ "GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", "classmodule_1_1vision_1_1GreenHorizonDetector" ],
         [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ]

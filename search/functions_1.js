@@ -1,15 +1,21 @@
 var searchData=
 [
-  ['activate_5frecorder_1300',['activate_recorder',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a85d29f6693d75c7a401fbb9ac1de86ce',1,'module::support::logging::DataLogging']]],
-  ['add_1301',['add',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a8276f8aa74014c55d368ba429bf066ea',1,'utility::motion::splines::SplineContainer']]],
-  ['add_5fcausing_1302',['add_causing',['../classmodule_1_1extension_1_1Director.html#ae38a0f87a58faec7521d61eb4faaae7a',1,'module::extension::Director']]],
-  ['add_5fgroup_5fprovider_1303',['add_group_provider',['../classmodule_1_1actuation_1_1Servos.html#a1acee00644967211057ad0806fc08e36',1,'module::actuation::Servos']]],
-  ['add_5fneeds_1304',['add_needs',['../classmodule_1_1extension_1_1Director.html#aaa959f154ca485d8bb435b898ecb3223',1,'module::extension::Director']]],
-  ['add_5fprovider_1305',['add_provider',['../classmodule_1_1extension_1_1Director.html#a194487bb54ff0df9fb6dfd687b8f80f6',1,'module::extension::Director']]],
-  ['add_5fsequence_5fprovider_1306',['add_sequence_provider',['../classmodule_1_1actuation_1_1Servos.html#aa84a86c2c71713eca6159cc53da76fb1',1,'module::actuation::Servos']]],
-  ['add_5fservo_5fprovider_1307',['add_servo_provider',['../classmodule_1_1actuation_1_1Servos.html#a61f86f1c99146c863c5bf1db1dd899d8',1,'module::actuation::Servos']]],
-  ['add_5fwhen_1308',['add_when',['../classmodule_1_1extension_1_1Director.html#a0f5fe71a8de8e8282b0a2774e6249e43',1,'module::extension::Director']]],
-  ['addpart_1309',['addPart',['../classutility_1_1motion_1_1splines_1_1Spline.html#a6ccaf9d75b6e9a09db782c62b56c35d8',1,'utility::motion::splines::Spline']]],
-  ['addpoint_1310',['addPoint',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#ab86a4c9d098ed9e13d286a44b324b2db',1,'utility::motion::splines::SmoothSpline']]],
-  ['angledistance_1311',['angleDistance',['../namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599',1,'utility::math::angle']]]
+  ['activate_5frecorder_1337',['activate_recorder',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a85d29f6693d75c7a401fbb9ac1de86ce',1,'module::support::logging::DataLogging']]],
+  ['add_1338',['add',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a8276f8aa74014c55d368ba429bf066ea',1,'utility::motion::splines::SplineContainer']]],
+  ['add_5fcausing_1339',['add_causing',['../classmodule_1_1extension_1_1Director.html#ae38a0f87a58faec7521d61eb4faaae7a',1,'module::extension::Director']]],
+  ['add_5fcircle_1340',['add_circle',['../classmodule_1_1localisation_1_1OccupancyMap.html#ad670b8607ccce0096397556723244c1f',1,'module::localisation::OccupancyMap']]],
+  ['add_5fcross_1341',['add_cross',['../classmodule_1_1localisation_1_1OccupancyMap.html#a4d2417987621f5efecedde30e83e0b1c',1,'module::localisation::OccupancyMap']]],
+  ['add_5fgroup_5fprovider_1342',['add_group_provider',['../classmodule_1_1actuation_1_1Servos.html#a1acee00644967211057ad0806fc08e36',1,'module::actuation::Servos']]],
+  ['add_5fhorizontal_5fline_1343',['add_horizontal_line',['../classmodule_1_1localisation_1_1OccupancyMap.html#a60c56efc123b4cc2dd643113bf9b1aba',1,'module::localisation::OccupancyMap']]],
+  ['add_5fneeds_1344',['add_needs',['../classmodule_1_1extension_1_1Director.html#aaa959f154ca485d8bb435b898ecb3223',1,'module::extension::Director']]],
+  ['add_5fnoise_1345',['add_noise',['../classmodule_1_1localisation_1_1RobotLocalisation.html#a2819753cbed9788441587545f1a7f6a4',1,'module::localisation::RobotLocalisation']]],
+  ['add_5fprovider_1346',['add_provider',['../classmodule_1_1extension_1_1Director.html#a194487bb54ff0df9fb6dfd687b8f80f6',1,'module::extension::Director']]],
+  ['add_5frectangle_1347',['add_rectangle',['../classmodule_1_1localisation_1_1OccupancyMap.html#a67a9bbd10ea8c70597d9cfb690ba2cec',1,'module::localisation::OccupancyMap::add_rectangle(int x0, int y0, int width, int height)'],['../classmodule_1_1localisation_1_1OccupancyMap.html#af9eeca22bbf63233373d67e5e81bfd3d',1,'module::localisation::OccupancyMap::add_rectangle(int x0, int y0, int width, int height, int inner_width)']]],
+  ['add_5fsequence_5fprovider_1348',['add_sequence_provider',['../classmodule_1_1actuation_1_1Servos.html#aa84a86c2c71713eca6159cc53da76fb1',1,'module::actuation::Servos']]],
+  ['add_5fservo_5fprovider_1349',['add_servo_provider',['../classmodule_1_1actuation_1_1Servos.html#a61f86f1c99146c863c5bf1db1dd899d8',1,'module::actuation::Servos']]],
+  ['add_5fvertical_5fline_1350',['add_vertical_line',['../classmodule_1_1localisation_1_1OccupancyMap.html#a076ebde6b4e618f826f2180b1e46ce91',1,'module::localisation::OccupancyMap']]],
+  ['add_5fwhen_1351',['add_when',['../classmodule_1_1extension_1_1Director.html#a0f5fe71a8de8e8282b0a2774e6249e43',1,'module::extension::Director']]],
+  ['addpart_1352',['addPart',['../classutility_1_1motion_1_1splines_1_1Spline.html#a6ccaf9d75b6e9a09db782c62b56c35d8',1,'utility::motion::splines::Spline']]],
+  ['addpoint_1353',['addPoint',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#ab86a4c9d098ed9e13d286a44b324b2db',1,'utility::motion::splines::SmoothSpline']]],
+  ['angledistance_1354',['angleDistance',['../namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599',1,'utility::math::angle']]]
 ];
