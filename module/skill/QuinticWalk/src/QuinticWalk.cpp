@@ -157,29 +157,26 @@ namespace module::skill {
             load_quintic_walk(config, goalie_config);
         });
 
-        on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
-            kinematicsModel = model;
-            first_run       = true;
-            current_orders.setZero();
-            is_left_support  = true;
-            last_update_time = NUClear::clock::now();
-            walk_engine.reset();
-        });
-
         // Runs every time the Walk provider starts (wasn't running)
-        on<Start<Walk>, With<Behaviour::State>>().then([this](const Behaviour::State& behaviour) {
-            walk_engine.reset();
-            if (behaviour == Behaviour::State::GOALIE_WALK) {
-                current_config = goalie_config;
-            }
-            else {
-                current_config = normal_config;
-            }
-            // Send these parameters to the walk engine
-            walk_engine.set_parameters(current_cfg.params);
+        on<Start<Walk>, With<Behaviour::State>>().then(
+            [this](const Behaviour::State& behaviour, const KinematicsModel& model) {
+                kinematicsModel = model;
+                first_run       = true;
+                current_orders.setZero();
+                is_left_support  = true;
+                last_update_time = NUClear::clock::now();
+                walk_engine.reset();
+                if (behaviour == Behaviour::State::GOALIE_WALK) {
+                    current_config = goalie_config;
+                }
+                else {
+                    current_config = normal_config;
+                }
+                // Send these parameters to the walk engine
+                walk_engine.set_parameters(current_cfg.params);
 
-            imu_reaction.enable(current_cfg.imu_active);
-        });
+                imu_reaction.enable(current_cfg.imu_active);
+            });
 
         // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] { imu_reaction.enable(false); });
