@@ -167,6 +167,7 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1GroupI
 
 <div class="header">
   <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structextension_1_1behaviour_1_1GroupInfo-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -179,15 +180,51 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1GroupI
 
 <p><code>#include &lt;<a class="el" href="InformationSource_8hpp_source.html">InformationSource.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:aeb813dadc96c609657c4608e76ac86d4"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4">RunState</a> { <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2">NO_TASK</a>
+, <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4">RUNNING</a>
+, <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe">QUEUED</a>
+ }</td></tr>
+<tr class="separator:aeb813dadc96c609657c4608e76ac86d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a2a976c93e0b219a0c6eb9a3a98b5f2d8"><td class="memItemLeft" align="right" valign="top"><a id="a2a976c93e0b219a0c6eb9a3a98b5f2d8"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>done</b></td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#a2a976c93e0b219a0c6eb9a3a98b5f2d8">done</a></td></tr>
+<tr class="memdesc:a2a976c93e0b219a0c6eb9a3a98b5f2d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the task is done or not, regardless of if this provider group is running it. <br /></td></tr>
 <tr class="separator:a2a976c93e0b219a0c6eb9a3a98b5f2d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace287bde7a3b4c09dab40c448c997370"><td class="memItemLeft" align="right" valign="top"><a id="ace287bde7a3b4c09dab40c448c997370"></a>
+<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4">RunState</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#ace287bde7a3b4c09dab40c448c997370">run_state</a></td></tr>
+<tr class="memdesc:ace287bde7a3b4c09dab40c448c997370"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current run state of the group. <br /></td></tr>
+<tr class="separator:ace287bde7a3b4c09dab40c448c997370"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Provides information about the current state of a provider group. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="aeb813dadc96c609657c4608e76ac86d4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeb813dadc96c609657c4608e76ac86d4">&#9670;&nbsp;</a></span>RunState</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4">extension::behaviour::GroupInfo::RunState</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2"></a>NO_TASK&#160;</td><td class="fielddoc"><p>The group has not emitted the task. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4"></a>RUNNING&#160;</td><td class="fielddoc"><p>The group is running the task. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe"></a>QUEUED&#160;</td><td class="fielddoc"><p>The group has the task queued. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>shared/extension/behaviour/<a class="el" href="InformationSource_8hpp_source.html">InformationSource.hpp</a></li>
 </ul>
 </div><!-- contents -->
@@ -196,7 +233,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>done</b></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a></li>
-    <li class="footer">Generated on Sat Mar 11 2023 00:02:03 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Mar 11 2023 04:09:53 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -232,9 +232,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3">Director</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a> reactor. <br /></td></tr>
 <tr class="separator:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a29c9e37d2c23e6007a46e7be79b2b33e"><td class="memItemLeft" align="right" valign="top">::<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">extension::behaviour::GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a29c9e37d2c23e6007a46e7be79b2b33e">_get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type) override</td></tr>
-<tr class="memdesc:a29c9e37d2c23e6007a46e7be79b2b33e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the ProviderGroup data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#a29c9e37d2c23e6007a46e7be79b2b33e">More...</a><br /></td></tr>
-<tr class="separator:a29c9e37d2c23e6007a46e7be79b2b33e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d803628b2906684e24023eec714475d"><td class="memItemLeft" align="right" valign="top">::<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">extension::behaviour::GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5d803628b2906684e24023eec714475d">_get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type, const std::type_index &amp;root_type) override</td></tr>
+<tr class="memdesc:a5d803628b2906684e24023eec714475d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the ProviderGroup data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#a5d803628b2906684e24023eec714475d">More...</a><br /></td></tr>
+<tr class="separator:a5d803628b2906684e24023eec714475d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06c8ef9a24944778876165b8b9a49160"><td class="memItemLeft" align="right" valign="top">::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">extension::behaviour::RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160">_get_run_info</a> (const uint64_t &amp;reaction_id) override</td></tr>
 <tr class="memdesc:a06c8ef9a24944778876165b8b9a49160"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the RunInfo data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160">More...</a><br /></td></tr>
 <tr class="separator:a06c8ef9a24944778876165b8b9a49160"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -280,6 +280,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:ad55edf0f7508766222d56f3028bc5b7a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ad55edf0f7508766222d56f3028bc5b7a">find_ok_solutions</a> (const std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a> &gt; &amp;solutions)</td></tr>
 <tr class="memdesc:ad55edf0f7508766222d56f3028bc5b7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution that can execute, or a blocked solution if none of the solutions can execute.  <a href="classmodule_1_1extension_1_1Director.html#ad55edf0f7508766222d56f3028bc5b7a">More...</a><br /></td></tr>
 <tr class="separator:ad55edf0f7508766222d56f3028bc5b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae70c9d1cd557625475736a41e910f843"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ae70c9d1cd557625475736a41e910f843">get_root_provider</a> (const std::type_index &amp;root_type)</td></tr>
+<tr class="memdesc:ae70c9d1cd557625475736a41e910f843"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds or creates a root provider for a task and returns it.  <a href="classmodule_1_1extension_1_1Director.html#ae70c9d1cd557625475736a41e910f843">More...</a><br /></td></tr>
+<tr class="separator:ae70c9d1cd557625475736a41e910f843"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d47a23014bcaeeac4df16728128b9af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">RunReasonLock</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a4d47a23014bcaeeac4df16728128b9af">hold_run_reason</a> (const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;reason)</td></tr>
 <tr class="memdesc:a4d47a23014bcaeeac4df16728128b9af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds a run reason as the current run reason for the current thread.  <a href="classmodule_1_1extension_1_1Director.html#a4d47a23014bcaeeac4df16728128b9af">More...</a><br /></td></tr>
 <tr class="separator:a4d47a23014bcaeeac4df16728128b9af"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -323,9 +326,9 @@ Static Private Member Functions</h2></td></tr>
 <tr class="memdesc:a5a568697d3755326763a1e24eaf87208"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the direct priorities of two director tasks and returns true if the challenger has priority over the incumbent.  <a href="classmodule_1_1extension_1_1Director.html#a5a568697d3755326763a1e24eaf87208">More...</a><br /></td></tr>
 <tr class="separator:a5a568697d3755326763a1e24eaf87208"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource')"><img src="closed.png" alt="-"/>&#160;Static Private Member Functions inherited from <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">extension::behaviour::information::InformationSource</a></td></tr>
-<tr class="memitem:a383884a6c4a6227bf56ccb4e7eb1c0c4 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a383884a6c4a6227bf56ccb4e7eb1c0c4">get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type)</td></tr>
-<tr class="memdesc:a383884a6c4a6227bf56ccb4e7eb1c0c4 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the group info object.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a383884a6c4a6227bf56ccb4e7eb1c0c4">More...</a><br /></td></tr>
-<tr class="separator:a383884a6c4a6227bf56ccb4e7eb1c0c4 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a1156449736afed349c1bb6b92e4f6cd5">get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type, const std::type_index &amp;root_type)</td></tr>
+<tr class="memdesc:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the group info object.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a1156449736afed349c1bb6b92e4f6cd5">More...</a><br /></td></tr>
+<tr class="separator:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">get_run_info</a> (const uint64_t &amp;reaction_id)</td></tr>
 <tr class="memdesc:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about why the current task is running from the information source.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">More...</a><br /></td></tr>
 <tr class="separator:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -433,8 +436,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a29c9e37d2c23e6007a46e7be79b2b33e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a29c9e37d2c23e6007a46e7be79b2b33e">&#9670;&nbsp;</a></span>_get_group_info()</h2>
+<a id="a5d803628b2906684e24023eec714475d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d803628b2906684e24023eec714475d">&#9670;&nbsp;</a></span>_get_group_info()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -452,7 +455,13 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::type_index &amp;&#160;</td>
-          <td class="paramname"><em>type</em>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::type_index &amp;&#160;</td>
+          <td class="paramname"><em>root_type</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -471,13 +480,14 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">reaction_id</td><td>the provider reaction that is requesting its information. </td></tr>
-    <tr><td class="paramname">type</td><td>the type of provider group that is being requested</td></tr>
+    <tr><td class="paramname">type</td><td>the type of provider group that is being requested </td></tr>
+    <tr><td class="paramname">root_type</td><td>the secondary type to use if this is a root task</td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the information about the provider group that this task is running on </dd></dl>
 
-<p>Implements <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a39e913eda01010135b02c6ad8c62821c">extension::behaviour::information::InformationSource</a>.</p>
+<p>Implements <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#afb11f57bbc4cf64aa0f0f0ff96f2020d">extension::behaviour::information::InformationSource</a>.</p>
 
 </div>
 </div>
@@ -934,6 +944,41 @@ false if the incumbent task has equal or higher priority</dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>a list of OkSolutions that represents the first solution that can execute, or a blocked solution if none of the solutions can execute. </dd></dl>
+
+</div>
+</div>
+<a id="ae70c9d1cd557625475736a41e910f843"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae70c9d1cd557625475736a41e910f843">&#9670;&nbsp;</a></span>get_root_provider()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; module::extension::Director::get_root_provider </td>
+          <td>(</td>
+          <td class="paramtype">const std::type_index &amp;&#160;</td>
+          <td class="paramname"><em>root_type</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Finds or creates a root provider for a task and returns it. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">root_type</td><td>the root task type</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the root provider </dd></dl>
 
 </div>
 </div>
@@ -1481,7 +1526,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a></li>
-    <li class="footer">Generated on Sat Mar 11 2023 00:02:03 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Mar 11 2023 04:09:53 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

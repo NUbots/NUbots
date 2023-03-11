@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['classification_1977',['Classification',['../structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367',1,'module::extension::provider::Provider']]]
+  ['classification_1989',['Classification',['../structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367',1,'module::extension::provider::Provider']]]
 ];

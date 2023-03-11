@@ -1,5 +1,7 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1input_1_1NatNet.html#a42547cbbd96afc994bf06bee2041effd":[1,0,2,3,9,15],
+"classmodule_1_1input_1_1NatNet.html#a4390ad14ade079210062706ab7a33dd5":[1,0,2,3,9,22],
 "classmodule_1_1input_1_1NatNet.html#a4511d15018c1d5a6b8a8f30d7269ebc5":[1,0,2,3,9,14],
 "classmodule_1_1input_1_1NatNet.html#a5cf8c24049a1910af299feae305fd6ad":[1,0,2,3,9,18],
 "classmodule_1_1input_1_1NatNet.html#a603e954e3e07545715df15cb6b56ceeb":[1,0,2,3,9,17],
@@ -247,7 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1motion_1_1QuinticWalk.html#a7afe3be66ae2759c84b5c50f583b1b80":[1,0,2,5,8,20],
 "classmodule_1_1motion_1_1QuinticWalk.html#a7c4065a3dbb4a1de25a36330ff579c10":[1,0,2,5,8,4],
 "classmodule_1_1motion_1_1QuinticWalk.html#aa53b548392609ef56e7b6f8817cb9788":[1,0,2,5,8,1],
-"classmodule_1_1motion_1_1QuinticWalk.html#abe3b227ff4b467a79fbfca93a4f4db1f":[1,0,2,5,8,10],
-"classmodule_1_1motion_1_1QuinticWalk.html#ac68d1866f2f504bceeef8ab55092a6c4":[1,0,2,5,8,14],
-"classmodule_1_1motion_1_1QuinticWalk.html#acbedcfcda123fd2251ce9d93ba59c210":[1,0,2,5,8,18]
+"classmodule_1_1motion_1_1QuinticWalk.html#abe3b227ff4b467a79fbfca93a4f4db1f":[1,0,2,5,8,10]
 };

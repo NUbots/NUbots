@@ -1,5 +1,7 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1motion_1_1QuinticWalk.html#ac68d1866f2f504bceeef8ab55092a6c4":[1,0,2,5,8,14],
+"classmodule_1_1motion_1_1QuinticWalk.html#acbedcfcda123fd2251ce9d93ba59c210":[1,0,2,5,8,18],
 "classmodule_1_1motion_1_1QuinticWalk.html#ad54aa140804597a354935b0e5b6987f9":[1,0,2,5,8,9],
 "classmodule_1_1motion_1_1QuinticWalk.html#ae7b8482047f25ccbf4b7d9f8a9ddb96a":[1,0,2,5,8,16],
 "classmodule_1_1motion_1_1QuinticWalk.html#af224d18881837b596ee6925cd8cce4dc":[1,0,2,5,8,15],
@@ -247,7 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1strategy_1_1FallRecovery.html":[1,0,2,11,0],
 "classmodule_1_1strategy_1_1FallRecovery.html#aa6579a63e2954fbd0dfae9fc5c00658d":[1,0,2,11,0,0],
 "classmodule_1_1support_1_1LocalisationSimulator.html":[1,0,2,12,2],
-"classmodule_1_1support_1_1LocalisationSimulator.html#acdd89907a1c92f9efbc23b0d8bc6dbcb":[1,0,2,12,2,1],
-"classmodule_1_1support_1_1LocalisationSimulator.html#ace700ce76a76e9289f0d830284497765":[1,0,2,12,2,0],
-"classmodule_1_1support_1_1NUsightHarness.html":[1,0,2,12,3]
+"classmodule_1_1support_1_1LocalisationSimulator.html#acdd89907a1c92f9efbc23b0d8bc6dbcb":[1,0,2,12,2,1]
 };

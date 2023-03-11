@@ -1,5 +1,13 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a04b7d0caa19c049b9a772b2f65eb5bc7ac9214185e3828dcebf67ccb935d14ab1":[1,0,2,3,27,1,0,2],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a04b7d0caa19c049b9a772b2f65eb5bc7ad2fbd75650f736aa4ca2278d96204a98":[1,0,2,3,27,1,0,0],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a04b7d0caa19c049b9a772b2f65eb5bc7ad306f235d2651f0334197c7ae7145b71":[1,0,2,3,27,1,0,3],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a04b7d0caa19c049b9a772b2f65eb5bc7afb32f6b9fdcd4d907ac92aa8a7c5aa4b":[1,0,2,3,27,1,0,1],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a178aaf225e5734e416d7c7346282f333":[1,0,2,3,27,1,4],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a2e4dfb7197ddfa1fb7066ab618a45cee":[1,0,2,3,27,1,6],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a99054fb36cb1e19e3a375950b8b53583":[1,0,2,3,27,1,7],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#aa59b6fbc5dd2100ee1b5abf524caafcb":[1,0,2,3,27,1,5],
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#abbad14abbd63780fa3e66612d342a2be":[1,0,2,3,27,1,2],
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#acaed200486d29177ff925a7a2853924d":[1,0,2,3,27,1,3],
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#afe43c4778c0b0537d5bb6216ed996c5e":[1,0,2,3,27,1,1],
@@ -241,13 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a292244234a93b1db7f39c7199e712b24":[1,0,2,7,0,1,1,0,6,5],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a5334ae274a6a66182e6009cf5bb5d77f":[1,0,2,7,0,1,1,0,6,9],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a593894b9b1273206736f8cd246fe2326":[1,0,2,7,0,1,1,0,6,6],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a66093d64a2f4ec744ff4d1a5c8782f7c":[1,0,2,7,0,1,1,0,6,2],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a68e65dd8dc8175eaa7722e326d0dbb2f":[1,0,2,7,0,1,1,0,6,7],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a793a91472184a50dfcbee230e74ae540":[1,0,2,7,0,1,1,0,6,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a878a3b35853f80d23f34fe20d907b61f":[1,0,2,7,0,1,1,0,6,3],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a99b0d66d5d227c5b739c41f89694ac58":[1,0,2,7,0,1,1,0,6,8],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aaf543d6f3fd9f89f58c0b625af5787a7":[1,0,2,7,0,1,1,0,6,11],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#ace872e809ad95d433e8e24bce0032bf8":[1,0,2,7,0,1,1,0,6,4],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aedae29c5b347dfcb84afeafbf4ed4586":[1,0,2,7,0,1,1,0,6,10],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html":[1,0,2,7,0,1,1,0,7]
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a66093d64a2f4ec744ff4d1a5c8782f7c":[1,0,2,7,0,1,1,0,6,2]
 };

@@ -1,5 +1,7 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1support_1_1LocalisationSimulator.html#ace700ce76a76e9289f0d830284497765":[1,0,2,12,2,0],
+"classmodule_1_1support_1_1NUsightHarness.html":[1,0,2,12,3],
 "classmodule_1_1support_1_1NUsightHarness.html#a0da4e39a56924403d3a91b97245722a3":[1,0,2,12,3,0],
 "classmodule_1_1support_1_1ReactionTimer.html":[1,0,2,12,4],
 "classmodule_1_1support_1_1ReactionTimer.html#ac87535eae4b269f9b8ef9b67d9c89ba1":[1,0,2,12,4,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX6 =
 "classutility_1_1motion_1_1Balancer.html#aad8f1c4ffc0f8c1eecba8f2360bb6ac8":[1,0,5,6,1,5],
 "classutility_1_1motion_1_1Balancer.html#abcae8a0cd4256846827e17f538e6b2e1":[1,0,5,6,1,15],
 "classutility_1_1motion_1_1Balancer.html#ad0860fdcd1fadc80eb50616a2db668a8":[1,0,5,6,1,0],
-"classutility_1_1motion_1_1splines_1_1Combination.html":[1,0,5,6,0,0],
-"classutility_1_1motion_1_1splines_1_1Combination.html#a027592ea1deaf8365476cf6486108334":[1,0,5,6,0,0,5],
-"classutility_1_1motion_1_1splines_1_1Combination.html#a0f7e6f7a8901a239fcf8b3733531b969":[1,0,5,6,0,0,3]
+"classutility_1_1motion_1_1splines_1_1Combination.html":[1,0,5,6,0,0]
 };

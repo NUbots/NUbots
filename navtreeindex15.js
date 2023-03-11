@@ -1,5 +1,13 @@
 var NAVTREEINDEX15 =
 {
+"structutility_1_1type__traits_1_1has__id.html#aef64f65454bb2de38347133915c99867":[1,0,5,10,0,2],
+"structutility_1_1type__traits_1_1has__id.html#af2d407cb2661302bccbff4aa7092267f":[1,0,5,10,0,0],
+"structutility_1_1type__traits_1_1has__id.html#affa22b294409ad90a7b0aca4423e8b0f":[1,0,5,10,0,3],
+"structutility_1_1type__traits_1_1has__timestamp.html":[1,0,5,10,1],
+"structutility_1_1type__traits_1_1has__timestamp.html#a4553f0c797927aaa66d30ecb62468a32":[1,0,5,10,1,2],
+"structutility_1_1type__traits_1_1has__timestamp.html#a862b265c5c1ab89a9707191f02d60a4a":[1,0,5,10,1,4],
+"structutility_1_1type__traits_1_1has__timestamp.html#aae2b44a94224730c6860b2a94b50fc81":[1,0,5,10,1,0],
+"structutility_1_1type__traits_1_1has__timestamp.html#ada5394a8f97b2ed8d3b4a813c84a87df":[1,0,5,10,1,3],
 "structutility_1_1type__traits_1_1has__timestamp.html#afbd5f17732c3aa3c3e1b02748b36114d":[1,0,5,10,1,1],
 "structutility_1_1type__traits_1_1is__iterable.html":[1,0,5,10,2],
 "structutility_1_1type__traits_1_1is__iterable.html#a051ccc86e938a9ec1f80d339fa74dd59":[1,0,5,10,2,6],
