@@ -28,11 +28,10 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct PrimaryTrigger {
-        PrimaryTrigger(const bool& run_) : run(run_) {}
-        bool run = false;
-    };
-    struct SecondaryTask {};
+    struct RunTrigger {};
+    struct RemoveTrigger {};
+    struct UsesTrigger {};
+    struct SimpleTask {};
     struct SubTask {};
 
     std::vector<std::string> events;
@@ -52,22 +51,21 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
             : TestBase<TestReactor>(std::move(environment)) {
 
+            on<Trigger<RunTrigger>>().then([this] {
+                events.push_back("emitting subtask");
+                emit<Task>(std::make_unique<SubTask>());
+            });
 
-            on<Trigger<PrimaryTrigger>, Uses<SubTask>>().then(
-                [this](const PrimaryTrigger& primary, const Uses<SubTask>& subtask) {
-                    events.push_back("primary trigger subtask run state: " + decode_run_state(subtask.run_state));
+            on<Trigger<RemoveTrigger>>().then([this] {
+                events.push_back("removing subtask");
+                emit<Task>(std::unique_ptr<SubTask>(nullptr));
+            });
 
-                    if (primary.run) {
-                        events.push_back("emitting subtask");
-                        emit<Task>(std::make_unique<SubTask>());
-                    }
-                    else {
-                        events.push_back("removing subtask");
-                        emit<Task>(std::unique_ptr<SubTask>(nullptr));
-                    }
-                });
+            on<Trigger<UsesTrigger>, Uses<SubTask>>().then([this](const Uses<SubTask>& subtask) {
+                events.push_back("root subtask run state: " + decode_run_state(subtask.run_state));
+            });
 
-            on<Provide<SecondaryTask>, Uses<SubTask>>().then([this](const Uses<SubTask>& subtask) {
+            on<Provide<SimpleTask>, Uses<SubTask>>().then([this](const Uses<SubTask>& subtask) {
                 events.push_back("secondary task subtask run state: " + decode_run_state(subtask.run_state));
                 events.push_back("emitting subtask");
                 emit<Task>(std::make_unique<SubTask>());
@@ -78,41 +76,47 @@ namespace {
             /**************
              * TEST STEPS *
              **************/
-            // Start the primary trigger, subtask will initially not be running
+            // Emit the trigger to run the subtask
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting primary trigger");
-                emit<Scope::DIRECT>(std::make_unique<PrimaryTrigger>(true));
+                events.push_back("emitting run trigger");
+                emit<Scope::DIRECT>(std::make_unique<RunTrigger>());
             });
 
-            // Run the primary task again, subtask will now be running
+            // Check the uses state of the subtask
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting primary trigger again");
-                emit<Scope::DIRECT>(std::make_unique<PrimaryTrigger>(true));
+                events.push_back("emit uses trigger");
+                emit<Scope::DIRECT>(std::make_unique<UsesTrigger>());
             });
 
-            // Run the secondary task, which has a lower priority than the root primary trigger subtask
+            // Run the simple task, which has a lower priority than the root trigger subtask
             // This should give a queued subtask state on the next run
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("emitting secondary task");
-                emit<Task>(std::make_unique<SecondaryTask>());
+                events.push_back("emitting simple task");
+                emit<Task>(std::make_unique<SimpleTask>());
             });
 
-            // Run the secondary task again to get the queued state
+            // Run the simple task again to get the queued state
             on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                events.push_back("emitting secondary task again");
-                emit<Task>(std::make_unique<SecondaryTask>());
+                events.push_back("emitting simple task again");
+                emit<Task>(std::make_unique<SimpleTask>());
             });
 
-            // Remove the primary trigger subtask to detect a running subtask on the secondary task
+            // Remove the root subtask to detect a running subtask on the secondary task
             on<Trigger<Step<5>>, Priority::LOW>().then([this] {
-                events.push_back("removing primary trigger");
-                emit<Scope::DIRECT>(std::make_unique<PrimaryTrigger>(false));
+                events.push_back("emit remove trigger");
+                emit<Scope::DIRECT>(std::make_unique<RemoveTrigger>());
             });
 
-            // Run the secondary task again to see the running state
+            // Run the simple task again to see the running state
             on<Trigger<Step<6>>, Priority::LOW>().then([this] {
-                events.push_back("emitting secondary task again");
-                emit<Task>(std::make_unique<SecondaryTask>());
+                events.push_back("emitting simple task again");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+
+            // Emit the uses trigger to check the non-running state
+            on<Trigger<Step<7>>, Priority::LOW>().then([this] {
+                events.push_back("emit uses trigger");
+                emit<Scope::DIRECT>(std::make_unique<UsesTrigger>());
             });
 
             on<Startup>().then([this] {
@@ -122,6 +126,7 @@ namespace {
                 emit(std::make_unique<Step<4>>());
                 emit(std::make_unique<Step<5>>());
                 emit(std::make_unique<Step<6>>());
+                emit(std::make_unique<Step<7>>());
             });
         }
 
@@ -139,28 +144,26 @@ TEST_CASE("Test that the Uses run state information is correct with root tasks",
     powerplant.start();
 
     std::vector<std::string> expected = {
-        "emitting primary trigger",
-        "primary trigger subtask run state: NO_TASK",
+        "emitting run trigger",
         "emitting subtask",
         "subtask executed",
-        "emitting primary trigger again",
-        "primary trigger subtask run state: RUNNING",
-        "emitting subtask",
-        "subtask executed",
-        "emitting secondary task",
+        "emit uses trigger",
+        "root subtask run state: RUNNING",
+        "emitting simple task",
         "secondary task subtask run state: NO_TASK",
         "emitting subtask",
-        "emitting secondary task again",
+        "emitting simple task again",
         "secondary task subtask run state: QUEUED",
         "emitting subtask",
-        "removing primary trigger",
-        "primary trigger subtask run state: RUNNING",
+        "emit remove trigger",
         "removing subtask",
         "subtask executed",
-        "emitting secondary task again",
+        "emitting simple task again",
         "secondary task subtask run state: RUNNING",
         "emitting subtask",
         "subtask executed",
+        "emit uses trigger",
+        "root subtask run state: NO_TASK",
     };
 
     // Make an info print the diff in an easy to read way if we fail
