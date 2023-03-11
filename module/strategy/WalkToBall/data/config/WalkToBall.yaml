@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# How long to wait until the ball is lost and we should walk in a search pattern
+ball_search_timeout: 2
