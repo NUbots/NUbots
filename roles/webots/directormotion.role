@@ -21,6 +21,7 @@ nuclear_role(
   actuation::Kinematics
   actuation::Servos
   # Skills
+  skill::QuinticWalk
   skill::ScriptKick
   skill::GetUp
   skill::Look
