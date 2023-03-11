@@ -34,7 +34,7 @@ namespace module::planning {
         });
 
         on<Provide<KickTo>, Uses<Kick>, Trigger<FilteredBall>>().then(
-            [this](const KickTo& kick, const RunInfo& info, const Uses<Kick>& kick, const FilteredBall& ball) {
+            [this](const KickTo& kick_to, const RunInfo& info, const Uses<Kick>& kick, const FilteredBall& ball) {
                 // If the kick is running, don't interrupt or the robot may fall
                 if (kick.run_state == GroupInfo::RunState::RUNNING) {
                     emit<Task>(std::make_unique<Idle>());
@@ -60,7 +60,7 @@ namespace module::planning {
                 }
 
                 // CHECK IF FACING POINT TO KICK TO
-                float align_angle = std::abs(std::atan2(kick.rPTt.y(), kick.rPTt.x()));
+                float align_angle = std::abs(std::atan2(kick_to.rPTt.y(), kick_to.rPTt.x()));
 
                 // Don't kick if we should align but we're not aligned to the target
                 if (align_angle > cfg.target_angle_threshold) {
