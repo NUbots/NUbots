@@ -18,7 +18,19 @@
   "files.associations": {
     "*.role": "cmake",
     ".clang-tidy": "yaml",
-    ".Doxyfile": "properties"
+    ".Doxyfile": "properties",
+    "*.ipp": "cpp",
+    "regex": "cpp",
+    "cholesky": "cpp",
+    "core": "cpp",
+    "eigenvalues": "cpp",
+    "geometry": "cpp",
+    "householder": "cpp",
+    "jacobi": "cpp",
+    "lu": "cpp",
+    "qr": "cpp",
+    "svd": "cpp",
+    "*.proto": "cpp"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
