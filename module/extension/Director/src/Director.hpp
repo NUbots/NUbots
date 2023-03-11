@@ -65,6 +65,15 @@ namespace module::extension {
         void remove_provider(const uint64_t& id);
 
         /**
+         * Finds or creates a root provider for a task and returns it
+         *
+         * @param root_type the root task type
+         *
+         * @return the root provider
+         */
+        std::shared_ptr<provider::Provider> get_root_provider(const std::type_index& root_type);
+
+        /**
          * Add a when condition to an existing Provider
          *
          * @param when the description of the When expression from the Behaviour extension
@@ -423,11 +432,13 @@ namespace module::extension {
          *
          * @param reaction_id the provider reaction that is requesting its information.
          * @param type        the type of provider group that is being requested
+         * @param root_type   the secondary type to use if this is a root task
          *
          * @return the information about the provider group that this task is running on
          */
         ::extension::behaviour::GroupInfo _get_group_info(const uint64_t& reaction_id,
-                                                          const std::type_index& type) override;
+                                                          const std::type_index& type,
+                                                          const std::type_index& root_type) override;
 
     private:
         /// A list of Provider groups
