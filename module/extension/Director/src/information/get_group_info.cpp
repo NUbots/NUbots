@@ -28,10 +28,9 @@ namespace module::extension {
                                         const std::type_index& root_type) {
         std::lock_guard<std::recursive_mutex> lock(director_mutex);
 
-        // Get the reaction id so we can change it if it is a root provider
-        // Since root providers get their own unique provider id
-        uint64_t r_id  = providers.contains(reaction_id) ? reaction_id : get_root_provider(root_type)->id;
-        auto& provider = providers.at(r_id);
+        // If the reaction is a non-Provider, then we need to get the root Provider
+        const auto& provider =
+            providers.contains(reaction_id) ? providers.at(reaction_id) : get_root_provider(root_type);
 
         if (groups.contains(type)) {
             auto& group = groups.at(type);
@@ -39,7 +38,7 @@ namespace module::extension {
             // Check if the task is active
             if (group.active_task != nullptr) {
                 // Check if the task is being run by this reaction
-                if (group.active_task->requester_id == r_id) {
+                if (group.active_task->requester_id == provider->id) {
                     return GroupInfo{GroupInfo::RunState::RUNNING, group.done};
                 }
             }
