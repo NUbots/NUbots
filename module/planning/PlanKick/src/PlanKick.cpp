@@ -33,11 +33,12 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Trigger<FilteredBall>>().then(
-            [this](const KickTo& kick, const RunInfo& info, const FilteredBall& ball) {
-                // If the kicking subtask is done, then we are no longer kicking
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    kicking = false;
+        on<Provide<KickTo>, Uses<Kick>, Trigger<FilteredBall>>().then(
+            [this](const KickTo& kick, const RunInfo& info, const Uses<Kick>& kick, const FilteredBall& ball) {
+                // If the kick is running, don't interrupt or the robot may fall
+                if (kick.run_state == GroupInfo::RunState::RUNNING) {
+                    emit<Task>(std::make_unique<Idle>());
+                    return;
                 }
 
                 // CHECK IF BALL IS BALL MEASUREMENT IS RECENT ENOUGH
@@ -68,14 +69,11 @@ namespace module::planning {
 
                 // If the kick conditions are not met, the function will have returned with no Tasks, ending the kick
                 // Otherwise, the kick conditions are met and we need to check if we are already kicking
-                // If we are already kicking, then only emit Idle to keep the previous Kick Task running
-                if (kicking) {
+                // If we are already queued to kick, then only emit Idle to keep the previous Kick Task running
+                if (kick.run_state == GroupInfo::RunState::QUEUED) {
                     emit<Task>(std::make_unique<Idle>());
                     return;
                 }
-
-                // All checks passed, and we aren't already kicking - KICK!
-                kicking = true;
 
                 // If the kick leg is forced left, kick left
                 // If the kick leg is auto, kick with left leg if ball is more to the left
