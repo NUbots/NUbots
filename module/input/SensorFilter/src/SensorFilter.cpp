@@ -783,7 +783,14 @@ namespace module::input {
                             Eigen::Isometry3d Hwt;
                             Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
-                            sensors->Htw      = Hwt.inverse().matrix();
+                            // Remove the yaw component of the rotation
+                            Hwt.linear() =
+                                Eigen::AngleAxisd(-std::atan2(Hwt(1, 0), Hwt(0, 0)), Eigen::Vector3d::UnitZ())
+                                    .toRotationMatrix()
+                                * Hwt.linear();
+
+
+                            sensors->Htw = Hwt.inverse().matrix();
 
                             // If there is ground truth data, determine the error in the odometry calculation
                             // and emit graphs of those errors
