@@ -39,6 +39,9 @@ namespace module::input {
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
+    using utility::platform::getRawServo;
+    using utility::platform::make_error_string;
+    using utility::platform::make_servo_error_string;
     using utility::support::Expression;
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
@@ -322,21 +325,18 @@ namespace module::input {
 
         // Check for errors on the platform and FSRs
         if (raw_sensors.platform_error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(
-                utility::platform::make_error_string("Platform", raw_sensors.platform_error_flags));
+            NUClear::log<NUClear::WARN>(make_error_string("Platform", raw_sensors.platform_error_flags));
         }
         if (raw_sensors.fsr.left.error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(
-                utility::platform::make_error_string("Left FSR", raw_sensors.fsr.left.error_flags));
+            NUClear::log<NUClear::WARN>(make_error_string("Left FSR", raw_sensors.fsr.left.error_flags));
         }
         if (raw_sensors.fsr.right.error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(
-                utility::platform::make_error_string("Right FSR", raw_sensors.fsr.right.error_flags));
+            NUClear::log<NUClear::WARN>(make_error_string("Right FSR", raw_sensors.fsr.right.error_flags));
         }
 
         // Read through all of our sensors
         for (uint32_t id = 0; id < 20; ++id) {
-            const auto& original = utility::platform::getRawServo(id, raw_sensors);
+            const auto& original = getRawServo(id, raw_sensors);
             const auto& error    = original.error_flags;
 
             // Check for an error on the servo and report it
