@@ -26,7 +26,7 @@ namespace module::planning {
         on<Configuration>("PlanKick.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PlanKick.yaml
             this->log_level             = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_timeout_threshold  = config["timeout_threshold"].as<float>();
+            cfg.ball_timeout_threshold  = config["ball_timeout_threshold"].as<float>();
             cfg.ball_distance_threshold = config["ball_distance_threshold"].as<float>();
             cfg.ball_angle_threshold    = config["ball_angle_threshold"].as<float>();
             cfg.target_angle_threshold  = config["target_angle_threshold"].as<float>();
