@@ -29,8 +29,6 @@ namespace module::skill {
 
         void calculate_joint_goals();
         [[nodiscard]] float get_time_delta();
-        [[nodiscard]] std::unique_ptr<message::behaviour::ServoCommands> motion(
-            const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
         struct Config {
             Eigen::Vector3f max_step = Eigen::Vector3f::Zero();

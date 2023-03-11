@@ -92,11 +92,11 @@ namespace module::skill {
         for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
             // Sets the leg gains
             if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
-                cfg.jointGains[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
+                cfg.[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
             }
             // Sets the arm gains
             if (id < ServoID::R_HIP_YAW) {
-                cfg.jointGains[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
+                cfg.[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
             }
         }
 
@@ -332,21 +332,21 @@ namespace module::skill {
         for (int id = 0; id < ServoID::NUMBER_OF_SERVOS - 2; ++id) {
             // Set the legs
             if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right legs
-                right_leg->servos[id] = current_cfg.jointGains[ServoID(id)]
+                right_leg->servos[id] = current_cfg.[ServoID(id)];
             }
             else if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left legs
 
-                left_leg->servos[id] = current_cfg.jointGains[ServoID(id)];
+                left_leg->servos[id] = current_cfg.[ServoID(id)];
             }
             else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right arms
                 right_arm->servos[id] = ServoCommand(time,
                                                      current_cfg.arm_positions[ServoID(id)].second,
-                                                     ServoState(current_cfg.jointGains[ServoID(id)], 100));
+                                                     current_cfg.jointGains[ServoID(id)]);
             }
             else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left arms
                 left_arm->servos[id] = ServoCommand(time,
                                                     current_cfg.arm_positions[ServoID(id)].second,
-                                                    ServoState(current_cfg.jointGains[ServoID(id)], 100));
+                                                    current_cfg.jointGains[ServoID(id)]);
             }
         }
 
