@@ -30,12 +30,7 @@ namespace module::extension {
 
         // Get the reaction id so we can change it if it is a root provider
         // Since root providers get their own unique provider id
-        uint64_t r_id = reaction_id;
-
-        // If it is a root provider, get the root provider id
-        if (!providers.contains(r_id)) {
-            r_id = get_root_provider(root_type)->id;
-        }
+        uint64_t r_id  = providers.contains(reaction_id) ? reaction_id : get_root_provider(root_type)->id;
         auto& provider = providers.at(r_id);
 
         if (groups.contains(type)) {
