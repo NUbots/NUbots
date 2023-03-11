@@ -34,7 +34,7 @@ namespace module::planning {
         });
 
         on<Provide<KickTo>, Uses<Kick>, Trigger<FilteredBall>>().then(
-            [this](const KickTo& kick_to, const RunInfo& info, const Uses<Kick>& kick, const FilteredBall& ball) {
+            [this](const KickTo& kick_to, const Uses<Kick>& kick, const FilteredBall& ball) {
                 // If the kick is running, don't interrupt or the robot may fall
                 if (kick.run_state == GroupInfo::RunState::RUNNING) {
                     emit<Task>(std::make_unique<Idle>());
