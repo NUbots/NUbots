@@ -165,7 +165,8 @@ namespace module::input {
             } footDown;
         } cfg;
 
-        /// @brief Update the sensors message with raw sensor data
+        /// @brief Updates the Sensors object with raw sensor data, including the timestamp, battery
+        /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
         /// @param sensors The sensors message to update
         /// @param previous_sensors The previous sensors message
         /// @param raw_sensors The raw sensor data
@@ -180,7 +181,8 @@ namespace module::input {
                                const KinematicsModel& kinematics_model,
                                const RawSensors& raw_sensors);
 
-        /// @brief Update the sensors messages odometry data with ukf filter
+        /// @brief Updates the sensors message with odometry data filtered using UKF. This includes the
+        // position, orientation, velocity and rotational velocity of the torso in world space.
         /// @param sensors The sensors message to update
         /// @param previous_sensors The previous sensors message
         /// @param raw_sensors The raw sensor data

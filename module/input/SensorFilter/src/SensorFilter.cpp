@@ -298,13 +298,22 @@ namespace module::input {
                                        const KinematicsModel& kinematics_model) {
                                     auto sensors = std::make_unique<Sensors>();
 
+                                    // Updates the Sensors message with raw sensor data, including the timestamp,
+                                    // battery voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
                                     update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
+                                    // Updates the Sensors message with kinematic data, including the homogeneous
+                                    // transforms from each servo to the torso, the centre of mass, the inertia
+                                    // tensor, and the state of each foot (i.e., whether it is in contact with the
+                                    // ground or not).
                                     update_kinematics(sensors, kinematics_model, raw_sensors);
 
+                                    // Updates the Sensors message with odometry data using UKF. This includes the
+                                    // position and orientation of the torso, the velocity and rotational velocity of
+                                    // the torso, and the position of the centre of mass of the torso.
                                     update_odometry_ukf(sensors, previous_sensors, raw_sensors);
 
-                                    // Debug sensor filter
+                                    // Graph debug information of the sensor filter
                                     if (log_level <= NUClear::DEBUG) {
                                         debug_sensor_filter(sensors, raw_sensors);
                                     }
@@ -429,11 +438,8 @@ namespace module::input {
         sensors->inertia_tensor = calculateInertialTensor(kinematics_model, sensors->Htx);
 
         // Determine if feet are on the ground using the selected method
-        sensors->feet.resize(2);
         sensors->feet[BodySide::RIGHT].down = true;
         sensors->feet[BodySide::LEFT].down  = true;
-
-        // Calculate Z distance between feet in torso space {t} and determine which foot is lower
         const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
         const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
         const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
@@ -672,6 +678,29 @@ namespace module::input {
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
+        // Graph the raw accelerometer and gyroscope data
+        emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
+        emit(
+            graph("Accelerometer", sensors->accelerometer.x(), sensors->accelerometer.y(), sensors->accelerometer.z()));
+
+        // Graph the foot down sensors state for each foot
+        emit(graph(fmt::format("Sensor/Foot Down/{}/Left", std::string(cfg.footDown.method())),
+                   sensors->feet[BodySide::LEFT].down));
+        emit(graph(fmt::format("Sensor/Foot Down/{}/Right", std::string(cfg.footDown.method())),
+                   sensors->feet[BodySide::RIGHT].down));
+
+        // Graph the position and orientation of the feet
+        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+        Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
+        Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
+        Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();
+        Eigen::Matrix<double, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
+        emit(graph("Left Foot Actual Position", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+        emit(graph("Left Foot Actual Orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
+        emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+        emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
+
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (raw_sensors.odometry_ground_truth.exists) {
             Eigen::Isometry3d true_Htw(raw_sensors.odometry_ground_truth.Htw);
@@ -698,28 +727,5 @@ namespace module::input {
             emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
             emit(graph("Quaternion rotational error", quat_rot_error));
         }
-
-        // Graph the raw accelerometer and gyroscope data
-        emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
-        emit(
-            graph("Accelerometer", sensors->accelerometer.x(), sensors->accelerometer.y(), sensors->accelerometer.z()));
-
-        // Graph the foot down sensors state for each foot
-        emit(graph(fmt::format("Sensor/Foot Down/{}/Left", std::string(cfg.footDown.method())),
-                   sensors->feet[BodySide::LEFT].down));
-        emit(graph(fmt::format("Sensor/Foot Down/{}/Right", std::string(cfg.footDown.method())),
-                   sensors->feet[BodySide::RIGHT].down));
-
-        // Graph the position and orientation of the feet
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-        Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
-        Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
-        emit(graph("Left Foot Actual Position", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
-        emit(graph("Left Foot Actual Orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
-        Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();
-        Eigen::Matrix<double, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
-        emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
-        emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
     }
 }  // namespace module::input
