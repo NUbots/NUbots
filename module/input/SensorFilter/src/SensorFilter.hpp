@@ -95,47 +95,47 @@ namespace module::input {
             struct MotionFilter {
                 MotionFilter() = default;
 
-                Eigen::Vector3d velocityDecay = Eigen::Vector3d::Zero();
+                Eigen::Vector3d velocity_decay = Eigen::Vector3d::Zero();
 
                 struct Noise {
                     Noise() = default;
                     struct Measurement {
-                        Eigen::Matrix3d accelerometer          = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d accelerometerMagnitude = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d gyroscope              = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d flatFootOdometry       = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix4d flatFootOrientation    = Eigen::Matrix4d::Zero();
+                        Eigen::Matrix3d accelerometer           = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d accelerometer_magnitude = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d gyroscope               = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d flat_foot_odometry      = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix4d flat_foot_orientation   = Eigen::Matrix4d::Zero();
                     } measurement{};
                     struct Process {
-                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
                     } process{};
                 } noise{};
                 struct Initial {
                     Initial() = default;
                     struct Mean {
-                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
                     } mean{};
                     struct Covariance {
-                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
                     } covariance{};
                 } initial{};
             } motionFilter{};
 
             struct Button {
-                Button()              = default;
-                int debounceThreshold = 0;
+                Button()               = default;
+                int debounce_threshold = 0;
             } buttons{};
 
             struct FootDown {
@@ -165,7 +165,7 @@ namespace module::input {
             } footDown;
         } cfg;
 
-        /// @brief Updates the Sensors object with raw sensor data, including the timestamp, battery
+        /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
         /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
         /// @param sensors The sensors message to update
         /// @param previous_sensors The previous sensors message
@@ -190,7 +190,7 @@ namespace module::input {
                                  const std::shared_ptr<const Sensors>& previous_sensors,
                                  const RawSensors& raw_sensors);
 
-        /// @brief Display debug information about sensor filter
+        /// @brief Display debug information about the sensor filter
         /// @param sensors The sensors message to update
         /// @param raw_sensors The raw sensor data
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
@@ -198,8 +198,8 @@ namespace module::input {
     private:
         // Current state of the button pushes
         // used to debounce button presses
-        bool leftDown   = false;
-        bool middleDown = false;
+        bool left_down   = false;
+        bool middle_down = false;
 
         // Our sensor for foot down
         VirtualLoadSensor<float> load_sensor{};
