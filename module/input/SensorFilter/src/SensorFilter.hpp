@@ -166,9 +166,32 @@ namespace module::input {
         } cfg;
 
         /// @brief Update the sensors message with raw sensor data
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
         void update_raw_sensors(std::unique_ptr<Sensors>& sensors,
                                 const std::shared_ptr<const Sensors>& previous_sensors,
                                 const RawSensors& raw_sensors);
+
+        /// @brief Update the sensors message with kinematics data
+        /// @param sensors The sensors message to update
+        /// @param kinematics_model The kinematics model to use for calculations
+        void update_kinematics(std::unique_ptr<Sensors>& sensors,
+                               const KinematicsModel& kinematics_model,
+                               const RawSensors& raw_sensors);
+
+        /// @brief Update the sensors messages odometry data with ukf filter
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        void update_odometry_ukf(std::unique_ptr<Sensors>& sensors,
+                                 const std::shared_ptr<const Sensors>& previous_sensors,
+                                 const RawSensors& raw_sensors);
+
+        /// @brief Display debug information about sensor filter
+        /// @param sensors The sensors message to update
+        /// @param raw_sensors The raw sensor data
+        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
         // Current state of the button pushes
