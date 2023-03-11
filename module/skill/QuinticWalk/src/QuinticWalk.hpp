@@ -7,10 +7,7 @@
 #include <vector>
 
 #include "extension/Behaviour.hpp"
-#include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
-#include "message/behaviour/ServoCommand.hpp"
 #include "message/behaviour/state/Stability.hpp"
 
 #include "utility/input/ServoID.hpp"
