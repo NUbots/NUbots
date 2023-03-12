@@ -8,7 +8,7 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
 
-#include "utility/motion/Script.hpp"
+#include "utility/skill/Script.hpp"
 
 namespace module::strategy {
 
