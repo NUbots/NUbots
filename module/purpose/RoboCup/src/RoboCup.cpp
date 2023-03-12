@@ -25,11 +25,6 @@ namespace module::purpose {
     using message::purpose::Defender;
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
-    using message::purpose::PenaltyShootoutGoalie;
-    using message::purpose::PenaltyShootoutStriker;
-    using message::purpose::PlayDefender;
-    using message::purpose::PlayGoalie;
-    using message::purpose::PlayStriker;
     using message::purpose::Striker;
 
     RoboCup::RoboCup(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -52,33 +47,17 @@ namespace module::purpose {
         });
 
         on<Provide<FindPurpose>>().then([this] {
-            // If force play is active, assume it is the playing state of the game
-            if (cfg.force_playing) {
-                switch (cfg.position) {
-                    case Position::STRIKER: emit<Task>(std::make_unique<PlayStriker>()); break;
-                    case Position::GOALIE: emit<Task>(std::make_unique<PlayGoalie>()); break;
-                    case Position::DEFENDER: emit<Task>(std::make_unique<PlayDefender>()); break;
-                    default: log<NUClear::ERROR>("Invalid robot position");
-                }
-                return;
-            }
-
-            // If force penalty shootout is active, assume we are in a penalty shootout
-            if (cfg.force_penalty_shootout) {
-                switch (cfg.position) {
-                    case Position::STRIKER: emit<Task>(std::make_unique<PenaltyShootoutStriker>()); break;
-                    case Position::GOALIE: emit<Task>(std::make_unique<PenaltyShootoutGoalie>()); break;
-                    case Position::DEFENDER: log<NUClear::ERROR>("Defender is not valid in penalty shootout"); break;
-                    default: log<NUClear::ERROR>("Invalid robot position");
-                }
-                return;
-            }
-
-            // Play with GameController state info
+            // Make task based on configured purpose/soccer position
             switch (cfg.position) {
-                case Position::STRIKER: emit<Task>(std::make_unique<Striker>()); break;
-                case Position::GOALIE: emit<Task>(std::make_unique<Goalie>()); break;
-                case Position::DEFENDER: emit<Task>(std::make_unique<Defender>()); break;
+                case Position::STRIKER:
+                    emit<Task>(std::make_unique<Striker>(cfg.force_playing, cfg.force_penalty_shootout));
+                    break;
+                case Position::GOALIE:
+                    emit<Task>(std::make_unique<Goalie>(cfg.force_playing, cfg.force_penalty_shootout));
+                    break;
+                case Position::DEFENDER:
+                    emit<Task>(std::make_unique<Defender>(cfg.force_playing, cfg.force_penalty_shootout));
+                    break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
         });
@@ -88,14 +67,14 @@ namespace module::purpose {
             if (self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-                // emit<Task>(std::make_unique<StandStill>());
+                emit<Task>(std::make_unique<StandStill>());
             }
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
-                // emit<Task>(std::unique_ptr<StandStill>(nullptr));
+                emit<Task>(std::unique_ptr<StandStill>(nullptr));
                 emit<Task>(std::make_unique<FindPurpose>());
             }
         });

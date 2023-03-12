@@ -10,7 +10,7 @@ namespace module::purpose {
 
     class RoboCup : public ::extension::behaviour::BehaviourReactor {
     private:
-        // Smart enum for the robot's position
+        /// @brief Smart enum for the robot's position
         struct Position {
             enum Value {
                 STRIKER,
@@ -36,8 +36,12 @@ namespace module::purpose {
 
         /// @brief Stores configuration values
         struct Config {
-            bool force_playing          = false;
+            /// @brief Whether or not to force the robot to ignore GameController and play as if in normal playing mode
+            bool force_playing = false;
+            /// @brief Whether or not to force the robot to ignore GameController and play as if in penalty shootout
+            /// playing mode
             bool force_penalty_shootout = false;
+            /// @brief The soccer position of the robot
             Position position{};
         } cfg;
 
