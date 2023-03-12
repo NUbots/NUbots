@@ -27,7 +27,7 @@ namespace module::strategy {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<StandStillTask>, With<Stability>>().then([this](const Stability& stability) {
+        on<Provide<StandStillTask>, Trigger<Stability>>().then([this](const Stability& stability) {
             // If we are stable, then we can provide the StandStill command
             if (stability != Stability::STANDING) {
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
