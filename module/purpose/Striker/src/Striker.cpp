@@ -94,8 +94,8 @@ namespace module::purpose {
         emit<Task>(std::make_unique<StandStill>());
         emit<Task>(std::make_unique<LookAtBall>(), 1);
         emit<Task>(std::make_unique<WalkToBall>(), 2);
-        // emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 3);
-        // emit<Task>(std::make_unique<FallRecovery>(), 4);
+        emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 3);
+        emit<Task>(std::make_unique<FallRecovery>(), 4);
     }
 
 }  // namespace module::purpose
