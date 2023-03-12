@@ -24,6 +24,7 @@ import "Vector.proto";
 
 /// Plan a path to walk to the specified point
 message WalkTo {
+    /// The point to walk to, relative to the torso
     fvec3 rPTt = 1;
 }
 
