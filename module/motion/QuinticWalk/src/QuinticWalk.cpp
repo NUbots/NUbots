@@ -129,7 +129,7 @@ namespace module::motion {
             }
         });
 
-        on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("quinticwalk.yaml").then([this](const Configuration& cfg) {
             log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             load_quintic_walk(cfg, normal_config);
@@ -145,7 +145,7 @@ namespace module::motion {
             }
         });
 
-        on<Configuration>("goalie/QuinticWalk.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("goalie/quinticwalk.yaml").then([this](const Configuration& cfg) {
             load_quintic_walk(cfg, goalie_config);
         });
 
