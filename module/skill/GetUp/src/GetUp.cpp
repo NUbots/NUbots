@@ -10,7 +10,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/skill/GetUp.hpp"
 
-#include "utility/motion/Script.hpp"
+#include "utility/skill/Script.hpp"
 
 namespace module::skill {
 

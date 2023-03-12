@@ -7,7 +7,7 @@
 #include "message/skill/Kick.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/motion/Script.hpp"
+#include "utility/skill/Script.hpp"
 
 namespace module::skill {
 
