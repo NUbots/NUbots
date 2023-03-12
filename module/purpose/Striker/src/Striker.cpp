@@ -41,11 +41,13 @@ namespace module::purpose {
 
         on<Provide<StrikerTask>, Optional<With<GameState>>>().then(
             [this](const StrikerTask& striker_task, const std::shared_ptr<const GameState>& game_state) {
+                // Do not use GameController information if force playing or force penalty shootout
                 if (striker_task.force_playing || striker_task.force_penalty_shootout) {
                     play();
                     return;
                 }
 
+                // Check if tthere is GameState information, and if so act based on the current mode
                 if (game_state) {
                     auto mode = game_state->data.mode.value;
                     switch (mode) {
@@ -58,6 +60,7 @@ namespace module::purpose {
             });
 
         on<Provide<PlayStriker>, Optional<With<Phase>>>().then([this](const std::shared_ptr<const Phase>& phase) {
+            // Check if there is Phase information, and if so act based on the phase
             if (phase) {
                 switch (phase->value) {
                     // Stand still in initial and set state
@@ -93,6 +96,7 @@ namespace module::purpose {
     }
 
     void Striker::play() {
+        // Walk to the ball and kick!
         emit<Task>(std::make_unique<StandStill>());
         emit<Task>(std::make_unique<LookAtBall>(), 1);
         emit<Task>(std::make_unique<WalkToBall>(), 2);
