@@ -92,11 +92,11 @@ namespace module::skill {
         for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
             // Sets the leg gains
             if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
-                cfg.[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
+                cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
             }
             // Sets the arm gains
             if (id < ServoID::R_HIP_YAW) {
-                cfg.[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
+                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
             }
         }
 
@@ -140,25 +140,25 @@ namespace module::skill {
         on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            load_quintic_walk(config, normal_config);
+            load_quintic_walk(config, normal_cfg);
 
             // Make sure the walk engine has the parameters at least once
-            if (first_config) {
+            if (first_cfg) {
                 // Send these parameters to the walk engine
                 walk_engine.set_parameters(current_cfg.params);
 
                 imu_reaction.enable(current_cfg.imu_active);
 
-                first_config = false;
+                first_cfg = false;
             }
         });
 
         on<Configuration>("goalie/QuinticWalk.yaml").then([this](const Configuration& config) {
-            load_quintic_walk(config, goalie_config);
+            load_quintic_walk(config, goalie_cfg);
         });
 
         // Runs every time the Walk provider starts (wasn't running)
-        on<Start<Walk>, With<Behaviour::State>>().then(
+        on<Start<Walk>, With<Behaviour::State>, With<KinematicsModel>>().then(
             [this](const Behaviour::State& behaviour, const KinematicsModel& model) {
                 kinematicsModel = model;
                 first_run       = true;
@@ -167,10 +167,10 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
                 walk_engine.reset();
                 if (behaviour == Behaviour::State::GOALIE_WALK) {
-                    current_config = goalie_config;
+                    current_cfg = goalie_cfg;
                 }
                 else {
-                    current_config = normal_config;
+                    current_cfg = normal_cfg;
                 }
                 // Send these parameters to the walk engine
                 walk_engine.set_parameters(current_cfg.params);
@@ -332,11 +332,11 @@ namespace module::skill {
         for (int id = 0; id < ServoID::NUMBER_OF_SERVOS - 2; ++id) {
             // Set the legs
             if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right legs
-                right_leg->servos[id] = current_cfg.[ServoID(id)];
+                right_leg->servos[id] = current_cfg.servo_states[ServoID(id)];
             }
             else if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left legs
 
-                left_leg->servos[id] = current_cfg.[ServoID(id)];
+                left_leg->servos[id] = current_cfg.servo_states[ServoID(id)];
             }
             else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right arms
                 right_arm->servos[id] = ServoCommand(time,

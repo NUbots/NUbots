@@ -7,7 +7,10 @@
 #include <vector>
 
 #include "extension/Behaviour.hpp"
+#include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/ServoCommand.hpp"
 #include "message/behaviour/state/Stability.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -39,7 +42,8 @@ namespace module::skill {
             float imu_roll_threshold  = 0.0f;
 
             utility::motion::WalkingParameter params{};
-            std::map<utility::input::ServoID, ServoState> servo_states{};
+
+            std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
 
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
         } normal_cfg{}, goalie_cfg{};
@@ -47,9 +51,9 @@ namespace module::skill {
         static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);
 
         /// @brief Stores the walking config
-        Config& current_config = normal_config;
+        Config& current_cfg = normal_cfg;
 
-        bool first_config = true;
+        bool first_cfg = true;
 
         Eigen::Vector3f current_orders = Eigen::Vector3f::Zero();
         bool is_left_support           = true;
