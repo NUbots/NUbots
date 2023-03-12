@@ -19,33 +19,17 @@
 
 #include "SensorFilter.hpp"
 
-#include "extension/Configuration.hpp"
+#include "Kinematics.hpp"
+#include "OdometryUKF.hpp"
+#include "RawSensors.hpp"
 
-#include "utility/actuation/ForwardKinematics.hpp"
-#include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
-#include "utility/math/euler.hpp"
-#include "utility/nusight/NUhelpers.hpp"
-#include "utility/platform/RawSensors.hpp"
-#include "utility/support/yaml_expression.hpp"
+#include "extension/Configuration.hpp"
 
 namespace module::input {
 
     using extension::Configuration;
 
-    using utility::actuation::kinematics::calculateAllPositions;
-    using utility::actuation::kinematics::calculateCentreOfMass;
-    using utility::actuation::kinematics::calculateInertialTensor;
-    using utility::input::ServoID;
-    using utility::math::euler::MatrixToEulerIntrinsic;
-    using utility::nusight::graph;
-    using utility::platform::getRawServo;
-    using utility::platform::make_error_string;
-    using utility::platform::make_servo_error_string;
-    using utility::support::Expression;
-
-    SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
+    SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -124,21 +108,16 @@ namespace module::input {
                 config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
 
             // Set our initial state with the config means and covariances, flagging the filter to reset it
-            MotionModel<double>::StateVec mean;
-            mean.rTWw     = cfg.motionFilter.initial.mean.position;
-            mean.vTw      = cfg.motionFilter.initial.mean.velocity;
-            mean.Rwt      = cfg.motionFilter.initial.mean.rotation;
-            mean.omegaTTt = cfg.motionFilter.initial.mean.rotational_velocity;
+            cfg.initial_mean.rTWw     = cfg.motionFilter.initial.mean.position;
+            cfg.initial_mean.vTw      = cfg.motionFilter.initial.mean.velocity;
+            cfg.initial_mean.Rwt      = cfg.motionFilter.initial.mean.rotation;
+            cfg.initial_mean.omegaTTt = cfg.motionFilter.initial.mean.rotational_velocity;
 
-            MotionModel<double>::StateVec covariance;
-            covariance.rTWw     = cfg.motionFilter.initial.covariance.position;
-            covariance.vTw      = cfg.motionFilter.initial.covariance.velocity;
-            covariance.Rwt      = cfg.motionFilter.initial.covariance.rotation;
-            covariance.omegaTTt = cfg.motionFilter.initial.covariance.rotational_velocity;
-            motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
-
-            // Set our initial position
-            rTWw = config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
+            cfg.initial_covariance.rTWw     = cfg.motionFilter.initial.covariance.position;
+            cfg.initial_covariance.vTw      = cfg.motionFilter.initial.covariance.velocity;
+            cfg.initial_covariance.Rwt      = cfg.motionFilter.initial.covariance.rotation;
+            cfg.initial_covariance.omegaTTt = cfg.motionFilter.initial.covariance.rotational_velocity;
+            motionFilter.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
 
             // Don't filter any sensors until we have initialised the filter
             update_loop.disable();
@@ -152,10 +131,8 @@ namespace module::input {
                     Eigen::Vector3d acc  = Eigen::Vector3d::Zero();
                     Eigen::Vector3d gyro = Eigen::Vector3d::Zero();
                     Eigen::Vector3d rMFt = Eigen::Vector3d::Zero();
-
                     for (const auto& s : sensors) {
                         Sensors filtered_sensors{};
-
                         // Accumulate accelerometer and gyroscope readings
                         acc += s->accelerometer.cast<double>();
                         gyro += s->gyroscope.cast<double>();
@@ -177,33 +154,27 @@ namespace module::input {
                                                                 original.voltage,
                                                                 static_cast<float>(original.temperature));
                         }
-
                         // Calculate forward kinematics
                         const auto Htx = calculateAllPositions(model, filtered_sensors);
                         for (const auto& entry : Htx) {
                             filtered_sensors.Htx[entry.first] = entry.second.matrix();
                         }
-
                         // Calculate the average length of both legs from the torso and accumulate this measurement
                         const Eigen::Isometry3d Htr(filtered_sensors.Htx[ServoID::R_ANKLE_ROLL]);
                         const Eigen::Isometry3d Htl(filtered_sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         const Eigen::Vector3d rTFt = (Htr.translation() + Htl.translation()) * 0.5;
-
                         // Accumulator CoM readings
                         rMFt += calculateCentreOfMass(model, filtered_sensors.Htx).head<3>() + rTFt;
                     }
-
                     // Average all accumulated readings
                     acc /= static_cast<double>(sensors.size());
                     gyro /= static_cast<double>(sensors.size());
                     rMFt /= static_cast<double>(sensors.size());
-
                     // Average time per sensor reading
                     double dt = std::chrono::duration_cast<std::chrono::duration<double>>(sensors.back()->timestamp
                                                                                           - sensors.front()->timestamp)
                                     .count()
                                 / static_cast<double>(sensors.size());
-
                     // Find the rotation from the average accelerometer reading to world UnitZ
                     // Rotating from torso acceleration vector to world z vector ===> this makes it Rwt and not Rtw
                     Eigen::Quaterniond Rwt = Eigen::Quaterniond::FromTwoVectors(acc, Eigen::Vector3d::UnitZ());
@@ -216,7 +187,6 @@ namespace module::input {
                     mean.vTw      = (acc - (Rwt.conjugate() * Eigen::Quaterniond(0.0, 0.0, 0.0, G) * Rwt).vec()) * dt;
                     mean.Rwt      = Rwt;
                     mean.omegaTTt = gyro;
-
                     MotionModel<double>::StateVec covariance;
                     covariance.rTWw     = cfg.motionFilter.initial.covariance.position;
                     covariance.vTw      = cfg.motionFilter.initial.covariance.velocity;
@@ -224,7 +194,7 @@ namespace module::input {
                     covariance.omegaTTt = cfg.motionFilter.initial.covariance.rotational_velocity;
 
                     // We have finished resetting the filter now
-                    switch (motionFilter.reset(mean.getStateVec(), covariance.asDiagonal())) {
+                    switch (motionFilter.reset(cfg.initial_mean.getStateVec(), covariance.asDiagonal())) {
                         case Eigen::Success:
                             log<NUClear::INFO>("Motion Model UKF has been reset");
                             reset_filter.store(false);
@@ -232,8 +202,7 @@ namespace module::input {
                             break;
                         case Eigen::NumericalIssue:
                             log<NUClear::WARN>(
-                                "Cholesky decomposition failed. The provided data did not satisfy the "
-                                "prerequisites.");
+                                "Cholesky decomposition failed. The provided data did not satisfy the prerequisites.");
                             break;
                         case Eigen::NoConvergence:
                             log<NUClear::WARN>("Cholesky decomposition failed. Iterative procedure did not converge.");
@@ -246,46 +215,38 @@ namespace module::input {
                         default: log<NUClear::WARN>("Cholesky decomposition failed. Some other reason."); break;
                     }
                 }
-
-                int leftCount   = 0;
-                int middleCount = 0;
-
+                int left_count   = 0;
+                int middle_count = 0;
                 // If we have any downs in the last 20 frames then we are button pushed
                 for (const auto& s : sensors) {
                     if (s->buttons.left && (s->platform_error_flags == 0u)) {
-                        ++leftCount;
+                        ++left_count;
                     }
                     if (s->buttons.middle && (s->platform_error_flags == 0u)) {
-                        ++middleCount;
+                        ++middle_count;
                     }
                 }
-
-                bool newLeftDown   = leftCount > cfg.buttons.debounce_threshold;
-                bool newMiddleDown = middleCount > cfg.buttons.debounce_threshold;
-
-                if (newLeftDown != left_down) {
-
-                    left_down = newLeftDown;
-
-                    if (newLeftDown) {
-                        log("Left Button Down");
+                bool new_left_down   = left_count > cfg.buttons.debounce_threshold;
+                bool new_middle_down = middle_count > cfg.buttons.debounce_threshold;
+                if (new_left_down != left_down) {
+                    left_down = new_left_down;
+                    if (new_left_down) {
+                        log<NUClear::INFO>("Left Button Down");
                         emit(std::make_unique<ButtonLeftDown>());
                     }
                     else {
-                        log("Left Button Up");
+                        log<NUClear::INFO>("Left Button Up");
                         emit(std::make_unique<ButtonLeftUp>());
                     }
                 }
-                if (newMiddleDown != middle_down) {
-
-                    middle_down = newMiddleDown;
-
-                    if (newMiddleDown) {
-                        log("Middle Button Down");
+                if (new_middle_down != middle_down) {
+                    middle_down = new_middle_down;
+                    if (new_middle_down) {
+                        log<NUClear::INFO>("Middle Button Down");
                         emit(std::make_unique<ButtonMiddleDown>());
                     }
                     else {
-                        log("Middle Button Up");
+                        log<NUClear::INFO>("Middle Button Up");
                         emit(std::make_unique<ButtonMiddleUp>());
                     }
                 }
@@ -322,354 +283,6 @@ namespace module::input {
                           .disable();
     }
 
-    void SensorFilter::update_raw_sensors(std::unique_ptr<Sensors>& sensors,
-                                          const std::shared_ptr<const Sensors>& previous_sensors,
-                                          const RawSensors& raw_sensors) {
-        // Check for errors on the platform and FSRs
-        if (raw_sensors.platform_error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(make_error_string("Platform", raw_sensors.platform_error_flags));
-        }
-        if (raw_sensors.fsr.left.error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(make_error_string("Left FSR", raw_sensors.fsr.left.error_flags));
-        }
-        if (raw_sensors.fsr.right.error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(make_error_string("Right FSR", raw_sensors.fsr.right.error_flags));
-        }
-
-        // **************** Servos ****************
-        for (uint32_t id = 0; id < 20; ++id) {
-            const auto& original = getRawServo(id, raw_sensors);
-            const auto& error    = original.error_flags;
-            // Check for an error on the servo and report it
-            if (error != RawSensors::Error::OK) {
-                NUClear::log<NUClear::WARN>(utility::platform::make_servo_error_string(original, id));
-            }
-            // If current Sensors message for this servo has an error and we have a previous sensors
-            // message available, then we use our previous sensor values with some updates
-            if (error != RawSensors::Error::OK && previous_sensors) {
-                // Add the sensor values to the system properly
-                sensors->servo.emplace_back(error,
-                                            id,
-                                            original.torque_enabled,
-                                            original.p_gain,
-                                            original.i_gain,
-                                            original.d_gain,
-                                            original.goal_position,
-                                            original.moving_speed,
-                                            previous_sensors->servo[id].present_position,
-                                            previous_sensors->servo[id].present_velocity,
-                                            previous_sensors->servo[id].load,
-                                            previous_sensors->servo[id].voltage,
-                                            previous_sensors->servo[id].temperature);
-            }
-            // Otherwise we can just use the new values as is
-            else {
-                // Add the sensor values to the system properly
-                sensors->servo.emplace_back(error,
-                                            id,
-                                            original.torque_enabled,
-                                            original.p_gain,
-                                            original.i_gain,
-                                            original.d_gain,
-                                            original.goal_position,
-                                            original.moving_speed,
-                                            original.present_position,
-                                            original.present_speed,
-                                            original.load,
-                                            original.voltage,
-                                            static_cast<float>(original.temperature));
-            }
-
-            // **************** Accelerometer and Gyroscope ****************
-            // If we have a previous Sensors and our platform has errors then reuse our last sensor value of the
-            // accelerometer
-            if ((raw_sensors.platform_error_flags != 0u) && previous_sensors) {
-                sensors->accelerometer = previous_sensors->accelerometer;
-            }
-            else {
-                sensors->accelerometer = raw_sensors.accelerometer.cast<double>();
-            }
-
-            // If we have a previous Sensors message, our platform has errors, and the gyro is spinning too fast then
-            // reuse our last sensor value of the gyroscope. Note: One of the gyros would occasionally
-            // throw massive numbers without an error flag and if our hardware is working as intended, it should never
-            // read that we're spinning at 2 revs/s
-            if (previous_sensors
-                && ((raw_sensors.platform_error_flags != 0u) || raw_sensors.gyroscope.norm() > 4.0 * M_PI)) {
-                NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
-                sensors->gyroscope = previous_sensors->gyroscope;
-            }
-            else {
-                sensors->gyroscope = raw_sensors.gyroscope.cast<double>();
-            }
-        }
-
-        // **************** Timestamp ****************
-        sensors->timestamp = raw_sensors.timestamp;
-
-        // **************** Battery Voltage  ****************
-        // Update the current battery voltage of the whole robot
-        sensors->voltage = raw_sensors.voltage;
-
-        // **************** Buttons and LEDs ****************
-        sensors->button.reserve(2);
-        sensors->button.emplace_back(0, raw_sensors.buttons.left);
-        sensors->button.emplace_back(1, raw_sensors.buttons.middle);
-        sensors->led.reserve(5);
-        sensors->led.emplace_back(0, raw_sensors.led_panel.led2 ? 0xFF0000 : 0);
-        sensors->led.emplace_back(1, raw_sensors.led_panel.led3 ? 0xFF0000 : 0);
-        sensors->led.emplace_back(2, raw_sensors.led_panel.led4 ? 0xFF0000 : 0);
-        sensors->led.emplace_back(3, raw_sensors.head_led.RGB);  // Head
-        sensors->led.emplace_back(4, raw_sensors.eye_led.RGB);   // Eye
-    }
-
-    void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors,
-                                         const KinematicsModel& kinematics_model,
-                                         const RawSensors& raw_sensors) {
-
-        // **************** Kinematics ****************
-        // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
-        auto Htx = calculateAllPositions(kinematics_model, *sensors);
-        for (const auto& entry : Htx) {
-            sensors->Htx[entry.first] = entry.second.matrix();
-        }
-
-        // **************** Centre of Mass and Inertia Tensor ****************
-        sensors->rMTt           = calculateCentreOfMass(kinematics_model, sensors->Htx);
-        sensors->inertia_tensor = calculateInertialTensor(kinematics_model, sensors->Htx);
-
-        // **************** Foot Down Information ****************
-        sensors->feet[BodySide::RIGHT].down = true;
-        sensors->feet[BodySide::LEFT].down  = true;
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
-        const Eigen::Vector3d rRLl  = Hlr.translation();
-        switch (cfg.footDown.method()) {
-            case FootDownMethod::Z_HEIGHT:
-                if (rRLl.z() < -cfg.footDown.threshold()) {
-                    sensors->feet[BodySide::LEFT].down = false;
-                }
-                else if (rRLl.z() > cfg.footDown.threshold()) {
-                    sensors->feet[BodySide::RIGHT].down = false;
-                }
-                break;
-            case FootDownMethod::FSR:
-                // Determine if any two diagonally opposite FSRs are in contact with the ground, which is either fsr1
-                // and fsr3, or fsr2 and fsr4. A FSR is in contact with the ground if its value is greater than the
-                // certainty threshold
-                sensors->feet[BodySide::LEFT].down = (raw_sensors.fsr.left.fsr1 > cfg.footDown.threshold()
-                                                      && raw_sensors.fsr.left.fsr3 > cfg.footDown.threshold())
-                                                     || (raw_sensors.fsr.left.fsr2 > cfg.footDown.threshold()
-                                                         && raw_sensors.fsr.left.fsr4 > cfg.footDown.threshold());
-                sensors->feet[BodySide::RIGHT].down = (raw_sensors.fsr.right.fsr1 > cfg.footDown.threshold()
-                                                       && raw_sensors.fsr.right.fsr3 > cfg.footDown.threshold())
-                                                      || (raw_sensors.fsr.right.fsr2 > cfg.footDown.threshold()
-                                                          && raw_sensors.fsr.right.fsr4 > cfg.footDown.threshold());
-                break;
-            default: log<NUClear::WARN>("Unknown foot down method"); break;
-        }
-    }
-
-    void SensorFilter::update_odometry_ukf(std::unique_ptr<Sensors>& sensors,
-                                           const std::shared_ptr<const Sensors>& previous_sensors,
-                                           const RawSensors& raw_sensors) {
-
-        // **************** UKF Measurement Update ****************
-        // Gyroscope measurement update
-        motionFilter.measure(sensors->gyroscope,
-                             cfg.motionFilter.noise.measurement.gyroscope,
-                             MeasurementType::GYROSCOPE());
-
-        // Calculate accelerometer noise factor
-        Eigen::Matrix3d acc_noise =
-            cfg.motionFilter.noise.measurement.accelerometer
-            // Add noise which is proportional to the square of how much we are moving, minus gravity
-            // This means that the more we're accelerating, the noisier we think the measurements are
-            + ((sensors->accelerometer.norm() - std::abs(G)) * (sensors->accelerometer.norm() - std::abs(G)))
-                  * cfg.motionFilter.noise.measurement.accelerometer_magnitude;
-
-        // Accelerometer measurement update
-        motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
-
-        // This loop calculates the Hwf transform for feet if they have just hit the ground. If they
-        // have not just hit the ground, it uses the previous Hwf value. This assumes that once the foot
-        // hits the ground, it doesn't move at all i.e. we're ASSUMING the foot cannot slip/slide
-        for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
-            bool foot_down      = sensors->feet[side].down;
-            bool prev_foot_down = previous_foot_down[side];
-            Eigen::Isometry3d Htf(sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
-
-            // If this side's foot is down, and it was not down at the previous time step, then we
-            // calculate our new footlanding_Hwf value, because our foot has just landed
-            if (foot_down && !prev_foot_down) {
-                const MotionModel<double>::StateVec filterState = MotionModel<double>::StateVec(motionFilter.get());
-                Eigen::Isometry3d Hwt;
-                Hwt.linear()      = filterState.Rwt.toRotationMatrix();
-                Hwt.translation() = filterState.rTWw;
-
-                // Htg is intended to be such that the "foot down" position is where the foot would be
-                // if it were flat, even if it's not flat when first touches the ground. As the foot
-                // flattens, it's meant to becomes true. This means that even if the foot hits the
-                // ground at an angle, it doesn't store that angled position as the footlanding_Hwf, but
-                // instead stores the position that foot would be if/when it becomes flat on the ground
-                Eigen::Isometry3d Htg(utility::actuation::kinematics::calculateGroundSpace(Htf, Hwt));
-
-                footlanding_Hwf[side]                   = Hwt * Htg;
-                footlanding_Hwf[side].translation().z() = 0.0;
-
-                // Store the current foot down state for next time
-                previous_foot_down[side] = true;
-            }
-            // This sides foot is down, but it didn't hit the ground this time step
-            else if (foot_down && prev_foot_down) {
-                // Use stored Hwf and Htf to calculate Hwt
-                Eigen::Isometry3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
-
-                // do a foot based position update
-                motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
-                                     cfg.motionFilter.noise.measurement.flat_foot_odometry,
-                                     MeasurementType::FLAT_FOOT_ODOMETRY());
-
-                // do a foot based orientation update
-                Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                motionFilter.measure(Rwt.coeffs(),
-                                     cfg.motionFilter.noise.measurement.flat_foot_orientation,
-                                     MeasurementType::FLAT_FOOT_ORIENTATION());
-            }
-            // Otherwise this side's foot is off the ground, so we make sure that for the next time
-            // step, we know that this time step, the foot was off the ground
-            else if (!foot_down) {
-                previous_foot_down[side] = false;
-            }
-
-            // Note that the Hwf is set, even if the foot is not down. This means that moving feet in
-            // the air will have an Hwf associated with them which is the transform from when that foot
-            // last hit the ground
-            sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
-        }
-
-        // Calculate our time offset from the last read then update the filter's time
-        const double dt = std::max(
-            std::chrono::duration_cast<std::chrono::duration<double>>(
-                raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
-                .count(),
-            0.0);
-
-        // **************** UKF Time Update ****************
-        switch (motionFilter.time(dt)) {
-            // If we succeeded doing the time update, we don't have to reset the filter
-            case Eigen::Success: break;
-            // Otherwise, we log the error and set the flag to reset the filter
-            case Eigen::NumericalIssue:
-                log<NUClear::WARN>(
-                    "Cholesky decomposition failed. The provided data did not satisfy the "
-                    "prerequisites.");
-                // Disable the sensor update loop to reset the filter post cholesky
-                update_loop.disable();
-                reset_filter.store(true);
-                break;
-            case Eigen::NoConvergence:
-                log<NUClear::WARN>("Cholesky decomposition failed. Iterative procedure did not converge.");
-                // Disable the sensor update loop to reset the filter post cholesky
-                update_loop.disable();
-                reset_filter.store(true);
-                break;
-            case Eigen::InvalidInput:
-                log<NUClear::WARN>(
-                    "Cholesky decomposition failed. The inputs are invalid, or the algorithm has "
-                    "been "
-                    "improperly called. When assertions are enabled, such errors trigger an "
-                    "assert.");
-                // Disable the sensor update loop to reset the filter post cholesky
-                update_loop.disable();
-                reset_filter.store(true);
-                break;
-            default:
-                log<NUClear::WARN>("Cholesky decomposition failed. Some other reason.");
-                // Disable the sensor update loop to reset the filter post cholesky
-                update_loop.disable();
-                reset_filter.store(true);
-                break;
-        }
-
-
-        // If the filter failed, use previous sensors
-        if (reset_filter.load() && previous_sensors) {
-            sensors->Htw = previous_sensors->Htw;
-            sensors->Hgt = previous_sensors->Hgt;
-            return;
-        }
-        else {
-
-            // **************** Torso CoM Position in World (rMWw) ****************
-            bool update_done = false;
-
-            for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
-                const bool& foot_down      = sensors->feet[side].down;
-                const bool& prev_foot_down = previous_foot_down[side];
-
-                // Get the Foot to Torso transform for this foot
-                const Eigen::Isometry3d Htf(
-                    sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
-
-                // Calculate our current Foot to CoM vector for this foot
-                const Eigen::Vector3d current_rMFt = Htf.translation() + sensors->rMTt.head<3>();
-
-                // We just put this foot on the ground (i.e. it wasn't on the ground in the last time
-                // step)
-                if (foot_down && !prev_foot_down) {
-                    // Update our Foot to CoM vector for this foot
-                    rMFt[side]               = current_rMFt;
-                    previous_foot_down[side] = true;
-                }
-                // Our foot is on the ground and was also on the ground in the last time step
-                else if (foot_down && prev_foot_down) {
-                    // If both feet are on the ground then we don't need to do another update
-                    if (!update_done) {
-                        // The difference between our current and previous Foot to torso CoM vectors is
-                        // how much our torso has moved in the last time step in torso space We need to
-                        // rotate this into world space to update our current Torso CoM position
-                        const Eigen::Quaterniond& Rwt     = MotionModel<double>::StateVec(motionFilter.get()).Rwt;
-                        const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
-                        const Eigen::Quaterniond q(
-                            Eigen::Vector4d(rMFt_update.x(), rMFt_update.y(), rMFt_update.z(), 0.0));
-                        rTWw += (Rwt * q * Rwt.conjugate()).vec();
-
-                        // Make sure we don't do another update
-                        update_done = true;
-                    }
-                    previous_foot_down[side] = true;
-                    rMFt[side]               = current_rMFt;
-                }
-                else {
-                    previous_foot_down[side] = false;
-                }
-            }
-
-            // **************** Construct Odometry Output (Htw) ****************
-            // Gives us the quaternion representation
-            const auto o = MotionModel<double>::StateVec(motionFilter.get());
-            // Map from world to torso coordinates (Rtw)
-            Eigen::Isometry3d Hwt;
-            Hwt.linear()      = o.Rwt.toRotationMatrix();
-            Hwt.translation() = o.rTWw;
-            // Remove the yaw component of the rotation
-            Hwt.linear() =
-                Eigen::AngleAxisd(-std::atan2(Hwt(1, 0), Hwt(0, 0)), Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                * Hwt.linear();
-            sensors->Htw = Hwt.inverse().matrix();
-
-            // **************** Kinematics Horizon (Hgt) ****************
-            Eigen::Isometry3d Rwt(sensors->Htw.inverse());
-            // remove translation components from the transform
-            Rwt.translation() = Eigen::Vector3d::Zero();
-            Eigen::Isometry3d Rgt(Eigen::AngleAxisd(-Rwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
-                                  * Rwt);
-            sensors->Hgt = Rgt.matrix();
-        }
-    }
-
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
         // Graph the raw accelerometer and gyroscope data
         emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
@@ -682,7 +295,7 @@ namespace module::input {
         emit(graph(fmt::format("Sensor/Foot Down/{}/Right", std::string(cfg.footDown.method())),
                    sensors->feet[BodySide::RIGHT].down));
 
-        // Graph the position and orientation of the feet
+        // Graph kinematics information
         const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
         const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
         Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
@@ -694,28 +307,35 @@ namespace module::input {
         emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
         emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
 
+        // Graph odometry information
+        Eigen::Isometry3d Htw = Eigen::Isometry3d(sensors->Htw);
+
+        // Translation
+        Eigen::Vector3d est_rWTt = Htw.translation();
+        emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
+
+        // Orientation
+        Eigen::Vector3d est_Rtw = MatrixToEulerIntrinsic(Htw.rotation());
+        emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
+
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (raw_sensors.odometry_ground_truth.exists) {
             Eigen::Isometry3d true_Htw(raw_sensors.odometry_ground_truth.Htw);
-            Eigen::Isometry3d Hwt = Eigen::Isometry3d(sensors->Htw).inverse();
+
             // Determine translational distance error
-            Eigen::Vector3d est_rWTt   = Hwt.inverse().translation();
             Eigen::Vector3d true_rWTt  = true_Htw.translation();
             Eigen::Vector3d error_rWTt = (true_rWTt - est_rWTt).cwiseAbs();
 
-            // Determine yaw, pitch and roll error
-            Eigen::Vector3d true_Rtw  = MatrixToEulerIntrinsic(true_Htw.rotation());
-            Eigen::Vector3d est_Rtw   = MatrixToEulerIntrinsic(Hwt.inverse().rotation());
-            Eigen::Vector3d error_Rtw = (true_Rtw - est_Rtw).cwiseAbs();
-            double quat_rot_error     = Eigen::Quaterniond(true_Htw.linear() * Hwt.linear()).w();
-
             // Graph translation and its error
-            emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
             emit(graph("Htw true translation (rWTt)", true_rWTt.x(), true_rWTt.y(), true_rWTt.z()));
             emit(graph("Htw translation error", error_rWTt.x(), error_rWTt.y(), error_rWTt.z()));
 
+            // Determine yaw, pitch and roll error
+            Eigen::Vector3d true_Rtw  = MatrixToEulerIntrinsic(true_Htw.rotation());
+            Eigen::Vector3d error_Rtw = (true_Rtw - est_Rtw).cwiseAbs();
+            double quat_rot_error     = Eigen::Quaterniond(true_Htw.linear() * Htw.inverse().linear()).w();
+
             // Graph angles and error
-            emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
             emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
             emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
             emit(graph("Quaternion rotational error", quat_rot_error));

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_INPUT_SENSORFILTER_HPP
@@ -32,8 +32,14 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/actuation/ForwardKinematics.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/euler.hpp"
 #include "utility/math/filter/UKF.hpp"
-
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/platform/RawSensors.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::input {
 
@@ -45,6 +51,17 @@ namespace module::input {
     using message::platform::ButtonMiddleDown;
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
+
+    using utility::actuation::kinematics::calculateAllPositions;
+    using utility::actuation::kinematics::calculateCentreOfMass;
+    using utility::actuation::kinematics::calculateInertialTensor;
+    using utility::input::ServoID;
+    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::nusight::graph;
+    using utility::platform::getRawServo;
+    using utility::platform::make_error_string;
+    using utility::platform::make_servo_error_string;
+    using utility::support::Expression;
 
     /**
      * @author Jade Fountain
@@ -133,6 +150,12 @@ namespace module::input {
                 } initial{};
             } motionFilter{};
 
+            /// @brief Initial state of the for the UKF filter
+            MotionModel<double>::StateVec initial_mean;
+
+            /// @brief Initial covariance of the for the UKF filter
+            MotionModel<double>::StateVec initial_covariance;
+
             struct Button {
                 Button()               = default;
                 int debounce_threshold = 0;
@@ -190,32 +213,29 @@ namespace module::input {
                                  const std::shared_ptr<const Sensors>& previous_sensors,
                                  const RawSensors& raw_sensors);
 
-        /// @brief Display debug information about the sensor filter
+        /// @brief Display debug information
         /// @param sensors The sensors message to update
         /// @param raw_sensors The raw sensor data
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
-        // Current state of the button pushes
-        // used to debounce button presses
-        bool left_down   = false;
+        /// @brief Current state of the left button
+        bool left_down = false;
+        /// @brief Current state of the middle button
         bool middle_down = false;
 
-        // Our sensor for foot down
+        /// @brief Our sensor for foot down
         VirtualLoadSensor<float> load_sensor{};
 
         // This keeps track of whether each sides foot was down in the previous time step
         // e.g. if right foot down at time t, then at time t+1, previous_foot_down[RightSide] = true
         std::array<bool, 2> previous_foot_down = {false, false};
+
         // Foot to world in foot-flat (both feet down) rotation at the timestep with the most recent foot landing
         std::array<Eigen::Isometry3d, 2> footlanding_Hwf{};
 
         // Foot to CoM in torso space
         std::array<Eigen::Vector3d, 2> rMFt{};
-        Eigen::Vector3d rTWw{};
-
-        // Storage for previous gyroscope values
-        Eigen::Vector3d theta = Eigen::Vector3d::Zero();
 
         // Handle for the sensor filter update loop, allows disabling new sensor updates when a reset event occurs
         ReactionHandle update_loop{};
