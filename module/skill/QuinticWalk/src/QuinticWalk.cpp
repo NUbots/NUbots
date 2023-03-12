@@ -40,8 +40,8 @@ namespace module::skill {
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
-    using utility::motion::WalkEngineState;
     using utility::nusight::graph;
+    using utility::skill::WalkEngineState;
     using utility::support::Expression;
 
 

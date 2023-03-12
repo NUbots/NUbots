@@ -14,7 +14,7 @@
 #include "message/behaviour/state/Stability.hpp"
 
 #include "utility/input/ServoID.hpp"
-#include "utility/motion/WalkEngine.hpp"
+#include "utility/skill/WalkEngine.hpp"
 
 namespace module::skill {
 
@@ -41,7 +41,7 @@ namespace module::skill {
             float imu_pitch_threshold = 0.0f;
             float imu_roll_threshold  = 0.0f;
 
-            utility::motion::WalkingParameter params{};
+            utility::skill::WalkingParameter params{};
 
             std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
 
@@ -61,7 +61,7 @@ namespace module::skill {
 
         NUClear::clock::time_point last_update_time{};
 
-        utility::motion::QuinticWalkEngine walk_engine{};
+        utility::skill::QuinticWalkEngine walk_engine{};
 
         message::actuation::KinematicsModel kinematicsModel{};
     };
