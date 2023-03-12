@@ -40,8 +40,12 @@ namespace module::purpose {
         });
 
         on<Provide<StrikerTask>, Optional<With<GameState>>>().then(
-            [this](const std::shared_ptr<const GameState>& game_state) {
-                log<NUClear::WARN>("striker task");
+            [this](const StrikerTask& striker_task, const std::shared_ptr<const GameState>& game_state) {
+                if (striker_task.force_playing || striker_task.force_penalty_shootout) {
+                    play();
+                    return;
+                }
+
                 if (game_state) {
                     auto mode = game_state->data.mode.value;
                     switch (mode) {
@@ -54,8 +58,6 @@ namespace module::purpose {
             });
 
         on<Provide<PlayStriker>, Optional<With<Phase>>>().then([this](const std::shared_ptr<const Phase>& phase) {
-            log<NUClear::WARN>("Play striker");
-            play();
             if (phase) {
                 switch (phase->value) {
                     // Stand still in initial and set state

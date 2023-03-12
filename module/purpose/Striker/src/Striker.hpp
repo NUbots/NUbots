@@ -13,6 +13,7 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief The position of the robot to walk to in ready, relative to the field
             Eigen::Vector3d rRFf = Eigen::Vector3d::Zero();
         } cfg;
 
