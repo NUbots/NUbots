@@ -7,16 +7,12 @@
 
 namespace module::strategy {
 
-class StandStill : public ::extension::behaviour::BehaviourReactor {
-private:
-    /// @brief Stores configuration values
-    struct Config {
-    } cfg;
+    class StandStill : public ::extension::behaviour::BehaviourReactor {
 
-public:
-    /// @brief Called by the powerplant to build and setup the StandStill reactor.
-    explicit StandStill(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the StandStill reactor.
+        explicit StandStill(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::strategy
 
