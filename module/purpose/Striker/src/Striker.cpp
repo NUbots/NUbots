@@ -39,30 +39,38 @@ namespace module::purpose {
             cfg.rRFf        = config["rRFf"].as<Expression>();
         });
 
-        on<Provide<StrikerTask>, With<GameState>>().then([this](const GameState& game_state) {
-            auto mode = game_state.data.mode.value;
-            switch (mode) {
-                case GameMode::PENALTY_SHOOTOUT: emit<Task>(std::make_unique<PenaltyShootoutStriker>()); break;
-                case GameMode::NORMAL:
-                case GameMode::OVERTIME: emit<Task>(std::make_unique<PlayStriker>()); break;
-                default: log<NUClear::WARN>("Game mode unknown.");
-            }
-        });
+        on<Provide<StrikerTask>, Optional<With<GameState>>>().then(
+            [this](const std::shared_ptr<const GameState>& game_state) {
+                log<NUClear::WARN>("striker task");
+                if (game_state) {
+                    auto mode = game_state->data.mode.value;
+                    switch (mode) {
+                        case GameMode::PENALTY_SHOOTOUT: emit<Task>(std::make_unique<PenaltyShootoutStriker>()); break;
+                        case GameMode::NORMAL:
+                        case GameMode::OVERTIME: emit<Task>(std::make_unique<PlayStriker>()); break;
+                        default: log<NUClear::WARN>("Game mode unknown.");
+                    }
+                }
+            });
 
-        on<Provide<PlayStriker>, With<Phase>>().then([this](const Phase& phase) {
-            switch (phase.value) {
-                // Stand still in initial and set state
-                case Phase::INITIAL:   // Beginning of game and half time
-                case Phase::SET:       // After ready
-                case Phase::FINISHED:  // Game has finished
-                case Phase::TIMEOUT:   // A pause in playing - not in simulation
-                    emit<Task>(std::make_unique<StandStill>());
-                    break;
-                // After initial, robots position on their half of the field
-                case Phase::READY: emit<Task>(std::make_unique<Ready>(cfg.rRFf)); break;
-                // After set, main game where we should play soccer
-                case Phase::PLAYING: play(); break;
-                default: log<NUClear::WARN>("Unknown normal gamemode phase.");
+        on<Provide<PlayStriker>, Optional<With<Phase>>>().then([this](const std::shared_ptr<const Phase>& phase) {
+            log<NUClear::WARN>("Play striker");
+            play();
+            if (phase) {
+                switch (phase->value) {
+                    // Stand still in initial and set state
+                    case Phase::INITIAL:   // Beginning of game and half time
+                    case Phase::SET:       // After ready
+                    case Phase::FINISHED:  // Game has finished
+                    case Phase::TIMEOUT:   // A pause in playing - not in simulation
+                        emit<Task>(std::make_unique<StandStill>());
+                        break;
+                    // After initial, robots position on their half of the field
+                    case Phase::READY: emit<Task>(std::make_unique<Ready>(cfg.rRFf)); break;
+                    // After set, main game where we should play soccer
+                    case Phase::PLAYING: play(); break;
+                    default: log<NUClear::WARN>("Unknown normal gamemode phase.");
+                }
             }
         });
 
@@ -83,10 +91,11 @@ namespace module::purpose {
     }
 
     void Striker::play() {
-        emit<Task>(std::make_unique<WalkToBall>());
-        emit<Task>(std::make_unique<LookAtBall>());
-        emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()));
-        emit<Task>(std::make_unique<FallRecovery>());
+        emit<Task>(std::make_unique<StandStill>());
+        emit<Task>(std::make_unique<LookAtBall>(), 1);
+        emit<Task>(std::make_unique<WalkToBall>(), 2);
+        // emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 3);
+        // emit<Task>(std::make_unique<FallRecovery>(), 4);
     }
 
 }  // namespace module::purpose
