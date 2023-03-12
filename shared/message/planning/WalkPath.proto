@@ -31,11 +31,11 @@ message WalkTo {
 /// Turn on the spot in the given direction
 message TurnOnSpot {
     /// Direction to turn
-    bool clockwise = 2;
+    bool clockwise = 1;
 }
 
 /// Turn around the ball in the given direction
 message TurnAroundBall {
     /// Direction to turn
-    bool clockwise = 2;
+    bool clockwise = 1;
 }
