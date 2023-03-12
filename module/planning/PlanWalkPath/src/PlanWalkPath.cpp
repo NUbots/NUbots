@@ -40,7 +40,7 @@ namespace module::planning {
         });
 
         // Path to walk to a particular point
-        on<Provide<WalkTo>, Needs<Walk>>().then([this](const WalkTo& walk_to) {
+        on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
             Eigen::Vector3f rPTt = walk_to.rPTt;
 
             // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
@@ -52,12 +52,10 @@ namespace module::planning {
                                                     std::atan2(walk_command.y(), walk_command.x()),
                                                     cfg.max_turn_speed);
 
-            log<NUClear::WARN>("walk command");
             emit<Task>(std::make_unique<Walk>(walk_command));
         });
 
-        on<Provide<TurnOnSpot>, Needs<Walk>>().then([this](const TurnOnSpot& turn_on_spot) {
-            log<NUClear::WARN>("turn on spot");
+        on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
             // Determine the direction of rotation
             int sign = turn_on_spot.clockwise ? -1 : 1;
 
@@ -66,10 +64,9 @@ namespace module::planning {
                 Eigen::Vector3f(cfg.rotate_speed_x, cfg.rotate_speed_y, sign * cfg.rotate_speed)));
         });
 
-        on<Provide<TurnAroundBall>, Needs<Walk>>().then([this](const TurnAroundBall& turn_around_ball) {
+        on<Provide<TurnAroundBall>>().then([this](const TurnAroundBall& turn_around_ball) {
             // Determine the direction of rotation
             int sign = turn_around_ball.clockwise ? -1 : 1;
-            log<NUClear::WARN>("turn around ball");
             // Turn around the ball
             emit<Task>(std::make_unique<Walk>(
                 Eigen::Vector3f(cfg.pivot_ball_speed_x, cfg.pivot_ball_speed_y, sign * cfg.pivot_ball_speed)));
