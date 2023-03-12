@@ -39,6 +39,7 @@ namespace module::skill {
             float imu_roll_threshold  = 0.0f;
 
             utility::motion::WalkingParameter params{};
+            std::map<utility::input::ServoID, ServoState> servo_states{};
 
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
         } normal_cfg{}, goalie_cfg{};

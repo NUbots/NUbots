@@ -341,12 +341,12 @@ namespace module::skill {
             else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right arms
                 right_arm->servos[id] = ServoCommand(time,
                                                      current_cfg.arm_positions[ServoID(id)].second,
-                                                     current_cfg.jointGains[ServoID(id)]);
+                                                     current_cfg.servo_states[ServoID(id)]);
             }
             else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left arms
                 left_arm->servos[id] = ServoCommand(time,
                                                     current_cfg.arm_positions[ServoID(id)].second,
-                                                    current_cfg.jointGains[ServoID(id)]);
+                                                    current_cfg.servo_states[ServoID(id)]);
             }
         }
 
