@@ -2,24 +2,23 @@
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
-#include "extension/behaviour/Script.hpp"
 
 #include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/planning/RelaxWhenFalling.hpp"
 
+#include "utility/motion/Script.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::planning {
 
     using extension::Configuration;
-    using extension::behaviour::Script;
-    using extension::behaviour::ScriptRequest;
     using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::planning::RelaxWhenFalling;
+    using utility::motion::load_script;
     using utility::support::Expression;
 
     double smooth(double value, double new_value, double alpha) {
@@ -108,7 +107,7 @@ namespace module::planning {
                                        : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
                                                                             : "STABLE");
                     emit(std::make_unique<Stability>(Stability::FALLING));
-                    emit<Script>(std::make_unique<BodySequence>(), ScriptRequest{"Relax.yaml"});
+                    emit<Task>(load_script<BodySequence>("Relax.yaml"));
                 }
             }
             else {

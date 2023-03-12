@@ -2,7 +2,6 @@
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
-#include "extension/behaviour/Script.hpp"
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
@@ -18,8 +17,6 @@
 namespace module::skill {
 
     using extension::Configuration;
-    using extension::behaviour::Script;
-    using extension::behaviour::ScriptRequest;
     using message::actuation::HeadIK;
     using message::actuation::LimbsSequence;
     using message::actuation::ServoState;
