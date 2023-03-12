@@ -25,15 +25,15 @@ namespace module::strategy {
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
         });
 
-        on<Provide<WalkToBallTask>, Optional<With<FilteredBall>>>().then(
+        on<Provide<WalkToBallTask>, Optional<With<FilteredBall>>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const std::shared_ptr<const FilteredBall>& ball) {
                 // If we have a ball, walk to it
                 if (ball && (NUClear::clock::now() - ball->time_of_measurement < cfg.ball_search_timeout)) {
-                    emit(std::make_unique<WalkTo>(ball->rBTt));
+                    emit<Task>(std::make_unique<WalkTo>(ball->rBTt));
                 }
                 else {
                     // Otherwise, search for it
-                    emit(std::make_unique<TurnOnSpot>(true));
+                    emit<Task>(std::make_unique<TurnOnSpot>(true));
                 }
             });
     }
