@@ -11,10 +11,21 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            float speed              = 0.0;
-            float max_turn_speed     = 0.0;
-            float pivot_speed        = 0.0;
-            float pivot_ball_speed_y = 0.0;
+            float speed          = 0.0;
+            float max_turn_speed = 0.0;
+            float min_turn_speed = 0.0;
+            /// @brief Rotate on spot walk command angular velocity
+            float rotate_speed = 0;
+            /// @brief Rotate on spot walk command forward velocity
+            float rotate_speed_x = 0;
+            /// @brief Rotate on spot walk command side velocity
+            float rotate_speed_y = 0;
+            /// @brief pivot ball command angular velocity
+            float pivot_ball_speed = 0;
+            /// @brief pivot ball forward velocity
+            float pivot_ball_speed_x = 0;
+            /// @brief pivot ball side velocity
+            float pivot_ball_speed_y = 0;
         } cfg;
 
     public:

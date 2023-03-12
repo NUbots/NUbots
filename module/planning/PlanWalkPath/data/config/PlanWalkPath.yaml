@@ -6,9 +6,14 @@ log_level: DEBUG
 speed: 0.3
 # Maximum turning speed in either direction while walking to a point (radians/s)
 max_turn_speed: 0.25
+min_turn_speed: -0.25
 
-# Pivot tuning values
-# Rotational speed while pivoting (radians/s)
-pivot_speed: 0.4
-# y-axis speed while pivoting around the ball (m/s)
-pivot_ball_speed_y: 0.22
+# Rotate on the spot tuning values
+rotate_speed: 0.4
+rotate_speed_x: 0
+rotate_speed_y: 0
+
+# Rotate around ball tuning values
+pivot_ball_speed: 0.4
+pivot_ball_speed_x: 0
+pivot_ball_speed_y: -0.4
