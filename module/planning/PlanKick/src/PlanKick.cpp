@@ -29,7 +29,7 @@ namespace module::planning {
             cfg.ball_timeout_threshold  = config["ball_timeout_threshold"].as<float>();
             cfg.ball_distance_threshold = config["ball_distance_threshold"].as<float>();
             cfg.ball_angle_threshold    = config["ball_angle_threshold"].as<float>();
-            cfg.target_angle_threshold  = config["target_angle_threshold"].as<float>();
+            cfg.target_angle_threshold  = config["target_angle_threshold"].as<Expression>();
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
