@@ -5,6 +5,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/Defender.hpp"
@@ -17,6 +18,7 @@ namespace module::purpose {
     using extension::Configuration;
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
+    using message::behaviour::state::Stability;
     using message::input::GameEvents;
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
@@ -43,7 +45,11 @@ namespace module::purpose {
         });
 
         // Start the Director graph for the RoboCup soccer scenario!
-        on<Startup>().then([this] { emit<Task>(std::make_unique<FindPurpose>()); });
+        on<Startup>().then([this] {
+            emit<Task>(std::make_unique<FindPurpose>());
+            // At the start of the program, we should be standing
+            emit(std::make_unique<Stability>(Stability::STANDING));
+        });
 
         on<Provide<FindPurpose>>().then([this] {
             // If force play is active, assume it is the playing state of the game
