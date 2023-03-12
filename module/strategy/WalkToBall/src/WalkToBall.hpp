@@ -11,7 +11,10 @@ namespace module::strategy {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Length of time before the ball detection is too old and we should search for the ball
             NUClear::clock::duration ball_search_timeout{};
+            /// @brief Offset to align the ball with the robot's foot
+            float ball_y_offset = 0.0;
         } cfg;
 
     public:
