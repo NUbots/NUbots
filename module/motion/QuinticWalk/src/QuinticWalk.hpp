@@ -45,7 +45,7 @@ namespace module::motion {
             float imu_pitch_threshold = 0.0f;
             float imu_roll_threshold  = 0.0f;
 
-            utility::motion::WalkingParameter params{};
+            utility::skill::WalkingParameter params{};
 
             std::map<utility::input::ServoID, float> jointGains{};
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
@@ -63,7 +63,7 @@ namespace module::motion {
 
         NUClear::clock::time_point last_update_time{};
 
-        utility::motion::QuinticWalkEngine walk_engine{};
+        utility::skill::QuinticWalkEngine walk_engine{};
 
         message::actuation::KinematicsModel kinematicsModel{};
     };
