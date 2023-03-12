@@ -118,6 +118,27 @@ namespace module::extension {
         }
     }
 
+    std::shared_ptr<provider::Provider> Director::get_root_provider(const std::type_index& root_type) {
+        // Create a root provider for this task if one doesn't already exist and use it
+        if (!groups.contains(root_type)) {
+            groups.emplace(root_type, ProviderGroup(root_type));
+        }
+        auto& group = groups.at(root_type);
+        if (group.providers.empty()) {
+            // We subtract from unique_id_source here so that we fill numbers from the top while regular
+            // reaction_ids are filling from the bottom
+            uint64_t unique = --unique_id_source;
+            auto provider =
+                std::make_shared<Provider>(group, unique, Provider::Classification::ROOT, root_type, nullptr);
+            group.providers.push_back(provider);
+            providers.emplace(unique, provider);
+            group.active_provider = provider;
+        }
+        auto root_provider = group.providers.front();
+
+        return root_provider;
+    }
+
     void Director::add_when(const WhenExpression& when) {
         auto it = providers.find(when.reaction->id);
         if (it != providers.end()) {
@@ -246,26 +267,8 @@ namespace module::extension {
 
             // Root level task, make the pack immediately and send it off to be executed as a root task
             if (!providers.contains(task->requester_id)) {
-
-                // Create a root provider for this task if one doesn't already exist and use it
-                if (!groups.contains(task->root_type)) {
-                    groups.emplace(task->root_type, ProviderGroup(task->root_type));
-                }
-                auto& group = groups.at(task->root_type);
-                if (group.providers.empty()) {
-                    // We subtract from unique_id_source here so that we fill numbers from the top while regular
-                    // reaction_ids are filling from the bottom
-                    uint64_t unique = --unique_id_source;
-                    auto provider   = std::make_shared<Provider>(group,
-                                                               unique,
-                                                               Provider::Classification::ROOT,
-                                                               task->root_type,
-                                                               nullptr);
-                    group.providers.push_back(provider);
-                    providers.emplace(unique, provider);
-                    group.active_provider = provider;
-                }
-                auto root_provider = group.providers.front();
+                // Get the root provider from the task root type
+                auto root_provider = get_root_provider(task->root_type);
 
                 // Modify the task we received to look like it came from this provider
                 task->requester_id = root_provider->id;

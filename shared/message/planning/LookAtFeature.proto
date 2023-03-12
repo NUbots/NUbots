@@ -14,25 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2017 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.localisation;
+package message.planning;
 
-import "Vector.proto";
-import "google/protobuf/timestamp.proto";
+/// Task requesting to look at the ball
+message LookAtBall {}
 
-message FilteredBall {
-    /// Ball's filtered cartesian position measured in torso space {t} from the torso {T}
-    fvec3 rBTt = 1;
+/// Task requesting to look at the goal
+message LookAtGoals {}
 
-    /// Ball's filtered cartesian position measured in camera space {c} from the camera {C}
-    fvec3 rBCc = 2;
-
-    /// Ball's filtered cartesian position measured in torso space {t} from the camera {C}
-    fvec3 rBCt = 3;
-
-    /// Time the ball measurement was taken
-    google.protobuf.Timestamp time_of_measurement = 4;
-}
+/// Task requesting to look around the environment
+message LookAround {}
