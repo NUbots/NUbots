@@ -12,7 +12,7 @@
 #include "message/behaviour/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
-#include "utility/motion/WalkEngine.hpp"
+#include "utility/skill/WalkEngine.hpp"
 
 namespace module::motion {
 
