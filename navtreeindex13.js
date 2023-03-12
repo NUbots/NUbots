@@ -1,16 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a68e65dd8dc8175eaa7722e326d0dbb2f":[1,0,2,7,0,1,1,0,6,7],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a793a91472184a50dfcbee230e74ae540":[1,0,2,7,0,1,1,0,6,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a878a3b35853f80d23f34fe20d907b61f":[1,0,2,7,0,1,1,0,6,3],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a99b0d66d5d227c5b739c41f89694ac58":[1,0,2,7,0,1,1,0,6,8],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aaf543d6f3fd9f89f58c0b625af5787a7":[1,0,2,7,0,1,1,0,6,11],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#ace872e809ad95d433e8e24bce0032bf8":[1,0,2,7,0,1,1,0,6,4],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aedae29c5b347dfcb84afeafbf4ed4586":[1,0,2,7,0,1,1,0,6,10],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html":[1,0,2,7,0,1,1,0,7],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a349fc4ab373b980cbd8d0ac0e8b43f81":[1,0,2,7,0,1,1,0,7,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a4ee45cba267f3b3dd82bb8ef42fa8b14":[1,0,2,7,0,1,1,0,7,7],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a5cccd2b997d28e47952469fcdada424c":[1,0,2,7,0,1,1,0,7,3],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a8bd831c11c8736012a25a33a267cd1c6":[1,0,2,7,0,1,1,0,7,5],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#abc846d452d54d233f3b4eeb0cfdb48ca":[1,0,2,7,0,1,1,0,7,1],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#ad986ea534aafda7a6d0beae6c4393f23":[1,0,2,7,0,1,1,0,7,8],
@@ -127,6 +116,15 @@ var NAVTREEINDEX13 =
 "structmodule_1_1skill_1_1Look_1_1Config.html#a424bf993615a006af07d97f0a523497a":[1,0,2,10,1,0,0],
 "structmodule_1_1skill_1_1Look_1_1Config.html#a733b1c413238944ae7006b908ce3fefc":[1,0,2,10,1,0,2],
 "structmodule_1_1skill_1_1Look_1_1Config.html#ae0180a11f87c07d2c869a2be246f43e7":[1,0,2,10,1,0,1],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html":[1,0,2,10,2,0],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#a19e38b82283dbf4a6b5b6f21d9c905ea":[1,0,2,10,2,0,6],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#a8beb8c9664bfd97a17759e2b75774f39":[1,0,2,10,2,0,7],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#a9b6295a6256b3596a81840c99ca9225c":[1,0,2,10,2,0,2],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#aac7fbf2c255fec4c58bef162e1cc7d32":[1,0,2,10,2,0,0],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#ad723f7cba4f70f5387f8296db3b66bcc":[1,0,2,10,2,0,4],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#aeb615c052372a4565400e63eac4d1a23":[1,0,2,10,2,0,3],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#af3c0352788f3381281c2cab7744bb955":[1,0,2,10,2,0,5],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#afa9b2b3647fb69f9ffc488c18c89e9a6":[1,0,2,10,2,0,1],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[1,0,2,12,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[1,0,2,12,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[1,0,2,12,1,1,0,3],
@@ -249,5 +247,7 @@ var NAVTREEINDEX13 =
 "structutility_1_1clock_1_1ClockData.html#ab22ccfbeb8b16f32bfdddef32b7548ad":[1,0,5,2,0,2],
 "structutility_1_1input_1_1LimbID.html":[1,0,5,3,0],
 "structutility_1_1input_1_1LimbID.html#a1a75bcf9c4f4a265c5466511868671e3":[1,0,5,3,0,9],
-"structutility_1_1input_1_1LimbID.html#a1b8ceef8ab1b5d27458db30bb03f7769":[1,0,5,3,0,15]
+"structutility_1_1input_1_1LimbID.html#a1b8ceef8ab1b5d27458db30bb03f7769":[1,0,5,3,0,15],
+"structutility_1_1input_1_1LimbID.html#a21819812d643abaa43fbddbd70b78eb6":[1,0,5,3,0,22],
+"structutility_1_1input_1_1LimbID.html#a2447f2f9c8ec4ba0d6d35bd9e8db05f3":[1,0,5,3,0,20]
 };

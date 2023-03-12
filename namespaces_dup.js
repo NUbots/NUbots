@@ -333,11 +333,9 @@ var namespaces_dup =
         [ "KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", "classmodule_1_1motion_1_1KickBalancer" ],
         [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
         [ "QuinticWalk", "classmodule_1_1motion_1_1QuinticWalk.html", "classmodule_1_1motion_1_1QuinticWalk" ],
-        [ "QuinticWalkEngine", "classmodule_1_1motion_1_1QuinticWalkEngine.html", "classmodule_1_1motion_1_1QuinticWalkEngine" ],
         [ "ScriptEngine", "classmodule_1_1motion_1_1ScriptEngine.html", "classmodule_1_1motion_1_1ScriptEngine" ],
         [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
         [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ],
-        [ "WalkingParameter", "structmodule_1_1motion_1_1WalkingParameter.html", "structmodule_1_1motion_1_1WalkingParameter" ],
         [ "KickType", "IKKick_8cpp.html#ab3ad9a0901a7cc87c7cccec9aab52bf3", null ],
         [ "LimbID", "HeadController_8cpp.html#a61a4760eed3f929d1ae7176e5dd793dc", null ],
         [ "ServoID", "HeadController_8cpp.html#ab2b0df2c19654efc0988e3603f0aa227", null ],
@@ -346,16 +344,6 @@ var namespaces_dup =
           [ "RUNNING", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a8df1ef7d10b5c28ebb2fb0ed83973980", null ],
           [ "STOPPING", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216ac4404e0674320ec745e5d05faf4a47d8", null ],
           [ "FINISHED", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a0b634e34da4c66e3c16075ca4689acc0", null ]
-        ] ],
-        [ "WalkEngineState", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffd", [
-          [ "IDLE", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffdaa5daf7f2ebbba4975d61dab1c40188c7", null ],
-          [ "PAUSED", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffda99b2439e63f73ad515f7ab2447a80673", null ],
-          [ "START_MOVEMENT", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffdaba1002977676dba63f0cb10d32e8f685", null ],
-          [ "START_STEP", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffda0154f6e8b7d5a0e0165b46a9391d4528", null ],
-          [ "WALKING", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffda606c114184493a665cf1f6a12fbab9d3", null ],
-          [ "STOP_STEP", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffda42f60be613205afe5e924596e73b1d6f", null ],
-          [ "STOP_MOVEMENT", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffda47e4d06604afec5403611f7fa567e6bb", null ],
-          [ "KICK", "WalkEngine_8hpp.html#a206e1bd513ccb4e34af156e13a54dffda959a795d5524bd9054026703a33afb87", null ]
         ] ]
       ] ],
       [ "network", null, [
@@ -565,6 +553,7 @@ var namespaces_dup =
       [ "skill", null, [
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
+        [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
         [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ]
@@ -862,6 +851,20 @@ var namespaces_dup =
       [ "platform", null, [
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ]
+      ] ],
+      [ "skill", null, [
+        [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
+        [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ],
+        [ "WalkEngineState", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357a", [
+          [ "IDLE", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aaa5daf7f2ebbba4975d61dab1c40188c7", null ],
+          [ "PAUSED", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa99b2439e63f73ad515f7ab2447a80673", null ],
+          [ "START_MOVEMENT", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aaba1002977676dba63f0cb10d32e8f685", null ],
+          [ "START_STEP", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa0154f6e8b7d5a0e0165b46a9391d4528", null ],
+          [ "WALKING", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa606c114184493a665cf1f6a12fbab9d3", null ],
+          [ "STOP_STEP", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa42f60be613205afe5e924596e73b1d6f", null ],
+          [ "STOP_MOVEMENT", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa47e4d06604afec5403611f7fa567e6bb", null ],
+          [ "KICK", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa959a795d5524bd9054026703a33afb87", null ]
+        ] ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", "namespaceutility_1_1strutil" ],
       [ "support", null, [

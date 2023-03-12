@@ -7,5 +7,5 @@ var structmodule_1_1motion_1_1QuinticWalk_1_1Config =
     [ "jointGains", "structmodule_1_1motion_1_1QuinticWalk_1_1Config.html#afcb71a29f2b5f94a60ce68c20b6f49c4", null ],
     [ "max_step", "structmodule_1_1motion_1_1QuinticWalk_1_1Config.html#a60e989f03086b1554c5f0facdb39d017", null ],
     [ "max_step_xy", "structmodule_1_1motion_1_1QuinticWalk_1_1Config.html#a2e73a51e117b1ef3009231dab4e22b7b", null ],
-    [ "params", "structmodule_1_1motion_1_1QuinticWalk_1_1Config.html#af20409ecfa5f9d226fb3b8236b09107c", null ]
+    [ "params", "structmodule_1_1motion_1_1QuinticWalk_1_1Config.html#a9341d5fee6ef76027e198aca95c2ae71", null ]
 ];

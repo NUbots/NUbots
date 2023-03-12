@@ -4,7 +4,7 @@ var classmodule_1_1motion_1_1QuinticWalk =
     [ "QuinticWalk", "classmodule_1_1motion_1_1QuinticWalk.html#aa53b548392609ef56e7b6f8817cb9788", null ],
     [ "calculate_joint_goals", "classmodule_1_1motion_1_1QuinticWalk.html#a2b122b948b51333281bb48b682632352", null ],
     [ "get_time_delta", "classmodule_1_1motion_1_1QuinticWalk.html#a4be0ec8b85f8b511812f7e308c57bbc8", null ],
-    [ "load_quintic_walk", "classmodule_1_1motion_1_1QuinticWalk.html#a7c4065a3dbb4a1de25a36330ff579c10", null ],
+    [ "load_quintic_walk", "classmodule_1_1motion_1_1QuinticWalk.html#a49873e4de0775a98bf41d0c0ebcbc878", null ],
     [ "motion", "classmodule_1_1motion_1_1QuinticWalk.html#a3d5e014f81a1dff1852d1aed42a0779c", null ],
     [ "current_config", "classmodule_1_1motion_1_1QuinticWalk.html#a57ff95d85b3e6232c7f3d3d7d9114bf6", null ],
     [ "current_orders", "classmodule_1_1motion_1_1QuinticWalk.html#a02de60c6425ea1bff949800ea6d1d0eb", null ],
@@ -20,5 +20,5 @@ var classmodule_1_1motion_1_1QuinticWalk =
     [ "subsumption_id", "classmodule_1_1motion_1_1QuinticWalk.html#a3062c39f5d65d9460979d297b368096b", null ],
     [ "UPDATE_FREQUENCY", "classmodule_1_1motion_1_1QuinticWalk.html#acbedcfcda123fd2251ce9d93ba59c210", null ],
     [ "update_handle", "classmodule_1_1motion_1_1QuinticWalk.html#a20ccab9156762e4060022a5eadb831f8", null ],
-    [ "walk_engine", "classmodule_1_1motion_1_1QuinticWalk.html#a7afe3be66ae2759c84b5c50f583b1b80", null ]
+    [ "walk_engine", "classmodule_1_1motion_1_1QuinticWalk.html#afccd392770aafdf30d42307d192f94bf", null ]
 ];

@@ -181,11 +181,9 @@ var annotated_dup =
         [ "KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", "classmodule_1_1motion_1_1KickBalancer" ],
         [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
         [ "QuinticWalk", "classmodule_1_1motion_1_1QuinticWalk.html", "classmodule_1_1motion_1_1QuinticWalk" ],
-        [ "QuinticWalkEngine", "classmodule_1_1motion_1_1QuinticWalkEngine.html", "classmodule_1_1motion_1_1QuinticWalkEngine" ],
         [ "ScriptEngine", "classmodule_1_1motion_1_1ScriptEngine.html", "classmodule_1_1motion_1_1ScriptEngine" ],
         [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
-        [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ],
-        [ "WalkingParameter", "structmodule_1_1motion_1_1WalkingParameter.html", "structmodule_1_1motion_1_1WalkingParameter" ]
+        [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ]
       ] ],
       [ "network", null, [
         [ "NetworkForwarder", "classmodule_1_1network_1_1NetworkForwarder.html", "classmodule_1_1network_1_1NetworkForwarder" ],
@@ -243,6 +241,7 @@ var annotated_dup =
       [ "skill", null, [
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
+        [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ]
       ] ],
       [ "strategy", null, [
@@ -390,6 +389,10 @@ var annotated_dup =
         [ "Encoder", "classutility_1_1nbs_1_1Encoder.html", "classutility_1_1nbs_1_1Encoder" ],
         [ "Index", "classutility_1_1nbs_1_1Index.html", "classutility_1_1nbs_1_1Index" ],
         [ "IndexItem", "structutility_1_1nbs_1_1IndexItem.html", "structutility_1_1nbs_1_1IndexItem" ]
+      ] ],
+      [ "skill", null, [
+        [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
+        [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", [
         [ "ANSISGR", "structutility_1_1strutil_1_1ANSISGR.html", [

@@ -175,13 +175,11 @@ var hierarchy =
     [ "module::motion::FinishKick", "structmodule_1_1motion_1_1FinishKick.html", null ],
     [ "module::motion::HeadController::Config", "structmodule_1_1motion_1_1HeadController_1_1Config.html", null ],
     [ "module::motion::QuinticWalk::Config", "structmodule_1_1motion_1_1QuinticWalk_1_1Config.html", null ],
-    [ "module::motion::QuinticWalkEngine", "classmodule_1_1motion_1_1QuinticWalkEngine.html", null ],
     [ "module::motion::SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", [
       [ "module::motion::KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", null ],
       [ "module::motion::Kicker", "classmodule_1_1motion_1_1Kicker.html", null ]
     ] ],
     [ "module::motion::SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", null ],
-    [ "module::motion::WalkingParameter", "structmodule_1_1motion_1_1WalkingParameter.html", null ],
     [ "module::network::NetworkForwarder::Handle", "structmodule_1_1network_1_1NetworkForwarder_1_1Handle.html", null ],
     [ "module::network::NetworkForwarder::Handle::TargetHandle", "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html", null ],
     [ "module::output::compressor::Compressor", "classmodule_1_1output_1_1compressor_1_1Compressor.html", [
@@ -219,6 +217,7 @@ var hierarchy =
     [ "module::platform::Webots::ServoState", "structmodule_1_1platform_1_1Webots_1_1ServoState.html", null ],
     [ "module::skill::GetUp::Config", "structmodule_1_1skill_1_1GetUp_1_1Config.html", null ],
     [ "module::skill::Look::Config", "structmodule_1_1skill_1_1Look_1_1Config.html", null ],
+    [ "module::skill::QuinticWalk::Config", "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html", null ],
     [ "module::support::logging::DataLogging::DataLog", "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html", null ],
     [ "module::support::logging::DataPlayback::Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", null ],
     [ "module::support::logging::Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", null ],
@@ -244,6 +243,7 @@ var hierarchy =
         [ "module::planning::PlanLook", "classmodule_1_1planning_1_1PlanLook.html", null ],
         [ "module::skill::GetUp", "classmodule_1_1skill_1_1GetUp.html", null ],
         [ "module::skill::Look", "classmodule_1_1skill_1_1Look.html", null ],
+        [ "module::skill::QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", null ],
         [ "module::skill::ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", null ],
         [ "module::strategy::FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", null ]
       ] ],
@@ -397,6 +397,8 @@ var hierarchy =
     [ "utility::nbs::Encoder", "classutility_1_1nbs_1_1Encoder.html", null ],
     [ "utility::nbs::Index", "classutility_1_1nbs_1_1Index.html", null ],
     [ "utility::nbs::IndexItem", "structutility_1_1nbs_1_1IndexItem.html", null ],
+    [ "utility::skill::QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", null ],
+    [ "utility::skill::WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", null ],
     [ "utility::strutil::ANSISGR< First, Codes >", "structutility_1_1strutil_1_1ANSISGR.html", null ],
     [ "utility::strutil::ANSISGR< First, Codes >::Apply", "structutility_1_1strutil_1_1ANSISGR_1_1Apply.html", null ],
     [ "utility::strutil::Colour", "structutility_1_1strutil_1_1Colour.html", null ],
