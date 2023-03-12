@@ -16,25 +16,25 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.planning;
+package message.planning;
 
- import "Vector.proto";
+import "Vector.proto";
 
- /// Plan a path to walk to the specified point
- message WalkTo {
+/// Plan a path to walk to the specified point
+message WalkTo {
     fvec3 rPTt = 1;
- }
+}
 
 /// Turn on the spot in the given direction
- message TurnOnSpot {
+message TurnOnSpot {
     /// Direction to turn
     bool clockwise = 2;
- }
+}
 
- /// Turn around the ball in the given direction
- message TurnAroundBall {
-      /// Direction to turn
-      bool clockwise = 2;
- }
+/// Turn around the ball in the given direction
+message TurnAroundBall {
+    /// Direction to turn
+    bool clockwise = 2;
+}
