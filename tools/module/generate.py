@@ -75,7 +75,7 @@ def run(path, director, **kwargs):
 
     with open(os.path.join(config_path, "{}.yaml".format(module_name)), "a") as output:
         output.write("# Controls the minimum log level that NUClear log will display\n")
-        output.write("log_level: DEBUG\n")
+        output.write("log_level: INFO\n")
         print("\t", os.path.join(config_path, "{}.yaml".format(module_name)))
 
 
