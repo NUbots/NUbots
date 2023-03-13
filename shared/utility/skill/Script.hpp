@@ -191,11 +191,11 @@ namespace utility::skill {
 // Functionality for reading in scripts
 namespace YAML {
     template <>
-    struct convert<::utility::motion::Frame::Target> {
+    struct convert<::utility::skill::Frame::Target> {
         /// @brief Encodes a Target as a YAML Node
         /// @param rhs The Target to convert to a YAML Node
         /// @return A YAML Node of the Target
-        static inline Node encode(const ::utility::motion::Frame::Target& rhs) {
+        static inline Node encode(const ::utility::skill::Frame::Target& rhs) {
             Node node;
 
             node["id"]       = static_cast<std::string>(rhs.id);
@@ -209,7 +209,7 @@ namespace YAML {
         /// @param node The YAML Node to decode
         /// @param rhs A Target where the YAML Node information will be placed
         /// @return True if decoding was successful, false otherwise
-        static inline bool decode(const Node& node, ::utility::motion::Frame::Target& rhs) {
+        static inline bool decode(const Node& node, ::utility::skill::Frame::Target& rhs) {
             // Try to read and save the target information
             try {
                 rhs = {node["id"].as<std::string>(),
@@ -235,11 +235,11 @@ namespace YAML {
     };
 
     template <>
-    struct convert<::utility::motion::Frame> {
+    struct convert<::utility::skill::Frame> {
         /// @brief Encodes a Frame as a YAML Node
         /// @param rhs The Frame to convert to a YAML Node
         /// @return A YAML Node of the Frame
-        static inline Node encode(const ::utility::motion::Frame& rhs) {
+        static inline Node encode(const ::utility::skill::Frame& rhs) {
             Node node;
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
@@ -252,12 +252,12 @@ namespace YAML {
         /// @param node The YAML Node to decode
         /// @param rhs A Frame where the YAML Node information will be placed
         /// @return True if decoding was successful, false otherwise
-        static inline bool decode(const Node& node, ::utility::motion::Frame& rhs) {
+        static inline bool decode(const Node& node, ::utility::skill::Frame& rhs) {
             try {
                 int millis = node["duration"].as<int>();
                 std::chrono::milliseconds duration(millis);
 
-                auto targets = node["targets"].as<std::vector<::utility::motion::Frame::Target>>();
+                auto targets = node["targets"].as<std::vector<::utility::skill::Frame::Target>>();
                 rhs          = {duration, targets};
             }
             catch (const YAML::Exception& e) {
@@ -278,11 +278,11 @@ namespace YAML {
     };
 
     template <typename Sequence>
-    struct convert<::utility::motion::Script<Sequence>> {
+    struct convert<::utility::skill::Script<Sequence>> {
         /// @brief Encodes a Script as a YAML Node
         /// @param rhs The Script to convert to a YAML Node
         /// @return A YAML Node of the Script
-        static inline Node encode(const ::utility::motion::Script<Sequence>& rhs) {
+        static inline Node encode(const ::utility::skill::Script<Sequence>& rhs) {
             Node node;
 
             node = rhs.frames;
@@ -294,9 +294,9 @@ namespace YAML {
         /// @param node The YAML Node to decode
         /// @param rhs A Script where the YAML Node information will be placed
         /// @return True if decoding was successful, false otherwise
-        static inline bool decode(const Node& node, ::utility::motion::Script<Sequence>& rhs) {
+        static inline bool decode(const Node& node, ::utility::skill::Script<Sequence>& rhs) {
             try {
-                auto frames = node.as<std::vector<::utility::motion::Frame>>();
+                auto frames = node.as<std::vector<::utility::skill::Frame>>();
                 rhs         = {frames};
             }
             catch (const YAML::Exception& e) {
