@@ -1,13 +1,9 @@
-IKKick
-======
+# IKKick
 
 ## Description
 
-
 ## Usage
 
-
 ## Emits
-
 
 ## Dependencies

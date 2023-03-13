@@ -7,7 +7,12 @@ settings:
   OffsetX: 0
   OffsetY: 0
   ExposureAuto: Continuous # Options: Off, Once, Continuous
-  GainAuto: Continuous # Options: Off, Once, Continuous
+  AutoExposureExposureTimeUpperLimit: 3000 # Lower time reduces motion blur
+  GainAuto: Off # Options: Off, Once, Continuous
+  Gain: 18
   BalanceWhiteAuto: Once # Options: Off, Once, Continuous
   AcquisitionFrameRateEnable: true
-  AcquisitionFrameRate: 20.00 # Adjusting frame rate can help remove flickering from lighting
+  DeviceLinkThroughputLimit: 380000000 # Throughput can limit the framerate
+  AcquisitionFrameRate: 100.00 # Adjusting frame rate can help remove flickering from lighting
+  AutoExposureTargetGreyValueAuto: Off
+  AutoExposureTargetGreyValue: 30

@@ -34,7 +34,7 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand WalkToState(const Eigen::Affine2d& goalState_) {
+    inline MotionCommand WalkToState(const Eigen::Isometry2d& goalState_) {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::WALK_TO_STATE;
         cmd.goal_state = Eigen::Vector3d(goalState_.translation().x(),
@@ -49,7 +49,7 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand DirectCommand(const Eigen::Affine2d& walkCommand_) {
+    inline MotionCommand DirectCommand(const Eigen::Isometry2d& walkCommand_) {
         MotionCommand cmd;
         cmd.type         = MotionCommand::Type::Value::DIRECT_COMMAND;
         cmd.walk_command = Eigen::Vector3d(walkCommand_.translation().x(),
@@ -58,15 +58,22 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand RotateOnSpot() {
+    inline MotionCommand RotateOnSpot(bool clockwise) {
         MotionCommand cmd;
-        cmd.type = MotionCommand::Type::Value::ROTATE_ON_SPOT;
+        cmd.type      = MotionCommand::Type::Value::ROTATE_ON_SPOT;
+        cmd.clockwise = clockwise;
         return cmd;
     }
 
     inline MotionCommand WalkToReady() {
         MotionCommand cmd;
         cmd.type = MotionCommand::Type::Value::WALK_TO_READY;
+        return cmd;
+    }
+
+    inline MotionCommand RotateAroundBall() {
+        MotionCommand cmd;
+        cmd.type = MotionCommand::Type::Value::ROTATE_AROUND_BALL;
         return cmd;
     }
 

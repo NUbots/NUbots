@@ -21,14 +21,14 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/BodySide.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/BodySide.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -37,20 +37,20 @@ namespace module::input {
 
     using extension::Configuration;
 
+    using message::actuation::BodySide;
+    using message::actuation::KinematicsModel;
     using message::input::Sensors;
-    using message::motion::BodySide;
-    using message::motion::KinematicsModel;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonLeftUp;
     using message::platform::ButtonMiddleDown;
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
 
+    using utility::actuation::kinematics::calculateAllPositions;
+    using utility::actuation::kinematics::calculateCentreOfMass;
+    using utility::actuation::kinematics::calculateInertialTensor;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
-    using utility::motion::kinematics::calculateAllPositions;
-    using utility::motion::kinematics::calculateCentreOfMass;
-    using utility::motion::kinematics::calculateInertialTensor;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -232,8 +232,8 @@ namespace module::input {
                         }
 
                         // Calculate the average length of both legs from the torso and accumulate this measurement
-                        const Eigen::Affine3d Htr(filtered_sensors.Htx[ServoID::R_ANKLE_ROLL]);
-                        const Eigen::Affine3d Htl(filtered_sensors.Htx[ServoID::L_ANKLE_ROLL]);
+                        const Eigen::Isometry3d Htr(filtered_sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                        const Eigen::Isometry3d Htl(filtered_sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         const Eigen::Vector3d rTFt = (Htr.translation() + Htl.translation()) * 0.5;
 
                         // Accumulator CoM readings
@@ -528,10 +528,10 @@ namespace module::input {
                         std::array<bool, 2> feet_down = {true, true};
 
                         // Calculate values needed for Z_HEIGHT method
-                        const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                        const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-                        const Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
-                        const Eigen::Vector3d rRLl = Hlr.translation();
+                        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
+                        const Eigen::Vector3d rRLl  = Hlr.translation();
 
                         switch (config.footDown.method()) {
                             case FootDownMethod::LOAD:
@@ -615,7 +615,7 @@ namespace module::input {
                         for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
                             bool foot_down      = sensors->feet[side].down;
                             bool prev_foot_down = previous_foot_down[side];
-                            Eigen::Affine3d Htf(
+                            Eigen::Isometry3d Htf(
                                 sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                             // If this side's foot is down, and it was not down at the previous time step, then we
@@ -623,7 +623,7 @@ namespace module::input {
                             if (foot_down && !prev_foot_down) {
                                 const MotionModel<double>::StateVec filterState =
                                     MotionModel<double>::StateVec(motionFilter.get());
-                                Eigen::Affine3d Hwt;
+                                Eigen::Isometry3d Hwt;
                                 Hwt.linear()      = filterState.Rwt.toRotationMatrix();
                                 Hwt.translation() = filterState.rTWw;
 
@@ -632,7 +632,7 @@ namespace module::input {
                                 // flattens, it's meant to becomes true. This means that even if the foot hits the
                                 // ground at an angle, it doesn't store that angled position as the footlanding_Hwf, but
                                 // instead stores the position that foot would be if/when it becomes flat on the ground
-                                Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
+                                Eigen::Isometry3d Htg(utility::actuation::kinematics::calculateGroundSpace(Htf, Hwt));
 
                                 footlanding_Hwf[side]                   = Hwt * Htg;
                                 footlanding_Hwf[side].translation().z() = 0.0;
@@ -643,7 +643,7 @@ namespace module::input {
                             // This sides foot is down, but it didn't hit the ground this time step
                             else if (foot_down && prev_foot_down) {
                                 // Use stored Hwf and Htf to calculate Hwt
-                                Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
+                                Eigen::Isometry3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
 
                                 // do a foot based position update
                                 motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
@@ -734,8 +734,9 @@ namespace module::input {
                                 const bool& prev_foot_down = previous_foot_down[side];
 
                                 // Get the Foot to Torso transform for this foot
-                                const Eigen::Affine3d Htf(sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL
-                                                                                              : ServoID::R_ANKLE_ROLL]);
+                                const Eigen::Isometry3d Htf(
+                                    sensors
+                                        ->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                                 // Calculate our current Foot to CoM vector for this foot
                                 const Eigen::Vector3d current_rMFt = Htf.translation() + sensors->rMTt.head<3>();
@@ -779,15 +780,22 @@ namespace module::input {
                             const auto o = MotionModel<double>::StateVec(motionFilter.get());
 
                             // Map from world to torso coordinates (Rtw)
-                            Eigen::Affine3d Hwt;
+                            Eigen::Isometry3d Hwt;
                             Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
-                            sensors->Htw      = Hwt.inverse().matrix();
+                            // Remove the yaw component of the rotation
+                            Hwt.linear() =
+                                Eigen::AngleAxisd(-std::atan2(Hwt(1, 0), Hwt(0, 0)), Eigen::Vector3d::UnitZ())
+                                    .toRotationMatrix()
+                                * Hwt.linear();
+
+
+                            sensors->Htw = Hwt.inverse().matrix();
 
                             // If there is ground truth data, determine the error in the odometry calculation
                             // and emit graphs of those errors
                             if (input.odometry_ground_truth.exists) {
-                                Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
+                                Eigen::Isometry3d true_Htw(input.odometry_ground_truth.Htw);
 
                                 // Determine translational distance error
                                 Eigen::Vector3d est_rWTt   = Hwt.inverse().translation();
@@ -816,10 +824,10 @@ namespace module::input {
                             /************************************************
                              *                  Kinematics Horizon          *
                              ************************************************/
-                            Eigen::Affine3d Rwt(sensors->Htw.inverse());
+                            Eigen::Isometry3d Rwt(sensors->Htw.inverse());
                             // remove translation components from the transform
                             Rwt.translation() = Eigen::Vector3d::Zero();
-                            Eigen::Affine3d Rgt(
+                            Eigen::Isometry3d Rgt(
                                 Eigen::AngleAxisd(-Rwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
                                 * Rwt);
                             // sensors->Hgt : Mat size [4x4] (default identity)
@@ -829,8 +837,8 @@ namespace module::input {
                         }
 
                         if (log_level <= NUClear::DEBUG) {
-                            const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-                            const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                            const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                            const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
                             Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
                             Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
                             emit(graph("Left Foot Actual Position", Htl(0, 3), Htl(1, 3), Htl(2, 3)));

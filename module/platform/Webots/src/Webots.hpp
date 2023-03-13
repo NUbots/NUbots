@@ -129,7 +129,7 @@ namespace module::platform {
         bool connection_active = false;
 
         std::mutex sensors_mutex;
-        std::vector<std::pair<NUClear::clock::time_point, Eigen::Affine3d>> Hwps;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Isometry3d>> Hwps;
 
         struct CameraContext {
             std::string name;
@@ -137,7 +137,7 @@ namespace module::platform {
             message::input::Image::Lens lens;
             // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is
             // attached to
-            Eigen::Affine3d Hpc;
+            Eigen::Isometry3d Hpc;
         };
         std::map<std::string, CameraContext> camera_context;
         uint32_t num_cameras = 0;
