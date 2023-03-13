@@ -1,2 +1,2 @@
 # Log level of DEBUG will print out compression rates
-log_level: WARN
+log_level: INFO

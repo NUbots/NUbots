@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 # Search path positions
 min_yaw: &min_yaw -0.7
