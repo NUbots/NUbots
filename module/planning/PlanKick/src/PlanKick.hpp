@@ -20,9 +20,6 @@ namespace module::planning {
             utility::input::LimbID kick_leg{};
         } cfg;
 
-        /// @brief True if a Kick task has been requested, false otherwise. Resets to false when the Kick task is Done.
-        bool kicking = false;
-
     public:
         /// @brief Called by the powerplant to build and setup the PlanKick reactor.
         explicit PlanKick(std::unique_ptr<NUClear::Environment> environment);
