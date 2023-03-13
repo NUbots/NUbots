@@ -9,14 +9,16 @@ namespace module::input {
     private:
         /// The configuration variables for this reactor
         struct {
+            /// @brief Path of the wav file to convert to text
             std::string wav_path;
-        } config;
+        } cfg;
 
     public:
         /// @brief Called by the powerplant to build and setup the WavReader reactor.
         explicit WavReader(std::unique_ptr<NUClear::Environment> environment);
-        void readWav();
-        //void fessk(FILE*, int, );
+
+        /// @brief Reads the wav file and emits the audio data
+        void read_wav();
     };
 
 }  // namespace module::input

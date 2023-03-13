@@ -14,59 +14,50 @@
 namespace module::input {
 
     using extension::Configuration;
-    using message::input::AudioData;
+    using message::input::Audio;
 
     WavReader::WavReader(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
 
-        // uncomment if you want to check if the path exists.
-        // bool filepathExists =
-        // std::filesystem::exists("/home/nubots/NUbots/module/input/WavReader/data/audio/test.wav");; std::cout <<
-        // filepathExists << std::endl;
-
-
-        on<Configuration>("WavReader.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("WavReader.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WavReader.yaml
 
-            this->log_level       = cfg["log_level"].as<NUClear::LogLevel>();
-            this->config.wav_path = cfg["wav_path"].as<std::string>();  // config is the name of the struct
-            std::cout << config.wav_path << std::endl;
-            log<NUClear::DEBUG>(config.wav_path);
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            cfg.wav_path    = cfg["wav_path"].as<std::string>();
+
+            if (!std::filesystem::exists(cfg.wav_path)) {
+                log<NUClear::ERROR>("Wav file does not exist");
+            }
+            else {
+                log<NUClear::INFO>("Reading wav file:", cfg.wav_path);
+                read_wav();
+            }
         });
-
-        // This reactor receives audiodata from emission
-        // on<Trigger<AudioData>>().then([this] (AudioData& audioData ) {
-        //  reactor code
-        //});
-
-        on<Startup>().then([this]() { readWav(); });
     }
 
-    void WavReader::readWav() {
+    void WavReader::read_wav() {
         FILE* wavin;
         uint32_t nread = 0;
         uint32_t size  = 0;
 
-        wavin = fopen(config.wav_path.c_str(), "rb");
+        wavin = fopen(cfg.wav_path.c_str(), "rb");
         fseek(wavin, 40, SEEK_SET);
         fread(&size, sizeof(uint32_t), 1, wavin);
-        log<NUClear::DEBUG>(size);
 
-        // Make it one longer for the null termination
-        auto audioData     = std::make_unique<AudioData>();
-        audioData->WavData = std::vector<uint8_t>(size);
+        auto audio       = std::make_unique<Audio>();
+        audio->timestamp = NUClear::clock::now();
+        audio->audio     = std::vector<uint8_t>(size);
 
-        nread = fread(audioData->WavData.data(), sizeof(uint8_t), size, wavin);
+        nread = fread(audio->audio.data(), sizeof(uint8_t), size, wavin);
 
         if (nread != size) {
-            // TODO(Tom Legge) don't throw
-            throw std::invalid_argument("number read from wav file was not its size");
+            log<NUClear::ERROR>("Expected and actual size of wav file do not match");
+        }
+        else {
+            emit(audio);
         }
 
         fclose(wavin);
-
-
-        emit(audioData);
     }
 
 }  // namespace module::input

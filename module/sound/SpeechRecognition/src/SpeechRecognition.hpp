@@ -9,7 +9,11 @@ namespace module::sound {
     private:
         /// The configuration variables for this reactor
         struct {
+            std::string model_path = "";
         } config;
+
+        VoskModel* model;
+        VoskRecognizer* recognizer;
 
     public:
         /// @brief Called by the powerplant to build and setup the SpeechRecognition reactor.
