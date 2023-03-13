@@ -37,7 +37,7 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Uses<Kick>, Trigger<FilteredBall>, With<Stability>>().then([this](
+        on<Provide<KickTo>, Uses<Kick>, Trigger<FilteredBall>, Trigger<Stability>>().then([this](
                                                                                            const KickTo& kick_to,
                                                                                            const Uses<Kick>& kick,
                                                                                            const FilteredBall& ball,
