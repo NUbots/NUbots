@@ -16,7 +16,7 @@ namespace module::strategy {
     using message::actuation::LimbsSequence;
     using message::behaviour::state::Stability;
     using message::skill::Walk;
-    using utility::motion::load_script;
+    using utility::skill::load_script;
     using StandStillTask = message::strategy::StandStill;
 
     StandStill::StandStill(std::unique_ptr<NUClear::Environment> environment)
