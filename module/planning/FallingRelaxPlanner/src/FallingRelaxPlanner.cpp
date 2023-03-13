@@ -94,7 +94,7 @@ namespace module::planning {
                 // We are falling
                 if (falling) {
                     // We are falling! Relax the limbs!
-                    log<NUClear::TRACE>("Falling:",
+                    log<NUClear::DEBUG>("Falling:",
                                         "Gyroscope Magnitude:",
                                         gyro_mag_state == State::FALLING    ? "FALLING"
                                         : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
