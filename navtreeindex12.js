@@ -1,5 +1,8 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a91f7972762a6af29f06aa5c8f9e25e84":[1,0,2,3,27,0,2,0,1,3],
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#ab09f4a9ef9aec96ba865df73fa26f92b":[1,0,2,3,27,0,2,0,1,4],
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#aef88a536b277c85a0e8228de08608217":[1,0,2,3,27,0,2,0,1,0],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise.html":[1,0,2,3,27,0,2,1],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise.html#a389d8e894a3367b3ea2750ff4ad1c4f1":[1,0,2,3,27,0,2,1,3],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise.html#a5b76147e564c73ce2948f4a35647b2c4":[1,0,2,3,27,0,2,1,4],
@@ -246,8 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aaf543d6f3fd9f89f58c0b625af5787a7":[1,0,2,7,0,1,1,0,6,11],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#ace872e809ad95d433e8e24bce0032bf8":[1,0,2,7,0,1,1,0,6,4],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aedae29c5b347dfcb84afeafbf4ed4586":[1,0,2,7,0,1,1,0,6,10],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html":[1,0,2,7,0,1,1,0,7],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a349fc4ab373b980cbd8d0ac0e8b43f81":[1,0,2,7,0,1,1,0,7,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a4ee45cba267f3b3dd82bb8ef42fa8b14":[1,0,2,7,0,1,1,0,7,7],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a5cccd2b997d28e47952469fcdada424c":[1,0,2,7,0,1,1,0,7,3]
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html":[1,0,2,7,0,1,1,0,7]
 };

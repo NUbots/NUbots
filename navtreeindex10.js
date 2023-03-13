@@ -1,5 +1,8 @@
 var NAVTREEINDEX10 =
 {
+"structextension_1_1FileWatch.html":[1,0,1,4],
+"structextension_1_1FileWatch.html#a08ab98fbe1ca8fbf78e55832c79838b8":[1,0,1,4,2],
+"structextension_1_1FileWatch.html#a309129244da67d392142aad968087f7b":[1,0,1,4,1],
 "structextension_1_1FileWatch.html#a309129244da67d392142aad968087f7ba2f9e85f8697fabf8287f2d525a1a84c6":[1,0,1,4,1,2],
 "structextension_1_1FileWatch.html#a309129244da67d392142aad968087f7ba4284d0a9c697de00db3239f548620c72":[1,0,1,4,1,0],
 "structextension_1_1FileWatch.html#a309129244da67d392142aad968087f7ba6e6db1f32cdc3581b9f3d1821a03ee2a":[1,0,1,4,1,1],
@@ -246,8 +249,5 @@ var NAVTREEINDEX10 =
 "structmodule_1_1extension_1_1FileWatcher_1_1FileMap.html#ab7ec03d4820e76b4b4f200f8024ecf0c":[1,0,2,2,2,0,0],
 "structmodule_1_1extension_1_1FileWatcher_1_1PathMap.html":[1,0,2,2,2,1],
 "structmodule_1_1extension_1_1FileWatcher_1_1PathMap.html#a341f80922ab6369a6f67eb6e4f1075d9":[1,0,2,2,2,1,1],
-"structmodule_1_1extension_1_1FileWatcher_1_1PathMap.html#a860fe461f73cb63d92246e0cebf6ef8a":[1,0,2,2,2,1,0],
-"structmodule_1_1extension_1_1FileWatcher_1_1PathMap.html#aa9b487c7085b6c0315fce72b54315638":[1,0,2,2,2,1,2],
-"structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html":[1,0,2,2,2,2],
-"structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html#aa244c5c3a7c1607ec94feb747c50ac36":[1,0,2,2,2,2,1]
+"structmodule_1_1extension_1_1FileWatcher_1_1PathMap.html#a860fe461f73cb63d92246e0cebf6ef8a":[1,0,2,2,2,1,0]
 };

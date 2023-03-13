@@ -1,5 +1,8 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1extension_1_1FileWatcher_1_1PathMap.html#aa9b487c7085b6c0315fce72b54315638":[1,0,2,2,2,1,2],
+"structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html":[1,0,2,2,2,2],
+"structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html#aa244c5c3a7c1607ec94feb747c50ac36":[1,0,2,2,2,2,1],
 "structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html#ac0ad77dce953ee6748b11ab83e4b272b":[1,0,2,2,2,2,0],
 "structmodule_1_1extension_1_1StateUpdate.html":[1,0,2,2,3],
 "structmodule_1_1extension_1_1StateUpdate.html#a14c8851da07f29c7f18592f3e5429b84":[1,0,2,2,3,2],
@@ -246,8 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#aba933f8db5a901dcf1a0a8ef9012d3a7":[1,0,2,3,27,0,2,0,0,4],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html":[1,0,2,3,27,0,2,0,1],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3674abdbbfa02e15090c80d9c55982f2":[1,0,2,3,27,0,2,0,1,1],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3f967463cbce527a8f5cd44073e3b805":[1,0,2,3,27,0,2,0,1,2],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a91f7972762a6af29f06aa5c8f9e25e84":[1,0,2,3,27,0,2,0,1,3],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#ab09f4a9ef9aec96ba865df73fa26f92b":[1,0,2,3,27,0,2,0,1,4],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#aef88a536b277c85a0e8228de08608217":[1,0,2,3,27,0,2,0,1,0]
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3f967463cbce527a8f5cd44073e3b805":[1,0,2,3,27,0,2,0,1,2]
 };

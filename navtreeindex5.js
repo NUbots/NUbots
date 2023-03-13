@@ -135,6 +135,9 @@ var NAVTREEINDEX5 =
 "classmodule_1_1planning_1_1PlanLook.html#a33931342e093f8624303c07960e4b0b9":[1,0,2,8,2,1],
 "classmodule_1_1planning_1_1PlanLook.html#a4a6899b9a5b49b198a4f1f3d463a4303":[1,0,2,8,2,4],
 "classmodule_1_1planning_1_1PlanLook.html#a992d8d83c5714b0a8c9d83ff89415d52":[1,0,2,8,2,3],
+"classmodule_1_1planning_1_1PlanWalkPath.html":[1,0,2,8,3],
+"classmodule_1_1planning_1_1PlanWalkPath.html#a6e84da1d1dc1c917d65ec5e6fda7aa5c":[1,0,2,8,3,2],
+"classmodule_1_1planning_1_1PlanWalkPath.html#a72b457718e2176b1291961724c49d5d4":[1,0,2,8,3,1],
 "classmodule_1_1platform_1_1Webots.html":[1,0,2,9,1],
 "classmodule_1_1platform_1_1Webots.html#a0e3aeeed4dc3662ec83d8bfcb3250a2a":[1,0,2,9,1,30],
 "classmodule_1_1platform_1_1Webots.html#a13e4c3a6a31e38e55a64b12bd61411c1":[1,0,2,9,1,12],
@@ -246,8 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1logging_1_1DataLogging.html#a85d29f6693d75c7a401fbb9ac1de86ce":[1,0,2,12,1,1,2],
 "classmodule_1_1support_1_1logging_1_1DataLogging.html#a8a513440735cc1c0b1d2846c48d8e17f":[1,0,2,12,1,1,3],
 "classmodule_1_1support_1_1logging_1_1DataLogging.html#aa8e3c01a0bd895d097f13a2261479be3":[1,0,2,12,1,1,5],
-"classmodule_1_1support_1_1logging_1_1DataLogging.html#ac8f69953a5aaa0a0bd75275c1ba3b6df":[1,0,2,12,1,1,9],
-"classmodule_1_1support_1_1logging_1_1DataPlayback.html":[1,0,2,12,1,2],
-"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a07cc49737c4046d6574234f7495d4224":[1,0,2,12,1,2,8],
-"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a198a8cec94143955da202dbb8429c2c5":[1,0,2,12,1,2,10]
+"classmodule_1_1support_1_1logging_1_1DataLogging.html#ac8f69953a5aaa0a0bd75275c1ba3b6df":[1,0,2,12,1,1,9]
 };
