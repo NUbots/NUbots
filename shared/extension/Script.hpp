@@ -102,12 +102,12 @@ namespace extension {
             //                       exist.
 
             if (utility::file::exists("scripts/" + hostname + "/" + fileName)) {
-                NUClear::log<NUClear::TRACE>("Parsing robot specific script:", fileName);
+                NUClear::log<NUClear::INFO>("Parsing robot specific script:", fileName);
                 config = YAML::LoadFile("scripts/" + hostname + "/" + fileName);
             }
 
             else if (utility::file::exists("scripts/" + platform + "/" + fileName)) {
-                NUClear::log<NUClear::TRACE>("Parsing default platform script:", fileName);
+                NUClear::log<NUClear::INFO>("Parsing default platform script:", fileName);
                 config = YAML::LoadFile("scripts/" + platform + "/" + fileName);
             }
 
