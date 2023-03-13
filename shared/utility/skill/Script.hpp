@@ -1,5 +1,5 @@
-#ifndef UTILITY_MOTION_SCRIPT_HPP
-#define UTILITY_MOTION_SCRIPT_HPP
+#ifndef UTILITY_SKILL_SCRIPT_HPP
+#define UTILITY_SKILL_SCRIPT_HPP
 
 #include <nuclear>
 #include <regex>
@@ -18,7 +18,7 @@
  * @author Ysobel Sims
  */
 
-namespace utility::motion {
+namespace utility::skill {
 
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
@@ -186,7 +186,7 @@ namespace utility::motion {
         return load_script<Sequence>(std::vector{ScriptRequest(script)}, start);
     }
 
-}  // namespace utility::motion
+}  // namespace utility::skill
 
 // Functionality for reading in scripts
 namespace YAML {
@@ -317,4 +317,4 @@ namespace YAML {
     };
 }  // namespace YAML
 
-#endif  // UTILITY_MOTION_SCRIPT_HPP
+#endif  // UTILITY_SKILL_SCRIPT_HPP

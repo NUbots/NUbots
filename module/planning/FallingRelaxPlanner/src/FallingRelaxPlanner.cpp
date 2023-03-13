@@ -18,7 +18,7 @@ namespace module::planning {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::planning::RelaxWhenFalling;
-    using utility::motion::load_script;
+    using utility::skill::load_script;
     using utility::support::Expression;
 
     double smooth(double value, double new_value, double alpha) {
