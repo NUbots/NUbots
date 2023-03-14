@@ -16,9 +16,9 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.strategy;
+package message.strategy;
 
 /// A Task that requests to handle the finding of the ball when its location is unknown
- message FindBall {}
+message FindBall {}
