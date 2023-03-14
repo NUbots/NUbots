@@ -228,6 +228,7 @@ var annotated_dup =
       [ "planning", null, [
         [ "FallingRelaxPlanner", "classmodule_1_1planning_1_1FallingRelaxPlanner.html", "classmodule_1_1planning_1_1FallingRelaxPlanner" ],
         [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ],
+        [ "PlanKick", "classmodule_1_1planning_1_1PlanKick.html", "classmodule_1_1planning_1_1PlanKick" ],
         [ "PlanLook", "classmodule_1_1planning_1_1PlanLook.html", "classmodule_1_1planning_1_1PlanLook" ],
         [ "PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", "classmodule_1_1planning_1_1PlanWalkPath" ]
       ] ],

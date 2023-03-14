@@ -1,0 +1,7 @@
+<map id="module::planning::PlanKick" name="module::planning::PlanKick">
+<area shape="rect" id="node1" title=" " alt="" coords="85,199,284,225"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="5,95,164,136"/>
+<area shape="rect" id="node3" title=" " alt="" coords="17,5,152,32"/>
+<area shape="rect" id="node4" href="$structmodule_1_1planning_1_1PlanKick_1_1Config.html" title="Stores configuration values." alt="" coords="188,95,387,136"/>
+<area shape="rect" id="node5" href="$structutility_1_1input_1_1LimbID.html" title=" " alt="" coords="210,5,365,32"/>
+</map>
