@@ -1,8 +1,8 @@
-# WalkToBall
+# StrategiseWalk
 
 ## Description
 
-Walks to the ball if a filtered ball exists, otherwise walks in a search pattern to find the ball.
+Walks to the ball if a filtered ball exists.
 
 ## Usage
 
@@ -16,6 +16,5 @@ Add this module to walk to the ball.
 ## Emits
 
 - `message::planning::WalkTo` Task requesting to walk to a location, in this case the ball
-- `message::planning::TurnOnSpot` Task requesting to turn on the spot, to search for the ball
 
 ## Dependencies
