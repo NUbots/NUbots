@@ -1,7 +1,7 @@
 var searchData=
 [
   ['g_297',['g',['../structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a2b8980e8c3d32584dfd002d0d9f38ece',1,'module::planning::GetUpPlanner::Config']]],
-  ['gain_298',['gain',['../structutility_1_1motion_1_1Frame_1_1Target.html#a9adc1a7e2621ac9614b03bddb3e7cd45',1,'utility::motion::Frame::Target']]],
+  ['gain_298',['gain',['../structutility_1_1skill_1_1Frame_1_1Target.html#aedad664cb6f91beda7a84ec31234b747',1,'utility::skill::Frame::Target']]],
   ['gain_5fconversion_5ffactor_299',['GAIN_CONVERSION_FACTOR',['../structmodule_1_1platform_1_1cm740_1_1Convert.html#af0ef1347a95f06fb7289f3d656a3354c',1,'module::platform::cm740::Convert']]],
   ['gamecontroller_300',['GameController',['../classmodule_1_1input_1_1GameController.html',1,'module::input']]],
   ['gamecontrollerpacket_301',['GameControllerPacket',['../structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html',1,'module::input::gamecontroller']]],
@@ -19,7 +19,7 @@ var searchData=
   ['get_5fnext_313',['get_next',['../classutility_1_1motion_1_1splines_1_1Footstep.html#aed8c1819603d5c2318622faf65a122c0',1,'utility::motion::splines::Footstep']]],
   ['get_5foccupancy_5fvalue_314',['get_occupancy_value',['../classmodule_1_1localisation_1_1OccupancyMap.html#a5828244266bc9a165df395803b8358f5',1,'module::localisation::OccupancyMap']]],
   ['get_5fphase_315',['get_phase',['../classutility_1_1skill_1_1QuinticWalkEngine.html#a6087f0da259297bc0fb2c5bf3a495e24',1,'utility::skill::QuinticWalkEngine']]],
-  ['get_5fplatform_316',['get_platform',['../namespaceutility_1_1motion.html#aa2669102361fc3a1b137b680d608425e',1,'utility::motion']]],
+  ['get_5fplatform_316',['get_platform',['../namespaceutility_1_1skill.html#aca73f6cdfa73f7e519dd35b0e8acf3a5',1,'utility::skill']]],
   ['get_5froot_5fprovider_317',['get_root_provider',['../classmodule_1_1extension_1_1Director.html#ae70c9d1cd557625475736a41e910f843',1,'module::extension::Director']]],
   ['get_5frun_5finfo_318',['get_run_info',['../classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d',1,'extension::behaviour::information::InformationSource']]],
   ['get_5ftask_5fdata_319',['get_task_data',['../classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453',1,'extension::behaviour::information::InformationSource']]],

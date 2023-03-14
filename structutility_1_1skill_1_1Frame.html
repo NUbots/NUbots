@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: YAML::convert&lt;::utility::motion::Frame &gt; Struct Reference</title>
+    <title>NUbots: utility::skill::Frame Struct Reference</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -147,7 +147,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structutility_1_1skill_1_1Frame.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -167,114 +167,41 @@ $(document).ready(function(){initNavTree('structYAML_1_1convert_3_1_1utility_1_1
 
 <div class="header">
   <div class="summary">
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
-<a href="structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4-members.html">List of all members</a>  </div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="structutility_1_1skill_1_1Frame-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">YAML::convert&lt;::utility::motion::Frame &gt; Struct Reference</div>  </div>
+<div class="title">utility::skill::Frame Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:abc0b97db92521c257bb179f5855285e6"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html#abc0b97db92521c257bb179f5855285e6">decode</a> (const Node &amp;node, ::<a class="el" href="structutility_1_1motion_1_1Frame.html">utility::motion::Frame</a> &amp;rhs)</td></tr>
-<tr class="memdesc:abc0b97db92521c257bb179f5855285e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decodes a YAML Node as a Frame.  <a href="structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html#abc0b97db92521c257bb179f5855285e6">More...</a><br /></td></tr>
-<tr class="separator:abc0b97db92521c257bb179f5855285e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd963e5bd03161cc4f9086cc6c83b54c"><td class="memItemLeft" align="right" valign="top">static Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html#acd963e5bd03161cc4f9086cc6c83b54c">encode</a> (const ::<a class="el" href="structutility_1_1motion_1_1Frame.html">utility::motion::Frame</a> &amp;rhs)</td></tr>
-<tr class="memdesc:acd963e5bd03161cc4f9086cc6c83b54c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encodes a Frame as a YAML Node.  <a href="structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html#acd963e5bd03161cc4f9086cc6c83b54c">More...</a><br /></td></tr>
-<tr class="separator:acd963e5bd03161cc4f9086cc6c83b54c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1Frame_1_1Target.html">Target</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Servo targets for each active servo in the frame.  <a href="structutility_1_1skill_1_1Frame_1_1Target.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a1dbe7282df59bf9286a7311abc559a2d"><td class="memItemLeft" align="right" valign="top"><a id="a1dbe7282df59bf9286a7311abc559a2d"></a>
+NUClear::clock::duration&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1Frame.html#a1dbe7282df59bf9286a7311abc559a2d">duration</a> {}</td></tr>
+<tr class="memdesc:a1dbe7282df59bf9286a7311abc559a2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time it should take for the servos to move to their targets. <br /></td></tr>
+<tr class="separator:a1dbe7282df59bf9286a7311abc559a2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adcacbcd66272dd7018e1db6472f0a669"><td class="memItemLeft" align="right" valign="top"><a id="adcacbcd66272dd7018e1db6472f0a669"></a>
+std::vector&lt; <a class="el" href="structutility_1_1skill_1_1Frame_1_1Target.html">Target</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1Frame.html#adcacbcd66272dd7018e1db6472f0a669">targets</a></td></tr>
+<tr class="memdesc:adcacbcd66272dd7018e1db6472f0a669"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structutility_1_1skill_1_1Frame_1_1Target.html" title="Servo targets for each active servo in the frame.">Target</a> position of servos for this frame. <br /></td></tr>
+<tr class="separator:adcacbcd66272dd7018e1db6472f0a669"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<h2 class="groupheader">Member Function Documentation</h2>
-<a id="abc0b97db92521c257bb179f5855285e6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abc0b97db92521c257bb179f5855285e6">&#9670;&nbsp;</a></span>decode()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static bool YAML::convert&lt;::<a class="el" href="structutility_1_1motion_1_1Frame.html">utility::motion::Frame</a> &gt;::decode </td>
-          <td>(</td>
-          <td class="paramtype">const Node &amp;&#160;</td>
-          <td class="paramname"><em>node</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">::<a class="el" href="structutility_1_1motion_1_1Frame.html">utility::motion::Frame</a> &amp;&#160;</td>
-          <td class="paramname"><em>rhs</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Decodes a YAML Node as a Frame. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">node</td><td>The YAML Node to decode </td></tr>
-    <tr><td class="paramname">rhs</td><td>A Frame where the YAML Node information will be placed </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if decoding was successful, false otherwise </dd></dl>
-
-</div>
-</div>
-<a id="acd963e5bd03161cc4f9086cc6c83b54c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acd963e5bd03161cc4f9086cc6c83b54c">&#9670;&nbsp;</a></span>encode()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static Node YAML::convert&lt;::<a class="el" href="structutility_1_1motion_1_1Frame.html">utility::motion::Frame</a> &gt;::encode </td>
-          <td>(</td>
-          <td class="paramtype">const ::<a class="el" href="structutility_1_1motion_1_1Frame.html">utility::motion::Frame</a> &amp;&#160;</td>
-          <td class="paramname"><em>rhs</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Encodes a Frame as a YAML Node. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">rhs</td><td>The Frame to convert to a YAML Node </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>A YAML Node of the Frame </dd></dl>
-
-</div>
-</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>shared/utility/motion/<a class="el" href="utility_2motion_2Script_8hpp_source.html">Script.hpp</a></li>
+<li>shared/utility/skill/<a class="el" href="utility_2skill_2Script_8hpp_source.html">Script.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>YAML</b></li><li class="navelem"><a class="el" href="structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html">convert&lt;::utility::motion::Frame &gt;</a></li>
-    <li class="footer">Generated on Tue Mar 14 2023 01:01:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1skill.html">skill</a></li><li class="navelem"><a class="el" href="structutility_1_1skill_1_1Frame.html">Frame</a></li>
+    <li class="footer">Generated on Tue Mar 14 2023 02:09:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

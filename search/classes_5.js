@@ -24,7 +24,7 @@ var searchData=
   ['footdownmethod_1093',['FootDownMethod',['../structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html',1,'module::input::SensorFilter']]],
   ['footstep_1094',['Footstep',['../classutility_1_1motion_1_1splines_1_1Footstep.html',1,'utility::motion::splines']]],
   ['forceplatemodel_1095',['ForcePlateModel',['../structmodule_1_1input_1_1NatNet_1_1ForcePlateModel.html',1,'module::input::NatNet']]],
-  ['frame_1096',['Frame',['../structextension_1_1Script_1_1Frame.html',1,'extension::Script::Frame'],['../structutility_1_1motion_1_1Frame.html',1,'utility::motion::Frame']]],
+  ['frame_1096',['Frame',['../structextension_1_1Script_1_1Frame.html',1,'extension::Script::Frame'],['../structutility_1_1skill_1_1Frame.html',1,'utility::skill::Frame']]],
   ['fsr_1097',['FSR',['../classCM740_1_1FSR.html',1,'CM740']]],
   ['fsrdata_1098',['FSRData',['../structCM740_1_1Types_1_1FSRData.html',1,'CM740::Types']]]
 ];

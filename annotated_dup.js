@@ -370,7 +370,7 @@ var annotated_dup =
           [ "MultivariateNormal", "structutility_1_1math_1_1stats_1_1MultivariateNormal.html", "structutility_1_1math_1_1stats_1_1MultivariateNormal" ]
         ] ]
       ] ],
-      [ "motion", "namespaceutility_1_1motion.html", [
+      [ "motion", null, [
         [ "splines", null, [
           [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
           [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
@@ -380,10 +380,7 @@ var annotated_dup =
           [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
           [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ]
         ] ],
-        [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ],
-        [ "Frame", "structutility_1_1motion_1_1Frame.html", "structutility_1_1motion_1_1Frame" ],
-        [ "Script", "structutility_1_1motion_1_1Script.html", "structutility_1_1motion_1_1Script" ],
-        [ "ScriptRequest", "structutility_1_1motion_1_1ScriptRequest.html", "structutility_1_1motion_1_1ScriptRequest" ]
+        [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ]
       ] ],
       [ "nbs", null, [
         [ "Decoder", "classutility_1_1nbs_1_1Decoder.html", "classutility_1_1nbs_1_1Decoder" ],
@@ -391,8 +388,11 @@ var annotated_dup =
         [ "Index", "classutility_1_1nbs_1_1Index.html", "classutility_1_1nbs_1_1Index" ],
         [ "IndexItem", "structutility_1_1nbs_1_1IndexItem.html", "structutility_1_1nbs_1_1IndexItem" ]
       ] ],
-      [ "skill", null, [
+      [ "skill", "namespaceutility_1_1skill.html", [
+        [ "Frame", "structutility_1_1skill_1_1Frame.html", "structutility_1_1skill_1_1Frame" ],
         [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
+        [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
+        [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
         [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", [
@@ -426,9 +426,9 @@ var annotated_dup =
       [ "convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4" ],
       [ "convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4" ],
       [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
-      [ "convert<::utility::motion::Frame >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4" ],
-      [ "convert<::utility::motion::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4" ],
-      [ "convert<::utility::motion::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4" ]
+      [ "convert<::utility::skill::Frame >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4" ],
+      [ "convert<::utility::skill::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4" ],
+      [ "convert<::utility::skill::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4" ]
     ] ],
     [ "Joystick", "classJoystick.html", "classJoystick" ],
     [ "JoystickEvent", "classJoystickEvent.html", "classJoystickEvent" ],

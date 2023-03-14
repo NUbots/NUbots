@@ -1,13 +1,5 @@
 var NAVTREEINDEX3 =
 {
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aca46f3b4192a109a83da15adb92a6211":[1,0,2,1,2,2,7],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad4cdab3ea39486ad738e5b8bfd6fe886":[1,0,2,1,2,2,9],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad5233c46229ec03366d3c1acbe25dc81":[1,0,2,1,2,2,16],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#adb2037e213c75e4fc32ecc4e2aa2cdc1":[1,0,2,1,2,2,25],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae632f26b2b2f20f962f7b7a95b3892fd":[1,0,2,1,2,2,5],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae6a1ff8f7b1d493a8e3b69199c7b54aa":[1,0,2,1,2,2,35],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeb241db4d2444c4b406a4acb85468976":[1,0,2,1,2,2,8],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeeb5e65dd7e7fa83e53f634520175e8e":[1,0,2,1,2,2,15],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html":[1,0,2,1,3,2],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html#a2012d12ed7c534c118d4cf2d55337b7c":[1,0,2,1,3,2,2],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html#a5b1f07fbd5d3859ae54049f9da1230d6":[1,0,2,1,3,2,1],
@@ -249,5 +241,13 @@ var NAVTREEINDEX3 =
 "classmodule_1_1localisation_1_1BallFilter.html":[1,0,2,4,0],
 "classmodule_1_1localisation_1_1BallFilter.html#a0d410b793057746d14c42638d46aedd7":[1,0,2,4,0,1],
 "classmodule_1_1localisation_1_1BallFilter.html#a4d8c627713dc5c9e67603397ba5fa299":[1,0,2,4,0,4],
-"classmodule_1_1localisation_1_1BallFilter.html#a7bb28c884ea8de57e36e04a7f390c8cb":[1,0,2,4,0,3]
+"classmodule_1_1localisation_1_1BallFilter.html#a7bb28c884ea8de57e36e04a7f390c8cb":[1,0,2,4,0,3],
+"classmodule_1_1localisation_1_1BallFilter.html#aa212e5940da03f8f9fe86242f1214a88":[1,0,2,4,0,2],
+"classmodule_1_1localisation_1_1BallLocalisation.html":[1,0,2,4,1],
+"classmodule_1_1localisation_1_1BallLocalisation.html#a083f58d77fbc44eebdeeea80efbed85e":[1,0,2,4,1,4],
+"classmodule_1_1localisation_1_1BallLocalisation.html#a1b74f959a8666a57fe02c9f877dc4c71":[1,0,2,4,1,0],
+"classmodule_1_1localisation_1_1BallLocalisation.html#a6f0b273950b925ce88e8ef9801770f96":[1,0,2,4,1,2],
+"classmodule_1_1localisation_1_1BallLocalisation.html#a8884192772589e68634efbe758f0c3c7":[1,0,2,4,1,7],
+"classmodule_1_1localisation_1_1BallLocalisation.html#aa2d5a5dbfc0c04ba737e72495023658a":[1,0,2,4,1,3],
+"classmodule_1_1localisation_1_1BallLocalisation.html#acfe025681ee2d46b660528838468903d":[1,0,2,4,1,5]
 };

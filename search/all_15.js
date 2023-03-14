@@ -3,7 +3,7 @@ var searchData=
   ['angle_913',['angle',['../namespaceutility_1_1math_1_1angle.html',1,'utility::math']]],
   ['coordinates_914',['coordinates',['../namespaceutility_1_1math_1_1coordinates.html',1,'utility::math']]],
   ['file_915',['file',['../namespaceutility_1_1file.html',1,'utility']]],
-  ['motion_916',['motion',['../namespaceutility_1_1motion.html',1,'utility']]],
+  ['skill_916',['skill',['../namespaceutility_1_1skill.html',1,'utility']]],
   ['strutil_917',['strutil',['../namespaceutility_1_1strutil.html',1,'utility']]],
   ['transform_918',['transform',['../namespaceutility_1_1math_1_1transform.html',1,'utility::math']]],
   ['uart_919',['UART',['../classCM740_1_1UART.html',1,'CM740']]],

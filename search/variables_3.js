@@ -17,5 +17,5 @@ var searchData=
   ['dpy_1710',['dpy',['../structmodule_1_1output_1_1compressor_1_1vaapi_1_1CompressionContext_1_1VAAPIContext.html#a3efad74fc2263e5630566fdccb2e54ee',1,'module::output::compressor::vaapi::CompressionContext::VAAPIContext']]],
   ['dropped_1711',['dropped',['../classmodule_1_1input_1_1ImageDecompressor.html#a211fd7cda33b65a7d46d54548853b846',1,'module::input::ImageDecompressor::dropped()'],['../classmodule_1_1output_1_1ImageCompressor.html#a202726ce18481d9d41f93c075f5a625f',1,'module::output::ImageCompressor::dropped()']]],
   ['dump_5fpackets_1712',['dump_packets',['../structmodule_1_1input_1_1NatNet_1_1Config.html#aa6dba21a9f6c75d8ad82cf89d8463a6f',1,'module::input::NatNet::Config']]],
-  ['duration_1713',['duration',['../structutility_1_1motion_1_1Frame.html#ade5f1c2ffbce7e15aeb6d731e8a2abf3',1,'utility::motion::Frame']]]
+  ['duration_1713',['duration',['../structutility_1_1skill_1_1Frame.html#a1dbe7282df59bf9286a7311abc559a2d',1,'utility::skill::Frame']]]
 ];

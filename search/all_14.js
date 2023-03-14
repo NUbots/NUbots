@@ -1,9 +1,9 @@
 var searchData=
 [
   ['table_880',['table',['../classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75',1,'utility::vision::Mosaic']]],
-  ['target_881',['Target',['../structextension_1_1Script_1_1Frame_1_1Target.html',1,'extension::Script::Frame::Target'],['../structutility_1_1motion_1_1Frame_1_1Target.html',1,'utility::motion::Frame::Target']]],
+  ['target_881',['Target',['../structextension_1_1Script_1_1Frame_1_1Target.html',1,'extension::Script::Frame::Target'],['../structutility_1_1skill_1_1Frame_1_1Target.html',1,'utility::skill::Frame::Target']]],
   ['targethandle_882',['TargetHandle',['../structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html',1,'module::network::NetworkForwarder::Handle']]],
-  ['targets_883',['targets',['../structutility_1_1motion_1_1Frame.html#a2a6f6adce0211a00b7c10c11eadc64b4',1,'utility::motion::Frame']]],
+  ['targets_883',['targets',['../structutility_1_1skill_1_1Frame.html#adcacbcd66272dd7018e1db6472f0a669',1,'utility::skill::Frame']]],
   ['task_884',['Task',['../structextension_1_1behaviour_1_1Task.html',1,'extension::behaviour']]],
   ['tasklist_885',['TaskList',['../classmodule_1_1extension_1_1Director.html#ab9bea9eca98c83216429445bb76a7804',1,'module::extension::Director::TaskList()'],['../structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a85198691c8f1316b8a51d1fc0e723a8b',1,'module::extension::provider::ProviderGroup::TaskList()']]],
   ['taskpack_886',['TaskPack',['../classmodule_1_1extension_1_1Director.html#acb8b43e3d47e674dc8ddbc35642ffdf4',1,'module::extension::Director']]],
@@ -22,7 +22,7 @@ var searchData=
   ['timestamp_899',['timestamp',['../structutility_1_1nbs_1_1IndexItem.html#a8998861ab27e5b00fd583b5da852cd51',1,'utility::nbs::IndexItem::timestamp()'],['../structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60',1,'module::support::logging::DataLogging::DataLog::timestamp()']]],
   ['tl_900',['tl',['../classutility_1_1math_1_1geometry_1_1Quad.html#ad79b55ba8f05fbb9d08bcae829fccf74',1,'utility::math::geometry::Quad']]],
   ['tomillisecondssinceepoch_901',['toMillisecondsSinceEpoch',['../classmodule_1_1network_1_1PlotJuggler.html#adf40faf65cf79d4347d6fa22a3a3bcf0',1,'module::network::PlotJuggler']]],
-  ['torque_902',['torque',['../structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a65b05bfaa259cd9d93d54893358d4a3e',1,'module::platform::cm740::HardwareIO::ServoState::torque()'],['../structutility_1_1motion_1_1Frame_1_1Target.html#a9d2957f296c529b2513c04d235794aab',1,'utility::motion::Frame::Target::torque()']]],
+  ['torque_902',['torque',['../structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a65b05bfaa259cd9d93d54893358d4a3e',1,'module::platform::cm740::HardwareIO::ServoState::torque()'],['../structutility_1_1skill_1_1Frame_1_1Target.html#a524d99d8453d3c054d820544cb833782',1,'utility::skill::Frame::Target::torque()']]],
   ['torque_5fenabled_903',['torque_enabled',['../structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a80ef8c4beddc8203855e3703d8f5ea54',1,'module::platform::cm740::HardwareIO::ServoState']]],
   ['torque_5flimit_5fconversion_5ffactor_904',['TORQUE_LIMIT_CONVERSION_FACTOR',['../structmodule_1_1platform_1_1cm740_1_1Convert.html#aaa1143ba0c6f8cbe1e5991160e99e00a',1,'module::platform::cm740::Convert']]],
   ['tr_905',['tr',['../classutility_1_1math_1_1geometry_1_1Quad.html#a4b008644d3503fc9dee54389b6697c1d',1,'utility::math::geometry::Quad']]],

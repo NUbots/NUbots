@@ -1,5 +1,6 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#ab37dc7458d605069a5f135a6b443e4a4":[1,0,2,9,0,0,16],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ab3b18dcfcdd8a377f96c3ef7acf5bcfe":[1,0,2,9,0,0,27],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ab5389df631030ddd5310fe35ed98ceb0":[1,0,2,9,0,0,10],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#aba533df97fd97f8481fd580c7e28e364":[1,0,2,9,0,0,13],
@@ -248,6 +249,5 @@ var NAVTREEINDEX13 =
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daadf736b0ca4db7aca821213e536bfddc8":[1,0,5,3,1,0,7],
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daaf0c2e9714e33aa60d589d3b703aa8b8b":[1,0,5,3,1,0,18],
 "structutility_1_1input_1_1ServoID.html#a268edf3adc760b92bd099ce955f84525":[1,0,5,3,1,20],
-"structutility_1_1input_1_1ServoID.html#a2f6a77ba7a6f53e32a6bf6ffda977ec8":[1,0,5,3,1,27],
-"structutility_1_1input_1_1ServoID.html#a4940c7f00fc50ac721ed7bcd1c12a7ba":[1,0,5,3,1,7]
+"structutility_1_1input_1_1ServoID.html#a2f6a77ba7a6f53e32a6bf6ffda977ec8":[1,0,5,3,1,27]
 };

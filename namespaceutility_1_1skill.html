@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: utility::motion Namespace Reference</title>
+    <title>NUbots: utility::skill Namespace Reference</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -147,7 +147,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('namespaceutility_1_1motion.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('namespaceutility_1_1skill.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -168,61 +168,74 @@ $(document).ready(function(){initNavTree('namespaceutility_1_1motion.html',''); 
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">utility::motion Namespace Reference</div>  </div>
+<div class="title">utility::skill Namespace Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1motion_1_1Balancer.html">Balancer</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1Frame.html">Frame</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1motion_1_1Frame.html">Frame</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html">QuinticWalkEngine</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html" title="QuinticWalkEngine.">QuinticWalkEngine</a>.  <a href="classutility_1_1skill_1_1QuinticWalkEngine.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1Script.html">Script</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One <a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> to run, with name of the script and a duration modifier to speed up or slow down the <a class="el" href="structutility_1_1motion_1_1Script.html">Script</a>.  <a href="structutility_1_1motion_1_1ScriptRequest.html#details">More...</a><br /></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1ScriptRequest.html">ScriptRequest</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One <a class="el" href="structutility_1_1skill_1_1Script.html">Script</a> to run, with name of the script and a duration modifier to speed up or slow down the <a class="el" href="structutility_1_1skill_1_1Script.html">Script</a>.  <a href="structutility_1_1skill_1_1ScriptRequest.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1WalkingParameter.html">WalkingParameter</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:a28c1d9a56af71ecba96a88e15459e1d6"><td class="memItemLeft" align="right" valign="top"><a id="a28c1d9a56af71ecba96a88e15459e1d6"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>LimbID</b> = <a class="el" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a></td></tr>
-<tr class="separator:a28c1d9a56af71ecba96a88e15459e1d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:a1c69be2789c1bfd44720674788c5357a"><td class="memItemLeft" align="right" valign="top"><a id="a1c69be2789c1bfd44720674788c5357a"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>WalkEngineState</b> { <br />
+&#160;&#160;<b>IDLE</b>
+, <b>PAUSED</b>
+, <b>START_MOVEMENT</b>
+, <b>START_STEP</b>
+, <br />
+&#160;&#160;<b>WALKING</b>
+, <b>STOP_STEP</b>
+, <b>STOP_MOVEMENT</b>
+, <b>KICK</b>
+<br />
+ }</td></tr>
+<tr class="separator:a1c69be2789c1bfd44720674788c5357a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:aa2669102361fc3a1b137b680d608425e"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#aa2669102361fc3a1b137b680d608425e">get_platform</a> (const std::string &amp;hostname)</td></tr>
-<tr class="memdesc:aa2669102361fc3a1b137b680d608425e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumes the hostname is of the form &lt;platform_name&gt;&lt;robot_number&gt; and returns &lt;platform_name&gt;.  <a href="namespaceutility_1_1motion.html#aa2669102361fc3a1b137b680d608425e">More...</a><br /></td></tr>
-<tr class="separator:aa2669102361fc3a1b137b680d608425e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee2199e03971e5a8d0163edc960409cf"><td class="memItemLeft" align="right" valign="top">static YAML::Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#aee2199e03971e5a8d0163edc960409cf">load</a> (const std::string &amp;script)</td></tr>
-<tr class="memdesc:aee2199e03971e5a8d0163edc960409cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">If a robot-specific script exists, load the YAML file as a script. If not, loads the platform-specific script. If neither exist, throws a runtime error.  <a href="namespaceutility_1_1motion.html#aee2199e03971e5a8d0163edc960409cf">More...</a><br /></td></tr>
-<tr class="separator:aee2199e03971e5a8d0163edc960409cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a926a4e3335a834f99de4c80a0f0b03"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
-<tr class="memitem:a1a926a4e3335a834f99de4c80a0f0b03"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#a1a926a4e3335a834f99de4c80a0f0b03">load_script</a> (const <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a> script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
-<tr class="memdesc:a1a926a4e3335a834f99de4c80a0f0b03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits a script function with one script request which is then sent through to the multi script version above.  <a href="namespaceutility_1_1motion.html#a1a926a4e3335a834f99de4c80a0f0b03">More...</a><br /></td></tr>
-<tr class="separator:a1a926a4e3335a834f99de4c80a0f0b03"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af926b18a4a287cfe5e956df33d583761"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
-<tr class="memitem:af926b18a4a287cfe5e956df33d583761"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#af926b18a4a287cfe5e956df33d583761">load_script</a> (const std::string script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
-<tr class="memdesc:af926b18a4a287cfe5e956df33d583761"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts a string and converts it into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above.  <a href="namespaceutility_1_1motion.html#af926b18a4a287cfe5e956df33d583761">More...</a><br /></td></tr>
-<tr class="separator:af926b18a4a287cfe5e956df33d583761"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4e28288c541c1d9e19947258564f92e7"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
-<tr class="memitem:a4e28288c541c1d9e19947258564f92e7"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#a4e28288c541c1d9e19947258564f92e7">load_script</a> (const std::vector&lt; <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a> &gt; scripts, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
-<tr class="memdesc:a4e28288c541c1d9e19947258564f92e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates sequences of servos from the script requests given.  <a href="namespaceutility_1_1motion.html#a4e28288c541c1d9e19947258564f92e7">More...</a><br /></td></tr>
-<tr class="separator:a4e28288c541c1d9e19947258564f92e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
-<tr class="memitem:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1motion.html#ace20fd80ea5adb9cd92b71eddb8567b2">load_script</a> (const std::vector&lt; std::string &gt; scripts, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
-<tr class="memdesc:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts a vector of strings and converts them into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above.  <a href="namespaceutility_1_1motion.html#ace20fd80ea5adb9cd92b71eddb8567b2">More...</a><br /></td></tr>
-<tr class="separator:ace20fd80ea5adb9cd92b71eddb8567b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca73f6cdfa73f7e519dd35b0e8acf3a5"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#aca73f6cdfa73f7e519dd35b0e8acf3a5">get_platform</a> (const std::string &amp;hostname)</td></tr>
+<tr class="memdesc:aca73f6cdfa73f7e519dd35b0e8acf3a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumes the hostname is of the form &lt;platform_name&gt;&lt;robot_number&gt; and returns &lt;platform_name&gt;.  <a href="namespaceutility_1_1skill.html#aca73f6cdfa73f7e519dd35b0e8acf3a5">More...</a><br /></td></tr>
+<tr class="separator:aca73f6cdfa73f7e519dd35b0e8acf3a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a165293156a62b9e4bb7899e5364d7cd8"><td class="memItemLeft" align="right" valign="top">static YAML::Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8">load</a> (const std::string &amp;script)</td></tr>
+<tr class="memdesc:a165293156a62b9e4bb7899e5364d7cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">If a robot-specific script exists, load the YAML file as a script. If not, loads the platform-specific script. If neither exist, throws a runtime error.  <a href="namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8">More...</a><br /></td></tr>
+<tr class="separator:a165293156a62b9e4bb7899e5364d7cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53142677645a7166736a733b2096b67b"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:a53142677645a7166736a733b2096b67b"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#a53142677645a7166736a733b2096b67b">load_script</a> (const <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html">ScriptRequest</a> script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:a53142677645a7166736a733b2096b67b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits a script function with one script request which is then sent through to the multi script version above.  <a href="namespaceutility_1_1skill.html#a53142677645a7166736a733b2096b67b">More...</a><br /></td></tr>
+<tr class="separator:a53142677645a7166736a733b2096b67b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d1ce6757ddb8c5386c3da34f1d185db"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:a5d1ce6757ddb8c5386c3da34f1d185db"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#a5d1ce6757ddb8c5386c3da34f1d185db">load_script</a> (const std::string script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:a5d1ce6757ddb8c5386c3da34f1d185db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts a string and converts it into a <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above.  <a href="namespaceutility_1_1skill.html#a5d1ce6757ddb8c5386c3da34f1d185db">More...</a><br /></td></tr>
+<tr class="separator:a5d1ce6757ddb8c5386c3da34f1d185db"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a917b6229cb1233389f832c2abf62378b"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:a917b6229cb1233389f832c2abf62378b"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#a917b6229cb1233389f832c2abf62378b">load_script</a> (const std::vector&lt; <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html">ScriptRequest</a> &gt; scripts, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:a917b6229cb1233389f832c2abf62378b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates sequences of servos from the script requests given.  <a href="namespaceutility_1_1skill.html#a917b6229cb1233389f832c2abf62378b">More...</a><br /></td></tr>
+<tr class="separator:a917b6229cb1233389f832c2abf62378b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73510cc3b1b8dfa1de8a0f8fb3b98330"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:a73510cc3b1b8dfa1de8a0f8fb3b98330"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#a73510cc3b1b8dfa1de8a0f8fb3b98330">load_script</a> (const std::vector&lt; std::string &gt; scripts, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:a73510cc3b1b8dfa1de8a0f8fb3b98330"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accepts a vector of strings and converts them into a <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above.  <a href="namespaceutility_1_1skill.html#a73510cc3b1b8dfa1de8a0f8fb3b98330">More...</a><br /></td></tr>
+<tr class="separator:a73510cc3b1b8dfa1de8a0f8fb3b98330"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section author"><dt>Author</dt><dd>Ysobel Sims </dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
-<a id="aa2669102361fc3a1b137b680d608425e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa2669102361fc3a1b137b680d608425e">&#9670;&nbsp;</a></span>get_platform()</h2>
+<a id="aca73f6cdfa73f7e519dd35b0e8acf3a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca73f6cdfa73f7e519dd35b0e8acf3a5">&#9670;&nbsp;</a></span>get_platform()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -231,7 +244,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static std::string utility::motion::get_platform </td>
+          <td class="memname">static std::string utility::skill::get_platform </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>hostname</em></td><td>)</td>
@@ -262,8 +275,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="aee2199e03971e5a8d0163edc960409cf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aee2199e03971e5a8d0163edc960409cf">&#9670;&nbsp;</a></span>load()</h2>
+<a id="a165293156a62b9e4bb7899e5364d7cd8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a165293156a62b9e4bb7899e5364d7cd8">&#9670;&nbsp;</a></span>load()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -272,7 +285,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static YAML::Node utility::motion::load </td>
+          <td class="memname">static YAML::Node utility::skill::load </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>script</em></td><td>)</td>
@@ -303,8 +316,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="a1a926a4e3335a834f99de4c80a0f0b03"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a926a4e3335a834f99de4c80a0f0b03">&#9670;&nbsp;</a></span>load_script() <span class="overload">[1/4]</span></h2>
+<a id="a53142677645a7166736a733b2096b67b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53142677645a7166736a733b2096b67b">&#9670;&nbsp;</a></span>load_script() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -315,9 +328,9 @@ template&lt;typename Sequence &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::skill::load_script </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a>&#160;</td>
+          <td class="paramtype">const <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html">ScriptRequest</a>&#160;</td>
           <td class="paramname"><em>script</em>, </td>
         </tr>
         <tr>
@@ -342,7 +355,7 @@ template&lt;typename Sequence &gt; </div>
 <p>Emits a script function with one script request which is then sent through to the multi script version above. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">script</td><td><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> to run </td></tr>
+    <tr><td class="paramname">script</td><td><a class="el" href="structutility_1_1skill_1_1Script.html">Script</a> to run </td></tr>
     <tr><td class="paramname">start</td><td>When the script should start executing. Default is now. </td></tr>
   </table>
   </dd>
@@ -351,8 +364,8 @@ template&lt;typename Sequence &gt; </div>
 
 </div>
 </div>
-<a id="af926b18a4a287cfe5e956df33d583761"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af926b18a4a287cfe5e956df33d583761">&#9670;&nbsp;</a></span>load_script() <span class="overload">[2/4]</span></h2>
+<a id="a5d1ce6757ddb8c5386c3da34f1d185db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d1ce6757ddb8c5386c3da34f1d185db">&#9670;&nbsp;</a></span>load_script() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -363,7 +376,7 @@ template&lt;typename Sequence &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::skill::load_script </td>
           <td>(</td>
           <td class="paramtype">const std::string&#160;</td>
           <td class="paramname"><em>script</em>, </td>
@@ -387,10 +400,10 @@ template&lt;typename Sequence &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Accepts a string and converts it into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above. </p>
+<p>Accepts a string and converts it into a <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">script</td><td><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> name to run </td></tr>
+    <tr><td class="paramname">script</td><td><a class="el" href="structutility_1_1skill_1_1Script.html">Script</a> name to run </td></tr>
     <tr><td class="paramname">start</td><td>When the script should start executing. Default is now. </td></tr>
   </table>
   </dd>
@@ -399,8 +412,8 @@ template&lt;typename Sequence &gt; </div>
 
 </div>
 </div>
-<a id="a4e28288c541c1d9e19947258564f92e7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4e28288c541c1d9e19947258564f92e7">&#9670;&nbsp;</a></span>load_script() <span class="overload">[3/4]</span></h2>
+<a id="a917b6229cb1233389f832c2abf62378b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a917b6229cb1233389f832c2abf62378b">&#9670;&nbsp;</a></span>load_script() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -411,9 +424,9 @@ template&lt;typename Sequence &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::skill::load_script </td>
           <td>(</td>
-          <td class="paramtype">const std::vector&lt; <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html">ScriptRequest</a> &gt;&#160;</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html">ScriptRequest</a> &gt;&#160;</td>
           <td class="paramname"><em>scripts</em>, </td>
         </tr>
         <tr>
@@ -447,8 +460,8 @@ template&lt;typename Sequence &gt; </div>
 
 </div>
 </div>
-<a id="ace20fd80ea5adb9cd92b71eddb8567b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ace20fd80ea5adb9cd92b71eddb8567b2">&#9670;&nbsp;</a></span>load_script() <span class="overload">[4/4]</span></h2>
+<a id="a73510cc3b1b8dfa1de8a0f8fb3b98330"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73510cc3b1b8dfa1de8a0f8fb3b98330">&#9670;&nbsp;</a></span>load_script() <span class="overload">[4/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -459,7 +472,7 @@ template&lt;typename Sequence &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::motion::load_script </td>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::skill::load_script </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; std::string &gt;&#160;</td>
           <td class="paramname"><em>scripts</em>, </td>
@@ -483,10 +496,10 @@ template&lt;typename Sequence &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Accepts a vector of strings and converts them into a <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1motion_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above. </p>
+<p>Accepts a vector of strings and converts them into a <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a>, and uses the <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> function above. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">scripts</td><td><a class="el" href="structutility_1_1motion_1_1Script.html">Script</a> names to run </td></tr>
+    <tr><td class="paramname">scripts</td><td><a class="el" href="structutility_1_1skill_1_1Script.html">Script</a> names to run </td></tr>
     <tr><td class="paramname">start</td><td>When the script should start executing. Default is now. </td></tr>
   </table>
   </dd>
@@ -500,8 +513,8 @@ template&lt;typename Sequence &gt; </div>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1motion.html">motion</a></li>
-    <li class="footer">Generated on Tue Mar 14 2023 01:01:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1skill.html">skill</a></li>
+    <li class="footer">Generated on Tue Mar 14 2023 02:09:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -1,13 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"classCM740_1_1UART.html#a8f094816bf528c0e3e8c9432ce1283ef":[1,0,0,9,8],
-"classCM740_1_1UART.html#aa8df2dca7607d9a858e953a7ba17d720":[1,0,0,9,15],
-"classCM740_1_1UART.html#aad9a470127f861db18c9cc9827d7876f":[1,0,0,9,14],
-"classCM740_1_1UART.html#ab0b40738e90b3ad52b1274547577a6b3":[1,0,0,9,11],
-"classCM740_1_1UART.html#ab1573fad1341198744db8b30af2eb2e6":[1,0,0,9,4],
-"classCM740_1_1UART.html#ab2433ab6bfdbeff94de9744b030e027f":[1,0,0,9,10],
-"classCM740_1_1UART.html#ab92f17338deef684c7dc21cbdacae533":[1,0,0,9,16],
-"classCM740_1_1UART.html#ad2beba534212d7bb4c73dc02f35bbee1":[1,0,0,9,17],
 "classCM740_1_1UART.html#ad30e00e1763c86aa7f14be0ecdc3ca9e":[1,0,0,9,1],
 "classCM740_1_1UART.html#ad71339ff8cafcd6f58f4b7bff9f482c5":[1,0,0,9,0],
 "classCM740_1_1UART.html#af01de59b866370aadf3caeaa4e1c00ee":[1,0,0,9,6],
@@ -249,5 +241,13 @@ var NAVTREEINDEX2 =
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aa93f334db3a3460d131d57f911ab9944":[1,0,2,1,2,2,14],
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aaec52983c0731627ec71243b03e88462":[1,0,2,1,2,2,17],
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#abe20cefbd3cc81fc4acec8fd522fa557":[1,0,2,1,2,2,34],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ac7abdaee4e3ff48dfa23b4915e70ba10":[1,0,2,1,2,2,30]
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ac7abdaee4e3ff48dfa23b4915e70ba10":[1,0,2,1,2,2,30],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aca46f3b4192a109a83da15adb92a6211":[1,0,2,1,2,2,7],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad4cdab3ea39486ad738e5b8bfd6fe886":[1,0,2,1,2,2,9],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad5233c46229ec03366d3c1acbe25dc81":[1,0,2,1,2,2,16],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#adb2037e213c75e4fc32ecc4e2aa2cdc1":[1,0,2,1,2,2,25],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae632f26b2b2f20f962f7b7a95b3892fd":[1,0,2,1,2,2,5],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae6a1ff8f7b1d493a8e3b69199c7b54aa":[1,0,2,1,2,2,35],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeb241db4d2444c4b406a4acb85468976":[1,0,2,1,2,2,8],
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeeb5e65dd7e7fa83e53f634520175e8e":[1,0,2,1,2,2,15]
 };

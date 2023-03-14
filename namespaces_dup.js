@@ -829,7 +829,29 @@ var namespaces_dup =
         [ "roundUp", "comparison_8hpp.html#a75da193963fbe74dc2a6e535d6c04912", null ],
         [ "sgn", "comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d", null ]
       ] ],
-      [ "motion", "namespaceutility_1_1motion.html", "namespaceutility_1_1motion" ],
+      [ "motion", null, [
+        [ "splines", null, [
+          [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
+          [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
+          [ "Polynom", "classutility_1_1motion_1_1splines_1_1Polynom.html", "classutility_1_1motion_1_1splines_1_1Polynom" ],
+          [ "SmoothSpline", "classutility_1_1motion_1_1splines_1_1SmoothSpline.html", "classutility_1_1motion_1_1splines_1_1SmoothSpline" ],
+          [ "Spline", "classutility_1_1motion_1_1splines_1_1Spline.html", "classutility_1_1motion_1_1splines_1_1Spline" ],
+          [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
+          [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ],
+          [ "Trajectories", "TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef", null ],
+          [ "Vector3fQuadruple", "TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34", null ],
+          [ "diffInv", "Footstep_8cpp.html#a5e5892b709f9e29c5777e3afa5297bf6", null ],
+          [ "operator<<", "Polynom_8hpp.html#a6db93f0d85aee6035e22097b31ba1fb1", null ],
+          [ "poseAdd", "Footstep_8cpp.html#a4d9e21dbf59a7fcb43d36b86b2c02ef6", null ],
+          [ "trajectories_init", "TrajectoryUtils_8hpp.html#acba54f0f4522861817101d7fe9143d4e", null ],
+          [ "trajectories_support_foot_state", "TrajectoryUtils_8hpp.html#a748c4e4b798d740908e5f87e217a207a", null ],
+          [ "trajectories_trunk_foot_pos", "TrajectoryUtils_8hpp.html#a055aaa07356b7911a25d490bd6c2b096", null ],
+          [ "trajectoriesTrunkFootAcc", "TrajectoryUtils_8hpp.html#a6e949a419d9136bea530f34b334755bc", null ],
+          [ "trajectoriesTrunkFootVel", "TrajectoryUtils_8hpp.html#a4900dbba8900d90675b9c6aeec5ea7d4", null ]
+        ] ],
+        [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ],
+        [ "LimbID", "Balance_8cpp.html#a28c1d9a56af71ecba96a88e15459e1d6", null ]
+      ] ],
       [ "nbs", null, [
         [ "Decoder", "classutility_1_1nbs_1_1Decoder.html", "classutility_1_1nbs_1_1Decoder" ],
         [ "Encoder", "classutility_1_1nbs_1_1Encoder.html", "classutility_1_1nbs_1_1Encoder" ],
@@ -853,20 +875,7 @@ var namespaces_dup =
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ]
       ] ],
-      [ "skill", null, [
-        [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
-        [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ],
-        [ "WalkEngineState", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357a", [
-          [ "IDLE", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aaa5daf7f2ebbba4975d61dab1c40188c7", null ],
-          [ "PAUSED", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa99b2439e63f73ad515f7ab2447a80673", null ],
-          [ "START_MOVEMENT", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aaba1002977676dba63f0cb10d32e8f685", null ],
-          [ "START_STEP", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa0154f6e8b7d5a0e0165b46a9391d4528", null ],
-          [ "WALKING", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa606c114184493a665cf1f6a12fbab9d3", null ],
-          [ "STOP_STEP", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa42f60be613205afe5e924596e73b1d6f", null ],
-          [ "STOP_MOVEMENT", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa47e4d06604afec5403611f7fa567e6bb", null ],
-          [ "KICK", "WalkEngine_8hpp.html#a1c69be2789c1bfd44720674788c5357aa959a795d5524bd9054026703a33afb87", null ]
-        ] ]
-      ] ],
+      [ "skill", "namespaceutility_1_1skill.html", "namespaceutility_1_1skill" ],
       [ "strutil", "namespaceutility_1_1strutil.html", "namespaceutility_1_1strutil" ],
       [ "support", null, [
         [ "evil", null, [
@@ -1000,8 +1009,8 @@ var namespaces_dup =
       [ "convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4" ],
       [ "convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4" ],
       [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
-      [ "convert<::utility::motion::Frame >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_01_4" ],
-      [ "convert<::utility::motion::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Frame_1_1Target_01_4" ],
-      [ "convert<::utility::motion::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1motion_1_1Script_3_01Sequence_01_4_01_4" ]
+      [ "convert<::utility::skill::Frame >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4" ],
+      [ "convert<::utility::skill::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4" ],
+      [ "convert<::utility::skill::Script< Sequence > >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Script_3_01Sequence_01_4_01_4" ]
     ] ]
 ];

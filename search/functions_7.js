@@ -12,7 +12,7 @@ var searchData=
   ['get_5fnext_1436',['get_next',['../classutility_1_1motion_1_1splines_1_1Footstep.html#aed8c1819603d5c2318622faf65a122c0',1,'utility::motion::splines::Footstep']]],
   ['get_5foccupancy_5fvalue_1437',['get_occupancy_value',['../classmodule_1_1localisation_1_1OccupancyMap.html#a5828244266bc9a165df395803b8358f5',1,'module::localisation::OccupancyMap']]],
   ['get_5fphase_1438',['get_phase',['../classutility_1_1skill_1_1QuinticWalkEngine.html#a6087f0da259297bc0fb2c5bf3a495e24',1,'utility::skill::QuinticWalkEngine']]],
-  ['get_5fplatform_1439',['get_platform',['../namespaceutility_1_1motion.html#aa2669102361fc3a1b137b680d608425e',1,'utility::motion']]],
+  ['get_5fplatform_1439',['get_platform',['../namespaceutility_1_1skill.html#aca73f6cdfa73f7e519dd35b0e8acf3a5',1,'utility::skill']]],
   ['get_5froot_5fprovider_1440',['get_root_provider',['../classmodule_1_1extension_1_1Director.html#ae70c9d1cd557625475736a41e910f843',1,'module::extension::Director']]],
   ['get_5frun_5finfo_1441',['get_run_info',['../classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d',1,'extension::behaviour::information::InformationSource']]],
   ['get_5ftask_5fdata_1442',['get_task_data',['../classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453',1,'extension::behaviour::information::InformationSource']]],
