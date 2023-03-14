@@ -25,6 +25,8 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "message/input/OdometryBenchmark.hpp"
+
 #include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -45,6 +47,8 @@ namespace module::input {
     using message::platform::ButtonMiddleDown;
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
+
+    using message::input::OdometryBenchmark;
 
     using utility::actuation::kinematics::calculateAllPositions;
     using utility::actuation::kinematics::calculateCentreOfMass;
@@ -812,6 +816,14 @@ namespace module::input {
                                 emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
                                 emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
                                 emit(graph("Quaternion rotational error", quat_rot_error));
+
+
+                                auto odometry_benchmark = std::make_unique<OdometryBenchmark>();
+
+                                odometry_benchmark->rWTt = true_rWTt.cast<float>();
+                                odometry_benchmark->Rtw = true_Rtw.cast<float>();
+
+                                emit(std::move(odometry_benchmark));
                             }
 
                             /************************************************
