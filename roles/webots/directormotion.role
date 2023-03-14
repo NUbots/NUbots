@@ -28,6 +28,7 @@ nuclear_role(
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
+  planning::PlanKick
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
