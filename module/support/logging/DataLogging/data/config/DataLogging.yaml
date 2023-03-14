@@ -10,3 +10,4 @@ messages:
   message.output.CompressedImage: false
   message.input.Sensors: false
   message.platform.RawSensors: false
+  message.input.OdometryBenchmark: true

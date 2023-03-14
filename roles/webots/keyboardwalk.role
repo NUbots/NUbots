@@ -29,4 +29,6 @@ nuclear_role(
   behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
   behaviour::strategy::KeyboardWalk
+  # Logging
+  support::logging::DataLogging
 )
