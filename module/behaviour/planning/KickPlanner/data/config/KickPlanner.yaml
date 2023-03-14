@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 max_ball_distance: 0.30
 kick_corridor_width: 0.1
