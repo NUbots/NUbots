@@ -43,15 +43,15 @@ namespace module::planning {
             }
         });
 
-        on<Provide<LookAtBall>, Optional<With<FilteredBall>>>().then(
+        on<Provide<LookAtBall>, Optional<With<FilteredBall>>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const std::shared_ptr<const FilteredBall>& ball) {
                 // If we have a ball and it is recent, look at it
                 if (ball && (NUClear::clock::now() - ball->time_of_measurement < cfg.ball_search_timeout)) {
-                    emit(std::make_unique<Look>(ball->rBCt.cast<double>(), true));
+                    emit<Task>(std::make_unique<Look>(ball->rBCt.cast<double>(), true));
                 }
                 // Otherwise, look around for the ball
                 else {
-                    emit(std::make_unique<LookAround>());
+                    emit<Task>(std::make_unique<LookAround>());
                 }
             });
 
@@ -69,11 +69,11 @@ namespace module::planning {
                 }
                 // Otherwise, look around for the goals
                 else {
-                    emit(std::make_unique<LookAround>());
+                    emit<Task>(std::make_unique<LookAround>());
                 }
             });
 
-        on<Provide<LookAround>>().then([this] {
+        on<Provide<LookAround>, Every<30, Per<std::chrono::seconds>>>().then([this] {
             // How long the look has lingered - will move to the next position if long enough
             float time_since_last_search_moved =
                 std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - search_last_moved)
@@ -92,7 +92,6 @@ namespace module::planning {
                                         * Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()))
                                            .toRotationMatrix()
                                        * Eigen::Vector3d::UnitX();
-
                 emit<Task>(std::make_unique<Look>(uPCt, false));
 
                 // Move to next search position in list
