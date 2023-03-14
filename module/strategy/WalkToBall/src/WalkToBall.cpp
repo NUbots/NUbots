@@ -30,7 +30,8 @@ namespace module::strategy {
             [this](const std::shared_ptr<const FilteredBall>& ball) {
                 // If we have a ball, walk to it
                 if (ball && (NUClear::clock::now() - ball->time_of_measurement < cfg.ball_search_timeout)) {
-                    const Eigen::Vector3d rBTt(ball->rBCc.x(), ball->rBCc.y() + cfg.ball_y_offset, ball->rBCc.z());
+                    // Add an offset to account for walking with the foot in front of the ball
+                    const Eigen::Vector3f rBTt(ball->rBCc.x(), ball->rBCc.y() + cfg.ball_y_offset, ball->rBCc.z());
                     emit<Task>(std::make_unique<WalkTo>(rBTt));
                 }
                 else {
