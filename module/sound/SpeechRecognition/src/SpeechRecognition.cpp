@@ -4,12 +4,12 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/input/AudioData.hpp"
+#include "message/input/Audio.hpp"
 
 namespace module::sound {
 
     using extension::Configuration;
-    using message::input::AudioData;
+    using message::input::Audio;
 
 
     SpeechRecognition::SpeechRecognition(std::unique_ptr<NUClear::Environment> environment)
@@ -23,7 +23,7 @@ namespace module::sound {
             recognizer      = vosk_recognizer_new(model, 16000.0);
         });
 
-        // This reactor receives audiodata from emission
+        // This reactor receives audio from emission
         on<Trigger<Audio>>().then([this](const Audio& audio) {
             int final = vosk_recognizer_accept_waveform(recognizer,
                                                         reinterpret_cast<const char*>(audio.audio.data()),
