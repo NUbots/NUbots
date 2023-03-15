@@ -53,14 +53,14 @@
 
     // Maybe something like this?
     // enum Error{
-    //     RESULT_FAIL = 0 << 1;
-    //     INSTRUCTION = 1 << 2;
-    //     CRC         = 1 << 3;
-    //     DATA_RANGE  = 1 << 4;
-    //     DATA_LENGTH = 1 << 5;
-    //     DATA_LIMIT  = 1 << 6;
-    //     ACCESS      = 1 << 7;
-    //     ALERT       = 1 << 8;
+    //     RESULT_FAIL = 0x01;
+    //     INSTRUCTION = 0x02;
+    //     CRC         = 0x03;
+    //     DATA_RANGE  = 0x04;
+    //     DATA_LENGTH = 0x05;
+    //     DATA_LIMIT  = 0x06;
+    //     ACCESS      = 0x07;
+    //     ALERT       = 0x08;
     // }
 
     message LEDPanel {
