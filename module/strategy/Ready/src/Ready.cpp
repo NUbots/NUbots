@@ -27,7 +27,7 @@ namespace module::strategy {
         });
 
         on<Provide<ReadyTask>, Uses<StandStill>, Every<30, Per<std::chrono::seconds>>>().then(
-            [this](const Uses<StandStill>& stand_still, const RunInfo& info) {
+            [this](const RunInfo& info, const Uses<StandStill>& stand_still) {
                 // If we have just started running ready, then record the current time and emit the walk task
                 if (info.run_reason == RunInfo::NEW_TASK) {
                     start_ready_time = NUClear::clock::now();
