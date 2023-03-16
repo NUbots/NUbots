@@ -26,22 +26,26 @@ namespace module::strategy {
             cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<float>();
         });
 
-        on<Provide<ReadyTask>, Every<30, Per<std::chrono::seconds>>>().then([this](const RunInfo& info) {
-            // If we have just started running ready, then record the current time and emit the walk task
-            if (info.run_reason == RunInfo::NEW_TASK) {
-                start_ready_time = NUClear::clock::now();
-                emit<Task>(std::make_unique<Walk>(
-                    Eigen::Vector3f(cfg.walk_to_ready_speed_x, cfg.walk_to_ready_speed_y, cfg.walk_to_ready_rotation)));
-            }
+        on<Provide<ReadyTask>, Uses<StandStill>, Every<30, Per<std::chrono::seconds>>>().then(
+            [this](const Uses<StandStill>& stand_still, const RunInfo& info) {
+                // If we have just started running ready, then record the current time and emit the walk task
+                if (info.run_reason == RunInfo::NEW_TASK) {
+                    start_ready_time = NUClear::clock::now();
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(cfg.walk_to_ready_speed_x,
+                                                                      cfg.walk_to_ready_speed_y,
+                                                                      cfg.walk_to_ready_rotation)));
+                }
 
-            // If the time has elapsed to walk to ready, then emit the stand still task
-            if (NUClear::clock::now() - start_ready_time > cfg.walk_to_ready_time) {
-                emit<Task>(std::make_unique<StandStill>());
-            }
-            else {  // Otherwise, emit the idle task to keep walking
-                emit<Task>(std::make_unique<Idle>());
-            }
-        });
+                // If the time has elapsed to walk to ready, then emit the stand still task
+                // Don't emit another stand still task if we already did so
+                if (NUClear::clock::now() - start_ready_time > cfg.walk_to_ready_time
+                    && stand_still.run_state == GroupInfo::RunState::NO_TASK) {
+                    emit<Task>(std::make_unique<StandStill>());
+                }
+                else {  // Otherwise, emit the idle task to keep walking
+                    emit<Task>(std::make_unique<Idle>());
+                }
+            });
     }
 
 }  // namespace module::strategy
