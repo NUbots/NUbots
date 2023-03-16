@@ -26,7 +26,7 @@ force_playing: false
 force_penalty_shootout: false
 
 # Time to walk forward in ready (in seconds)
-walk_to_ready_time: 20
+walk_to_ready_time: 12
 
 # Distance to begin the kick on the ball while normally playing (in metres)
 kicking_distance_threshold: 0.35
