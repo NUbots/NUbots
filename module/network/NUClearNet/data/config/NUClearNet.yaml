@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 name: ""
 address: 239.226.152.162
