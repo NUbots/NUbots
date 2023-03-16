@@ -12,6 +12,7 @@
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/strategy/StandStill.hpp"
 
 namespace module::purpose {
 
@@ -26,6 +27,7 @@ namespace module::purpose {
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
     using message::purpose::Striker;
+    using message::strategy::StandStill;
 
     RoboCup::RoboCup(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
