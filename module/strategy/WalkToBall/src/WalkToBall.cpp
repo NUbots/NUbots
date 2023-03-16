@@ -12,7 +12,7 @@ namespace module::strategy {
     using extension::Configuration;
     using message::localisation::FilteredBall;
     using message::planning::WalkTo;
-    using message::strategy::WalkToBall;
+    using WalkToBallTask = message::strategy::WalkToBall;
 
     WalkToBall::WalkToBall(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -27,7 +27,7 @@ namespace module::strategy {
 
         // If the Provider updates on Every and the last FilteredBall was too long ago, it won't emit any Task
         // Otherwise it will emit a Task to walk to the ball
-        on<Provide<WalkToBall>, With<FilteredBall>, Every<30, Per<std::chrono::seconds>>>().then(
+        on<Provide<WalkToBallTask>, With<FilteredBall>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const FilteredBall& ball) {
                 // If we have a ball, walk to it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
