@@ -43,10 +43,14 @@ namespace module::platform::openCR {
             // Initialise packet_queue map
             // OpenCR
             packet_queue[uint8_t(NUgus::ID::OPENCR)] = std::vector<PacketTypes>();
-            // Servos
-            for (int i = 0; i < 20; ++i) {
-                packet_queue[i] = std::vector<PacketTypes>();
+            // Servos - NOT zero indexed. First servo is ID 1.
+            // Required because response packets have Dynamixel ID
+            for (auto& id : nugus.servo_ids()) {
+                packet_queue[id] = std::vector<PacketTypes>();
             }
+            // Broadcast ID - defined to capture any StatusReturn's
+            packet_queue[uint8_t(NUgus::ID::BROADCAST)] = std::vector<PacketTypes>();
+            
             // FSRs
             // packet_queue[uint8_t(NUgus::ID::R_FSR)] = std::vector<PacketTypes>();
             // packet_queue[uint8_t(NUgus::ID::L_FSR)] = std::vector<PacketTypes>();
@@ -290,8 +294,8 @@ namespace module::platform::openCR {
 
             // Get updated servo data
             // SYNC_READ (read the same memory addresses on all devices)
-            for (int i = 0; i < 20; ++i) {
-                packet_queue[i].push_back(PacketTypes::SERVO_DATA);
+            for (auto& id : nugus.servo_ids()) {
+                packet_queue[id].push_back(PacketTypes::SERVO_DATA);
             }
             opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(AddressBook::SERVO_READ),
                                                             sizeof(DynamixelServoReadData),
