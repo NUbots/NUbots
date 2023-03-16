@@ -20,9 +20,9 @@ rotate_around_ball_speed_x: 0
 rotate_around_ball_speed_y: -0.4
 
 # Walk to ready position tuning values
-walk_to_ready_speed_x: 0.01
-walk_to_ready_speed_y: -0.01
-walk_to_ready_rotation: 0
+walk_to_ready_speed_x: 0.3
+walk_to_ready_speed_y: 0.0
+walk_to_ready_rotation: 0.0
 
 # Y - Offset for ball position such that ball is approached with foot behind ball
 ball_y_offset: 0.1
