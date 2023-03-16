@@ -1,4 +1,4 @@
-#include "StrategiseWalk.hpp"
+#include "WalkToBall.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -14,11 +14,11 @@ namespace module::strategy {
     using message::planning::WalkTo;
     using message::strategy::WalkToBall;
 
-    StrategiseWalk::StrategiseWalk(std::unique_ptr<NUClear::Environment> environment)
+    WalkToBall::WalkToBall(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("StrategiseWalk.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file StrategiseWalk.yaml
+        on<Configuration>("WalkToBall.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file WalkToBall.yaml
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
