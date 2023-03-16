@@ -102,12 +102,12 @@ def update_config_files(args: dict) -> None:
     # ROBOCUP_TEAM_COLOR
     # (not set as it's not used by our code)
 
-    # Set `server_address` and `port` in webots.yaml from ROBOCUP_SIMULATOR_ADDR
-    webots_config = read_config("webots.yaml")
+    # Set `server_address` and `port` in Webots.yaml from ROBOCUP_SIMULATOR_ADDR
+    webots_config = read_config("Webots.yaml")
     address, port = env_vars["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
     webots_config["server_address"] = address
     webots_config["port"] = int(port)
-    write_config("webots.yaml", webots_config)
+    write_config("Webots.yaml", webots_config)
 
     # Set `team_id` if it is provided
     if "ROBOCUP_TEAM_ID" in env_vars:

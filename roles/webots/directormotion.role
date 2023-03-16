@@ -33,5 +33,6 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
+  strategy::StrategiseLook
   strategy::FindObject
 )
