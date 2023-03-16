@@ -6,7 +6,7 @@ Play soccer in the striker position, which is an offensive position. Either bypa
 
 In the ready state, makes a Ready subtask.
 
-In the playing state (for both normal game mode and penalty shootout), it looks for the ball, walks to the ball, kicks the ball and recovers from falling.
+In the playing state (for both normal game mode and penalty shootout), finds the ball, fixates on the ball, walks to the ball, kicks the ball and recovers from falling.
 
 ## Usage
 

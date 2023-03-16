@@ -5,9 +5,10 @@
 
 #include "message/input/GameState.hpp"
 #include "message/planning/KickTo.hpp"
-#include "message/planning/LookAtFeature.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/strategy/FallRecovery.hpp"
+#include "message/strategy/FindFeature.hpp"
+#include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToBall.hpp"
@@ -17,19 +18,20 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using Phase = message::input::GameState::Data::Phase;
+    using Phase    = message::input::GameState::Data::Phase;
+    using GameMode = message::input::GameState::Data::Mode;
     using message::input::GameState;
     using message::planning::KickTo;
-    using message::planning::LookAtBall;
     using message::purpose::PenaltyShootoutStriker;
     using message::purpose::PlayStriker;
-    using StrikerTask = message::purpose::Striker;
     using message::strategy::FallRecovery;
+    using message::strategy::FindBall;
+    using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
+    using StrikerTask = message::purpose::Striker;
     using utility::support::Expression;
-    using GameMode = message::input::GameState::Data::Mode;
 
     Striker::Striker(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -59,49 +61,39 @@ namespace module::purpose {
                 }
             });
 
-        on<Provide<PlayStriker>, Optional<With<Phase>>>().then([this](const std::shared_ptr<const Phase>& phase) {
-            // Check if there is Phase information, and if so act based on the phase
-            if (phase) {
-                switch (phase->value) {
-                    // Stand still in initial and set state
-                    case Phase::INITIAL:   // Beginning of game and half time
-                    case Phase::SET:       // After ready
-                    case Phase::FINISHED:  // Game has finished
-                    case Phase::TIMEOUT:   // A pause in playing - not in simulation
-                        emit<Task>(std::make_unique<StandStill>());
-                        break;
-                    // After initial, robots position on their half of the field
-                    case Phase::READY: emit<Task>(std::make_unique<Ready>(cfg.rRFf)); break;
-                    // After set, main game where we should play soccer
-                    case Phase::PLAYING: play(); break;
-                    default: log<NUClear::WARN>("Unknown normal gamemode phase.");
-                }
-            }
-        });
+        // Normal READY state
+        on<Provide<PlayStriker>, With<Phase, std::equals, Phase::READY>>().then(
+            [this] { emit<Task>(std::make_unique<Ready>(cfg.rRFf)); });
 
-        on<Provide<PenaltyShootoutStriker>, With<Phase>>().then([this](const Phase& phase) {
-            switch (phase.value) {
-                // Stand still in initial and set state
-                case Phase::INITIAL:   // Beginning of penalty shootout
-                case Phase::SET:       // After initial
-                case Phase::FINISHED:  // Penalty shootout has finished
-                case Phase::TIMEOUT:   // A pause in playing - not in simulation
-                    emit<Task>(std::make_unique<StandStill>());
-                    break;
-                // After set, where we should play a penalty shootout
-                case Phase::PLAYING: play(); break;
-                default: log<NUClear::WARN>("Unknown penalty shootout gamemode phase.");
-            }
-        });
+        // Normal PLAYING state
+        on<Provide<PlayStriker>, With<Phase, std::equals, Phase::PLAYING>>().then([this] { play(); });
+
+        // Normal UNKNOWN state
+        on<Provide<PlayStriker>, With<Phase, std::equals, Phase::UNKNOWN_PHASE>>().then(
+            [this] { log<NUClear::WARN>("Unknown normal game phase."); });
+
+        // Default for INITIAL, SET, FINISHED, TIMEOUT
+        on<Provide<PlayStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Penalty shootout PLAYING state
+        on<Provide<PenaltyShootoutStriker>, With<Phase, std::equals, Phase::PLAYING>>().then([this] { play(); });
+
+        // Penalty shootout UNKNOWN state
+        on<Provide<PenaltyShootoutStriker>, With<Phase, std::equals, Phase::UNKNOWN_PHASE>>().then(
+            [this] { log<NUClear::WARN>("Unknown penalty shootout game phase."); });
+
+        // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
+        on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
     void Striker::play() {
         // Walk to the ball and kick!
-        emit<Task>(std::make_unique<StandStill>());
-        emit<Task>(std::make_unique<LookAtBall>(), 1);
-        emit<Task>(std::make_unique<WalkToBall>(), 2);
-        emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 3);
-        emit<Task>(std::make_unique<FallRecovery>(), 4);
+        emit<Task>(std::make_unique<StandStill>());     // if nothing else is happening, stand still
+        emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
+        emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
+        emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 4);  // kick the ball if possible
+        emit<Task>(std::make_unique<FallRecovery>(), 5);                   // recover from falling if applicable
     }
 
 }  // namespace module::purpose
