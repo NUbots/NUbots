@@ -1,5 +1,8 @@
 var NAVTREEINDEX7 =
 {
+"classutility_1_1motion_1_1splines_1_1Footstep.html#ad5d8d9e665d128a0179dc2d305fd33f1":[1,0,5,6,0,1,11],
+"classutility_1_1motion_1_1splines_1_1Footstep.html#aed8c1819603d5c2318622faf65a122c0":[1,0,5,6,0,1,3],
+"classutility_1_1motion_1_1splines_1_1Footstep.html#af306ae96c0d5c4d9ac1a1deb5c6f7fc3":[1,0,5,6,0,1,2],
 "classutility_1_1motion_1_1splines_1_1Polynom.html":[1,0,5,6,0,2],
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a0a36aa3215a7bb05c6d16f2737130120":[1,0,5,6,0,2,13],
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a1e1af727e5234961dbc157f3b2885e97":[1,0,5,6,0,2,11],
@@ -246,8 +249,5 @@ var NAVTREEINDEX7 =
 "functions_type.html":[1,3,3],
 "functions_u.html":[1,3,0,21],
 "functions_v.html":[1,3,0,22],
-"functions_vars.html":[1,3,2],
-"functions_vars.html":[1,3,2,0],
-"functions_vars_b.html":[1,3,2,1],
-"functions_vars_c.html":[1,3,2,2]
+"functions_vars.html":[1,3,2]
 };

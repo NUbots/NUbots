@@ -217,6 +217,9 @@ var NAVTREEINDEX5 =
 "classmodule_1_1skill_1_1ScriptKick.html#a90f1c96cb47b2946ad217493f2e665fa":[1,0,2,10,3,0],
 "classmodule_1_1strategy_1_1FallRecovery.html":[1,0,2,11,0],
 "classmodule_1_1strategy_1_1FallRecovery.html#aa6579a63e2954fbd0dfae9fc5c00658d":[1,0,2,11,0,0],
+"classmodule_1_1strategy_1_1StrategiseLook.html":[1,0,2,11,1],
+"classmodule_1_1strategy_1_1StrategiseLook.html#a78b231f16264e35e74a30d5afba03317":[1,0,2,11,1,2],
+"classmodule_1_1strategy_1_1StrategiseLook.html#a82d17383b39d62d163e6d8423090b3fd":[1,0,2,11,1,1],
 "classmodule_1_1support_1_1LocalisationSimulator.html":[1,0,2,12,2],
 "classmodule_1_1support_1_1LocalisationSimulator.html#acdd89907a1c92f9efbc23b0d8bc6dbcb":[1,0,2,12,2,1],
 "classmodule_1_1support_1_1LocalisationSimulator.html#ace700ce76a76e9289f0d830284497765":[1,0,2,12,2,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1support_1_1logging_1_1DataLogging.html#aa8e3c01a0bd895d097f13a2261479be3":[1,0,2,12,1,1,5],
 "classmodule_1_1support_1_1logging_1_1DataLogging.html#ac8f69953a5aaa0a0bd75275c1ba3b6df":[1,0,2,12,1,1,9],
 "classmodule_1_1support_1_1logging_1_1DataPlayback.html":[1,0,2,12,1,2],
-"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a07cc49737c4046d6574234f7495d4224":[1,0,2,12,1,2,8],
-"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a198a8cec94143955da202dbb8429c2c5":[1,0,2,12,1,2,10],
-"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a2669dd4649259409746e7333947a32f0":[1,0,2,12,1,2,5],
-"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a2b71d2c22b1a75b4e5695bbd017a16fd":[1,0,2,12,1,2,6]
+"classmodule_1_1support_1_1logging_1_1DataPlayback.html#a07cc49737c4046d6574234f7495d4224":[1,0,2,12,1,2,8]
 };

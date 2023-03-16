@@ -562,6 +562,7 @@ var namespaces_dup =
       ] ],
       [ "strategy", null, [
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
+        [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
         [ "FallRecoveryTask", "FallRecovery_8cpp.html#a4a627b96cd02d6e31d1c95f7671b327c", null ]
       ] ],
       [ "support", null, [

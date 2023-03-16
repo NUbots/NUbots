@@ -1,5 +1,8 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a878a3b35853f80d23f34fe20d907b61f":[1,0,2,7,0,1,1,0,6,3],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a99b0d66d5d227c5b739c41f89694ac58":[1,0,2,7,0,1,1,0,6,8],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aaf543d6f3fd9f89f58c0b625af5787a7":[1,0,2,7,0,1,1,0,6,11],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#ace872e809ad95d433e8e24bce0032bf8":[1,0,2,7,0,1,1,0,6,4],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aedae29c5b347dfcb84afeafbf4ed4586":[1,0,2,7,0,1,1,0,6,10],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html":[1,0,2,7,0,1,1,0,7],
@@ -35,10 +38,8 @@ var NAVTREEINDEX13 =
 "structmodule_1_1planning_1_1PlanKick_1_1Config.html#ac32eb2f84da8efc149e44ff3dc42101e":[1,0,2,8,2,0,0],
 "structmodule_1_1planning_1_1PlanKick_1_1Config.html#ac42cf0ca90b4572c1fc11e2ca251b6d3":[1,0,2,8,2,0,1],
 "structmodule_1_1planning_1_1PlanLook_1_1Config.html":[1,0,2,8,3,0],
-"structmodule_1_1planning_1_1PlanLook_1_1Config.html#a0626a27c9b8bf9cb87df28983ab4cfd4":[1,0,2,8,3,0,2],
-"structmodule_1_1planning_1_1PlanLook_1_1Config.html#a3e96d3ffc77171e20bab7b429d8c27a0":[1,0,2,8,3,0,0],
-"structmodule_1_1planning_1_1PlanLook_1_1Config.html#ac9c22d37fe3e89e25243ba6f1feb4b4d":[1,0,2,8,3,0,3],
-"structmodule_1_1planning_1_1PlanLook_1_1Config.html#ae130ed2ee381f2d821f58579329b9081":[1,0,2,8,3,0,1],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#a0626a27c9b8bf9cb87df28983ab4cfd4":[1,0,2,8,3,0,0],
+"structmodule_1_1planning_1_1PlanLook_1_1Config.html#ac9c22d37fe3e89e25243ba6f1feb4b4d":[1,0,2,8,3,0,1],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html":[1,0,2,8,4,0],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a2741e8ba6a7913f95465d4c02d6b16e2":[1,0,2,8,4,0,6],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a559c10f78e96f285f6c4d533432b97f8":[1,0,2,8,4,0,7],
@@ -148,6 +149,9 @@ var NAVTREEINDEX13 =
 "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#aeb615c052372a4565400e63eac4d1a23":[1,0,2,10,2,0,3],
 "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#af3c0352788f3381281c2cab7744bb955":[1,0,2,10,2,0,5],
 "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#afa9b2b3647fb69f9ffc488c18c89e9a6":[1,0,2,10,2,0,1],
+"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html":[1,0,2,11,1,0],
+"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a163c7d0607ecc204ce2265d308e0f16c":[1,0,2,11,1,0,1],
+"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3":[1,0,2,11,1,0,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[1,0,2,12,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[1,0,2,12,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[1,0,2,12,1,1,0,3],
@@ -245,9 +249,5 @@ var NAVTREEINDEX13 =
 "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html":[1,0,5,0,19],
 "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html#a4d1e9f49d72c98e4a15956606716ceed":[1,0,5,0,19,0],
 "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html":[1,0,5,0,20],
-"structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html#a07a3d0a493ff87eb371a631a1e05786a":[1,0,5,0,20,0],
-"structutility_1_1behaviour_1_1ActionKill.html":[1,0,5,1,0],
-"structutility_1_1behaviour_1_1ActionKill.html#a0030576cbcecde86753a0a7ddeb6b746":[1,0,5,1,0,2],
-"structutility_1_1behaviour_1_1ActionKill.html#a1ce4dfea00362e7d66779e1df5c4d0df":[1,0,5,1,0,1],
-"structutility_1_1behaviour_1_1ActionKill.html#aeb2144c51c8ca6a31d23ff0f802449bf":[1,0,5,1,0,0]
+"structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html#a07a3d0a493ff87eb371a631a1e05786a":[1,0,5,0,20,0]
 };
