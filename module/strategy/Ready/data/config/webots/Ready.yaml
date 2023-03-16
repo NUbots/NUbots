@@ -5,6 +5,6 @@ log_level: DEBUG
 walk_to_ready_time: 12
 
 # Walk to ready position tuning values
-walk_to_ready_speed_x: 0.1 # m/s
-walk_to_ready_speed_y: 0.05 # m/s
-walk_to_ready_rotation: 0.4 # radians/s
+walk_to_ready_speed_x: 0.3 # m/s
+walk_to_ready_speed_y: 0.0 # m/s
+walk_to_ready_rotation: 0.0 # radians/s
