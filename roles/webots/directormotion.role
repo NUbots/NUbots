@@ -26,11 +26,14 @@ nuclear_role(
   skill::GetUp
   skill::Look
   # Planners
+  planning::PlanWalkPath
   planning::PlanLook
+  planning::PlanKick
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
+  strategy::StrategiseLook
   # Purposes
   purpose::RoboCup
 )

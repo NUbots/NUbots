@@ -1,0 +1,19 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# General playing tuning values for approaching ball
+# Speed in the xy direction while walking to a point (m/s)
+speed: 0.3
+# Maximum turning speed in either direction while walking to a point (radians/s)
+max_turn_speed: 0.25
+min_turn_speed: -0.25
+
+# Rotate on the spot tuning values
+rotate_speed: 0.4
+rotate_speed_x: 0
+rotate_speed_y: 0
+
+# Rotate around ball tuning values
+pivot_ball_speed: 0.4
+pivot_ball_speed_x: 0
+pivot_ball_speed_y: -0.4
