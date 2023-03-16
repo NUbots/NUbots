@@ -10,7 +10,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/skill/GetUp.hpp"
 
-#include "utility/motion/Script.hpp"
+#include "utility/skill/Script.hpp"
 
 namespace module::skill {
 
@@ -19,7 +19,7 @@ namespace module::skill {
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
-    using utility::motion::load_script;
+    using utility::skill::load_script;
 
     GetUp::GetUp(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 

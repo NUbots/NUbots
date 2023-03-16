@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 walk:
   # Full walk cycle frequency (how long it takes in seconds for a left + right steps)
