@@ -35,4 +35,5 @@ nuclear_role(
   strategy::FallRecovery
   strategy::StrategiseLook
   strategy::WalkToBall
+  strategy::FindObject
 )
