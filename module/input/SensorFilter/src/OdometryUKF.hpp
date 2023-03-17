@@ -56,7 +56,8 @@ namespace module::input {
             // If this side's foot is down, and it was not down at the previous time step, then we
             // calculate our new footlanding_Hwf value, because our foot has just landed
             if (foot_down && !prev_foot_down) {
-                const MotionModel<double>::StateVec filterState = MotionModel<double>::StateVec(motionFilter.get());
+                const MotionModel<double>::StateVec filterState =
+                    MotionModel<double>::StateVec(motionFilter.get_state());
                 Eigen::Isometry3d Hwt;
                 Hwt.linear()      = filterState.Rwt.toRotationMatrix();
                 Hwt.translation() = filterState.rTWw;
@@ -156,7 +157,7 @@ namespace module::input {
         else {
             // **************** Construct Odometry Output (Htw) ****************
             // Gives us the quaternion representation
-            const auto o = MotionModel<double>::StateVec(motionFilter.get());
+            const auto o = MotionModel<double>::StateVec(motionFilter.get_state());
             // Map from world to torso coordinates (Rtw)
             Eigen::Isometry3d Hwt;
             Hwt.linear()      = o.Rwt.toRotationMatrix();

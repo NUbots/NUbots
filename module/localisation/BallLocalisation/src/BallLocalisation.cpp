@@ -85,12 +85,12 @@ namespace module::localisation {
 
             /* Creating ball state vector and covariance matrix for emission */
             auto ball        = std::make_unique<Ball>();
-            ball->position   = filter.getMean();
-            ball->covariance = filter.getCovariance();
+            ball->position   = filter.get_state();
+            ball->covariance = filter.get_covariance();
 
             if (ball_pos_log) {
-                emit(graph("localisation ball pos", filter.getMean()[0], filter.getMean()[1]));
-                log("localisation ball pos = ", filter.getMean()[0], filter.getMean()[1]);
+                emit(graph("localisation ball pos", filter.get_state()[0], filter.get_state()[1]));
+                log("localisation ball pos = ", filter.get_state()[0], filter.get_state()[1]);
                 log("localisation seconds elapsed = ", seconds);
             }
             emit(ball);

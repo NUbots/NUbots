@@ -51,7 +51,7 @@ namespace module::localisation {
                 filter.time(seconds);
 
                 // Get filter state and transform
-                Eigen::Vector3d state(filter.getMean());
+                Eigen::Vector3d state(filter.get_state());
                 emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
@@ -60,7 +60,7 @@ namespace module::localisation {
                 position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
                 position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
                 field->position        = position.matrix();
-                field->covariance      = filter.getCovariance();
+                field->covariance      = filter.get_covariance();
 
                 log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
                                                 state[RobotModel<double>::kX],
@@ -117,7 +117,7 @@ namespace module::localisation {
                                                            goals.Hcw);
 
                                     if (log_level <= NUClear::DEBUG) {
-                                        const Eigen::Vector3d state(filter.getMean());
+                                        const Eigen::Vector3d state(filter.get_state());
                                         Eigen::Isometry3d Hfw;
                                         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
                                         Hfw.linear() =

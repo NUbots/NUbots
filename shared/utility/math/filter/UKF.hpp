@@ -291,11 +291,11 @@ namespace utility::math::filter {
                 });
         }
 
-        [[nodiscard]] const StateVec& get() const {
+        [[nodiscard]] const StateVec& get_state() const {
             return mean;
         }
 
-        [[nodiscard]] const StateMat& getCovariance() const {
+        [[nodiscard]] const StateMat& get_covariance() const {
             return covariance;
         }
     };

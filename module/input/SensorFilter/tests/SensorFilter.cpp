@@ -129,7 +129,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         // Failed to initialise UKF
         const double covariance_sigma_weight = 0.1 * 0.1 * MotionModel<double>::size;
         const MotionModel<double>::StateMat state(
-            covariance_sigma_weight * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
+            covariance_sigma_weight * filter.get_covariance().unaryExpr([](const double& c) { return std::abs(c); }));
         INFO(state.diagonal());
 
         INFO(error_msg);
@@ -207,7 +207,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
         if (!failed) {
             // Calculate difference between expected and predicted orientations
-            Eigen::Quaterniond Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
+            Eigen::Quaterniond Rwt = MotionModel<double>::StateVec(filter.get_state()).Rwt;
             INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
 
             angular_errors.emplace_back(Rwt.angularDistance(quaternions[i]));
@@ -215,7 +215,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         }
         else {
             // UKF state unrecoverable. Print current average error and bail
-            Eigen::Quaterniond Rwt             = MotionModel<double>::StateVec(filter.get()).Rwt;
+            Eigen::Quaterniond Rwt             = MotionModel<double>::StateVec(filter.get_state()).Rwt;
             const double current_angular_error = Rwt.angularDistance(quaternions[i]);
 
             angular_errors.emplace_back(current_angular_error);
@@ -235,7 +235,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
             const double covariance_sigma_weight = 0.1 * 0.1 * MotionModel<double>::size;
             const MotionModel<double>::StateMat state(
                 covariance_sigma_weight
-                * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
+                * filter.get_covariance().unaryExpr([](const double& c) { return std::abs(c); }));
             INFO(state.diagonal());
 
             INFO(error_msg);
