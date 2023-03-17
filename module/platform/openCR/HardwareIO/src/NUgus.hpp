@@ -112,6 +112,9 @@ namespace module::platform::openCR {
             }
         }
 
+        /// @brief Get an array of the dynamixel IDs of each servo
+        /// @warning Different to utility::input::ServoID which is zero indexed
+        /// @return Array of uint8_t containing the IDs in order
         constexpr std::array<uint8_t, 20> servo_ids() const {
             return {uint8_t(ID::R_SHOULDER_PITCH), uint8_t(ID::L_SHOULDER_PITCH), uint8_t(ID::R_SHOULDER_ROLL),
                     uint8_t(ID::L_SHOULDER_ROLL),  uint8_t(ID::R_ELBOW),          uint8_t(ID::L_ELBOW),
