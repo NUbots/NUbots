@@ -50,7 +50,7 @@ namespace module::platform::openCR {
             }
             // Broadcast ID - defined to capture any StatusReturn's
             packet_queue[uint8_t(NUgus::ID::BROADCAST)] = std::vector<PacketTypes>();
-            
+
             // FSRs
             // packet_queue[uint8_t(NUgus::ID::R_FSR)] = std::vector<PacketTypes>();
             // packet_queue[uint8_t(NUgus::ID::L_FSR)] = std::vector<PacketTypes>();
@@ -94,7 +94,8 @@ namespace module::platform::openCR {
             // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
             std::array<dynamixel::v2::SyncWriteData<uint8_t>, 20> data;
             for (int i = 0; i < 20; ++i) {
-                data[i] = dynamixel::v2::SyncWriteData<uint8_t>(i, 1);
+                // ensure write command targets the ID (ID != i)
+                data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 1);
             }
 
             opencr.write(
@@ -104,7 +105,8 @@ namespace module::platform::openCR {
             // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been
             // configured before)
             for (int i = 0; i < 20; ++i) {
-                data[i] = dynamixel::v2::SyncWriteData<uint8_t>(i, 0);
+                // ensure write command targets the ID (ID != i)
+                data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 0);
             }
 
             opencr.write(
@@ -116,7 +118,7 @@ namespace module::platform::openCR {
 
             for (int i = 0; i < 20; ++i) {
                 read_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>(
-                    i,
+                    nugus.servo_ids()[i],  // ensure write command targets the ID (ID != i)
                     {uint16_t(DynamixelServo::Address::TORQUE_ENABLE),
                      uint16_t(DynamixelServo::Address::HARDWARE_ERROR_STATUS),
                      uint16_t(DynamixelServo::Address::PRESENT_PWM_L),
@@ -146,7 +148,7 @@ namespace module::platform::openCR {
 
             for (int i = 0; i < 20; ++i) {
                 write_data1[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>(
-                    i,
+                    nugus.servo_ids()[i],  // ensure write command targets the ID (ID != i)
                     {uint16_t(DynamixelServo::Address::TORQUE_ENABLE),
                      uint16_t(DynamixelServo::Address::VELOCITY_I_GAIN_L),
                      uint16_t(DynamixelServo::Address::VELOCITY_I_GAIN_H),
@@ -160,7 +162,7 @@ namespace module::platform::openCR {
                      uint16_t(DynamixelServo::Address::POSITION_P_GAIN_H)});
 
                 write_data2[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>>(
-                    i,
+                    nugus.servo_ids()[i],  // ensure write command targets the ID (ID != i)
                     {uint16_t(DynamixelServo::Address::FEEDFORWARD_1ST_GAIN_L),
                      uint16_t(DynamixelServo::Address::FEEDFORWARD_1ST_GAIN_H),
                      uint16_t(DynamixelServo::Address::FEEDFORWARD_2ND_GAIN_L),
@@ -221,9 +223,9 @@ namespace module::platform::openCR {
                 std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
 
                 for (uint i = 0; i < servoStates.size(); ++i) {
-                    // Servo ID is sequential
-                    data1[i].id = i;
-                    data2[i].id = i;
+                    // Servo ID is sequential, but not 0-indexed
+                    data1[i].id = nugus.servo_ids()[i];
+                    data2[i].id = nugus.servo_ids()[i];
 
                     // Clear our dirty flag
                     servoStates[i].dirty = false;
@@ -711,20 +713,22 @@ namespace module::platform::openCR {
 
     void HardwareIO::processServoData(const StatusReturn& packet) {
         const DynamixelServoReadData data = *(reinterpret_cast<const DynamixelServoReadData*>(packet.data.data()));
+        // IDs are 1..20 so need to be converted for the servoStates index
+        uint8_t servoIndex = packet.id - 1;
 
-        servoStates[packet.id].torqueEnabled  = (data.torqueEnable == 1);
-        servoStates[packet.id].errorFlags     = data.hardwareErrorStatus;
-        servoStates[packet.id].presentPWM     = convert::PWM(data.presentPWM);
-        servoStates[packet.id].presentCurrent = convert::current(data.presentCurrent);
+        servoStates[servoIndex].torqueEnabled  = (data.torqueEnable == 1);
+        servoStates[servoIndex].errorFlags     = data.hardwareErrorStatus;
+        servoStates[servoIndex].presentPWM     = convert::PWM(data.presentPWM);
+        servoStates[servoIndex].presentCurrent = convert::current(data.presentCurrent);
         // warning: no idea if the conversion below is correct, just trusting the existing
         // conversion functions in the branch. Whatever is happening it's very different to
         // the solution in the CM740 hwIO (which does make sense). Probably need to test IRL
         // to understand what's going on.
-        servoStates[packet.id].presentVelocity = convert::velocity(data.presentVelocity);
-        servoStates[packet.id].presentPosition =
-            convert::position(packet.id, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
-        servoStates[packet.id].voltage     = convert::voltage(data.presentVoltage);
-        servoStates[packet.id].temperature = convert::temperature(data.presentTemperature);
+        servoStates[servoIndex].presentVelocity = convert::velocity(data.presentVelocity);
+        servoStates[servoIndex].presentPosition =
+            convert::position(servoIndex, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
+        servoStates[servoIndex].voltage     = convert::voltage(data.presentVoltage);
+        servoStates[servoIndex].temperature = convert::temperature(data.presentTemperature);
     }
 
     // void HardwareIO::processFSRData(const StatusReturn& packet) {
