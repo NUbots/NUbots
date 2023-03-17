@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #include <Eigen/Core>
@@ -24,6 +24,7 @@
 
 #include "VanDerPolModel.hpp"
 
+#include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/math/filter/ParticleFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -70,8 +71,8 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
     for (const auto& measurement : measurements) {
         model_filter.measure(measurement, measurement_noise);
         model_filter.time(deltaT);
-        innovations.push_back(measurement.x() - model_filter.get().x());
-        actual_state.push_back(std::make_pair(model_filter.get(), model_filter.getCovariance()));
+        innovations.push_back(measurement.x() - model_filter.get_state().x());
+        actual_state.push_back(std::make_pair(model_filter.get_state(), model_filter.get_covariance()));
     }
 
     INFO("Calculating statistics")
@@ -156,8 +157,8 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     for (const auto& measurement : measurements) {
         model_filter.measure(measurement, measurement_noise);
         model_filter.time(deltaT);
-        innovations.push_back(measurement.x() - model_filter.getMean().x());
-        actual_state.push_back(std::make_pair(model_filter.getMean(), model_filter.getCovariance()));
+        innovations.push_back(measurement.x() - model_filter.get_state().x());
+        actual_state.push_back(std::make_pair(model_filter.get_state(), model_filter.get_covariance()));
     }
 
     INFO("Calculating statistics")
@@ -198,4 +199,81 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     INFO("The mean 1\u03C3 boundary for state 2 is [" << -mean_x2_boundary << ", " << mean_x2_boundary << "]");
 
     REQUIRE(percentage_x1 <= 30.0);
+}
+
+TEST_CASE("Test the KalmanFilter", "[utility][math][filter][KalmanFilter]") {
+
+    // Load in the test data
+    const YAML::Node config                         = YAML::LoadFile("tests/TestKalman.yaml");
+    const std::vector<double> true_angle            = resolve_expression<double>(config["true_angle"]);
+    const std::vector<Eigen::Vector2d> measurements = resolve_expression<Eigen::Vector2d>(config["measurements"]);
+
+    // Define the model
+    const size_t n_states       = 3;
+    const size_t n_inputs       = 0;
+    const size_t n_measurements = 2;
+
+    // Define the state transition model
+    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n_states, n_states);
+    A << 0, 0, 0, 1, 0, 0, 0, 0, 0;
+
+    // Define the control model
+    Eigen::MatrixXd B = Eigen::MatrixXd::Zero(n_states, n_inputs);
+
+    // Define the measurement model
+    Eigen::MatrixXd C = Eigen::MatrixXd::Zero(n_measurements, n_states);
+    C << 0, 1, 0, 1, 0, 1;
+
+    // Define the process noise covariance TODO: Move to yaml
+    Eigen::Matrix3d Q;
+    Q << 3.336564728582061e-04, 1.210220716654972e-05, -1.708092671728623e-04, 1.210220716654972e-05,
+        4.680081577954583e-06, 6.268022135995622e-06, -1.708092671728623e-04, 6.268022135995622e-06,
+        1.320010202073407e-04;
+
+    // Define the measurement noise covariance TODO: Move to yaml
+    Eigen::Matrix2d R;
+    R << 0.0502, 0.0, 0.0, 3.4546e-06;
+
+    // Define the initial state
+    Eigen::Matrix<double, n_states, 1> x0 = Eigen::Matrix<double, n_states, 1>::Zero();
+
+    // Define the initial covariance
+    Eigen::Matrix<double, n_states, n_states> P0 = Eigen::Matrix<double, n_states, n_states>::Identity();
+
+    // Create a Kalman filter
+    utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf(x0, P0, A, B, C, Q, R);
+
+    // Define the time step
+    const double dt = 0.005;
+    int N           = 1000;
+
+    // Run the filter
+    double total_error = 0.0;
+    for (int i = 0; i < N; ++i) {
+        // No control input
+        Eigen::Matrix<double, n_inputs, 1> u = Eigen::Matrix<double, n_inputs, 1>::Zero();
+
+        // Get the measurement
+        Eigen::Matrix<double, n_measurements, 1> y = measurements[i];
+
+        // Time update
+        kf.time(u, dt);
+
+        // Measurement update
+        kf.measure(y);
+
+        // Get the state
+        Eigen::Matrix<double, n_states, 1> x_i = kf.get_state();
+
+        // Compute the error between ground truth and the filter
+        double error = std::abs(true_angle[i] - x_i(1));
+        total_error += error;
+    }
+    double average_error = total_error / N;
+
+    INFO("The total error is: " << total_error);
+    INFO("The average error is: " << average_error);
+    INFO("The final state is: " << kf.get_state().transpose());
+
+    REQUIRE(average_error < 1e-2);
 }
