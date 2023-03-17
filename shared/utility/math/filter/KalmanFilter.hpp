@@ -23,9 +23,6 @@
 #include <Eigen/Cholesky>
 #include <Eigen/Core>
 
-#include "utility/support/LazyEvaluation.hpp"
-
-
 namespace utility::math::filter {
 
     template <typename Scalar, int NumStates, int NumInputs, int NumMeasurements>
@@ -57,20 +54,6 @@ namespace utility::math::filter {
             , C(measurement_model_matrix)
             , Q(process_noise_covariance)
             , R(measurement_noise_covariance) {}
-
-        /**
-         * @brief Discretises the system model using a zero-order hold method.
-         *
-         * @param[out] Ad Discretised state transition matrix.
-         * @param[out] Bd Discretised input model matrix.
-         * @param[in] dt Timestep to discretise with.
-         */
-        void zero_order_hold(Eigen::Matrix<Scalar, NumStates, NumStates>& Ad,
-                             Eigen::Matrix<Scalar, NumStates, NumInputs>& Bd,
-                             const Scalar& dt) {
-            Ad = Eigen::Matrix<Scalar, NumStates, NumStates>::Identity() + dt * A;
-            Bd = dt * B;
-        }
 
         /**
          * @brief Resets the filter to a new initial state and covariance.
@@ -125,18 +108,38 @@ namespace utility::math::filter {
         }
 
     private:
+        /**
+         * @brief Discretises the system model using a zero-order hold method.
+         *
+         * @param[out] Ad Discretised state transition matrix.
+         * @param[out] Bd Discretised input model matrix.
+         * @param[in] dt Timestep to discretise with.
+         */
+        void zero_order_hold(Eigen::Matrix<Scalar, NumStates, NumStates>& Ad,
+                             Eigen::Matrix<Scalar, NumStates, NumInputs>& Bd,
+                             const Scalar& dt) {
+            Ad = Eigen::Matrix<Scalar, NumStates, NumStates>::Identity() + dt * A;
+            Bd = dt * B;
+        }
+
         /// @brief Current estimate of the system state
         StateVec state = StateVec::Zero();
+
         /// @brief Current covariance of the system state
         StateMat covariance = StateMat::Identity();
+
         /// @brief State transition matrix
         StateMat A = StateMat::Identity();
+
         /// @brief Input model matrix
         InputModelMat B = InputModelMat::Zero();
+
         /// @brief Measurement model matrix
         MeasModelMat C = MeasModelMat::Zero();
+
         /// @brief Process noise covariance matrix
         StateMat Q = StateMat::Identity();
+
         /// @brief Measurement noise covariance matrix
         MeasMat R = MeasMat::Identity();
     };
