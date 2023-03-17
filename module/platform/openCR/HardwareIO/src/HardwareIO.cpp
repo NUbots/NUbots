@@ -404,8 +404,17 @@ namespace module::platform::openCR {
 
         on<Trigger<StatusReturn>>().then([this](const StatusReturn& packet) {
             log<NUClear::TRACE>("StatusReturn Start");
-            // Figure out what the contents of the message are
-            if (packet_queue[packet.id].size() > 0) {
+
+            // Check we can process this packet
+            if (packet_queue.find(packet.id) == packet_queue.end()) {
+                log<NUClear::WARN>(fmt::format("Recieved packet for unexpected ID {}.", packet.id));
+            }
+            // Check we're expecting the packet
+            else if (packet_queue[packet.id].size() == 0) {
+                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
+            }
+            // All good, now figure out what the contents of the message are
+            else {
                 // Pop the front of the packet queue
                 auto info = packet_queue[packet.id].front();
                 packet_queue[packet.id].erase(packet_queue[packet.id].begin());
@@ -428,9 +437,6 @@ namespace module::platform::openCR {
                 }
             }
 
-            else {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
-            }
             log<NUClear::TRACE>("StatusReturn END");
         });
 
