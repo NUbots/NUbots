@@ -34,4 +34,5 @@ nuclear_role(
   # Strategies
   strategy::FallRecovery
   strategy::StrategiseLook
+  strategy::FindObject
 )
