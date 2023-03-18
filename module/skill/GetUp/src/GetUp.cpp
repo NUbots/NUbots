@@ -4,56 +4,34 @@
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
-#include "extension/behaviour/Script.hpp"
 
 #include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/skill/GetUp.hpp"
 
+#include "utility/skill/Script.hpp"
+
 namespace module::skill {
 
     using extension::Configuration;
-    using extension::behaviour::Script;
     using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
     using GetUpTask = message::skill::GetUp;
+    using utility::skill::load_script;
 
     GetUp::GetUp(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("GetUp.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.getup_front.clear();
-            for (const auto& s : config["scripts"]["getup_front"].as<std::vector<std::string>>()) {
-                cfg.getup_front.push_back(extension::behaviour::ScriptRequest(s));
-            }
-
-            cfg.getup_back.clear();
-            for (const auto& s : config["scripts"]["getup_back"].as<std::vector<std::string>>()) {
-                cfg.getup_back.push_back(extension::behaviour::ScriptRequest(s));
-            }
-
-            cfg.getup_right.clear();
-            for (const auto& s : config["scripts"]["getup_right"].as<std::vector<std::string>>()) {
-                cfg.getup_right.push_back(extension::behaviour::ScriptRequest(s));
-            }
-
-            cfg.getup_left.clear();
-            for (const auto& s : config["scripts"]["getup_left"].as<std::vector<std::string>>()) {
-                cfg.getup_left.push_back(extension::behaviour::ScriptRequest(s));
-            }
-
-            cfg.getup_upright.clear();
-            for (const auto& s : config["scripts"]["getup_upright"].as<std::vector<std::string>>()) {
-                cfg.getup_upright.push_back(extension::behaviour::ScriptRequest(s));
-            }
-
-            cfg.getup_upside_down.clear();
-            for (const auto& s : config["scripts"]["getup_upside_down"].as<std::vector<std::string>>()) {
-                cfg.getup_upside_down.push_back(extension::behaviour::ScriptRequest(s));
-            }
+            cfg.getup_front       = config["scripts"]["getup_front"].as<std::vector<std::string>>();
+            cfg.getup_back        = config["scripts"]["getup_back"].as<std::vector<std::string>>();
+            cfg.getup_right       = config["scripts"]["getup_right"].as<std::vector<std::string>>();
+            cfg.getup_left        = config["scripts"]["getup_left"].as<std::vector<std::string>>();
+            cfg.getup_upright     = config["scripts"]["getup_upright"].as<std::vector<std::string>>();
+            cfg.getup_upside_down = config["scripts"]["getup_upside_down"].as<std::vector<std::string>>();
         });
 
         on<Provide<GetUpTask>, Needs<BodySequence>, With<Sensors>>().then(
@@ -88,27 +66,27 @@ namespace module::skill {
 
                         if (on_front) {
                             log<NUClear::INFO>("Getting up from front");
-                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_front);
+                            emit<Task>(load_script<BodySequence>(cfg.getup_front));
                         }
                         else if (on_back) {
                             log<NUClear::INFO>("Getting up from back");
-                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_back);
+                            emit<Task>(load_script<BodySequence>(cfg.getup_back));
                         }
                         else if (on_right) {
                             log<NUClear::INFO>("Getting up from right");
-                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_right);
+                            emit<Task>(load_script<BodySequence>(cfg.getup_right));
                         }
                         else if (on_left) {
                             log<NUClear::INFO>("Getting up from left");
-                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_left);
+                            emit<Task>(load_script<BodySequence>(cfg.getup_left));
                         }
                         else if (upright) {
                             log<NUClear::INFO>("Getting up from upright");
-                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_upright);
+                            emit<Task>(load_script<BodySequence>(cfg.getup_upright));
                         }
                         else if (upside_down) {
                             log<NUClear::INFO>("Getting up from upside_down");
-                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_upside_down);
+                            emit<Task>(load_script<BodySequence>(cfg.getup_upside_down));
                         }
 
                     } break;

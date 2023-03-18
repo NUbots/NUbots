@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 # Priority in subsumption system when a getup is requested
 getup_priority: 6

@@ -17,8 +17,7 @@ import rggbUrl from './images/image.rggb.jpg'
 
 const createModel = () => observable<{ image: Image | undefined }>({ image: undefined })
 
-storiesOf('components.vision.image_view', module)
-  .addDecorator(fullscreen)
+fullscreen(storiesOf('components.vision.image_view', module))
   .add('JPEG', () => {
     const model = createModel()
     loadImageElement(jpegUrl, ImageFormat.JPEG).then(
@@ -57,9 +56,9 @@ storiesOf('components.vision.image_view', module)
   })
 
 async function loadImageElement(url: string, format: ImageFormat): Promise<Image> {
-  const element = await loadImage(url)
-  const { width, height } = element
-  return { type: 'element', width, height, element, format }
+  const image = await loadImage(url)
+  const { width, height } = image
+  return { type: 'element-or-bitmap', width, height, image, format }
 }
 
 async function loadImageData(
@@ -69,7 +68,7 @@ async function loadImageData(
   format: ImageFormat,
 ): Promise<Image> {
   const data = await fetchUrlAsBuffer(url)
-  return { type: 'data', width, height, data: computed(() => new Uint8Array(data)), format }
+  return { type: 'data', width, height, image: computed(() => new Uint8Array(data)), format }
 }
 
 async function loadImage(url: string): Promise<HTMLImageElement> {
