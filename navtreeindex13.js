@@ -1,5 +1,8 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#a185ae643881a648bc817a0d9a1547512":[1,0,2,9,0,0,6],
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#a1db6c2a65c5fec8f280144ee35cd12de":[1,0,2,9,0,0,12],
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#a28b82f4f5798537303e24fc52f6ecf03":[1,0,2,9,0,0,1],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#a3aaae4898080eb82ad207f729f0b1079":[1,0,2,9,0,0,11],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#a3b978af40cbb5c5b4cb02fb190371bbe":[1,0,2,9,0,0,3],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#a467b9c67ad74e5435c370a3ba53af6c2":[1,0,2,9,0,0,26],
@@ -76,9 +79,9 @@ var NAVTREEINDEX13 =
 "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#aeb615c052372a4565400e63eac4d1a23":[1,0,2,10,2,0,3],
 "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#af3c0352788f3381281c2cab7744bb955":[1,0,2,10,2,0,5],
 "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#afa9b2b3647fb69f9ffc488c18c89e9a6":[1,0,2,10,2,0,1],
-"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html":[1,0,2,11,2,0],
-"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a163c7d0607ecc204ce2265d308e0f16c":[1,0,2,11,2,0,1],
-"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3":[1,0,2,11,2,0,0],
+"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html":[1,0,2,11,3,0],
+"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a163c7d0607ecc204ce2265d308e0f16c":[1,0,2,11,3,0,1],
+"structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3":[1,0,2,11,3,0,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[1,0,2,12,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[1,0,2,12,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[1,0,2,12,1,1,0,3],
@@ -246,8 +249,5 @@ var NAVTREEINDEX13 =
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0a795133771e7ca846037b6cb48f501b":[1,0,5,3,1,0,0],
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0e167a9cfd6032f8a88e0d177cd47a74":[1,0,5,3,1,0,17],
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa1b33e756021ce4773bd32719b9d8fbdc":[1,0,5,3,1,0,8],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa2078be5587efdf553822e54ff7b8254f":[1,0,5,3,1,0,6],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa2bfe46de35a071363788406659e29dee":[1,0,5,3,1,0,19],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa3bde2993568c40b432fad1bc3b5fff07":[1,0,5,3,1,0,12],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa489232c3e380487b2704c318fd00b992":[1,0,5,3,1,0,4]
+"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa2078be5587efdf553822e54ff7b8254f":[1,0,5,3,1,0,6]
 };

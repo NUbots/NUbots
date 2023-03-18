@@ -249,6 +249,7 @@ var annotated_dup =
       [ "strategy", null, [
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
         [ "FindObject", "classmodule_1_1strategy_1_1FindObject.html", "classmodule_1_1strategy_1_1FindObject" ],
+        [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ]
       ] ],
       [ "support", null, [

@@ -252,6 +252,7 @@ var hierarchy =
         [ "module::skill::ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", null ],
         [ "module::strategy::FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", null ],
         [ "module::strategy::FindObject", "classmodule_1_1strategy_1_1FindObject.html", null ],
+        [ "module::strategy::StandStill", "classmodule_1_1strategy_1_1StandStill.html", null ],
         [ "module::strategy::StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],
