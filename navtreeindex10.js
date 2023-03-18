@@ -1,5 +1,9 @@
 var NAVTREEINDEX10 =
 {
+"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2":[1,0,1,0,5,0,0],
+"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe":[1,0,1,0,5,0,2],
+"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4":[1,0,1,0,5,0,1],
+"structextension_1_1behaviour_1_1Idle.html":[1,0,1,0,6],
 "structextension_1_1behaviour_1_1Needs.html":[1,0,1,0,7],
 "structextension_1_1behaviour_1_1Needs.html#a52b6a9f257c60c96f2baea9e84bed77e":[1,0,1,0,7,0],
 "structextension_1_1behaviour_1_1Provide.html":[1,0,1,0,8],
@@ -245,9 +249,5 @@ var NAVTREEINDEX10 =
 "structmodule_1_1input_1_1CameraContext.html#a0e2d66675096f54d39595b70a3ffe53a":[1,0,2,3,4,9],
 "structmodule_1_1input_1_1CameraContext.html#a1b4d5706676f2fb17217e87facfa1238":[1,0,2,3,4,6],
 "structmodule_1_1input_1_1CameraContext.html#a32db3abb05edd9fa50d5005158cf211e":[1,0,2,3,4,4],
-"structmodule_1_1input_1_1CameraContext.html#a34bafec2e7c319f42f527bb261291708":[1,0,2,3,4,7],
-"structmodule_1_1input_1_1CameraContext.html#a429966454ad18f1a37c1ebaabd921f94":[1,0,2,3,4,8],
-"structmodule_1_1input_1_1CameraContext.html#a96aec4886716a4886d0928c767301e92":[1,0,2,3,4,1],
-"structmodule_1_1input_1_1CameraContext.html#aa7e4194b5c2ae8b874107e2cf27d383b":[1,0,2,3,4,2],
-"structmodule_1_1input_1_1CameraContext.html#ac465e809b89e17006d12da153b1c3c6c":[1,0,2,3,4,3]
+"structmodule_1_1input_1_1CameraContext.html#a34bafec2e7c319f42f527bb261291708":[1,0,2,3,4,7]
 };

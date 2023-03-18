@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1localisation_1_1BallLocalisation.html#aa2d5a5dbfc0c04ba737e72495023658a":[1,0,2,4,1,3],
 "classmodule_1_1localisation_1_1BallLocalisation.html#acfe025681ee2d46b660528838468903d":[1,0,2,4,1,5],
 "classmodule_1_1localisation_1_1BallLocalisation.html#ad49420e81b98d0f90cd7d39dd1cc61b9":[1,0,2,4,1,6],
 "classmodule_1_1localisation_1_1BallLocalisation.html#ad4943e4390ee393bb23b98c4e3b66102":[1,0,2,4,1,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a24d5839c81a3c3c34c88d199d2a3f066":[1,0,2,7,0,0,0,10],
 "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a3d9c56843ac846d8aa4bac0e35c14f83":[1,0,2,7,0,0,0,3],
 "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a494881b03092524ba3e577cf4cc44560":[1,0,2,7,0,0,0,4],
-"classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a51d75163afb84a3e8c58f5b6ab5c7818":[1,0,2,7,0,0,0,1],
-"classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a60d6c0797652e7d9a31326c29ef55243":[1,0,2,7,0,0,0,11]
+"classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a51d75163afb84a3e8c58f5b6ab5c7818":[1,0,2,7,0,0,0,1]
 };

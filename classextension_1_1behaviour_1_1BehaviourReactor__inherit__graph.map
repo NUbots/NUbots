@@ -1,5 +1,5 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,397,347,439"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,423,347,464"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="439,5,587,47"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="439,71,587,112"/>
 <area shape="rect" id="node5" href="$classmodule_1_1planning_1_1FallingRelaxPlanner.html" title=" " alt="" coords="421,136,606,177"/>
@@ -15,5 +15,6 @@
 <area shape="rect" id="node15" href="$classmodule_1_1strategy_1_1FindObject.html" title=" " alt="" coords="409,658,618,685"/>
 <area shape="rect" id="node16" href="$classmodule_1_1strategy_1_1StandStill.html" title=" " alt="" coords="412,709,615,735"/>
 <area shape="rect" id="node17" href="$classmodule_1_1strategy_1_1StrategiseLook.html" title=" " alt="" coords="395,759,632,786"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,405,140,431"/>
+<area shape="rect" id="node18" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,810,619,837"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,430,140,457"/>
 </map>

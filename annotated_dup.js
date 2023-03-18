@@ -250,7 +250,8 @@ var annotated_dup =
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
         [ "FindObject", "classmodule_1_1strategy_1_1FindObject.html", "classmodule_1_1strategy_1_1FindObject" ],
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
-        [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ]
+        [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
+        [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ]
       ] ],
       [ "support", null, [
         [ "configuration", null, [

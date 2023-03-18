@@ -1,5 +1,9 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#af6e7f671e77fb21da5fc2098d3335bf6":[1,0,2,9,1,1,10],
+"structmodule_1_1platform_1_1cm740_1_1Convert.html":[1,0,2,9,0,0],
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#a093842b331532da397d6b613c6f2e174":[1,0,2,9,0,0,14],
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#a0a6b1d35c369997138922f7af1d4d684":[1,0,2,9,0,0,21],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#a185ae643881a648bc817a0d9a1547512":[1,0,2,9,0,0,6],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#a1db6c2a65c5fec8f280144ee35cd12de":[1,0,2,9,0,0,12],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#a28b82f4f5798537303e24fc52f6ecf03":[1,0,2,9,0,0,1],
@@ -82,6 +86,9 @@ var NAVTREEINDEX13 =
 "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html":[1,0,2,11,3,0],
 "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a163c7d0607ecc204ce2265d308e0f16c":[1,0,2,11,3,0,1],
 "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3":[1,0,2,11,3,0,0],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html":[1,0,2,11,4,0],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb":[1,0,2,11,4,0,0],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a82d2763570c209a41c41b431813e6244":[1,0,2,11,4,0,1],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[1,0,2,12,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[1,0,2,12,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[1,0,2,12,1,1,0,3],
@@ -242,12 +249,5 @@ var NAVTREEINDEX13 =
 "structutility_1_1input_1_1ServoID.html":[1,0,5,3,1],
 "structutility_1_1input_1_1ServoID.html#a099d66316df7ca2bd3256dd435a3b272":[1,0,5,3,1,6],
 "structutility_1_1input_1_1ServoID.html#a0ab4348dd30622d26a46182ffc3ed17e":[1,0,5,3,1,25],
-"structutility_1_1input_1_1ServoID.html#a0dccc3c86509d39bc8451a53270806c8":[1,0,5,3,1,1],
-"structutility_1_1input_1_1ServoID.html#a189321f62d9ea01eab6e0163ccefd4d0":[1,0,5,3,1,2],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026da":[1,0,5,3,1,0],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0163e46a6376145647a7ee8988bbe800":[1,0,5,3,1,0,16],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0a795133771e7ca846037b6cb48f501b":[1,0,5,3,1,0,0],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa0e167a9cfd6032f8a88e0d177cd47a74":[1,0,5,3,1,0,17],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa1b33e756021ce4773bd32719b9d8fbdc":[1,0,5,3,1,0,8],
-"structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daa2078be5587efdf553822e54ff7b8254f":[1,0,5,3,1,0,6]
+"structutility_1_1input_1_1ServoID.html#a0dccc3c86509d39bc8451a53270806c8":[1,0,5,3,1,1]
 };

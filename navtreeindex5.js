@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a60d6c0797652e7d9a31326c29ef55243":[1,0,2,7,0,0,0,11],
 "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a6420b9005d923cc642d1b9792f758ab1":[1,0,2,7,0,0,0,9],
 "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a76359f2001211400c96c3643c9c26c05":[1,0,2,7,0,0,0,0],
 "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a80ce08bb7d74d16def92b1ac1e3be891":[1,0,2,7,0,0,0,6],
@@ -150,6 +151,9 @@ var NAVTREEINDEX5 =
 "classmodule_1_1strategy_1_1StrategiseLook.html":[1,0,2,11,3],
 "classmodule_1_1strategy_1_1StrategiseLook.html#a78b231f16264e35e74a30d5afba03317":[1,0,2,11,3,2],
 "classmodule_1_1strategy_1_1StrategiseLook.html#a82d17383b39d62d163e6d8423090b3fd":[1,0,2,11,3,1],
+"classmodule_1_1strategy_1_1WalkToBall.html":[1,0,2,11,4],
+"classmodule_1_1strategy_1_1WalkToBall.html#a664cfc41e6bceef42e68124ff19f6328":[1,0,2,11,4,2],
+"classmodule_1_1strategy_1_1WalkToBall.html#aab2b0923992f7dd90b649d1552945ef9":[1,0,2,11,4,1],
 "classmodule_1_1support_1_1LocalisationSimulator.html":[1,0,2,12,2],
 "classmodule_1_1support_1_1LocalisationSimulator.html#acdd89907a1c92f9efbc23b0d8bc6dbcb":[1,0,2,12,2,1],
 "classmodule_1_1support_1_1LocalisationSimulator.html#ace700ce76a76e9289f0d830284497765":[1,0,2,12,2,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1vision_1_1GoalDetector.html#ae45cd4f8e2ff7da4bb0f4d837d2bbc58":[1,0,2,14,3,0],
 "classmodule_1_1vision_1_1GoalDetector.html#af7ecb607ba95f573e9bfbd4ec83bfb8e":[1,0,2,14,3,1],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html":[1,0,2,14,4],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#a0e8855e59122c098ddc8fdb5e22c1cc8":[1,0,2,14,4,1],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#a63d9242f60a730b536c79118e3a6953d":[1,0,2,14,4,4],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64":[1,0,2,14,4,0],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#ad05c35b3cddd7eb6b269bf8060b4877b":[1,0,2,14,4,3],
-"classmodule_1_1vision_1_1GreenHorizonDetector.html#ae06a7e45e66da2973f04ca90bf9017ce":[1,0,2,14,4,2]
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#a0e8855e59122c098ddc8fdb5e22c1cc8":[1,0,2,14,4,1]
 };

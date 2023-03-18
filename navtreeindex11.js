@@ -1,5 +1,9 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1input_1_1CameraContext.html#a429966454ad18f1a37c1ebaabd921f94":[1,0,2,3,4,8],
+"structmodule_1_1input_1_1CameraContext.html#a96aec4886716a4886d0928c767301e92":[1,0,2,3,4,1],
+"structmodule_1_1input_1_1CameraContext.html#aa7e4194b5c2ae8b874107e2cf27d383b":[1,0,2,3,4,2],
+"structmodule_1_1input_1_1CameraContext.html#ac465e809b89e17006d12da153b1c3c6c":[1,0,2,3,4,3],
 "structmodule_1_1input_1_1CameraContext_1_1TimeCorrection.html":[1,0,2,3,4,0],
 "structmodule_1_1input_1_1CameraContext_1_1TimeCorrection.html#a124522df42d7c8cd73231784e1b4be11":[1,0,2,3,4,0,10],
 "structmodule_1_1input_1_1CameraContext_1_1TimeCorrection.html#a796654cdeef58a4b1ab815a73f228df2":[1,0,2,3,4,0,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a18c137fa26bd74fb9d651ac1151c3bf9":[1,0,2,3,1,0,2],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a29d5536a8dd324998eba2c932e69c033":[1,0,2,3,1,0,6],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a4995366065f81d24b645ae4f481a2028":[1,0,2,3,1,0,11],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a4efd6ece6d388814d003345ed60883d0":[1,0,2,3,1,0,8],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a6f37ed2631e70abe2441b8aa2ac9d941":[1,0,2,3,1,0,9],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a74d511178ec46a560ff488d4cd0a0f4b":[1,0,2,3,1,0,0],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a934f8b06ca2e75265f65df998a4a5cb4":[1,0,2,3,1,0,1],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a97f61d5fdce1438315202323ba7dd488":[1,0,2,3,1,0,10]
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a4efd6ece6d388814d003345ed60883d0":[1,0,2,3,1,0,8]
 };

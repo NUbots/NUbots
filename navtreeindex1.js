@@ -14,6 +14,7 @@ var NAVTREEINDEX1 =
 "VisualMeshRunner_8cpp.html#a7aab69bd8034eb2c0ec9079af53bee61":[0,0,2,14,0,0,4],
 "VisualMeshRunner_8cpp.html#a8439cd14b8801bafeb3165af8d20c5c3":[0,0,2,14,0,0,3],
 "VisualMeshRunner_8cpp.html#aba896e714c3b008bd15a63c709a60a7a":[0,0,2,14,0,0,5],
+"WalkToBall_8cpp.html#a556666d019fe9e4e081a492782ffa34b":[0,0,2,11,7],
 "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61":[0,0,2,9,4],
 "Webots_8cpp.html#a81eded8b344d72482e2c16f89c1d4a34":[0,0,2,9,3],
 "Webots_8cpp.html#aa06422bdf1cbba3ecfa22842768ccae4":[0,0,2,9,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "classCM740_1_1UART.html#aad9a470127f861db18c9cc9827d7876f":[1,0,0,9,14],
 "classCM740_1_1UART.html#ab0b40738e90b3ad52b1274547577a6b3":[1,0,0,9,11],
 "classCM740_1_1UART.html#ab1573fad1341198744db8b30af2eb2e6":[1,0,0,9,4],
-"classCM740_1_1UART.html#ab2433ab6bfdbeff94de9744b030e027f":[1,0,0,9,10],
-"classCM740_1_1UART.html#ab92f17338deef684c7dc21cbdacae533":[1,0,0,9,16]
+"classCM740_1_1UART.html#ab2433ab6bfdbeff94de9744b030e027f":[1,0,0,9,10]
 };

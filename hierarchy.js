@@ -221,6 +221,7 @@ var hierarchy =
     [ "module::skill::Look::Config", "structmodule_1_1skill_1_1Look_1_1Config.html", null ],
     [ "module::skill::QuinticWalk::Config", "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html", null ],
     [ "module::strategy::StrategiseLook::Config", "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html", null ],
+    [ "module::strategy::WalkToBall::Config", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html", null ],
     [ "module::support::logging::DataLogging::DataLog", "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html", null ],
     [ "module::support::logging::DataPlayback::Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", null ],
     [ "module::support::logging::Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", null ],
@@ -253,7 +254,8 @@ var hierarchy =
         [ "module::strategy::FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", null ],
         [ "module::strategy::FindObject", "classmodule_1_1strategy_1_1FindObject.html", null ],
         [ "module::strategy::StandStill", "classmodule_1_1strategy_1_1StandStill.html", null ],
-        [ "module::strategy::StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", null ]
+        [ "module::strategy::StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", null ],
+        [ "module::strategy::WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],
       [ "module::behaviour::Controller", "classmodule_1_1behaviour_1_1Controller.html", null ],

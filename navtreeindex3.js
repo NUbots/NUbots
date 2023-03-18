@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeb241db4d2444c4b406a4acb85468976":[1,0,2,1,2,2,8],
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeeb5e65dd7e7fa83e53f634520175e8e":[1,0,2,1,2,2,15],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html":[1,0,2,1,3,2],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html#a2012d12ed7c534c118d4cf2d55337b7c":[1,0,2,1,3,2,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1localisation_1_1BallLocalisation.html#a083f58d77fbc44eebdeeea80efbed85e":[1,0,2,4,1,4],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a1b74f959a8666a57fe02c9f877dc4c71":[1,0,2,4,1,0],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a6f0b273950b925ce88e8ef9801770f96":[1,0,2,4,1,2],
-"classmodule_1_1localisation_1_1BallLocalisation.html#a8884192772589e68634efbe758f0c3c7":[1,0,2,4,1,7],
-"classmodule_1_1localisation_1_1BallLocalisation.html#aa2d5a5dbfc0c04ba737e72495023658a":[1,0,2,4,1,3]
+"classmodule_1_1localisation_1_1BallLocalisation.html#a8884192772589e68634efbe758f0c3c7":[1,0,2,4,1,7]
 };
