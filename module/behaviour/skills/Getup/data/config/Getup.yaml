@@ -1,6 +1,6 @@
 log_level: INFO
 
 # Priority in subsumption system when a getup is requested
-getup_priority: 6
+getup_priority: 5
 
 fallen_angle: 0.95 # ~55 degrees

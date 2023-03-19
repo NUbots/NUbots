@@ -23,7 +23,6 @@
 #include <cmath>
 
 #include "extension/Configuration.hpp"
-#include "extension/Script.hpp"
 
 #include "message/actuation/BodySide.hpp"
 #include "message/behaviour/MotionCommand.hpp"
@@ -86,10 +85,6 @@ namespace module::behaviour::strategy {
     using utility::support::Expression;
 
     using utility::support::Expression;
-
-    using extension::ExecuteScript;
-    using extension::ExecuteScriptByName;
-    using extension::Script;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
