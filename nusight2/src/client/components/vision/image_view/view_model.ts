@@ -14,7 +14,7 @@ import { mesh } from '../../three/builders'
 import { planeGeometry } from '../../three/builders'
 import { ImageFormat } from '../image'
 import { BayerImageFormat } from '../image'
-import { ElementImage } from '../image'
+import { ElementOrBitmapImage } from '../image'
 import { DataImage } from '../image'
 import { Image } from '../image'
 
@@ -103,16 +103,16 @@ export class ImageViewModel {
     switch (this.source.type) {
       case 'data':
         return this.dataTexture(this.source)
-      case 'element':
-        return this.elementTexture(this.source)
+      case 'element-or-bitmap':
+        return this.imageTexture(this.source)
       default:
         throw new UnreachableError(this.source)
     }
   }
 
-  private readonly elementTexture = imageTexture(
-    ({ element, width, height, format }: ElementImage) => ({
-      image: element,
+  private readonly imageTexture = imageTexture(
+    ({ image, width, height, format }: ElementOrBitmapImage) => ({
+      image,
       width,
       height,
       format: this.textureFormat(format),
@@ -121,14 +121,16 @@ export class ImageViewModel {
     }),
   )
 
-  private readonly dataTexture = dataTexture(({ data, width, height, format }: DataImage) => ({
-    data: data.get(),
-    width,
-    height,
-    format: this.textureFormat(format),
-    magFilter: THREE.LinearFilter,
-    minFilter: THREE.LinearFilter,
-  }))
+  private readonly dataTexture = dataTexture(
+    ({ image: data, width, height, format }: DataImage) => ({
+      data: data.get(),
+      width,
+      height,
+      format: this.textureFormat(format),
+      magFilter: THREE.LinearFilter,
+      minFilter: THREE.LinearFilter,
+    }),
+  )
 
   private textureFormat = createTransformer((format: ImageFormat): THREE.PixelFormat => {
     switch (format) {

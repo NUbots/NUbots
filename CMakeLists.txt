@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.20)
 project(NUbots)
+
+# The GENERATED source file property is now visible in all directories
+cmake_policy(SET CMP0118 NEW)
 
 # ~~~
 # This is needed so we can link in the custom clock object library to the message and utility libraries
@@ -122,3 +125,18 @@ endif()
 if(BUILD_TESTS)
   add_subdirectory(${NUCLEAR_SHARED_DIR}/tests)
 endif()
+
+# Generate VSCode launch configurations
+find_package(PythonInterp 3 REQUIRED)
+list(JOIN NUCLEAR_ROLES " " launch_roles)
+add_custom_command(
+  OUTPUT "${PROJECT_SOURCE_DIR}/.vscode/launch.json"
+  COMMAND
+    ${PYTHON_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
+    "${PROJECT_SOURCE_DIR}" "-b" "${PROJECT_BINARY_DIR}" "-l" "${PROJECT_SOURCE_DIR}/.vscode/launch.json" "-a"
+    "${USE_ASAN}" "${launch_roles}"
+  DEPENDS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py"
+  USES_TERMINAL
+  COMMENT "Generating VSCode launch configurations"
+)
+add_custom_target(generate_launch_configurations ALL DEPENDS "${PROJECT_SOURCE_DIR}/.vscode/launch.json")

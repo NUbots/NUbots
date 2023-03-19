@@ -21,14 +21,14 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/BodySide.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/BodySide.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -37,20 +37,20 @@ namespace module::input {
 
     using extension::Configuration;
 
+    using message::actuation::BodySide;
+    using message::actuation::KinematicsModel;
     using message::input::Sensors;
-    using message::motion::BodySide;
-    using message::motion::KinematicsModel;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonLeftUp;
     using message::platform::ButtonMiddleDown;
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
 
+    using utility::actuation::kinematics::calculateAllPositions;
+    using utility::actuation::kinematics::calculateCentreOfMass;
+    using utility::actuation::kinematics::calculateInertialTensor;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
-    using utility::motion::kinematics::calculateAllPositions;
-    using utility::motion::kinematics::calculateCentreOfMass;
-    using utility::motion::kinematics::calculateInertialTensor;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -632,7 +632,7 @@ namespace module::input {
                                 // flattens, it's meant to becomes true. This means that even if the foot hits the
                                 // ground at an angle, it doesn't store that angled position as the footlanding_Hwf, but
                                 // instead stores the position that foot would be if/when it becomes flat on the ground
-                                Eigen::Isometry3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
+                                Eigen::Isometry3d Htg(utility::actuation::kinematics::calculateGroundSpace(Htf, Hwt));
 
                                 footlanding_Hwf[side]                   = Hwt * Htg;
                                 footlanding_Hwf[side].translation().z() = 0.0;
@@ -783,7 +783,14 @@ namespace module::input {
                             Eigen::Isometry3d Hwt;
                             Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
-                            sensors->Htw      = Hwt.inverse().matrix();
+                            // Remove the yaw component of the rotation
+                            Hwt.linear() =
+                                Eigen::AngleAxisd(-std::atan2(Hwt(1, 0), Hwt(0, 0)), Eigen::Vector3d::UnitZ())
+                                    .toRotationMatrix()
+                                * Hwt.linear();
+
+
+                            sensors->Htw = Hwt.inverse().matrix();
 
                             // If there is ground truth data, determine the error in the odometry calculation
                             // and emit graphs of those errors

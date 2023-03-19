@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: WARN
+log_level: INFO
 
 process_noise_diagonal: [0.001, 0.001, 0.0001]
 

@@ -6,7 +6,7 @@ nuclear_role(
   support::logging::FileLogHandler
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
@@ -23,10 +23,11 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
+  vision::FieldLineDetector
   output::ImageCompressor
   # Localisation
   localisation::BallFilter
-  localisation::RobotParticleLocalisation
+  localisation::RobotLocalisation
   # Behaviour
   behaviour::Controller
   behaviour::skills::Getup

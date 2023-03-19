@@ -8,6 +8,9 @@ on:
     branches: [main]
   # Triggers on PRs to any branch
   pull_request:
+  # Trigger for merge queue
+  merge_group:
+    types: [checks_requested]
 
 # Ensure that only one instance of the workflow is run at a time for each branch/tag.
 # Jobs currently running on the branch/tag will be cancelled when new commits are pushed.
