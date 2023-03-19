@@ -1,15 +1,2 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
-
-# Distance to begin the dive to stop the ball while normally playing (in meters)
-diving_distance_threshold: 0.7
-
-scripts:
-  dive_left:
-    - "DiveLeft.yaml"
-    - "RollOverBack.yaml"
-    - "Stand.yaml"
-  dive_right:
-    - "DiveRight.yaml"
-    - "RollOverBack.yaml"
-    - "Stand.yaml"

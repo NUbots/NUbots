@@ -20,7 +20,11 @@ syntax = "proto3";
 
 package message.skill;
 
+import "message/actuation/BodySide.proto";
+
 /**
  * Emit a Dive Task in order to tell the system to perform the appropriate dive action for it's current situation
  */
-message Dive {}
+message Dive {
+    BodySide side = 1;
+}

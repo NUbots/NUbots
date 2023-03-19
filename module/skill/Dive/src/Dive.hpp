@@ -28,16 +28,6 @@
 namespace module::skill {
 
     class Dive : public ::extension::behaviour::BehaviourReactor {
-    private:
-        /// @brief Stores configuration values
-        struct Config {
-            /// @brief Distance in meters used as a threshold to start a dive
-            float diving_distance_threshold = 0;
-            /// @brief Script sequence to run when diving left
-            std::vector<::extension::behaviour::ScriptRequest> dive_left;
-            /// @brief Script sequence to run when diving left
-            std::vector<::extension::behaviour::ScriptRequest> dive_right;
-        } cfg;
 
     public:
         /// @brief Called by the powerplant to build and setup the Dive reactor.
