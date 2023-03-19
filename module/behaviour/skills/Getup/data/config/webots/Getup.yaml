@@ -9,6 +9,5 @@ getup_front:
   - "StandUpFront.yaml"
   - "Stand.yaml"
 getup_back:
-  - "RollOverBack.yaml"
-  - "StandUpFront.yaml"
+  - "StandUpBack.yaml"
   - "Stand.yaml"
