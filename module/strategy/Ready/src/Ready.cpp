@@ -35,11 +35,10 @@ namespace module::strategy {
                                                                       cfg.walk_to_ready_speed_y,
                                                                       cfg.walk_to_ready_rotation)));
                 }
-
                 // If the time has elapsed to walk to ready, then emit the stand still task
                 // Don't emit another stand still task if we already did so
-                if (NUClear::clock::now() - start_ready_time > cfg.walk_to_ready_time
-                    && stand_still.run_state == GroupInfo::RunState::NO_TASK) {
+                else if (NUClear::clock::now() - start_ready_time > cfg.walk_to_ready_time
+                         && stand_still.run_state == GroupInfo::RunState::NO_TASK) {
                     emit<Task>(std::make_unique<StandStill>());
                 }
                 else {  // Otherwise, emit the idle task to keep walking
