@@ -269,7 +269,7 @@ namespace module::extension {
             // Root level task, make the pack immediately and send it off to be executed as a root task
             if (!providers.contains(task->requester_id)) {
                 // Get the root provider from the task root type
-                auto root_provider = get_root_provider(task->root_type);
+                auto root_provider = get_root_provider(t.root_type);
 
                 // Modify the task we received to look like it came from this provider
                 task->requester_id = root_provider->id;
