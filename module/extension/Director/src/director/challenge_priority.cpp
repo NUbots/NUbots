@@ -122,6 +122,7 @@ namespace module::extension {
         const bool i_o = std::any_of(i_p.begin(), i_p.end(), [](const auto& v) { return v.optional; });
         const bool c_o = std::any_of(c_p.begin(), c_p.end(), [](const auto& v) { return v.optional; });
 
+        // If either, but not both, of the tasks are dying, the one that is not dying wins
         if (i_p.back().dying != c_p.back().dying) {
             return i_p.back().dying;
         }
