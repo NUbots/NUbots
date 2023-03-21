@@ -264,7 +264,7 @@ namespace module::extension {
         on<Trigger<BehaviourTask>>().then("Director Task", [this](const BehaviourTask& t) {
             std::lock_guard<std::recursive_mutex> lock(director_mutex);
             // Make our own mutable director task from the behaviour task
-            auto task = std::make_shared<DirectorTask>(t, false);
+            auto task = std::make_shared<DirectorTask>(t);
 
             // Root level task, make the pack immediately and send it off to be executed as a root task
             if (!providers.contains(task->requester_id)) {

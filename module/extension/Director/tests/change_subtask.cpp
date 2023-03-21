@@ -28,7 +28,7 @@
 namespace {
 
     struct ParentTask {
-        ParentTask(bool subtask) : subtask_a(subtask) {}
+        ParentTask(int subtask_) : subtask(subtask_) {}
         int subtask = 0;
     };
 

@@ -147,38 +147,6 @@ namespace module::extension {
         const auto& provider = pack.first;
         auto& group          = provider->group;
 
-        bool normal_striker_log = NUClear::util::demangle(pack.first->type.name()) == "message::purpose::NormalStriker";
-
-        if (normal_striker_log) {
-            // Print pack
-            log<NUClear::WARN>("Running task pack for", NUClear::util::demangle(pack.first->type.name()));
-            for (const auto& t : pack.second) {
-                log<NUClear::WARN>("- Task", NUClear::util::demangle(t->type.name()));
-            }
-
-            // Print all the groups
-            for (auto const& [key, g] : groups) {
-
-                if (g.active_task != nullptr) {
-                    if (NUClear::util::demangle(g.type.name()) == "message::strategy::Ready") {
-                        log<NUClear::WARN>("ready group, has tasks, subtasks of parent are");
-                        for (const auto& t : providers[g.active_task->requester_id]->group.subtasks) {
-                            log<NUClear::WARN>("--", NUClear::util::demangle(t->type.name()));
-                        }
-                    }
-
-                    log<NUClear::WARN>("-",
-                                       NUClear::util::demangle(g.type.name()),
-                                       "has active task",
-                                       NUClear::util::demangle(g.active_task->type.name()));
-                }
-                else {
-                    log<NUClear::WARN>("-", NUClear::util::demangle(g.type.name()), "has no active task");
-                }
-            }
-        }
-
-
         // Check if this Provider is active and allowed to make subtasks
         if (provider != group.active_provider) {
             return;
@@ -276,29 +244,13 @@ namespace module::extension {
         // This new task pack we are trying to run might be different from the task pack previously ran.
         // There might be some tasks that weren't emitted in the new task pack.
         // These tasks need to be removed from the places they were running.
-        // This is at the end, so that if one of our new tasks uses something the old tasks did then we won't run other
-        // tasks with lower priority for a single cycle until this one runs
+        // Set them as dying so that they are removed at the end of this function.
+        // The dying state stops the task being run again when it shouldn't before it is removed.
         for (const auto& t : group.subtasks) {
-            if (normal_striker_log) {
-                log<NUClear::WARN>("\t-", NUClear::util::demangle(t->type.name()), "was running, let's check");
-            }
-            // Search the new tasks for an equivalent task and if we can't find it remove
+            // Search the new tasks for an equivalent task and if we can't find it set it as dying
             auto f = [t](const auto& t2) { return t->type == t2->type; };
             if (std::find_if(tasks.begin(), tasks.end(), f) == tasks.end()) {
-                if (normal_striker_log) {
-                    log<NUClear::WARN>("\t-",
-                                       NUClear::util::demangle(t->type.name()),
-                                       "was running, but not emitted, removing");
-                }
                 t->dying = true;
-                // remove_task(t);
-            }
-            else {
-                if (normal_striker_log) {
-                    log<NUClear::WARN>("\t-",
-                                       NUClear::util::demangle(t->type.name()),
-                                       "was running, and emitted, keeping");
-                }
             }
         }
 
@@ -309,20 +261,12 @@ namespace module::extension {
         // If we are not running normally now and were previously we might still have active tasks that need removing
         if (run_level != RunLevel::OK) {
             for (auto& t : group.subtasks) {
-                if (normal_striker_log) {
-                    log<NUClear::WARN>("\t-",
-                                       NUClear::util::demangle(t->type.name()),
-                                       ": something is not okay and the task is being removed");
-                }
                 remove_task(t);
             }
         }
 
         // Run each of the optional tasks but only to the level the main task ran or pushed
         if (run_level <= RunLevel::PUSH) {
-            if (normal_striker_log) {
-                log<NUClear::WARN>("PUSHING");
-            }
             for (auto it = first_optional; it != tasks.end(); ++it) {
                 // Run each optional task in turn as its own pack
                 // but if the main group was pushed, we can at most push in optional
@@ -338,19 +282,15 @@ namespace module::extension {
             }
         }
 
+        // Remove any tasks that were marked as dying earlier
+        // This is at the end, so that if one of our new tasks uses something the old tasks did then we won't run other
+        // tasks with lower priority for a single cycle until this one runs
         for (const auto& t : group.subtasks) {
             if (t->dying) {
                 remove_task(t);
             }
         }
 
-        // print tasks
-        if (normal_striker_log) {
-            log<NUClear::WARN>("Tasks:");
-            for (const auto& t : tasks) {
-                log<NUClear::WARN>("\t-", NUClear::util::demangle(t->type.name()));
-            }
-        }
         // Update the new subtasks
         group.subtasks = tasks;
     }
