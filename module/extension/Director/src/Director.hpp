@@ -36,6 +36,11 @@ namespace module::extension {
         : public NUClear::Reactor
         , ::extension::behaviour::information::InformationSource {
     public:
+        struct DirectorTask {
+            BehaviourTask task;
+            bool dying = false;
+        };
+
         /// Behaviour task
         using BehaviourTask = ::extension::behaviour::commands::BehaviourTask;
         /// A task list holds a list of tasks

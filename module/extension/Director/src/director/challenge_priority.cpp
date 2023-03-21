@@ -33,12 +33,16 @@ namespace module::extension {
     // Scope this struct to just this translation unit
     namespace {
         struct TaskPriority {
-            TaskPriority(const std::type_index& requester_, const int& priority_, const bool& optional_)
-                : requester(requester_), priority(priority_), optional(optional_) {}
+            TaskPriority(const std::type_index& requester_,
+                         const int& priority_,
+                         const bool& optional_,
+                         const bool& dying_)
+                : requester(requester_), priority(priority_), optional(optional_), dying(dying_) {}
 
             std::type_index requester;
             int priority;
             bool optional;
+            bool dying;
         };
     }  // namespace
 
@@ -66,7 +70,7 @@ namespace module::extension {
             // We recognise that we have passed a root provider when the active task is nullptr
             auto t = task;
             do {
-                ancestors.emplace_back(t->type, t->priority, t->optional);
+                ancestors.emplace_back(t->type, t->priority, t->optional, t->dying);
                 auto p              = providers.at(t->requester_id);
                 auto classification = p->classification;
                 t                   = p->group.active_task;
@@ -76,7 +80,7 @@ namespace module::extension {
                     if (p->group.zombie) {
                         // Add an ancestor that is the lowest possible priority and optional
                         // Anyone can beat up a zombie, I mean, it's just a bunch of rotting flesh
-                        ancestors.emplace_back(p->group.type, std::numeric_limits<int>::min(), true);
+                        ancestors.emplace_back(p->group.type, std::numeric_limits<int>::min(), true, true);
                     }
                     else if (classification != Provider::Classification::ROOT) {
                         throw std::runtime_error("Task has broken parentage");
@@ -117,6 +121,10 @@ namespace module::extension {
         // Work out if there are any optionals in either of the tasks parentage
         const bool i_o = std::any_of(i_p.begin(), i_p.end(), [](const auto& v) { return v.optional; });
         const bool c_o = std::any_of(c_p.begin(), c_p.end(), [](const auto& v) { return v.optional; });
+
+        if (i_p.back().dying != c_p.back().dying) {
+            return i_p.back().dying;
+        }
 
         // If both or neither are optional then we compare at the point where their ancestors were siblings.
         // If both are optional then we would rather that whichever ancestor had higher priority have its optional tasks
