@@ -41,7 +41,7 @@ namespace module::extension::component {
          *
          * @param task                  the BehaviourTask to use as a base
          */
-        DirectorTask(::extension::behaviour::commands::BehaviourTask task)
+        DirectorTask(const ::extension::behaviour::commands::BehaviourTask& task)
             : type(task.type)
             , requester_id(task.requester_id)
             , requester_task_id(task.requester_task_id)
@@ -53,7 +53,7 @@ namespace module::extension::component {
 
         /// The Provider type this task is for
         std::type_index type;
-        /// The provider id of the requester
+        /// The Provider id of the requester
         uint64_t requester_id;
         /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)
         uint64_t requester_task_id;
