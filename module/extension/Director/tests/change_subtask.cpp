@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2022 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #include <catch.hpp>
@@ -29,7 +29,7 @@ namespace {
 
     struct ParentTask {
         ParentTask(bool subtask) : subtask_a(subtask) {}
-        bool subtask_a = false;
+        int subtask = 0;
     };
 
     template <int N>
@@ -46,7 +46,7 @@ namespace {
             : TestBase<TestReactor>(std::move(environment)) {
 
             on<Provide<ParentTask>>().then([this](const ParentTask& task) {
-                if (task.subtask_a) {
+                if (task.subtask == 1) {
                     events.push_back("parent task with subtask 1");
                     emit<Task>(std::make_unique<SubTask<1>>("from parent task"));
                 }
@@ -70,12 +70,12 @@ namespace {
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 events.push_back("emitting parent task with subtask 1");
-                emit<Task>(std::make_unique<ParentTask>(true));
+                emit<Task>(std::make_unique<ParentTask>(1));
             });
 
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 events.push_back("emitting parent task with subtask 2");
-                emit<Task>(std::make_unique<ParentTask>(false));
+                emit<Task>(std::make_unique<ParentTask>(2));
             });
 
             on<Startup>().then([this] {
@@ -89,7 +89,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that subtasks can be changed", "[director][subtasks][change]") {
+TEST_CASE("Test that subtasks can be changed when one subtask calls the other", "[director][subtasks][change]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;

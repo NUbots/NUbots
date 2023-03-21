@@ -21,9 +21,10 @@
 
 namespace module::extension {
 
+    using component::DirectorTask;
+    using component::Provider;
+    using component::ProviderGroup;
     using ::extension::behaviour::RunInfo;
-    using provider::Provider;
-    using provider::ProviderGroup;
 
     Director::RunLevel Director::run_tasks(ProviderGroup& our_group, const TaskList& tasks, const RunLevel& run_level) {
 
@@ -249,7 +250,7 @@ namespace module::extension {
         TaskList lowered_tasks;
         for (auto& subtask : group.subtasks) {
             // See if we have a matching task
-            auto it = std::find_if(tasks.begin(), tasks.end(), [&](const std::shared_ptr<BehaviourTask>& t) {
+            auto it = std::find_if(tasks.begin(), tasks.end(), [&](const std::shared_ptr<DirectorTask>& t) {
                 return subtask->type == t->type;
             });
 

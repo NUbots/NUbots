@@ -26,13 +26,12 @@
 
 #include "Provider.hpp"
 
-namespace module::extension::provider {
+namespace module::extension::component {
 
     struct ProviderGroup {
 
-        using BehaviourTask = ::extension::behaviour::commands::BehaviourTask;
         /// A task list holds a list of tasks
-        using TaskList = std::vector<std::shared_ptr<BehaviourTask>>;
+        using TaskList = std::vector<std::shared_ptr<DirectorTask>>;
 
         ProviderGroup(const std::type_index& type_) : type(type_) {}
 
@@ -50,7 +49,7 @@ namespace module::extension::provider {
                 return *this;
             }
 
-            WatchHandle(const WatchHandle&) = delete;
+            WatchHandle(const WatchHandle&)            = delete;
             WatchHandle& operator=(const WatchHandle&) = delete;
             ~WatchHandle() {
                 if (deleter) {
@@ -61,7 +60,7 @@ namespace module::extension::provider {
             std::function<void()> deleter;
         };
 
-        std::shared_ptr<WatchHandle> add_watcher(const std::shared_ptr<BehaviourTask>& task) {
+        std::shared_ptr<WatchHandle> add_watcher(const std::shared_ptr<DirectorTask>& task) {
             watchers.push_back(task);
 
             return std::make_shared<WatchHandle>([this, task] {
@@ -85,7 +84,7 @@ namespace module::extension::provider {
         bool zombie = false;
 
         /// The current task that is running on this Provider
-        std::shared_ptr<BehaviourTask> active_task;
+        std::shared_ptr<DirectorTask> active_task;
         /// The currently active provider that is executing
         std::shared_ptr<Provider> active_provider;
         /// The tasks who are interested in interacting with this provider. We use it to notify people in priority order
@@ -95,7 +94,7 @@ namespace module::extension::provider {
         std::vector<std::shared_ptr<WatchHandle>> watch_handles;
 
         /// The task that is pushing this provider to run in a different way
-        std::shared_ptr<BehaviourTask> pushing_task;
+        std::shared_ptr<DirectorTask> pushing_task;
         /// The provider that the pushing task wants to run on this provider
         std::shared_ptr<Provider> pushed_provider;
 
@@ -103,6 +102,6 @@ namespace module::extension::provider {
         TaskList subtasks;
     };
 
-}  // namespace module::extension::provider
+}  // namespace module::extension::component
 
 #endif  // MODULE_EXTENSION_DIRECTOR_PROVIDERGROUP_HPP

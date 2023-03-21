@@ -27,8 +27,8 @@
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::BehaviourTask;
-    using provider::Provider;
+    using component::DirectorTask;
+    using component::Provider;
 
     // Scope this struct to just this translation unit
     namespace {
@@ -46,8 +46,8 @@ namespace module::extension {
         };
     }  // namespace
 
-    bool Director::challenge_priority(const std::shared_ptr<BehaviourTask>& incumbent,
-                                      const std::shared_ptr<BehaviourTask>& challenger) {
+    bool Director::challenge_priority(const std::shared_ptr<DirectorTask>& incumbent,
+                                      const std::shared_ptr<DirectorTask>& challenger) {
 
         // If there is no incumbent the challenger wins by default
         if (incumbent == nullptr) {
@@ -63,7 +63,7 @@ namespace module::extension {
         }
 
         // Function to get the priorities of the ancestors of this task
-        auto get_ancestor_priorities = [this](const std::shared_ptr<BehaviourTask>& task) {
+        auto get_ancestor_priorities = [this](const std::shared_ptr<DirectorTask>& task) {
             std::vector<TaskPriority> ancestors;
 
             // Loop up through the providers until we reach a point where a task was emitted by a root provider
