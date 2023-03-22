@@ -18,13 +18,13 @@ var searchData=
   ['process_1204',['Process',['../structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise_1_1Process.html',1,'module::input::SensorFilter::Config::MotionFilter::Noise']]],
   ['progressbar_1205',['ProgressBar',['../classutility_1_1support_1_1ProgressBar.html',1,'utility::support']]],
   ['provide_1206',['Provide',['../structextension_1_1behaviour_1_1Provide.html',1,'extension::behaviour']]],
-  ['provider_1207',['Provider',['../structmodule_1_1extension_1_1provider_1_1Provider.html',1,'module::extension::provider']]],
+  ['provider_1207',['Provider',['../structmodule_1_1extension_1_1component_1_1Provider.html',1,'module::extension::component']]],
   ['providerbase_1208',['ProviderBase',['../structextension_1_1behaviour_1_1ProviderBase.html',1,'extension::behaviour']]],
   ['providerbase_3c_20t_2c_20commands_3a_3aproviderclassification_3a_3aprovide_20_3e_1209',['ProviderBase&lt; T, commands::ProviderClassification::PROVIDE &gt;',['../structextension_1_1behaviour_1_1ProviderBase.html',1,'extension::behaviour']]],
   ['providerbase_3c_20t_2c_20commands_3a_3aproviderclassification_3a_3astart_20_3e_1210',['ProviderBase&lt; T, commands::ProviderClassification::START &gt;',['../structextension_1_1behaviour_1_1ProviderBase.html',1,'extension::behaviour']]],
   ['providerbase_3c_20t_2c_20commands_3a_3aproviderclassification_3a_3astop_20_3e_1211',['ProviderBase&lt; T, commands::ProviderClassification::STOP &gt;',['../structextension_1_1behaviour_1_1ProviderBase.html',1,'extension::behaviour']]],
   ['providerdone_1212',['ProviderDone',['../structextension_1_1behaviour_1_1commands_1_1ProviderDone.html',1,'extension::behaviour::commands']]],
   ['providereaction_1213',['ProvideReaction',['../structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html',1,'extension::behaviour::commands']]],
-  ['providergroup_1214',['ProviderGroup',['../structmodule_1_1extension_1_1provider_1_1ProviderGroup.html',1,'module::extension::provider']]],
+  ['providergroup_1214',['ProviderGroup',['../structmodule_1_1extension_1_1component_1_1ProviderGroup.html',1,'module::extension::component']]],
   ['ps3walk_1215',['PS3Walk',['../classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html',1,'module::behaviour::strategy']]]
 ];

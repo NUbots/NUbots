@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['zombie_983',['zombie',['../structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a4eba4c9d90445f3549d8d91091a40756',1,'module::extension::provider::ProviderGroup']]]
+  ['zombie_982',['zombie',['../structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a75f28d0f267552774e706d100342e7b2',1,'module::extension::component::ProviderGroup']]]
 ];

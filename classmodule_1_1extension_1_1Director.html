@@ -213,18 +213,14 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:af34da10ed9e9296084675dc025c7ef07"><td class="memItemLeft" align="right" valign="top"><a id="af34da10ed9e9296084675dc025c7ef07"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> = ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a></td></tr>
-<tr class="memdesc:af34da10ed9e9296084675dc025c7ef07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Behaviour task. <br /></td></tr>
-<tr class="separator:af34da10ed9e9296084675dc025c7ef07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9bea9eca98c83216429445bb76a7804"><td class="memItemLeft" align="right" valign="top"><a id="ab9bea9eca98c83216429445bb76a7804"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab9bea9eca98c83216429445bb76a7804">TaskList</a> = std::vector&lt; std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &gt;</td></tr>
-<tr class="memdesc:ab9bea9eca98c83216429445bb76a7804"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task list holds a list of tasks. <br /></td></tr>
-<tr class="separator:ab9bea9eca98c83216429445bb76a7804"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acb8b43e3d47e674dc8ddbc35642ffdf4"><td class="memItemLeft" align="right" valign="top"><a id="acb8b43e3d47e674dc8ddbc35642ffdf4"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#acb8b43e3d47e674dc8ddbc35642ffdf4">TaskPack</a> = std::pair&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt;, <a class="el" href="classmodule_1_1extension_1_1Director.html#ab9bea9eca98c83216429445bb76a7804">TaskList</a> &gt;</td></tr>
-<tr class="memdesc:acb8b43e3d47e674dc8ddbc35642ffdf4"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task pack is the result of a set of tasks emitted by a provider that should be run together. <br /></td></tr>
-<tr class="separator:acb8b43e3d47e674dc8ddbc35642ffdf4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7021252f80d525cec056bec1adfa81eb"><td class="memItemLeft" align="right" valign="top"><a id="a7021252f80d525cec056bec1adfa81eb"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> = std::vector&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &gt;</td></tr>
+<tr class="memdesc:a7021252f80d525cec056bec1adfa81eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task list holds a list of tasks. <br /></td></tr>
+<tr class="separator:a7021252f80d525cec056bec1adfa81eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ce3ff604f6ea87b215f803efb7b13e5"><td class="memItemLeft" align="right" valign="top"><a id="a2ce3ff604f6ea87b215f803efb7b13e5"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a2ce3ff604f6ea87b215f803efb7b13e5">TaskPack</a> = std::pair&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt;, <a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> &gt;</td></tr>
+<tr class="memdesc:a2ce3ff604f6ea87b215f803efb7b13e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task pack is the result of a set of tasks emitted by a provider that should be run together. <br /></td></tr>
+<tr class="separator:a2ce3ff604f6ea87b215f803efb7b13e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -268,9 +264,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a0f5fe71a8de8e8282b0a2774e6249e43"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a0f5fe71a8de8e8282b0a2774e6249e43">add_when</a> (const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1WhenExpression.html">extension::behaviour::commands::WhenExpression</a> &amp;when)</td></tr>
 <tr class="memdesc:a0f5fe71a8de8e8282b0a2774e6249e43"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a when condition to an existing Provider.  <a href="classmodule_1_1extension_1_1Director.html#a0f5fe71a8de8e8282b0a2774e6249e43">More...</a><br /></td></tr>
 <tr class="separator:a0f5fe71a8de8e8282b0a2774e6249e43"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a149e94434b67b3ceb83f8d66f9d2aa64"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a149e94434b67b3ceb83f8d66f9d2aa64">challenge_priority</a> (const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;incumbent, const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;challenger)</td></tr>
-<tr class="memdesc:a149e94434b67b3ceb83f8d66f9d2aa64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the challenge priorities of two director tasks and returns true if the challenger has priority over the incumbent using challenge priority.  <a href="classmodule_1_1extension_1_1Director.html#a149e94434b67b3ceb83f8d66f9d2aa64">More...</a><br /></td></tr>
-<tr class="separator:a149e94434b67b3ceb83f8d66f9d2aa64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e12b0846a7c148a6dea84299670b45c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a6e12b0846a7c148a6dea84299670b45c">challenge_priority</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;incumbent, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;challenger)</td></tr>
+<tr class="memdesc:a6e12b0846a7c148a6dea84299670b45c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the challenge priorities of two director tasks and returns true if the challenger has priority over the incumbent using challenge priority.  <a href="classmodule_1_1extension_1_1Director.html#a6e12b0846a7c148a6dea84299670b45c">More...</a><br /></td></tr>
+<tr class="separator:a6e12b0846a7c148a6dea84299670b45c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53c31913830e62fdc1b7c49c9a259191"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a53c31913830e62fdc1b7c49c9a259191">find_ok_solution</a> (const <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a> &amp;requirement, const std::set&lt; std::type_index &gt; &amp;used_types)</td></tr>
 <tr class="memdesc:a53c31913830e62fdc1b7c49c9a259191"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the first available option for a solution that we can run now for this solution.  <a href="classmodule_1_1extension_1_1Director.html#a53c31913830e62fdc1b7c49c9a259191">More...</a><br /></td></tr>
 <tr class="separator:a53c31913830e62fdc1b7c49c9a259191"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -280,51 +276,51 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:ad55edf0f7508766222d56f3028bc5b7a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ad55edf0f7508766222d56f3028bc5b7a">find_ok_solutions</a> (const std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a> &gt; &amp;solutions)</td></tr>
 <tr class="memdesc:ad55edf0f7508766222d56f3028bc5b7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution that can execute, or a blocked solution if none of the solutions can execute.  <a href="classmodule_1_1extension_1_1Director.html#ad55edf0f7508766222d56f3028bc5b7a">More...</a><br /></td></tr>
 <tr class="separator:ad55edf0f7508766222d56f3028bc5b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae70c9d1cd557625475736a41e910f843"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ae70c9d1cd557625475736a41e910f843">get_root_provider</a> (const std::type_index &amp;root_type)</td></tr>
-<tr class="memdesc:ae70c9d1cd557625475736a41e910f843"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds or creates a root provider for a task and returns it.  <a href="classmodule_1_1extension_1_1Director.html#ae70c9d1cd557625475736a41e910f843">More...</a><br /></td></tr>
-<tr class="separator:ae70c9d1cd557625475736a41e910f843"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a553b675b4947fe028b198285a393d778"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778">get_root_provider</a> (const std::type_index &amp;root_type)</td></tr>
+<tr class="memdesc:a553b675b4947fe028b198285a393d778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds or creates a root provider for a task and returns it.  <a href="classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778">More...</a><br /></td></tr>
+<tr class="separator:a553b675b4947fe028b198285a393d778"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d47a23014bcaeeac4df16728128b9af"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438">RunReasonLock</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a4d47a23014bcaeeac4df16728128b9af">hold_run_reason</a> (const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;reason)</td></tr>
 <tr class="memdesc:a4d47a23014bcaeeac4df16728128b9af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds a run reason as the current run reason for the current thread.  <a href="classmodule_1_1extension_1_1Director.html#a4d47a23014bcaeeac4df16728128b9af">More...</a><br /></td></tr>
 <tr class="separator:a4d47a23014bcaeeac4df16728128b9af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0f0070bb74a92a1a244615c1840f335"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#aa0f0070bb74a92a1a244615c1840f335">reevaluate_children</a> (<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">provider::ProviderGroup</a> &amp;group)</td></tr>
-<tr class="memdesc:aa0f0070bb74a92a1a244615c1840f335"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a reevaluation on not only the passed group, but any groups that it is using.  <a href="classmodule_1_1extension_1_1Director.html#aa0f0070bb74a92a1a244615c1840f335">More...</a><br /></td></tr>
-<tr class="separator:aa0f0070bb74a92a1a244615c1840f335"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3cb5b9627b60c553aa2cd01311f84c82"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a3cb5b9627b60c553aa2cd01311f84c82">reevaluate_group</a> (<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">provider::ProviderGroup</a> &amp;group)</td></tr>
-<tr class="memdesc:a3cb5b9627b60c553aa2cd01311f84c82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reevaluates all of the tasks that are queued to execute on a provider group.  <a href="classmodule_1_1extension_1_1Director.html#a3cb5b9627b60c553aa2cd01311f84c82">More...</a><br /></td></tr>
-<tr class="separator:a3cb5b9627b60c553aa2cd01311f84c82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2525565f36ac81678c9987d70bfa35e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#aa2525565f36ac81678c9987d70bfa35e">reevaluate_children</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group)</td></tr>
+<tr class="memdesc:aa2525565f36ac81678c9987d70bfa35e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a reevaluation on not only the passed group, but any groups that it is using.  <a href="classmodule_1_1extension_1_1Director.html#aa2525565f36ac81678c9987d70bfa35e">More...</a><br /></td></tr>
+<tr class="separator:aa2525565f36ac81678c9987d70bfa35e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98348af06fa8b1126bc28e2d21695668"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a98348af06fa8b1126bc28e2d21695668">reevaluate_group</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group)</td></tr>
+<tr class="memdesc:a98348af06fa8b1126bc28e2d21695668"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reevaluates all of the tasks that are queued to execute on a provider group.  <a href="classmodule_1_1extension_1_1Director.html#a98348af06fa8b1126bc28e2d21695668">More...</a><br /></td></tr>
+<tr class="separator:a98348af06fa8b1126bc28e2d21695668"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac71aac2110faf4406b7c01b2eeeb79e6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ac71aac2110faf4406b7c01b2eeeb79e6">remove_provider</a> (const uint64_t &amp;id)</td></tr>
 <tr class="memdesc:ac71aac2110faf4406b7c01b2eeeb79e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a Provider for a type.  <a href="classmodule_1_1extension_1_1Director.html#ac71aac2110faf4406b7c01b2eeeb79e6">More...</a><br /></td></tr>
 <tr class="separator:ac71aac2110faf4406b7c01b2eeeb79e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a116654a8d592ad8d404ac870eef43776"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a116654a8d592ad8d404ac870eef43776">remove_task</a> (const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;task)</td></tr>
-<tr class="memdesc:a116654a8d592ad8d404ac870eef43776"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the provided task from the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a>.  <a href="classmodule_1_1extension_1_1Director.html#a116654a8d592ad8d404ac870eef43776">More...</a><br /></td></tr>
-<tr class="separator:a116654a8d592ad8d404ac870eef43776"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abe5775bc41af1b56efad1e18c0bdf41a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#abe5775bc41af1b56efad1e18c0bdf41a">run_task_on_provider</a> (const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;task, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; &amp;provider, const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;run_reason)</td></tr>
-<tr class="memdesc:abe5775bc41af1b56efad1e18c0bdf41a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs the passed task on the passed provider.  <a href="classmodule_1_1extension_1_1Director.html#abe5775bc41af1b56efad1e18c0bdf41a">More...</a><br /></td></tr>
-<tr class="separator:abe5775bc41af1b56efad1e18c0bdf41a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a867e019bba1e28cf210a89d786452bf5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">run_task_pack</a> (const <a class="el" href="classmodule_1_1extension_1_1Director.html#acb8b43e3d47e674dc8ddbc35642ffdf4">TaskPack</a> &amp;pack)</td></tr>
+<tr class="memitem:a310d77d2ee390e96e2e35db3d3a45a73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a310d77d2ee390e96e2e35db3d3a45a73">remove_task</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;task)</td></tr>
+<tr class="memdesc:a310d77d2ee390e96e2e35db3d3a45a73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Remove the provided task from the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a>.  <a href="classmodule_1_1extension_1_1Director.html#a310d77d2ee390e96e2e35db3d3a45a73">More...</a><br /></td></tr>
+<tr class="separator:a310d77d2ee390e96e2e35db3d3a45a73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7bd00630d43e26bcc654b131a9f9724a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a7bd00630d43e26bcc654b131a9f9724a">run_task_on_provider</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;task, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &amp;provider, const ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html#ad7c9ddc70f5f6f83514ffec6fdd38c14">extension::behaviour::RunInfo::RunReason</a> &amp;run_reason)</td></tr>
+<tr class="memdesc:a7bd00630d43e26bcc654b131a9f9724a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs the passed task on the passed provider.  <a href="classmodule_1_1extension_1_1Director.html#a7bd00630d43e26bcc654b131a9f9724a">More...</a><br /></td></tr>
+<tr class="separator:a7bd00630d43e26bcc654b131a9f9724a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a867e019bba1e28cf210a89d786452bf5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">run_task_pack</a> (const <a class="el" href="classmodule_1_1extension_1_1Director.html#a2ce3ff604f6ea87b215f803efb7b13e5">TaskPack</a> &amp;pack)</td></tr>
 <tr class="memdesc:a867e019bba1e28cf210a89d786452bf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.  <a href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">More...</a><br /></td></tr>
 <tr class="separator:a867e019bba1e28cf210a89d786452bf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6e5491593da8b985ee7ad6b19d69647e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a6e5491593da8b985ee7ad6b19d69647e">run_tasks</a> (<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">provider::ProviderGroup</a> &amp;group, const <a class="el" href="classmodule_1_1extension_1_1Director.html#ab9bea9eca98c83216429445bb76a7804">TaskList</a> &amp;pack, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a> &amp;run_level)</td></tr>
-<tr class="memdesc:a6e5491593da8b985ee7ad6b19d69647e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to execute tasks in the pack, but only up to the passed run level.  <a href="classmodule_1_1extension_1_1Director.html#a6e5491593da8b985ee7ad6b19d69647e">More...</a><br /></td></tr>
-<tr class="separator:a6e5491593da8b985ee7ad6b19d69647e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a776a638615309dd76d9d1ea74cc0e578"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a776a638615309dd76d9d1ea74cc0e578">solve_group</a> (const std::type_index &amp;type, const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;authority, const std::set&lt; std::type_index &gt; &amp;visited)</td></tr>
-<tr class="memdesc:a776a638615309dd76d9d1ea74cc0e578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates options for each provider in a provider group specified by the passed type.  <a href="classmodule_1_1extension_1_1Director.html#a776a638615309dd76d9d1ea74cc0e578">More...</a><br /></td></tr>
-<tr class="separator:a776a638615309dd76d9d1ea74cc0e578"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1a063f93cff781a2ec9e55abcfa85a7f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html">Solution::Option</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a1a063f93cff781a2ec9e55abcfa85a7f">solve_provider</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; &amp;provider, const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;authority, std::set&lt; std::type_index &gt; visited)</td></tr>
-<tr class="memdesc:a1a063f93cff781a2ec9e55abcfa85a7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the passed provider as an option for a solution along with its requirements.  <a href="classmodule_1_1extension_1_1Director.html#a1a063f93cff781a2ec9e55abcfa85a7f">More...</a><br /></td></tr>
-<tr class="separator:a1a063f93cff781a2ec9e55abcfa85a7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a628a3a685aa2f7ba16dbe7c4cb1228a6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a628a3a685aa2f7ba16dbe7c4cb1228a6">solve_task</a> (const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;task)</td></tr>
-<tr class="memdesc:a628a3a685aa2f7ba16dbe7c4cb1228a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds a solution for a given task.  <a href="classmodule_1_1extension_1_1Director.html#a628a3a685aa2f7ba16dbe7c4cb1228a6">More...</a><br /></td></tr>
-<tr class="separator:a628a3a685aa2f7ba16dbe7c4cb1228a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae18a92c25e5fdf99e8a133f465cbe462"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ae18a92c25e5fdf99e8a133f465cbe462">solve_when</a> (const <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html">provider::Provider::WhenCondition</a> &amp;when, const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;authority, const std::set&lt; std::type_index &gt; &amp;visited)</td></tr>
-<tr class="memdesc:ae18a92c25e5fdf99e8a133f465cbe462"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the providers that can cause the passed when condition to be met.  <a href="classmodule_1_1extension_1_1Director.html#ae18a92c25e5fdf99e8a133f465cbe462">More...</a><br /></td></tr>
-<tr class="separator:ae18a92c25e5fdf99e8a133f465cbe462"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3669dac468866c9333fb4e1d9042b542"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a3669dac468866c9333fb4e1d9042b542">run_tasks</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> &amp;pack, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a> &amp;run_level)</td></tr>
+<tr class="memdesc:a3669dac468866c9333fb4e1d9042b542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to execute tasks in the pack, but only up to the passed run level.  <a href="classmodule_1_1extension_1_1Director.html#a3669dac468866c9333fb4e1d9042b542">More...</a><br /></td></tr>
+<tr class="separator:a3669dac468866c9333fb4e1d9042b542"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afedb2bfa4e97b1c4ea03645541bb59f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#afedb2bfa4e97b1c4ea03645541bb59f7">solve_group</a> (const std::type_index &amp;type, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;authority, const std::set&lt; std::type_index &gt; &amp;visited)</td></tr>
+<tr class="memdesc:afedb2bfa4e97b1c4ea03645541bb59f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates options for each provider in a provider group specified by the passed type.  <a href="classmodule_1_1extension_1_1Director.html#afedb2bfa4e97b1c4ea03645541bb59f7">More...</a><br /></td></tr>
+<tr class="separator:afedb2bfa4e97b1c4ea03645541bb59f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6441c5661adb6df1a67bc76571e2aea0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html">Solution::Option</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a6441c5661adb6df1a67bc76571e2aea0">solve_provider</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &amp;provider, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;authority, std::set&lt; std::type_index &gt; visited)</td></tr>
+<tr class="memdesc:a6441c5661adb6df1a67bc76571e2aea0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the passed provider as an option for a solution along with its requirements.  <a href="classmodule_1_1extension_1_1Director.html#a6441c5661adb6df1a67bc76571e2aea0">More...</a><br /></td></tr>
+<tr class="separator:a6441c5661adb6df1a67bc76571e2aea0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addeec0f3be82e2b190be9af57edfb40d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#addeec0f3be82e2b190be9af57edfb40d">solve_task</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;task)</td></tr>
+<tr class="memdesc:addeec0f3be82e2b190be9af57edfb40d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds a solution for a given task.  <a href="classmodule_1_1extension_1_1Director.html#addeec0f3be82e2b190be9af57edfb40d">More...</a><br /></td></tr>
+<tr class="separator:addeec0f3be82e2b190be9af57edfb40d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a065cf29244da79d96ebd3c94fea7153f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a065cf29244da79d96ebd3c94fea7153f">solve_when</a> (const <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html">component::Provider::WhenCondition</a> &amp;when, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;authority, const std::set&lt; std::type_index &gt; &amp;visited)</td></tr>
+<tr class="memdesc:a065cf29244da79d96ebd3c94fea7153f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the providers that can cause the passed when condition to be met.  <a href="classmodule_1_1extension_1_1Director.html#a065cf29244da79d96ebd3c94fea7153f">More...</a><br /></td></tr>
+<tr class="separator:a065cf29244da79d96ebd3c94fea7153f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
-<tr class="memitem:a5a568697d3755326763a1e24eaf87208"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5a568697d3755326763a1e24eaf87208">direct_priority</a> (const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;incumbent, const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;challenger)</td></tr>
-<tr class="memdesc:a5a568697d3755326763a1e24eaf87208"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the direct priorities of two director tasks and returns true if the challenger has priority over the incumbent.  <a href="classmodule_1_1extension_1_1Director.html#a5a568697d3755326763a1e24eaf87208">More...</a><br /></td></tr>
-<tr class="separator:a5a568697d3755326763a1e24eaf87208"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aadabed75b770382026823c49eba00812"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812">direct_priority</a> (const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;incumbent, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;challenger)</td></tr>
+<tr class="memdesc:aadabed75b770382026823c49eba00812"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the direct priorities of two director tasks and returns true if the challenger has priority over the incumbent.  <a href="classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812">More...</a><br /></td></tr>
+<tr class="separator:aadabed75b770382026823c49eba00812"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource')"><img src="closed.png" alt="-"/>&#160;Static Private Member Functions inherited from <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">extension::behaviour::information::InformationSource</a></td></tr>
 <tr class="memitem:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a1156449736afed349c1bb6b92e4f6cd5">get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type, const std::type_index &amp;root_type)</td></tr>
 <tr class="memdesc:a1156449736afed349c1bb6b92e4f6cd5 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the group info object.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a1156449736afed349c1bb6b92e4f6cd5">More...</a><br /></td></tr>
@@ -341,18 +337,18 @@ Private Attributes</h2></td></tr>
 <tr class="memitem:adf79e402d0c8f9daee55f5be9ea994e9"><td class="memItemLeft" align="right" valign="top"><a id="adf79e402d0c8f9daee55f5be9ea994e9"></a>
 std::recursive_mutex&#160;</td><td class="memItemRight" valign="bottom"><b>director_mutex</b> {}</td></tr>
 <tr class="separator:adf79e402d0c8f9daee55f5be9ea994e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5229764df175d487be239513c912bdf1"><td class="memItemLeft" align="right" valign="top"><a id="a5229764df175d487be239513c912bdf1"></a>
-std::map&lt; std::type_index, <a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">provider::ProviderGroup</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5229764df175d487be239513c912bdf1">groups</a></td></tr>
-<tr class="memdesc:a5229764df175d487be239513c912bdf1"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of Provider groups. <br /></td></tr>
-<tr class="separator:a5229764df175d487be239513c912bdf1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5797114c77d8b75a962f4e19dfd0d5bd"><td class="memItemLeft" align="right" valign="top"><a id="a5797114c77d8b75a962f4e19dfd0d5bd"></a>
-std::multimap&lt; uint64_t, std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5797114c77d8b75a962f4e19dfd0d5bd">pack_builder</a></td></tr>
-<tr class="memdesc:a5797114c77d8b75a962f4e19dfd0d5bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit all these as a pack so that the director can work out when Providers change which subtasks they emit. <br /></td></tr>
-<tr class="separator:a5797114c77d8b75a962f4e19dfd0d5bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a420ddbdc1d8df6ce35e6c938e760fae4"><td class="memItemLeft" align="right" valign="top"><a id="a420ddbdc1d8df6ce35e6c938e760fae4"></a>
-std::map&lt; uint64_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a420ddbdc1d8df6ce35e6c938e760fae4">providers</a></td></tr>
-<tr class="memdesc:a420ddbdc1d8df6ce35e6c938e760fae4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps reaction_id to the Provider which implements it. <br /></td></tr>
-<tr class="separator:a420ddbdc1d8df6ce35e6c938e760fae4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="memItemLeft" align="right" valign="top"><a id="ab2350ea1c07f3e9dd54776dcadf29e4d"></a>
+std::map&lt; std::type_index, <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d">groups</a></td></tr>
+<tr class="memdesc:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of Provider groups. <br /></td></tr>
+<tr class="separator:ab2350ea1c07f3e9dd54776dcadf29e4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af67f44bba504fa0f8872d6e04f3b4776"><td class="memItemLeft" align="right" valign="top"><a id="af67f44bba504fa0f8872d6e04f3b4776"></a>
+std::multimap&lt; uint64_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#af67f44bba504fa0f8872d6e04f3b4776">pack_builder</a></td></tr>
+<tr class="memdesc:af67f44bba504fa0f8872d6e04f3b4776"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit all these as a pack so that the director can work out when Providers change which subtasks they emit. <br /></td></tr>
+<tr class="separator:af67f44bba504fa0f8872d6e04f3b4776"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f196b09a6c1b4c27930a2d2d36f0be9"><td class="memItemLeft" align="right" valign="top"><a id="a5f196b09a6c1b4c27930a2d2d36f0be9"></a>
+std::map&lt; uint64_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5f196b09a6c1b4c27930a2d2d36f0be9">providers</a></td></tr>
+<tr class="memdesc:a5f196b09a6c1b4c27930a2d2d36f0be9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps reaction_id to the Provider which implements it. <br /></td></tr>
+<tr class="separator:a5f196b09a6c1b4c27930a2d2d36f0be9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d146d3ea9f1fb47cb37d9bc0dcee07d"><td class="memItemLeft" align="right" valign="top"><a id="a5d146d3ea9f1fb47cb37d9bc0dcee07d"></a>
 uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a5d146d3ea9f1fb47cb37d9bc0dcee07d">unique_id_source</a> = 0</td></tr>
 <tr class="memdesc:a5d146d3ea9f1fb47cb37d9bc0dcee07d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue. <br /></td></tr>
@@ -707,8 +703,8 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b
 
 </div>
 </div>
-<a id="a149e94434b67b3ceb83f8d66f9d2aa64"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a149e94434b67b3ceb83f8d66f9d2aa64">&#9670;&nbsp;</a></span>challenge_priority()</h2>
+<a id="a6e12b0846a7c148a6dea84299670b45c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6e12b0846a7c148a6dea84299670b45c">&#9670;&nbsp;</a></span>challenge_priority()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -719,13 +715,13 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b
         <tr>
           <td class="memname">bool module::extension::Director::challenge_priority </td>
           <td>(</td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>incumbent</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>challenger</em>&#160;</td>
         </tr>
         <tr>
@@ -763,8 +759,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a5a568697d3755326763a1e24eaf87208"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a568697d3755326763a1e24eaf87208">&#9670;&nbsp;</a></span>direct_priority()</h2>
+<a id="aadabed75b770382026823c49eba00812"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aadabed75b770382026823c49eba00812">&#9670;&nbsp;</a></span>direct_priority()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -775,13 +771,13 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">bool module::extension::Director::direct_priority </td>
           <td>(</td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>incumbent</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>challenger</em>&#160;</td>
         </tr>
         <tr>
@@ -947,8 +943,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="ae70c9d1cd557625475736a41e910f843"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae70c9d1cd557625475736a41e910f843">&#9670;&nbsp;</a></span>get_root_provider()</h2>
+<a id="a553b675b4947fe028b198285a393d778"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a553b675b4947fe028b198285a393d778">&#9670;&nbsp;</a></span>get_root_provider()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -957,7 +953,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; module::extension::Director::get_root_provider </td>
+          <td class="memname">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; module::extension::Director::get_root_provider </td>
           <td>(</td>
           <td class="paramtype">const std::type_index &amp;&#160;</td>
           <td class="paramname"><em>root_type</em></td><td>)</td>
@@ -1018,8 +1014,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="aa0f0070bb74a92a1a244615c1840f335"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa0f0070bb74a92a1a244615c1840f335">&#9670;&nbsp;</a></span>reevaluate_children()</h2>
+<a id="aa2525565f36ac81678c9987d70bfa35e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2525565f36ac81678c9987d70bfa35e">&#9670;&nbsp;</a></span>reevaluate_children()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1030,7 +1026,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">void module::extension::Director::reevaluate_children </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">provider::ProviderGroup</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;&#160;</td>
           <td class="paramname"><em>group</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1053,8 +1049,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a3cb5b9627b60c553aa2cd01311f84c82"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3cb5b9627b60c553aa2cd01311f84c82">&#9670;&nbsp;</a></span>reevaluate_group()</h2>
+<a id="a98348af06fa8b1126bc28e2d21695668"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98348af06fa8b1126bc28e2d21695668">&#9670;&nbsp;</a></span>reevaluate_group()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1065,7 +1061,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">bool module::extension::Director::reevaluate_group </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">provider::ProviderGroup</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;&#160;</td>
           <td class="paramname"><em>group</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1129,8 +1125,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a116654a8d592ad8d404ac870eef43776"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a116654a8d592ad8d404ac870eef43776">&#9670;&nbsp;</a></span>remove_task()</h2>
+<a id="a310d77d2ee390e96e2e35db3d3a45a73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a310d77d2ee390e96e2e35db3d3a45a73">&#9670;&nbsp;</a></span>remove_task()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1141,7 +1137,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">void module::extension::Director::remove_task </td>
           <td>(</td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>task</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1164,8 +1160,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="abe5775bc41af1b56efad1e18c0bdf41a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abe5775bc41af1b56efad1e18c0bdf41a">&#9670;&nbsp;</a></span>run_task_on_provider()</h2>
+<a id="a7bd00630d43e26bcc654b131a9f9724a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7bd00630d43e26bcc654b131a9f9724a">&#9670;&nbsp;</a></span>run_task_on_provider()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1176,13 +1172,13 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">void module::extension::Director::run_task_on_provider </td>
           <td>(</td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>task</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>provider</em>, </td>
         </tr>
         <tr>
@@ -1228,7 +1224,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname">void module::extension::Director::run_task_pack </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="classmodule_1_1extension_1_1Director.html#acb8b43e3d47e674dc8ddbc35642ffdf4">TaskPack</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classmodule_1_1extension_1_1Director.html#a2ce3ff604f6ea87b215f803efb7b13e5">TaskPack</a> &amp;&#160;</td>
           <td class="paramname"><em>pack</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1252,8 +1248,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a6e5491593da8b985ee7ad6b19d69647e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6e5491593da8b985ee7ad6b19d69647e">&#9670;&nbsp;</a></span>run_tasks()</h2>
+<a id="a3669dac468866c9333fb4e1d9042b542"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3669dac468866c9333fb4e1d9042b542">&#9670;&nbsp;</a></span>run_tasks()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1264,13 +1260,13 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname"><a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">Director::RunLevel</a> module::extension::Director::run_tasks </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">provider::ProviderGroup</a> &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;&#160;</td>
           <td class="paramname"><em>group</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="classmodule_1_1extension_1_1Director.html#ab9bea9eca98c83216429445bb76a7804">TaskList</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> &amp;&#160;</td>
           <td class="paramname"><em>pack</em>, </td>
         </tr>
         <tr>
@@ -1306,8 +1302,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a776a638615309dd76d9d1ea74cc0e578"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a776a638615309dd76d9d1ea74cc0e578">&#9670;&nbsp;</a></span>solve_group()</h2>
+<a id="afedb2bfa4e97b1c4ea03645541bb59f7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afedb2bfa4e97b1c4ea03645541bb59f7">&#9670;&nbsp;</a></span>solve_group()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1324,7 +1320,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>authority</em>, </td>
         </tr>
         <tr>
@@ -1360,8 +1356,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a1a063f93cff781a2ec9e55abcfa85a7f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1a063f93cff781a2ec9e55abcfa85a7f">&#9670;&nbsp;</a></span>solve_provider()</h2>
+<a id="a6441c5661adb6df1a67bc76571e2aea0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6441c5661adb6df1a67bc76571e2aea0">&#9670;&nbsp;</a></span>solve_provider()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1372,13 +1368,13 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html">Director::Solution::Option</a> module::extension::Director::solve_provider </td>
           <td>(</td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>provider</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>authority</em>, </td>
         </tr>
         <tr>
@@ -1414,8 +1410,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a628a3a685aa2f7ba16dbe7c4cb1228a6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a628a3a685aa2f7ba16dbe7c4cb1228a6">&#9670;&nbsp;</a></span>solve_task()</h2>
+<a id="addeec0f3be82e2b190be9af57edfb40d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#addeec0f3be82e2b190be9af57edfb40d">&#9670;&nbsp;</a></span>solve_task()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1426,7 +1422,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Director::Solution</a> module::extension::Director::solve_task </td>
           <td>(</td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>task</em></td><td>)</td>
           <td></td>
         </tr>
@@ -1450,8 +1446,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="ae18a92c25e5fdf99e8a133f465cbe462"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae18a92c25e5fdf99e8a133f465cbe462">&#9670;&nbsp;</a></span>solve_when()</h2>
+<a id="a065cf29244da79d96ebd3c94fea7153f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a065cf29244da79d96ebd3c94fea7153f">&#9670;&nbsp;</a></span>solve_when()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1462,13 +1458,13 @@ false if the incumbent task has equal or higher priority</dd></dl>
         <tr>
           <td class="memname"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Director::Solution</a> module::extension::Director::solve_when </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html">provider::Provider::WhenCondition</a> &amp;&#160;</td>
+          <td class="paramtype">const <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html">component::Provider::WhenCondition</a> &amp;&#160;</td>
           <td class="paramname"><em>when</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="classmodule_1_1extension_1_1Director.html#af34da10ed9e9296084675dc025c7ef07">BehaviourTask</a> &gt; &amp;&#160;</td>
+          <td class="paramtype">const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;&#160;</td>
           <td class="paramname"><em>authority</em>, </td>
         </tr>
         <tr>
@@ -1526,7 +1522,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a></li>
-    <li class="footer">Generated on Sun Mar 19 2023 11:48:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Mar 22 2023 00:46:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

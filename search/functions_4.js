@@ -6,7 +6,8 @@ var searchData=
   ['degree_1409',['degree',['../classutility_1_1motion_1_1splines_1_1Polynom.html#a7fc40b9b5229003847d20777e265abf1',1,'utility::motion::splines::Polynom']]],
   ['density_1410',['density',['../structutility_1_1math_1_1stats_1_1MultivariateNormal.html#ad535e117d4a152975060ce1a286aa432',1,'utility::math::stats::MultivariateNormal']]],
   ['difference_1411',['difference',['../namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945',1,'utility::math::angle']]],
-  ['direct_5fpriority_1412',['direct_priority',['../classmodule_1_1extension_1_1Director.html#a5a568697d3755326763a1e24eaf87208',1,'module::extension::Director']]],
+  ['direct_5fpriority_1412',['direct_priority',['../classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812',1,'module::extension::Director']]],
   ['director_1413',['Director',['../classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3',1,'module::extension::Director']]],
-  ['directwalkcontroller_1414',['DirectWalkController',['../classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html#ad559b2d53cd97bccb752c9ee7fa4a28f',1,'module::behaviour::skills::DirectWalkController']]]
+  ['directortask_1414',['DirectorTask',['../structmodule_1_1extension_1_1component_1_1DirectorTask.html#af3d49eb2dd4db3bb4cfe6ddc45359997',1,'module::extension::component::DirectorTask']]],
+  ['directwalkcontroller_1415',['DirectWalkController',['../classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html#ad559b2d53cd97bccb752c9ee7fa4a28f',1,'module::behaviour::skills::DirectWalkController']]]
 ];

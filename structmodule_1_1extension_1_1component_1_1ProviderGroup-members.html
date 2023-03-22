@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: module::extension::provider::Provider::WhenCondition Struct Reference</title>
+    <title>NUbots: Member List</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -147,7 +147,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structmodule_1_1extension_1_1component_1_1ProviderGroup.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -166,57 +166,33 @@ $(document).ready(function(){initNavTree('structmodule_1_1extension_1_1provider_
 </div>
 
 <div class="header">
-  <div class="summary">
-<a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">module::extension::provider::Provider::WhenCondition Struct Reference</div>  </div>
+<div class="title">module::extension::component::ProviderGroup Member List</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>The data held by a <code>When</code> condition in order to monitor when the condition will be met, as well as to compare it to <code>Causing</code> statements to determine if those <code>Causing</code> statements would satisfy this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>.  
- <a href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html#details">More...</a></p>
-
-<p><code>#include &lt;<a class="el" href="Provider_8hpp_source.html">Provider.hpp</a>&gt;</code></p>
-<table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
-Public Member Functions</h2></td></tr>
-<tr class="memitem:ad63a017a03e2caec55d051aa5a388ed9"><td class="memItemLeft" align="right" valign="top"><a id="ad63a017a03e2caec55d051aa5a388ed9"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>WhenCondition</b> (const std::type_index &amp;type_, std::function&lt; bool(const int &amp;)&gt; validator_, const bool &amp;current_)</td></tr>
-<tr class="separator:ad63a017a03e2caec55d051aa5a388ed9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a7bde99f9e34e153a2abb67cfe4e6e520"><td class="memItemLeft" align="right" valign="top"><a id="a7bde99f9e34e153a2abb67cfe4e6e520"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html#a7bde99f9e34e153a2abb67cfe4e6e520">current</a></td></tr>
-<tr class="memdesc:a7bde99f9e34e153a2abb67cfe4e6e520"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current state of the condition when it was last seen by the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a>. <br /></td></tr>
-<tr class="separator:a7bde99f9e34e153a2abb67cfe4e6e520"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a84d1f72fd09f8fa58edfd334a685d4f4"><td class="memItemLeft" align="right" valign="top"><a id="a84d1f72fd09f8fa58edfd334a685d4f4"></a>
-NUClear::threading::ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html#a84d1f72fd09f8fa58edfd334a685d4f4">handle</a></td></tr>
-<tr class="memdesc:a84d1f72fd09f8fa58edfd334a685d4f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction handle which is monitoring this state for a valid condition. <br /></td></tr>
-<tr class="separator:a84d1f72fd09f8fa58edfd334a685d4f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7b8623ff179d1e55bbd265c5c949c6ac"><td class="memItemLeft" align="right" valign="top"><a id="a7b8623ff179d1e55bbd265c5c949c6ac"></a>
-std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html#a7b8623ff179d1e55bbd265c5c949c6ac">type</a></td></tr>
-<tr class="memdesc:a7b8623ff179d1e55bbd265c5c949c6ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">The type of state that this condition is checking. <br /></td></tr>
-<tr class="separator:a7b8623ff179d1e55bbd265c5c949c6ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ace2d14e33e5b4164188f0359a82cff49"><td class="memItemLeft" align="right" valign="top"><a id="ace2d14e33e5b4164188f0359a82cff49"></a>
-std::function&lt; bool(const int &amp;)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html#ace2d14e33e5b4164188f0359a82cff49">validator</a></td></tr>
-<tr class="memdesc:ace2d14e33e5b4164188f0359a82cff49"><td class="mdescLeft">&#160;</td><td class="mdescRight">Expression to determine if the passed state is valid. <br /></td></tr>
-<tr class="separator:ace2d14e33e5b4164188f0359a82cff49"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>The data held by a <code>When</code> condition in order to monitor when the condition will be met, as well as to compare it to <code>Causing</code> statements to determine if those <code>Causing</code> statements would satisfy this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
-<li>module/extension/Director/src/provider/<a class="el" href="Provider_8hpp_source.html">Provider.hpp</a></li>
-</ul>
-</div><!-- contents -->
+<p>This is the complete list of members for <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a>, including all inherited members.</p>
+<table class="directory">
+  <tr class="even"><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#ac75a1aea7aa188b1fb54c95bd4206b1f">active_provider</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#adb6a16adde9a2fa04087a7c82098e6f2">active_task</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>add_watcher</b>(const std::shared_ptr&lt; DirectorTask &gt; &amp;task) (defined in <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a>)</td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#ae1369b1168dda1ed86b998807afd22a3">done</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr bgcolor="#f0f0f0" class="even"><td class="entry"><b>ProviderGroup</b>(const std::type_index &amp;type_) (defined in <a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a>)</td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"><span class="mlabel">inline</span></td></tr>
+  <tr><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#abd7076392778f38c24f3019ac0ebe247">providers</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a16e942169115cc8e76cbc88964c84099">pushed_provider</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a02bf626376ee32f0b7d91d6554911b33">pushing_task</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a5632196a74e477663fb9feb1edd388b7">subtasks</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a6425eec5b47f8e4b97d3fc9410808219">TaskList</a> typedef</td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a4e52dd8b8e62ef4948e1b3a9121d0031">type</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#ab2e6c89dcfb6123484c22110dcf5e539">watch_handles</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr class="even"><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#aa48ec0dea2e16b764bbf55cb3c67395d">watchers</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+  <tr><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a75f28d0f267552774e706d100342e7b2">zombie</a></td><td class="entry"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">module::extension::component::ProviderGroup</a></td><td class="entry"></td></tr>
+</table></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><b>provider</b></li><li class="navelem"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">Provider</a></li><li class="navelem"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html">WhenCondition</a></li>
-    <li class="footer">Generated on Sun Mar 19 2023 11:48:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Mar 22 2023 00:46:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

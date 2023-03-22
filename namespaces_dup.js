@@ -147,9 +147,10 @@ var namespaces_dup =
         [ "hasLimbs", "Controller_8cpp.html#a05990f6e6595b71ed659909fe9e98db2", null ]
       ] ],
       [ "extension", null, [
-        [ "provider", null, [
-          [ "Provider", "structmodule_1_1extension_1_1provider_1_1Provider.html", "structmodule_1_1extension_1_1provider_1_1Provider" ],
-          [ "ProviderGroup", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html", "structmodule_1_1extension_1_1provider_1_1ProviderGroup" ]
+        [ "component", null, [
+          [ "DirectorTask", "structmodule_1_1extension_1_1component_1_1DirectorTask.html", "structmodule_1_1extension_1_1component_1_1DirectorTask" ],
+          [ "Provider", "structmodule_1_1extension_1_1component_1_1Provider.html", "structmodule_1_1extension_1_1component_1_1Provider" ],
+          [ "ProviderGroup", "structmodule_1_1extension_1_1component_1_1ProviderGroup.html", "structmodule_1_1extension_1_1component_1_1ProviderGroup" ]
         ] ],
         [ "Director", "classmodule_1_1extension_1_1Director.html", "classmodule_1_1extension_1_1Director" ],
         [ "FileWatcher", "classmodule_1_1extension_1_1FileWatcher.html", "classmodule_1_1extension_1_1FileWatcher" ],
