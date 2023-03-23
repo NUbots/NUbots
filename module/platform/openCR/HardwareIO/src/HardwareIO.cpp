@@ -51,6 +51,7 @@ namespace module::platform::openCR {
             // Broadcast ID - defined to capture any StatusReturn's
             packet_queue[uint8_t(NUgus::ID::BROADCAST)] = std::vector<PacketTypes>();
 
+
             // FSRs
             // packet_queue[uint8_t(NUgus::ID::R_FSR)] = std::vector<PacketTypes>();
             // packet_queue[uint8_t(NUgus::ID::L_FSR)] = std::vector<PacketTypes>();
@@ -200,7 +201,7 @@ namespace module::platform::openCR {
         });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
-            log<NUClear::TRACE>("Shutdown");
+            // log<NUClear::TRACE>("Shutdown");
             // Close our connection to the OpenCR
             if (opencr.connected()) {
                 opencr.close();
@@ -209,7 +210,7 @@ namespace module::platform::openCR {
 
         // This trigger gets the sensor data from the sub controller
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
-            log<NUClear::TRACE>("Update START");
+            // log<NUClear::TRACE>("Update START");
             // Write out servo data
             // SYNC_WRITE (write the same memory addresses on all devices)
             // We need to do 2 sync writes here.
@@ -327,11 +328,11 @@ namespace module::platform::openCR {
             emit(std::move(sensors));
 
             // emit(std::make_unique<RawSensors>(constructSensors()));
-            log<NUClear::TRACE>("Update END");
+            // log<NUClear::TRACE>("Update END");
         });
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            log<NUClear::TRACE>("ServoTargets START");
+            // log<NUClear::TRACE>("ServoTargets START");
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
                 float diff =
@@ -353,6 +354,9 @@ namespace module::platform::openCR {
                     || servoStates[command.id].goalVelocity != speed
                     || servoStates[command.id].goalPosition != command.position) {
 
+
+                    // log<NUClear::DEBUG>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
+
                     servoStates[command.id].dirty = true;
 
                     servoStates[command.id].velocityPGain = command.gain;
@@ -363,26 +367,26 @@ namespace module::platform::openCR {
                     servoStates[command.id].goalPosition = command.position;
                 }
             }
-            log<NUClear::TRACE>("ServoTargets END");
+            // log<NUClear::TRACE>("ServoTargets END");
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            log<NUClear::TRACE>("ServoTarget START");
+            // log<NUClear::TRACE>("ServoTarget START");
             auto commandList = std::make_unique<ServoTargets>();
             commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(commandList));
-            log<NUClear::TRACE>("ServoTarget END");
+            // log<NUClear::TRACE>("ServoTarget END");
         });
 
         // If we get a HeadLED command then write it
         on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
-            log<NUClear::TRACE>("HeadLED START");
+            // log<NUClear::TRACE>("HeadLED START");
             // Update our internal state
             opencrState.headLED = led.RGB;
             opencrState.dirty   = true;
-            log<NUClear::TRACE>("HeadLED END");
+            // log<NUClear::TRACE>("HeadLED END");
         });
 
         // If we get a EyeLED command then write it
@@ -393,13 +397,13 @@ namespace module::platform::openCR {
 
         // If we get a EyeLED command then write it
         on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
-            log<NUClear::TRACE>("LEDPanel Start");
+            // log<NUClear::TRACE>("LEDPanel Start");
             // Update our internal state
             opencrState.ledPanel.led2 = led.led2;
             opencrState.ledPanel.led3 = led.led3;
             opencrState.ledPanel.led4 = led.led4;
             opencrState.dirty         = true;
-            log<NUClear::TRACE>("LEDPanel END");
+            // log<NUClear::TRACE>("LEDPanel END");
         });
 
         on<Trigger<StatusReturn>>().then([this](const StatusReturn& packet) {
@@ -418,6 +422,11 @@ namespace module::platform::openCR {
                 // Pop the front of the packet queue
                 auto info = packet_queue[packet.id].front();
                 packet_queue[packet.id].erase(packet_queue[packet.id].begin());
+
+                log<NUClear::DEBUG>(fmt::format("Packet ID {}, Contents {}, Remaining in this queue {}",
+                                                packet.id,
+                                                (uint8_t) info,
+                                                packet_queue[packet.id].size()));
 
                 switch (info) {
                     // Handles OpenCR model and version information
@@ -444,7 +453,7 @@ namespace module::platform::openCR {
         // Run a state machine to handle reception of packet header and data
         // If a packet is successfully emitted then we emit a StatusReturn message
         on<IO>(opencr.native_handle(), IO::READ).then([this] {
-            log<NUClear::TRACE>("IO Start");
+            // log<NUClear::TRACE>("IO Start");
             enum class Phases : uint8_t { IDLE, HEADER_SYNC, PREAMBLE, DATA, FINISH, TIMEOUT };
 
             static constexpr uint8_t packet_header[4]           = {0xFF, 0xFF, 0xFD, 0x00};
@@ -462,7 +471,7 @@ namespace module::platform::openCR {
 
             // Quick lambda to emit a completed StatusReturn message (to reduce code duplication)
             auto emit_msg = [&]() -> void {
-                log<NUClear::TRACE>("\t\t\temit_msg START");
+                // log<NUClear::TRACE>("\t\t\temit_msg START");
                 // std::unique_ptr<StatusReturn> msg;
                 auto msg         = std::make_unique<StatusReturn>();
                 msg->magic       = 0x00FDFFFF;
@@ -477,12 +486,14 @@ namespace module::platform::openCR {
 
                 // Check CRC
                 if (dynamixel::v2::calculateChecksum(response) == msg->checksum) {
+                    // log<NUClear::DEBUG>(
+                    //     fmt::format("StatusReturn from ID {}, Alert/Error: {}/{}", msg->id, msg->alert, msg->error));
                     emit(msg);
                 }
                 else {
                     log<NUClear::WARN>("Invalid CRC detected.");
                 }
-                log<NUClear::TRACE>("\t\t\temit_msg END");
+                // log<NUClear::TRACE>("\t\t\temit_msg END");
             };
 
             // Quick lambda to reset state machine state (to reduce code duplication)
@@ -494,13 +505,13 @@ namespace module::platform::openCR {
             };
 
             for (uint8_t i = 0; i < num_bytes; ++i) {
-                log<NUClear::TRACE>("\tswitch START");
+                // log<NUClear::TRACE>("\tswitch START");
                 switch (current_phase) {
                     // Idle phase
                     // We haven't seen any data, so we are waiting for the
                     // first byte of the header
                     case Phases::IDLE:
-                        log<NUClear::TRACE>("\t\tIDLE START");
+                        // log<NUClear::TRACE>("\t\tIDLE START");
                         // If we match the first byte of the header then
                         // transition to the HEADER_SYNC phase
                         if (packet_header[sync_point] == buf[i]) {
@@ -510,14 +521,14 @@ namespace module::platform::openCR {
                             packet_start_time = NUClear::clock::now();
                             timeout           = std::chrono::microseconds(packet_wait);
                         }
-                        log<NUClear::TRACE>("\t\tIDLE END");
+                        // log<NUClear::TRACE>("\t\tIDLE END");
                         break;
 
                     // Header Sync phase
                     // We have matched the first byte of the header
                     // now match the next three bytes
                     case Phases::HEADER_SYNC:
-                        log<NUClear::TRACE>("\t\tHEADER_SYNC START");
+                        // log<NUClear::TRACE>("\t\tHEADER_SYNC START");
                         if (NUClear::clock::now() < (packet_start_time + timeout)) {
                             if (packet_header[sync_point] == buf[i]) {
                                 response.push_back(packet_header[sync_point]);
@@ -537,14 +548,14 @@ namespace module::platform::openCR {
                             current_phase = Phases::TIMEOUT;
                         }
 
-                        log<NUClear::TRACE>("\t\tHEADER_SYNC END");
+                        // log<NUClear::TRACE>("\t\tHEADER_SYNC END");
                         break;
 
                     // Preamble phase
                     // We have the full header, now we are looking for the next 5 bytes
                     // Packet ID, Length, Instruction ID, and Error
                     case Phases::PREAMBLE:
-                        log<NUClear::TRACE>("\t\tPREAMBLE START");
+                        // log<NUClear::TRACE>("\t\tPREAMBLE START");
                         if (NUClear::clock::now() < (packet_start_time + timeout)) {
                             response.push_back(buf[i]);
 
@@ -563,7 +574,7 @@ namespace module::platform::openCR {
                         else {
                             current_phase = Phases::TIMEOUT;
                         }
-                        log<NUClear::TRACE>("\t\tPREAMBLE END");
+                        // log<NUClear::TRACE>("\t\tPREAMBLE END");
                         break;
 
                     // Data phase
@@ -571,7 +582,7 @@ namespace module::platform::openCR {
                     // Now we read in the message parameters and CRC
                     // We should be looking for (packet_length - 2) bytes
                     case Phases::DATA:
-                        log<NUClear::TRACE>("\t\tDATA START");
+                        // log<NUClear::TRACE>("\t\tDATA START");
                         if (NUClear::clock::now() < (packet_start_time + timeout)) {
                             response.push_back(buf[i]);
 
@@ -583,7 +594,7 @@ namespace module::platform::openCR {
                         else {
                             current_phase = Phases::TIMEOUT;
                         }
-                        log<NUClear::TRACE>("\t\tDATA END");
+                        // log<NUClear::TRACE>("\t\tDATA END");
                         break;
 
                     // Finish phase
@@ -591,13 +602,13 @@ namespace module::platform::openCR {
                     // However, it looks like we have more data to process
                     // Package up the current message, and reset our buf counter and phase
                     case Phases::FINISH:
-                        log<NUClear::TRACE>("\t\tFINISH START");
+                        // log<NUClear::TRACE>("\t\tFINISH START");
                         emit_msg();
 
                         // Set up for next message
                         i--;  // Decrement counter to account for the next increment
                         reset_state();
-                        log<NUClear::TRACE>("\t\tFINISH END");
+                        // log<NUClear::TRACE>("\t\tFINISH END");
                         break;
 
                     // Timeout phase
@@ -610,7 +621,7 @@ namespace module::platform::openCR {
                     // Yea, dont know what happened here
                     default: reset_state(); break;
                 }
-                log<NUClear::TRACE>("\tswitch END");
+                // log<NUClear::TRACE>("\tswitch END");
             }
 
             // Our input buffer ended at the exact end of the packet
@@ -618,11 +629,12 @@ namespace module::platform::openCR {
                 emit_msg();
                 reset_state();
             }
-            log<NUClear::TRACE>("IO END");
+            // log<NUClear::TRACE>("IO END");
         });
     }
 
     void HardwareIO::processModelInformation(const StatusReturn& packet) {
+        // log<NUClear::TRACE>("processModelInformation START");
         uint16_t model  = (packet.data[1] << 8) | packet.data[0];
         uint8_t version = packet.data[2];
         log<NUClear::INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
@@ -631,13 +643,18 @@ namespace module::platform::openCR {
 
     void HardwareIO::processOpenCRData(const StatusReturn& packet) {
         log<NUClear::TRACE>("processOpenCRData START");
+
         const OpenCRReadData data = *(reinterpret_cast<const OpenCRReadData*>(packet.data.data()));
+
+        log<NUClear::TRACE>("\tOpenCRReadData casted");
 
         // 00000321
         // LED_1 = 0x01
         // LED_2 = 0x02
         // LED_3 = 0x04
         opencrState.ledPanel = {bool(data.led & 0x01), bool(data.led & 0x02), bool(data.led & 0x04)};
+
+        // log<NUClear::TRACE>("\tdata obj accessed");
 
         // 0BBBBBGG GGGRRRRR
         // R = 0x001F
@@ -718,6 +735,7 @@ namespace module::platform::openCR {
     }
 
     void HardwareIO::processServoData(const StatusReturn& packet) {
+        log<NUClear::TRACE>("processServoData START");
         const DynamixelServoReadData data = *(reinterpret_cast<const DynamixelServoReadData*>(packet.data.data()));
         // IDs are 1..20 so need to be converted for the servoStates index
         uint8_t servoIndex = packet.id - 1;
@@ -735,6 +753,7 @@ namespace module::platform::openCR {
             convert::position(servoIndex, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
         servoStates[servoIndex].voltage     = convert::voltage(data.presentVoltage);
         servoStates[servoIndex].temperature = convert::temperature(data.presentTemperature);
+        log<NUClear::TRACE>("processServoData END");
     }
 
     // void HardwareIO::processFSRData(const StatusReturn& packet) {
@@ -743,7 +762,7 @@ namespace module::platform::openCR {
     // }
 
     RawSensors HardwareIO::constructSensors() {
-        log<NUClear::TRACE>("constructSensors START");
+        // log<NUClear::TRACE>("constructSensors START");
         RawSensors sensors;
 
         // Timestamp when this message was created (data itsself could be old)
@@ -837,7 +856,7 @@ namespace module::platform::openCR {
         /* FSRs data */
 
 
-        log<NUClear::TRACE>("constructSensors END");
+        // log<NUClear::TRACE>("constructSensors END");
         return sensors;
     }
 
