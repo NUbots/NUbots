@@ -327,7 +327,6 @@ namespace module::platform::openCR {
             *sensors     = constructSensors();
             emit(std::move(sensors));
 
-            // emit(std::make_unique<RawSensors>(constructSensors()));
             // log<NUClear::TRACE>("Update END");
         });
 
@@ -423,9 +422,10 @@ namespace module::platform::openCR {
                 auto info = packet_queue[packet.id].front();
                 packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
-                log<NUClear::DEBUG>(fmt::format("Packet ID {}, Contents {}, Remaining in this queue {}",
+                log<NUClear::DEBUG>(fmt::format("Packet ID {}, Contents {}, Data size {}, Remaining in this queue {}",
                                                 packet.id,
                                                 (uint8_t) info,
+                                                packet.data.size(),
                                                 packet_queue[packet.id].size()));
 
                 // check for errors
@@ -490,6 +490,17 @@ namespace module::platform::openCR {
                 // extract alert flag from byte & cast the rest to CommandError
                 msg->alert = response[8] >> 7;
                 msg->error = static_cast<StatusReturn::CommandError>(response[8] & 0x7F);
+
+                /************
+                 * @todo Start here for next time
+                 * Sometimes packets have data size zero, meaning we get a null pointer
+                 * We shouldn't get any data of size zero.
+                 * Check if:
+                 *  - The openCR is actually adjusting it's StatusReturn level
+                 *  - Packets are being correctly sent
+                 *      > especially because model number is arriving incorrectly
+                 *  - and check the std::copy runs correctly
+                 ***********/
 
                 std::copy(response.begin() + 9, response.begin() + packet_length - 4, std::back_inserter(msg->data));
 
