@@ -428,6 +428,14 @@ namespace module::platform::openCR {
                                                 (uint8_t) info,
                                                 packet_queue[packet.id].size()));
 
+                // check for errors
+                if (packet.error != StatusReturn::CommandError::NO_ERROR) {
+                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet.id));
+                }
+                if (packet.alert) {
+                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert"));
+                }
+
                 switch (info) {
                     // Handles OpenCR model and version information
                     case PacketTypes::MODEL_INFORMATION: processModelInformation(packet); break;
@@ -472,27 +480,39 @@ namespace module::platform::openCR {
             // Quick lambda to emit a completed StatusReturn message (to reduce code duplication)
             auto emit_msg = [&]() -> void {
                 // log<NUClear::TRACE>("\t\t\temit_msg START");
-                // std::unique_ptr<StatusReturn> msg;
-                auto msg         = std::make_unique<StatusReturn>();
-                msg->magic       = 0x00FDFFFF;
+
+                auto msg = std::make_unique<StatusReturn>();
+
+                msg->magic       = 0x00FDFFFF;  // little endian header bytes
                 msg->id          = response[4];
                 msg->length      = packet_length;
                 msg->instruction = response[7];
-                msg->alert       = (response[8] >> 7) & 1;   // select alert flag in MSB
-                msg->error       = response[8] & ~(1 << 7);  // remove alert flag to get error number
+                // extract alert flag from byte & cast the rest to CommandError
+                msg->alert = response[8] >> 7;
+                msg->error = static_cast<StatusReturn::CommandError>(response[8] & 0x7F);
+
                 std::copy(response.begin() + 9, response.begin() + packet_length - 4, std::back_inserter(msg->data));
+
                 msg->checksum  = (response[response.size() - 1] << 8) | response[response.size() - 2];
                 msg->timestamp = NUClear::clock::now();
 
                 // Check CRC
-                if (dynamixel::v2::calculateChecksum(response) == msg->checksum) {
-                    // log<NUClear::DEBUG>(
-                    //     fmt::format("StatusReturn from ID {}, Alert/Error: {}/{}", msg->id, msg->alert, msg->error));
-                    emit(msg);
-                }
-                else {
+                if (dynamixel::v2::calculateChecksum(response) != msg->checksum) {
                     log<NUClear::WARN>("Invalid CRC detected.");
+                    return;  // without emit
                 }
+
+                // Check we're emitting a Status (return) packet
+                if ((uint8_t) msg->instruction != dynamixel::v2::Instruction::STATUS_RETURN) {
+                    log<NUClear::WARN>("Attempt to emit non Status(return) packet");
+                    return;  // without emit
+                }
+
+                // Finally emit if no errors
+                emit(msg);
+
+                // log<NUClear::DEBUG>(
+                //     fmt::format("StatusReturn from ID {}, Alert/Error: {}/{}", msg->id, msg->alert, msg->error));
                 // log<NUClear::TRACE>("\t\t\temit_msg END");
             };
 
@@ -682,8 +702,8 @@ namespace module::platform::openCR {
                                           convert::acc(data.acc[2]));  // Z
 
         // Command send/receive errors only
-        opencrState.alertFlag   = bool(packet.alert);
-        opencrState.errorNumber = uint8_t(packet.error);
+        opencrState.alertFlag   = static_cast<bool>(packet.alert);
+        opencrState.errorNumber = static_cast<int>(packet.error);
 
         // Work out a battery charged percentage
         batteryState.currentVoltage = convert::voltage(data.voltage);
@@ -740,7 +760,8 @@ namespace module::platform::openCR {
         // IDs are 1..20 so need to be converted for the servoStates index
         uint8_t servoIndex = packet.id - 1;
 
-        servoStates[servoIndex].torqueEnabled  = (data.torqueEnable == 1);
+        servoStates[servoIndex].torqueEnabled = (data.torqueEnable == 1);
+        // Servo error status, NOT dynamixel status packet error.
         servoStates[servoIndex].errorFlags     = data.hardwareErrorStatus;
         servoStates[servoIndex].presentPWM     = convert::PWM(data.presentPWM);
         servoStates[servoIndex].presentCurrent = convert::current(data.presentCurrent);

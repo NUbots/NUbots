@@ -75,6 +75,7 @@ namespace module::platform::openCR {
             bool dirty = false;
 
             /// @brief Current error state of the servo
+            /// @warning different to the dynamixel packet error status
             uint8_t errorFlags = 0;
 
             /// @brief True if we simulate where we think the servos should be

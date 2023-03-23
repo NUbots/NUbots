@@ -29,28 +29,6 @@ import "google/protobuf/timestamp.proto";
  */
 message StatusReturn {
 
-    /* 2022-01-26 Dex
-    I don't think the CommandError structure works - see https://emanual.robotis.com/docs/en/dxl/protocol2/#error
-    Looking into this later but this only reflects the error number and doesn't
-    include the alert bit which we will recieve. Just don't know how to do it
-    correctly in protobuf. something like:
-        struct PacketError {
-            int alert : 1,
-            enum ErrorNumber {
-                NO_ERROR          = 0;
-                RESULT_FAIL       = 1;
-                INSTRUCTION_ERROR = 2;
-                CRC_ERROR         = 3;
-                RANGE_ERROR       = 4;
-                LENGTH_ERROR      = 5;
-                LIMIT_ERROR       = 6;
-                ACCESS_ERROR      = 7;
-            } : 7
-        }
-    Or potentially changing the structure to separate out the alert flag.
-    For now just changing the enum type and processing it later.
-    */
-
     /// Error values
     enum CommandError {
         NO_ERROR          = 0;
@@ -67,8 +45,8 @@ message StatusReturn {
     int32                     id          = 2;  /// The ID of the device that we are communicating with
     int32                     length      = 3;  /// The total length of the data packet (4 plus the size of data)
     int32                     instruction = 4;  /// Will always be Instruction::STATUS_RETURN
-    bool                      alert       = 5;  /// Alert bit
-    int32                     error       = 6;  /// Error number
+    int32                     alert       = 5;  /// Alert bit (int instead of bool to ensure size is known)
+    CommandError              error       = 6;  /// Error number
     bytes                     data        = 7;  /// Expected return data
     int32                     checksum    = 8;  /// Our checksum for this command
     google.protobuf.Timestamp timestamp   = 9;
