@@ -162,11 +162,7 @@ namespace module::input {
             Eigen::Isometry3d Hwt;
             Hwt.linear()      = o.Rwt.toRotationMatrix();
             Hwt.translation() = o.rTWw;
-            // Remove the yaw component of the rotation
-            Hwt.linear() =
-                Eigen::AngleAxisd(-std::atan2(Hwt(1, 0), Hwt(0, 0)), Eigen::Vector3d::UnitZ()).toRotationMatrix()
-                * Hwt.linear();
-            sensors->Htw = Hwt.inverse().matrix();
+            sensors->Htw      = Hwt.inverse().matrix();
 
             // **************** Kinematics Horizon (Hgt) ****************
             Eigen::Isometry3d Rwt(sensors->Htw.inverse());

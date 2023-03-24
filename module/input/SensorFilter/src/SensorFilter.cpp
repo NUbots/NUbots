@@ -21,7 +21,7 @@
 
 #include "Kinematics.hpp"
 #include "OdometryKF.hpp"
-// #include "OdometryUKF.hpp"
+#include "OdometryUKF.hpp"
 #include "RawSensors.hpp"
 
 #include "extension/Configuration.hpp"
@@ -127,10 +127,13 @@ namespace module::input {
             Eigen::Matrix<double, n_measurements, n_states> C;
             C << 1, 0, 0, 0, 0, 1, 0, 0;
 
-            Eigen::Matrix<double, n_states, n_states> Q = 0.001 * Eigen::Matrix<double, n_states, n_states>::Identity();
+            Eigen::Matrix<double, n_states, n_states> Q =
+                0.00001 * Eigen::Matrix<double, n_states, n_states>::Identity();
 
             Eigen::Matrix<double, n_measurements, n_measurements> R =
-                0.01 * Eigen::Matrix<double, n_measurements, n_measurements>::Identity();
+                Eigen::Matrix<double, n_measurements, n_measurements>::Identity();
+            R(0, 0) = 0.00011025;
+            R(1, 1) = 0.0018284176;
 
             pose_filter.update(Ac, Bc, C, Q, R);
             pose_filter.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
@@ -140,8 +143,8 @@ namespace module::input {
             reset_filter.store(true);
         });
 
-        on<Last<20, Trigger<RawSensors>>, With<KinematicsModel>, Single>().then(
-            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors, const KinematicsModel& model) {
+        on<Last<20, Trigger<RawSensors>>, Single>().then(
+            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 // If we need to reset the filter, do that here
                 if (reset_filter.load()) {
                     // We have finished resetting the filter now

@@ -17,8 +17,8 @@
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_INPUT_ODOMETRYUKF_HPP
-#define MODULE_INPUT_ODOMETRYUKF_HPP
+#ifndef MODULE_INPUT_ODOMETRYKF_HPP
+#define MODULE_INPUT_ODOMETRYKF_HPP
 
 #include "SensorFilter.hpp"
 
@@ -88,4 +88,4 @@ namespace module::input {
         sensors->Htw      = Hwt.inverse().matrix();
     }
 }  // namespace module::input
-#endif  // MODULE_INPUT_ODOMETRYUKF_HPP
+#endif  // MODULE_INPUT_ODOMETRYKF_HPP
