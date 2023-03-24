@@ -30,12 +30,15 @@
 #include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/motion/GetupCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
+#include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -46,6 +49,12 @@ namespace module::input {
     using message::actuation::BodySide;
     using message::actuation::KinematicsModel;
     using message::input::Sensors;
+    using message::motion::DisableWalkEngineCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::ExecuteGetup;
+    using message::motion::KillGetup;
+    using message::motion::StopCommand;
+    using message::motion::WalkCommand;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonLeftUp;
     using message::platform::ButtonMiddleDown;
@@ -72,6 +81,14 @@ namespace module::input {
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
         utility::math::filter::UKF<double, MotionModel> motionFilter{};
+
+        // Define the kf model dimensions
+        static const size_t n_states       = 4;
+        static const size_t n_inputs       = 0;
+        static const size_t n_measurements = 2;
+
+        /// @brief Kalman filter for pose estimation
+        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> pose_filter;
 
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
@@ -204,6 +221,15 @@ namespace module::input {
                                const KinematicsModel& kinematics_model,
                                const RawSensors& raw_sensors);
 
+        /// @brief Updates the sensors message with odometry data filtered using Kalman Filter. This includes the
+        // position, orientation, velocity and rotational velocity of the torso in world space.
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        void update_odometry_kf(std::unique_ptr<Sensors>& sensors,
+                                const std::shared_ptr<const Sensors>& previous_sensors,
+                                const RawSensors& raw_sensors);
+
         /// @brief Updates the sensors message with odometry data filtered using UKF. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
         /// @param sensors The sensors message to update
@@ -219,8 +245,27 @@ namespace module::input {
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
+        /// @brief Dead reckoning position of the robot {r} [x,y,z] in world {w} space
+        Eigen::Vector3d rRWw = Eigen::Vector3d::Zero();
+
+        /// @brief Dead reckoning yaw orientation of the robot in world space
+        double yaw = 0;
+
+        /// @brief Kinematics estimate of the robot's height above the ground
+        double z_height = 0.5;
+
+        /// @brief Current walk command
+        Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
+
+        /// @brief Bool to indicate if the robot is falling
+        bool falling = false;
+
+        /// @brief Bool to indicate if the robot is walking
+        bool walk_engine_enabled = false;
+
         /// @brief Current state of the left button
         bool left_down = false;
+
         /// @brief Current state of the middle button
         bool middle_down = false;
 

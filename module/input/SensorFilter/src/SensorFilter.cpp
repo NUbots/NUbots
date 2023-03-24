@@ -20,7 +20,8 @@
 #include "SensorFilter.hpp"
 
 #include "Kinematics.hpp"
-#include "OdometryUKF.hpp"
+#include "OdometryKF.hpp"
+// #include "OdometryUKF.hpp"
 #include "RawSensors.hpp"
 
 #include "extension/Configuration.hpp"
@@ -119,6 +120,21 @@ namespace module::input {
             cfg.initial_covariance.omegaTTt = cfg.motionFilter.initial.covariance.rotational_velocity;
             motionFilter.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
 
+            // Kalman Filter Continuous Process Model
+            Eigen::Matrix<double, n_states, n_states> Ac;
+            Ac << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1;
+            Eigen::Matrix<double, n_inputs, n_inputs> Bc;
+            Eigen::Matrix<double, n_measurements, n_states> C;
+            C << 1, 0, 0, 0, 0, 1, 0, 0;
+
+            Eigen::Matrix<double, n_states, n_states> Q = 0.001 * Eigen::Matrix<double, n_states, n_states>::Identity();
+
+            Eigen::Matrix<double, n_measurements, n_measurements> R =
+                0.01 * Eigen::Matrix<double, n_measurements, n_measurements>::Identity();
+
+            pose_filter.update(Ac, Bc, C, Q, R);
+            pose_filter.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
+
             // Don't filter any sensors until we have initialised the filter
             update_loop.disable();
             reset_filter.store(true);
@@ -128,73 +144,8 @@ namespace module::input {
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors, const KinematicsModel& model) {
                 // If we need to reset the filter, do that here
                 if (reset_filter.load()) {
-                    Eigen::Vector3d acc  = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d gyro = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d rMFt = Eigen::Vector3d::Zero();
-                    for (const auto& s : sensors) {
-                        Sensors filtered_sensors{};
-                        // Accumulate accelerometer and gyroscope readings
-                        acc += s->accelerometer.cast<double>();
-                        gyro += s->gyroscope.cast<double>();
-                        // Make sure we have servo positions
-                        for (uint32_t id = 0; id < 20; ++id) {
-                            const auto& original = utility::platform::getRawServo(id, *s);
-                            // Add the sensor values to the system properly
-                            filtered_sensors.servo.emplace_back(0,
-                                                                id,
-                                                                original.torque_enabled,
-                                                                original.p_gain,
-                                                                original.i_gain,
-                                                                original.d_gain,
-                                                                original.goal_position,
-                                                                original.moving_speed,
-                                                                original.present_position,
-                                                                original.present_speed,
-                                                                original.load,
-                                                                original.voltage,
-                                                                static_cast<float>(original.temperature));
-                        }
-                        // Calculate forward kinematics
-                        const auto Htx = calculateAllPositions(model, filtered_sensors);
-                        for (const auto& entry : Htx) {
-                            filtered_sensors.Htx[entry.first] = entry.second.matrix();
-                        }
-                        // Calculate the average length of both legs from the torso and accumulate this measurement
-                        const Eigen::Isometry3d Htr(filtered_sensors.Htx[ServoID::R_ANKLE_ROLL]);
-                        const Eigen::Isometry3d Htl(filtered_sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                        const Eigen::Vector3d rTFt = (Htr.translation() + Htl.translation()) * 0.5;
-                        // Accumulator CoM readings
-                        rMFt += calculateCentreOfMass(model, filtered_sensors.Htx).head<3>() + rTFt;
-                    }
-                    // Average all accumulated readings
-                    acc /= static_cast<double>(sensors.size());
-                    gyro /= static_cast<double>(sensors.size());
-                    rMFt /= static_cast<double>(sensors.size());
-                    // Average time per sensor reading
-                    double dt = std::chrono::duration_cast<std::chrono::duration<double>>(sensors.back()->timestamp
-                                                                                          - sensors.front()->timestamp)
-                                    .count()
-                                / static_cast<double>(sensors.size());
-                    // Find the rotation from the average accelerometer reading to world UnitZ
-                    // Rotating from torso acceleration vector to world z vector ===> this makes it Rwt and not Rtw
-                    Eigen::Quaterniond Rwt = Eigen::Quaterniond::FromTwoVectors(acc, Eigen::Vector3d::UnitZ());
-                    Rwt.normalize();
-
-                    MotionModel<double>::StateVec mean;
-                    // Rotate rMFt (Foot to Torso CoM) into world space
-                    mean.rTWw = Rwt.toRotationMatrix() * rMFt;
-                    // Remove gravity from accelerometer average and integrate to get velocity
-                    mean.vTw      = (acc - (Rwt.conjugate() * Eigen::Quaterniond(0.0, 0.0, 0.0, G) * Rwt).vec()) * dt;
-                    mean.Rwt      = Rwt;
-                    mean.omegaTTt = gyro;
-                    MotionModel<double>::StateVec covariance;
-                    covariance.rTWw     = cfg.motionFilter.initial.covariance.position;
-                    covariance.vTw      = cfg.motionFilter.initial.covariance.velocity;
-                    covariance.Rwt      = cfg.motionFilter.initial.covariance.rotation;
-                    covariance.omegaTTt = cfg.motionFilter.initial.covariance.rotational_velocity;
-
                     // We have finished resetting the filter now
-                    switch (motionFilter.reset(cfg.initial_mean.getStateVec(), covariance.asDiagonal())) {
+                    switch (motionFilter.reset(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal())) {
                         case Eigen::Success:
                             log<NUClear::INFO>("Motion Model UKF has been reset");
                             reset_filter.store(false);
@@ -252,6 +203,29 @@ namespace module::input {
                 }
             });
 
+        on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
+            if (!walk_engine_enabled) {
+                walk_engine_enabled = true;
+            }
+            walk_command = wc.command;
+        });
+
+        on<Trigger<EnableWalkEngineCommand>>().then([this]() { walk_engine_enabled = true; });
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this]() {
+            walk_command        = Eigen::Vector3d::Zero();
+            walk_engine_enabled = false;
+        });
+
+        on<Trigger<StopCommand>>().then([this]() {
+            walk_command        = Eigen::Vector3d::Zero();
+            walk_engine_enabled = false;
+        });
+
+        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
+
+        on<Trigger<KillGetup>>().then([this]() { falling = false; });
+
         update_loop = on<Trigger<RawSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>()
                           .then("Main Sensors Loop",
                                 [this](const RawSensors& raw_sensors,
@@ -271,7 +245,7 @@ namespace module::input {
                                     // Updates the Sensors message with odometry data filtered using UKF. This includes
                                     // the position, orientation, velocity and rotational velocity of the torso in world
                                     // space.
-                                    update_odometry_ukf(sensors, previous_sensors, raw_sensors);
+                                    update_odometry_kf(sensors, previous_sensors, raw_sensors);
 
                                     // Graph debug information
                                     if (log_level <= NUClear::DEBUG) {

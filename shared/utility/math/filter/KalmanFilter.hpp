@@ -40,6 +40,9 @@ namespace utility::math::filter {
         using InputModelMat = Eigen::Matrix<Scalar, NumStates, NumInputs>;
 
         /// @brief Default constructor for KalmanFilter
+        KalmanFilter() = default;
+
+        /// @brief Construct a KalmanFilter with the given parameters
         KalmanFilter(StateVec initial_state,
                      StateMat initial_covariance,
                      StateMat state_transition_matrix,
@@ -54,6 +57,28 @@ namespace utility::math::filter {
             , C(measurement_model_matrix)
             , Q(process_noise_covariance)
             , R(measurement_noise_covariance) {}
+
+
+        /**
+         * @brief Update the filter parameters.
+         *
+         * @param[in] state_transition_matrix
+         * @param[in] input_model_matrix
+         * @param[in] measurement_model_matrix
+         * @param[in] process_noise_covariance
+         * @param[in] measurement_noise_covariance
+         */
+        void update(StateMat state_transition_matrix,
+                    InputModelMat input_model_matrix,
+                    MeasModelMat measurement_model_matrix,
+                    StateMat process_noise_covariance,
+                    MeasMat measurement_noise_covariance) {
+            A = state_transition_matrix;
+            B = input_model_matrix;
+            C = measurement_model_matrix;
+            Q = process_noise_covariance;
+            R = measurement_noise_covariance;
+        }
 
         /**
          * @brief Resets the filter to a new initial state and covariance.
@@ -79,7 +104,7 @@ namespace utility::math::filter {
             Eigen::Matrix<Scalar, NumStates, NumInputs> Bd;
             zero_order_hold(Ad, Bd, dt);
             state      = Ad * state + Bd * control_input;
-            covariance = Ad * covariance * Ad.transpose() + Q;
+            covariance = Ad * covariance * Ad.transpose() + Q * dt;
         }
 
         /**
