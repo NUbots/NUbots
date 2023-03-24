@@ -20,7 +20,7 @@ namespace module::localisation {
 
     // Particle struct
     struct Particle {
-        Eigen::Matrix<double, 3, 1> state;
+        Eigen::Matrix<double, 3, 1> state;  // (x, y, theta) of world space in field space
         double weight = 1.0;
     };
 
@@ -34,12 +34,6 @@ namespace module::localisation {
             int n_particles = 0;
             /// @brief Uncertainty in the process model
             Eigen::Matrix<double, 3, 3> process_noise = Eigen::Matrix<double, 3, 3>::Zero();
-            /// @brief Scaling factor for odometry x velocity
-            double scale_x = 0.0;
-            /// @brief Scaling factor for odometry y velocity
-            double scale_y = 0.0;
-            /// @brief Scaling factor for odometry theta velocity
-            double scale_theta = 0.0;
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
         } cfg;
@@ -74,16 +68,16 @@ namespace module::localisation {
 
         /// @brief Converts a unit vector of point from the camera in robot space to a (x,y) point relative to the robot
         /// on the field plane
-        /// @param uPCr unit vector from the camera to the field point in robot space
-        /// @param Hcr the camera to robot space transform
+        /// @param uPCw unit vector of point from the camera in world space
+        /// @param Hcw the world from camera transform
         /// @return the field point measurement (x,y) relative to the robot
-        Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcr);
+        Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
 
         /// @brief Transform a point in the robot's coordinate frame into an index in the map
         /// @param particle The state of the particle (x,y,theta)
-        /// @param rPRr The field point (x, y) in robot space {r} [m]
+        /// @param rPRw The field point (x, y) in world space {w} [m]
         /// @return The observation location (x, y) in the map
-        Eigen::Vector2i position_in_map(const Eigen::Matrix<double, 3, 1> particle, const Eigen::Vector2d rPRr);
+        Eigen::Vector2i position_in_map(const Eigen::Matrix<double, 3, 1> particle, const Eigen::Vector2d rPRw);
 
         /// @brief Get the weight of a particle given a set of observations
         /// @param particle The state of the particle (x,y,theta)

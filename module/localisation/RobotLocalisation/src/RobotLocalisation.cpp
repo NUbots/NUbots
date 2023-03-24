@@ -30,13 +30,7 @@ namespace module::localisation {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.grid_size   = config["grid_size"].as<double>();
             cfg.n_particles = config["n_particles"].as<int>();
-
-            // Odometry scaling factors
-            cfg.scale_x     = config["scale_x"].as<double>();
-            cfg.scale_y     = config["scale_y"].as<double>();
-            cfg.scale_theta = config["scale_theta"].as<double>();
-
-            cfg.save_map = config["save_map"].as<bool>();
+            cfg.save_map    = config["save_map"].as<bool>();
 
             // Initial state, covariance and process noise
             state                        = config["initial_state"].as<Expression>();
@@ -166,7 +160,7 @@ namespace module::localisation {
             fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
 
             // Fill the surrounding cells close to the field lines with decreasing occupancy values
-            fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
+            fieldline_map.fill_surrounding_cells(0.4 / cfg.grid_size);
 
             // Save the map to a csv file
             if (cfg.save_map) {
@@ -222,21 +216,18 @@ namespace module::localisation {
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             if (!falling) {
-                // Time update
-                time_update();
-
                 // Add noise to the particles
                 add_noise();
 
                 // Project the field line observations (uPCr) onto the field plane
                 std::vector<Eigen::Vector2d> field_point_observations;
+                Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
                 for (auto point : field_lines.points) {
-                    Eigen::Isometry3d Hcr = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
-                    auto uPCr             = point.cast<double>();
-                    auto rPCr             = ray_to_field_plane(uPCr, Hcr);
-                    field_point_observations.push_back(rPCr);
+                    auto uPCw = point.cast<double>();
+                    auto rPCw = ray_to_field_plane(uPCw, Hcw);
+                    field_point_observations.push_back(rPCw);
                     if (log_level <= NUClear::DEBUG) {
-                        auto cell = position_in_map(state, rPCr);
+                        auto cell = position_in_map(state, rPCw);
                         emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
                     }
                 }
@@ -259,10 +250,18 @@ namespace module::localisation {
 
                 if (log_level <= NUClear::DEBUG) {
                     auto state_cell = position_in_map(state, Eigen::Vector2d(0.0, 0.0));
-                    emit(graph("State (x,y)", state_cell.x(), state_cell.y()));
+                    emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
                     // Emit the cell 0.5m in front of the robot to visualise the direction the robot is facing
                     auto direction_cell = position_in_map(state, Eigen::Vector2d(0.5, 0.0));
-                    emit(graph("State (theta)", direction_cell.x(), direction_cell.y()));
+                    emit(graph("World (theta)", direction_cell.x(), direction_cell.y()));
+                    Eigen::Isometry3d Hwc = Hcw.inverse();
+                    Eigen::Vector2d rCWw  = Eigen::Vector2d(Hwc.translation().x(), Hwc.translation().y());
+                    auto robot_cell       = position_in_map(state, rCWw);
+                    emit(graph("Robot (x,y)", robot_cell.x(), robot_cell.y()));
+                    Eigen::Vector3d rPCc  = Eigen::Vector3d(0.5, 0.0, 0.0);
+                    Eigen::Vector3d rPWw  = Hwc * rPCc;
+                    auto robot_theta_cell = position_in_map(state, rPWw.head(2));
+                    emit(graph("Robot (theta)", robot_theta_cell.x(), robot_theta_cell.y()));
                 }
 
                 // Build and emit the field message
@@ -278,22 +277,23 @@ namespace module::localisation {
     }
 
 
-    Eigen::Vector2d RobotLocalisation::ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcr) {
+    Eigen::Vector2d RobotLocalisation::ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcw) {
         // Project the field line points onto the field plane
-        auto Hrc             = Hcr.inverse();
-        Eigen::Vector3d rPCr = uPCr * std::abs(Hrc.translation().z() / uPCr.z());
-        return rPCr.head(2);
+        auto Hwc             = Hcw.inverse();
+        Eigen::Vector3d rCWw = Eigen::Vector3d(Hwc.translation().x(), Hwc.translation().y(), 0.0);
+        Eigen::Vector3d rPCw = uPCr * std::abs(Hwc.translation().z() / uPCr.z()) + rCWw;
+        return rPCw.head(2);
     }
 
     Eigen::Vector2i RobotLocalisation::position_in_map(const Eigen::Matrix<double, 3, 1> particle,
-                                                       const Eigen::Vector2d rPRr) {
-        // Create transform from robot {r} to field {f} space
-        Eigen::Isometry2d Hfr;
-        Hfr.translation() = Eigen::Vector2d(particle(0), particle(1));
-        Hfr.linear()      = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
+                                                       const Eigen::Vector2d rPRw) {
+        // Create transform from world {w} to field {f} space
+        Eigen::Isometry2d Hfw;
+        Hfw.translation() = Eigen::Vector2d(particle(0), particle(1));
+        Hfw.linear()      = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
 
         // Transform the observations from robot space {r} to field space {f}
-        Eigen::Vector2d rPFf = Hfr * rPRr;
+        Eigen::Vector2d rPFf = Hfw * rPRw;
 
         // Get the associated position/index in the map [x, y]
         int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
@@ -343,9 +343,7 @@ namespace module::localisation {
     Eigen::Vector3d RobotLocalisation::compute_mean() {
         Eigen::Vector3d mean = Eigen::Vector3d::Zero();
         for (const auto& particle : particles) {
-            mean.x() += particle.state.x();
-            mean.y() += particle.state.y();
-            mean.z() += particle.state.z();
+            mean += particle.state;
         }
         return mean / cfg.n_particles;
     }
@@ -358,27 +356,6 @@ namespace module::localisation {
         }
         cov_matrix /= (cfg.n_particles - 1);
         return cov_matrix;
-    }
-
-    void RobotLocalisation::time_update() {
-        // Calculate the time since the last time update
-        using namespace std::chrono;
-        const auto current_time = NUClear::clock::now();
-        const double dt         = duration_cast<duration<double>>(current_time - last_time_update_time).count();
-        last_time_update_time   = current_time;
-
-        // Update the particles using the walk command and the time since the last time update, with some tunable
-        // scaling on the walk command velocities
-        for (auto& particle : particles) {
-            double delta_x     = walk_command.x() * dt * cfg.scale_x;
-            double delta_y     = walk_command.y() * dt * cfg.scale_y;
-            double delta_theta = walk_command.z() * dt * cfg.scale_theta;
-            particle.state.x() = particle.state.x() + delta_x * cos(particle.state.z() + delta_theta)
-                                 - delta_y * sin(particle.state.z() + delta_theta);
-            particle.state.y() = particle.state.y() + delta_y * cos(particle.state.z() + delta_theta)
-                                 + delta_x * sin(particle.state.z() + delta_theta);
-            particle.state.z() = particle.state.z() + delta_theta;
-        }
     }
 
     void RobotLocalisation::resample() {
