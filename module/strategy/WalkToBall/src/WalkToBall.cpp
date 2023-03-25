@@ -32,7 +32,7 @@ namespace module::strategy {
                 // If we have a ball, walk to it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
                     // Add an offset to account for walking with the foot in front of the ball
-                    const Eigen::Vector3f rBTt(ball.rBCc.x(), ball.rBCc.y() + cfg.ball_y_offset, ball.rBCc.z());
+                    const Eigen::Vector3f rBTt(ball.rBTt.x(), ball.rBTt.y() + cfg.ball_y_offset, ball.rBTt.z());
                     emit<Task>(std::make_unique<WalkTo>(rBTt));
                 }
             });
