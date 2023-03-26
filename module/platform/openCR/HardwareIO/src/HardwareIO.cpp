@@ -422,11 +422,13 @@ namespace module::platform::openCR {
                 auto info = packet_queue[packet.id].front();
                 packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
-                log<NUClear::DEBUG>(fmt::format("Packet ID {}, Contents {}, Data size {}, Remaining in this queue {}",
-                                                packet.id,
-                                                (uint8_t) info,
-                                                packet.data.size(),
-                                                packet_queue[packet.id].size()));
+                // log<NUClear::DEBUG>(fmt::format(
+                //     "Packet ID {}, Contents {}, Data size {}, Remaining in this
+                //     queue {} ",
+                //     packet.id,
+                //     (uint8_t) info,
+                //     packet.data.size(),
+                //     packet_queue[packet.id].size()));
 
                 // check for errors
                 if (packet.error != StatusReturn::CommandError::NO_ERROR) {
@@ -490,7 +492,7 @@ namespace module::platform::openCR {
                 // extract alert flag from byte & cast the rest to CommandError
                 msg->alert = response[8] >> 7;
                 msg->error = static_cast<StatusReturn::CommandError>(response[8] & 0x7F);
-                
+
                 // Param field starts 9 bytes after start, CRC takes up last 2
                 std::copy(response.begin() + 9, response.end() - 2, std::back_inserter(msg->data));
 
