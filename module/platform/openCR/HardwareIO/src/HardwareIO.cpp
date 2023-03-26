@@ -490,19 +490,9 @@ namespace module::platform::openCR {
                 // extract alert flag from byte & cast the rest to CommandError
                 msg->alert = response[8] >> 7;
                 msg->error = static_cast<StatusReturn::CommandError>(response[8] & 0x7F);
-
-                /************
-                 * @todo Start here for next time
-                 * Sometimes packets have data size zero, meaning we get a null pointer
-                 * We shouldn't get any data of size zero.
-                 * Check if:
-                 *  - The openCR is actually adjusting it's StatusReturn level
-                 *  - Packets are being correctly sent
-                 *      > especially because model number is arriving incorrectly
-                 *  - and check the std::copy runs correctly
-                 ***********/
-
-                std::copy(response.begin() + 9, response.begin() + packet_length - 4, std::back_inserter(msg->data));
+                
+                // Param field starts 9 bytes after start, CRC takes up last 2
+                std::copy(response.begin() + 9, response.end() - 2, std::back_inserter(msg->data));
 
                 msg->checksum  = (response[response.size() - 1] << 8) | response[response.size() - 2];
                 msg->timestamp = NUClear::clock::now();
@@ -666,6 +656,8 @@ namespace module::platform::openCR {
 
     void HardwareIO::processModelInformation(const StatusReturn& packet) {
         // log<NUClear::TRACE>("processModelInformation START");
+        log<NUClear::DEBUG>(
+            fmt::format("Model {:02X} {:02X}, Version {:02X}", packet.data[1], packet.data[0], packet.data[2]));
         uint16_t model  = (packet.data[1] << 8) | packet.data[0];
         uint8_t version = packet.data[2];
         log<NUClear::INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
