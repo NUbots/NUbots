@@ -318,11 +318,12 @@ namespace module::localisation {
             // Check if the observation is within the max range and within the field
             if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
                 double distance_error_norm = std::pow(occupancy_value, 2);
-                weight += std::log(std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
-                                   / (2 * M_PI * std::pow(cfg.measurement_noise, 2)));
+                weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
+                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
         }
-        return weight;
+
+        return std::max(weight, 0.0);
     }
 
     Eigen::Vector3d RobotLocalisation::compute_mean() {
@@ -345,19 +346,19 @@ namespace module::localisation {
 
     void RobotLocalisation::resample() {
         std::vector<double> weights(particles.size());
-
-        // Normalise the weights
-        double max_weight = std::numeric_limits<double>::lowest();
         for (size_t i = 0; i < particles.size(); i++) {
-            max_weight = std::max(max_weight, particles[i].weight);
+            weights[i] = particles[i].weight;
         }
-        double log_sum = 0.0;
-        for (size_t i = 0; i < particles.size(); i++) {
-            log_sum += std::exp(particles[i].weight - max_weight);
+        double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
+        if (weight_sum == 0) {
+            log<NUClear::WARN>("All weights are zero, cannot resample");
+            // Add some more noise to the particles
+            add_noise();
+            return;
         }
-        log_sum = std::log(log_sum);
-        for (size_t i = 0; i < particles.size(); i++) {
-            weights[i] = std::exp(particles[i].weight - max_weight - log_sum);
+        // Normalise the weights so that they sum to 1
+        for (auto& weight : weights) {
+            weight /= weight_sum;
         }
 
         std::vector<Particle> resampled_particles(particles.size());
