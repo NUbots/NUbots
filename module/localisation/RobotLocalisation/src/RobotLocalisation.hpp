@@ -34,6 +34,10 @@ namespace module::localisation {
             int n_particles = 0;
             /// @brief Uncertainty in the process model
             Eigen::Matrix<double, 3, 3> process_noise = Eigen::Matrix<double, 3, 3>::Zero();
+            /// @brief Uncertainty in the measurement model
+            double measurement_noise = 0;
+            /// @brief Maximum distance a field line can be from a particle to be considered an observation [m]
+            double max_range = 0;
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
         } cfg;

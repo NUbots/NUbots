@@ -36,6 +36,8 @@ namespace module::localisation {
             state                        = config["initial_state"].as<Expression>();
             covariance.diagonal()        = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
             cfg.process_noise.diagonal() = Eigen::Vector3d(config["process_noise"].as<Expression>());
+            cfg.measurement_noise        = config["measurement_noise"].as<double>();
+            cfg.max_range                = config["max_range"].as<double>();
 
             // Initialise the particles with a multivariate normal distribution
             MultivariateNormal<double, 3> multivariate(state, covariance);
@@ -160,7 +162,10 @@ namespace module::localisation {
             fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
 
             // Fill the surrounding cells close to the field lines with decreasing occupancy values
-            fieldline_map.fill_surrounding_cells(0.4 / cfg.grid_size);
+            // fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
+
+            // Precompute the distance map
+            fieldline_map.create_distance_map(cfg.grid_size);
 
             // Save the map to a csv file
             if (cfg.save_map) {
@@ -174,7 +179,7 @@ namespace module::localisation {
                 Eigen::MatrixXd fieldline_map_data = fieldline_map.get_map();
                 for (int i = 0; i < fieldline_map_data.rows(); i++) {
                     for (int j = 0; j < fieldline_map_data.cols(); j++) {
-                        if (fieldline_map_data(i, j) == 1) {
+                        if (fieldline_map_data(i, j) == 0) {
                             emit(graph("Field Line Map", i, j));
                         }
                     }
@@ -304,39 +309,19 @@ namespace module::localisation {
 
     double RobotLocalisation::calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
                                                const std::vector<Eigen::Vector2d>& observations) {
-        double weight         = 0;
-        double n_observations = observations.size();
-
+        double weight = 0;
         for (auto rORr : observations) {
-            // Get the position of this particle in the map, which we use to check if robot is on the field [x, y]
-            Eigen::Vector2i particle_position = position_in_map(particle, Eigen::Vector2d(0.0, 0.0));
-            double particle_occupancy = fieldline_map.get_occupancy_value(particle_position.x(), particle_position.y());
-
             // Get the position of the observation in the map for this particle [x, y]
             Eigen::Vector2i map_position = position_in_map(particle, rORr);
-
-            // Get the occupancy value of the observation at this position in the map
-            double observation_occupancy = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
-
-            // If the particle_occupancy is -1 then the robot is outside the map, penalise the particle
-            if (particle_occupancy == -1) {
-                weight = 0;
-            }
-            // If the observation_occupancy is -1 then the observation is outside the map, penalise the particle.
-            // Reduce the weight of the particle by the 1 / number of observations
-            else if (observation_occupancy == -1) {
-                weight -= (1.0 / n_observations);
-            }
-            else if (observation_occupancy > 0) {
-                // Increase the weight of the particle by the occupancy/n_observations, such that the maximum weight is
-                // between [0, 1]
-                weight += observation_occupancy / n_observations;
+            // Get the distance to the closest field line point in the map
+            double occupancy_value = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
+            // Check if the observation is within the max range and within the field
+            if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
+                double distance_error_norm = std::pow(occupancy_value, 2);
+                weight += std::log(std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
+                                   / (2 * M_PI * std::pow(cfg.measurement_noise, 2)));
             }
         }
-
-        // Ensure the weight is positive
-        weight = std::max(weight, 0.0);
-
         return weight;
     }
 
@@ -360,20 +345,21 @@ namespace module::localisation {
 
     void RobotLocalisation::resample() {
         std::vector<double> weights(particles.size());
+
+        // Normalise the weights
+        double max_weight = std::numeric_limits<double>::lowest();
         for (size_t i = 0; i < particles.size(); i++) {
-            weights[i] = particles[i].weight;
+            max_weight = std::max(max_weight, particles[i].weight);
         }
-        double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
-        if (weight_sum == 0) {
-            log<NUClear::WARN>("All weights are zero, cannot resample");
-            // Add some more noise to the particles
-            add_noise();
-            return;
+        double log_sum = 0.0;
+        for (size_t i = 0; i < particles.size(); i++) {
+            log_sum += std::exp(particles[i].weight - max_weight);
         }
-        // Normalise the weights so that they sum to 1
-        for (auto& weight : weights) {
-            weight /= weight_sum;
+        log_sum = std::log(log_sum);
+        for (size_t i = 0; i < particles.size(); i++) {
+            weights[i] = std::exp(particles[i].weight - max_weight - log_sum);
         }
+
         std::vector<Particle> resampled_particles(particles.size());
         std::default_random_engine gen;
         std::discrete_distribution<int> distribution(weights.begin(), weights.end());
@@ -387,6 +373,7 @@ namespace module::localisation {
 
     void RobotLocalisation::add_noise() {
         MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), cfg.process_noise);
+
         for (auto& particle : particles) {
             particle.state += multivariate.sample();
         }
