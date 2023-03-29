@@ -20,7 +20,8 @@ namespace module::localisation {
 
     // Particle struct
     struct Particle {
-        Eigen::Matrix<double, 3, 1> state;  // (x, y, theta) of world space in field space
+        Eigen::Matrix<double, 3, 1> state =
+            Eigen::Matrix<double, 3, 1>::Zero();  // (x, y, theta) of world space in field space
         double weight = 1.0;
     };
 

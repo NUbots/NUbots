@@ -247,6 +247,14 @@ namespace module::input {
                                 const std::shared_ptr<const Sensors>& previous_sensors,
                                 const RawSensors& raw_sensors);
 
+        /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        /// @param dt The time since the last update
+        void integrate_walkcommand(const double dt);
+
+
         /// @brief Updates the sensors message with odometry data filtered using UKF. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
         /// @param sensors The sensors message to update
@@ -272,7 +280,7 @@ namespace module::input {
 
     private:
         /// @brief Dead reckoning yaw orientation of the robot in world space
-        double theta = 0;
+        double yaw = 0;
 
         /// @brief Transform of torso from world space
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();

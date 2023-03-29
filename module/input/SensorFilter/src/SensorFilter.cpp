@@ -20,9 +20,7 @@
 #include "SensorFilter.hpp"
 
 #include "Kinematics.hpp"
-#include "OdometryKF.hpp"
-#include "OdometryMahony.hpp"
-#include "OdometryUKF.hpp"
+#include "Odometry.hpp"
 #include "RawSensors.hpp"
 
 #include "extension/Configuration.hpp"

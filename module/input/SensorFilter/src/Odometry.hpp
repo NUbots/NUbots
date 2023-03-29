@@ -17,8 +17,8 @@
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_INPUT_ODOMETRYUKF_HPP
-#define MODULE_INPUT_ODOMETRYUKF_HPP
+#ifndef MODULE_INPUT_ODOMETRY_HPP
+#define MODULE_INPUT_ODOMETRY_HPP
 
 #include "SensorFilter.hpp"
 
@@ -170,5 +170,102 @@ namespace module::input {
         }
     }
 
+    void SensorFilter::integrate_walkcommand(const double dt) {
+        // Integrate the walk command to estimate the change in position and yaw orientation
+        double dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
+        double dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
+        yaw += walk_command.z() * dt * cfg.deadreckoning_scale.z();
+        // Rotate the change in position into world coordinates before adding it to the current position
+        Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
+        Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
+    }
+
+    void SensorFilter::update_odometry_kf(std::unique_ptr<Sensors>& sensors,
+                                          const std::shared_ptr<const Sensors>& previous_sensors,
+                                          const RawSensors& raw_sensors) {
+        // **************** Time Update ****************
+        // Calculate our time offset from the last read then update the filter's time
+        const double dt = std::max(
+            std::chrono::duration_cast<std::chrono::duration<double>>(
+                raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
+                .count(),
+            0.0);
+
+        // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
+        integrate_walkcommand(dt);
+
+        // Integrate the rotational velocity to predict the change in orientation (roll, pitch)
+        Eigen::Matrix<double, n_inputs, 1> u;
+        kf.time(u, dt);
+
+        // **************** Roll/Pitch Orientation Measurement Update ****************
+        // Calculate the roll and pitch estimates from the accelerometer
+        double est_roll  = std::atan2(sensors->accelerometer.y(), sensors->accelerometer.z());
+        double est_pitch = std::atan2(-sensors->accelerometer.x(),
+                                      std::sqrt(sensors->accelerometer.y() * sensors->accelerometer.y()
+                                                + sensors->accelerometer.z() * sensors->accelerometer.z()));
+
+        // Perform a gyroscope and accelerometer measurement based correction of the predicted roll and pitch
+        Eigen::Matrix<double, n_measurements, 1> y;
+        y << est_roll, est_pitch, sensors->gyroscope.x(), sensors->gyroscope.y();
+        kf.measure(y);
+
+        // Update the height of the torso using the kinematics from a foot which is on the ground
+        if (sensors->feet[BodySide::LEFT].down) {
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+        }
+        else if (sensors->feet[BodySide::RIGHT].down) {
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+        }
+
+        // **************** Construct Odometry Output (Htw) ****************
+        // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning of walk command
+        const double roll  = kf.get_state()(0);
+        const double pitch = kf.get_state()(1);
+        Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
+        sensors->Htw       = Hwt.inverse().matrix();
+    }
+
+    void SensorFilter::update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
+                                              const std::shared_ptr<const Sensors>& previous_sensors,
+                                              const RawSensors& raw_sensors) {
+        // **************** Time Update ****************
+        // Calculate our time offset from the last read then update the filter's time
+        const double dt = std::max(
+            std::chrono::duration_cast<std::chrono::duration<double>>(
+                raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
+                .count(),
+            0.0);
+
+        // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
+        integrate_walkcommand(dt);
+
+        // **************** Roll/Pitch Orientation Measurement Update ****************
+        Eigen::Quaterniond quat_Rwt = Eigen::Quaterniond(Hwt.rotation());
+        utility::math::filter::MahonyUpdate(sensors->accelerometer,
+                                            sensors->gyroscope,
+                                            dt,
+                                            cfg.Ki,
+                                            cfg.Kp,
+                                            quat_Rwt,
+                                            bias);
+        // Extract the roll and pitch from the orientation quaternion
+        Eigen::Vector3d rpy = MatrixToEulerIntrinsic(quat_Rwt.toRotationMatrix());
+
+        // Compute the height of the torso using the kinematics from a foot which is on the ground
+        if (sensors->feet[BodySide::LEFT].down) {
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+        }
+        else if (sensors->feet[BodySide::RIGHT].down) {
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+        }
+
+        // **************** Construct Odometry Output (Htw) ****************
+        // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning of walk command
+        const double roll  = rpy(0);
+        const double pitch = rpy(1);
+        Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
+        sensors->Htw       = Hwt.inverse().matrix();
+    }
 }  // namespace module::input
-#endif  // MODULE_INPUT_ODOMETRYUKF_HPP
+#endif  // MODULE_INPUT_ODOMETRYKF_HPP
