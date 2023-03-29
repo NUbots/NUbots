@@ -19,15 +19,32 @@
 
 #include "SensorFilter.hpp"
 
-#include "Kinematics.hpp"
-#include "Odometry.hpp"
-#include "RawSensors.hpp"
-
 #include "extension/Configuration.hpp"
+
+#include "message/actuation/BodySide.hpp"
+#include "message/motion/GetupCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+
+#include "utility/input/ServoID.hpp"
+#include "utility/math/euler.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::input {
 
     using extension::Configuration;
+    using message::actuation::BodySide;
+    using utility::input::ServoID;
+    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::nusight::graph;
+    using utility::support::Expression;
+
+    using message::motion::DisableWalkEngineCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::ExecuteGetup;
+    using message::motion::KillGetup;
+    using message::motion::StopCommand;
+    using message::motion::WalkCommand;
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -158,41 +175,9 @@ namespace module::input {
                         default: log<NUClear::WARN>("Cholesky decomposition failed. Some other reason."); break;
                     }
                 }
-                int left_count   = 0;
-                int middle_count = 0;
-                // If we have any downs in the last 20 frames then we are button pushed
-                for (const auto& s : sensors) {
-                    if (s->buttons.left && (s->platform_error_flags == 0u)) {
-                        ++left_count;
-                    }
-                    if (s->buttons.middle && (s->platform_error_flags == 0u)) {
-                        ++middle_count;
-                    }
-                }
-                bool new_left_down   = left_count > cfg.buttons.debounce_threshold;
-                bool new_middle_down = middle_count > cfg.buttons.debounce_threshold;
-                if (new_left_down != left_down) {
-                    left_down = new_left_down;
-                    if (new_left_down) {
-                        log<NUClear::INFO>("Left Button Down");
-                        emit(std::make_unique<ButtonLeftDown>());
-                    }
-                    else {
-                        log<NUClear::INFO>("Left Button Up");
-                        emit(std::make_unique<ButtonLeftUp>());
-                    }
-                }
-                if (new_middle_down != middle_down) {
-                    middle_down = new_middle_down;
-                    if (new_middle_down) {
-                        log<NUClear::INFO>("Middle Button Down");
-                        emit(std::make_unique<ButtonMiddleDown>());
-                    }
-                    else {
-                        log<NUClear::INFO>("Middle Button Up");
-                        emit(std::make_unique<ButtonMiddleUp>());
-                    }
-                }
+
+                // Detect wether a button has been pressed or not
+                detect_button_press(sensors);
             });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {

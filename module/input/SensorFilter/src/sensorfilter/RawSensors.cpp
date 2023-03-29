@@ -17,12 +17,20 @@
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_INPUT_SENSORS_HPP
-#define MODULE_INPUT_SENSORS_HPP
+#include "utility/platform/RawSensors.hpp"
 
 #include "SensorFilter.hpp"
 
 namespace module::input {
+
+    using utility::platform::getRawServo;
+    using utility::platform::make_error_string;
+    using utility::platform::make_servo_error_string;
+
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonLeftUp;
+    using message::platform::ButtonMiddleDown;
+    using message::platform::ButtonMiddleUp;
 
     void SensorFilter::update_raw_sensors(std::unique_ptr<Sensors>& sensors,
                                           const std::shared_ptr<const Sensors>& previous_sensors,
@@ -44,7 +52,7 @@ namespace module::input {
             const auto& error    = original.error_flags;
             // Check for an error on the servo and report it
             if (error != RawSensors::Error::OK) {
-                NUClear::log<NUClear::WARN>(utility::platform::make_servo_error_string(original, id));
+                NUClear::log<NUClear::WARN>(make_servo_error_string(original, id));
             }
             // If current Sensors message for this servo has an error and we have a previous sensors
             // message available, then we use our previous sensor values with some updates
@@ -125,5 +133,42 @@ namespace module::input {
         sensors->led.emplace_back(4, raw_sensors.eye_led.RGB);   // Eye
     }
 
+    void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
+        int left_count   = 0;
+        int middle_count = 0;
+        // If we have any downs in the last 20 frames then we are button pushed
+        for (const auto& s : sensors) {
+            if (s->buttons.left && (s->platform_error_flags == 0u)) {
+                ++left_count;
+            }
+            if (s->buttons.middle && (s->platform_error_flags == 0u)) {
+                ++middle_count;
+            }
+        }
+        bool new_left_down   = left_count > cfg.buttons.debounce_threshold;
+        bool new_middle_down = middle_count > cfg.buttons.debounce_threshold;
+        if (new_left_down != left_down) {
+            left_down = new_left_down;
+            if (new_left_down) {
+                log<NUClear::INFO>("Left Button Down");
+                emit(std::make_unique<ButtonLeftDown>());
+            }
+            else {
+                log<NUClear::INFO>("Left Button Up");
+                emit(std::make_unique<ButtonLeftUp>());
+            }
+        }
+        if (new_middle_down != middle_down) {
+            middle_down = new_middle_down;
+            if (new_middle_down) {
+                log<NUClear::INFO>("Middle Button Down");
+                emit(std::make_unique<ButtonMiddleDown>());
+            }
+            else {
+                log<NUClear::INFO>("Middle Button Up");
+                emit(std::make_unique<ButtonMiddleUp>());
+            }
+        }
+    }
+
 }  // namespace module::input
-#endif  // MODULE_INPUT_SENSORS_HPP

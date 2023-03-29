@@ -17,13 +17,21 @@
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_INPUT_KINEMATICS_HPP
-#define MODULE_INPUT_KINEMATICS_HPP
-
 #include "SensorFilter.hpp"
+
+#include "message/actuation/BodySide.hpp"
+
+#include "utility/actuation/ForwardKinematics.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module::input {
 
+    using message::actuation::BodySide;
+
+    using utility::actuation::kinematics::calculateAllPositions;
+    using utility::actuation::kinematics::calculateCentreOfMass;
+    using utility::actuation::kinematics::calculateInertialTensor;
     using utility::input::ServoID;
 
     void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors,
@@ -73,7 +81,4 @@ namespace module::input {
             default: log<NUClear::WARN>("Unknown foot down method"); break;
         }
     }
-
-
 }  // namespace module::input
-#endif  // MODULE_INPUT_KINEMATICS_HPP

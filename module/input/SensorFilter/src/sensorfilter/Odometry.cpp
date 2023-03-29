@@ -17,12 +17,23 @@
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_INPUT_ODOMETRY_HPP
-#define MODULE_INPUT_ODOMETRY_HPP
-
 #include "SensorFilter.hpp"
 
+#include "message/actuation/BodySide.hpp"
+
+#include "utility/actuation/ForwardKinematics.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/math/euler.hpp"
+#include "utility/math/filter/MahonyFilter.hpp"
+
 namespace module::input {
+
+    using message::actuation::BodySide;
+
+    using utility::actuation::kinematics::calculateGroundSpace;
+    using utility::input::ServoID;
+    using utility::math::euler::EulerIntrinsicToMatrix;
+    using utility::math::euler::MatrixToEulerIntrinsic;
 
     void SensorFilter::update_odometry_ukf(std::unique_ptr<Sensors>& sensors,
                                            const std::shared_ptr<const Sensors>& previous_sensors,
@@ -64,7 +75,7 @@ namespace module::input {
                 // flattens, it's meant to becomes true. This means that even if the foot hits the
                 // ground at an angle, it doesn't store that angled position as the footlanding_Hwf, but
                 // instead stores the position that foot would be if/when it becomes flat on the ground
-                Eigen::Isometry3d Htg(utility::actuation::kinematics::calculateGroundSpace(Htf, Hwt));
+                Eigen::Isometry3d Htg(calculateGroundSpace(Htf, Hwt));
 
                 footlanding_Hwf[side]                   = Hwt * Htg;
                 footlanding_Hwf[side].translation().z() = 0.0;
@@ -268,4 +279,3 @@ namespace module::input {
         sensors->Htw       = Hwt.inverse().matrix();
     }
 }  // namespace module::input
-#endif  // MODULE_INPUT_ODOMETRYKF_HPP

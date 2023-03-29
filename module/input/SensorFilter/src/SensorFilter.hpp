@@ -27,52 +27,18 @@
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
-#include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/GetupCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
 #include "message/platform/RawSensors.hpp"
 
-#include "utility/actuation/ForwardKinematics.hpp"
-#include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
-#include "utility/math/euler.hpp"
 #include "utility/math/filter/KalmanFilter.hpp"
-#include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
-#include "utility/nusight/NUhelpers.hpp"
-#include "utility/platform/RawSensors.hpp"
-#include "utility/support/yaml_expression.hpp"
 
 namespace module::input {
 
-    using message::actuation::BodySide;
     using message::actuation::KinematicsModel;
     using message::input::Sensors;
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::ExecuteGetup;
-    using message::motion::KillGetup;
-    using message::motion::StopCommand;
-    using message::motion::WalkCommand;
-    using message::platform::ButtonLeftDown;
-    using message::platform::ButtonLeftUp;
-    using message::platform::ButtonMiddleDown;
-    using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
-
-    using utility::actuation::kinematics::calculateAllPositions;
-    using utility::actuation::kinematics::calculateCentreOfMass;
-    using utility::actuation::kinematics::calculateInertialTensor;
-    using utility::input::ServoID;
-    using utility::math::euler::EulerIntrinsicToMatrix;
-    using utility::math::euler::MatrixToEulerIntrinsic;
-    using utility::nusight::graph;
-    using utility::platform::getRawServo;
-    using utility::platform::make_error_string;
-    using utility::platform::make_servo_error_string;
-    using utility::support::Expression;
 
     /**
      * @author Jade Fountain
@@ -230,6 +196,10 @@ namespace module::input {
         void update_raw_sensors(std::unique_ptr<Sensors>& sensors,
                                 const std::shared_ptr<const Sensors>& previous_sensors,
                                 const RawSensors& raw_sensors);
+
+        /// @brief Detect when a button has been pressed
+        /// @param sensors A vector of previous sensor messages
+        void detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors);
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
