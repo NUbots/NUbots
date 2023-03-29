@@ -440,7 +440,9 @@ namespace module::behaviour::strategy {
             // We are in range, lets kick
             // emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
             // TEST IKKick command
-            emit(std::make_unique<KickCommand>(ball->rBTt, ball->rBTt, KickCommandType::NORMAL));
+            emit(std::make_unique<KickCommand>(ball->rBTt.cast<double>(),
+                                               ball->rBTt.cast<double>(),
+                                               KickCommandType::NORMAL));
         }
         else {
             // Request walk planner to walk to the ball
