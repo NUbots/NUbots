@@ -30,14 +30,14 @@ export class NUgusViewModel {
     // TODO (Annable): Baking the offsets into the model geometries would be ideal.
     const PI = Math.PI
     const PI_2 = PI / 2
-    robot.position.x = this.model.rTFf.x
-    robot.position.y = this.model.rTFf.y
-    robot.position.z = this.model.rTFf.z
+    robot.position.x = this.model.rWTt.x
+    robot.position.y = this.model.rWTt.y
+    robot.position.z = this.model.rWTt.z
     const rotation = new Quaternion(
-      this.model.Rtf.x,
-      this.model.Rtf.y,
-      this.model.Rtf.z,
-      this.model.Rtf.w,
+      this.model.Rwt.x,
+      this.model.Rwt.y,
+      this.model.Rwt.z,
+      this.model.Rwt.w,
     )
     rotation.multiply(new Quaternion().setFromEuler(new Euler(PI_2, 0, 0)))
     robot.setRotationFromQuaternion(rotation)

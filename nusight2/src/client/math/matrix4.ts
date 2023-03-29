@@ -1,5 +1,4 @@
 import * as THREE from 'three'
-import { Matrix3 } from './matrix3'
 
 import { Vector4 } from './vector4'
 
@@ -31,15 +30,6 @@ export class Matrix4 {
       Vector4.from(mat.y),
       Vector4.from(mat.z),
       Vector4.from(mat.t),
-    )
-  }
-
-  static fromMatrix3(mat: Matrix3) {
-    return new Matrix4(
-      new Vector4(mat.x.x, mat.x.y, 0, mat.x.z),
-      new Vector4(mat.y.x, mat.y.y, 0, mat.y.z),
-      new Vector4(0, 0, 1, 0),
-      new Vector4(mat.z.x, mat.z.y, 0, mat.z.z),
     )
   }
 

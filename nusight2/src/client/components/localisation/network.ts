@@ -1,19 +1,21 @@
 import { action } from 'mobx'
+import * as THREE from 'three'
 
 import { message } from '../../../shared/messages'
-import { Matrix3 } from '../../math/matrix3'
-import { Matrix4 } from '../../math/matrix4'
+import { Imat4 } from '../../../shared/messages'
+import { Quaternion } from '../../math/quaternion'
+import { Vector3 } from '../../math/vector3'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
 
 import { LocalisationRobotModel } from './darwin_robot/model'
 import { LocalisationModel } from './model'
+import Sensors = message.input.Sensors
 
 export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
-    this.network.on(message.input.Sensors, this.onSensors)
-    this.network.on(message.localisation.Field, this.onField)
+    this.network.on(Sensors, this.onSensors)
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -26,10 +28,14 @@ export class LocalisationNetwork {
   }
 
   @action
-  private onSensors = (robotModel: RobotModel, sensors: message.input.Sensors) => {
+  private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
     const robot = LocalisationRobotModel.of(robotModel)
 
-    robot.Htw = Matrix4.from(sensors.Htw)
+    const { translation: rWTt, rotation: Rwt } = decompose(
+      new THREE.Matrix4().getInverse(fromProtoMat44(sensors.Htw!)),
+    )
+    robot.rWTt = new Vector3(rWTt.x, rWTt.y, rWTt.z)
+    robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w)
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!
     robot.motors.leftShoulderPitch.angle = sensors.servo[1].presentPosition!
@@ -52,10 +58,37 @@ export class LocalisationNetwork {
     robot.motors.headPan.angle = sensors.servo[18].presentPosition!
     robot.motors.headTilt.angle = sensors.servo[19].presentPosition!
   }
+}
 
-  @action
-  private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
-    const robot = LocalisationRobotModel.of(robotModel)
-    robot.Hfw = Matrix4.fromMatrix3(Matrix3.from(field.position))
-  }
+function decompose(m: THREE.Matrix4): {
+  translation: THREE.Vector3
+  rotation: THREE.Quaternion
+  scale: THREE.Vector3
+} {
+  const translation = new THREE.Vector3()
+  const rotation = new THREE.Quaternion()
+  const scale = new THREE.Vector3()
+  m.decompose(translation, rotation, scale)
+  return { translation, rotation, scale }
+}
+
+function fromProtoMat44(m: Imat4): THREE.Matrix4 {
+  return new THREE.Matrix4().set(
+    m!.x!.x!,
+    m!.y!.x!,
+    m!.z!.x!,
+    m!.t!.x!,
+    m!.x!.y!,
+    m!.y!.y!,
+    m!.z!.y!,
+    m!.t!.y!,
+    m!.x!.z!,
+    m!.y!.z!,
+    m!.z!.z!,
+    m!.t!.z!,
+    m!.x!.t!,
+    m!.y!.t!,
+    m!.z!.t!,
+    m!.t!.t!,
+  )
 }
