@@ -36,10 +36,10 @@ namespace module::input {
                 .count(),
             0.0);
 
-        // Integrate the walk command to get the change in position and orientation (x,y,theta)
-        double delta_x   = walk_command.x() * dt;        // * cfg.scale_x;
-        double delta_y   = walk_command.y() * dt;        // * cfg.scale_y;
-        double delta_yaw = walk_command.z() * dt * 0.6;  // * cfg.scale_yaw;
+        // Integrate the walk command to estimate the change in position and yaw orientation (x,y,theta)
+        double delta_x   = walk_command.x() * dt * cfg.deadreckoning_scale_dx;
+        double delta_y   = walk_command.y() * dt * cfg.deadreckoning_scale_dy;
+        double delta_yaw = walk_command.z() * dt * cfg.deadreckoning_scale_dtheta;
         rRWw.x() += delta_x * cos(yaw + delta_yaw) - delta_y * sin(yaw + delta_yaw);
         rRWw.y() += delta_y * cos(yaw + delta_yaw) + delta_x * sin(yaw + delta_yaw);
         yaw += delta_yaw;
@@ -50,21 +50,18 @@ namespace module::input {
 
         // **************** KF Measurement Update ****************
         // Gyroscope and accelerometer measurement based correction of the predicted state
-        // Roll
-        double roll = std::atan2(sensors->accelerometer.y(), sensors->accelerometer.z());
-        // Pitch
+        double roll  = std::atan2(sensors->accelerometer.y(), sensors->accelerometer.z());
         double pitch = std::atan2(-sensors->accelerometer.x(),
                                   std::sqrt(sensors->accelerometer.y() * sensors->accelerometer.y()
                                             + sensors->accelerometer.z() * sensors->accelerometer.z()));
-        Eigen::Matrix<double, n_measurements, 1> y;
-        y << roll, pitch;
 
-        // Perform the correction step with accelerometer estimate of roll and pitch
+        Eigen::Matrix<double, n_measurements, 1> y;
+        y << roll, pitch, sensors->gyroscope.x(), sensors->gyroscope.y();
         pose_filter.measure(y);
 
         // **************** Construct Odometry Output (Htw) ****************
-        // Gives us the quaternion representation
-        const auto state = pose_filter.get_state();  // [roll, pitch, roll_rate, pitch_rate, roll_bias, pitch_bias]
+        const auto state =
+            pose_filter.get_state();  // [roll, pitch, roll_rate, pitch_rate, gyro_roll_bias, gyro_pitch_bias]
         // Construct the rotation matrix using roll, pitch and yaw
         Eigen::Matrix3d Rwt = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())
                               * Eigen::AngleAxisd(state(1), Eigen::Vector3d::UnitY())
@@ -79,8 +76,7 @@ namespace module::input {
             auto Hft = sensors->Htx[ServoID::R_ANKLE_ROLL].inverse();
             z_height = Hft(2, 3);
         }
-
-        Eigen::Vector3d rTWw(rRWw.x(), rRWw.y(), z_height);
+        Eigen::Vector3d rTWw = Eigen::Vector3d(rRWw.x(), rRWw.y(), z_height);
 
         Eigen::Isometry3d Hwt;
         Hwt.linear()      = Rwt;
