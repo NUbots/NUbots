@@ -67,6 +67,7 @@ namespace module::behaviour::strategy {
     using message::localisation::ResetBallHypotheses;
     using message::localisation::ResetRobotHypotheses;
     using message::motion::ExecuteGetup;
+    using message::motion::KickCommand;
     using message::motion::KickCommandType;
     using message::motion::KickScriptCommand;
     using message::motion::KillGetup;
@@ -437,7 +438,9 @@ namespace module::behaviour::strategy {
         if (ball && distance_to_ball < cfg.kicking_distance_threshold
             && absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // We are in range, lets kick
-            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+            // emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+            // TEST IKKick command
+            emit(std::make_unique<KickCommand>(ball->rBTt, ball->rBTt, KickCommandType::NORMAL));
         }
         else {
             // Request walk planner to walk to the ball
