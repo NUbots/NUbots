@@ -104,7 +104,7 @@ namespace utility::math::filter {
             Eigen::Matrix<Scalar, NumStates, NumInputs> Bd;
             zero_order_hold(Ad, Bd, dt);
             state      = Ad * state + Bd * control_input;
-            covariance = Ad * covariance * Ad.transpose() + Q * dt;
+            covariance = Ad * covariance * Ad.transpose() + Q;
         }
 
         /**
