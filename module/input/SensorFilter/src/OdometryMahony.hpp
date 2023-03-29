@@ -37,26 +37,23 @@ namespace module::input {
             0.0);
 
         // Integrate the walk command to estimate the change in position and yaw orientation (x,y,theta)
-        double delta_x   = walk_command.x() * dt * cfg.deadreckoning_scale_dx;
-        double delta_y   = walk_command.y() * dt * cfg.deadreckoning_scale_dy;
-        double delta_yaw = walk_command.z() * dt * cfg.deadreckoning_scale_dtheta;
-        rRWw.x() += delta_x * cos(yaw + delta_yaw) - delta_y * sin(yaw + delta_yaw);
-        rRWw.y() += delta_y * cos(yaw + delta_yaw) + delta_x * sin(yaw + delta_yaw);
-        yaw += delta_yaw;
+        double dx     = walk_command.x() * dt * cfg.deadreckoning_scale.x();
+        double dy     = walk_command.y() * dt * cfg.deadreckoning_scale.y();
+        double dtheta = walk_command.z() * dt * cfg.deadreckoning_scale.z();
+        theta += dtheta;
+        Hwt.translation().x() += dx * cos(theta) - dy * sin(theta);
+        Hwt.translation().y() += dy * cos(theta) + dx * sin(theta);
 
         // Compute the height of the torso using the kinematics from a foot which is on the ground
         if (sensors->feet[BodySide::LEFT].down) {
-            z_height = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
         }
         else if (sensors->feet[BodySide::RIGHT].down) {
-            z_height = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
         }
 
-        // Construct the position using the dead reckoned position (x,y) of the robot in the world and kinematics
-        // estimate of torso height
-        Eigen::Vector3d rTWw = Eigen::Vector3d(rRWw.x(), rRWw.y(), z_height);
-
-        // **************** Mahony Orientation Measurement Update ****************
+        // **************** Mahony Roll/Pitch Orientation Measurement Update ****************
+        Eigen::Quaterniond quat_Rwt = Eigen::Quaterniond(Hwt.rotation());
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
                                             sensors->gyroscope,
                                             dt,
@@ -68,11 +65,9 @@ namespace module::input {
         Eigen::Vector3d rpy_mahony = MatrixToEulerIntrinsic(quat_Rwt.toRotationMatrix());
 
         // **************** Construct Odometry Output (Htw) ****************
-        Eigen::Isometry3d Hwt;
-        // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning
-        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony(0), rpy_mahony(1), yaw));
-        Hwt.translation() = rTWw;
-        sensors->Htw      = Hwt.inverse().matrix();
+        // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning walk command
+        Hwt.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony(0), rpy_mahony(1), theta));
+        sensors->Htw = Hwt.inverse().matrix();
     }
 }  // namespace module::input
 #endif  // MODULE_INPUT_ODOMETRYKF_HPP

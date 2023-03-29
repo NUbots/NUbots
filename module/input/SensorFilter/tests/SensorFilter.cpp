@@ -77,11 +77,11 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     YAML::Node config = YAML::LoadFile("config/SensorFilter.yaml");
 
     // Update our velocity timestep decay
-    filter.model.timeUpdateVelocityDecay = config["motion_filter"]["update"]["velocity_decay"].as<Expression>();
+    filter.model.timeUpdateVelocityDecay = config["ukf"]["update"]["velocity_decay"].as<Expression>();
 
     // Set our process noise in our filter
     MotionModel<double>::StateVec process_noise{};
-    const auto& process        = config["motion_filter"]["noise"]["process"];
+    const auto& process        = config["ukf"]["noise"]["process"];
     process_noise.rTWw         = process["position"].as<Expression>();
     process_noise.vTw          = process["velocity"].as<Expression>();
     process_noise.Rwt          = Eigen::Vector4d(process["rotation"].as<Expression>());
@@ -91,7 +91,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     // Set our initial mean and covariance
     MotionModel<double>::StateVec mean{};
     MotionModel<double>::StateVec covariance{};
-    const auto& initial = config["motion_filter"]["initial"];
+    const auto& initial = config["ukf"]["initial"];
     mean.rTWw           = initial["mean"]["position"].as<Expression>();
     mean.vTw            = initial["mean"]["velocity"].as<Expression>();
     mean.Rwt            = Eigen::Vector4d(initial["mean"]["rotation"].as<Expression>());
@@ -138,14 +138,13 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
     // Noise to be applied to gyroscope measurements
     Eigen::Matrix3d gyroscope_noise =
-        Eigen::Vector3d(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
+        Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
 
     // Noise to be applied to accelerometer measurements
     Eigen::Matrix3d accelerometer_noise =
-        Eigen::Vector3d(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
+        Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
     Eigen::Matrix3d accelerometer_magnitude_noise =
-        Eigen::Vector3d(config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
-            .asDiagonal();
+        Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>()).asDiagonal();
 
     // Elapsed time between each sensor read
     static constexpr double deltaT = 1.0 / 90.0;

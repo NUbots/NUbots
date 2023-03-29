@@ -30,20 +30,18 @@ namespace module::input {
 
         // **************** UKF Measurement Update ****************
         // Gyroscope measurement update
-        motionFilter.measure(sensors->gyroscope,
-                             cfg.motionFilter.noise.measurement.gyroscope,
-                             MeasurementType::GYROSCOPE());
+        ukf.measure(sensors->gyroscope, cfg.ukf.noise.measurement.gyroscope, MeasurementType::GYROSCOPE());
 
         // Calculate accelerometer noise factor
         Eigen::Matrix3d acc_noise =
-            cfg.motionFilter.noise.measurement.accelerometer
+            cfg.ukf.noise.measurement.accelerometer
             // Add noise which is proportional to the square of how much we are moving, minus gravity
             // This means that the more we're accelerating, the noisier we think the measurements are
             + ((sensors->accelerometer.norm() - std::abs(G)) * (sensors->accelerometer.norm() - std::abs(G)))
-                  * cfg.motionFilter.noise.measurement.accelerometer_magnitude;
+                  * cfg.ukf.noise.measurement.accelerometer_magnitude;
 
         // Accelerometer measurement update
-        motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
+        ukf.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
         // This loop calculates the Hwf transform for feet if they have just hit the ground. If they
         // have not just hit the ground, it uses the previous Hwf value. This assumes that once the foot
@@ -56,8 +54,7 @@ namespace module::input {
             // If this side's foot is down, and it was not down at the previous time step, then we
             // calculate our new footlanding_Hwf value, because our foot has just landed
             if (foot_down && !prev_foot_down) {
-                const MotionModel<double>::StateVec filterState =
-                    MotionModel<double>::StateVec(motionFilter.get_state());
+                const MotionModel<double>::StateVec filterState = MotionModel<double>::StateVec(ukf.get_state());
                 Eigen::Isometry3d Hwt;
                 Hwt.linear()      = filterState.Rwt.toRotationMatrix();
                 Hwt.translation() = filterState.rTWw;
@@ -81,15 +78,15 @@ namespace module::input {
                 Eigen::Isometry3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
 
                 // do a foot based position update
-                motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
-                                     cfg.motionFilter.noise.measurement.flat_foot_odometry,
-                                     MeasurementType::FLAT_FOOT_ODOMETRY());
+                ukf.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
+                            cfg.ukf.noise.measurement.flat_foot_odometry,
+                            MeasurementType::FLAT_FOOT_ODOMETRY());
 
                 // do a foot based orientation update
                 Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                motionFilter.measure(Rwt.coeffs(),
-                                     cfg.motionFilter.noise.measurement.flat_foot_orientation,
-                                     MeasurementType::FLAT_FOOT_ORIENTATION());
+                ukf.measure(Rwt.coeffs(),
+                            cfg.ukf.noise.measurement.flat_foot_orientation,
+                            MeasurementType::FLAT_FOOT_ORIENTATION());
             }
             // Otherwise this side's foot is off the ground, so we make sure that for the next time
             // step, we know that this time step, the foot was off the ground
@@ -111,7 +108,7 @@ namespace module::input {
             0.0);
 
         // **************** UKF Time Update ****************
-        switch (motionFilter.time(dt)) {
+        switch (ukf.time(dt)) {
             // If we succeeded doing the time update, we don't have to reset the filter
             case Eigen::Success: break;
             // Otherwise, we log the error and set the flag to reset the filter
@@ -156,7 +153,7 @@ namespace module::input {
         else {
             // **************** Construct Odometry Output (Htw) ****************
             // Gives us the quaternion representation
-            const auto o = MotionModel<double>::StateVec(motionFilter.get_state());
+            const auto o = MotionModel<double>::StateVec(ukf.get_state());
             // Map from world to torso coordinates (Rtw)
             Eigen::Isometry3d Hwt;
             Hwt.linear()      = o.Rwt.toRotationMatrix();

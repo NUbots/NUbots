@@ -82,7 +82,7 @@ namespace module::input {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-        utility::math::filter::UKF<double, MotionModel> motionFilter{};
+        utility::math::filter::UKF<double, MotionModel> ukf{};
 
         // Define the kalman filter model dimensions
         static const size_t n_states       = 4;
@@ -90,7 +90,7 @@ namespace module::input {
         static const size_t n_measurements = 4;
 
         /// @brief Kalman filter for pose estimation
-        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> pose_filter;
+        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf;
 
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
@@ -128,8 +128,43 @@ namespace module::input {
         struct Config {
             Config() = default;
 
-            struct MotionFilter {
-                MotionFilter() = default;
+            /// @brief Config for the button debouncer
+            struct Button {
+                Button()               = default;
+                int debounce_threshold = 0;
+            } buttons{};
+
+            /// @brief Config for the foot down detector
+            struct FootDown {
+                FootDown() = default;
+                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
+                    set_method(method, thresholds);
+                }
+                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
+                    if (thresholds.count(method) == 0) {
+                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", std::string(method)));
+                    }
+                    current_method       = method;
+                    certainty_thresholds = thresholds;
+                }
+                [[nodiscard]] float threshold() const {
+                    return certainty_thresholds.at(current_method);
+                }
+                [[nodiscard]] FootDownMethod method() const {
+                    return current_method;
+                }
+                FootDownMethod current_method                        = FootDownMethod::Z_HEIGHT;
+                std::map<FootDownMethod, float> certainty_thresholds = {
+                    {FootDownMethod::Z_HEIGHT, 0.01f},
+                    {FootDownMethod::LOAD, 0.05f},
+                    {FootDownMethod::FSR, 60.0f},
+                };
+            } footDown;
+
+            //  **************************************** UKF Config ****************************************
+            /// @brief Config for the UKF
+            struct UKF {
+                UKF() = default;
 
                 Eigen::Vector3d velocity_decay = Eigen::Vector3d::Zero();
 
@@ -167,7 +202,7 @@ namespace module::input {
                         Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
                     } covariance{};
                 } initial{};
-            } motionFilter{};
+            } ukf{};
 
             /// @brief Initial state of the for the UKF filter
             MotionModel<double>::StateVec initial_mean;
@@ -175,46 +210,16 @@ namespace module::input {
             /// @brief Initial covariance of the for the UKF filter
             MotionModel<double>::StateVec initial_covariance;
 
-            struct Button {
-                Button()               = default;
-                int debounce_threshold = 0;
-            } buttons{};
+            /// @brief Parameter for scaling the walk command to better match actual achieved velocity
+            Eigen::Vector3d deadreckoning_scale = Eigen::Vector3d::Zero();
 
-            struct FootDown {
-                FootDown() = default;
-                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
-                    set_method(method, thresholds);
-                }
-                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
-                    if (thresholds.count(method) == 0) {
-                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", std::string(method)));
-                    }
-                    current_method       = method;
-                    certainty_thresholds = thresholds;
-                }
-                [[nodiscard]] float threshold() const {
-                    return certainty_thresholds.at(current_method);
-                }
-                [[nodiscard]] FootDownMethod method() const {
-                    return current_method;
-                }
-                FootDownMethod current_method                        = FootDownMethod::Z_HEIGHT;
-                std::map<FootDownMethod, float> certainty_thresholds = {
-                    {FootDownMethod::Z_HEIGHT, 0.01f},
-                    {FootDownMethod::LOAD, 0.05f},
-                    {FootDownMethod::FSR, 60.0f},
-                };
-            } footDown;
-
-            double deadreckoning_scale_dx     = 1.0;
-            double deadreckoning_scale_dy     = 1.0;
-            double deadreckoning_scale_dtheta = 1.0;
-
-            Eigen::Vector3d bias;
-            Eigen::Vector4d initial_quat;
-            double Ki;
-            double Kp;
-            double ts;
+            //  **************************************** Mahony Filter Config ****************************************
+            /// @brief Mahony filter bias
+            Eigen::Vector3d bias = Eigen::Vector3d::Zero();
+            /// @brief Mahony filter proportional gain
+            double Ki = 0.0;
+            /// @brief Mahony filter integral gain
+            double Kp = 0.0;
         } cfg;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
@@ -266,17 +271,11 @@ namespace module::input {
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
-        /// @brief Dead reckoning position of the robot {r} [x,y,z] in world {w} space
-        Eigen::Vector3d rRWw = Eigen::Vector3d::Zero();
-
         /// @brief Dead reckoning yaw orientation of the robot in world space
-        double yaw = 0;
+        double theta = 0;
 
-        /// @brief Kinematics estimate of the robot's height above the ground
-        double z_height = 0.5;
-
-        /// @brief Mahony filter quaternion for orientation
-        Eigen::Quaterniond quat_Rwt = Eigen::Quaterniond::Identity();
+        /// @brief Transform of torso from world space
+        Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter bias
         Eigen::Vector3d bias = Eigen::Vector3d::Zero();
@@ -305,9 +304,6 @@ namespace module::input {
 
         // Foot to world in foot-flat (both feet down) rotation at the timestep with the most recent foot landing
         std::array<Eigen::Isometry3d, 2> footlanding_Hwf{};
-
-        // Foot to CoM in torso space
-        std::array<Eigen::Vector3d, 2> rMFt{};
 
         // Handle for the sensor filter update loop, allows disabling new sensor updates when a reset event occurs
         ReactionHandle update_loop{};

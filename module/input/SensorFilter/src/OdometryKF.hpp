@@ -28,7 +28,6 @@ namespace module::input {
                                           const std::shared_ptr<const Sensors>& previous_sensors,
                                           const RawSensors& raw_sensors) {
 
-        // **************** KF Time Update ****************
         // Calculate our time offset from the last read then update the filter's time
         const double dt = std::max(
             std::chrono::duration_cast<std::chrono::duration<double>>(
@@ -36,17 +35,25 @@ namespace module::input {
                 .count(),
             0.0);
 
-        // Integrate the walk command to estimate the change in position and yaw orientation (x,y,theta)
-        double delta_x   = walk_command.x() * dt * cfg.deadreckoning_scale_dx;
-        double delta_y   = walk_command.y() * dt * cfg.deadreckoning_scale_dy;
-        double delta_yaw = walk_command.z() * dt * cfg.deadreckoning_scale_dtheta;
-        rRWw.x() += delta_x * cos(yaw + delta_yaw) - delta_y * sin(yaw + delta_yaw);
-        rRWw.y() += delta_y * cos(yaw + delta_yaw) + delta_x * sin(yaw + delta_yaw);
-        yaw += delta_yaw;
+        // Integrate the walk command to estimate the change in position and yaw orientation
+        double dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
+        double dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
+        theta += walk_command.z() * dt * cfg.deadreckoning_scale.z();
+        Hwt.translation().x() += dx * cos(theta) - dy * sin(theta);
+        Hwt.translation().y() += dy * cos(theta) + dx * sin(theta);
 
+        // Compute the height of the torso using the kinematics from a foot which is on the ground
+        if (sensors->feet[BodySide::LEFT].down) {
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+        }
+        else if (sensors->feet[BodySide::RIGHT].down) {
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+        }
+
+        // **************** KF Time Update ****************
         // Integrate the state velocity to predict the change in orientation (roll, pitch)
         Eigen::Matrix<double, n_inputs, 1> u;
-        pose_filter.time(u, dt);
+        kf.time(u, dt);
 
         // **************** KF Measurement Update ****************
         // Gyroscope and accelerometer measurement based correction of the predicted state
@@ -57,31 +64,12 @@ namespace module::input {
 
         Eigen::Matrix<double, n_measurements, 1> y;
         y << roll, pitch, sensors->gyroscope.x(), sensors->gyroscope.y();
-        pose_filter.measure(y);
+        kf.measure(y);
 
         // **************** Construct Odometry Output (Htw) ****************
-        const auto state =
-            pose_filter.get_state();  // [roll, pitch, roll_rate, pitch_rate, gyro_roll_bias, gyro_pitch_bias]
-        // Construct the rotation matrix using roll, pitch and yaw
-        Eigen::Matrix3d Rwt = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())
-                              * Eigen::AngleAxisd(state(1), Eigen::Vector3d::UnitY())
-                              * Eigen::AngleAxisd(state(0), Eigen::Vector3d::UnitX()).toRotationMatrix();
-        // Construct the position using the dead reckoned position (x,y) of the robot in the world and kinematics
-        // estimate of torso height
-        if (sensors->feet[BodySide::LEFT].down) {
-            auto Hft = sensors->Htx[ServoID::L_ANKLE_ROLL].inverse();
-            z_height = Hft(2, 3);
-        }
-        else if (sensors->feet[BodySide::RIGHT].down) {
-            auto Hft = sensors->Htx[ServoID::R_ANKLE_ROLL].inverse();
-            z_height = Hft(2, 3);
-        }
-        Eigen::Vector3d rTWw = Eigen::Vector3d(rRWw.x(), rRWw.y(), z_height);
-
-        Eigen::Isometry3d Hwt;
-        Hwt.linear()      = Rwt;
-        Hwt.translation() = rTWw;
-        sensors->Htw      = Hwt.inverse().matrix();
+        const auto state = kf.get_state();  // [roll, pitch, roll_rate, pitch_rate, gyro_roll_bias, gyro_pitch_bias]
+        Hwt.linear()     = EulerIntrinsicToMatrix(Eigen::Vector3d(state(0), state(1), theta));
+        sensors->Htw     = Hwt.inverse().matrix();
     }
 }  // namespace module::input
 #endif  // MODULE_INPUT_ODOMETRYKF_HPP
