@@ -39,3 +39,23 @@ motion_filter:
       velocity: [1e-3, 1e-3, 1e-3] # We are unsure of our velocity
       rotational_velocity: [0.1, 0.1, 0.1] # Fairly unsure about our rotational velocity
       rotation: [0.01, 0.01, 0.01, 0.01] # Not very sure of rotation (QX, QY, QZ, QW)
+
+kalman_filter:
+  Ac:
+    - [0, 0, 1, 0]
+    - [0, 0, 0, 1]
+    - [0, 0, 0, 0]
+    - [0, 0, 0, 0]
+  Bc: []
+  C:
+    - [1, 0, 0, 0]
+    - [0, 1, 0, 0]
+    - [0, 0, 1, 0]
+    - [0, 0, 0, 1]
+  Q: [1e-6, 1e-6, 1e-5, 1e-5]
+  R: [0.000011025, 0.000011025, 0.0018284176, 0.0018284176]
+
+# Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
+deadreckoning_scale_dx: 1
+deadreckoning_scale_dy: 1
+deadreckoning_scale_dtheta: 0.6

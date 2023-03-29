@@ -82,10 +82,10 @@ namespace module::input {
 
         utility::math::filter::UKF<double, MotionModel> motionFilter{};
 
-        // Define the kf model dimensions
+        // Define the kalman filter model dimensions
         static const size_t n_states       = 4;
         static const size_t n_inputs       = 0;
-        static const size_t n_measurements = 2;
+        static const size_t n_measurements = 4;
 
         /// @brief Kalman filter for pose estimation
         utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> pose_filter;
@@ -203,6 +203,10 @@ namespace module::input {
                     {FootDownMethod::FSR, 60.0f},
                 };
             } footDown;
+
+            double deadreckoning_scale_dx     = 1.0;
+            double deadreckoning_scale_dy     = 1.0;
+            double deadreckoning_scale_dtheta = 1.0;
         } cfg;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery

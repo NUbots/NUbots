@@ -120,27 +120,29 @@ namespace module::input {
             cfg.initial_covariance.omegaTTt = cfg.motionFilter.initial.covariance.rotational_velocity;
             motionFilter.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
 
-            // Kalman Filter Continuous Process Model
-            Eigen::Matrix<double, n_states, n_states> Ac;
-            Ac << 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1;
+            // Don't filter any sensors until we have initialised the filter
+            update_loop.disable();
+            reset_filter.store(true);
+
+            // Kalman Filter Model Matrix's
+            Eigen::Matrix<double, n_states, n_states> Ac =
+                Eigen::Matrix<double, n_states, n_states>(config["kalman_filter"]["Ac"].as<Expression>());
             Eigen::Matrix<double, n_inputs, n_inputs> Bc;
-            Eigen::Matrix<double, n_measurements, n_states> C;
-            C << 1, 0, 0, 0, 0, 1, 0, 0;
+            Eigen::Matrix<double, n_measurements, n_states> C =
+                Eigen::Matrix<double, n_measurements, n_states>(config["kalman_filter"]["C"].as<Expression>());
+            Eigen::Matrix<double, n_states, n_states> Q;
+            Q.diagonal() = Eigen::VectorXd(config["kalman_filter"]["Q"].as<Expression>());
 
-            Eigen::Matrix<double, n_states, n_states> Q =
-                0.00001 * Eigen::Matrix<double, n_states, n_states>::Identity();
-
-            Eigen::Matrix<double, n_measurements, n_measurements> R =
-                Eigen::Matrix<double, n_measurements, n_measurements>::Identity();
-            R(0, 0) = 0.00011025;
-            R(1, 1) = 0.0018284176;
+            Eigen::Matrix<double, n_measurements, n_measurements> R;
+            R.diagonal() = Eigen::VectorXd(config["kalman_filter"]["R"].as<Expression>());
 
             pose_filter.update(Ac, Bc, C, Q, R);
             pose_filter.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
 
-            // Don't filter any sensors until we have initialised the filter
-            update_loop.disable();
-            reset_filter.store(true);
+            // Deadreckoning tuning parameters
+            cfg.deadreckoning_scale_dx     = config["deadreckoning_scale_dx"].as<Expression>();
+            cfg.deadreckoning_scale_dy     = config["deadreckoning_scale_dy"].as<Expression>();
+            cfg.deadreckoning_scale_dtheta = config["deadreckoning_scale_dtheta"].as<Expression>();
         });
 
         on<Last<20, Trigger<RawSensors>>, Single>().then(
@@ -285,36 +287,36 @@ namespace module::input {
         emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
 
         // Graph odometry information
-        Eigen::Isometry3d Htw = Eigen::Isometry3d(sensors->Htw);
+        Eigen::Isometry3d Hwt = Eigen::Isometry3d(sensors->Htw).inverse();
 
         // Translation
-        Eigen::Vector3d est_rWTt = Htw.translation();
-        emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
+        Eigen::Vector3d est_rTWw = Hwt.translation();
+        emit(graph("Htw est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
 
         // Orientation
-        Eigen::Vector3d est_Rtw = MatrixToEulerIntrinsic(Htw.rotation());
-        emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
+        Eigen::Vector3d est_Rwt = MatrixToEulerIntrinsic(Hwt.rotation());
+        emit(graph("Rtw est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (raw_sensors.odometry_ground_truth.exists) {
-            Eigen::Isometry3d true_Htw(raw_sensors.odometry_ground_truth.Htw);
+            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
 
             // Determine translational distance error
-            Eigen::Vector3d true_rWTt  = true_Htw.translation();
-            Eigen::Vector3d error_rWTt = (true_rWTt - est_rWTt).cwiseAbs();
+            Eigen::Vector3d true_rTWw  = true_Hwt.translation();
+            Eigen::Vector3d error_rTWw = (true_rTWw - est_rTWw).cwiseAbs();
 
             // Graph translation and its error
-            emit(graph("Htw true translation (rWTt)", true_rWTt.x(), true_rWTt.y(), true_rWTt.z()));
-            emit(graph("Htw translation error", error_rWTt.x(), error_rWTt.y(), error_rWTt.z()));
+            emit(graph("Htw true translation (rTWw)", true_rTWw.x(), true_rTWw.y(), true_rTWw.z()));
+            emit(graph("Htw translation error", error_rTWw.x(), error_rTWw.y(), error_rTWw.z()));
 
             // Determine yaw, pitch and roll error
-            Eigen::Vector3d true_Rtw  = MatrixToEulerIntrinsic(true_Htw.rotation());
-            Eigen::Vector3d error_Rtw = (true_Rtw - est_Rtw).cwiseAbs();
-            double quat_rot_error     = Eigen::Quaterniond(true_Htw.linear() * Htw.inverse().linear()).w();
+            Eigen::Vector3d true_Rwt  = MatrixToEulerIntrinsic(true_Hwt.rotation());
+            Eigen::Vector3d error_Rwt = (true_Rwt - est_Rwt).cwiseAbs();
+            double quat_rot_error     = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
 
             // Graph angles and error
-            emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
-            emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
+            emit(graph("Rwt true angles (rpy)", true_Rwt.x(), true_Rwt.y(), true_Rwt.z()));
+            emit(graph("Rwt error (rpy)", error_Rwt.x(), error_Rwt.y(), error_Rwt.z()));
             emit(graph("Quaternion rotational error", quat_rot_error));
         }
     }
