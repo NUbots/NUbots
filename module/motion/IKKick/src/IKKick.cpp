@@ -88,8 +88,8 @@ namespace module::motion {
             gain_legs = config["servo"]["gain"].as<float>();
             torque    = config["servo"]["torque"].as<float>();
 
-            auto& balanceConfig = config["active_balance"];
-            feedback_active     = balanceConfig["enabled"].as<bool>();
+            auto balanceConfig = config["active_balance"];
+            feedback_active    = balanceConfig["enabled"].as<bool>();
             feedbackBalancer.configure(balanceConfig);
 
             // Emit useful info to KickPlanner

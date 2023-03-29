@@ -40,6 +40,7 @@ nuclear_role(
   motion::ScriptEngine
   motion::QuinticWalk
   motion::HeadController
+  motion::IKKick
   # Data logger
   support::logging::DataLogging
 )
