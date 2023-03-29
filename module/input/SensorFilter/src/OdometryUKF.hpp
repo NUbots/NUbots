@@ -152,7 +152,6 @@ namespace module::input {
         if (reset_filter.load() && previous_sensors) {
             sensors->Htw = previous_sensors->Htw;
             sensors->Hgt = previous_sensors->Hgt;
-            return;
         }
         else {
             // **************** Construct Odometry Output (Htw) ****************

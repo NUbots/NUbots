@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 buttons:
   debounce_threshold: 7
@@ -64,3 +64,9 @@ kalman_filter:
 deadreckoning_scale_dx: 1
 deadreckoning_scale_dy: 1
 deadreckoning_scale_dtheta: 0.6
+
+mahony:
+  Kp: 10.8279
+  Ki: 17.8421
+  initial_quat: [1, 0, 0, 0]
+  initial_bias: [0, 0, 0]

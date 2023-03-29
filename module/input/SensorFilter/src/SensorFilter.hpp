@@ -39,6 +39,7 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/filter/KalmanFilter.hpp"
+#include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -65,6 +66,7 @@ namespace module::input {
     using utility::actuation::kinematics::calculateCentreOfMass;
     using utility::actuation::kinematics::calculateInertialTensor;
     using utility::input::ServoID;
+    using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
     using utility::platform::getRawServo;
@@ -207,6 +209,12 @@ namespace module::input {
             double deadreckoning_scale_dx     = 1.0;
             double deadreckoning_scale_dy     = 1.0;
             double deadreckoning_scale_dtheta = 1.0;
+
+            Eigen::Vector3d bias;
+            Eigen::Vector4d initial_quat;
+            double Ki;
+            double Kp;
+            double ts;
         } cfg;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
@@ -243,6 +251,15 @@ namespace module::input {
                                  const std::shared_ptr<const Sensors>& previous_sensors,
                                  const RawSensors& raw_sensors);
 
+        /// @brief Updates the sensors message with odometry data filtered using MahonyFilter. This includes the
+        // position, orientation, velocity and rotational velocity of the torso in world space.
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
+                                    const std::shared_ptr<const Sensors>& previous_sensors,
+                                    const RawSensors& raw_sensors);
+
         /// @brief Display debug information
         /// @param sensors The sensors message to update
         /// @param raw_sensors The raw sensor data
@@ -257,6 +274,12 @@ namespace module::input {
 
         /// @brief Kinematics estimate of the robot's height above the ground
         double z_height = 0.5;
+
+        /// @brief Mahony filter quaternion for orientation
+        Eigen::Quaterniond quat_Rwt = Eigen::Quaterniond::Identity();
+
+        /// @brief Mahony filter bias
+        Eigen::Vector3d bias = Eigen::Vector3d::Zero();
 
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();

@@ -21,6 +21,7 @@
 
 #include "Kinematics.hpp"
 #include "OdometryKF.hpp"
+#include "OdometryMahony.hpp"
 #include "OdometryUKF.hpp"
 #include "RawSensors.hpp"
 
@@ -143,6 +144,14 @@ namespace module::input {
             cfg.deadreckoning_scale_dx     = config["deadreckoning_scale_dx"].as<Expression>();
             cfg.deadreckoning_scale_dy     = config["deadreckoning_scale_dy"].as<Expression>();
             cfg.deadreckoning_scale_dtheta = config["deadreckoning_scale_dtheta"].as<Expression>();
+
+            // Mahony Filter
+            Eigen::Vector4d initial_quat_Rwt = Eigen::Vector4d(config["mahony"]["initial_quat"].as<Expression>());
+            quat_Rwt =
+                Eigen::Quaterniond(initial_quat_Rwt[0], initial_quat_Rwt[1], initial_quat_Rwt[2], initial_quat_Rwt[3]);
+            bias   = Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>());
+            cfg.Ki = config["mahony"]["Ki"].as<Expression>();
+            cfg.Kp = config["mahony"]["Kp"].as<Expression>();
         });
 
         on<Last<20, Trigger<RawSensors>>, Single>().then(
@@ -250,7 +259,7 @@ namespace module::input {
                                     // Updates the Sensors message with odometry data filtered using UKF. This includes
                                     // the position, orientation, velocity and rotational velocity of the torso in world
                                     // space.
-                                    update_odometry_kf(sensors, previous_sensors, raw_sensors);
+                                    update_odometry_mahony(sensors, previous_sensors, raw_sensors);
 
                                     // Graph debug information
                                     if (log_level <= NUClear::DEBUG) {
