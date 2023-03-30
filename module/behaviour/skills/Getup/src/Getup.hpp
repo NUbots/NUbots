@@ -42,6 +42,10 @@ namespace module::behaviour::skills {
             float getup_priority = 0.0f;
             /// @brief Threshold angle for executing getup, between torso z axis and world z axis
             float fallen_angle = 0.0f;
+            /// @brief Script sequence to run when getting from lying on the front to standing
+            std::vector<std::string> getup_front;
+            /// @brief Script sequence to run when getting from lying on the back to standing
+            std::vector<std::string> getup_back;
         } cfg;
 
         /// @brief Bool to indicate if the robot has fallen on its front or back

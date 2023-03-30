@@ -23,10 +23,11 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
+  vision::FieldLineDetector
   output::ImageCompressor
   # Localisation
   localisation::BallFilter
-  localisation::RobotParticleLocalisation
+  localisation::RobotLocalisation
   # Behaviour
   behaviour::Controller
   behaviour::skills::Getup
