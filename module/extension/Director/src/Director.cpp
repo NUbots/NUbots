@@ -23,6 +23,9 @@
 
 namespace module::extension {
 
+    using component::DirectorTask;
+    using component::Provider;
+    using component::ProviderGroup;
     using ::extension::Configuration;
     using ::extension::behaviour::RunInfo;
     using ::extension::behaviour::commands::BehaviourTask;
@@ -31,8 +34,6 @@ namespace module::extension {
     using ::extension::behaviour::commands::ProviderDone;
     using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
-    using provider::Provider;
-    using provider::ProviderGroup;
     using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
 
 
@@ -118,7 +119,7 @@ namespace module::extension {
         }
     }
 
-    std::shared_ptr<provider::Provider> Director::get_root_provider(const std::type_index& root_type) {
+    std::shared_ptr<component::Provider> Director::get_root_provider(const std::type_index& root_type) {
         // Create a root provider for this task if one doesn't already exist and use it
         if (!groups.contains(root_type)) {
             groups.emplace(root_type, ProviderGroup(root_type));
@@ -160,7 +161,7 @@ namespace module::extension {
             }
 
             // The when condition object
-            auto w  = std::make_shared<provider::Provider::WhenCondition>(when.type, when.validator, current);
+            auto w  = std::make_shared<component::Provider::WhenCondition>(when.type, when.validator, current);
             auto id = when.reaction->id;
 
             // Add a reaction that will listen for changes to this state and notify the director
@@ -262,13 +263,13 @@ namespace module::extension {
         // the Provider has finished executing
         on<Trigger<BehaviourTask>>().then("Director Task", [this](const BehaviourTask& t) {
             std::lock_guard<std::recursive_mutex> lock(director_mutex);
-            // Make our own mutable copy of the task
-            auto task = std::make_shared<BehaviourTask>(t);
+            // Make our own mutable director task from the behaviour task
+            auto task = std::make_shared<DirectorTask>(t);
 
             // Root level task, make the pack immediately and send it off to be executed as a root task
             if (!providers.contains(task->requester_id)) {
                 // Get the root provider from the task root type
-                auto root_provider = get_root_provider(task->root_type);
+                auto root_provider = get_root_provider(t.root_type);
 
                 // Modify the task we received to look like it came from this provider
                 task->requester_id = root_provider->id;

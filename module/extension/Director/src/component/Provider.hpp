@@ -25,7 +25,7 @@
 
 #include "extension/Behaviour.hpp"
 
-namespace module::extension::provider {
+namespace module::extension::component {
 
     struct ProviderGroup;
 
@@ -89,6 +89,6 @@ namespace module::extension::provider {
         std::set<std::type_index> needs;
     };
 
-}  // namespace module::extension::provider
+}  // namespace module::extension::component
 
 #endif  // MODULE_EXTENSION_DIRECTOR_PROVIDER_HPP

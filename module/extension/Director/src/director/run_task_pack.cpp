@@ -21,9 +21,10 @@
 
 namespace module::extension {
 
+    using component::DirectorTask;
+    using component::Provider;
+    using component::ProviderGroup;
     using ::extension::behaviour::RunInfo;
-    using provider::Provider;
-    using provider::ProviderGroup;
 
     Director::RunLevel Director::run_tasks(ProviderGroup& our_group, const TaskList& tasks, const RunLevel& run_level) {
 
@@ -217,7 +218,7 @@ namespace module::extension {
         TaskList lowered_tasks;
         for (auto& subtask : group.subtasks) {
             // See if we have a matching task
-            auto it = std::find_if(tasks.begin(), tasks.end(), [&](const std::shared_ptr<BehaviourTask>& t) {
+            auto it = std::find_if(tasks.begin(), tasks.end(), [&](const std::shared_ptr<DirectorTask>& t) {
                 return subtask->type == t->type;
             });
 
@@ -239,6 +240,19 @@ namespace module::extension {
 
         // Clear all the queue handles so their destructors remove us from all of the watchers we were in
         group.watch_handles.clear();
+
+        // This new task pack we are trying to run might be different from the task pack previously ran.
+        // There might be some tasks that weren't emitted in the new task pack.
+        // These tasks need to be removed from the places they were running.
+        // Set them as dying so that they are removed at the end of this function.
+        // The dying state stops the task being run again when it shouldn't before it is removed.
+        for (const auto& t : group.subtasks) {
+            // Search the new tasks for an equivalent task and if we can't find it set it as dying
+            auto f = [t](const auto& t2) { return t->type == t2->type; };
+            if (std::find_if(tasks.begin(), tasks.end(), f) == tasks.end()) {
+                t->dying = true;
+            }
+        }
 
         // Run the first task pack segment as all tasks that are not optional
         auto first_optional = std::find_if(tasks.begin(), tasks.end(), [](const auto& t) { return t->optional; });
@@ -268,14 +282,11 @@ namespace module::extension {
             }
         }
 
-        // This new task pack we are trying to run might be different from the task pack previously ran.
-        // There might be some tasks that weren't emitted in the new task pack.
-        // These tasks need to be removed from the places they were running.
+        // Remove any tasks that were marked as dying earlier
+        // This is at the end, so that if one of our new tasks uses something the old tasks did then we won't run other
+        // tasks with lower priority for a single cycle until this one runs
         for (const auto& t : group.subtasks) {
-
-            // Search the new tasks for an equivalent task and if we can't find it remove
-            auto f = [t](const auto& t2) { return t->type == t2->type; };
-            if (std::find_if(tasks.begin(), tasks.end(), f) == tasks.end()) {
+            if (t->dying) {
                 remove_task(t);
             }
         }
