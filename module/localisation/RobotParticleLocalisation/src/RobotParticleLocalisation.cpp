@@ -59,7 +59,7 @@ namespace module::localisation {
                 Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
                 position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
                 position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
-                field->position        = position.matrix();
+                field->Hfw             = position.matrix();
                 field->covariance      = filter.get_covariance();
 
                 log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",

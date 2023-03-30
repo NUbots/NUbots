@@ -95,7 +95,7 @@ namespace module::behaviour::planning {
                     std::chrono::duration_cast<std::chrono::microseconds>(now - ball_last_seen).count() * 1e-6;
 
                 // Compute target in robot coords
-                Eigen::Isometry2d position(field.position);
+                Eigen::Isometry2d position(field.Hfw);
                 Eigen::Isometry3d Hfw;
                 Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0.0);
                 Hfw.linear() =

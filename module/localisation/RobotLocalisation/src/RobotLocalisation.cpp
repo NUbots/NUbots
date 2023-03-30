@@ -254,15 +254,21 @@ namespace module::localisation {
                 covariance = compute_covariance();
 
                 if (log_level <= NUClear::DEBUG) {
+                    // Graph where the world frame is positioned in the map
                     auto state_cell = position_in_map(state, Eigen::Vector2d(0.0, 0.0));
                     emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
-                    // Emit the cell 0.5m in front of the robot to visualise the direction the robot is facing
+
+                    // Graph the cell 0.5m in front of the world frame to visualise the direction of world frame x
                     auto direction_cell = position_in_map(state, Eigen::Vector2d(0.5, 0.0));
                     emit(graph("World (theta)", direction_cell.x(), direction_cell.y()));
+
+                    // Graph where the robot is positioned in the map
                     Eigen::Isometry3d Hwc = Hcw.inverse();
                     Eigen::Vector2d rCWw  = Eigen::Vector2d(Hwc.translation().x(), Hwc.translation().y());
                     auto robot_cell       = position_in_map(state, rCWw);
                     emit(graph("Robot (x,y)", robot_cell.x(), robot_cell.y()));
+
+                    // Graph the cell 0.5m in front of the robot to visualise the direction it's facing
                     Eigen::Vector3d rPCc  = Eigen::Vector3d(0.5, 0.0, 0.0);
                     Eigen::Vector3d rPWw  = Hwc * rPCc;
                     auto robot_theta_cell = position_in_map(state, rPWw.head(2));
@@ -271,11 +277,11 @@ namespace module::localisation {
 
                 // Build and emit the field message
                 auto field(std::make_unique<Field>());
-                Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
-                position.translation() = Eigen::Vector2d(state.x(), state.y());
-                position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
-                field->position        = position.matrix();
-                field->covariance      = covariance;
+                Eigen::Isometry2d Hfw(Eigen::Isometry2d::Identity());
+                Hfw.translation() = Eigen::Vector2d(state.x(), state.y());
+                Hfw.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
+                field->Hfw        = Hfw.matrix();
+                field->covariance = covariance;
                 emit(field);
             }
         });
