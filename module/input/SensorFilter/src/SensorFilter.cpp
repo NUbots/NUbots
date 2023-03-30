@@ -14,12 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #include "SensorFilter.hpp"
-
-#include "extension/Configuration.hpp"
 
 #include "message/actuation/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
@@ -32,7 +30,6 @@
 
 namespace module::input {
 
-    using extension::Configuration;
     using message::actuation::BodySide;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
@@ -45,6 +42,8 @@ namespace module::input {
     using message::motion::KillGetup;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
+
+    using extension::Configuration;
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -62,96 +61,19 @@ namespace module::input {
             }
             cfg.footDown.set_method(method, thresholds);
 
-            //  **************************************** UKF Config ****************************************
-            // Set velocity decay
-            cfg.ukf.velocity_decay            = config["ukf"]["update"]["velocity_decay"].as<Expression>();
-            ukf.model.timeUpdateVelocityDecay = cfg.ukf.velocity_decay;
+            //  **************************************** Configure Filters ****************************************
+            cfg.filtering_method = config["filtering_method"].as<std::string>();
+            configure_ukf(config);
+            configure_kf(config);
+            configure_mahony(config);
 
-            // Set our measurement noises
-            cfg.ukf.noise.measurement.accelerometer =
-                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
-            cfg.ukf.noise.measurement.accelerometer_magnitude =
-                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
-                    .asDiagonal();
-            cfg.ukf.noise.measurement.gyroscope =
-                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
-            cfg.ukf.noise.measurement.flat_foot_odometry =
-                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>())
-                    .asDiagonal();
-            cfg.ukf.noise.measurement.flat_foot_orientation =
-                Eigen::Vector4d(config["ukf"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>())
-                    .asDiagonal();
-
-            // Set our process noises
-            cfg.ukf.noise.process.position = config["ukf"]["noise"]["process"]["position"].as<Expression>();
-            cfg.ukf.noise.process.velocity = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
-            cfg.ukf.noise.process.rotation = config["ukf"]["noise"]["process"]["rotation"].as<Expression>();
-            cfg.ukf.noise.process.rotational_velocity =
-                config["ukf"]["noise"]["process"]["rotational_velocity"].as<Expression>();
-
-            // Set our motion model's process noise
-            MotionModel<double>::StateVec process_noise;
-            process_noise.rTWw      = cfg.ukf.noise.process.position;
-            process_noise.vTw       = cfg.ukf.noise.process.velocity;
-            process_noise.Rwt       = cfg.ukf.noise.process.rotation;
-            process_noise.omegaTTt  = cfg.ukf.noise.process.rotational_velocity;
-            ukf.model.process_noise = process_noise;
-
-            // Set our initial means
-            cfg.ukf.initial.mean.position = config["ukf"]["initial"]["mean"]["position"].as<Expression>();
-            cfg.ukf.initial.mean.velocity = config["ukf"]["initial"]["mean"]["velocity"].as<Expression>();
-            cfg.ukf.initial.mean.rotation = config["ukf"]["initial"]["mean"]["rotation"].as<Expression>();
-            cfg.ukf.initial.mean.rotational_velocity =
-                config["ukf"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
-
-            // Set out initial covariance
-            cfg.ukf.initial.covariance.position = config["ukf"]["initial"]["covariance"]["position"].as<Expression>();
-            cfg.ukf.initial.covariance.velocity = config["ukf"]["initial"]["covariance"]["velocity"].as<Expression>();
-            cfg.ukf.initial.covariance.rotation = config["ukf"]["initial"]["covariance"]["rotation"].as<Expression>();
-            cfg.ukf.initial.covariance.rotational_velocity =
-                config["ukf"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
-
-            // Set our initial state with the config means and covariances, flagging the filter to reset it
-            cfg.initial_mean.rTWw     = cfg.ukf.initial.mean.position;
-            cfg.initial_mean.vTw      = cfg.ukf.initial.mean.velocity;
-            cfg.initial_mean.Rwt      = cfg.ukf.initial.mean.rotation;
-            cfg.initial_mean.omegaTTt = cfg.ukf.initial.mean.rotational_velocity;
-
-            cfg.initial_covariance.rTWw     = cfg.ukf.initial.covariance.position;
-            cfg.initial_covariance.vTw      = cfg.ukf.initial.covariance.velocity;
-            cfg.initial_covariance.Rwt      = cfg.ukf.initial.covariance.rotation;
-            cfg.initial_covariance.omegaTTt = cfg.ukf.initial.covariance.rotational_velocity;
-            ukf.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
-
-            // Don't filter any sensors until we have initialised the filter
-            update_loop.disable();
-            reset_filter.store(true);
-
-            //  **************************************** Kalman Filter Config ****************************************
-            Eigen::Matrix<double, n_states, n_states> Ac =
-                Eigen::Matrix<double, n_states, n_states>(config["kalman_filter"]["Ac"].as<Expression>());
-            Eigen::Matrix<double, n_inputs, n_inputs> Bc;
-            Eigen::Matrix<double, n_measurements, n_states> C =
-                Eigen::Matrix<double, n_measurements, n_states>(config["kalman_filter"]["C"].as<Expression>());
-            Eigen::Matrix<double, n_states, n_states> Q;
-            Q.diagonal() = Eigen::VectorXd(config["kalman_filter"]["Q"].as<Expression>());
-            Eigen::Matrix<double, n_measurements, n_measurements> R;
-            R.diagonal()            = Eigen::VectorXd(config["kalman_filter"]["R"].as<Expression>());
+            // Deadreckoning
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
-            // Initialise the Kalman filter
-            Hwt.translation() = cfg.initial_mean.rTWw;
-            kf.update(Ac, Bc, C, Q, R);
-            kf.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
-
-            //  **************************************** Mahony Filter Config ****************************************
-            bias   = Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>());
-            cfg.Ki = config["mahony"]["Ki"].as<Expression>();
-            cfg.Kp = config["mahony"]["Kp"].as<Expression>();
         });
 
         on<Last<20, Trigger<RawSensors>>, Single>().then(
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-                // If we need to reset the filter, do that here
+                // If we need to reset the UKF filter, do that here
                 if (reset_filter.load()) {
                     // We have finished resetting the filter now
                     switch (ukf.reset(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal())) {
@@ -210,15 +132,25 @@ namespace module::input {
                                        const KinematicsModel& kinematics_model) {
                                     auto sensors = std::make_unique<Sensors>();
 
-                                    // Updates message with raw sensor data, including the timestamp, battery voltage,
-                                    // servo sensors, accelerometer, gyroscope, buttons, and LED.
+                                    // Updates message with raw sensor data
                                     update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
                                     // Updates the message with kinematics data
                                     update_kinematics(sensors, kinematics_model, raw_sensors);
 
-                                    // Updates the Sensors message with odometry data filtered using MahonyFilter.
-                                    update_odometry_mahony(sensors, previous_sensors, raw_sensors);
+                                    // Updates the Sensors message with odometry data filtered using specified filter
+                                    switch (cfg.filtering_method.value) {
+                                        case FilteringMethod::UKF:
+                                            update_odometry_ukf(sensors, previous_sensors, raw_sensors);
+                                            break;
+                                        case FilteringMethod::KF:
+                                            update_odometry_kf(sensors, previous_sensors, raw_sensors);
+                                            break;
+                                        case FilteringMethod::MAHONY:
+                                            update_odometry_mahony(sensors, previous_sensors, raw_sensors);
+                                            break;
+                                        default: log<NUClear::WARN>("Unknown Filtering Method"); break;
+                                    }
 
                                     // Graph debug information
                                     if (log_level <= NUClear::DEBUG) {

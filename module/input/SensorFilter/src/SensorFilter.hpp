@@ -27,6 +27,8 @@
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
+#include "extension/Configuration.hpp"
+
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -34,11 +36,14 @@
 #include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
 
+using extension::Configuration;
+
 namespace module::input {
 
     using message::actuation::KinematicsModel;
     using message::input::Sensors;
     using message::platform::RawSensors;
+
 
     /**
      * @author Jade Fountain
@@ -50,10 +55,10 @@ namespace module::input {
 
         utility::math::filter::UKF<double, MotionModel> ukf{};
 
-        // Define the kalman filter model dimensions
-        static const size_t n_states       = 4;
-        static const size_t n_inputs       = 0;
-        static const size_t n_measurements = 4;
+        // Define the Kalman filter model dimensions
+        static const size_t n_states       = 4;  // Model has 4 states: x = [roll, pitch, roll rate, pitch rate]'
+        static const size_t n_inputs       = 0;  // Model has no inputs
+        static const size_t n_measurements = 4;  // Model has 4 measurements: y = [roll, pitch, roll rate, pitch rate]'
 
         /// @brief Kalman filter for pose estimation
         utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf;
@@ -73,7 +78,7 @@ namespace module::input {
                         else if (str == "FSR")  { value = Value::FSR; }
                         else {
                             value = Value::UNKNOWN;
-                            throw std::runtime_error("String " + str + " did not match any enum for ServoID");
+                            throw std::runtime_error("String " + str + " did not match any enum for FootDownMethod");
                         }
                 // clang-format on
             }
@@ -91,6 +96,42 @@ namespace module::input {
                 }
             }
         };
+
+        struct FilteringMethod {
+            enum Value { UNKNOWN = 0, UKF = 1, KF = 2, MAHONY = 3 };
+            Value value = Value::UNKNOWN;
+
+            // Constructors
+            FilteringMethod() = default;
+            FilteringMethod(int const& v) : value(static_cast<Value>(v)) {}
+            FilteringMethod(Value const& v) : value(v) {}
+            FilteringMethod(std::string const& str) {
+                // clang-format off
+                        if      (str == "UKF") { value = Value::UKF; }
+                        else if (str == "KF") { value = Value::KF; }
+                        else if (str == "MAHONY")  { value = Value::MAHONY; }
+                        else {
+                            value = Value::UNKNOWN;
+                            throw std::runtime_error("String " + str + " did not match any enum for FilteringMethod");
+                        }
+                // clang-format on
+            }
+
+            // Conversions
+            [[nodiscard]] operator Value() const {
+                return value;
+            }
+            [[nodiscard]] operator std::string() const {
+                switch (value) {
+                    case Value::UKF: return "UKF";
+                    case Value::KF: return "KF";
+                    case Value::MAHONY: return "MAHONY";
+                    default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
+                }
+            }
+        };
+
+
         struct Config {
             Config() = default;
 
@@ -126,6 +167,9 @@ namespace module::input {
                     {FootDownMethod::FSR, 60.0f},
                 };
             } footDown;
+
+            // Config for Filtering Method
+            FilteringMethod filtering_method;
 
             //  **************************************** UKF Config ****************************************
             /// @brief Config for the UKF
@@ -169,16 +213,24 @@ namespace module::input {
                     } covariance{};
                 } initial{};
             } ukf{};
-
             /// @brief Initial state of the for the UKF filter
             MotionModel<double>::StateVec initial_mean;
-
             /// @brief Initial covariance of the for the UKF filter
             MotionModel<double>::StateVec initial_covariance;
-
             /// @brief Parameter for scaling the walk command to better match actual achieved velocity
             Eigen::Vector3d deadreckoning_scale = Eigen::Vector3d::Zero();
 
+            //  **************************************** Kalman Filter Config ****************************************
+            /// @brief Kalman Continuos time process model
+            Eigen::Matrix<double, n_states, n_states> Ac;
+            /// @brief Kalman Continuos time input model
+            Eigen::Matrix<double, n_inputs, n_inputs> Bc;
+            /// @brief Kalman Continuos time measurement model
+            Eigen::Matrix<double, n_measurements, n_states> C;
+            /// @brief Kalman Process noise
+            Eigen::Matrix<double, n_states, n_states> Q;
+            /// @brief Kalman Measurement noise
+            Eigen::Matrix<double, n_measurements, n_measurements> R;
             //  **************************************** Mahony Filter Config ****************************************
             /// @brief Mahony filter bias
             Eigen::Vector3d bias = Eigen::Vector3d::Zero();
@@ -208,15 +260,6 @@ namespace module::input {
                                const KinematicsModel& kinematics_model,
                                const RawSensors& raw_sensors);
 
-        /// @brief Updates the sensors message with odometry data filtered using Kalman Filter. This includes the
-        // position, orientation, velocity and rotational velocity of the torso in world space.
-        /// @param sensors The sensors message to update
-        /// @param previous_sensors The previous sensors message
-        /// @param raw_sensors The raw sensor data
-        void update_odometry_kf(std::unique_ptr<Sensors>& sensors,
-                                const std::shared_ptr<const Sensors>& previous_sensors,
-                                const RawSensors& raw_sensors);
-
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
         /// @param sensors The sensors message to update
         /// @param previous_sensors The previous sensors message
@@ -224,6 +267,14 @@ namespace module::input {
         /// @param dt The time since the last update
         void integrate_walkcommand(const double dt);
 
+        /// @brief Configure UKF filter
+        void configure_ukf(const Configuration& config);
+
+        /// @brief Configure Kalman filter
+        void configure_kf(const Configuration& config);
+
+        /// @brief Configure Mahony filter
+        void configure_mahony(const Configuration& config);
 
         /// @brief Updates the sensors message with odometry data filtered using UKF. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
@@ -233,6 +284,16 @@ namespace module::input {
         void update_odometry_ukf(std::unique_ptr<Sensors>& sensors,
                                  const std::shared_ptr<const Sensors>& previous_sensors,
                                  const RawSensors& raw_sensors);
+
+        /// @brief Updates the sensors message with odometry data filtered using Kalman Filter. This includes the
+        // position, orientation, velocity and rotational velocity of the torso in world space.
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        void update_odometry_kf(std::unique_ptr<Sensors>& sensors,
+                                const std::shared_ptr<const Sensors>& previous_sensors,
+                                const RawSensors& raw_sensors);
+
 
         /// @brief Updates the sensors message with odometry data filtered using MahonyFilter. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
@@ -285,7 +346,7 @@ namespace module::input {
 
         // Handle for the sensor filter update loop, allows disabling new sensor updates when a reset event occurs
         ReactionHandle update_loop{};
-        std::atomic_bool reset_filter{true};
+        std::atomic_bool reset_filter{false};
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP
