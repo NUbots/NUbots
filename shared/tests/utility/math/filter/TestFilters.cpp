@@ -213,26 +213,20 @@ TEST_CASE("Test the KalmanFilter", "[utility][math][filter][KalmanFilter]") {
     const size_t n_inputs       = 0;
     const size_t n_measurements = 2;
 
-    // Define the state transition model
-    Eigen::MatrixXd A = Eigen::MatrixXd::Zero(n_states, n_states);
-    A << 0, 0, 0, 1, 0, 0, 0, 0, 0;
+    // Define the process model
+    Eigen::Matrix3d A = config["kalman"]["A"].as<Expression>();
 
-    // Define the control model
-    Eigen::MatrixXd B = Eigen::MatrixXd::Zero(n_states, n_inputs);
+    // Define the input model
+    Eigen::MatrixXd B;
 
     // Define the measurement model
-    Eigen::MatrixXd C = Eigen::MatrixXd::Zero(n_measurements, n_states);
-    C << 0, 1, 0, 1, 0, 1;
+    Eigen::MatrixXd C = config["kalman"]["C"].as<Expression>();
 
-    // Define the process noise covariance TODO: Move to yaml
-    Eigen::Matrix3d Q;
-    Q << 3.336564728582061e-04, 1.210220716654972e-05, -1.708092671728623e-04, 1.210220716654972e-05,
-        4.680081577954583e-06, 6.268022135995622e-06, -1.708092671728623e-04, 6.268022135995622e-06,
-        1.320010202073407e-04;
+    // Define the process noise covariance
+    Eigen::Matrix3d Q = config["kalman"]["Q"].as<Expression>();
 
-    // Define the measurement noise covariance TODO: Move to yaml
-    Eigen::Matrix2d R;
-    R << 0.0502, 0.0, 0.0, 3.4546e-06;
+    // Define the measurement noise covariance
+    Eigen::Matrix2d R = config["kalman"]["R"].as<Expression>();
 
     // Define the initial state
     Eigen::Matrix<double, n_states, 1> x0 = Eigen::Matrix<double, n_states, 1>::Zero();
