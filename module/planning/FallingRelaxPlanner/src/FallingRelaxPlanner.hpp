@@ -29,6 +29,8 @@ namespace module::planning {
             Levels acc_mag;
             /// @brief The configuration for the accelerometer angle check
             Levels acc_angle;
+            /// @brief The script to run when falling
+            std::string fall_script;
         } cfg;
 
     public:

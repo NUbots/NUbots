@@ -18,15 +18,15 @@
  */
 
 #include "Director.hpp"
-#include "provider/ProviderGroup.hpp"
+#include "component/ProviderGroup.hpp"
 
 namespace module::extension {
 
+    using component::DirectorTask;
+    using component::Provider;
     using ::extension::behaviour::RunInfo;
-    using ::extension::behaviour::commands::BehaviourTask;
-    using provider::Provider;
 
-    void Director::remove_task(const std::shared_ptr<BehaviourTask>& task) {
+    void Director::remove_task(const std::shared_ptr<DirectorTask>& task) {
 
         // Get the group for this task
         auto& group = groups.at(task->type);

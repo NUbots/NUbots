@@ -224,8 +224,8 @@ namespace module::platform {
     }
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Configuration>("webots.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file webots.yaml
+        on<Configuration>("Webots.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file Webots.yaml
             time_step            = config["time_step"].as<int>();
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
