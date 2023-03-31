@@ -14,7 +14,8 @@ nuclear_role(
   output::Overview
   # Sensors
   input::Camera
-  platform::cm740::HardwareIO
+  # platform::cm740::HardwareIO
+  platform::openCR::HardwareIO
   input::SensorFilter
   # Vision
   vision::VisualMesh

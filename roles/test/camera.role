@@ -9,7 +9,8 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   support::configuration::GlobalConfig
-  platform::cm740::HardwareIO
+  # platform::cm740::HardwareIO
+  platform::openCR::HardwareIO
   input::SensorFilter
   input::Camera
   output::Overview

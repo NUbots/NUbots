@@ -14,7 +14,8 @@ nuclear_role(
   support::configuration::SoccerConfig
   # Sensors
   input::Camera
-  platform::cm740::HardwareIO
+  # platform::cm740::HardwareIO
+  platform::openCR::HardwareIO
   # platform::cm740::HardwareSimulator
   input::SensorFilter
   # Vision

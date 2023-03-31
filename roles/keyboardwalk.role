@@ -11,7 +11,8 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   # Hardware Interface
-  platform::cm740::HardwareIO
+  # platform::cm740::HardwareIO
+  platform::openCR::HardwareIO
   input::SensorFilter
   # Motion
   motion::QuinticWalk
