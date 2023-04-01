@@ -1,5 +1,10 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#a96f8688a34eaf5c9a888fd5516fe1853":[1,0,2,3,31,1],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#abd401a54b5a53b605f1e44d4d66d28d1":[1,0,2,3,31,3],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#af03130e048a1cc73692f44fe61412039":[1,0,2,3,31,2],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html":[1,0,2,3,32],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a23591516abf64e8986d18f13e34b9efb":[1,0,2,3,32,3],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a40bdd50e441e3f864d15427a4ee905c9":[1,0,2,3,32,0],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a66594e4f239820abba94cc4e0a736004":[1,0,2,3,32,2],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a742abcb7a0fff57e4dbec6e782e629a5":[1,0,2,3,32,1],
@@ -244,10 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ae56d51343f99adae9c272c78b385a2d7":[1,0,2,8,4,0,1],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#af569df7ac3fe772754d2b6ef2adf12af":[1,0,2,8,4,0,8],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afc906a2e2b6e83d7c475dd93b55b407c":[1,0,2,8,4,0,2],
-"structmodule_1_1platform_1_1Webots_1_1CameraContext.html":[1,0,2,9,1,0],
-"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#a7a3ccaea7203a58a11edb3150fd3a659":[1,0,2,9,1,0,2],
-"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#aacc16712dff38c94e32ace20c9fdc177":[1,0,2,9,1,0,3],
-"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#ae1f6f508a18aedc1614091cc4ea22773":[1,0,2,9,1,0,1],
-"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#af6291a344ae3940d145b5955f0555965":[1,0,2,9,1,0,0],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html":[1,0,2,9,1,1]
+"structmodule_1_1platform_1_1Webots_1_1CameraContext.html":[1,0,2,9,1,0]
 };

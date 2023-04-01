@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classCM740_1_1UART.html#ab2433ab6bfdbeff94de9744b030e027f":[1,0,0,9,10],
 "classCM740_1_1UART.html#ab92f17338deef684c7dc21cbdacae533":[1,0,0,9,16],
 "classCM740_1_1UART.html#ad2beba534212d7bb4c73dc02f35bbee1":[1,0,0,9,17],
 "classCM740_1_1UART.html#ad30e00e1763c86aa7f14be0ecdc3ca9e":[1,0,0,9,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad4cdab3ea39486ad738e5b8bfd6fe886":[1,0,2,1,2,2,9],
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad5233c46229ec03366d3c1acbe25dc81":[1,0,2,1,2,2,16],
 "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#adb2037e213c75e4fc32ecc4e2aa2cdc1":[1,0,2,1,2,2,25],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae632f26b2b2f20f962f7b7a95b3892fd":[1,0,2,1,2,2,5],
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae6a1ff8f7b1d493a8e3b69199c7b54aa":[1,0,2,1,2,2,35]
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae632f26b2b2f20f962f7b7a95b3892fd":[1,0,2,1,2,2,5]
 };

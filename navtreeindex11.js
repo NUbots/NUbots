@@ -1,5 +1,10 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#a55c36fde40a65b1472c6e9d4cac99bef":[1,0,2,2,0,2,0,6],
+"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#ada8f80b6f4ce61e64eefb2d00c9625fb":[1,0,2,2,0,2,0,2],
+"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#aebb0f8e65ff8dbef316285a2070638b7":[1,0,2,2,0,2,0,1],
+"structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html":[1,0,2,2,0,1,0],
+"structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html#a932f5461f09eacfdba01e2109a76040f":[1,0,2,2,0,1,0,3],
 "structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html#a9c492fc00d70201820156884fb77f599":[1,0,2,2,0,1,0,4],
 "structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html#ab63df686794c003e0553130b0130328e":[1,0,2,2,0,1,0,0],
 "structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html#acec0313afb20422b635fb4fc013f10cc":[1,0,2,2,0,1,0,1],
@@ -244,10 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html#aabea4c01d7aab0ed556649fe92959f20":[1,0,2,3,30,3],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html#ab3f4f32bce89edab9cc4157371f42269":[1,0,2,3,30,2],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html":[1,0,2,3,31],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#a26c627edfd6a9b48f0ccffc85e9512bd":[1,0,2,3,31,0],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#a96f8688a34eaf5c9a888fd5516fe1853":[1,0,2,3,31,1],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#abd401a54b5a53b605f1e44d4d66d28d1":[1,0,2,3,31,3],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#af03130e048a1cc73692f44fe61412039":[1,0,2,3,31,2],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html":[1,0,2,3,32],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html#a23591516abf64e8986d18f13e34b9efb":[1,0,2,3,32,3]
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#a26c627edfd6a9b48f0ccffc85e9512bd":[1,0,2,3,31,0]
 };

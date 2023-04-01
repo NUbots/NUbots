@@ -1,5 +1,10 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1vision_1_1GoalDetector.html#ae45cd4f8e2ff7da4bb0f4d837d2bbc58":[1,0,2,14,3,0],
+"classmodule_1_1vision_1_1GoalDetector.html#af7ecb607ba95f573e9bfbd4ec83bfb8e":[1,0,2,14,3,1],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html":[1,0,2,14,4],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#a0e8855e59122c098ddc8fdb5e22c1cc8":[1,0,2,14,4,1],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#a63d9242f60a730b536c79118e3a6953d":[1,0,2,14,4,4],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64":[1,0,2,14,4,0],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#ad05c35b3cddd7eb6b269bf8060b4877b":[1,0,2,14,4,3],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#ae06a7e45e66da2973f04ca90bf9017ce":[1,0,2,14,4,2],
@@ -244,10 +249,5 @@ var NAVTREEINDEX6 =
 "classutility_1_1motion_1_1splines_1_1SplineContainer.html#a64ffd768e1bd48573ce3b479064131fb":[1,0,5,6,0,5,14],
 "classutility_1_1motion_1_1splines_1_1SplineContainer.html#a69de9ba2f40d63f2d393641676ad1d3b":[1,0,5,6,0,5,2],
 "classutility_1_1motion_1_1splines_1_1SplineContainer.html#a8276f8aa74014c55d368ba429bf066ea":[1,0,5,6,0,5,1],
-"classutility_1_1motion_1_1splines_1_1SplineContainer.html#ab034f439cb4a6c84c6fe70b8fa6741d6":[1,0,5,6,0,5,0],
-"classutility_1_1motion_1_1splines_1_1SplineContainer.html#ad568289b5b860467d32c1b215c02529b":[1,0,5,6,0,5,11],
-"classutility_1_1motion_1_1splines_1_1SplineContainer.html#ad9d9010a06b0c92703ad81a69cbeb7f1":[1,0,5,6,0,5,12],
-"classutility_1_1motion_1_1splines_1_1SplineContainer.html#ae4a343ea39d146f949cfc34f29e897c7":[1,0,5,6,0,5,13],
-"classutility_1_1motion_1_1splines_1_1SplineContainer.html#aef51569b679a47beaf6ab72aa971eed0":[1,0,5,6,0,5,7],
-"classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67":[1,0,5,6,0,5,3]
+"classutility_1_1motion_1_1splines_1_1SplineContainer.html#ab034f439cb4a6c84c6fe70b8fa6741d6":[1,0,5,6,0,5,0]
 };

@@ -1,5 +1,10 @@
 var NAVTREEINDEX9 =
 {
+"structCM740_1_1BulkReadResults.html#a51c2f631013aa5f460fc4da95d58694b":[1,0,0,1,5],
+"structCM740_1_1BulkReadResults.html#a56d10fe7556375c71ce5126842fa6d51":[1,0,0,1,0],
+"structCM740_1_1BulkReadResults.html#a589c9458e26c2b510d65f8ffd9940069":[1,0,0,1,3],
+"structCM740_1_1BulkReadResults.html#a6e4341a3b009fb23fe826d2a4ab20813":[1,0,0,1,6],
+"structCM740_1_1BulkReadResults.html#afd7e4540ccf409acb4eb6118d393fef2":[1,0,0,1,2],
 "structCM740_1_1CM740Interface_1_1PingCommand.html":[1,0,0,4,0],
 "structCM740_1_1CM740Interface_1_1PingCommand.html#a17fc6e67503f784d42477d32f3ab0871":[1,0,0,4,0,5],
 "structCM740_1_1CM740Interface_1_1PingCommand.html#a24f99d8935cf2da9440f9a7bf3f8a6ef":[1,0,0,4,0,1],
@@ -244,10 +249,5 @@ var NAVTREEINDEX9 =
 "structextension_1_1Script_1_1Frame_1_1Target.html#ae14795a24dbdd293ed83517f7a71ee2a":[1,0,1,7,0,0,6],
 "structextension_1_1behaviour_1_1Causing.html":[1,0,1,0,3],
 "structextension_1_1behaviour_1_1Causing.html#a1e62867eb96b62dfa70b2ee369da85ef":[1,0,1,0,3,0],
-"structextension_1_1behaviour_1_1Done.html":[1,0,1,0,4],
-"structextension_1_1behaviour_1_1GroupInfo.html":[1,0,1,0,5],
-"structextension_1_1behaviour_1_1GroupInfo.html#a2a976c93e0b219a0c6eb9a3a98b5f2d8":[1,0,1,0,5,1],
-"structextension_1_1behaviour_1_1GroupInfo.html#ace287bde7a3b4c09dab40c448c997370":[1,0,1,0,5,2],
-"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4":[1,0,1,0,5,0],
-"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2":[1,0,1,0,5,0,0]
+"structextension_1_1behaviour_1_1Done.html":[1,0,1,0,4]
 };

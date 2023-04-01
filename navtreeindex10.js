@@ -1,5 +1,10 @@
 var NAVTREEINDEX10 =
 {
+"structextension_1_1behaviour_1_1GroupInfo.html":[1,0,1,0,5],
+"structextension_1_1behaviour_1_1GroupInfo.html#a2a976c93e0b219a0c6eb9a3a98b5f2d8":[1,0,1,0,5,1],
+"structextension_1_1behaviour_1_1GroupInfo.html#ace287bde7a3b4c09dab40c448c997370":[1,0,1,0,5,2],
+"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4":[1,0,1,0,5,0],
+"structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a2b3cfdd5ca65e323151eaf8fc79dfec2":[1,0,1,0,5,0,0],
 "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a5557f226e3048add2939fa58925c6abe":[1,0,1,0,5,0,2],
 "structextension_1_1behaviour_1_1GroupInfo.html#aeb813dadc96c609657c4608e76ac86d4a7a2f19a44f6b8e586020186fda8d60f4":[1,0,1,0,5,0,1],
 "structextension_1_1behaviour_1_1Idle.html":[1,0,1,0,6],
@@ -244,10 +249,5 @@ var NAVTREEINDEX10 =
 "structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#a09df5b037846ae0a5474886c7d7f70ab":[1,0,2,2,0,2,0,4],
 "structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#a2dee18d18ce4fe84e8bb0ca004f0540b":[1,0,2,2,0,2,0,0],
 "structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#a4438be026ce514e241a6fb7240614ce8":[1,0,2,2,0,2,0,5],
-"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#a47aa5d3d5e5b7a9212a2e1092822e4de":[1,0,2,2,0,2,0,3],
-"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#a55c36fde40a65b1472c6e9d4cac99bef":[1,0,2,2,0,2,0,6],
-"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#ada8f80b6f4ce61e64eefb2d00c9625fb":[1,0,2,2,0,2,0,2],
-"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#aebb0f8e65ff8dbef316285a2070638b7":[1,0,2,2,0,2,0,1],
-"structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html":[1,0,2,2,0,1,0],
-"structmodule_1_1extension_1_1component_1_1Provider_1_1WhenCondition.html#a932f5461f09eacfdba01e2109a76040f":[1,0,2,2,0,1,0,3]
+"structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html#a47aa5d3d5e5b7a9212a2e1092822e4de":[1,0,2,2,0,2,0,3]
 };
