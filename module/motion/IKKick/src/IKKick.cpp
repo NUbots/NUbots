@@ -152,6 +152,9 @@ namespace module::motion {
                 Eigen::Vector3d goalPosition = directionSupportFoot;
                 goalPosition.z()             = 0.0;
 
+                // DEBUG - LC
+                // NUClear::log<NUClear::DEBUG>("Trigger - supportFoot matrix: ", supportFoot.matrix());
+
                 balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
                 kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
 
@@ -197,7 +200,9 @@ namespace module::motion {
                     kickFootGoal =
                         supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
                 }
-
+                // ****DEBUG - LC****
+                NUClear::log<NUClear::DEBUG>("update just before getFootPose - kickFootGoal matrix: ",
+                                             kickFootGoal.matrix());
                 // Move foot to ball to kick
                 if (kicker.isRunning()) {
                     kickFootGoal = kickFootGoal * kicker.getFootPose(sensors);
@@ -212,7 +217,10 @@ namespace module::motion {
 
                 // Calculate IK and send waypoints
                 std::vector<std::pair<ServoID, float>> joints;
-
+                // ****DEBUG - LC****
+                NUClear::log<NUClear::DEBUG>("update just before calc - kickFootGoal matrix: ", kickFootGoal.matrix());
+                NUClear::log<NUClear::DEBUG>("update just before calc - supportFootGoal matrix: ",
+                                             supportFootGoal.matrix());
                 // IK
                 auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
                 auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
