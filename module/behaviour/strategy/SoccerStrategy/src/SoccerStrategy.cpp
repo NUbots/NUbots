@@ -440,9 +440,14 @@ namespace module::behaviour::strategy {
             // We are in range, lets kick
             // emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
             // TEST IKKick command
-            emit(std::make_unique<KickCommand>(ball->rBTt.cast<double>(),
-                                               ball->rBTt.cast<double>(),
-                                               KickCommandType::NORMAL));
+            // emit(std::make_unique<KickCommand>(ball->rBTt.cast<double>(),
+            //                                    ball->rBTt.cast<double>(),
+            //                                    KickCommandType::NORMAL));
+            //
+            // log<NUClear::DEBUG>("Gonna Kick!");
+            Eigen::Vector3d test_point     = {0.4, 0.0, -0.42};
+            Eigen::Vector3d test_direction = {0.4, 0.0, 0.0};
+            emit(std::make_unique<KickCommand>(test_point, test_direction, KickCommandType::NORMAL));
         }
         else {
             // Request walk planner to walk to the ball
