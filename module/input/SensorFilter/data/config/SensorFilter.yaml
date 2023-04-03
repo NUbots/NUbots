@@ -72,7 +72,7 @@ mahony:
   # Mahony "Proportional" Gain on error
   Kp: 1
   # Mahony "Integral" Gain used to compute bias
-  Ki: 0
+  Ki: 1
   # Mahony Filter Initial bias
   initial_bias: [-0.0967263, 0.00640166, 0.197743]
   # Mahony Filter initial deadreckoned position and height
