@@ -70,11 +70,11 @@ kalman_filter:
 
 mahony:
   # Mahony "Proportional" Gain on error
-  Kp: 10.8279
+  Kp: 1
   # Mahony "Integral" Gain used to compute bias
-  Ki: 17.8421
+  Ki: 0
   # Mahony Filter Initial bias
-  initial_bias: [0, 0, 0]
+  initial_bias: [-0.0967263, 0.00640166, 0.197743]
   # Mahony Filter initial deadreckoned position and height
   initial_rTWw: [0, 0, 0.49]
 
