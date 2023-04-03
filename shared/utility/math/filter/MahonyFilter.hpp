@@ -21,6 +21,7 @@
 #define UTILITY_MATH_FILTER_MAHONYFILTER_HPP
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 namespace utility {
     namespace math {
@@ -44,36 +45,34 @@ namespace utility {
              * @param acc:     accelerometer reading as a column vector, [a_x, a_y, a_z]'. g force
              * @param gyro:    gyroscope reading as  column vector, [w_x, w_y, w_z]'. angular velocities in rad/s.
              * @param ts:      Sample rate of this update.
-             * @param Ki:      integral gain
-             * @param Kp:      proportional gain
-             * @param quat:    quaternion representing the rotation of the torso. Hwt.
+             * @param Ki:      Integral gain
+             * @param Kp:      Proportional gain
+             * @param Hwb:     Homogeneous transformation matrix from world to body frame of IMU
              * @param bias:    gyroscope bias
              */
-            void MahonyUpdate(Eigen::Vector3d acc,
-                              Eigen::Vector3d gyro,
+            void MahonyUpdate(const Eigen::Vector3d& acc,
+                              const Eigen::Vector3d& gyro,
                               const double ts,
                               const double Ki,
                               const double Kp,
-                              Eigen::Quaterniond& quat,
+                              Eigen::Isometry3d& Hwb,
                               Eigen::Vector3d& bias) {
-                // Normalise the acceleration vector
-                acc.normalize();
-                Eigen::Vector3d rGTt = acc;
+                // Normalize the accelerometer reading
+                Eigen::Vector3d rGTt = acc.normalized();
 
-                // Convert the quaternion to a rotation matrix
-                Eigen::Matrix3d Rtw = quat.toRotationMatrix().inverse();
+                // Invert the rotation matrix to get the body-to-world transformation
+                Eigen::Matrix3d Rbw = Hwb.linear().transpose();
 
-                // Calculate the error between the accelerometer gravity and state estimated gravity vector
-                // World vector for gravity (gravity is positive)
-                Eigen::Vector3d rGWw(0, 0, 1);
-                // Calculate estimated accelerometer reading
-                Eigen::Vector3d est_rGTt = Rtw * rGWw;
-                // Calculate error between estimate and real
-                Eigen::Matrix3d a_corr = rGTt * est_rGTt.transpose() - est_rGTt * rGTt.transpose();
-                // Vex (inverse function of skew-symmetric function) the error
+                // Rotate the world gravity vector in the world frame into the body frame
+                Eigen::Vector3d rGBb(0, 0, 1);
+                Eigen::Vector3d est_rGTt = Rbw * rGBb;
+
+                // Calculate the error between the measured and estimated acceleration vectors
+                Eigen::Matrix3d a_corr    = rGTt * est_rGTt.transpose() - est_rGTt * rGTt.transpose();
                 Eigen::Vector3d omega_mes = -1 * Eigen::Vector3d(a_corr(2, 1), a_corr(0, 2), a_corr(1, 0));
 
-                // Estimate the bias
+
+                // Integrate the error vector to estimate the gyro bias
                 bias += Ki * omega_mes * ts;
 
                 // Depolarizing the gyroscope bias
@@ -87,6 +86,7 @@ namespace utility {
                 ome.block<3, 1>(0, 3)   = l_omega;
                 ome(3, 3)               = 0;
 
+                Eigen::Quaterniond quat(Hwb.linear());
                 Eigen::Vector4d quat_vec(quat.x(), quat.y(), quat.z(), quat.w());
                 Eigen::Vector4d q_d(0.5 * ome * quat_vec);
 
@@ -96,7 +96,11 @@ namespace utility {
                 // Set quat (Rwt) and normalise
                 quat = Eigen::Quaterniond(quat_vec(3), quat_vec(0), quat_vec(1), quat_vec(2));
                 quat.normalize();
+
+                // Set the rotation matrix
+                Hwb.linear() = quat.toRotationMatrix();
             }
+
 
         }  // namespace filter
     }      // namespace math
