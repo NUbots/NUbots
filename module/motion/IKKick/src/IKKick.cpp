@@ -196,7 +196,13 @@ namespace module::motion {
                 // Move torso over support foot
                 if (balancer.isRunning()) {
                     Eigen::Isometry3d supportFootPose = balancer.getFootPose(sensors);
-                    supportFootGoal                   = supportFootPose;
+                    NUClear::log<NUClear::DEBUG>("supportFootPose Matrix: ", supportFootPose.matrix());
+                    // double dummy = supportFootPose.matrix().coeff(3, 3);
+                    // if (!std::isfinite(dummy)) {
+                    //     std::cout << "I am exiting " << std::endl;
+                    //     exit(1);
+                    // }
+                    supportFootGoal = supportFootPose;
                     kickFootGoal =
                         supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
                 }
