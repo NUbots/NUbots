@@ -20,5 +20,5 @@ syntax = "proto3";
 
 package message.strategy;
 
-/// Makes the robot stop walking and stand still
-message StandStill {}
+/// A Task that requests to handle the finding of the ball when its location is unknown
+message FindBall {}

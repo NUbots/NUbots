@@ -21,12 +21,12 @@
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::BehaviourTask;
-    using ::module::extension::provider::Provider;
-    using ::module::extension::provider::ProviderGroup;
+    using component::DirectorTask;
+    using component::Provider;
+    using component::ProviderGroup;
 
     Director::Solution::Option Director::solve_provider(const std::shared_ptr<Provider>& provider,
-                                                        const std::shared_ptr<BehaviourTask>& authority,
+                                                        const std::shared_ptr<DirectorTask>& authority,
                                                         std::set<std::type_index> visited) {
 
         Solution::Option option;
@@ -63,7 +63,7 @@ namespace module::extension {
 
 
     Director::Solution Director::solve_when(const Provider::WhenCondition& when,
-                                            const std::shared_ptr<BehaviourTask>& authority,
+                                            const std::shared_ptr<DirectorTask>& authority,
                                             const std::set<std::type_index>& visited) {
         Solution s;
         s.pushed = true;
@@ -96,7 +96,7 @@ namespace module::extension {
     }
 
     Director::Solution Director::solve_group(const std::type_index& type,
-                                             const std::shared_ptr<BehaviourTask>& authority,
+                                             const std::shared_ptr<DirectorTask>& authority,
                                              const std::set<std::type_index>& visited) {
         Solution s;
         s.pushed = false;
@@ -122,7 +122,7 @@ namespace module::extension {
         return s;
     }
 
-    Director::Solution Director::solve_task(const std::shared_ptr<BehaviourTask>& task) {
+    Director::Solution Director::solve_task(const std::shared_ptr<DirectorTask>& task) {
         std::set<std::type_index> visited;
         return solve_group(task->type, task, visited);
     }

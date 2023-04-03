@@ -16,14 +16,14 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.strategy;
+package message.strategy;
 
- import "Vector.proto";
+import "Vector.proto";
 
- /// Ready state strategy
- message Ready {
+/// Ready state strategy for walking onto the field
+message Ready {
     /// The target position to walk to relative to the field
     vec3 rRFf = 1;
- }
+}

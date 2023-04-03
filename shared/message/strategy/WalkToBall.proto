@@ -16,9 +16,9 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.strategy;
+package message.strategy;
 
- /// Robot walks to the ball or searches if it can't find it
- message WalkToBall {}
+/// Robot walks to the ball or searches if it can't find it
+message WalkToBall {}

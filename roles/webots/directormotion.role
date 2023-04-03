@@ -33,7 +33,11 @@ nuclear_role(
   planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
+  strategy::StandStill
   strategy::StrategiseLook
+  strategy::WalkToBall
+  strategy::FindObject
+  strategy::Ready
   # Purposes
   purpose::Striker
 )
