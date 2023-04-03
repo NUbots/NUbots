@@ -445,8 +445,8 @@ namespace module::behaviour::strategy {
             //                                    KickCommandType::NORMAL));
             //
             // log<NUClear::DEBUG>("Gonna Kick!");
-            Eigen::Vector3d test_point     = {0.4, 0.0, -0.42};
-            Eigen::Vector3d test_direction = {0.4, 0.0, 0.0};
+            Eigen::Vector3d test_point     = {0.05, -0.055, -0.35};
+            Eigen::Vector3d test_direction = {0.05, 0.0, 0.0};
             emit(std::make_unique<KickCommand>(test_point, test_direction, KickCommandType::NORMAL));
         }
         else {
