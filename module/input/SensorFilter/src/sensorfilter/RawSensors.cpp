@@ -133,11 +133,11 @@ namespace module::input {
         sensors->led.emplace_back(4, raw_sensors.eye_led.RGB);   // Eye
     }
 
-    void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors) {
+    void SensorFilter::detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& raw_sensors) {
         int left_count   = 0;
         int middle_count = 0;
         // If we have any downs in the last 20 frames then we are button pushed
-        for (const auto& s : sensors) {
+        for (const auto& s : raw_sensors) {
             if (s->buttons.left && (s->platform_error_flags == 0u)) {
                 ++left_count;
             }

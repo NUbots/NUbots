@@ -238,20 +238,35 @@ namespace module::input {
             double Ki = 0.0;
             /// @brief Mahony filter integral gain
             double Kp = 0.0;
+
+            // Mahony optimisation parameters
+            /// @brief Bool to determine wether to run Mahony filter optimisation
+            bool run_optimisation = false;
+            /// @brief Mahony filter minimum gain in grid search optimisation
+            double min_gain = 0.0;
+            /// @brief Mahony filter maximum gain in grid search optimisation
+            double max_gain = 0.0;
+            /// @brief Number of grid points to use in grid search optimisation
+            int num_grid_points = 0.0;
+
         } cfg;
 
-        /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
-        /// voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
-        /// @param sensors The sensors message to update
-        /// @param previous_sensors The previous sensors message
-        /// @param raw_sensors The raw sensor data
+        /**
+         * @brief Updates the sensors message with raw sensor data, including the timestamp, battery
+         * voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.
+         * @param sensors The sensors message to update
+         * @param previous_sensors The previous sensors message
+         * @param raw_sensors The raw sensor data
+         */
         void update_raw_sensors(std::unique_ptr<Sensors>& sensors,
                                 const std::shared_ptr<const Sensors>& previous_sensors,
                                 const RawSensors& raw_sensors);
 
-        /// @brief Detect when a button has been pressed
-        /// @param sensors A vector of previous sensor messages
-        void detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& sensors);
+        /**
+         * @brief Detect whn a button is pressed
+         * @param sensors The history of raw sensor messages
+         */
+        void detect_button_press(const std::list<std::shared_ptr<const RawSensors>>& raw_sensors);
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
@@ -309,6 +324,35 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
+        /**
+         * @brief Computes the error in roll and pitch between the current orientation and the true orientation from
+         * simulation or motion capture
+         * @param Hwt The current torso transform in world space
+         * @param true_Hwt The true torso transform in world space
+         * @return The norm of the error in roll and pitch
+         */
+        double cost_function_mahony(const Eigen::Isometry3d& Hwt, const Eigen::Isometry3d& true_Hwt);
+
+        /**
+         * @brief Runs a grid search to find the best gains for the Mahony filter over a history of sensor messages and
+         * ground truth data
+         * @param sensors_history The history of sensor messages
+         * @param raw_sensors_history The history of raw sensor messages, which contains the true orientation
+         * @param Kp Optimal proportional gain
+         * @param Ki Optimal integral gain
+         * @param min_gain Minimum gain to search over
+         * @param max_gain Maximum gain to search over
+         * @param num_grid_points Number of points to search over in each dimension
+         * @return Optimal gains and bias for the Mahony filter
+         */
+        void optimize_mahony(const std::list<std::shared_ptr<const Sensors>>& sensors_history,
+                             const std::list<std::shared_ptr<const RawSensors>>& raw_sensors_history,
+                             double& Kp,
+                             double& Ki,
+                             const double min_gain,
+                             const double max_gain,
+                             const int num_grid_points);
+
     private:
         /// @brief Dead reckoning yaw orientation of the robot in world space
         double yaw = 0;
@@ -343,6 +387,10 @@ namespace module::input {
 
         // Handle for the sensor filter update loop, allows disabling new sensor updates when a reset event occurs
         ReactionHandle update_loop{};
+
+        // Handle for the optimization loop, allows configuring the optimization loop to run or not
+        ReactionHandle optimization_loop{};
+
         std::atomic_bool reset_filter{false};
     };
 }  // namespace module::input

@@ -57,6 +57,12 @@ namespace module::input {
         cfg.Kp            = config["mahony"]["Kp"].as<Expression>();
         cfg.bias          = Eigen::Vector3d(config["mahony"]["bias"].as<Expression>());
         Hwt.translation() = Eigen::VectorXd(config["mahony"]["initial_rTWw"].as<Expression>());
+
+        // Optimisation Config
+        cfg.run_optimisation = config["mahony"]["run_optimisation"].as<bool>();
+        cfg.min_gain         = config["mahony"]["min_gain"].as<Expression>();
+        cfg.max_gain         = config["mahony"]["max_gain"].as<Expression>();
+        cfg.num_grid_points  = config["mahony"]["num_grid_points"].as<int>();
     }
 
     void SensorFilter::update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
@@ -76,12 +82,11 @@ namespace module::input {
         // **************** Roll/Pitch Orientation Measurement Update ****************
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
                                             sensors->gyroscope,
+                                            Hwt,
                                             dt,
                                             cfg.Ki,
                                             cfg.Kp,
-                                            Hwt,
                                             cfg.bias);
-        log<NUClear::DEBUG>("cfg.bias", cfg.bias.transpose());
         // Extract the roll and pitch from the orientation quaternion
         Eigen::Vector3d rpy = MatrixToEulerIntrinsic(Hwt.rotation());
 
@@ -101,4 +106,73 @@ namespace module::input {
         sensors->Htw       = Hwt.inverse().matrix();
         update_loop.enable();
     }
+
+    void SensorFilter::optimize_mahony(const std::list<std::shared_ptr<const Sensors>>& sensors_history,
+                                       const std::list<std::shared_ptr<const RawSensors>>& raw_sensors_history,
+                                       double& Kp,
+                                       double& Ki,
+                                       const double min_gain,
+                                       const double max_gain,
+                                       const int num_grid_points) {
+        double min_avg_cost = std::numeric_limits<double>::max();
+        double K_step       = (max_gain - min_gain) / num_grid_points;
+
+        for (int i = 0; i <= num_grid_points; ++i) {
+            for (int j = 0; j <= num_grid_points; ++j) {
+                double test_Kp = min_gain + i * K_step;
+                double test_Ki = min_gain + j * K_step;
+
+                double total_cost = 0;
+                int count         = 0;
+
+                auto sensor_iter     = sensors_history.rbegin();
+                auto raw_sensor_iter = raw_sensors_history.rbegin();
+
+                for (; sensor_iter != sensors_history.rend() && raw_sensor_iter != raw_sensors_history.rend();
+                     ++sensor_iter, ++raw_sensor_iter) {
+                    const std::shared_ptr<const Sensors>& sensors        = *sensor_iter;
+                    const std::shared_ptr<const RawSensors>& raw_sensors = *raw_sensor_iter;
+
+                    // Compute dt (time since last sensor reading)
+                    auto prev_raw_sensor_iter = std::next(raw_sensor_iter);
+                    double dt                 = 0.0;
+                    if (prev_raw_sensor_iter != raw_sensors_history.rend()) {
+                        dt = std::max(std::chrono::duration_cast<std::chrono::duration<double>>(
+                                          raw_sensors->timestamp - (*prev_raw_sensor_iter)->timestamp)
+                                          .count(),
+                                      0.0);
+                    }
+
+                    // Get ground truth and estimated orientation
+                    Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(raw_sensors->odometry_ground_truth.Htw).inverse();
+                    Eigen::Isometry3d Hwt_temp = Eigen::Isometry3d(sensors->Htw).inverse();
+                    Eigen::Vector3d bias_temp  = cfg.bias;
+
+                    // Apply Mahony update
+                    MahonyUpdate(sensors->accelerometer, sensors->gyroscope, Hwt_temp, dt, test_Ki, test_Kp, bias_temp);
+
+                    // Compute cost for this measurement
+                    double cost = cost_function_mahony(Hwt_temp, true_Hwt);
+                    total_cost += cost;
+                    count++;
+                }
+
+                double avg_cost = total_cost / count;
+
+                if (avg_cost < min_avg_cost) {
+                    min_avg_cost = avg_cost;
+                    Kp           = test_Kp;
+                    Ki           = test_Ki;
+                }
+            }
+        }
+    }
+
+    double SensorFilter::cost_function_mahony(const Eigen::Isometry3d& Hwt, const Eigen::Isometry3d& true_Hwt) {
+        Eigen::Vector3d rpy      = MatrixToEulerIntrinsic(Hwt.rotation());
+        Eigen::Vector3d true_rpy = MatrixToEulerIntrinsic(true_Hwt.rotation());
+        double cost              = (rpy.head<2>() - true_rpy.head<2>()).norm();
+        return cost;
+    }
+
 }  // namespace module::input

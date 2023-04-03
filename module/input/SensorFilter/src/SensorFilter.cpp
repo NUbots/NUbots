@@ -71,6 +71,24 @@ namespace module::input {
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
         });
 
+        on<Startup>().then("Startup Filters", [this]() {
+            // Start up the filters
+            switch (cfg.filtering_method.value) {
+                case FilteringMethod::UKF:
+                    // Handled in the reset of filter
+                    break;
+                case FilteringMethod::KF: update_loop.enable(); break;
+                case FilteringMethod::MAHONY:
+                    update_loop.enable();
+                    // Start the optimization loop if we are optimising
+                    if (cfg.run_optimisation) {
+                        optimization_loop.enable();
+                    }
+                    break;
+                default: log<NUClear::WARN>("Unknown Filtering Method"); break;
+            }
+        });
+
         on<Last<20, Trigger<RawSensors>>, Single>().then(
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 // If we need to reset the UKF filter, do that here
@@ -101,6 +119,24 @@ namespace module::input {
                 // Detect wether a button has been pressed or not
                 detect_button_press(sensors);
             });
+
+        optimization_loop = on<Last<1000, Trigger<Sensors>, With<RawSensors>, Single>>()
+                                .then([this](const std::list<std::shared_ptr<const Sensors>>& sensors,
+                                             const std::list<std::shared_ptr<const RawSensors>>& raw_sensors) {
+                                    // Run the optimization on the last 1000 sensor readings
+                                    optimize_mahony(sensors,
+                                                    raw_sensors,
+                                                    cfg.Kp,
+                                                    cfg.Ki,
+                                                    cfg.min_gain,
+                                                    cfg.max_gain,
+                                                    cfg.num_grid_points);
+                                    // Emit the optimized gains
+                                    emit(graph("Kp", cfg.Kp));
+                                    emit(graph("Ki", cfg.Ki));
+                                    emit(graph("bias", cfg.bias.x(), cfg.bias.y(), cfg.bias.z()));
+                                })
+                                .disable();
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
             if (!walk_engine_enabled) {
