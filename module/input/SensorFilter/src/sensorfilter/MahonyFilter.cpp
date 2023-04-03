@@ -76,12 +76,11 @@ namespace module::input {
         // **************** Roll/Pitch Orientation Measurement Update ****************
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
                                             sensors->gyroscope,
+                                            Hwt,
                                             dt,
                                             cfg.Ki,
                                             cfg.Kp,
-                                            Hwt,
                                             cfg.bias);
-        log<NUClear::DEBUG>("cfg.bias", cfg.bias.transpose());
         // Extract the roll and pitch from the orientation quaternion
         Eigen::Vector3d rpy = MatrixToEulerIntrinsic(Hwt.rotation());
 
