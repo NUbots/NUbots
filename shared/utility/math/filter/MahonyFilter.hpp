@@ -52,10 +52,10 @@ namespace utility {
              */
             void MahonyUpdate(const Eigen::Vector3d& acc,
                               const Eigen::Vector3d& gyro,
+                              Eigen::Isometry3d& Hwb,
                               const double ts,
                               const double Ki,
                               const double Kp,
-                              Eigen::Isometry3d& Hwb,
                               Eigen::Vector3d& bias) {
                 // Normalize the accelerometer reading
                 Eigen::Vector3d rGTt = acc.normalized();
