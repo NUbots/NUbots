@@ -316,9 +316,6 @@ namespace module::input {
         /// @brief Transform of torso from world space
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
 
-        /// @brief Mahony filter bias
-        Eigen::Vector3d bias = Eigen::Vector3d::Zero();
-
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
