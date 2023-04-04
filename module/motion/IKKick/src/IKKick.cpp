@@ -195,6 +195,7 @@ namespace module::motion {
 
                 // Move torso over support foot
                 if (balancer.isRunning()) {
+                    // NOTE: Nans coming from getFootPose
                     Eigen::Isometry3d supportFootPose = balancer.getFootPose(sensors);
                     NUClear::log<NUClear::DEBUG>("supportFootPose Matrix: ", supportFootPose.matrix());
                     // double dummy = supportFootPose.matrix().coeff(3, 3);

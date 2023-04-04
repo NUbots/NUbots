@@ -193,12 +193,20 @@ namespace module::motion {
                 double elapsedTime =
                     std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count()
                     * 1e-6;
+                // DEBUG!
+                NUClear::log<NUClear::DEBUG>("getFootPose motionStartTime: ",
+                                             motionStartTime.time_since_epoch().count());
                 double alpha = (anim.currentFrame().duration != 0)
                                    ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
                                    : 1;
-
+                // DEBUG!
+                NUClear::log<NUClear::DEBUG>("getFootPose alpha: ", alpha);
+                NUClear::log<NUClear::DEBUG>("getFootPose anim.previousFrame: ", anim.previousFrame().pose.matrix());
+                NUClear::log<NUClear::DEBUG>("getFootPose anim.currentFrame: ", anim.currentFrame().pose.matrix());
                 result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
-
+                // NOTE: result has nan in bottom right of matrix just before error
+                // DEBUG!
+                NUClear::log<NUClear::DEBUG>("getFootPose result: ", result.matrix());
                 bool servosAtGoal = true;
 
                 // Check all the servos between R_HIP_YAW and L_ANKLE_ROLL are within the angle threshold
