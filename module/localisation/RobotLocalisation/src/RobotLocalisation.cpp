@@ -327,6 +327,10 @@ namespace module::localisation {
                 weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
                           / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
+            else {
+                weight += std::exp(-0.5 * std::pow(cfg.max_range / cfg.measurement_noise, 2))
+                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
+            }
         }
 
         return std::max(weight, 0.0);
