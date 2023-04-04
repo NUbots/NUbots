@@ -136,7 +136,7 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.
 # Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
 # -Dwith_x11 requires x11 to be installed
 RUN install-package xorg-server
-RUN install-from-source https://github.com/intel/libva/releases/download/2.12.0/libva-2.12.0.tar.bz2 \
+RUN install-from-source https://github.com/intel/libva/releases/download/2.18.0/libva-2.18.0.tar.bz2 \
     -DENABLE_VA_MESSAGING=ON \
     -Dwith_x11=yes
 
@@ -280,6 +280,15 @@ RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a1
 
 # JSON for modern C++ (https://github.com/nlohmann/json)
 RUN install-header-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+
+# TinyXML
+RUN install-package tinyxml2
+
+# Catch2
+RUN install-package catch2
+
+# tinyrobotics
+RUN git clone https://github.com/Tom0Brien/tinyrobotics && cd tinyrobotics && mkdir build && cd build && cmake .. -G Ninja && ninja install && cd ../.. && rm -rf tinyrobotics
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
