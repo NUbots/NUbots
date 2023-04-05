@@ -247,7 +247,10 @@ namespace module::motion {
                 for (auto& joint : joints) {
                     waypoints->commands.emplace_back(subsumptionId, time, joint.first, joint.second, gain_legs, torque);
                 }
-
+                // ****DEBUG - LC****
+                // NOTE: Want to check on the waypoints message
+                // NUClear::log<NUClear::DEBUG>("Just before waypoints emit - waypoints: ", waypoints);
+                NUClear::log<NUClear::DEBUG>("Just before waypoints emit");
                 // Send message
                 emit(waypoints);
             });
