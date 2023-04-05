@@ -88,6 +88,8 @@ namespace utility::math::transform {
 
         // Create and return interpolated transform
         Eigen::Transform<Scalar, 3, Eigen::Isometry> result;
+        result = Eigen::Transform<Scalar, 3, Eigen::Isometry>::Identity();
+
         // DEBUG!
         NUClear::log<NUClear::DEBUG>("interpolate result1: ", result.matrix());
         result.linear() = (t1Rot.slerp(alpha, t2Rot)).toRotationMatrix();
