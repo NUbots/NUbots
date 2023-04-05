@@ -111,7 +111,7 @@ namespace utility::motion {
         Eigen::Isometry3f hip = Eigen::Isometry3f::Identity();
         hip.translation()     = Eigen::Vector3f(model.leg.HIP_OFFSET_X,
                                             model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
-                                            -model.leg.HIP_OFFSET_Z);
+                                            model.leg.HIP_OFFSET_Z);
 
         // Rotate around our hip to apply a balance
         footToTorso = utility::math::transform::rotateLocal(footToTorso, hipRotation, hip);  // Lean against the motion

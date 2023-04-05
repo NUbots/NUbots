@@ -1,5 +1,5 @@
 leg:
-  hip_offset: [0.00, 0.055, 0.045] # [x, y, z]
+  hip_offset: [0.00, 0.055, -0.045] # [x, y, z]
   upper_leg_length: 0.2
   lower_leg_length: 0.2
   heel_length: 0.085 # measured
@@ -98,3 +98,5 @@ tensor_model:
       - [0.00046922761556703155, -1.237289853891243e-05, 5.165617444725389e-06]
       - [-1.237289853891243e-05, 0.0010836186025044235, 1.7594150186636352e-06]
       - [5.165617444725389e-06, 1.7594150186636352e-06, 0.0013901177557110861]
+
+urdf_path: "/home/nubots/NUbots/module/actuation/KinematicsConfiguration/data/nugus.urdf"

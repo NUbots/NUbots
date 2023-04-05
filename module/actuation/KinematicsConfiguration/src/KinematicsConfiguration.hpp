@@ -22,6 +22,8 @@
 
 #include <Eigen/Core>
 #include <nuclear>
+#include <tinyrobotics/Kinematics.hpp>
+#include <tinyrobotics/Parser.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.hpp"
@@ -30,6 +32,8 @@
 
 namespace module::actuation {
 
+    using namespace tinyrobotics;
+
     class KinematicsConfiguration : public NUClear::Reactor {
 
     public:
@@ -37,13 +41,35 @@ namespace module::actuation {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        static void configure(message::actuation::KinematicsModel& model,
-                              const ::extension::Configuration& objNugusModel);
-        static void configureLeg(message::actuation::KinematicsModel& model, const YAML::Node& objLeg);
-        static void configureHead(message::actuation::KinematicsModel& model, const YAML::Node& objHead);
-        static void configureArm(message::actuation::KinematicsModel& model, const YAML::Node& objArm);
-        static void configureMassModel(message::actuation::KinematicsModel& model, const YAML::Node& objMassModel);
-        static void configureTensorModel(message::actuation::KinematicsModel& model, const YAML::Node& objTensorModel);
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Path to the URDF file
+            std::string urdf_path;
+        } cfg;
+
+        /// @brief Number of actuatable joints in the NUgus robot
+        static const int n_joints = 20;
+
+        /// @brief Tinyrobotics model of the NUgus robot
+        tinyrobotics::Model<float, n_joints> nugus_model;
+
+        /// @brief Configures the NUclear robot model message with values from config file and tinyrobotics model
+        void configure(message::actuation::KinematicsModel& model, const ::extension::Configuration& config);
+
+        /// @brief Configures the legs
+        void configure_leg(message::actuation::KinematicsModel& model, const YAML::Node& obj_leg);
+
+        /// @brief Configures the head
+        void configure_head(message::actuation::KinematicsModel& model, const YAML::Node& obj_head);
+
+        /// @brief Configures the arms
+        void configure_arm(message::actuation::KinematicsModel& model, const YAML::Node& obj_arm);
+
+        /// @brief Configures the mass model
+        void configure_mass_model(message::actuation::KinematicsModel& model, const YAML::Node& obj_mass_model);
+
+        /// @brief Configures the tensor model
+        void configure_tensor_model(message::actuation::KinematicsModel& model, const YAML::Node& obj_tensor_model);
     };
 }  // namespace module::actuation
 
