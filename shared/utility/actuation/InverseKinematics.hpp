@@ -48,14 +48,14 @@ namespace utility::actuation::kinematics {
        of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder
        to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is
        left, z is normal to the plane of the foot
-        @param target The target 4x4 basis matrix for the ankle
+        @param Htf The target transform of the foot from the torso.
         @param isLeft Request for left leg motors or right leg motors?
         @param RobotKinematicsModel The class containing the leg model of the robot.
     */
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
         const message::actuation::KinematicsModel& model,
-        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& target_,
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> Htf,
         const LimbID& limb) {
         const Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
         const Scalar DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
@@ -65,17 +65,15 @@ namespace utility::actuation::kinematics {
 
         std::vector<std::pair<ServoID, Scalar>> positions;
 
-        Scalar hipYaw     = 0;
-        Scalar hipRoll    = 0;
-        Scalar hipPitch   = 0;
-        Scalar knee       = 0;
-        Scalar anklePitch = 0;
-        Scalar ankleRoll  = 0;
+        Scalar hip_yaw     = 0;
+        Scalar hip_roll    = 0;
+        Scalar hip_pitch   = 0;
+        Scalar knee        = 0;
+        Scalar ankle_pitch = 0;
+        Scalar ankle_roll  = 0;
 
         // Correct for input referencing the bottom of the foot
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> target(target_);
-        target = target.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, model.leg.FOOT_HEIGHT));
-
+        Htf = Htf.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, model.leg.FOOT_HEIGHT));
         // Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates
         // TODO remove this. It was due to wrong convention use
         Eigen::Matrix<Scalar, 4, 4> Tci;
@@ -86,118 +84,120 @@ namespace utility::actuation::kinematics {
                    0.0, 0.0,  0.0, 1.0;
         // clang-format on
         // Rotate input position from standard robot coords to foot coords
-        Eigen::Matrix<Scalar, 3, 1> translation = (Tci * target.matrix().template rightCols<1>()).template head<3>();
-        target                                  = Tci * target * Tci.transpose();
-        target.translation()                    = translation;
+        Eigen::Matrix<Scalar, 3, 1> translation = (Tci * Htf.matrix().template rightCols<1>()).template head<3>();
+        Htf                                     = Tci * Htf * Tci.transpose();
+        Htf.translation()                       = translation;
 
-        // swap legs if needed
+        // Swap legs if needed
         if (limb != LimbID::LEFT_LEG) {
-            target(0, 1)             = -target(0, 1);
-            target(0, 2)             = -target(0, 2);
-            target(1, 0)             = -target(1, 0);
-            target(2, 0)             = -target(2, 0);
-            target.translation().x() = -target.translation().x();
+            Htf(0, 1)             = -Htf(0, 1);
+            Htf(0, 2)             = -Htf(0, 2);
+            Htf(1, 0)             = -Htf(1, 0);
+            Htf(2, 0)             = -Htf(2, 0);
+            Htf.translation().x() = -Htf.translation().x();
         }
 
-        const Eigen::Matrix<Scalar, 3, 1> ankleX   = target.matrix().template leftCols<1>().template head<3>();
-        const Eigen::Matrix<Scalar, 3, 1> ankleY   = target.matrix().template middleCols<1>(1).template head<3>();
-        const Eigen::Matrix<Scalar, 3, 1> anklePos = target.translation();
+        const Eigen::Matrix<Scalar, 3, 1> ankle_x   = Htf.matrix().template leftCols<1>().template head<3>();
+        const Eigen::Matrix<Scalar, 3, 1> ankle_y   = Htf.matrix().template middleCols<1>(1).template head<3>();
+        const Eigen::Matrix<Scalar, 3, 1> ankle_pos = Htf.translation();
 
-        const Eigen::Matrix<Scalar, 3, 1> hipOffset(LENGTH_BETWEEN_LEGS * 0.5,
-                                                    HIP_OFFSET_X,
-                                                    -DISTANCE_FROM_BODY_TO_HIP_JOINT);
+        const Eigen::Matrix<Scalar, 3, 1> hip_offset(LENGTH_BETWEEN_LEGS * 0.5,
+                                                     HIP_OFFSET_X,
+                                                     -DISTANCE_FROM_BODY_TO_HIP_JOINT);
 
-        Eigen::Matrix<Scalar, 3, 1> targetLeg = anklePos - hipOffset;
+        Eigen::Matrix<Scalar, 3, 1> Htf_leg = ankle_pos - hip_offset;
 
-        const Scalar maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
-        Scalar length             = targetLeg.norm();
-        if (length > maxLegLength) {
-            targetLeg = targetLeg * maxLegLength / length;
-            length    = targetLeg.norm();
+        const Scalar max_leg_length = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;
+        Scalar length               = Htf_leg.norm();
+        if (length > max_leg_length) {
+            Htf_leg = Htf_leg * max_leg_length / length;
+            length  = Htf_leg.norm();
         }
-        const Scalar sqrLength   = length * length;
-        const Scalar sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
-        const Scalar sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
+        const Scalar sqr_length    = length * length;
+        const Scalar sqr_upperLeg  = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;
+        const Scalar sqr_lower_leg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
 
-        const Scalar cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-        knee                 = std::acos(std::max(std::min(cosKnee, Scalar(1.0)), Scalar(-1.0)));
+        const Scalar cosKnee =
+            (sqr_upperLeg + sqr_lower_leg - sqr_length) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
+        knee = std::acos(std::max(std::min(cosKnee, Scalar(1.0)), Scalar(-1.0)));
 
-        const Scalar cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);
-        const Scalar lowerLeg    = std::acos(std::max(std::min(cosLowerLeg, Scalar(1.0)), Scalar(-1.0)));
+        const Scalar cos_lower_leg = (sqr_lower_leg + sqr_length - sqr_upperLeg) / (2.0 * LOWER_LEG_LENGTH * length);
+        const Scalar lower_leg     = std::acos(std::max(std::min(cos_lower_leg, Scalar(1.0)), Scalar(-1.0)));
 
-        const Scalar phi2 = std::acos(targetLeg.dot(ankleY) / length);
+        const Scalar phi2 = std::acos(Htf_leg.dot(ankle_y) / length);
 
-        anklePitch = lowerLeg + phi2 - M_PI_2;
+        ankle_pitch = lower_leg + phi2 - M_PI_2;
 
-        const Eigen::Matrix<Scalar, 3, 1> unitTargetLeg = targetLeg / length;
+        const Eigen::Matrix<Scalar, 3, 1> unit_target_leg = Htf_leg / length;
 
-        Eigen::Matrix<Scalar, 3, 1> hipX = ankleY.cross(unitTargetLeg);
-        Scalar hipXLength                = hipX.norm();
-        if (hipXLength > 0) {
-            hipX /= hipXLength;
+        Eigen::Matrix<Scalar, 3, 1> hip_x = ankle_y.cross(unit_target_leg);
+        Scalar hip_xLength                = hip_x.norm();
+        if (hip_xLength > 0) {
+            hip_x /= hip_xLength;
         }
         else {
             NUClear::log<NUClear::DEBUG>(
-                "InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at "
+                "InverseKinematics::calculateLegJoints : Htf_leg and ankle_y parallel. This is unhandled at "
                 "the moment. requested pose = \n",
-                target.matrix());
+                Htf.matrix());
             return positions;
         }
-        // Will be unit as ankleY and hipX are normal and unit
-        const Eigen::Matrix<Scalar, 3, 1> legPlaneTangent = ankleY.cross(hipX);
+        // Will be unit as ankle_y and hip_x are normal and unit
+        const Eigen::Matrix<Scalar, 3, 1> leg_plane_tangent = ankle_y.cross(hip_x);
 
-        ankleRoll = std::atan2(ankleX.dot(legPlaneTangent), ankleX.dot(hipX));
+        ankle_roll = std::atan2(ankle_x.dot(leg_plane_tangent), ankle_x.dot(hip_x));
 
-        const bool isAnkleAboveWaist = unitTargetLeg.dot(Eigen::Matrix<Scalar, 3, 1>::UnitZ()) < 0;
+        const bool is_ankle_above_waist = unit_target_leg.dot(Eigen::Matrix<Scalar, 3, 1>::UnitZ()) < 0;
 
-        const Scalar cosZandHipX   = Eigen::Matrix<Scalar, 3, 1>::UnitZ().dot(hipX);
-        const bool hipRollPositive = cosZandHipX <= 0;
-        Eigen::Matrix<Scalar, 3, 1> legPlaneGlobalZ =
-            (isAnkleAboveWaist ? -1 : 1) * (Eigen::Matrix<Scalar, 3, 1>::UnitZ() - (cosZandHipX * hipX));
-        const Scalar legPlaneGlobalZLength = legPlaneGlobalZ.norm();
-        if (legPlaneGlobalZLength > 0) {
-            legPlaneGlobalZ /= legPlaneGlobalZLength;
+        const Scalar cos_z_and_hip_x = Eigen::Matrix<Scalar, 3, 1>::UnitZ().dot(hip_x);
+        const bool hip_roll_positive = cos_z_and_hip_x <= 0;
+        Eigen::Matrix<Scalar, 3, 1> leg_plane_global_z =
+            (is_ankle_above_waist ? -1 : 1) * (Eigen::Matrix<Scalar, 3, 1>::UnitZ() - (cos_z_and_hip_x * hip_x));
+        const Scalar leg_plane_global_z_length = leg_plane_global_z.norm();
+        if (leg_plane_global_z_length > 0) {
+            leg_plane_global_z /= leg_plane_global_z_length;
         }
 
-        const Scalar cosHipRoll = legPlaneGlobalZ.dot(Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-        hipRoll = (hipRollPositive ? 1 : -1) * std::acos(std::max(std::min(cosHipRoll, Scalar(1)), Scalar(-1)));
+        const Scalar cos_hip_roll = leg_plane_global_z.dot(Eigen::Matrix<Scalar, 3, 1>::UnitZ());
+        hip_roll = (hip_roll_positive ? 1 : -1) * std::acos(std::max(std::min(cos_hip_roll, Scalar(1)), Scalar(-1)));
 
-        const Scalar phi4 = M_PI - knee - lowerLeg;
+        const Scalar phi4 = M_PI - knee - lower_leg;
         // Superposition values:
-        const Scalar sinPIminusPhi2 = std::sin(M_PI - phi2);
-        const Eigen::Matrix<Scalar, 3, 1> unitUpperLeg =
-            unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
-        const bool isHipPitchPositive = hipX.dot(unitUpperLeg.cross(legPlaneGlobalZ)) >= 0;
+        const Scalar sin_PI_minus_phi_2 = std::sin(M_PI - phi2);
+        const Eigen::Matrix<Scalar, 3, 1> unit_upper_leg =
+            unit_target_leg * (std::sin(phi2 - phi4) / sin_PI_minus_phi_2)
+            + ankle_y * (std::sin(phi4) / sin_PI_minus_phi_2);
+        const bool is_hip_pitch_positive = hip_x.dot(unit_upper_leg.cross(leg_plane_global_z)) >= 0;
 
-        hipPitch = (isHipPitchPositive ? 1 : -1)
-                   * std::acos(std::max(std::min(legPlaneGlobalZ.dot(unitUpperLeg), Scalar(1)), Scalar(-1)));
+        hip_pitch = (is_hip_pitch_positive ? 1 : -1)
+                    * std::acos(std::max(std::min(leg_plane_global_z.dot(unit_upper_leg), Scalar(1)), Scalar(-1)));
 
-        // If leg is above waist then hipX is pointing in the wrong direction in the xy plane
-        Eigen::Matrix<Scalar, 3, 1> hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;
-        hipXProjected.z()                         = 0;
-        hipXProjected.normalize();
-        const bool isHipYawPositive = hipXProjected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitY()) >= 0;
-        hipYaw                      = (isHipYawPositive ? 1 : -1)
-                 * std::acos(std::max(std::min(hipXProjected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitX()), Scalar(1)),
-                                      Scalar(-1)));
+        // If leg is above waist then hip_x is pointing in the wrong direction in the xy plane
+        Eigen::Matrix<Scalar, 3, 1> hip_x_projected = (is_ankle_above_waist ? -1 : 1) * hip_x;
+        hip_x_projected.z()                         = 0;
+        hip_x_projected.normalize();
+        const bool is_hip_yaw_positive = hip_x_projected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitY()) >= 0;
+        hip_yaw                        = (is_hip_yaw_positive ? 1 : -1)
+                  * std::acos(std::max(std::min(hip_x_projected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitX()), Scalar(1)),
+                                       Scalar(-1)));
 
         if (limb == LimbID::LEFT_LEG) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hipRoll));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hipPitch));
+            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hip_yaw));
+            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hip_roll));
+            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hip_pitch));
             positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -ankle_pitch));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankle_roll));
         }
         else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
+            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hip_yaw));
+            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hip_roll));
+            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hip_pitch));
             positions.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee)));
             positions.push_back(
-                std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
+                std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -ankle_pitch));
             positions.push_back(
-                std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
+                std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankle_roll));
         }
 
         return positions;
