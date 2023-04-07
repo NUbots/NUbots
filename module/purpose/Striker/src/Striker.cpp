@@ -3,11 +3,9 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/state/Stability.hpp"
 #include "message/input/GameState.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
-#include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
@@ -19,20 +17,17 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using Phase    = message::input::GameState::Data::Phase;
-    using GameMode = message::input::GameState::Data::Mode;
+    using Phase = message::input::GameState::Data::Phase;
     using message::input::GameState;
     using message::planning::KickTo;
     using message::purpose::NormalStriker;
     using message::purpose::PenaltyShootoutStriker;
-    using message::strategy::FallRecovery;
     using message::strategy::FindBall;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
     using StrikerTask = message::purpose::Striker;
-    using message::behaviour::state::Stability;
     using utility::support::Expression;
 
 
