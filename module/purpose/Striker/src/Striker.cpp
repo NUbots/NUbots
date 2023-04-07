@@ -17,7 +17,8 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using Phase = message::input::GameState::Data::Phase;
+    using Phase    = message::input::GameState::Data::Phase;
+    using GameMode = message::input::GameState::Data::Mode;
     using message::input::GameState;
     using message::planning::KickTo;
     using message::purpose::NormalStriker;
