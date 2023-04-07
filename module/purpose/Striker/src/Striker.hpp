@@ -11,12 +11,6 @@ namespace module::purpose {
 
     class Striker : public ::extension::behaviour::BehaviourReactor {
     private:
-        /// @brief Stores configuration values
-        struct Config {
-            /// @brief The position of the robot to walk to in ready, relative to the field
-            Eigen::Vector3d rRFf = Eigen::Vector3d::Zero();
-        } cfg;
-
         /// @brief Calls Tasks to play soccer normally for a striker
         void play();
 

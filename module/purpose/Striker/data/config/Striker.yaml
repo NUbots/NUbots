@@ -1,5 +1,2 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
-
-# Position on the field to walk to in ready from the field centre in field space
-rRFf: [0.0, 0.0, 0.0]

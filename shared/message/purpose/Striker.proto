@@ -21,9 +21,8 @@ syntax = "proto3";
 package message.purpose;
 
 message Striker {
-    bool force_playing          = 1;
-    bool force_penalty_shootout = 2;
+    bool force_playing = 1;
 }
 
-message PlayStriker {}
+message NormalStriker {}
 message PenaltyShootoutStriker {}
