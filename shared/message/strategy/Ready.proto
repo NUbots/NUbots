@@ -20,7 +20,5 @@ syntax = "proto3";
 
 package message.strategy;
 
-import "Vector.proto";
-
 /// Ready state strategy for walking onto the field
 message Ready {}
