@@ -12,13 +12,13 @@ balancer:
   adjustment: -0.05 #default value is 0.
   # Height to the robot's origin (somewhere near the bottom of the torso)
   #stand_height: 0.23 #m
-  stand_height: 0.40
+  stand_height: 0.46
   # How far to move the torso forward.
-  # Note that this tilts both the hips and ankles
-  forward_lean: -0.05 #m
+  # Note: this tilts both the hips and ankles
+  forward_lean: 0.062 #m
 
-  forward_duration: 0.01 #m/s
-  return_duration: 0.01 #m/s
+  forward_duration: 0.001 #m/s
+  return_duration: 0.001 #m/s
 
 active_balance:
   enabled: false
@@ -42,12 +42,12 @@ active_balance:
 kick:
   kick_velocity: 0.5 #m/s
   follow_through: 0.10 #m
-  kick_height: 0.09 #m
-  wind_up: 0.05 #m
+  kick_height: 0.10 #m
+  wind_up: 0.10 #m
   foot_separation_margin: 0.04 #m
 
-  lift_before_windup_duration: 0.9
-  return_before_place_duration: 0.9
+  lift_before_windup_duration: 0.5
+  return_before_place_duration: 0.5
 
 kick_frames:
   servo_angle_threshold: 0.5
