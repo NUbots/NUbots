@@ -148,12 +148,13 @@ namespace module::motion {
                 Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
 
                 Eigen::Vector3d ballPosition = targetSupportFoot;
+                // NOTE: hard code bad
                 ballPosition.z()             = 0.05;  // TODO: get ball height from config
                 Eigen::Vector3d goalPosition = directionSupportFoot;
                 goalPosition.z()             = 0.0;
 
                 // DEBUG - LC
-                // NUClear::log<NUClear::DEBUG>("Trigger - supportFoot matrix: ", supportFoot.matrix());
+                NUClear::log<NUClear::DEBUG>("Trigger - supportFoot matrix: ", supportFoot.value);
 
                 balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
                 kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -175,16 +176,25 @@ namespace module::motion {
                 int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
 
                 // State checker
+                // If the balancer is stable, start the kicker
+                NUClear::log<NUClear::DEBUG>("balancer frame: ", balancer.anim.i);
+                NUClear::log<NUClear::DEBUG>("kicker frame: ", kicker.anim.i);
                 if (balancer.isStable()) {
+                    // DEBUG - LC
+                    NUClear::log<NUClear::DEBUG>("STATE CHECK - balancer.isStable");
                     kicker.start(kinematicsModel, sensors);
                 }
-
+                // If th kicker is stable, stop the balancer and kicker
                 if (kicker.isStable()) {
+                    // DEBUG - LC
+                    NUClear::log<NUClear::DEBUG>("STATE CHECK - kicker.isStable");
                     kicker.stop(sensors);
                     balancer.stop(sensors);
                 }
-
+                // If the balancer is finished, emit a FinishKick
                 if (balancer.isFinished()) {
+                    // DEBUG - LC
+                    NUClear::log<NUClear::DEBUG>("STATE CHECK - balancer.isFinished");
                     emit(std::move(std::make_unique<FinishKick>()));
                 }
 
@@ -197,7 +207,7 @@ namespace module::motion {
                 if (balancer.isRunning()) {
                     // NOTE: Nans coming from getFootPose
                     Eigen::Isometry3d supportFootPose = balancer.getFootPose(sensors);
-                    NUClear::log<NUClear::DEBUG>("supportFootPose Matrix: ", supportFootPose.matrix());
+                    // NUClear::log<NUClear::DEBUG>("supportFootPose Matrix: ", supportFootPose.matrix());
                     // double dummy = supportFootPose.matrix().coeff(3, 3);
                     // if (!std::isfinite(dummy)) {
                     //     std::cout << "I am exiting " << std::endl;
@@ -208,11 +218,14 @@ namespace module::motion {
                         supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
                 }
                 // ****DEBUG - LC****
-                NUClear::log<NUClear::DEBUG>("update just before getFootPose - kickFootGoal matrix: ",
-                                             kickFootGoal.matrix());
+                // NUClear::log<NUClear::DEBUG>("update just before getFootPose - kickFootGoal matrix: ",
+                //                              kickFootGoal.matrix());
                 // Move foot to ball to kick
                 if (kicker.isRunning()) {
+
                     kickFootGoal = kickFootGoal * kicker.getFootPose(sensors);
+                    // ****DEBUG - LC****
+                    NUClear::log<NUClear::DEBUG>("Kicker is running - kickfoot pose is: ", kickFootGoal.matrix());
                 }
 
                 // Balance based on the IMU
@@ -225,9 +238,10 @@ namespace module::motion {
                 // Calculate IK and send waypoints
                 std::vector<std::pair<ServoID, float>> joints;
                 // ****DEBUG - LC****
-                NUClear::log<NUClear::DEBUG>("update just before calc - kickFootGoal matrix: ", kickFootGoal.matrix());
-                NUClear::log<NUClear::DEBUG>("update just before calc - supportFootGoal matrix: ",
-                                             supportFootGoal.matrix());
+                // NUClear::log<NUClear::DEBUG>("update just before calc - kickFootGoal matrix: ",
+                // kickFootGoal.matrix()); NUClear::log<NUClear::DEBUG>("update just before calc - supportFootGoal
+                // matrix: ",
+                //                              supportFootGoal.matrix());
                 // IK
                 auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
                 auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
@@ -250,7 +264,7 @@ namespace module::motion {
                 // ****DEBUG - LC****
                 // NOTE: Want to check on the waypoints message
                 // NUClear::log<NUClear::DEBUG>("Just before waypoints emit - waypoints: ", waypoints);
-                NUClear::log<NUClear::DEBUG>("Just before waypoints emit");
+                // NUClear::log<NUClear::DEBUG>("Just before waypoints emit");
                 // Send message
                 emit(waypoints);
             });

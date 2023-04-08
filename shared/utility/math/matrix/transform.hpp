@@ -77,10 +77,10 @@ namespace utility::math::transform {
         // Create quaternions from the transforms' rotation matrices
         Eigen::Quaternion<Scalar> t1Rot = Eigen::Quaternion<Scalar>(t1.rotation());
         Eigen::Quaternion<Scalar> t2Rot = Eigen::Quaternion<Scalar>(t2.rotation());
-        // DEBUG!
-        NUClear::log<NUClear::DEBUG>("interpolate t1Rot: ", t1Rot.matrix());
-        // DEBUG!
-        NUClear::log<NUClear::DEBUG>("interpolate t2Rot: ", t2Rot.matrix());
+        // // DEBUG!
+        // NUClear::log<NUClear::DEBUG>("interpolate t1Rot: ", t1Rot.matrix());
+        // // DEBUG!
+        // NUClear::log<NUClear::DEBUG>("interpolate t2Rot: ", t2Rot.matrix());
 
         // Extract the translation vectors
         Eigen::Matrix<Scalar, 3, 1> t1Translation = t1.translation();
@@ -90,11 +90,11 @@ namespace utility::math::transform {
         Eigen::Transform<Scalar, 3, Eigen::Isometry> result;
         result = Eigen::Transform<Scalar, 3, Eigen::Isometry>::Identity();
 
-        // DEBUG!
-        NUClear::log<NUClear::DEBUG>("interpolate result1: ", result.matrix());
+        // // DEBUG!
+        // NUClear::log<NUClear::DEBUG>("interpolate result1: ", result.matrix());
         result.linear() = (t1Rot.slerp(alpha, t2Rot)).toRotationMatrix();
-        // DEBUG!
-        NUClear::log<NUClear::DEBUG>("interpolate result2 after slerp: ", result.matrix());
+        // // DEBUG!
+        // NUClear::log<NUClear::DEBUG>("interpolate result2 after slerp: ", result.matrix());
         result.translation() = alpha * (t2Translation - t1Translation) + t1Translation;
         return result;
     }

@@ -140,6 +140,7 @@ namespace module::motion {
                 stage           = MotionStage::RUNNING;
                 stable          = false;
                 motionStartTime = sensors.timestamp;
+                NUClear::log<NUClear::DEBUG>("MotionStage::RUNNING");
                 computeStartMotion(kinematicsModel, sensors);
             }
         }
@@ -150,6 +151,7 @@ namespace module::motion {
                 stage           = MotionStage::STOPPING;
                 stable          = false;
                 motionStartTime = sensors.timestamp;
+                NUClear::log<NUClear::DEBUG>("MotionStage::STOPPING");
                 computeStopMotion(sensors);
             }
         }
@@ -194,15 +196,15 @@ namespace module::motion {
                     std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count()
                     * 1e-6;
                 // DEBUG!
-                NUClear::log<NUClear::DEBUG>("getFootPose motionStartTime: ",
-                                             motionStartTime.time_since_epoch().count());
+                // NUClear::log<NUClear::DEBUG>("getFootPose motionStartTime: ",
+                //                              motionStartTime.time_since_epoch().count());
                 double alpha = (anim.currentFrame().duration != 0)
                                    ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
                                    : 1;
                 // DEBUG!
-                NUClear::log<NUClear::DEBUG>("getFootPose alpha: ", alpha);
-                NUClear::log<NUClear::DEBUG>("getFootPose anim.previousFrame: ", anim.previousFrame().pose.matrix());
-                NUClear::log<NUClear::DEBUG>("getFootPose anim.currentFrame: ", anim.currentFrame().pose.matrix());
+                // NUClear::log<NUClear::DEBUG>("getFootPose alpha: ", alpha);
+                // NUClear::log<NUClear::DEBUG>("getFootPose anim.previousFrame: ", anim.previousFrame().pose.matrix());
+                // NUClear::log<NUClear::DEBUG>("getFootPose anim.currentFrame: ", anim.currentFrame().pose.matrix());
                 result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
                 // NOTE: result has nan in bottom right of matrix just before error
                 // DEBUG!
@@ -238,10 +240,10 @@ namespace module::motion {
     class KickBalancer : public SixDOFFootController {
     private:
         // Config
-        float stand_height    = 0.18;
-        float foot_separation = 0.074;
-        float forward_lean    = 0.01;
-        float adjustment      = 0.011;
+        float stand_height    = 0.0;
+        float foot_separation = 0.0;
+        float forward_lean    = 0.0;
+        float adjustment      = 0.0;
 
     public:
         virtual void configure(const ::extension::Configuration& config);
