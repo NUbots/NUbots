@@ -20,12 +20,12 @@ Add this module to play as a striker in soccer!
 - `message::input::GameState::Data::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
 - `message::strategy::Striker` a Task requesting to play as a Striker
 - `message::strategy::NormalStriker` a Test requesting to play as a Striker in the normal game state
-- `message::strategy::PenaltyShootoutStriker` a Test requesting to play as a Striker in the penalty shootout game state
+- `message::strategy::PenaltyShootoutStriker` a Task requesting to play as a Striker in the penalty shootout game state
 
 ## Emits
 
-- `message::strategy::NormalStriker` a Test requesting to play as a Striker in the normal game state
-- `message::strategy::PenaltyShootoutStriker` a Test requesting to play as a Striker in the penalty shootout game state
+- `message::strategy::NormalStriker` a Task requesting to play as a Striker in the normal game state
+- `message::strategy::PenaltyShootoutStriker` a Task requesting to play as a Striker in the penalty shootout game state
 - `message::strategy::Ready` a Task requesting to walk to the ready position
 - `message::strategy::StandStill` a Task requesting to stand still and not move
 - `message::strategy::FindBall` a Task requesting to look and move around to find the ball
