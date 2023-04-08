@@ -21,6 +21,7 @@
 
 #include <Eigen/Geometry>
 #include <cmath>
+#include <unistd.h>
 
 #include "extension/Configuration.hpp"
 
@@ -447,6 +448,9 @@ namespace module::behaviour::strategy {
             // log<NUClear::DEBUG>("Gonna Kick!");
             Eigen::Vector3d test_point     = {0.05, -0.055, -0.35};
             Eigen::Vector3d test_direction = {0.05, 0.0, 0.0};
+            // NOTE: Hacky stand still before kicking
+            stand_still();
+            sleep(2);
             emit(std::make_unique<KickCommand>(test_point, test_direction, KickCommandType::NORMAL));
         }
         else {
