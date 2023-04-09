@@ -177,8 +177,8 @@ namespace module::motion {
 
                 // State checker
                 // If the balancer is stable, start the kicker
-                NUClear::log<NUClear::DEBUG>("balancer frame: ", balancer.anim.i);
-                NUClear::log<NUClear::DEBUG>("kicker frame: ", kicker.anim.i);
+                // NUClear::log<NUClear::DEBUG>("balancer frame: ", balancer.anim.get_index());
+                // NUClear::log<NUClear::DEBUG>("kicker frame: ", kicker.anim.get_index());
                 if (balancer.isStable()) {
                     // DEBUG - LC
                     NUClear::log<NUClear::DEBUG>("STATE CHECK - balancer.isStable");

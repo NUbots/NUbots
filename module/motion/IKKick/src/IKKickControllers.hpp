@@ -99,6 +99,9 @@ namespace module::motion {
         bool stable() {
             return i >= int(frames.size() - 2);
         }
+        int get_index() {
+            return i;
+        }
     };
 
     class SixDOFFootController {
@@ -190,8 +193,9 @@ namespace module::motion {
 
         Eigen::Isometry3d getFootPose(const message::input::Sensors& sensors) {
             auto result = Eigen::Isometry3d::Identity();
+            NUClear::log<NUClear::DEBUG>("Get foot pose.");
             if (stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
-
+                NUClear::log<NUClear::DEBUG>("Get foot pose - RUNNING || STOPPING.");
                 double elapsedTime =
                     std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count()
                     * 1e-6;
@@ -208,7 +212,7 @@ namespace module::motion {
                 result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
                 // NOTE: result has nan in bottom right of matrix just before error
                 // DEBUG!
-                NUClear::log<NUClear::DEBUG>("getFootPose result: ", result.matrix());
+                // NUClear::log<NUClear::DEBUG>("getFootPose result: ", result.matrix());
                 bool servosAtGoal = true;
 
                 // Check all the servos between R_HIP_YAW and L_ANKLE_ROLL are within the angle threshold
@@ -222,12 +226,18 @@ namespace module::motion {
 
                 if (alpha >= 1.0 && servosAtGoal) {
                     stable = anim.stable();
+                    NUClear::log<NUClear::DEBUG>("Servos at goal");
+                    NUClear::log<NUClear::DEBUG>("anim index 1: ", anim.get_index());
                     if (!stable) {
+                        NUClear::log<NUClear::DEBUG>("anim index 2: ", anim.get_index());
                         anim.next();
                         motionStartTime = sensors.timestamp;
                     }
                 }
+                NUClear::log<NUClear::DEBUG>("stable: ", stable);
+                NUClear::log<NUClear::DEBUG>("stage: : ", stage);
                 if (stable && stage == MotionStage::STOPPING) {
+                    NUClear::log<NUClear::DEBUG>("kick finished");
                     stage = MotionStage::FINISHED;
                 }
             }

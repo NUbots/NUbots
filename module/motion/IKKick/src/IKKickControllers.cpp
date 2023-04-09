@@ -155,6 +155,7 @@ namespace module::motion {
     }
     void Kicker::computeStopMotion(const Sensors&) {
         // Just play the place_foot frame
+        NUClear::log<NUClear::DEBUG>("Kicker playing place foot frame.");
         std::vector<SixDOFFrame> frames;
         frames.push_back(place_foot);
         anim = Animator(frames);
