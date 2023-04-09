@@ -6,66 +6,68 @@ servo:
   torque: 100
 
 balancer:
-  servo_angle_threshold: 0.5
-  foot_separation: 0.15 # 0.074 = hip separation
+  # Restricts the allowable error in the desired angle
+  # and the current angle before playing the next frame
+  servo_angle_threshold: 1.0
+  foot_separation: 0.165 # 0.074 = hip separation
   # Adjusts how far the robot leans over it's support foot
-  adjustment: -0.05 #default value is 0.
+  adjustment: 0.001050 #default value is 0.
   # Height to the robot's origin (somewhere near the bottom of the torso)
   #stand_height: 0.23 #m
   stand_height: 0.46
   # How far to move the torso forward.
   # Note: this tilts both the hips and ankles
-  forward_lean: 0.062 #m
+  forward_lean: 0.0680 #m
 
   forward_duration: 0.001 #m/s
   return_duration: 0.001 #m/s
 
 active_balance:
-  enabled: false
-  hip_rotation_scale: 0.00
-  ankle_rotation_scale: 0.5
+  enabled: true
+  hip_rotation_scale: 0.03
+  ankle_rotation_scale: 0.03
   angle_gain:
-    p: 0.1
+    p: 0.12
     i: 0.0
     d: 0.0
   translation_gain:
     X:
-      p: 0.25
-      d: -0.0
+      p: 0.10
+      d: 0.0
     Y:
-      p: 0.185
-      d: 0
+      p: 0.15
+      d: 0.0
     Z:
       p: 0.0
       d: 0
 
 kick:
-  kick_velocity: 0.5 #m/s
+  kick_velocity: 0.10 #m/s
   follow_through: 0.10 #m
-  kick_height: 0.10 #m
+  kick_height: 0.06 #m
   wind_up: 0.10 #m
-  foot_separation_margin: 0.04 #m
+  foot_separation_margin: 0.09 #m
 
   lift_before_windup_duration: 0.5
   return_before_place_duration: 0.5
 
 kick_frames:
-  servo_angle_threshold: 0.5
+  servo_angle_threshold: 2.0
   # note that some of the following config is overwritten by planning processes
   lift_foot:
     #Note: pos does nothing
     pos: [-0.05, 0, 0.05]
     orientation: [0, 0, 0]
-    duration: 0.6
+    duration: 0.5
 
   kick:
     #Note: pos and duration do nothing
     pos: [0, 0, 0]
     orientation: [0, 0, 0]
-    duration: 0.5
+    duration: 0.25
 
   place_foot:
     #This transform WILL entirely define the foot placement after kicking
-    pos: [0, 0.02, 0.02]
-    orientation: [0, 0, 0]
-    duration: 0.5
+    pos: [0.0, 0.0, -0.06]
+    orientation: [0, 0, 0.0]
+    duration: 0.25
