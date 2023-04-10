@@ -14,23 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2022 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#include <memory>
+package message.strategy;
 
-#include "Director.hpp"
-
-#include "extension/Behaviour.hpp"
-
-namespace module::extension {
-
-    using component::DirectorTask;
-
-    bool Director::direct_priority(const std::shared_ptr<DirectorTask>& incumbent,
-                                   const std::shared_ptr<DirectorTask>& challenger) {
-        return incumbent->optional == challenger->optional ? incumbent->priority < challenger->priority
-                                                           : incumbent->optional;
-    }
-
-}  // namespace module::extension
+/// Robot walks to the ball or searches if it can't find it
+message WalkToBall {}

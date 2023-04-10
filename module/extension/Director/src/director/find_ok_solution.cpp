@@ -21,7 +21,7 @@
 
 namespace module::extension {
 
-    using provider::Provider;
+    using component::Provider;
 
     Director::OkSolution Director::find_ok_solution(const Solution& solution,
                                                     const std::set<std::type_index>& used_types) {

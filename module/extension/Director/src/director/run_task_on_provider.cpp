@@ -21,11 +21,12 @@
 
 namespace module::extension {
 
+    using component::DirectorTask;
+    using component::Provider;
     using ::extension::behaviour::RunInfo;
-    using provider::Provider;
 
-    void Director::run_task_on_provider(const std::shared_ptr<BehaviourTask>& task,
-                                        const std::shared_ptr<provider::Provider>& provider,
+    void Director::run_task_on_provider(const std::shared_ptr<DirectorTask>& task,
+                                        const std::shared_ptr<component::Provider>& provider,
                                         const RunInfo::RunReason& run_reason) {
 
         // Update the active provider and task
