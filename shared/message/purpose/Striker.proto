@@ -16,11 +16,13 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.purpose;
+package message.purpose;
 
- message Striker {}
+message Striker {
+    bool force_playing = 1;
+}
 
- message PlayStriker{}
- message PenaltyShootoutStriker {}
+message NormalStriker {}
+message PenaltyShootoutStriker {}

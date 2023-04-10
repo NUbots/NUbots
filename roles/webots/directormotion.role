@@ -6,7 +6,9 @@ nuclear_role(
   # Config
   support::configuration::SoccerConfig
   actuation::KinematicsConfiguration
+  support::configuration::GlobalConfig
   # Sensors
+  input::GameController
   input::SensorFilter
   platform::Webots
   # Vision
@@ -39,5 +41,6 @@ nuclear_role(
   strategy::FindObject
   strategy::Ready
   # Purposes
+  purpose::Striker
   purpose::RoboCup
 )

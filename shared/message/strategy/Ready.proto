@@ -20,10 +20,5 @@ syntax = "proto3";
 
 package message.strategy;
 
-import "Vector.proto";
-
 /// Ready state strategy for walking onto the field
-message Ready {
-    /// The target position to walk to relative to the field
-    vec3 rRFf = 1;
-}
+message Ready {}
