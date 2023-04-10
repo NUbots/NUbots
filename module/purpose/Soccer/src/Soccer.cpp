@@ -1,4 +1,4 @@
-#include "RoboCup.hpp"
+#include "Soccer.hpp"
 
 #include <string>
 
@@ -31,10 +31,10 @@ namespace module::purpose {
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
 
-    RoboCup::RoboCup(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+    Soccer::Soccer(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("RoboCup.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file RoboCup.yaml
+        on<Configuration>("Soccer.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file Soccer.yaml
             this->log_level   = config["log_level"].as<NUClear::LogLevel>();
             cfg.force_playing = config["force_playing"].as<bool>();
 
@@ -42,12 +42,12 @@ namespace module::purpose {
             cfg.position = Position(config["position"].as<std::string>());
         });
 
-        // Start the Director graph for the RoboCup soccer scenario!
+        // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
             // Without this emit, modules that need a Stability message may not run
             emit(std::make_unique<Stability>(Stability::STANDING));
-            // This emit starts the tree to play soccer for the robocup competiton
+            // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>());
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 1);

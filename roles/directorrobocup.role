@@ -39,5 +39,5 @@ nuclear_role(
   strategy::Ready
   # Purposes
   purpose::Striker
-  purpose::RoboCup
+  purpose::Soccer
 )

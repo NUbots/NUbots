@@ -1,14 +1,14 @@
-# RoboCup
+# Soccer
 
 ## Description
 
-Starts the Director graph for the RoboCup scenario. If the robot is penalised, it will make it stand still. Otherwise, it will emit the Task corresponding to the soccer position specified in configuration.
+Starts the Director graph for the soccer scenario. If the robot is penalised, it will make it stand still. Otherwise, it will emit the Task corresponding to the soccer position specified in configuration.
 
 Possible positions are Striker, Goalie and Defender.
 
 ## Usage
 
-Include this in your role to start the Director tree for the RoboCup scenario.
+Include this in your role to start the Director tree to play soccer.
 
 ## Consumes
 
@@ -19,7 +19,7 @@ Include this in your role to start the Director tree for the RoboCup scenario.
 
 ## Emits
 
-- `message::purpose::FindPurpose` a Task to request to find the robot's soccer playing purpose, to start the Director graph for the RoboCup scenario
+- `message::purpose::FindPurpose` a Task to request to find the robot's soccer playing purpose, to start the Director graph to play soccer
 - `message::strategy::StandStill` to make the robot still while penalised
 - `message::platform::ResetWebotsServos` to reset the servos in Webots when penalised
 - `message::purpose::Striker` a Task to request the robot acts as a striker
