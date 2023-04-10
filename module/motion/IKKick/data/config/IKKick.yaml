@@ -20,14 +20,15 @@ balancer:
   forward_lean: 0.0620 #m
 
   # Seems to be the forward duration of the kick movement
-  forward_duration: 0.05 #m/s
+  # - Also seems to be related to an ankle glitch
+  forward_duration: 0.0005 #m/s
   # TBA
-  return_duration: 0.05 #m/s
+  return_duration: 0.005 #m/s
 
 active_balance:
   enabled: true
   hip_rotation_scale: 0.09
-  ankle_rotation_scale: 0.09
+  ankle_rotation_scale: 0.009
   angle_gain:
     p: 0.01
     i: 0.0
