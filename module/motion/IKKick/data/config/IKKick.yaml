@@ -29,7 +29,7 @@ active_balance:
   hip_rotation_scale: 0.09
   ankle_rotation_scale: 0.09
   angle_gain:
-    p: 0.02
+    p: 0.01
     i: 0.0
     d: 0.0
   translation_gain:
@@ -54,7 +54,7 @@ kick:
   return_before_place_duration: 0.15
 
 kick_frames:
-  servo_angle_threshold: 2.0
+  servo_angle_threshold: 1.5
   # note that some of the following config is overwritten by planning processes
   lift_foot:
     #Note: pos does nothing
