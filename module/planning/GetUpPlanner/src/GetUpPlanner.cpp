@@ -49,17 +49,14 @@ namespace module::planning {
 
                 bool running = getup.run_state == GroupInfo::RunState::RUNNING;
                 bool queued  = getup.run_state == GroupInfo::RunState::QUEUED;
-                bool no_task = getup.run_state == GroupInfo::RunState::NO_TASK;
-
-                bool get_up = recovery_frames > cfg.count;
 
                 // If we have been at recovery levels for long enough we can trigger a getup, but only if we haven't
                 // already requested one
-                if (get_up && no_task) {
+                if (recovery_frames > cfg.count && getup.run_state == GroupInfo::RunState::NO_TASK) {
                     emit<Task>(std::make_unique<GetUp>());
                 }
-                // Keep running the get up if running and not done, or if we are queued and we need to get up
-                else if ((get_up && queued) || (running && !getup.done)) {
+                // Keep requesting the get up if running and not done, or if we are queued and we need to get up
+                else if ((recovery_frames > cfg.count && queued) || (running && !getup.done)) {
                     emit<Task>(std::make_unique<Idle>());
                 }
                 // Otherwise do not need to get up so emit no tasks
