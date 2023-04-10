@@ -19,23 +19,25 @@ balancer:
   # Note: this tilts both the hips and ankles
   forward_lean: 0.0620 #m
 
+  # Seems to be the forward duration of the kick movement
   forward_duration: 0.05 #m/s
-  return_duration: 0.001 #m/s
+  # TBA
+  return_duration: 0.05 #m/s
 
 active_balance:
   enabled: true
-  hip_rotation_scale: 0.05
-  ankle_rotation_scale: 0.05
+  hip_rotation_scale: 0.09
+  ankle_rotation_scale: 0.09
   angle_gain:
-    p: 0.12
+    p: 0.02
     i: 0.0
     d: 0.0
   translation_gain:
     X:
-      p: 0.05
+      p: 0.02
       d: 0.0
     Y:
-      p: 0.05
+      p: 0.02
       d: 0.0
     Z:
       p: 0.0
@@ -46,10 +48,10 @@ kick:
   follow_through: 0.20 #m
   kick_height: 0.10 #m
   wind_up: 0.10 #m
-  foot_separation_margin: 0.20 #m
+  foot_separation_margin: 0.10 #m
 
   lift_before_windup_duration: 0.15
-  return_before_place_duration: 0.05
+  return_before_place_duration: 0.15
 
 kick_frames:
   servo_angle_threshold: 2.0
