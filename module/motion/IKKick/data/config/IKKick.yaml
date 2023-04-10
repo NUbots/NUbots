@@ -17,39 +17,39 @@ balancer:
   stand_height: 0.46
   # How far to move the torso forward.
   # Note: this tilts both the hips and ankles
-  forward_lean: 0.0680 #m
+  forward_lean: 0.0620 #m
 
-  forward_duration: 0.001 #m/s
+  forward_duration: 0.05 #m/s
   return_duration: 0.001 #m/s
 
 active_balance:
   enabled: true
-  hip_rotation_scale: 0.03
-  ankle_rotation_scale: 0.03
+  hip_rotation_scale: 0.05
+  ankle_rotation_scale: 0.05
   angle_gain:
     p: 0.12
     i: 0.0
     d: 0.0
   translation_gain:
     X:
-      p: 0.10
+      p: 0.05
       d: 0.0
     Y:
-      p: 0.15
+      p: 0.05
       d: 0.0
     Z:
       p: 0.0
       d: 0
 
 kick:
-  kick_velocity: 0.10 #m/s
-  follow_through: 0.10 #m
-  kick_height: 0.06 #m
+  kick_velocity: 0.25 #m/s
+  follow_through: 0.20 #m
+  kick_height: 0.10 #m
   wind_up: 0.10 #m
-  foot_separation_margin: 0.09 #m
+  foot_separation_margin: 0.20 #m
 
-  lift_before_windup_duration: 0.5
-  return_before_place_duration: 0.5
+  lift_before_windup_duration: 0.15
+  return_before_place_duration: 0.05
 
 kick_frames:
   servo_angle_threshold: 2.0
@@ -58,7 +58,7 @@ kick_frames:
     #Note: pos does nothing
     pos: [-0.05, 0, 0.05]
     orientation: [0, 0, 0]
-    duration: 0.5
+    duration: 0.25
 
   kick:
     #Note: pos and duration do nothing
@@ -68,6 +68,6 @@ kick_frames:
 
   place_foot:
     #This transform WILL entirely define the foot placement after kicking
-    pos: [0.0, 0.0, -0.06]
+    pos: [0.0, 0.00, -0.02]
     orientation: [0, 0, 0.0]
     duration: 0.25
