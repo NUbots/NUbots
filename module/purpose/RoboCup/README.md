@@ -22,8 +22,8 @@ Include this in your role to start the Director tree for the RoboCup scenario.
 - `message::purpose::FindPurpose` a Task to request to find the robot's soccer playing purpose, to start the Director graph for the RoboCup scenario
 - `message::strategy::StandStill` to make the robot still while penalised
 - `message::platform::ResetWebotsServos` to reset the servos in Webots when penalised
-- `message::purpose::Striker` a task to Request the robot acts as a striker
-- `message::purpose::Goalie` a task to Request the robot acts as a goalie
-- `message::purpose::Defender` a task to Request the robot acts as a defender
+- `message::purpose::Striker` a Task to request the robot acts as a striker
+- `message::purpose::Goalie` a Task to request the robot acts as a goalie
+- `message::purpose::Defender` a Task to request the robot acts as a defender
 -
 ## Dependencies

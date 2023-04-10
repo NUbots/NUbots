@@ -36,11 +36,8 @@ namespace module::purpose {
 
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Whether or not to force the robot to ignore GameController and play as if in normal playing mode
+            /// @brief Whether or not to force the robot to ignore GameController and play
             bool force_playing = false;
-            /// @brief Whether or not to force the robot to ignore GameController and play as if in penalty shootout
-            /// playing mode
-            bool force_penalty_shootout = false;
             /// @brief The soccer position of the robot
             Position position{};
         } cfg;

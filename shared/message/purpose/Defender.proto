@@ -20,6 +20,6 @@
 
  package message.purpose;
 
- message Defender {}
-
- message PlayDefender{}
+ message Defender {
+    bool force_playing = 1;
+ }
