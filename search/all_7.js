@@ -40,7 +40,7 @@ var searchData=
   ['getparticleweights_338',['getParticleWeights',['../classutility_1_1math_1_1filter_1_1ParticleFilter.html#a8f71059b704d1ce68c93de44f5cb336f',1,'utility::math::filter::ParticleFilter']]],
   ['getpoints_339',['getPoints',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#a89896e4c47834688d00ac8869a85dfb9',1,'utility::motion::splines::SmoothSpline']]],
   ['gettimes_340',['getTimes',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a2fd3241691e45448dd5bc8b7b4420004',1,'utility::motion::splines::SplineContainer']]],
-  ['getting_5fup_341',['getting_up',['../classmodule_1_1planning_1_1GetUpPlanner.html#a4b42340c7ab67ffe6b7602575cfbfc94',1,'module::planning::GetUpPlanner::getting_up()'],['../classmodule_1_1behaviour_1_1skills_1_1Getup.html#a94d01d4e3bbbeb1e8c98b613824273b8',1,'module::behaviour::skills::Getup::getting_up()']]],
+  ['getting_5fup_341',['getting_up',['../classmodule_1_1behaviour_1_1skills_1_1Getup.html#a94d01d4e3bbbeb1e8c98b613824273b8',1,'module::behaviour::skills::Getup']]],
   ['gettopcentre_342',['getTopCentre',['../classutility_1_1math_1_1geometry_1_1Quad.html#a69211859f9c7512f72b79bbc876ecd6c',1,'utility::math::geometry::Quad']]],
   ['gettopleft_343',['getTopLeft',['../classutility_1_1math_1_1geometry_1_1Quad.html#a3d44fa4a90c095efa1f57bd36d8c1a66',1,'utility::math::geometry::Quad']]],
   ['gettopright_344',['getTopRight',['../classutility_1_1math_1_1geometry_1_1Quad.html#a883e4edb426c41b638bdadce715db2a0',1,'utility::math::geometry::Quad']]],
