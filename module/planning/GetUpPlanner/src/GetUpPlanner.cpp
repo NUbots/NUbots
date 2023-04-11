@@ -30,42 +30,37 @@ namespace module::planning {
             cfg.acc       = config["acc"].as<Expression>();
         });
 
-        on<Provide<GetUpWhenFallen>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
-            // Other trigger means we got a new sensors object
-            if (info.run_reason == RunInfo::OTHER_TRIGGER) {
-                // Calculate our recovery values
-                // Htw(2, 2) contains the dot product of the z axis of the torso with the world z axis (cos_angle)
-                double cos_angle = sensors.Htw(2, 2);
-                double acc       = sensors.accelerometer.norm() - cfg.g;
-                double gyro      = sensors.gyroscope.x() + sensors.gyroscope.y() + sensors.gyroscope.z();
+        on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
+            [this](const RunInfo& info, const Uses<GetUp>& getup, const Sensors& sensors) {
+                // Other trigger means we got a new sensors object
+                if (info.run_reason == RunInfo::OTHER_TRIGGER) {
+                    // Calculate our recovery values
+                    // Htw(2, 2) contains the dot product of the z axis of the torso with the world z axis (cos_angle)
+                    double cos_angle = sensors.Htw(2, 2);
+                    double acc       = sensors.accelerometer.norm() - cfg.g;
+                    double gyro      = sensors.gyroscope.x() + sensors.gyroscope.y() + sensors.gyroscope.z();
 
-                // Check if we are at recovery levels
-                bool recovery = cos_angle < cfg.cos_angle && acc < cfg.acc && gyro < cfg.gyro;
+                    // Check if we are at recovery levels
+                    bool recovery = cos_angle < cfg.cos_angle && acc < cfg.acc && gyro < cfg.gyro;
 
-                // Accumulate recovery frames or reset if we are not at recovery levels
-                recovery_frames = recovery ? recovery_frames + 1 : 0;
-            }
+                    // Accumulate recovery frames or reset if we are not at recovery levels
+                    recovery_frames = recovery ? recovery_frames + 1 : 0;
+                }
 
-            // We have finished getting up so we can reset getting_up and decide if we want to get up again (we failed)
-            // If we don't this will make our task lapse and other providers can take over
-            if (getting_up && info.run_reason == RunInfo::SUBTASK_DONE) {
-                getting_up = false;
-            }
+                bool running = getup.run_state == GroupInfo::RunState::RUNNING;
+                bool queued  = getup.run_state == GroupInfo::RunState::QUEUED;
 
-            // If we have been at recovery levels for long enough we can trigger a getup
-            if (!getting_up && recovery_frames > cfg.count) {
-                getting_up = true;
-                // Emit a getup
-                emit<Task>(std::make_unique<GetUp>());
-            }
-            // We are still getting up
-            else if (getting_up) {
-                emit<Task>(std::make_unique<Idle>());
-            }
-        });
-
-        // If we are interrupted make sure we know we are no longer getting up
-        on<Stop<GetUpWhenFallen>>().then([this] { getting_up = false; });
+                // If we have been at recovery levels for long enough we can trigger a getup, but only if we haven't
+                // already requested one
+                if (recovery_frames > cfg.count && getup.run_state == GroupInfo::RunState::NO_TASK) {
+                    emit<Task>(std::make_unique<GetUp>());
+                }
+                // Keep requesting the get up if running and not done, or if we are queued and we need to get up
+                else if ((recovery_frames > cfg.count && queued) || (running && !getup.done)) {
+                    emit<Task>(std::make_unique<Idle>());
+                }
+                // Otherwise do not need to get up so emit no tasks
+            });
     }
 
 }  // namespace module::planning
