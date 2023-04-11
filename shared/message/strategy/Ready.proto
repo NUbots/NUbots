@@ -14,23 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2022 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
+syntax = "proto3";
 
-#include <memory>
+package message.strategy;
 
-#include "Director.hpp"
+import "Vector.proto";
 
-#include "extension/Behaviour.hpp"
-
-namespace module::extension {
-
-    using component::DirectorTask;
-
-    bool Director::direct_priority(const std::shared_ptr<DirectorTask>& incumbent,
-                                   const std::shared_ptr<DirectorTask>& challenger) {
-        return incumbent->optional == challenger->optional ? incumbent->priority < challenger->priority
-                                                           : incumbent->optional;
-    }
-
-}  // namespace module::extension
+/// Ready state strategy for walking onto the field
+message Ready {
+    /// The target position to walk to relative to the field
+    vec3 rRFf = 1;
+}
