@@ -92,7 +92,7 @@ namespace module::actuation {
 
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<Head>();
-                auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
+                auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPTt));
 
                 // Get head kinematics limits
                 double max_yaw   = kinematics_model.head.MAX_YAW;
