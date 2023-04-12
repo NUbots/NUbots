@@ -9,9 +9,12 @@ namespace module::purpose {
 
 class Defender : public ::extension::behaviour::BehaviourReactor {
     private:
-        /// @brief Stores configuration values
-        struct Config {
-        } cfg;
+        // /// @brief Stores configuration values
+        // struct Config {
+        // } cfg;
+
+        /// @brief Calls Tasks to play soccer normally for a defender
+        void play();
 
     public:
         /// @brief Called by the powerplant to build and setup the Defender reactor.
