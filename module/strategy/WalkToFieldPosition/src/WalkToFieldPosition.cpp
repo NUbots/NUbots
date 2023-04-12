@@ -27,7 +27,7 @@ namespace module::strategy {
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
-                // Transform the field position into the robot's torso frame
+                // Transform the desired field {f} position into ground {g} space
                 const Eigen::Isometry3f Hfw = Eigen::Isometry3f(field.Hfw.cast<float>());
                 const Eigen::Isometry3f Hgw = Eigen::Isometry3f(sensors.Hgw.cast<float>());
                 const Eigen::Isometry3f Hgf = Hgw * Hfw.inverse();
@@ -41,11 +41,11 @@ namespace module::strategy {
                     const Eigen::Vector3f uHFf(std::cos(walk_to_field_position.heading),
                                                std::sin(walk_to_field_position.heading),
                                                0.0f);
-                    // Rotate the desired heading in field space to the robot's torso space
-                    const Eigen::Vector3f uHTt(Hgf.linear() * uHFf);
-                    heading = std::atan2(uHTt.y(), uHTt.x());
+                    // Rotate the desired heading in field space to ground space
+                    const Eigen::Vector3f uHGg(Hgf.linear() * uHFf);
+                    heading = std::atan2(uHGg.y(), uHGg.x());
                 }
-                // Otherwise, walk directly to the field position aligning with the point
+                // Otherwise, walk directly to the field position
                 else {
                     heading = std::atan2(rPGg.y(), rPGg.x());
                 }
