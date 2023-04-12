@@ -41,11 +41,8 @@ nuclear_role(
   strategy::WalkToBall
   strategy::FindObject
   strategy::Ready
-<<<<<<< HEAD:roles/webots/directormotion.role
   strategy::DiveToBall
-=======
   # Purposes
   purpose::Striker
   purpose::Soccer
->>>>>>> main:roles/webots/directorrobocup.role
 )
