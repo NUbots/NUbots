@@ -53,8 +53,8 @@ Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : Behaviou
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
                 }
-            });
 
+                    // Put this in the above SWITCH
         // Normal READY state
         on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::READY>>().then(
             [this] { emit<Task>(std::make_unique<Ready>()); });
@@ -66,8 +66,9 @@ Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : Behaviou
         on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
-        // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<DefenderTask>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+            });
+
+
     }
 
     void Defender::play() {
