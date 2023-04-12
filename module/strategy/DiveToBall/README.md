@@ -2,7 +2,7 @@
 
 ## Description
 
-Dives when the ball is close enough on the x-axis in the direction of the ball. Intended for use by a goalie to stop the ball.
+Dives when the ball is close enough on the x-axis, diving in the direction of the ball. Intended for use by a goalie to stop the ball.
 
 ## Usage
 
