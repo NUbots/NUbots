@@ -249,6 +249,7 @@ var hierarchy =
         [ "module::planning::PlanKick", "classmodule_1_1planning_1_1PlanKick.html", null ],
         [ "module::planning::PlanLook", "classmodule_1_1planning_1_1PlanLook.html", null ],
         [ "module::planning::PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", null ],
+        [ "module::purpose::Striker", "classmodule_1_1purpose_1_1Striker.html", null ],
         [ "module::skill::GetUp", "classmodule_1_1skill_1_1GetUp.html", null ],
         [ "module::skill::Look", "classmodule_1_1skill_1_1Look.html", null ],
         [ "module::skill::QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", null ],

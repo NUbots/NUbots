@@ -553,6 +553,12 @@ var namespaces_dup =
         [ "translate_id_servo", "Webots_8cpp.html#a81eded8b344d72482e2c16f89c1d4a34", null ],
         [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ]
       ] ],
+      [ "purpose", null, [
+        [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
+        [ "GameMode", "Striker_8cpp.html#af6f0bbbfc3739b1fdb947add452d4ae3", null ],
+        [ "Phase", "Striker_8cpp.html#a9e287f8d3fac4776d448159cf92126d0", null ],
+        [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ]
+      ] ],
       [ "skill", null, [
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
