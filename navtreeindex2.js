@@ -1,5 +1,7 @@
 var NAVTREEINDEX2 =
 {
+"classCM740_1_1FSR.html#aba29ba53d57a57407cd78e235813807f":[1,0,0,6,1],
+"classCM740_1_1Servo.html":[1,0,0,8],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61e":[1,0,0,8,0],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea02f32d5f752561d17c8b8d8c60489e3a":[1,0,0,8,0,57],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea041f188ba33898cc9e4c9703dcb71020":[1,0,0,8,0,25],
@@ -247,7 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a59e44117a09a494b373216633f3cba4e":[1,0,2,1,2,0,21],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a5e812f153154d730148aa14371f76668":[1,0,2,1,2,0,8],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a77ca8ad171d149936236d7e3e9f29fea":[1,0,2,1,2,0,27],
-"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a86016bc8d0cae6a337c8ba7e6f8ce5af":[1,0,2,1,2,0,4],
-"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a86d4acc84982cc06d38867e3313f16a4":[1,0,2,1,2,0,1],
-"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a89ded1848aa9f633196f065b70b6f18b":[1,0,2,1,2,0,13]
+"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a86016bc8d0cae6a337c8ba7e6f8ce5af":[1,0,2,1,2,0,4]
 };

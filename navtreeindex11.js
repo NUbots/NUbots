@@ -1,5 +1,12 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a7fc402b6f828ed0f7db4d3878f6435c4":[1,0,2,1,0,1,0,1],
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a89ab9776e39eda743e785a45e8c90271":[1,0,2,1,0,1,0,2],
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a8de56d8ac15a3b593d8485786c3a2e3c":[1,0,2,1,0,1,0,7],
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#aaafa64396de020925e9cad5406da92a4":[1,0,2,1,0,1,0,4],
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ab4b441757dc1f08186d5ab9ffa0ed0b2":[1,0,2,1,0,1,0,12],
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ab93efbb93f0e3222b1d3c117f9c32bb0":[1,0,2,1,0,1,0,6],
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ae0c634004e70f819edd45cac77ed9c4a":[1,0,2,1,0,1,0,5],
 "structmodule_1_1behaviour_1_1skills_1_1DirectWalkController_1_1Config.html":[1,0,2,1,1,0,0],
 "structmodule_1_1behaviour_1_1skills_1_1DirectWalkController_1_1Config.html#a848b90b33b0de8878608015d53f5414e":[1,0,2,1,1,0,0,1],
 "structmodule_1_1behaviour_1_1skills_1_1DirectWalkController_1_1Config.html#ae73a95855e37f559bd6c8eea5553e3e4":[1,0,2,1,1,0,0,0],
@@ -242,12 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1input_1_1NatNet_1_1MarkerSetModel.html#a78da1b90e342e33d1a2059b167dd36a0":[1,0,2,3,9,4,1],
 "structmodule_1_1input_1_1NatNet_1_1Packet.html":[1,0,2,3,9,5],
 "structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20":[1,0,2,3,9,5,0],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20a392cc9eb8ec6aa2e833422dae04b7bc0":[1,0,2,3,9,5,0,7],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20a4fa1a4d2e48aa765093ca6aae57a5150":[1,0,2,3,9,5,0,3],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20a603221b75698b35afd27b6a15f8d0a5d":[1,0,2,3,9,5,0,9],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20a86b3bdfae903c60e282ba0e020114909":[1,0,2,3,9,5,0,5],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20aa2131922388c17ef97618dd682206ab9":[1,0,2,3,9,5,0,4],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20aad6c35880c58d97c03d60a6ad0f23737":[1,0,2,3,9,5,0,2],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20aae652efb08e70a591ee8c08570b8ba6f":[1,0,2,3,9,5,0,6],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20ae07ff41a486c27c095a15898dcca34d1":[1,0,2,3,9,5,0,0]
+"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20a392cc9eb8ec6aa2e833422dae04b7bc0":[1,0,2,3,9,5,0,7]
 };

@@ -246,12 +246,14 @@ var annotated_dup =
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ]
       ] ],
       [ "skill", null, [
+        [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ]
       ] ],
       [ "strategy", null, [
+        [ "DiveToBall", "classmodule_1_1strategy_1_1DiveToBall.html", "classmodule_1_1strategy_1_1DiveToBall" ],
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
         [ "FindObject", "classmodule_1_1strategy_1_1FindObject.html", "classmodule_1_1strategy_1_1FindObject" ],
         [ "Ready", "classmodule_1_1strategy_1_1Ready.html", "classmodule_1_1strategy_1_1Ready" ],

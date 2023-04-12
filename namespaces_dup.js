@@ -562,20 +562,24 @@ var namespaces_dup =
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ]
       ] ],
       [ "skill", null, [
+        [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
+        [ "DiveTask", "Dive_8cpp.html#aab4cff4ad6c87765b3bf727736fd547f", null ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
         [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ]
       ] ],
       [ "strategy", null, [
+        [ "DiveToBall", "classmodule_1_1strategy_1_1DiveToBall.html", "classmodule_1_1strategy_1_1DiveToBall" ],
         [ "FallRecovery", "classmodule_1_1strategy_1_1FallRecovery.html", "classmodule_1_1strategy_1_1FallRecovery" ],
         [ "FindObject", "classmodule_1_1strategy_1_1FindObject.html", "classmodule_1_1strategy_1_1FindObject" ],
         [ "Ready", "classmodule_1_1strategy_1_1Ready.html", "classmodule_1_1strategy_1_1Ready" ],
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
         [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ],
+        [ "DiveToBallTask", "DiveToBall_8cpp.html#a13d9363b2f126b9b014996b9c6938906", null ],
         [ "FallRecoveryTask", "FallRecovery_8cpp.html#a4a627b96cd02d6e31d1c95f7671b327c", null ],
         [ "ReadyTask", "Ready_8cpp.html#ad71cfd87761d266ccd997e1c01aee34f", null ],
         [ "StandStillTask", "StandStill_8cpp.html#a34f0cf0c4ada0c7e001c5f278b773f79", null ],

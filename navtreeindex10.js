@@ -1,5 +1,12 @@
 var NAVTREEINDEX10 =
 {
+"structRoboCupGameControlData.html#af94ee5056a82bc78bd5461da91e328a5":[1,0,9,4],
+"structRoboCupGameControlReturnData.html":[1,0,10],
+"structRoboCupGameControlReturnData.html#a4bcaa6ccc352f5af8f5e46849ce823c1":[1,0,10,3],
+"structRoboCupGameControlReturnData.html#a4e0af445b21ccaad2fe078a7996c1869":[1,0,10,1],
+"structRoboCupGameControlReturnData.html#a5973a89cb2bfb4c2064fd288377eb700":[1,0,10,2],
+"structRoboCupGameControlReturnData.html#ab312e59ab0c085a4fbf3357820d8febf":[1,0,10,4],
+"structRoboCupGameControlReturnData.html#abbc3d8a3ac6f298388d2da7a424b2294":[1,0,10,0],
 "structRobotInfo.html":[1,0,11],
 "structRobotInfo.html#aaadaeb99268bd3143d800a0a80f6f405":[1,0,11,1],
 "structRobotInfo.html#aceb887f54b437485773bc3d80518410f":[1,0,11,0],
@@ -242,12 +249,5 @@ var NAVTREEINDEX10 =
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a410c4d3b41c3779bd2c758af84ab8c1c":[1,0,2,1,0,1,0,14],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a47ebd1c52848698bb922413e8b202b74":[1,0,2,1,0,1,0,11],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a61d981bbaaad5a8b7b5e7c5155fa9a2e":[1,0,2,1,0,1,0,9],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a6b97786321aa7a60f27425c48e3b4f5c":[1,0,2,1,0,1,0,0],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a7fc402b6f828ed0f7db4d3878f6435c4":[1,0,2,1,0,1,0,1],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a89ab9776e39eda743e785a45e8c90271":[1,0,2,1,0,1,0,2],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a8de56d8ac15a3b593d8485786c3a2e3c":[1,0,2,1,0,1,0,7],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#aaafa64396de020925e9cad5406da92a4":[1,0,2,1,0,1,0,4],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ab4b441757dc1f08186d5ab9ffa0ed0b2":[1,0,2,1,0,1,0,12],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ab93efbb93f0e3222b1d3c117f9c32bb0":[1,0,2,1,0,1,0,6],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ae0c634004e70f819edd45cac77ed9c4a":[1,0,2,1,0,1,0,5]
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a6b97786321aa7a60f27425c48e3b4f5c":[1,0,2,1,0,1,0,0]
 };
