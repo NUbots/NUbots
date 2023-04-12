@@ -27,6 +27,7 @@ nuclear_role(
   skill::ScriptKick
   skill::GetUp
   skill::Look
+  skill::Dive
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
@@ -40,6 +41,7 @@ nuclear_role(
   strategy::WalkToBall
   strategy::FindObject
   strategy::Ready
+  strategy::DiveToBall
   # Purposes
   purpose::Striker
   purpose::Soccer
