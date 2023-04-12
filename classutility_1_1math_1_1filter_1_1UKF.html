@@ -198,12 +198,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3ef11beeb4fb7b57dd6f2d7bd6d1eb95"><td class="memItemLeft" align="right" valign="top"><a id="a3ef11beeb4fb7b57dd6f2d7bd6d1eb95"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>UKF</b> (StateVec initial_mean=StateVec::Zero(), StateMat initial_covariance=StateMat::Identity() *0.1, Scalar alpha=ALPHA_DEFAULT, Scalar kappa=KAPPA_DEFAULT, Scalar beta=BETA_DEFAULT)</td></tr>
 <tr class="separator:a3ef11beeb4fb7b57dd6f2d7bd6d1eb95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa16230d5a84ef719e6292b17be45574d"><td class="memItemLeft" align="right" valign="top"><a id="aa16230d5a84ef719e6292b17be45574d"></a>
-const StateVec &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get</b> () const</td></tr>
-<tr class="separator:aa16230d5a84ef719e6292b17be45574d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5ba1ba9680759f8fc1783c5decc8ef7a"><td class="memItemLeft" align="right" valign="top"><a id="a5ba1ba9680759f8fc1783c5decc8ef7a"></a>
-const StateMat &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>getCovariance</b> () const</td></tr>
-<tr class="separator:a5ba1ba9680759f8fc1783c5decc8ef7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a016a8bdc726e631c85b1d98d8dde4628"><td class="memItemLeft" align="right" valign="top"><a id="a016a8bdc726e631c85b1d98d8dde4628"></a>
+const StateMat &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get_covariance</b> () const</td></tr>
+<tr class="separator:a016a8bdc726e631c85b1d98d8dde4628"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4ccfb267bcc181a1057783fdbe42f7c"><td class="memItemLeft" align="right" valign="top"><a id="ad4ccfb267bcc181a1057783fdbe42f7c"></a>
+const StateVec &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get_state</b> () const</td></tr>
+<tr class="separator:ad4ccfb267bcc181a1057783fdbe42f7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a32425791859741f957b6f5d27181603e"><td class="memTemplParams" colspan="2"><a id="a32425791859741f957b6f5d27181603e"></a>
 template&lt;typename MeasurementScalar , int S, int... VArgs, int... MArgs, typename... Args&gt; </td></tr>
 <tr class="memitem:a32425791859741f957b6f5d27181603e"><td class="memTemplItemLeft" align="right" valign="top"><a class="el" href="structutility_1_1support_1_1LazyEvaluation.html">utility::support::LazyEvaluation</a>&lt; MeasurementScalar &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html#a32425791859741f957b6f5d27181603e">measure</a> (const Eigen::Matrix&lt; MeasurementScalar, S, 1, VArgs... &gt; &amp;measurement, const Eigen::Matrix&lt; MeasurementScalar, S, S, MArgs... &gt; &amp;measurement_variance, const Args &amp;... params)</td></tr>
@@ -368,7 +368,7 @@ template&lt;typename T1 , typename T2 , int S&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>math</b></li><li class="navelem"><b>filter</b></li><li class="navelem"><a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html">UKF</a></li>
-    <li class="footer">Generated on Wed Apr 12 2023 00:18:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Apr 12 2023 03:11:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

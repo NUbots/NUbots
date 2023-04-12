@@ -210,14 +210,14 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a786422d323d6bb444a26f489da5361d6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a786422d323d6bb444a26f489da5361d6">ParticleFilter</a> (const std::vector&lt; std::pair&lt; StateVec, StateMat &gt;&gt; &amp;hypotheses, const <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a87b84437479faf42b4ce81fbc70bdb9d">ResampleMethod</a> &amp;resample_method_=ResampleMethod::SYSTEMATIC, const bool &amp;use_residual_resampling_=true)</td></tr>
 <tr class="memdesc:a786422d323d6bb444a26f489da5361d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs the particle filter with the provided values.  <a href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a786422d323d6bb444a26f489da5361d6">More...</a><br /></td></tr>
 <tr class="separator:a786422d323d6bb444a26f489da5361d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae62846a48aeb7c22764546b9ec4e78f7"><td class="memItemLeft" align="right" valign="top"><a id="ae62846a48aeb7c22764546b9ec4e78f7"></a>
-StateMat&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#ae62846a48aeb7c22764546b9ec4e78f7">getCovariance</a> () const</td></tr>
-<tr class="memdesc:ae62846a48aeb7c22764546b9ec4e78f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates and returns the covariance of the particles. <br /></td></tr>
-<tr class="separator:ae62846a48aeb7c22764546b9ec4e78f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8890f47ccab2ce47e0d5d00c6d43d5f5"><td class="memItemLeft" align="right" valign="top"><a id="a8890f47ccab2ce47e0d5d00c6d43d5f5"></a>
-StateVec&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a8890f47ccab2ce47e0d5d00c6d43d5f5">getMean</a> () const</td></tr>
-<tr class="memdesc:a8890f47ccab2ce47e0d5d00c6d43d5f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates and returns the mean of all particles. <br /></td></tr>
-<tr class="separator:a8890f47ccab2ce47e0d5d00c6d43d5f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32ed424e8cfa5d9b8c32fdbf4c47bfcb"><td class="memItemLeft" align="right" valign="top"><a id="a32ed424e8cfa5d9b8c32fdbf4c47bfcb"></a>
+StateMat&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a32ed424e8cfa5d9b8c32fdbf4c47bfcb">get_covariance</a> () const</td></tr>
+<tr class="memdesc:a32ed424e8cfa5d9b8c32fdbf4c47bfcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates and returns the covariance of the particles. <br /></td></tr>
+<tr class="separator:a32ed424e8cfa5d9b8c32fdbf4c47bfcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b5d5b95d4c7884dd6801bb8e981d43a"><td class="memItemLeft" align="right" valign="top"><a id="a7b5d5b95d4c7884dd6801bb8e981d43a"></a>
+StateVec&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a7b5d5b95d4c7884dd6801bb8e981d43a">get_state</a> () const</td></tr>
+<tr class="memdesc:a7b5d5b95d4c7884dd6801bb8e981d43a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates and returns the mean of all particles. <br /></td></tr>
+<tr class="separator:a7b5d5b95d4c7884dd6801bb8e981d43a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79f83c5172e0287cfa440b2ee92b6b84"><td class="memItemLeft" align="right" valign="top"><a id="a79f83c5172e0287cfa440b2ee92b6b84"></a>
 const ParticleList &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a79f83c5172e0287cfa440b2ee92b6b84">getParticles</a> () const</td></tr>
 <tr class="memdesc:a79f83c5172e0287cfa440b2ee92b6b84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the underlying particle list. <br /></td></tr>
@@ -817,7 +817,7 @@ template&lt;typename... Args&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>math</b></li><li class="navelem"><b>filter</b></li><li class="navelem"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html">ParticleFilter</a></li>
-    <li class="footer">Generated on Wed Apr 12 2023 00:18:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Apr 12 2023 03:11:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

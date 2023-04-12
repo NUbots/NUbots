@@ -195,6 +195,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a076ebde6b4e618f826f2180b1e46ce91"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a076ebde6b4e618f826f2180b1e46ce91">add_vertical_line</a> (int x0, int y0, int length)</td></tr>
 <tr class="memdesc:a076ebde6b4e618f826f2180b1e46ce91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a vertical line to the map.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a076ebde6b4e618f826f2180b1e46ce91">More...</a><br /></td></tr>
 <tr class="separator:a076ebde6b4e618f826f2180b1e46ce91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1833c2c21a07630bfec48545e6b06f8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#aa1833c2c21a07630bfec48545e6b06f8">create_distance_map</a> (double grid_size)</td></tr>
+<tr class="memdesc:aa1833c2c21a07630bfec48545e6b06f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace map with a new map with occupancy values which encode the minimum distance to the closest occupied cell.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#aa1833c2c21a07630bfec48545e6b06f8">More...</a><br /></td></tr>
+<tr class="separator:aa1833c2c21a07630bfec48545e6b06f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1d708019f05d482b1c65bed97baca11"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#ad1d708019f05d482b1c65bed97baca11">fill_surrounding_cells</a> (int range)</td></tr>
 <tr class="memdesc:ad1d708019f05d482b1c65bed97baca11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills the surrounding cells with a decreasing occupancy value from 1 for a user-specified range.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#ad1d708019f05d482b1c65bed97baca11">More...</a><br /></td></tr>
 <tr class="separator:ad1d708019f05d482b1c65bed97baca11"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -524,6 +527,33 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
+<a id="aa1833c2c21a07630bfec48545e6b06f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1833c2c21a07630bfec48545e6b06f8">&#9670;&nbsp;</a></span>create_distance_map()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::localisation::OccupancyMap::create_distance_map </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>grid_size</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Replace map with a new map with occupancy values which encode the minimum distance to the closest occupied cell. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">map</td><td>The pre-filled Map with occupancy values of 0 or 1 </td></tr>
+    <tr><td class="paramname">grid_size</td><td>The size of the grid cells </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ad1d708019f05d482b1c65bed97baca11"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ad1d708019f05d482b1c65bed97baca11">&#9670;&nbsp;</a></span>fill_surrounding_cells()</h2>
 
@@ -636,7 +666,7 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">OccupancyMap</a></li>
-    <li class="footer">Generated on Wed Apr 12 2023 00:18:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Apr 12 2023 03:11:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -6,6 +6,7 @@ var classmodule_1_1localisation_1_1OccupancyMap =
     [ "add_rectangle", "classmodule_1_1localisation_1_1OccupancyMap.html#a67a9bbd10ea8c70597d9cfb690ba2cec", null ],
     [ "add_rectangle", "classmodule_1_1localisation_1_1OccupancyMap.html#af9eeca22bbf63233373d67e5e81bfd3d", null ],
     [ "add_vertical_line", "classmodule_1_1localisation_1_1OccupancyMap.html#a076ebde6b4e618f826f2180b1e46ce91", null ],
+    [ "create_distance_map", "classmodule_1_1localisation_1_1OccupancyMap.html#aa1833c2c21a07630bfec48545e6b06f8", null ],
     [ "fill_surrounding_cells", "classmodule_1_1localisation_1_1OccupancyMap.html#ad1d708019f05d482b1c65bed97baca11", null ],
     [ "get_length", "classmodule_1_1localisation_1_1OccupancyMap.html#a4389f12c14ab117eeed54e36432d9145", null ],
     [ "get_map", "classmodule_1_1localisation_1_1OccupancyMap.html#a78b7a02770befb2b93bad15b8d91e26c", null ],

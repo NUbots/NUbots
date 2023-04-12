@@ -360,6 +360,7 @@ var annotated_dup =
       ] ],
       [ "math", null, [
         [ "filter", null, [
+          [ "KalmanFilter", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", "classutility_1_1math_1_1filter_1_1KalmanFilter" ],
           [ "ParticleFilter", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", "classutility_1_1math_1_1filter_1_1ParticleFilter" ],
           [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ]
         ] ],

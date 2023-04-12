@@ -1,9 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#a95a3aa8266e270dfca85568ff2c92725":[1,0,2,7,0,1,1,0,3,6],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#a982539969834d37250008629db3e95d2":[1,0,2,7,0,1,1,0,3,4],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#aa63766df0c8cbab584b053e572c730d2":[1,0,2,7,0,1,1,0,3,8],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#aa82862f3a7d49c7525375ed3936aef0d":[1,0,2,7,0,1,1,0,3,12],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#ae461a34b7ba5272036252dd79101e4cc":[1,0,2,7,0,1,1,0,3,15],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#af3b5d6048e03e99b42156db90b0cae5f":[1,0,2,7,0,1,1,0,3,0],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html":[1,0,2,7,0,1,1,0,4],
@@ -249,5 +245,9 @@ var NAVTREEINDEX13 =
 "structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html":[1,0,4,1],
 "structutility_1_1actuation_1_1ServoMap.html":[1,0,5,0,0],
 "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html":[1,0,5,0,1],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html#a690fc0a10878a580f023df38d277cfa0":[1,0,5,0,1,0]
+"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html#a690fc0a10878a580f023df38d277cfa0":[1,0,5,0,1,0],
+"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html":[1,0,5,0,2],
+"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html#ad6a8f3533793d1cea4245d4e8c3b070e":[1,0,5,0,2,0],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html":[1,0,5,0,3],
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html#a92577dac919bdb0c173dfdc3d06ea3e0":[1,0,5,0,3,0]
 };

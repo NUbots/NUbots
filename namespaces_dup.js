@@ -299,7 +299,6 @@ var namespaces_dup =
         [ "TeamColourEvent", "GameController_8cpp.html#a2372c1a1b7940ae9f2900425594545b9", null ],
         [ "Unpenalisation", "GameController_8cpp.html#a7590774cc2ec9916750561eadd281821", null ],
         [ "description_to_fourcc", "description__to__fourcc_8hpp.html#a9eafba3f12c745ee669e27de1a8887d7", null ],
-        [ "makeErrorString", "SensorFilter_8cpp.html#a66ff2afda835b6c72dc80d4fd3d3c397", null ],
         [ "set_setting", "settings_8hpp.html#aa996f3b2aa7af423b56622644f3c00fe", null ],
         [ "sync_clocks", "time__sync_8cpp.html#a235ccd7baf919af6cc690c4b193bf879", null ],
         [ "G", "MotionModel_8hpp.html#a4d17a85472d1380f84733ea2f29565c2", null ],
@@ -786,8 +785,11 @@ var namespaces_dup =
           [ "MatrixToEulerIntrinsic", "euler_8hpp.html#a9924fe7f0d6191e3db36d9eaad37b7f2", null ]
         ] ],
         [ "filter", null, [
+          [ "KalmanFilter", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", "classutility_1_1math_1_1filter_1_1KalmanFilter" ],
           [ "ParticleFilter", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", "classutility_1_1math_1_1filter_1_1ParticleFilter" ],
-          [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ]
+          [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ],
+          [ "MahonyUpdate", "MahonyFilter_8hpp.html#a827f331e690e2569e06d8cedad3c5e8d", null ],
+          [ "skew", "MahonyFilter_8hpp.html#a526abc991bda7fa4540eb788d55a956c", null ]
         ] ],
         [ "geometry", null, [
           [ "Quad", "classutility_1_1math_1_1geometry_1_1Quad.html", "classutility_1_1math_1_1geometry_1_1Quad" ],
@@ -889,7 +891,9 @@ var namespaces_dup =
       ] ],
       [ "platform", null, [
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
-        [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ]
+        [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ],
+        [ "make_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#a2594ea6b08bf054326817ca5ecec7c83", null ],
+        [ "make_servo_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#a7b9fad892f307b3fc1326e724225e5e6", null ]
       ] ],
       [ "skill", "namespaceutility_1_1skill.html", "namespaceutility_1_1skill" ],
       [ "strutil", "namespaceutility_1_1strutil.html", "namespaceutility_1_1strutil" ],

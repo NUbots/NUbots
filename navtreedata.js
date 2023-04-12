@@ -52,22 +52,23 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"",
-"RobotParticleLocalisation_8cpp.html#a555e4584b906d95add31b8b4f7e0b068",
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea0abec74169222cb130b33adac5eaf8d0",
-"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#aaf71cd8f28275f6094f678fd5b1a4b5c",
-"classmodule_1_1input_1_1NatNet.html#a4390ad14ade079210062706ab7a33dd5",
-"classmodule_1_1motion_1_1QuinticWalk.html#ad54aa140804597a354935b0e5b6987f9",
-"classmodule_1_1support_1_1configuration_1_1SoccerConfig.html",
-"classutility_1_1motion_1_1splines_1_1Combination.html#aeb729f4414eb508d28187b8d848dd44c",
-"functions_func_~.html",
-"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9eabf6aa1e7e70a98990e84b6ec12115c15",
-"structextension_1_1Configuration.html#ae1ca86ef5bf0d2a904612a6f080d1cfb",
-"structmodule_1_1behaviour_1_1tools_1_1ExecuteNextScript.html",
-"structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01T_01_4_01_4.html",
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#a95a3aa8266e270dfca85568ff2c92725",
-"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html",
-"structutility_1_1nbs_1_1IndexItem.html#abc3260989e55ab2cd35e4092c0dc991c"
+"Action_8hpp.html#aa2c2b0b91b7e566e5acd49bdaee5cb92",
+"Vision_8hpp.html#ad896aec4a9b1fbb6f88aac5c060c454faa81c619cc8cb0fa68ff01e355ea09d97",
+"classCM740_1_1UART.html#aa8df2dca7607d9a858e953a7ba17d720",
+"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad4cdab3ea39486ad738e5b8bfd6fe886",
+"classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Decompressor.html#ac3b15c300111cca2635e0cca2c62d11c",
+"classmodule_1_1output_1_1ImageCompressor.html#a63c0584df93f5b561edc78b80c7a46a2",
+"classmodule_1_1tools_1_1FirmwareInstaller.html#af9fb541b04d2b37bef15fc593c92084f",
+"classutility_1_1motion_1_1splines_1_1Polynom.html#a7fc40b9b5229003847d20777e265abf1",
+"functions_vars_m.html",
+"projection_8hpp.html#a25d1e4edee33bb48e49c28b5d2fa9f7c",
+"structextension_1_1FileWatch.html#a08ab98fbe1ca8fbf78e55832c79838b8",
+"structmodule_1_1extension_1_1FileWatcher_1_1PathMap.html#a860fe461f73cb63d92246e0cebf6ef8a",
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html#adc6ff26f7617fe1c2afbb9907b6a4a62",
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#ae461a34b7ba5272036252dd79101e4cc",
+"structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html",
+"structutility_1_1skill_1_1Frame.html#a1dbe7282df59bf9286a7311abc559a2d",
+""
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

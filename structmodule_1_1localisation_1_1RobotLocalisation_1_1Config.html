@@ -183,6 +183,14 @@ Public Attributes</h2></td></tr>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a260de1b6f3c1d14884f8ab151914e208">grid_size</a> = 0.0</td></tr>
 <tr class="memdesc:a260de1b6f3c1d14884f8ab151914e208"><td class="mdescLeft">&#160;</td><td class="mdescRight">Size of the grid cells in the occupancy grid [m]. <br /></td></tr>
 <tr class="separator:a260de1b6f3c1d14884f8ab151914e208"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1035fbe2a9295aa1525a34c0c015f5ec"><td class="memItemLeft" align="right" valign="top"><a id="a1035fbe2a9295aa1525a34c0c015f5ec"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a1035fbe2a9295aa1525a34c0c015f5ec">max_range</a> = 0</td></tr>
+<tr class="memdesc:a1035fbe2a9295aa1525a34c0c015f5ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum distance a field line can be from a particle to be considered an observation [m]. <br /></td></tr>
+<tr class="separator:a1035fbe2a9295aa1525a34c0c015f5ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c9ad4f79bbb1a03fd0c7b61f54f4d90"><td class="memItemLeft" align="right" valign="top"><a id="a2c9ad4f79bbb1a03fd0c7b61f54f4d90"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a2c9ad4f79bbb1a03fd0c7b61f54f4d90">measurement_noise</a> = 0</td></tr>
+<tr class="memdesc:a2c9ad4f79bbb1a03fd0c7b61f54f4d90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uncertainty in the measurement model. <br /></td></tr>
+<tr class="separator:a2c9ad4f79bbb1a03fd0c7b61f54f4d90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8374fa6b09acf8fc27cfae780f9b3727"><td class="memItemLeft" align="right" valign="top"><a id="a8374fa6b09acf8fc27cfae780f9b3727"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a8374fa6b09acf8fc27cfae780f9b3727">n_particles</a> = 0</td></tr>
 <tr class="memdesc:a8374fa6b09acf8fc27cfae780f9b3727"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles to use in the particle filter. <br /></td></tr>
@@ -195,18 +203,6 @@ Eigen::Matrix&lt; double, 3, 3 &gt;&#160;</td><td class="memItemRight" valign="b
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a452a3c8c32b0db40df76dba65975fcd5">save_map</a> = false</td></tr>
 <tr class="memdesc:a452a3c8c32b0db40df76dba65975fcd5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool to enable/disable saving the generated map as a csv file. <br /></td></tr>
 <tr class="separator:a452a3c8c32b0db40df76dba65975fcd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a721a51e28338bb606d0fa2a06df927e1"><td class="memItemLeft" align="right" valign="top"><a id="a721a51e28338bb606d0fa2a06df927e1"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a721a51e28338bb606d0fa2a06df927e1">scale_theta</a> = 0.0</td></tr>
-<tr class="memdesc:a721a51e28338bb606d0fa2a06df927e1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaling factor for odometry theta velocity. <br /></td></tr>
-<tr class="separator:a721a51e28338bb606d0fa2a06df927e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adfe04a0ff329b342c0527610bb4df544"><td class="memItemLeft" align="right" valign="top"><a id="adfe04a0ff329b342c0527610bb4df544"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#adfe04a0ff329b342c0527610bb4df544">scale_x</a> = 0.0</td></tr>
-<tr class="memdesc:adfe04a0ff329b342c0527610bb4df544"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaling factor for odometry x velocity. <br /></td></tr>
-<tr class="separator:adfe04a0ff329b342c0527610bb4df544"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a98dd834dbd8d329f00e6d76879f440d2"><td class="memItemLeft" align="right" valign="top"><a id="a98dd834dbd8d329f00e6d76879f440d2"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#a98dd834dbd8d329f00e6d76879f440d2">scale_y</a> = 0.0</td></tr>
-<tr class="memdesc:a98dd834dbd8d329f00e6d76879f440d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Scaling factor for odometry y velocity. <br /></td></tr>
-<tr class="separator:a98dd834dbd8d329f00e6d76879f440d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores configuration values. </p>
@@ -219,7 +215,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Wed Apr 12 2023 00:18:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Apr 12 2023 03:11:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

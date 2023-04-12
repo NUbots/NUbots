@@ -222,12 +222,12 @@ Eigen::Matrix&lt; double, 3, 3 &gt;&#160;</td><td class="memItemRight" valign="b
 Eigen::Matrix&lt; double, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a626145d3a591a61787b9741304157e30">compute_mean</a> ()</td></tr>
 <tr class="memdesc:a626145d3a591a61787b9741304157e30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current mean (state) of the robot. <br /></td></tr>
 <tr class="separator:a626145d3a591a61787b9741304157e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ad6a013d12ba4a780c9dd077f268ba1"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a3ad6a013d12ba4a780c9dd077f268ba1">position_in_map</a> (const Eigen::Matrix&lt; double, 3, 1 &gt; particle, const Eigen::Vector2d rPRr)</td></tr>
-<tr class="memdesc:a3ad6a013d12ba4a780c9dd077f268ba1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a point in the robot's coordinate frame into an index in the map.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a3ad6a013d12ba4a780c9dd077f268ba1">More...</a><br /></td></tr>
-<tr class="separator:a3ad6a013d12ba4a780c9dd077f268ba1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1aa8caffc89c937d5074fd67dc90bdfe"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a1aa8caffc89c937d5074fd67dc90bdfe">ray_to_field_plane</a> (Eigen::Vector3d uPCr, Eigen::Isometry3d Hcr)</td></tr>
-<tr class="memdesc:a1aa8caffc89c937d5074fd67dc90bdfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a unit vector of point from the camera in robot space to a (x,y) point relative to the robot on the field plane.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a1aa8caffc89c937d5074fd67dc90bdfe">More...</a><br /></td></tr>
-<tr class="separator:a1aa8caffc89c937d5074fd67dc90bdfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2da8acb48b179a3c54f96e30990519ee"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a2da8acb48b179a3c54f96e30990519ee">position_in_map</a> (const Eigen::Matrix&lt; double, 3, 1 &gt; particle, const Eigen::Vector2d rPRw)</td></tr>
+<tr class="memdesc:a2da8acb48b179a3c54f96e30990519ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a point in the robot's coordinate frame into an index in the map.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a2da8acb48b179a3c54f96e30990519ee">More...</a><br /></td></tr>
+<tr class="separator:a2da8acb48b179a3c54f96e30990519ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cf7175d5f567f7d8421d0e286111236"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a0cf7175d5f567f7d8421d0e286111236">ray_to_field_plane</a> (Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw)</td></tr>
+<tr class="memdesc:a0cf7175d5f567f7d8421d0e286111236"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a unit vector of point from the camera in robot space to a (x,y) point relative to the robot on the field plane.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a0cf7175d5f567f7d8421d0e286111236">More...</a><br /></td></tr>
+<tr class="separator:a0cf7175d5f567f7d8421d0e286111236"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a086601fc1b6a76c65360367b6fa3a518"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a086601fc1b6a76c65360367b6fa3a518">resample</a> ()</td></tr>
 <tr class="memdesc:a086601fc1b6a76c65360367b6fa3a518"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resample the particles based on their weights.  <a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a086601fc1b6a76c65360367b6fa3a518">More...</a><br /></td></tr>
 <tr class="separator:a086601fc1b6a76c65360367b6fa3a518"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -337,8 +337,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="a3ad6a013d12ba4a780c9dd077f268ba1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3ad6a013d12ba4a780c9dd077f268ba1">&#9670;&nbsp;</a></span>position_in_map()</h2>
+<a id="a2da8acb48b179a3c54f96e30990519ee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2da8acb48b179a3c54f96e30990519ee">&#9670;&nbsp;</a></span>position_in_map()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -353,7 +353,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Eigen::Vector2d&#160;</td>
-          <td class="paramname"><em>rPRr</em>&#160;</td>
+          <td class="paramname"><em>rPRw</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -367,7 +367,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">particle</td><td>The state of the particle (x,y,theta) </td></tr>
-    <tr><td class="paramname">rPRr</td><td>The field point (x, y) in robot space {r} [m] </td></tr>
+    <tr><td class="paramname">rPRw</td><td>The field point (x, y) in world space {w} [m] </td></tr>
   </table>
   </dd>
 </dl>
@@ -375,8 +375,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="a1aa8caffc89c937d5074fd67dc90bdfe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1aa8caffc89c937d5074fd67dc90bdfe">&#9670;&nbsp;</a></span>ray_to_field_plane()</h2>
+<a id="a0cf7175d5f567f7d8421d0e286111236"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cf7175d5f567f7d8421d0e286111236">&#9670;&nbsp;</a></span>ray_to_field_plane()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -385,13 +385,13 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td class="memname">Eigen::Vector2d module::localisation::RobotLocalisation::ray_to_field_plane </td>
           <td>(</td>
           <td class="paramtype">Eigen::Vector3d&#160;</td>
-          <td class="paramname"><em>uPCr</em>, </td>
+          <td class="paramname"><em>uPCw</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">Eigen::Isometry3d&#160;</td>
-          <td class="paramname"><em>Hcr</em>&#160;</td>
+          <td class="paramname"><em>Hcw</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -404,8 +404,8 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <p>Converts a unit vector of point from the camera in robot space to a (x,y) point relative to the robot on the field plane. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">uPCr</td><td>unit vector from the camera to the field point in robot space </td></tr>
-    <tr><td class="paramname">Hcr</td><td>the camera to robot space transform </td></tr>
+    <tr><td class="paramname">uPCw</td><td>unit vector of point from the camera in world space </td></tr>
+    <tr><td class="paramname">Hcw</td><td>the world from camera transform </td></tr>
   </table>
   </dd>
 </dl>
@@ -475,7 +475,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a></li>
-    <li class="footer">Generated on Wed Apr 12 2023 00:18:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Apr 12 2023 03:11:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
