@@ -16,9 +16,13 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
-syntax = "proto3";
+ syntax = "proto3";
 
-package message.strategy;
+ package message.purpose;
 
-/// Ready state strategy for walking onto the field
-message Ready {}
+ message Goalie {
+    bool force_playing = 1;
+ }
+
+ message NormalGoalie{}
+ message PenaltyShootoutGoalie {}

@@ -18,7 +18,11 @@
  */
 syntax = "proto3";
 
-package message.strategy;
+package message.purpose;
 
-/// Ready state strategy for walking onto the field
-message Ready {}
+message Striker {
+    bool force_playing = 1;
+}
+
+message NormalStriker {}
+message PenaltyShootoutStriker {}
