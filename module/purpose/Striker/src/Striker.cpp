@@ -65,9 +65,8 @@ namespace module::purpose {
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
             // Create walk to field position message
             auto walk_to_ready(std::make_unique<WalkToFieldPosition>());
-            walk_to_ready->rPFf  = Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0);
-            walk_to_ready->theta = cfg.ready_position.z();
-
+            walk_to_ready->rPFf    = Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0);
+            walk_to_ready->heading = cfg.ready_position.z();
             // If we are stable, walk to the ready field position
             emit<Task>(walk_to_ready);
         });

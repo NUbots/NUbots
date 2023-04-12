@@ -27,5 +27,5 @@ message WalkToFieldPosition {
     /// The position on the field to walk to
     fvec3 rPFf = 1;
     /// The orientation of the robot on the field
-    float theta = 2;
+    float heading = 2;
 }

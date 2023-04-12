@@ -48,9 +48,7 @@ namespace module::planning {
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed
-            walk_command.z() = utility::math::clamp(cfg.min_turn_speed,
-                                                    std::atan2(walk_command.y(), walk_command.x()),
-                                                    cfg.max_turn_speed);
+            walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_to.heading, cfg.max_turn_speed);
 
             emit<Task>(std::make_unique<Walk>(walk_command));
         });

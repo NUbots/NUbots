@@ -46,7 +46,6 @@ nuclear_role(
   strategy::WalkToBall
   strategy::WalkToFieldPosition
   strategy::FindObject
-  strategy::Ready
   # Purposes
   purpose::Striker
   purpose::Soccer

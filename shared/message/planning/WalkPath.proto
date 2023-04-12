@@ -26,6 +26,9 @@ import "Vector.proto";
 message WalkTo {
     /// The point to walk to, relative to the torso
     fvec3 rPTt = 1;
+
+    /// Current desired heading, relative to the torso
+    float heading = 2;
 }
 
 /// Turn on the spot in the given direction

@@ -11,6 +11,8 @@ namespace module::strategy {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Radius to begin aligning with desired field heading
+            float align_radius = 0.0f;
         } cfg;
 
     public:

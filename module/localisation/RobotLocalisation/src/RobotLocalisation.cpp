@@ -5,10 +5,13 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
+
 namespace module::localisation {
 
     using extension::Configuration;
 
+    using message::behaviour::state::Stability;
     using message::localisation::Field;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
@@ -193,6 +196,15 @@ namespace module::localisation {
         on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
+
+        on<Trigger<Stability>>().then([this](const Stability& stability) {
+            if (stability == Stability::FALLEN) {
+                falling = true;
+            }
+            else {
+                falling = false;
+            }
+        });
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             if (!falling) {
