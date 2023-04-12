@@ -108,7 +108,7 @@ message Sensors {
     /// It measures the world in robot space
     mat4 Htw = 4;
     /// Set of force sensitive resistors. Used to sense if a foot is on the ground
-    repeated Foot   feet   = 5;
+    repeated Foot   feet   = 5 [(array_size) = 2];
     repeated Servo  servo  = 6;
     repeated Button button = 7;
     repeated LED    led    = 8;

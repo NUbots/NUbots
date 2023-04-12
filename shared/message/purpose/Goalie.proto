@@ -14,17 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2017 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
-package message.localisation;
+package message.purpose;
 
-import "Matrix.proto";
-
-message Field {
-    /// Isometry2d position transform of world from field
-    mat3 Hfw = 1;
-    /// Covariance of (x, y, theta)
-    mat3 covariance = 2;
+message Goalie {
+    bool force_playing = 1;
 }
+
+message NormalGoalie {}
+message PenaltyShootoutGoalie {}
