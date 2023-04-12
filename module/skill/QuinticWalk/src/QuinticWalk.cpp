@@ -181,7 +181,7 @@ namespace module::skill {
 
                 auto walking_state          = std::make_unique<WalkingState>();
                 walking_state->is_walking   = true;
-                walking_state->walk_command = current_orders;
+                walking_state->walk_command = Eigen::Vector3f::Zero();
                 emit(std::move(walking_state));
             });
 
@@ -249,7 +249,7 @@ namespace module::skill {
                 }
                 auto walking_state          = std::make_unique<WalkingState>();
                 walking_state->is_walking   = true;
-                walking_state->walk_command = current_orders;
+                walking_state->walk_command = walk.velocity_target;
                 emit(std::move(walking_state));
             });
 
@@ -273,7 +273,7 @@ namespace module::skill {
 
                 auto walking_state          = std::make_unique<WalkingState>();
                 walking_state->is_walking   = false;
-                walking_state->walk_command = current_orders;
+                walking_state->walk_command = Eigen::Vector3f::Zero();
                 emit(std::move(walking_state));
             });
     }
