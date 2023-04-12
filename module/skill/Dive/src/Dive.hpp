@@ -23,7 +23,6 @@
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
-#include "extension/behaviour/Script.hpp"
 
 namespace module::skill {
 

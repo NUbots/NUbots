@@ -14,17 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2016 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
-syntax = "proto3";
+ syntax = "proto3";
 
-package message.skill;
+ package message.strategy;
 
-import "message/actuation/BodySide.proto";
-
-/**
- * Emit a Dive Task in order to tell the system to perform the appropriate dive action for it's current situation
- */
-message Dive {
-    actuation.BodySide side = 1;
-}
+ /**
+  * A task that will tell behaviour to dive toward the ball if it is close enough
+  */
+ message DiveToBall {}

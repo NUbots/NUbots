@@ -13,6 +13,8 @@ namespace module::strategy {
         struct Config {
             /// @brief Distance in meters used as a threshold to start a dive
             float diving_distance_threshold = 0;
+            /// @brief Time in seconds before the ball measurement is too long ago to use
+            float ball_timeout = 0;
         } cfg;
 
     public:

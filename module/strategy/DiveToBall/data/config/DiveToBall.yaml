@@ -1,5 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# Distance to begin the dive to stop the ball while normally playing (in meters)
+# Distance to begin the dive to stop the ball (in meters)
 diving_distance_threshold: 0.7
+
+# Time before the ball measurement is too old
+ball_timeout: 0.5

@@ -3,6 +3,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/BodySide.hpp"
 #include "message/actuation/Limbs.hpp"
 #include "message/skill/Dive.hpp"
 
@@ -12,6 +13,7 @@ namespace module::skill {
 
     using extension::Configuration;
     using message::actuation::BodySequence;
+    using message::actuation::BodySide;
     using utility::skill::load_script;
     using DiveTask = message::skill::Dive;
 
@@ -22,7 +24,12 @@ namespace module::skill {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<DiveTask>>().then([this](const DiveTask& dive) {
+        on<Provide<DiveTask>>().then([this](const DiveTask& dive, const RunInfo& info) {
+            if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
+
             if (dive.side == BodySide::LEFT) {
                 emit<Task>(load_script<BodySequence>("DiveLeft.yaml"));
             }
