@@ -64,16 +64,19 @@ namespace module::localisation {
                 // Generate message and emit
                 auto ball = std::make_unique<FilteredBall>();
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                Eigen::Affine3f Hgc(sensors.Hgw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 ball->rBTt                = Htc * filtered_rBCc;
+                ball->rBGg                = Hgc * filtered_rBCc;
                 ball->rBCt                = Htc.rotation() * filtered_rBCc;
-                ball->rBCc                = filtered_rBCc;
                 ball->time_of_measurement = NUClear::clock::now();
 
                 if (log_level <= NUClear::DEBUG) {
-                    emit(graph("rBCc: ", filtered_rBCc.x(), filtered_rBCc.y(), filtered_rBCc.z()));
+                    log<NUClear::DEBUG>("rBTt: ", ball->rBTt.x(), ball->rBTt.y(), ball->rBTt.z());
+                    log<NUClear::DEBUG>("rBGg: ", ball->rBGg.x(), ball->rBGg.y(), ball->rBGg.z());
+                    log<NUClear::DEBUG>("rBCt: ", ball->rBCt.x(), ball->rBCt.y(), ball->rBCt.z());
                     emit(graph("rBTt: ", ball->rBTt.x(), ball->rBTt.y(), ball->rBTt.z()));
-                    log<NUClear::DEBUG>("rBCc: ", filtered_rBCc.transpose());
-                    log<NUClear::DEBUG>("rBTt: ", ball->rBTt.transpose());
+                    emit(graph("rBGg: ", ball->rBGg.x(), ball->rBGg.y(), ball->rBGg.z()));
+                    emit(graph("rBCt: ", ball->rBCt.x(), ball->rBCt.y(), ball->rBCt.z()));
                 }
 
                 emit(ball);

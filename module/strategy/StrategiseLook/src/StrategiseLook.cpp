@@ -40,7 +40,7 @@ namespace module::strategy {
             [this](const FilteredBall& ball) {
                 // If we have a ball and it is recent, look at it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
-                    emit<Task>(std::make_unique<Look>(ball.rBCt.cast<double>(), true));
+                    emit<Task>(std::make_unique<Look>(ball.rBTt.cast<double>(), true));
                 }
             });
 

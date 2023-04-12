@@ -29,30 +29,30 @@ namespace module::strategy {
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
                 // Transform the field position into the robot's torso frame
                 const Eigen::Isometry3f Hfw = Eigen::Isometry3f(field.Hfw.cast<float>());
-                const Eigen::Isometry3f Htw = Eigen::Isometry3f(sensors.Htw.cast<float>());
-                const Eigen::Isometry3f Htf = Htw * Hfw.inverse();
+                const Eigen::Isometry3f Hgw = Eigen::Isometry3f(sensors.Hgw.cast<float>());
+                const Eigen::Isometry3f Hgf = Hgw * Hfw.inverse();
                 const Eigen::Vector3f rPFf(walk_to_field_position.rPFf.x(), walk_to_field_position.rPFf.y(), 0.0f);
-                const Eigen::Vector3f rPTt(Htf * rPFf);
+                const Eigen::Vector3f rPGg(Hgf * rPFf);
 
                 // If we are close to the field position, align with the desired heading
                 float heading;
-                if (rPTt.head(2).norm() < cfg.align_radius) {
+                if (rPGg.head(2).norm() < cfg.align_radius) {
                     // Create a unit vector in the direction of the desired heading in field space
                     const Eigen::Vector3f uHFf(std::cos(walk_to_field_position.heading),
                                                std::sin(walk_to_field_position.heading),
                                                0.0f);
                     // Rotate the desired heading in field space to the robot's torso space
-                    const Eigen::Vector3f uHTt(Htf.linear() * uHFf);
+                    const Eigen::Vector3f uHTt(Hgf.linear() * uHFf);
                     heading = std::atan2(uHTt.y(), uHTt.x());
                 }
                 // Otherwise, walk directly to the field position aligning with the point
                 else {
-                    heading = std::atan2(rPTt.y(), rPTt.x());
+                    heading = std::atan2(rPGg.y(), rPGg.x());
                 }
 
                 // Emit a task to walk to the field position
                 auto walk_to_point     = std::make_unique<WalkTo>();
-                walk_to_point->rPTt    = rPTt;
+                walk_to_point->rPGg    = rPGg;
                 walk_to_point->heading = heading;
                 emit<Task>(walk_to_point);
             });

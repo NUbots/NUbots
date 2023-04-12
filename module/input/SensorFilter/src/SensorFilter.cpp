@@ -20,6 +20,7 @@
 #include "SensorFilter.hpp"
 
 #include "message/actuation/BodySide.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkingState.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
@@ -37,6 +38,7 @@ namespace module::input {
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    using message::behaviour::state::Stability;
     using message::behaviour::state::WalkingState;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
@@ -107,6 +109,15 @@ namespace module::input {
         on<Trigger<WalkingState>>().then([this](const WalkingState& walking_state) {
             walk_command        = walking_state.walk_command.cast<double>();
             walk_engine_enabled = walking_state.is_walking;
+        });
+
+        on<Trigger<Stability>>().then([this](const Stability& stability) {
+            if (stability == Stability::FALLEN) {
+                falling = true;
+            }
+            else {
+                falling = false;
+            }
         });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {

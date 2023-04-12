@@ -23,6 +23,6 @@ package message.planning;
 import "Vector.proto";
 
 message KickTo {
-    /// Torso to point to kick to in torso space
-    fvec3 rPTt = 1;
+    /// Torso to point to kick to in ground space
+    fvec3 rPGg = 1;
 }

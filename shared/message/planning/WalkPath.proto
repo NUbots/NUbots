@@ -24,10 +24,9 @@ import "Vector.proto";
 
 /// Plan a path to walk to the specified point
 message WalkTo {
-    /// The point to walk to, relative to the torso
-    fvec3 rPTt = 1;
-
-    /// Current desired heading, relative to the torso
+    /// Point to walk to in ground space (m)
+    fvec3 rPGg = 1;
+    /// Desired heading in ground space (radians)
     float heading = 2;
 }
 
