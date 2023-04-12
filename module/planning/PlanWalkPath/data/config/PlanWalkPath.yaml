@@ -3,7 +3,7 @@ log_level: DEBUG
 
 # General playing tuning values for approaching ball
 # Speed in the xy direction while walking to a point (m/s)
-speed: 0.3
+speed: 0.2
 # Maximum turning speed in either direction while walking to a point (radians/s)
 max_turn_speed: 0.25
 min_turn_speed: -0.25
