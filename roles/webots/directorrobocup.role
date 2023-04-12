@@ -44,16 +44,11 @@ nuclear_role(
   strategy::StandStill
   strategy::StrategiseLook
   strategy::WalkToBall
-  <<<<<<<
-  HEAD
   strategy::WalkToFieldPosition
   strategy::FindObject
-  =======
   strategy::FindObject
   strategy::Ready
   strategy::DiveToBall
-  >>>>>>>
-  origin/sims/ramp-path-director
   # Purposes
   purpose::Striker
   purpose::Soccer
