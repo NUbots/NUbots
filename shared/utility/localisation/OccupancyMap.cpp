@@ -128,4 +128,59 @@ namespace module::localisation {
         }
     }
 
+    void OccupancyMap::create_distance_map(double grid_size) {
+        // Initialize the distance map with infinite distances
+        Eigen::MatrixXd dist_map =
+            Eigen::MatrixXd::Constant(map.rows(), map.cols(), std::numeric_limits<double>::infinity());
+
+        // Create a queue to hold the cells to be visited
+        std::queue<std::pair<int, int>> q;
+
+        // Mark all occupied cells as visited and set their distances to 0
+        for (int y = 0; y < map.rows(); y++) {
+            for (int x = 0; x < map.cols(); x++) {
+                if (map(y, x) == 1) {
+                    dist_map(y, x) = 0;
+                    q.push(std::make_pair(y, x));
+                }
+            }
+        }
+
+        // Run BFS algorithm to compute the distances of all unoccupied cells to the nearest occupied cell
+        while (!q.empty()) {
+            std::pair<int, int> curr = q.front();
+            q.pop();
+            int y = curr.first;
+            int x = curr.second;
+
+            // Update the distances of the neighbors of the current cell
+            for (int j = -1; j <= 1; j++) {
+                for (int i = -1; i <= 1; i++) {
+                    // Skip the current cell
+                    if (i == 0 && j == 0) {
+                        continue;
+                    }
+
+                    int new_y = y + j;
+                    int new_x = x + i;
+
+                    // Check if the neighbor is within the map boundaries
+                    if (new_y >= 0 && new_y < map.rows() && new_x >= 0 && new_x < map.cols()) {
+                        double weight = std::sqrt(std::pow(i, 2) + std::pow(j, 2));
+
+                        // Check if the neighbor is unoccupied and has a shorter distance through the current cell
+                        if (map(new_y, new_x) == 0 && dist_map(new_y, new_x) > dist_map(y, x) + weight) {
+                            dist_map(new_y, new_x) = dist_map(y, x) + weight;
+                            q.push(std::make_pair(new_y, new_x));
+                        }
+                    }
+                }
+            }
+        }
+
+        // Replace the original map with the distance map
+        map = dist_map * grid_size;
+    }
+
+
 }  // namespace module::localisation
