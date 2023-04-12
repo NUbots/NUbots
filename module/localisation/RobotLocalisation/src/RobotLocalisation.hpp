@@ -48,17 +48,11 @@ namespace module::localisation {
         /// @brief Occupancy grid map of the field lines
         OccupancyMap fieldline_map;
 
-        /// @brief Current walk command (dx, dy, dtheta)
-        Eigen::Matrix<double, 3, 1> walk_command = Eigen::Matrix<double, 3, 1>::Zero();
-
         /// @brief State (x,y,theta) of the robot
         Eigen::Matrix<double, 3, 1> state = Eigen::Matrix<double, 3, 1>::Zero();
 
         /// @brief Covariance matrix of the robot's state
         Eigen::Matrix<double, 3, 3> covariance = Eigen::Matrix<double, 3, 3>::Identity();
-
-        /// @brief Status of walk engine
-        bool walk_engine_enabled = false;
 
         /// @brief Status of if the robot is falling
         bool falling = false;

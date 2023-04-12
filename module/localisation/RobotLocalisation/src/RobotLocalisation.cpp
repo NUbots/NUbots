@@ -190,31 +190,6 @@ namespace module::localisation {
             last_time_update_time = NUClear::clock::now();
         });
 
-        on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
-            if (!walk_engine_enabled) {
-                const auto current_time = NUClear::clock::now();
-                last_time_update_time   = current_time;
-                walk_engine_enabled     = true;
-            }
-            walk_command = wc.command;
-        });
-
-        on<Trigger<EnableWalkEngineCommand>>().then([this]() {
-            walk_engine_enabled     = true;
-            const auto current_time = NUClear::clock::now();
-            last_time_update_time   = current_time;
-        });
-
-        on<Trigger<DisableWalkEngineCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
-
-        on<Trigger<StopCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
-
         on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
@@ -277,9 +252,9 @@ namespace module::localisation {
 
                 // Build and emit the field message
                 auto field(std::make_unique<Field>());
-                Eigen::Isometry2d Hfw(Eigen::Isometry2d::Identity());
-                Hfw.translation() = Eigen::Vector2d(state.x(), state.y());
-                Hfw.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
+                Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+                Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
+                Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
                 field->Hfw        = Hfw.matrix();
                 field->covariance = covariance;
                 emit(field);
