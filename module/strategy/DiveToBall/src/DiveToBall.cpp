@@ -26,7 +26,6 @@ namespace module::strategy {
             // Use configuration here from file DiveToBall.yaml
             this->log_level               = config["log_level"].as<NUClear::LogLevel>();
             cfg.diving_distance_threshold = config["diving_distance_threshold"].as<float>();
-            cfg.ball_timeout              = config["ball_timeout"].as<float>();
         });
 
         on<Provide<DiveToBallTask>, Trigger<FilteredBall>>().then(
