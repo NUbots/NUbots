@@ -1,0 +1,7 @@
+<map id="module::purpose::Soccer" name="module::purpose::Soccer">
+<area shape="rect" id="node1" title=" " alt="" coords="89,213,272,240"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="5,109,164,151"/>
+<area shape="rect" id="node3" title=" " alt="" coords="17,13,152,39"/>
+<area shape="rect" id="node4" href="$structmodule_1_1purpose_1_1Soccer_1_1Config.html" title="Stores configuration values." alt="" coords="188,109,371,151"/>
+<area shape="rect" id="node5" href="$structmodule_1_1purpose_1_1Soccer_1_1Position.html" title="Smart enum for the robot&#39;s position." alt="" coords="188,5,371,47"/>
+</map>

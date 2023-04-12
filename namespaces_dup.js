@@ -553,10 +553,13 @@ var namespaces_dup =
         [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ]
       ] ],
       [ "purpose", null, [
+        [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "GameMode", "Striker_8cpp.html#af6f0bbbfc3739b1fdb947add452d4ae3", null ],
+        [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
         [ "Phase", "Striker_8cpp.html#a9e287f8d3fac4776d448159cf92126d0", null ],
-        [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ]
+        [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
+        [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ]
       ] ],
       [ "skill", null, [
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
