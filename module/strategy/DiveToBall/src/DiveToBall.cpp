@@ -29,7 +29,6 @@ namespace module::strategy {
             cfg.ball_timeout              = config["ball_timeout"].as<float>();
         });
 
-
         on<Provide<DiveToBallTask>, Trigger<FilteredBall>>().then(
             [this](const RunInfo& info, const FilteredBall& ball) {
                 // If we ran because the Dive is done, then we don't keep running the Dive
@@ -38,7 +37,7 @@ namespace module::strategy {
                 }
 
                 // If the distance to the ball is less than the threshold, dive
-                if (ball.rBTt.head(2).norm() < cfg.diving_distance_threshold) {
+                if (ball.rBTt.head(2).x() < cfg.diving_distance_threshold) {
                     // Determine angle to ball and whether we should dive right or left
                     float yaw_angle         = std::atan2(ball.rBTt.y(), ball.rBTt.x());
                     BodySide dive_direction = yaw_angle < 0 ? BodySide::RIGHT : BodySide::LEFT;
