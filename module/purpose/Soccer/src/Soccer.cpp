@@ -87,6 +87,7 @@ namespace module::purpose {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
                 emit<Task>(std::make_unique<FindPurpose>());
+                emit<Task>(std::unique_ptr<StandStill>(nullptr));
             }
         });
     }
