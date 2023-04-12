@@ -8,14 +8,14 @@
 namespace module::purpose {
 
 class Defender : public ::extension::behaviour::BehaviourReactor {
-private:
-    /// @brief Stores configuration values
-    struct Config {
-    } cfg;
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+        } cfg;
 
-public:
-    /// @brief Called by the powerplant to build and setup the Defender reactor.
-    explicit Defender(std::unique_ptr<NUClear::Environment> environment);
+    public:
+        /// @brief Called by the powerplant to build and setup the Defender reactor.
+        explicit Defender(std::unique_ptr<NUClear::Environment> environment);
 };
 
 }  // namespace module::purpose
