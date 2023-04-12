@@ -22,7 +22,6 @@ using Phase    = message::input::GameState::Data::Phase;
 using GameMode = message::input::GameState::Data::Mode;
 using message::input::GameState;
 using message::planning::KickTo;
-using message::purpose::Defending;
 using message::strategy::FindBall;
 using message::strategy::LookAtBall;
 using message::strategy::Ready;
@@ -38,10 +37,10 @@ Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : Behaviou
         this->log_level = config["log_level"].as<NUClear::LogLevel>();
     });
 
-    on<Provide<StrikerTask>, Optional<Trigger<GameState>>>().then(
-            [this](const StrikerTask& defender_task, const std::shared_ptr<const GameState>& game_state) {
+    on<Provide<DefenderTask>, Optional<Trigger<GameState>>>().then(
+            [this](const DefenderTask& defender_task, const std::shared_ptr<const GameState>& game_state) {
                 // Do not use GameController information if force playing or force penalty shootout
-                if (defenderr_task.force_playing) {
+                if (defender_task.force_playing) {
                     play();
                     return;
                 }
@@ -50,31 +49,28 @@ Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : Behaviou
                 if (game_state) {
                     switch (game_state->data.mode.value) {
                         case GameMode::NORMAL:
-                        case GameMode::OVERTIME: emit<Task>(std::make_unique<NormalStriker>()); break;
+                        case GameMode::OVERTIME: emit<Task>(std::make_unique<DefenderTask>()); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
                 }
             });
 
         // Normal READY state
-        on<Provide<Defending>, When<Phase, std::equal_to, Phase::READY>>().then(
+        on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::READY>>().then(
             [this] { emit<Task>(std::make_unique<Ready>()); });
 
         // Normal PLAYING state
-        on<Provide<Defending>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+        on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
 
         // Normal UNKNOWN state
-        on<Provide<Defending>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
+        on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<Defending>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
-
-        // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
-        // on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<DefenderTask>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
-    void Striker::play() {
+    void Defender::play() {
         // Walk to the ball and kick!
         // Second argument is priority - higher number means higher priority
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
@@ -82,7 +78,5 @@ Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : Behaviou
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
         emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 4);  // kick the ball if possible
     }
-
-}
 
 }  // namespace module::purpose
