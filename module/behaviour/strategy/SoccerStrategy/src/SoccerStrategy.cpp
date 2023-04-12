@@ -446,7 +446,9 @@ namespace module::behaviour::strategy {
             //                                    KickCommandType::NORMAL));
             //
             // log<NUClear::DEBUG>("Gonna Kick!");
-            Eigen::Vector3d test_point     = {0.05, -0.055, -0.35};
+            // Will determine which foot to use
+            Eigen::Vector3d test_point = {0.05, -0.055, -0.35};
+            // Will determine...
             Eigen::Vector3d test_direction = {0.05, 0.0, 0.0};
             // NOTE: Hacky stand still before kicking
             stand_still();
@@ -454,6 +456,9 @@ namespace module::behaviour::strategy {
             emit(std::make_unique<KickCommand>(test_point, test_direction, KickCommandType::NORMAL));
         }
         else {
+            // NOTE: Hacky stand still after kicking
+            // stand_still();
+            // sleep(2);
             // Request walk planner to walk to the ball
             emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
         }
