@@ -93,7 +93,7 @@ namespace module::output {
                         // Transform the field state into Hfw
                         Eigen::Isometry3d Hfw;
 
-                        Eigen::Isometry2d position(field->position);
+                        Eigen::Isometry2d position(field->Hfw);
                         Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
 
                         // Rotate field-position.rotation().angle() radians about the Z-axis

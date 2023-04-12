@@ -2,6 +2,7 @@
 #define UTILITY_LOCALISATION_OCCUPANCYMAP_HPP
 
 #include <Eigen/Core>
+#include <queue>
 
 namespace module::localisation {
 
@@ -90,6 +91,14 @@ namespace module::localisation {
          * @param range The range for the surrounding cells
          */
         void fill_surrounding_cells(int range);
+
+        /**
+         * @brief Replace map with a new map with occupancy values which encode the minimum distance to the
+         * closest occupied cell
+         * @param map The pre-filled Map with occupancy values of 0 or 1
+         * @param grid_size The size of the grid cells
+         */
+        void create_distance_map(double grid_size);
 
     private:
         /// @brief Eigen matrix which stores the map data
