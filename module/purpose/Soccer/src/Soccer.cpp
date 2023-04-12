@@ -68,14 +68,14 @@ namespace module::purpose {
             if (self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-                emit<Task>(std::make_unique<StandStill>());
+                // emit<Task>(std::make_unique<StandStill>());
             }
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
-                emit<Task>(std::unique_ptr<StandStill>(nullptr));
+                // emit<Task>(std::unique_ptr<StandStill>(nullptr));
                 emit<Task>(std::make_unique<FindPurpose>());
             }
         });
@@ -87,7 +87,7 @@ namespace module::purpose {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
                 emit<Task>(std::make_unique<FindPurpose>());
-                emit<Task>(std::unique_ptr<StandStill>(nullptr));
+                // emit<Task>(std::unique_ptr<StandStill>(nullptr));
             }
         });
     }
