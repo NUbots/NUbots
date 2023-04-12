@@ -18,7 +18,6 @@ namespace module::strategy {
     using message::localisation::FilteredBall;
     using message::skill::Dive;
 
-
     DiveToBall::DiveToBall(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
