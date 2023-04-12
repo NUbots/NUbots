@@ -16,10 +16,10 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.purpose;
+package message.purpose;
 
- // Indicates to the robot to identify its purpose
- // This is used in the RoboCup scenario to determine the position of the robot
- message FindPurpose {}
+// Indicates to the robot to identify its purpose
+// This is used in the RoboCup scenario to determine the position of the robot
+message FindPurpose {}

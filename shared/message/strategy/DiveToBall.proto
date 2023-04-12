@@ -18,8 +18,9 @@
  */
 syntax = "proto3";
 
-package message.purpose;
+package message.strategy;
 
-message Defender {
-    bool force_playing = 1;
-}
+/**
+ * A task that will tell behaviour to dive toward the ball if it is close enough
+ */
+message DiveToBall {}
