@@ -84,15 +84,19 @@ namespace module::motion {
     void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
         Eigen::Isometry3d startPose = Eigen::Isometry3d::Identity();
 
-        // Convert torso to support foot
+        // Convert torso to support foot = Hts
         Eigen::Isometry3d currentTorso = getTorsoPose(sensors);
-        // Convert kick foot to torso
+        // Convert kick foot to torso = Htk
+        // Eigen::Isometry3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
+        //                                         ? Eigen::Isometry3d(sensors.Htx[ServoID::R_ANKLE_ROLL])
+        //                                         : Eigen::Isometry3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
         Eigen::Isometry3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
                                                 ? Eigen::Isometry3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
                                                 : Eigen::Isometry3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to
-        // torso
+        // torso Hks = Htk.inv * Hts
+        // Eigen::Isometry3d supportToKickFoot = currentKickFoot.inverse() * currentTorso;
         Eigen::Isometry3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
         // Convert ball position from support foot coordinates to kick foot coordinates
         Eigen::Vector3d ballFromKickFoot = supportToKickFoot * ballPosition;
