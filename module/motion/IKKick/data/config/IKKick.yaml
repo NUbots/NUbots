@@ -17,13 +17,13 @@ balancer:
   stand_height: 0.46
   # How far to move the torso forward.
   # Note: this tilts both the hips and ankles
-  forward_lean: 0.0620 #m
+  forward_lean: 0.0640 #m
 
   # Seems to be the forward duration of the kick movement
   # - Also seems to be related to an ankle glitch
-  forward_duration: 0.0005 #m/s
+  forward_duration: 0.05 #m/s
   # TBA
-  return_duration: 0.005 #m/s
+  return_duration: 0.05 #m/s
 
 active_balance:
   enabled: true
