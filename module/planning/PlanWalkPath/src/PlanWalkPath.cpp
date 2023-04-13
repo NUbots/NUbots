@@ -58,7 +58,18 @@ namespace module::planning {
                 speed = std::max(cfg.min_forward_speed, std::min(speed, cfg.max_forward_speed));
             }
 
-            // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
+            // If robot getting close to the ball, begin to decelerate to minimum speed
+            if (rPGg.head(2).norm() < cfg.approach_radius) {
+                speed -= cfg.acceleration;
+                speed = std::max(speed, cfg.min_forward_speed);
+            }
+            else {
+                // If robot is far away from the ball, accelerate to max speed
+                speed += cfg.acceleration;
+                speed = std::min(speed, cfg.max_forward_speed);
+            }
+
+            // Obtain the unit vector to desired target in ground space and scale by cfg.forward_speed
             Eigen::Vector3f walk_command = rPGg.normalized() * speed;
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
