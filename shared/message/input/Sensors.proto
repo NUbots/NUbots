@@ -122,8 +122,8 @@ message Sensors {
     repeated mat4 Htx = 12 [(array_size) = 20];
     /// Homogeneous transform torso {t} from ground {g}
     mat4 Hgt  = 13;
-    /// Homogeneous transform world {w} from ground {g}
-    mat4 Hgw = 14;
+    /// Homogeneous transform world {w} from robot {r}
+    mat4 Hrw = 14;
     /// Homogeneous transform world {w} from torso {t}
     mat4 Htw = 15;
 }

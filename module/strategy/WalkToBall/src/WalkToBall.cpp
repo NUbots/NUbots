@@ -32,10 +32,10 @@ namespace module::strategy {
                 // If we have a ball, walk to it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
                     // Add an offset to account for walking with the foot in front of the ball
-                    const Eigen::Vector3f rBGg(ball.rBGg.x(), ball.rBGg.y() + cfg.ball_y_offset, ball.rBGg.z());
-                    const float heading    = std::atan2(ball.rBGg.y(), ball.rBGg.x());
+                    const Eigen::Vector3f rBRr(ball.rBRr.x(), ball.rBRr.y() + cfg.ball_y_offset, ball.rBRr.z());
+                    const float heading    = std::atan2(ball.rBRr.y(), ball.rBRr.x());
                     auto walk_to_point     = std::make_unique<WalkTo>();
-                    walk_to_point->rPGg    = rBGg;
+                    walk_to_point->rPRr    = rBRr;
                     walk_to_point->heading = heading;
                     emit<Task>(walk_to_point);
                 }

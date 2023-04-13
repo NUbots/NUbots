@@ -98,9 +98,9 @@ namespace module::input {
         Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
         sensors->Htw       = Hwt.inverse().matrix();
 
-        Eigen::Isometry3d Hwg = Eigen::Isometry3d::Identity();
-        Hwg.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Hwg.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
-        sensors->Hgw          = Hwg.inverse().matrix();
+        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+        Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+        sensors->Hrw          = Hwr.inverse().matrix();
     }
 }  // namespace module::input

@@ -45,10 +45,10 @@ namespace module::planning {
 
         // Path to walk to a particular point
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            Eigen::Vector3f rPGg = walk_to.rPGg;
+            Eigen::Vector3f rPRr = walk_to.rPRr;
 
             // If robot getting close to the ball, begin to decelerate to minimum speed
-            if (rPGg.head(2).norm() < cfg.approach_radius) {
+            if (rPRr.head(2).norm() < cfg.approach_radius) {
                 speed -= cfg.acceleration;
                 speed = std::max(speed, cfg.min_forward_speed);
             }
@@ -59,7 +59,7 @@ namespace module::planning {
             }
 
             // If robot getting close to the ball, begin to decelerate to minimum speed
-            if (rPGg.head(2).norm() < cfg.approach_radius) {
+            if (rPRr.head(2).norm() < cfg.approach_radius) {
                 speed -= cfg.acceleration;
                 speed = std::max(speed, cfg.min_forward_speed);
             }
@@ -69,8 +69,8 @@ namespace module::planning {
                 speed = std::min(speed, cfg.max_forward_speed);
             }
 
-            // Obtain the unit vector to desired target in ground space and scale by cfg.forward_speed
-            Eigen::Vector3f walk_command = rPGg.normalized() * speed;
+            // Obtain the unit vector to desired target in robot space and scale by cfg.forward_speed
+            Eigen::Vector3f walk_command = rPRr.normalized() * speed;
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed

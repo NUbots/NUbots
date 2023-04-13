@@ -6,6 +6,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/support/FieldDescription.hpp"
 
 namespace module::localisation {
 
@@ -285,18 +286,15 @@ namespace module::localisation {
 
     Eigen::Vector2i RobotLocalisation::position_in_map(const Eigen::Matrix<double, 3, 1> particle,
                                                        const Eigen::Vector2d rPRw) {
-        // Create transform from world {w} to field {f} space
+        // Transform observations from world {w} to field {f} space
         Eigen::Isometry2d Hfw;
-        Hfw.translation() = Eigen::Vector2d(particle(0), particle(1));
-        Hfw.linear()      = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
-
-        // Transform the observations from robot space {r} to field space {f}
+        Hfw.translation()    = Eigen::Vector2d(particle(0), particle(1));
+        Hfw.linear()         = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
         Eigen::Vector2d rPFf = Hfw * rPRw;
 
         // Get the associated position/index in the map [x, y]
         int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
         int y_map = fieldline_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size);
-
         return Eigen::Vector2i(x_map, y_map);
     }
 
@@ -314,6 +312,7 @@ namespace module::localisation {
                 weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
                           / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
+            // If the observation is outside the max range, penalise it by adding a small weight
             else {
                 weight += std::exp(-0.5 * std::pow(cfg.max_range / cfg.measurement_noise, 2))
                           / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
