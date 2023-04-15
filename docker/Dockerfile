@@ -53,7 +53,8 @@ COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
 RUN ldconfig
 
 # Make a symlink from /usr/local/lib to /usr/local/lib64 so library install location is irrelevant
-RUN cd /usr/local && ln -sf lib lib64
+WORKDIR /usr/local 
+RUN  ln -sf lib lib64
 
 # Generate toolchain files for the generic platform
 COPY usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
