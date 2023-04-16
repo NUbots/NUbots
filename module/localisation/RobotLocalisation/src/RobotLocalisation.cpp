@@ -30,18 +30,14 @@ namespace module::localisation {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.grid_size   = config["grid_size"].as<double>();
             cfg.n_particles = config["n_particles"].as<int>();
-
-            // Odometry scaling factors
-            cfg.scale_x     = config["scale_x"].as<double>();
-            cfg.scale_y     = config["scale_y"].as<double>();
-            cfg.scale_theta = config["scale_theta"].as<double>();
-
-            cfg.save_map = config["save_map"].as<bool>();
+            cfg.save_map    = config["save_map"].as<bool>();
 
             // Initial state, covariance and process noise
             state                        = config["initial_state"].as<Expression>();
             covariance.diagonal()        = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
             cfg.process_noise.diagonal() = Eigen::Vector3d(config["process_noise"].as<Expression>());
+            cfg.measurement_noise        = config["measurement_noise"].as<double>();
+            cfg.max_range                = config["max_range"].as<double>();
 
             // Initialise the particles with a multivariate normal distribution
             MultivariateNormal<double, 3> multivariate(state, covariance);
@@ -166,7 +162,10 @@ namespace module::localisation {
             fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
 
             // Fill the surrounding cells close to the field lines with decreasing occupancy values
-            fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
+            // fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
+
+            // Precompute the distance map
+            fieldline_map.create_distance_map(cfg.grid_size);
 
             // Save the map to a csv file
             if (cfg.save_map) {
@@ -180,7 +179,7 @@ namespace module::localisation {
                 Eigen::MatrixXd fieldline_map_data = fieldline_map.get_map();
                 for (int i = 0; i < fieldline_map_data.rows(); i++) {
                     for (int j = 0; j < fieldline_map_data.cols(); j++) {
-                        if (fieldline_map_data(i, j) == 1) {
+                        if (fieldline_map_data(i, j) == 0) {
                             emit(graph("Field Line Map", i, j));
                         }
                     }
@@ -222,21 +221,18 @@ namespace module::localisation {
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             if (!falling) {
-                // Time update
-                time_update();
-
                 // Add noise to the particles
                 add_noise();
 
                 // Project the field line observations (uPCr) onto the field plane
                 std::vector<Eigen::Vector2d> field_point_observations;
+                Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
                 for (auto point : field_lines.points) {
-                    Eigen::Isometry3d Hcr = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
-                    auto uPCr             = point.cast<double>();
-                    auto rPCr             = ray_to_field_plane(uPCr, Hcr);
-                    field_point_observations.push_back(rPCr);
+                    auto uPCw = point.cast<double>();
+                    auto rPCw = ray_to_field_plane(uPCw, Hcw);
+                    field_point_observations.push_back(rPCw);
                     if (log_level <= NUClear::DEBUG) {
-                        auto cell = position_in_map(state, rPCr);
+                        auto cell = position_in_map(state, rPCw);
                         emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
                     }
                 }
@@ -258,42 +254,57 @@ namespace module::localisation {
                 covariance = compute_covariance();
 
                 if (log_level <= NUClear::DEBUG) {
+                    // Graph where the world frame is positioned in the map
                     auto state_cell = position_in_map(state, Eigen::Vector2d(0.0, 0.0));
-                    emit(graph("State (x,y)", state_cell.x(), state_cell.y()));
-                    // Emit the cell 0.5m in front of the robot to visualise the direction the robot is facing
+                    emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
+
+                    // Graph the cell 0.5m in front of the world frame to visualise the direction of world frame x
                     auto direction_cell = position_in_map(state, Eigen::Vector2d(0.5, 0.0));
-                    emit(graph("State (theta)", direction_cell.x(), direction_cell.y()));
+                    emit(graph("World (theta)", direction_cell.x(), direction_cell.y()));
+
+                    // Graph where the robot is positioned in the map
+                    Eigen::Isometry3d Hwc = Hcw.inverse();
+                    Eigen::Vector2d rCWw  = Eigen::Vector2d(Hwc.translation().x(), Hwc.translation().y());
+                    auto robot_cell       = position_in_map(state, rCWw);
+                    emit(graph("Robot (x,y)", robot_cell.x(), robot_cell.y()));
+
+                    // Graph the cell 0.5m in front of the robot to visualise the direction it's facing
+                    Eigen::Vector3d rPCc  = Eigen::Vector3d(0.5, 0.0, 0.0);
+                    Eigen::Vector3d rPWw  = Hwc * rPCc;
+                    auto robot_theta_cell = position_in_map(state, rPWw.head(2));
+                    emit(graph("Robot (theta)", robot_theta_cell.x(), robot_theta_cell.y()));
                 }
 
                 // Build and emit the field message
                 auto field(std::make_unique<Field>());
-                Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
-                position.translation() = Eigen::Vector2d(state.x(), state.y());
-                position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
-                field->position        = position.matrix();
-                field->covariance      = covariance;
+                Eigen::Isometry2d Hfw(Eigen::Isometry2d::Identity());
+                Hfw.translation() = Eigen::Vector2d(state.x(), state.y());
+                Hfw.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
+                field->Hfw        = Hfw.matrix();
+                field->covariance = covariance;
                 emit(field);
             }
         });
     }
 
 
-    Eigen::Vector2d RobotLocalisation::ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcr) {
+    Eigen::Vector2d RobotLocalisation::ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcw) {
         // Project the field line points onto the field plane
-        auto Hrc             = Hcr.inverse();
-        Eigen::Vector3d rPCr = uPCr * std::abs(Hrc.translation().z() / uPCr.z());
-        return rPCr.head(2);
+        auto Hwc             = Hcw.inverse();
+        Eigen::Vector3d rCWw = Eigen::Vector3d(Hwc.translation().x(), Hwc.translation().y(), 0.0);
+        Eigen::Vector3d rPCw = uPCr * std::abs(Hwc.translation().z() / uPCr.z()) + rCWw;
+        return rPCw.head(2);
     }
 
     Eigen::Vector2i RobotLocalisation::position_in_map(const Eigen::Matrix<double, 3, 1> particle,
-                                                       const Eigen::Vector2d rPRr) {
-        // Create transform from robot {r} to field {f} space
-        Eigen::Isometry2d Hfr;
-        Hfr.translation() = Eigen::Vector2d(particle(0), particle(1));
-        Hfr.linear()      = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
+                                                       const Eigen::Vector2d rPRw) {
+        // Create transform from world {w} to field {f} space
+        Eigen::Isometry2d Hfw;
+        Hfw.translation() = Eigen::Vector2d(particle(0), particle(1));
+        Hfw.linear()      = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
 
         // Transform the observations from robot space {r} to field space {f}
-        Eigen::Vector2d rPFf = Hfr * rPRr;
+        Eigen::Vector2d rPFf = Hfw * rPRw;
 
         // Get the associated position/index in the map [x, y]
         int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
@@ -304,48 +315,31 @@ namespace module::localisation {
 
     double RobotLocalisation::calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
                                                const std::vector<Eigen::Vector2d>& observations) {
-        double weight         = 0;
-        double n_observations = observations.size();
-
+        double weight = 0;
         for (auto rORr : observations) {
-            // Get the position of this particle in the map, which we use to check if robot is on the field [x, y]
-            Eigen::Vector2i particle_position = position_in_map(particle, Eigen::Vector2d(0.0, 0.0));
-            double particle_occupancy = fieldline_map.get_occupancy_value(particle_position.x(), particle_position.y());
-
             // Get the position of the observation in the map for this particle [x, y]
             Eigen::Vector2i map_position = position_in_map(particle, rORr);
-
-            // Get the occupancy value of the observation at this position in the map
-            double observation_occupancy = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
-
-            // If the particle_occupancy is -1 then the robot is outside the map, penalise the particle
-            if (particle_occupancy == -1) {
-                weight = 0;
+            // Get the distance to the closest field line point in the map
+            double occupancy_value = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
+            // Check if the observation is within the max range and within the field
+            if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
+                double distance_error_norm = std::pow(occupancy_value, 2);
+                weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
+                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
-            // If the observation_occupancy is -1 then the observation is outside the map, penalise the particle.
-            // Reduce the weight of the particle by the 1 / number of observations
-            else if (observation_occupancy == -1) {
-                weight -= (1.0 / n_observations);
-            }
-            else if (observation_occupancy > 0) {
-                // Increase the weight of the particle by the occupancy/n_observations, such that the maximum weight is
-                // between [0, 1]
-                weight += observation_occupancy / n_observations;
+            else {
+                weight += std::exp(-0.5 * std::pow(cfg.max_range / cfg.measurement_noise, 2))
+                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
         }
 
-        // Ensure the weight is positive
-        weight = std::max(weight, 0.0);
-
-        return weight;
+        return std::max(weight, 0.0);
     }
 
     Eigen::Vector3d RobotLocalisation::compute_mean() {
         Eigen::Vector3d mean = Eigen::Vector3d::Zero();
         for (const auto& particle : particles) {
-            mean.x() += particle.state.x();
-            mean.y() += particle.state.y();
-            mean.z() += particle.state.z();
+            mean += particle.state;
         }
         return mean / cfg.n_particles;
     }
@@ -358,27 +352,6 @@ namespace module::localisation {
         }
         cov_matrix /= (cfg.n_particles - 1);
         return cov_matrix;
-    }
-
-    void RobotLocalisation::time_update() {
-        // Calculate the time since the last time update
-        using namespace std::chrono;
-        const auto current_time = NUClear::clock::now();
-        const double dt         = duration_cast<duration<double>>(current_time - last_time_update_time).count();
-        last_time_update_time   = current_time;
-
-        // Update the particles using the walk command and the time since the last time update, with some tunable
-        // scaling on the walk command velocities
-        for (auto& particle : particles) {
-            double delta_x     = walk_command.x() * dt * cfg.scale_x;
-            double delta_y     = walk_command.y() * dt * cfg.scale_y;
-            double delta_theta = walk_command.z() * dt * cfg.scale_theta;
-            particle.state.x() = particle.state.x() + delta_x * cos(particle.state.z() + delta_theta)
-                                 - delta_y * sin(particle.state.z() + delta_theta);
-            particle.state.y() = particle.state.y() + delta_y * cos(particle.state.z() + delta_theta)
-                                 + delta_x * sin(particle.state.z() + delta_theta);
-            particle.state.z() = particle.state.z() + delta_theta;
-        }
     }
 
     void RobotLocalisation::resample() {
@@ -397,6 +370,7 @@ namespace module::localisation {
         for (auto& weight : weights) {
             weight /= weight_sum;
         }
+
         std::vector<Particle> resampled_particles(particles.size());
         std::default_random_engine gen;
         std::discrete_distribution<int> distribution(weights.begin(), weights.end());
@@ -410,6 +384,7 @@ namespace module::localisation {
 
     void RobotLocalisation::add_noise() {
         MultivariateNormal<double, 3> multivariate(Eigen::Vector3d(0.0, 0.0, 0.0), cfg.process_noise);
+
         for (auto& particle : particles) {
             particle.state += multivariate.sample();
         }

@@ -4,6 +4,14 @@
 
 Uses a Unscented Kalman filter to filter the raw incoming data, and provide clean platform agnostic data.
 
+We assume that the IMU (accelerometer and gyroscope) are oriented to conform with the standard coordinate system x-axis out
+the front of the robot y-axis to the left z-axis up
+
+For the accelerometer the orientation should be as follows
+x axis reports a +1g acceleration when robot is laying on its back
+y axis reports a +1g acceleration when robot is laying on its right side
+z axis reports a +1g acceleration when robot is vertical
+
 ## Usage
 
 When installed, it will read incoming `message::platform::RawSensors` objects and pass them through the kalman filter.

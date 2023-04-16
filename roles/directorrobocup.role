@@ -6,9 +6,12 @@ nuclear_role(
   # Config
   support::configuration::SoccerConfig
   actuation::KinematicsConfiguration
+  support::configuration::GlobalConfig
   # Sensors
+  platform::cm740::HardwareIO
   input::SensorFilter
-  platform::Webots
+  input::Camera
+  input::GameController
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
@@ -37,4 +40,8 @@ nuclear_role(
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
+  strategy::Ready
+  # Purposes
+  purpose::Striker
+  purpose::Soccer
 )
