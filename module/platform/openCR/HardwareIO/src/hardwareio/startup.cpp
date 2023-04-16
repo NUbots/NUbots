@@ -13,16 +13,17 @@ namespace module::platform::openCR {
                                                           uint16_t(OpenCR::Address::RETURN_DELAY_TIME),
                                                           uint8_t(0)));
 
+        // Enable power to the servos
+        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
+                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
+                                                          uint8_t(1)));
+
         // Find OpenCR firmware and model versions
         packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::MODEL_INFORMATION);
         opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
                                                 uint16_t(OpenCR::Address::MODEL_NUMBER_L),
                                                 uint8_t(3)));
 
-        // Enable power to the servos
-        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
-                                                          uint8_t(1)));
 
         // Wait about 300ms for the dynamixels to start up
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
