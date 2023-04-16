@@ -45,7 +45,7 @@ ukf:
       rotation: [0.01, 0.01, 0.01, 0.01] # Not very sure of rotation (QX, QY, QZ, QW)
 
 # State = [roll, pitch, roll rate, pitch rate]'
-kalman_filter:
+kalman:
   # Continuous time process model: dx = Ac*x Essentially results in dx = [roll rate, pitch rate, 0, 0]'
   Ac:
     - [0, 0, 1, 0]
@@ -74,7 +74,7 @@ mahony:
   # Mahony "Integral" Gain used to compute bias
   Ki: 1
   # Mahony Filter Initial bias
-  initial_bias: [-0.0967263, 0.00640166, 0.197743]
+  bias: [-0.0967263, 0.00640166, 0.197743]
   # Mahony Filter initial deadreckoned position and height
   initial_rTWw: [0, 0, 0.49]
 

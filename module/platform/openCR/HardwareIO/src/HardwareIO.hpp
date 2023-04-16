@@ -12,6 +12,7 @@
 #include "message/platform/StatusReturn.hpp"
 
 #include "utility/io/uart.hpp"
+#include "utility/platform/RawSensors.hpp"
 
 namespace module::platform::openCR {
 
@@ -188,7 +189,7 @@ namespace module::platform::openCR {
         void send_servo_request();
 
         /// @brief We expect 20 servo responses, only send when we have them all
-        std::array<bool, 20> servo_response{};
+        std::array<bool, 1> servo_response{};
         /// @brief We expect an OpenCR response, when we get it send servo requests
         bool opencr_response = false;
     };

@@ -28,7 +28,9 @@ namespace utility::platform {
     using message::platform::RawSensors;
     using utility::input::ServoID;
 
-    std::string make_error_string(const std::string& src, const uint error_code) {
+    /// @todo Update error handling to protocol v2
+    /// @see RawSensors.proto, StatusReturn.proto
+    inline std::string make_error_string(const std::string& src, const uint error_code) {
         std::stringstream s;
 
         s << "Error on ";
@@ -60,7 +62,7 @@ namespace utility::platform {
         return s.str();
     }
 
-    std::string make_servo_error_string(const RawSensors::Servo& servo, const uint32_t servo_id) {
+    inline std::string make_servo_error_string(const RawSensors::Servo& servo, const uint32_t servo_id) {
         std::stringstream s;
         s << "Error on Servo " << (servo_id + 1) << " (" << static_cast<ServoID>(servo_id) << "):";
 
@@ -74,7 +76,7 @@ namespace utility::platform {
             s << " Overheating - " << servo.temperature;
         }
         if (RawSensors::Error::OVERLOAD != 0u) {
-            s << " Overloaded - " << servo.load;
+            s << " Overloaded - " << servo.present_current;
         }
         if (RawSensors::Error::INSTRUCTION != 0u) {
             s << " Bad Instruction ";

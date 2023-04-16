@@ -4,7 +4,6 @@
 #include "HardwareIO.hpp"
 
 #include "utility/math/comparison.hpp"
-#include "utility/platform/RawSensors.hpp"
 
 namespace module::platform::openCR {
 

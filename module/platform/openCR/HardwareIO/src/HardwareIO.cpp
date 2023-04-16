@@ -11,7 +11,6 @@
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
-#include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::platform::openCR {
@@ -62,7 +61,10 @@ namespace module::platform::openCR {
             }
         });
 
-        on<Startup>().then("HardwareIO Startup", [this] { startup(); });
+        on<Startup>().then("HardwareIO Startup", [this] {
+            startup();
+            log<NUClear::DEBUG>("HardwareIO started");
+        });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
             // log<NUClear::TRACE>("Shutdown");
@@ -72,7 +74,7 @@ namespace module::platform::openCR {
             }
         });
 
-        on<Watchdog<HardwareIO, 1, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
+        on<Watchdog<HardwareIO, 2, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
             // We haven't received any messages lately
             log<NUClear::WARN>("No packets recently, request servo packets");
             // Send a request for all servo packets
@@ -83,6 +85,7 @@ namespace module::platform::openCR {
         // Run a state machine to handle reception of packet header and data
         // If a packet is successfully emitted then we emit a StatusReturn message
         on<IO>(opencr.native_handle(), IO::READ).then([this] {
+            log<NUClear::WARN>("Received data");
             // Process the response packet and emit a StatusReturn if applicable
             handle_response();
             // Service the watchdog
@@ -107,7 +110,7 @@ namespace module::platform::openCR {
                 auto info = packet_queue[packet.id].front();
                 packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
-                // log<NUClear::DEBUG>(fmt::format(
+                // log<NUClear::WARN>(fmt::format(
                 //     "Packet ID {}, Contents {}, Data size {}, Remaining in this
                 //     queue {} ",
                 //     packet.id,
@@ -157,6 +160,7 @@ namespace module::platform::openCR {
 
             // If we have all the servos, now we need to send an OpenCR read command
             if (all_servos_received) {
+                log<NUClear::WARN>("All servos received, requesting OpenCR data");
                 send_opencr_request();
 
                 // Reset the servo response array
@@ -166,6 +170,7 @@ namespace module::platform::openCR {
             }
             // If we have all the OpenCR data, now we need to send servo read commands
             else if (opencr_response) {
+                log<NUClear::WARN>("OpenCR data received, requesting servo data");
                 send_servo_request();
 
                 // Reset the OpenCR response flag

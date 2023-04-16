@@ -1,7 +1,6 @@
 #include "HardwareIO.hpp"
 
 #include "utility/math/angle.hpp"
-#include "utility/platform/RawSensors.hpp"
 
 namespace module::platform::openCR {
 

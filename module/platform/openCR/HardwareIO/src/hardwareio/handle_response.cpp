@@ -1,7 +1,5 @@
 #include "HardwareIO.hpp"
 
-#include "utility/platform/RawSensors.hpp"
-
 namespace module::platform::openCR {
 
     using message::platform::StatusReturn;
