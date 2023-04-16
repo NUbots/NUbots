@@ -147,20 +147,20 @@ namespace module::platform::openCR {
          * @brief Reads information from an OpenCR packet and logs the model and firmware version.
          * @param packet a preprocessed OpenCR packet
          */
-        void processModelInformation(const message::platform::StatusReturn& packet);
+        void process_model_information(const message::platform::StatusReturn& packet);
 
         /**
          * @brief Reads information from an OpenCR packet and populates opencrState and batteryState
          * @param packet a preprocessed OpenCR packet
          */
-        void processOpenCRData(const message::platform::StatusReturn& packet);
+        void process_opencr_data(const message::platform::StatusReturn& packet);
 
         /**
          * @brief Reads information from an OpenCR packet and populates servoStates
          * @param packet a preprocessed OpenCR packet
          * @note Although we do a Sync Write to all servos, data is returned one by one
          */
-        void processServoData(const message::platform::StatusReturn& packet);
+        void process_servo_data(const message::platform::StatusReturn& packet);
 
         /**
          * @brief Reads information from an OpenCR packet and populares fsrStates
@@ -173,7 +173,24 @@ namespace module::platform::openCR {
          * @brief Reads info from the state variables and processes it into a RawSensors message
          * @return A RawSensors message created from the current state variables
          */
-        message::platform::RawSensors constructSensors();
+        message::platform::RawSensors construct_sensors();
+
+        /// @brief Runs the setup for the devices
+        void startup();
+
+        /// @brief handles a response packet from the device
+        void handle_response();
+
+        /// @brief handle sending a request to the OpenCR device
+        void send_opencr_request();
+
+        /// @brief handle sending a request to the servo devices
+        void send_servo_request();
+
+        /// @brief We expect 20 servo responses, only send when we have them all
+        std::array<bool, 20> servo_response{};
+        /// @brief We expect an OpenCR response, when we get it send servo requests
+        bool opencr_response = false;
     };
 
 }  // namespace module::platform::openCR

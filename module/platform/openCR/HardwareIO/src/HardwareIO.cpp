@@ -29,8 +29,6 @@ namespace module::platform::openCR {
         on<Configuration>("HardwareIO_OpenCR.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            log<NUClear::TRACE>("Config START");
-
             // Make sure OpenCR is operating at the correct baud rate (based on config params)
             if (opencr.connected()) {
                 opencr.close();
@@ -62,143 +60,9 @@ namespace module::platform::openCR {
                 nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
                 servoStates[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
-
-            log<NUClear::TRACE>("Config END");
         });
 
-        on<Startup>().then("HardwareIO Startup", [this] {
-            log<NUClear::TRACE>("Startup START");
-            // Set the OpenCR to not return a status packet when written to (to allow consecutive writes)
-            opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                              uint16_t(OpenCR::Address::STATUS_RETURN_LEVEL),
-                                                              uint8_t(1)));
-
-            // Set the OpenCRs delay time to 0 (it may not have been configured before)
-            opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                              uint16_t(OpenCR::Address::RETURN_DELAY_TIME),
-                                                              uint8_t(0)));
-
-            // Find OpenCR firmware and model versions
-            packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::MODEL_INFORMATION);
-            opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
-                                                    uint16_t(OpenCR::Address::MODEL_NUMBER_L),
-                                                    uint8_t(3)));
-
-            // Enable power to the servos
-            opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                              uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
-                                                              uint8_t(1)));
-
-            // Wait about 300ms for the dynamixels to start up
-            std::this_thread::sleep_for(std::chrono::milliseconds(300));
-
-            // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
-            std::array<dynamixel::v2::SyncWriteData<uint8_t>, 20> data;
-            for (int i = 0; i < 20; ++i) {
-                // ensure write command targets the ID (ID != i)
-                data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 1);
-            }
-
-            opencr.write(
-                dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::STATUS_RETURN_LEVEL),
-                                                             data));
-
-            // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been
-            // configured before)
-            for (int i = 0; i < 20; ++i) {
-                // ensure write command targets the ID (ID != i)
-                data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 0);
-            }
-
-            opencr.write(
-                dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::RETURN_DELAY_TIME),
-                                                             data));
-
-            // Set up indirect addressing for read addresses
-            std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>, 20> read_data;
-
-            for (int i = 0; i < 20; ++i) {
-                read_data[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>(
-                    nugus.servo_ids()[i],  // ensure write command targets the ID (ID != i)
-                    {uint16_t(DynamixelServo::Address::TORQUE_ENABLE),
-                     uint16_t(DynamixelServo::Address::HARDWARE_ERROR_STATUS),
-                     uint16_t(DynamixelServo::Address::PRESENT_PWM_L),
-                     uint16_t(DynamixelServo::Address::PRESENT_PWM_H),
-                     uint16_t(DynamixelServo::Address::PRESENT_CURRENT_L),
-                     uint16_t(DynamixelServo::Address::PRESENT_CURRENT_H),
-                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_L),
-                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_2),
-                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_3),
-                     uint16_t(DynamixelServo::Address::PRESENT_VELOCITY_H),
-                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_L),
-                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_2),
-                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_3),
-                     uint16_t(DynamixelServo::Address::PRESENT_POSITION_H),
-                     uint16_t(DynamixelServo::Address::PRESENT_INPUT_VOLTAGE_L),
-                     uint16_t(DynamixelServo::Address::PRESENT_INPUT_VOLTAGE_H),
-                     uint16_t(DynamixelServo::Address::PRESENT_TEMPERATURE)});
-            }
-
-            opencr.write(
-                dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 17>, 20>(uint16_t(AddressBook::SERVO_READ_ADDRESS),
-                                                                              read_data));
-
-            // Set up indirect addressing for write addresses
-            std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>, 20> write_data1;
-            std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>>, 20> write_data2;
-
-            for (int i = 0; i < 20; ++i) {
-                write_data1[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>(
-                    nugus.servo_ids()[i],  // ensure write command targets the ID (ID != i)
-                    {uint16_t(DynamixelServo::Address::TORQUE_ENABLE),
-                     uint16_t(DynamixelServo::Address::VELOCITY_I_GAIN_L),
-                     uint16_t(DynamixelServo::Address::VELOCITY_I_GAIN_H),
-                     uint16_t(DynamixelServo::Address::VELOCITY_P_GAIN_L),
-                     uint16_t(DynamixelServo::Address::VELOCITY_P_GAIN_H),
-                     uint16_t(DynamixelServo::Address::VELOCITY_D_GAIN_L),
-                     uint16_t(DynamixelServo::Address::VELOCITY_D_GAIN_H),
-                     uint16_t(DynamixelServo::Address::POSITION_I_GAIN_L),
-                     uint16_t(DynamixelServo::Address::POSITION_I_GAIN_H),
-                     uint16_t(DynamixelServo::Address::POSITION_P_GAIN_L),
-                     uint16_t(DynamixelServo::Address::POSITION_P_GAIN_H)});
-
-                write_data2[i] = dynamixel::v2::SyncWriteData<std::array<uint16_t, 24>>(
-                    nugus.servo_ids()[i],  // ensure write command targets the ID (ID != i)
-                    {uint16_t(DynamixelServo::Address::FEEDFORWARD_1ST_GAIN_L),
-                     uint16_t(DynamixelServo::Address::FEEDFORWARD_1ST_GAIN_H),
-                     uint16_t(DynamixelServo::Address::FEEDFORWARD_2ND_GAIN_L),
-                     uint16_t(DynamixelServo::Address::FEEDFORWARD_2ND_GAIN_H),
-                     uint16_t(DynamixelServo::Address::GOAL_PWM_L),
-                     uint16_t(DynamixelServo::Address::GOAL_PWM_H),
-                     uint16_t(DynamixelServo::Address::GOAL_CURRENT_L),
-                     uint16_t(DynamixelServo::Address::GOAL_CURRENT_H),
-                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_L),
-                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_2),
-                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_3),
-                     uint16_t(DynamixelServo::Address::GOAL_VELOCITY_H),
-                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_L),
-                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_2),
-                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_3),
-                     uint16_t(DynamixelServo::Address::PROFILE_ACCELERATION_H),
-                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_L),
-                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_2),
-                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_3),
-                     uint16_t(DynamixelServo::Address::PROFILE_VELOCITY_H),
-                     uint16_t(DynamixelServo::Address::GOAL_POSITION_L),
-                     uint16_t(DynamixelServo::Address::GOAL_POSITION_2),
-                     uint16_t(DynamixelServo::Address::GOAL_POSITION_3),
-                     uint16_t(DynamixelServo::Address::GOAL_POSITION_H)});
-            }
-
-            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 11>, 20>(
-                uint16_t(AddressBook::SERVO_WRITE_ADDRESS_1),
-                write_data1));
-            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(
-                uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
-                write_data2));
-
-            log<NUClear::TRACE>("Startup END");
-        });
+        on<Startup>().then("HardwareIO Startup", [this] { startup(); });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
             // log<NUClear::TRACE>("Shutdown");
@@ -208,127 +72,108 @@ namespace module::platform::openCR {
             }
         });
 
-        // This trigger gets the sensor data from the sub controller
-        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
-            // log<NUClear::TRACE>("Update START");
-            // Write out servo data
-            // SYNC_WRITE (write the same memory addresses on all devices)
-            // We need to do 2 sync writes here.
-            // We always write to all servos if at least one of them is dirty
-            const bool servos_dirty = std::any_of(servoStates.cbegin(),
-                                                  servoStates.cend(),
-                                                  [](const ServoState& servo) -> bool { return servo.dirty; });
-            if (servos_dirty) {
-                // Write data is split into two components
-                std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, 20> data1;
-                std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
+        on<Watchdog<HardwareIO, 1, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
+            // We haven't received any messages lately
+            log<NUClear::WARN>("No packets recently, request servo packets");
+            // Send a request for all servo packets
+            send_servo_request();
+        });
 
-                for (uint i = 0; i < servoStates.size(); ++i) {
-                    // Servo ID is sequential, but not 0-indexed
-                    data1[i].id = nugus.servo_ids()[i];
-                    data2[i].id = nugus.servo_ids()[i];
+        // When we receive data back from the OpenCR it will arrive here
+        // Run a state machine to handle reception of packet header and data
+        // If a packet is successfully emitted then we emit a StatusReturn message
+        on<IO>(opencr.native_handle(), IO::READ).then([this] {
+            // Process the response packet and emit a StatusReturn if applicable
+            handle_response();
+            // Service the watchdog
+            emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
+        });
 
-                    // Clear our dirty flag
-                    servoStates[i].dirty = false;
 
-                    // If our torque should be disabled then we disable our torque
-                    if (servoStates[i].torqueEnabled
-                        && (std::isnan(servoStates[i].goalPosition) || servoStates[i].goalCurrent == 0)) {
-                        servoStates[i].torqueEnabled = false;
-                        data1[i].data.torqueEnable   = 0;
-                    }
-                    else {
-                        // If our torque was disabled but is now enabled
-                        if (!servoStates[i].torqueEnabled && !std::isnan(servoStates[i].goalPosition)
-                            && servoStates[i].goalCurrent != 0) {
-                            servoStates[i].torqueEnabled = true;
-                            data1[i].data.torqueEnable   = 1;
-                        }
-                    }
+        // Single is used to process servos one at a time and increment the counter
+        on<Trigger<StatusReturn>, Single, Sync<HardwareIO>>().then([this](const StatusReturn& packet) {
+            // Check we can process this packet
+            if (packet_queue.find(packet.id) == packet_queue.end()) {
+                log<NUClear::WARN>(fmt::format("Recieved packet for unexpected ID {}.", packet.id));
+            }
+            // Check we're expecting the packet
+            else if (packet_queue[packet.id].size() == 0) {
+                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
+            }
 
-                    // Pack our data
-                    data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
-                    data1[i].data.velocityIGain = convert::IGain(servoStates[i].velocityIGain);
-                    data1[i].data.velocityDGain = convert::DGain(servoStates[i].velocityDGain);
-                    // Warning this might be wrong since the conversion functions might be implicitly for velocity gain
-                    // only.
-                    data1[i].data.positionPGain = convert::PGain(servoStates[i].positionPGain);
-                    data1[i].data.positionIGain = convert::IGain(servoStates[i].positionIGain);
+            // All good, now figure out what the contents of the message are
+            else {
+                // Pop the front of the packet queue
+                auto info = packet_queue[packet.id].front();
+                packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
-                    data2[i].data.feedforward1stGain  = convert::FFGain(servoStates[i].feedforward1stGain);
-                    data2[i].data.feedforward2ndGain  = convert::FFGain(servoStates[i].feedforward2ndGain);
-                    data2[i].data.goalPWM             = convert::PWM(servoStates[i].goalPWM);
-                    data2[i].data.goalCurrent         = convert::current(servoStates[i].goalCurrent);
-                    data2[i].data.goalVelocity        = convert::velocity(servoStates[i].goalVelocity);
-                    data2[i].data.profileAcceleration = convert::FFGain(servoStates[i].profileAcceleration);
-                    data2[i].data.profileVelocity     = convert::FFGain(servoStates[i].profileVelocity);
-                    data2[i].data.goalPosition =
-                        convert::position(i, servoStates[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
+                // log<NUClear::DEBUG>(fmt::format(
+                //     "Packet ID {}, Contents {}, Data size {}, Remaining in this
+                //     queue {} ",
+                //     packet.id,
+                //     (uint8_t) info,
+                //     packet.data.size(),
+                //     packet_queue[packet.id].size()));
+
+                // Check for errors
+                if (packet.error != StatusReturn::CommandError::NO_ERROR) {
+                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet.id));
+                }
+                if (packet.alert) {
+                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert"));
                 }
 
-                opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(
-                    uint16_t(AddressBook::SERVO_WRITE_1),
-                    data1));
-                opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, 20>(
-                    uint16_t(AddressBook::SERVO_WRITE_2),
-                    data2));
+                switch (info) {
+                    // Handles OpenCR model and version information
+                    case PacketTypes::MODEL_INFORMATION: process_model_information(packet); break;
+
+                    // Handles OpenCR sensor data
+                    case PacketTypes::OPENCR_DATA: process_opencr_data(packet); break;
+
+                    // Handles servo data
+                    case PacketTypes::SERVO_DATA: process_servo_data(packet); break;
+
+                    // Handles FSR data
+                    // case PacketTypes::FSR_DATA: processFSRData(packet); break;
+
+                    // What is this??
+                    default: log<NUClear::WARN>("Unknown packet data received"); break;
+                }
             }
 
-            // Write out OpenCR data
-            if (opencrState.dirty) {
-                // Clear the dirty flag
-                opencrState.dirty = false;
+            // -> Received all servo packets
+            // -> Request OpenCR packet
+            // -> Received OpenCR packet
+            // -> Request servo packets
 
-                // Pack our data
-                OpenCRWriteData data;
-                data.led = opencrState.ledPanel.led4 ? 0x04 : 0x00;
-                data.led |= opencrState.ledPanel.led3 ? 0x02 : 0x00;
-                data.led |= opencrState.ledPanel.led2 ? 0x01 : 0x00;
-                data.rgbLED = (uint8_t(0x000000FF & opencrState.headLED.RGB) & 0x1F) << 10;         // R
-                data.rgbLED |= ((uint8_t(0x0000FF00 & opencrState.headLED.RGB) >> 8) & 0x1F) << 5;  // G
-                data.rgbLED |= (uint8_t(0x00FF0000 & opencrState.headLED.RGB) >> 16) & 0x1F;        // B
-                data.buzzer = opencrState.buzzer;
-
-                // Write our data
-                opencr.write(dynamixel::v2::WriteCommand<OpenCRWriteData>(uint8_t(NUgus::ID::OPENCR),
-                                                                          uint16_t(OpenCR::Address::LED),
-                                                                          data));
+            // Loop through the array - if any are false, then not all servos received
+            bool all_servos_received = true;
+            for (const bool s : servo_response) {
+                if (!s) {
+                    all_servos_received = false;
+                    break;
+                }
             }
 
-            // Get updated servo data
-            // SYNC_READ (read the same memory addresses on all devices)
-            for (auto& id : nugus.servo_ids()) {
-                packet_queue[id].push_back(PacketTypes::SERVO_DATA);
+            // If we have all the servos, now we need to send an OpenCR read command
+            if (all_servos_received) {
+                send_opencr_request();
+
+                // Reset the servo response array
+                for (bool& s : servo_response) {
+                    s = false;
+                }
             }
-            opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(AddressBook::SERVO_READ),
-                                                            sizeof(DynamixelServoReadData),
-                                                            nugus.servo_ids()));
+            // If we have all the OpenCR data, now we need to send servo read commands
+            else if (opencr_response) {
+                send_servo_request();
 
-            // Get OpenCR data
-            // READ (only reading from a single device here)
-            packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::OPENCR_DATA);
-            opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
-                                                    uint16_t(OpenCR::Address::LED),
-                                                    sizeof(OpenCRReadData)));
-
-            /**
-             * Not really sure if any of this is correct, just one big massive guess
-             */
-            // Get FSR data
-            // SYNC_READ from both FSRs
-            // packet_queue[uint8_t(NUgus::ID::R_FSR)].push_back(PacketTypes::FSR_DATA);
-            // packet_queue[uint8_t(NUgus::ID::L_FSR)].push_back(PacketTypes::FSR_DATA);
-            // opencr.write(dynamixel::v2::SyncReadCommand<2>(uint16_t(AddressBook::FSR_READ),
-            //                                                sizeof(FSRReadData),
-            //                                                nugus.fsr_ids()));
-
-            // Our final sensor output
-            auto sensors = std::make_unique<RawSensors>();
-            *sensors     = constructSensors();
-            emit(std::move(sensors));
-
-            // log<NUClear::TRACE>("Update END");
+                // Reset the OpenCR response flag
+                opencr_response = false;
+            }
         });
+
+        // REACTIONS FOR RECEIVING HARDWARE REQUESTS FROM THE SYSTEM
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             // log<NUClear::TRACE>("ServoTargets START");
@@ -366,26 +211,21 @@ namespace module::platform::openCR {
                     servoStates[command.id].goalPosition = command.position;
                 }
             }
-            // log<NUClear::TRACE>("ServoTargets END");
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            // log<NUClear::TRACE>("ServoTarget START");
             auto commandList = std::make_unique<ServoTargets>();
             commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(commandList));
-            // log<NUClear::TRACE>("ServoTarget END");
         });
 
         // If we get a HeadLED command then write it
         on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
-            // log<NUClear::TRACE>("HeadLED START");
             // Update our internal state
             opencrState.headLED = led.RGB;
             opencrState.dirty   = true;
-            // log<NUClear::TRACE>("HeadLED END");
         });
 
         // If we get a EyeLED command then write it
@@ -396,494 +236,12 @@ namespace module::platform::openCR {
 
         // If we get a EyeLED command then write it
         on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
-            // log<NUClear::TRACE>("LEDPanel Start");
             // Update our internal state
             opencrState.ledPanel.led2 = led.led2;
             opencrState.ledPanel.led3 = led.led3;
             opencrState.ledPanel.led4 = led.led4;
             opencrState.dirty         = true;
-            // log<NUClear::TRACE>("LEDPanel END");
         });
-
-        on<Trigger<StatusReturn>>().then([this](const StatusReturn& packet) {
-            log<NUClear::TRACE>("StatusReturn Start");
-
-            // Check we can process this packet
-            if (packet_queue.find(packet.id) == packet_queue.end()) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for unexpected ID {}.", packet.id));
-            }
-            // Check we're expecting the packet
-            else if (packet_queue[packet.id].size() == 0) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
-            }
-            // All good, now figure out what the contents of the message are
-            else {
-                // Pop the front of the packet queue
-                auto info = packet_queue[packet.id].front();
-                packet_queue[packet.id].erase(packet_queue[packet.id].begin());
-
-                // log<NUClear::DEBUG>(fmt::format(
-                //     "Packet ID {}, Contents {}, Data size {}, Remaining in this
-                //     queue {} ",
-                //     packet.id,
-                //     (uint8_t) info,
-                //     packet.data.size(),
-                //     packet_queue[packet.id].size()));
-
-                // check for errors
-                if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet.id));
-                }
-                if (packet.alert) {
-                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert"));
-                }
-
-                switch (info) {
-                    // Handles OpenCR model and version information
-                    case PacketTypes::MODEL_INFORMATION: processModelInformation(packet); break;
-
-                    // Handles OpenCR sensor data
-                    case PacketTypes::OPENCR_DATA: processOpenCRData(packet); break;
-
-                    // Handles servo data
-                    case PacketTypes::SERVO_DATA: processServoData(packet); break;
-
-                    // Handles FSR data
-                    // case PacketTypes::FSR_DATA: processFSRData(packet); break;
-
-                    // What is this??
-                    default: log<NUClear::WARN>("Unknown packet data received"); break;
-                }
-            }
-
-            log<NUClear::TRACE>("StatusReturn END");
-        });
-
-        // When we receive data back from the OpenCR it will arrive here
-        // Run a state machine to handle reception of packet header and data
-        // If a packet is successfully emitted then we emit a StatusReturn message
-        on<IO>(opencr.native_handle(), IO::READ).then([this] {
-            // log<NUClear::TRACE>("IO Start");
-            enum class Phases : uint8_t { IDLE, HEADER_SYNC, PREAMBLE, DATA, FINISH, TIMEOUT };
-
-            static constexpr uint8_t packet_header[4]           = {0xFF, 0xFF, 0xFD, 0x00};
-            static Phases current_phase                         = Phases::IDLE;
-            static uint8_t sync_point                           = 0;
-            static NUClear::clock::time_point packet_start_time = NUClear::clock::now();
-            static std::chrono::microseconds timeout            = std::chrono::microseconds(packet_wait);
-            static std::vector<uint8_t> response;
-            static uint16_t packet_length = 0;
-
-            std::array<uint8_t, 128> buf;
-            uint8_t num_bytes;
-
-            num_bytes = opencr.read(buf.data(), 128);
-
-            // Quick lambda to emit a completed StatusReturn message (to reduce code duplication)
-            auto emit_msg = [&]() -> void {
-                // log<NUClear::TRACE>("\t\t\temit_msg START");
-
-                auto msg = std::make_unique<StatusReturn>();
-
-                msg->magic       = 0x00FDFFFF;  // little endian header bytes
-                msg->id          = response[4];
-                msg->length      = packet_length;
-                msg->instruction = response[7];
-                // extract alert flag from byte & cast the rest to CommandError
-                msg->alert = response[8] >> 7;
-                msg->error = static_cast<StatusReturn::CommandError>(response[8] & 0x7F);
-
-                // Param field starts 9 bytes after start, CRC takes up last 2
-                std::copy(response.begin() + 9, response.end() - 2, std::back_inserter(msg->data));
-
-                msg->checksum  = (response[response.size() - 1] << 8) | response[response.size() - 2];
-                msg->timestamp = NUClear::clock::now();
-
-                // Check CRC
-                if (dynamixel::v2::calculateChecksum(response) != msg->checksum) {
-                    log<NUClear::WARN>("Invalid CRC detected.");
-                    return;  // without emit
-                }
-
-                // Check we're emitting a Status (return) packet
-                if ((uint8_t) msg->instruction != dynamixel::v2::Instruction::STATUS_RETURN) {
-                    log<NUClear::WARN>("Attempt to emit non Status(return) packet");
-                    return;  // without emit
-                }
-
-                // Finally emit if no errors
-                emit(msg);
-
-                // log<NUClear::DEBUG>(
-                //     fmt::format("StatusReturn from ID {}, Alert/Error: {}/{}", msg->id, msg->alert, msg->error));
-                // log<NUClear::TRACE>("\t\t\temit_msg END");
-            };
-
-            // Quick lambda to reset state machine state (to reduce code duplication)
-            auto reset_state = [&]() -> void {
-                sync_point    = 0;
-                packet_length = 0;
-                current_phase = Phases::IDLE;
-                response.clear();
-            };
-
-            for (uint8_t i = 0; i < num_bytes; ++i) {
-                // log<NUClear::TRACE>("\tswitch START");
-                switch (current_phase) {
-                    // Idle phase
-                    // We haven't seen any data, so we are waiting for the
-                    // first byte of the header
-                    case Phases::IDLE:
-                        // log<NUClear::TRACE>("\t\tIDLE START");
-                        // If we match the first byte of the header then
-                        // transition to the HEADER_SYNC phase
-                        if (packet_header[sync_point] == buf[i]) {
-                            response.push_back(packet_header[sync_point]);
-                            sync_point++;
-                            current_phase     = Phases::HEADER_SYNC;
-                            packet_start_time = NUClear::clock::now();
-                            timeout           = std::chrono::microseconds(packet_wait);
-                        }
-                        // log<NUClear::TRACE>("\t\tIDLE END");
-                        break;
-
-                    // Header Sync phase
-                    // We have matched the first byte of the header
-                    // now match the next three bytes
-                    case Phases::HEADER_SYNC:
-                        // log<NUClear::TRACE>("\t\tHEADER_SYNC START");
-                        if (NUClear::clock::now() < (packet_start_time + timeout)) {
-                            if (packet_header[sync_point] == buf[i]) {
-                                response.push_back(packet_header[sync_point]);
-                                sync_point++;
-                            }
-
-                            // Header has been matched
-                            // Now read in the rest of the packet
-                            if (sync_point == 4) {
-                                sync_point        = 0;
-                                current_phase     = Phases::PREAMBLE;
-                                packet_start_time = NUClear::clock::now();
-                                timeout           = std::chrono::microseconds(byte_wait * 5 + 2000 + packet_wait);
-                            }
-                        }
-                        else {
-                            current_phase = Phases::TIMEOUT;
-                        }
-
-                        // log<NUClear::TRACE>("\t\tHEADER_SYNC END");
-                        break;
-
-                    // Preamble phase
-                    // We have the full header, now we are looking for the next 5 bytes
-                    // Packet ID, Length, Instruction ID, and Error
-                    case Phases::PREAMBLE:
-                        // log<NUClear::TRACE>("\t\tPREAMBLE START");
-                        if (NUClear::clock::now() < (packet_start_time + timeout)) {
-                            response.push_back(buf[i]);
-
-                            // We just read in the expected length of the packet
-                            if (response.size() == 7) {
-                                packet_length = (response[6] << 8) | response[5];
-                            }
-
-                            // We now have the header and the packet preamble
-                            // Time to get the packet parameters and CRC
-                            if (response.size() == 9) {
-                                current_phase = Phases::DATA;
-                                timeout = std::chrono::microseconds(byte_wait * packet_length + 2000 + packet_wait);
-                            }
-                        }
-                        else {
-                            current_phase = Phases::TIMEOUT;
-                        }
-                        // log<NUClear::TRACE>("\t\tPREAMBLE END");
-                        break;
-
-                    // Data phase
-                    // Header and preamble have been received
-                    // Now we read in the message parameters and CRC
-                    // We should be looking for (packet_length - 2) bytes
-                    case Phases::DATA:
-                        // log<NUClear::TRACE>("\t\tDATA START");
-                        if (NUClear::clock::now() < (packet_start_time + timeout)) {
-                            response.push_back(buf[i]);
-
-                            // We now have all of our data
-                            if (response.size() == size_t(7 + packet_length)) {
-                                current_phase = Phases::FINISH;
-                            }
-                        }
-                        else {
-                            current_phase = Phases::TIMEOUT;
-                        }
-                        // log<NUClear::TRACE>("\t\tDATA END");
-                        break;
-
-                    // Finish phase
-                    // We have now received a complete message
-                    // However, it looks like we have more data to process
-                    // Package up the current message, and reset our buf counter and phase
-                    case Phases::FINISH:
-                        // log<NUClear::TRACE>("\t\tFINISH START");
-                        emit_msg();
-
-                        // Set up for next message
-                        i--;  // Decrement counter to account for the next increment
-                        reset_state();
-                        // log<NUClear::TRACE>("\t\tFINISH END");
-                        break;
-
-                    // Timeout phase
-                    // It took too long to read in the full packet .... Giving up
-                    case Phases::TIMEOUT:
-                        log<NUClear::WARN>("Packet timeout occurred.");
-                        reset_state();
-                        break;
-
-                    // Yea, dont know what happened here
-                    default: reset_state(); break;
-                }
-                // log<NUClear::TRACE>("\tswitch END");
-            }
-
-            // Our input buffer ended at the exact end of the packet
-            if (response.size() == size_t(7 + packet_length)) {
-                emit_msg();
-                reset_state();
-            }
-            // log<NUClear::TRACE>("IO END");
-        });
-    }
-
-    void HardwareIO::processModelInformation(const StatusReturn& packet) {
-        // log<NUClear::TRACE>("processModelInformation START");
-        log<NUClear::DEBUG>(
-            fmt::format("Model {:02X} {:02X}, Version {:02X}", packet.data[1], packet.data[0], packet.data[2]));
-        uint16_t model  = (packet.data[1] << 8) | packet.data[0];
-        uint8_t version = packet.data[2];
-        log<NUClear::INFO>(fmt::format("OpenCR Model...........: {:#06X}", model));
-        log<NUClear::INFO>(fmt::format("OpenCR Firmware Version: {:#04X}", version));
-    }
-
-    void HardwareIO::processOpenCRData(const StatusReturn& packet) {
-        log<NUClear::TRACE>("processOpenCRData START");
-
-        const OpenCRReadData data = *(reinterpret_cast<const OpenCRReadData*>(packet.data.data()));
-
-        log<NUClear::TRACE>("\tOpenCRReadData casted");
-
-        // 00000321
-        // LED_1 = 0x01
-        // LED_2 = 0x02
-        // LED_3 = 0x04
-        opencrState.ledPanel = {bool(data.led & 0x01), bool(data.led & 0x02), bool(data.led & 0x04)};
-
-        // log<NUClear::TRACE>("\tdata obj accessed");
-
-        // 0BBBBBGG GGGRRRRR
-        // R = 0x001F
-        // G = 0x02E0
-        // B = 0x7C00
-        uint32_t RGB = 0;
-        RGB |= uint8_t(data.rgbLed & 0x001F) << 16;  // R
-        RGB |= uint8_t(data.rgbLed & 0x02E0) << 8;   // G
-        RGB |= uint8_t(data.rgbLed & 0x7C00);        // B
-        opencrState.headLED = {RGB};
-
-        // 00004321
-        // Button_4 = Not used
-        // Button Right (Reset) = 0x01
-        // Button Middle = 0x02
-        // Button Left = 0x04
-        opencrState.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
-
-        opencrState.gyro = Eigen::Vector3f(convert::gyro(data.gyro[2]),   // X
-                                           convert::gyro(data.gyro[1]),   // Y
-                                           convert::gyro(data.gyro[0]));  // Z
-
-        opencrState.acc = Eigen::Vector3f(convert::acc(data.acc[0]),   // X
-                                          convert::acc(data.acc[1]),   // Y
-                                          convert::acc(data.acc[2]));  // Z
-
-        // Command send/receive errors only
-        opencrState.alertFlag   = static_cast<bool>(packet.alert);
-        opencrState.errorNumber = static_cast<int>(packet.error);
-
-        // Work out a battery charged percentage
-        batteryState.currentVoltage = convert::voltage(data.voltage);
-        float percentage            = std::max(0.0f,
-                                    (batteryState.currentVoltage - batteryState.flatVoltage)
-                                        / (batteryState.chargedVoltage - batteryState.flatVoltage));
-
-        // Battery percentage has changed, recalculate LEDs
-        if (!utility::math::almost_equal(percentage, batteryState.percentage, 2)) {
-            batteryState.dirty      = true;
-            batteryState.percentage = percentage;
-
-            uint32_t ledr            = 0;
-            std::array<bool, 3> ledp = {false, false, false};
-
-            if (batteryState.percentage > 0.90f) {
-                ledp = {true, true, true};
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-            }
-            else if (batteryState.percentage > 0.70f) {
-                ledp = {false, true, true};
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-            }
-            else if (batteryState.percentage > 0.50f) {
-                ledp = {false, false, true};
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-            }
-            else if (batteryState.percentage > 0.30f) {
-                ledp = {false, false, false};
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-            }
-            else if (batteryState.percentage > 0.20f) {
-                ledp = {false, false, false};
-                ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
-            }
-            else if (batteryState.percentage > 0) {
-                ledp = {false, false, false};
-                ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
-            }
-            // Error in reading voltage blue
-            else {
-                ledp = {false, false, false};
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
-            }
-            emit(std::make_unique<RawSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
-            emit(std::make_unique<RawSensors::HeadLED>(ledr));
-        }
-        log<NUClear::TRACE>("processOpenCRData END");
-    }
-
-    void HardwareIO::processServoData(const StatusReturn& packet) {
-        log<NUClear::TRACE>("processServoData START");
-        const DynamixelServoReadData data = *(reinterpret_cast<const DynamixelServoReadData*>(packet.data.data()));
-        // IDs are 1..20 so need to be converted for the servoStates index
-        uint8_t servoIndex = packet.id - 1;
-
-        servoStates[servoIndex].torqueEnabled = (data.torqueEnable == 1);
-        // Servo error status, NOT dynamixel status packet error.
-        servoStates[servoIndex].errorFlags     = data.hardwareErrorStatus;
-        servoStates[servoIndex].presentPWM     = convert::PWM(data.presentPWM);
-        servoStates[servoIndex].presentCurrent = convert::current(data.presentCurrent);
-        // warning: no idea if the conversion below is correct, just trusting the existing
-        // conversion functions in the branch. Whatever is happening it's very different to
-        // the solution in the CM740 hwIO (which does make sense). Probably need to test IRL
-        // to understand what's going on.
-        servoStates[servoIndex].presentVelocity = convert::velocity(data.presentVelocity);
-        servoStates[servoIndex].presentPosition =
-            convert::position(servoIndex, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
-        servoStates[servoIndex].voltage     = convert::voltage(data.presentVoltage);
-        servoStates[servoIndex].temperature = convert::temperature(data.presentTemperature);
-        log<NUClear::TRACE>("processServoData END");
-    }
-
-    // void HardwareIO::processFSRData(const StatusReturn& packet) {
-    //     // process packet once we know the structure
-    //     return;
-    // }
-
-    RawSensors HardwareIO::constructSensors() {
-        // log<NUClear::TRACE>("constructSensors START");
-        RawSensors sensors;
-
-        // Timestamp when this message was created (data itsself could be old)
-        sensors.timestamp = NUClear::clock::now();
-
-        /* OpenCR data */
-        sensors.platform_error_flags = RawSensors::Error::OK;
-        /// @todo Add proper error handling to translate new errors into rawsensors errors, using
-        /// opencrState.errorFlags.errorNumber and opencrState.errorFlags.alertFlag
-        sensors.led_panel     = opencrState.ledPanel;
-        sensors.head_led      = opencrState.headLED;
-        sensors.eye_led       = opencrState.eyeLED;
-        sensors.buttons       = opencrState.buttons;
-        sensors.accelerometer = opencrState.acc;
-        sensors.gyroscope     = opencrState.gyro;
-
-        /* Battery data */
-        sensors.battery = batteryState.currentVoltage;
-
-        /* Servos data */
-        for (int i = 0; i < 20; i++) {
-            // Get a reference to the servo we are populating
-            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
-
-
-            // Booleans
-            servo.torque_enabled = servoStates[i].torqueEnabled;
-
-            // Gain
-            servo.velocity_p_gain = servoStates[i].velocityPGain;
-            servo.velocity_i_gain = servoStates[i].velocityIGain;
-            servo.velocity_d_gain = servoStates[i].velocityDGain;
-
-            // Targets
-            servo.goal_position    = servoStates[i].goalPosition;
-            servo.profile_velocity = servoStates[i].profileVelocity;
-
-
-            // If we are faking this hardware, simulate its motion
-            if (servoStates[i].simulated) {
-                // Work out how fast we should be moving
-                // 5.236 == 50 rpm which is similar to the max speed of the servos
-                float movingSpeed =
-                    (servoStates[i].profileVelocity == 0 ? 5.236 : servoStates[i].profileVelocity) / UPDATE_FREQUENCY;
-
-                // Get our offset for this servo and apply it
-                // The values are now between -pi and pi around the servos axis
-                auto offset  = nugus.servo_offset[i];
-                auto present = utility::math::angle::normalizeAngle(servoStates[i].presentPosition - offset);
-                auto goal    = utility::math::angle::normalizeAngle(servoStates[i].goalPosition - offset);
-
-                // We have reached our destination
-                if (std::abs(present - goal) < movingSpeed) {
-                    servoStates[i].presentPosition = servoStates[i].goalPosition;
-                    servoStates[i].presentVelocity = 0;
-                }
-                // We have to move towards our destination at moving speed
-                else {
-                    servoStates[i].presentPosition = utility::math::angle::normalizeAngle(
-                        (present + movingSpeed * (goal > present ? 1 : -1)) + offset);
-                    servoStates[i].presentVelocity = movingSpeed;
-                }
-
-                // Store our simulated values
-                servo.present_position = servoStates[i].presentPosition;
-                servo.present_velocity = servoStates[i].presentVelocity;
-                servo.voltage          = servoStates[i].voltage;
-                servo.temperature      = servoStates[i].temperature;
-            }
-
-            // If we are using real data, get it from the packet
-            else {
-                // Error code
-                servo.error_flags = servoStates[i].errorFlags;
-
-                // Present Data
-                servo.present_position = servoStates[i].presentPosition;
-                servo.present_velocity = servoStates[i].presentVelocity;
-
-                // Diagnostic Information
-                servo.voltage     = servoStates[i].voltage;
-                servo.temperature = servoStates[i].temperature;
-
-                // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
-                if (servo.voltage <= batteryState.chargedVoltage) {
-                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
-                }
-            }
-        }
-
-        /* FSRs data */
-
-
-        // log<NUClear::TRACE>("constructSensors END");
-        return sensors;
     }
 
 }  // namespace module::platform::openCR
