@@ -1,5 +1,9 @@
 #include "Convert.hpp"
 
+#include <fmt/format.h>
+#include <limits>
+#include <nuclear>
+
 #include "NUgus.hpp"
 
 #include "utility/math/angle.hpp"
@@ -15,53 +19,55 @@ namespace module::platform::openCR {
          * types is what implies whether its a forward or backward conversion.
          */
 
-        float gyro(int16_t gyro) {
-            // Range: -32800 - +32800 = -2000dps - +2000dps
+        float gyro(int16_t raw) {
+            // Range: -32768 - +32767 = -2000dps - +2000dps
             //
             //               gyro(raw) - min_gyro(raw)
             // gyro(dps) = ----------------------------- * (max_gyro(dps) - min_gyro(dps)) + min_gyro(dps)
             //             max_gyro(raw) - min_gyro(raw)
             //
-            int16_t clamped  = utility::math::clamp(int16_t(-32800), gyro, int16_t(32800));
-            float normalised = (clamped + 32800.0f) / 65600.0f;
-            return normalised * 4000.0f - 2000.0f;
+
+            const float converted = raw * 2000.0 / INT16_MAX;
+
+            return float(converted * M_PI / 180);  // conv to rad/s
         }
 
-        int16_t gyro(float gyro) {
+        int16_t gyro(float SI) {
             // Range: -32800 - +32800 = -2000dps - +2000dps
             //
             //               gyro(dps) - min_gyro(dps)
             // gyro(raw) = ----------------------------- * (max_gyro(raw) - min_gyro(raw)) + min_gyro(raw)
             //             max_gyro(dps) - min_gyro(dps)
             //
-            float clamped    = utility::math::clamp(-2000.0f, gyro, 2000.0f);
-            float normalised = (clamped + 2000.0f) / 4000.0f;
-            return int16_t(normalised * 65600.0f - 32800.0f);
+
+            float dps = SI * 180 / M_PI;  // first convert from system unit rad/s
+
+            int16_t converted = int16_t(dps * INT16_MAX / 2000);
+
+            return converted;
         }
 
 
-        float acc(int16_t gyro) {
+        float acc(int16_t raw) {
             // Range: -32768 - +32768 = -2g - +2g
             //
             //               acc(raw) - min_acc(raw)
             // acc(dps) = ----------------------------- * (max_acc(dps) - min_acc(dps)) + min_acc(dps)
             //             max_acc(raw) - min_acc(raw)
             //
-            int16_t clamped  = utility::math::clamp(int16_t(-32768), gyro, int16_t(32768));
-            float normalised = (clamped + 32768.0f) / 65536.0f;
-            return normalised * 4.0f - 2.0f;
+
+            return float(raw * 2 / INT16_MAX);
         }
 
-        int16_t acc(float gyro) {
+        int16_t acc(float gs) {
             // Range: -32768 - +32768 = -2g - +2g
             //
             //               acc(dps) - min_acc(dps)
             // acc(raw) = ----------------------------- * (max_acc(raw) - min_acc(raw)) + min_acc(raw)
             //             max_acc(dps) - min_acc(dps)
             //
-            float clamped    = utility::math::clamp(-2.0f, gyro, 2.0f);
-            float normalised = (clamped + 2.0f) / 4.0f;
-            return int16_t(normalised * 65536.0f - 32768.0f);
+
+            return int16_t(gs * INT16_MAX / 2);
         }
 
 
@@ -199,7 +205,8 @@ namespace module::platform::openCR {
         //     }
         //     // Flips right foot coordinates to match robot coords
         //     // See:
-        //     // http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
+        //     //
+        //     http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
         //     if (left) {
         //         // This normalises the value between -1 and 1
         //         return double(value - 127) / 127.0;

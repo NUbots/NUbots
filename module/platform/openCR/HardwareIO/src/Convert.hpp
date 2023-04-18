@@ -10,7 +10,7 @@ namespace module::platform::openCR {
 
     namespace convert {
         // Convert gyroscope readings between control table values and actual values
-        float gryo(int16_t gyro);
+        float gyro(int16_t gyro);
         int16_t gyro(float gyro);
 
         // Convert accelerometer readings between control table values and actual values
