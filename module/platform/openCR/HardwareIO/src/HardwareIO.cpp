@@ -45,8 +45,6 @@ namespace module::platform::openCR {
             for (auto& id : nugus.servo_ids()) {
                 packet_queue[id] = std::vector<PacketTypes>();
             }
-            // Broadcast ID - defined to capture any StatusReturn's
-            packet_queue[uint8_t(NUgus::ID::BROADCAST)] = std::vector<PacketTypes>();
 
 
             // FSRs
@@ -75,8 +73,17 @@ namespace module::platform::openCR {
         });
 
         on<Watchdog<HardwareIO, 2, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
+            // Check what the hangup was
+            for (const auto& keypair : packet_queue) {
+                uint8_t id = keypair.first;
+                if (packet_queue[id].size() != 0) {
+                    // delete the packet we're waiting on
+                    packet_queue[id].erase(packet_queue[id].begin());
+                    log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", id));
+                }
+            }
             // We haven't received any messages lately
-            log<NUClear::WARN>("No packets recently, request servo packets");
+            log<NUClear::WARN>("Requesting servo packets to restart system");
             // Send a request for all servo packets
             send_servo_request();
         });
@@ -88,13 +95,14 @@ namespace module::platform::openCR {
             log<NUClear::WARN>("Received data");
             // Process the response packet and emit a StatusReturn if applicable
             handle_response();
-            // Service the watchdog
-            emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
         });
 
 
         // Single is used to process servos one at a time and increment the counter
         on<Trigger<StatusReturn>, Single, Sync<HardwareIO>>().then([this](const StatusReturn& packet) {
+            // to store what packet was last processed
+            PacketTypes info;
+
             // Check we can process this packet
             if (packet_queue.find(packet.id) == packet_queue.end()) {
                 log<NUClear::WARN>(fmt::format("Recieved packet for unexpected ID {}.", packet.id));
@@ -103,11 +111,13 @@ namespace module::platform::openCR {
             else if (packet_queue[packet.id].size() == 0) {
                 log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
             }
-
-            // All good, now figure out what the contents of the message are
+            // All good
             else {
+                // Service the watchdog because we recieved a valid packet
+                emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
+
                 // Pop the front of the packet queue
-                auto info = packet_queue[packet.id].front();
+                info = packet_queue[packet.id].front();
                 packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
                 // log<NUClear::WARN>(fmt::format(
@@ -149,32 +159,15 @@ namespace module::platform::openCR {
             // -> Received OpenCR packet
             // -> Request servo packets
 
-            // Loop through the array - if any are false, then not all servos received
-            bool all_servos_received = true;
-            for (const bool s : servo_response) {
-                if (!s) {
-                    all_servos_received = false;
-                    break;
-                }
-            }
-
-            // If we have all the servos, now we need to send an OpenCR read command
-            if (all_servos_received) {
-                log<NUClear::WARN>("All servos received, requesting OpenCR data");
+            // If we just processed the last servo, now we need to send an OpenCR read command
+            if (!servo_waiting() && info == PacketTypes::SERVO_DATA) {
+                log<NUClear::INFO>("All servos received, requesting OpenCR data");
                 send_opencr_request();
-
-                // Reset the servo response array
-                for (bool& s : servo_response) {
-                    s = false;
-                }
             }
-            // If we have all the OpenCR data, now we need to send servo read commands
-            else if (opencr_response) {
-                log<NUClear::WARN>("OpenCR data received, requesting servo data");
+            // If we just processed the OpenCR data, now we need to send servo read commands
+            else if (!opencr_waiting() && info == PacketTypes::OPENCR_DATA) {
+                log<NUClear::INFO>("OpenCR data received, requesting servo data");
                 send_servo_request();
-
-                // Reset the OpenCR response flag
-                opencr_response = false;
             }
         });
 

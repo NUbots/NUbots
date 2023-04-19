@@ -112,9 +112,6 @@ namespace module::platform::openCR {
             emit(std::make_unique<RawSensors::HeadLED>(ledr));
         }
 
-        // We have an OpenCR response, can request again
-        opencr_response = true;
-
         log<NUClear::TRACE>("processOpenCRData END");
     }
 
@@ -139,9 +136,6 @@ namespace module::platform::openCR {
         servoStates[servoIndex].voltage     = convert::voltage(data.presentVoltage);
         servoStates[servoIndex].temperature = convert::temperature(data.presentTemperature);
         log<NUClear::TRACE>("processServoData END");
-
-        // Set this servo as having been received
-        servo_response[servoIndex] = true;
     }
 
     // void HardwareIO::process_fsr_data(const StatusReturn& packet) {

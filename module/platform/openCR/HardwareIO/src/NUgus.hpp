@@ -33,7 +33,7 @@ namespace module::platform::openCR {
         std::array<double, 20> servo_offset;
 
         enum class ID : uint8_t {
-            OPENCR           = 200,
+            NO_ID            = 0,
             R_SHOULDER_PITCH = 1,
             L_SHOULDER_PITCH = 2,
             R_SHOULDER_ROLL  = 3,
@@ -56,6 +56,7 @@ namespace module::platform::openCR {
             HEAD_PITCH       = 20,
             R_FSR            = 111,
             L_FSR            = 112,
+            OPENCR           = 200,
             BROADCAST        = 254
         };
 

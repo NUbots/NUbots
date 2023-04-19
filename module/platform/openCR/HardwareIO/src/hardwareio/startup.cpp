@@ -130,5 +130,8 @@ namespace module::platform::openCR {
         opencr.write(
             dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
                                                                           write_data2));
+
+        // kickstart the system
+        send_servo_request();
     }
 }  // namespace module::platform::openCR

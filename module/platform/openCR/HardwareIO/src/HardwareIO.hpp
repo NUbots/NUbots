@@ -188,10 +188,11 @@ namespace module::platform::openCR {
         /// @brief handle sending a request to the servo devices
         void send_servo_request();
 
-        /// @brief We expect 20 servo responses, only send when we have them all
-        std::array<bool, 1> servo_response{};
-        /// @brief We expect an OpenCR response, when we get it send servo requests
-        bool opencr_response = false;
+        /// @brief return ID of FIRST servo we're waiting on
+        uint8_t servo_waiting();
+
+        /// @brief return number of OpenCR packets waiting
+        int opencr_waiting();
     };
 
 }  // namespace module::platform::openCR
