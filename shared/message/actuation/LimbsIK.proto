@@ -50,7 +50,7 @@ message HeadIK {
     /// When the command should execute
     google.protobuf.Timestamp time = 1;
     /// Vector for the head to look towards (torso to point in torso space)
-    vec3 uPTt = 2;
+    vec3 uPCt = 2;
     /// Gain and torque of each servo, with the key corresponding to ServoID
     map<uint32, ServoState> servos = 3;
 }
