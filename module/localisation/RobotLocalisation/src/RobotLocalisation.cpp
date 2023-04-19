@@ -347,7 +347,7 @@ namespace module::localisation {
         }
         double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
         if (weight_sum == 0) {
-            log<NUClear::WARN>("All weights are zero, cannot resample");
+            log<NUClear::DEBUG>("All weights are zero, cannot resample");
             // Add some more noise to the particles
             add_noise();
             return;
