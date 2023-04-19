@@ -15,4 +15,5 @@ Add this module to walk to a position on the field.
 ## Emits
 
 - `message::planning::WalkTo` Task requesting to walk to a point
+
 ## Dependencies
