@@ -188,11 +188,8 @@ namespace module::skill {
         // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] {
             imu_reaction.enable(false);
-
-            auto walking_state          = std::make_unique<WalkingState>();
-            walking_state->is_walking   = false;
-            walking_state->walk_command = Eigen::Vector3f::Zero();
-            emit(std::move(walking_state));
+            // Update the walking state
+            emit(std::make_unique<WalkingState>(false, Eigen::Vector3f::Zero()));
         });
 
         // MAIN LOOP
@@ -247,10 +244,8 @@ namespace module::skill {
                 if (walk_engine.update_state(dt, current_orders)) {
                     calculate_joint_goals();
                 }
-                auto walking_state          = std::make_unique<WalkingState>();
-                walking_state->is_walking   = true;
-                walking_state->walk_command = walk.velocity_target;
-                emit(std::move(walking_state));
+                // Update the walking state
+                emit(std::make_unique<WalkingState>(true, walk.velocity_target));
             });
 
         // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
@@ -271,10 +266,8 @@ namespace module::skill {
                 }
                 calculate_joint_goals();
 
-                auto walking_state          = std::make_unique<WalkingState>();
-                walking_state->is_walking   = false;
-                walking_state->walk_command = Eigen::Vector3f::Zero();
-                emit(std::move(walking_state));
+                // Update the walking state
+                emit(std::make_unique<WalkingState>(false, Eigen::Vector3f::Zero()));
             });
     }
 
