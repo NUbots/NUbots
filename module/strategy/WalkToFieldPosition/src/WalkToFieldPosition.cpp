@@ -51,10 +51,7 @@ namespace module::strategy {
                 }
 
                 // Emit a task to walk to the field position
-                auto walk_to_point     = std::make_unique<WalkTo>();
-                walk_to_point->rPRr    = rPRr;
-                walk_to_point->heading = heading;
-                emit<Task>(walk_to_point);
+                emit<Task>(std::make_unique<WalkTo>(rPRr, heading));
             });
     }
 

@@ -33,11 +33,8 @@ namespace module::strategy {
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
                     // Add an offset to account for walking with the foot in front of the ball
                     const Eigen::Vector3f rBRr(ball.rBRr.x(), ball.rBRr.y() + cfg.ball_y_offset, ball.rBRr.z());
-                    const float heading    = std::atan2(ball.rBRr.y(), ball.rBRr.x());
-                    auto walk_to_point     = std::make_unique<WalkTo>();
-                    walk_to_point->rPRr    = rBRr;
-                    walk_to_point->heading = heading;
-                    emit<Task>(walk_to_point);
+                    const float heading = std::atan2(ball.rBRr.y(), ball.rBRr.x());
+                    emit<Task>(std::make_unique<WalkTo>(rBRr, heading));
                 }
             });
     }
