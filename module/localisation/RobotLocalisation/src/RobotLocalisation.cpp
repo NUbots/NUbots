@@ -343,10 +343,9 @@ namespace module::localisation {
                 weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
                           / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
-            // If the observation is outside the max range, penalise it by adding a small weight
+            // If the observation is outside the max range, penalise it
             else {
-                weight += std::exp(-0.5 * std::pow(cfg.max_range / cfg.measurement_noise, 2))
-                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
+                weight *= (1 - 1 / observations.size());
             }
         }
 
