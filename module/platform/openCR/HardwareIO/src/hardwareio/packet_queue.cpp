@@ -14,8 +14,33 @@ namespace module::platform::openCR {
         return uint8_t(NUgus::ID::NO_ID);
     }
 
-    int HardwareIO::opencr_waiting() {
+    uint8_t HardwareIO::opencr_waiting() {
         // just a basic wrapper for consistency
         return packet_queue[uint8_t(NUgus::ID::OPENCR)].size();
     }
+
+    uint8_t HardwareIO::queue_item_waiting() {
+        // Loop through all devices in the queue
+        for (const auto& keypair : packet_queue) {
+            // If any are waiting, then return their ID
+            if (keypair.second.size()) {
+                return keypair.first;
+            }
+        }
+        // no devices waiting
+        return uint8_t(NUgus::ID::NO_ID);
+    }
+
+    int HardwareIO::queue_clear_all() {
+        int packets_cleared = 0;
+        // Loop through all initialised queues
+        for (const auto& keypair : packet_queue) {
+            // Add the packets to the running total
+            packets_cleared += keypair.second.size();
+            // Clear the queue
+            packet_queue[keypair.first].clear();
+        }
+        return packets_cleared;
+    }
+
 }  // namespace module::platform::openCR

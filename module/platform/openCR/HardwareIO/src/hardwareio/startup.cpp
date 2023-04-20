@@ -18,13 +18,6 @@ namespace module::platform::openCR {
                                                           uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
                                                           uint8_t(1)));
 
-        // Find OpenCR firmware and model versions
-        packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::MODEL_INFORMATION);
-        opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
-                                                uint16_t(OpenCR::Address::MODEL_NUMBER_L),
-                                                uint8_t(3)));
-
-
         // Wait about 300ms for the dynamixels to start up
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
@@ -131,7 +124,12 @@ namespace module::platform::openCR {
             dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
                                                                           write_data2));
 
-        // kickstart the system
-        send_servo_request();
+
+        /// @brief Find OpenCR firmware and model versions
+        /// @warning this has to be called last, as we need to wait for the response packet before starting
+        packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::MODEL_INFORMATION);
+        opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
+                                                uint16_t(OpenCR::Address::MODEL_NUMBER_L),
+                                                uint8_t(3)));
     }
 }  // namespace module::platform::openCR

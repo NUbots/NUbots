@@ -73,16 +73,28 @@ namespace module::platform::openCR {
         });
 
         on<Watchdog<HardwareIO, 2, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
-            // Check what the hangup was
-            for (const auto& keypair : packet_queue) {
-                uint8_t id = keypair.first;
-                if (packet_queue[id].size() != 0) {
-                    // delete the packet we're waiting on
-                    packet_queue[id].erase(packet_queue[id].begin());
-                    log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", id));
-                }
+            // First, check if this is the model info packet, because if it is, the system
+            // startup failed, and we need to re-trigger it.
+            if (opencr_waiting()
+                && packet_queue[uint8_t(NUgus::ID::OPENCR)].front() == PacketTypes::MODEL_INFORMATION) {
+                log<NUClear::WARN>(fmt::format("OpenCR model information not recieved, restarting system"));
+                // Clear all packet queues just in case
+                queue_clear_all();
+                // Restart the system and exit the watchdog
+                startup();
+                return;
             }
-            // We haven't received any messages lately
+
+            // Check what the hangup was
+            uint8_t dropout_id = uint8_t(NUgus::ID::NO_ID);
+            // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
+            // any packets, otherwise is the nonzero ID of the timed out device
+            while ((dropout_id = queue_item_waiting())) {
+                // delete the packet we're waiting on
+                packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
+                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
+            }
+
             log<NUClear::WARN>("Requesting servo packets to restart system");
             // Send a request for all servo packets
             send_servo_request();
@@ -136,15 +148,46 @@ namespace module::platform::openCR {
                     log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert"));
                 }
 
+                /// @brief handle incoming packets, and send next request if all packets were handled
+                // -> Recieved model information packet
+                //    -> Trigger first servo request
+                // -> Received all servo packets
+                //    -> Request OpenCR packet
+                // -> Received OpenCR packet
+                //    -> Request servo packets
                 switch (info) {
                     // Handles OpenCR model and version information
-                    case PacketTypes::MODEL_INFORMATION: process_model_information(packet); break;
+                    case PacketTypes::MODEL_INFORMATION:
+                        // call packet handler
+                        process_model_information(packet);
+                        // check if we recieved the final packet we are expecting
+                        if (!queue_item_waiting()) {
+                            log<NUClear::INFO>("Initial data received, kickstarting system");
+                            send_servo_request();
+                        }
+                        break;
 
                     // Handles OpenCR sensor data
-                    case PacketTypes::OPENCR_DATA: process_opencr_data(packet); break;
+                    case PacketTypes::OPENCR_DATA:
+                        // call packet handler
+                        process_opencr_data(packet);
+                        // check if we recieved the final packet we are expecting
+                        if (!queue_item_waiting()) {
+                            log<NUClear::INFO>("OpenCR data received, requesting servo data");
+                            send_servo_request();
+                        }
+                        break;
 
                     // Handles servo data
-                    case PacketTypes::SERVO_DATA: process_servo_data(packet); break;
+                    case PacketTypes::SERVO_DATA:
+                        // call packet handler
+                        process_servo_data(packet);
+                        // check if we recieved the final packet we are expecting
+                        if (!queue_item_waiting()) {
+                            log<NUClear::INFO>("OpenCR data received, requesting servo data");
+                            send_servo_request();
+                        }
+                        break;
 
                     // Handles FSR data
                     // case PacketTypes::FSR_DATA: processFSRData(packet); break;
@@ -152,22 +195,6 @@ namespace module::platform::openCR {
                     // What is this??
                     default: log<NUClear::WARN>("Unknown packet data received"); break;
                 }
-            }
-
-            // -> Received all servo packets
-            // -> Request OpenCR packet
-            // -> Received OpenCR packet
-            // -> Request servo packets
-
-            // If we just processed the last servo, now we need to send an OpenCR read command
-            if (!servo_waiting() && info == PacketTypes::SERVO_DATA) {
-                log<NUClear::INFO>("All servos received, requesting OpenCR data");
-                send_opencr_request();
-            }
-            // If we just processed the OpenCR data, now we need to send servo read commands
-            else if (!opencr_waiting() && info == PacketTypes::OPENCR_DATA) {
-                log<NUClear::INFO>("OpenCR data received, requesting servo data");
-                send_servo_request();
             }
         });
 

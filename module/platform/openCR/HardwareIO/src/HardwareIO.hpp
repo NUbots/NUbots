@@ -188,11 +188,21 @@ namespace module::platform::openCR {
         /// @brief handle sending a request to the servo devices
         void send_servo_request();
 
-        /// @brief return ID of FIRST servo we're waiting on
+        /// @brief Check if we're currently waiting on any servo packets
+        /// @returns ID of FIRST servo we're waiting on, or 0 if none
         uint8_t servo_waiting();
 
-        /// @brief return number of OpenCR packets waiting
-        int opencr_waiting();
+        /// @brief Check if we're currently waiting on any OpenCR packets
+        /// @returns number of OpenCR packets waiting
+        uint8_t opencr_waiting();
+
+        /// @brief Check if we're currently waiting on any packets
+        /// @returns ID of FIRST device we're waiting on, or 0 if none
+        uint8_t queue_item_waiting();
+
+        /// @brief clear all packet queues
+        /// @returns the number of packets cleared
+        int queue_clear_all();
     };
 
 }  // namespace module::platform::openCR
