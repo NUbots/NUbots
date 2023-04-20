@@ -19,6 +19,7 @@ namespace module::platform::openCR {
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::platform::RawSensors;
+    using message::platform::ServoLED;
     using message::platform::StatusReturn;
     using utility::support::Expression;
 
@@ -272,6 +273,48 @@ namespace module::platform::openCR {
             opencrState.ledPanel.led3 = led.led3;
             opencrState.ledPanel.led4 = led.led4;
             opencrState.dirty         = true;
+        });
+
+        // If we get a ServoLED command then trigger it
+        // Debugging so set priority HIGH
+        on<Trigger<ServoLED>, Single, Sync<HardwareIO>, Priority::HIGH>().then([this](const ServoLED& target) {
+            // check it's a valid ID
+            if (target.id < 1 || target.id > 20) {
+                log<NUClear::WARN>(fmt::format("Bad ID {} for ServoLED command", target.id));
+                return;
+            }
+            // create the write command and send it
+            // the target state is casted from a bool to a byte (0x00 or 0x01)
+            opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(target.id),
+                                                              uint16_t(DynamixelServo::Address::LED),
+                                                              uint8_t(target.state)));
+            // logging
+            log<NUClear::DEBUG>(fmt::format("Turned servo {} LED {}", target.id, target.state ? "on" : "off"));
+        });
+
+        /// @brief trigger the LEDs of all servos
+        /// @details this is basically for debugging only
+        on<Every<10, std::chrono::seconds>>().then([this] {
+            // control vals
+            int msBetweenServos = 100;
+            int msBeforeOff     = 1000;
+            // create triggers for every servo
+            for (auto& id : nugus.servo_ids()) {
+                // create messages
+                auto onTarget  = std::make_unique<ServoLED>();
+                auto offTarget = std::make_unique<ServoLED>();
+                // fill messages
+                onTarget->id     = uint32_t(id);
+                offTarget->id    = uint32_t(id);
+                onTarget->state  = true;
+                offTarget->state = false;
+                // emit on with delay
+                int onDelay = (id - 1) * msBetweenServos;
+                emit<Scope::DELAY>(std::move(onTarget), std::chrono::milliseconds(onDelay));
+                // emit off with additional delay
+                int offDelay = (((20 - 1) + (id - 1)) * msBetweenServos) + msBeforeOff;
+                emit<Scope::DELAY>(std::move(offTarget), std::chrono::milliseconds(offDelay));
+            }
         });
     }
 

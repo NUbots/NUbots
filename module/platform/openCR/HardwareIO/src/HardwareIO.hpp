@@ -9,6 +9,7 @@
 #include "dynamixel/v2/Dynamixel.hpp"
 
 #include "message/platform/RawSensors.hpp"
+#include "message/platform/ServoLED.hpp"
 #include "message/platform/StatusReturn.hpp"
 
 #include "utility/io/uart.hpp"
