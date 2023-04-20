@@ -38,7 +38,7 @@ def write_config(file_path, config):
             yaml.dump(config, file)
     except FileNotFoundError:
         print(f"config file not found: {file_path}")
-        sys.exit(1)
+        continue
 
 
 def read_args() -> dict:
