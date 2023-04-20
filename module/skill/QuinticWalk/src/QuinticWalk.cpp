@@ -179,10 +179,8 @@ namespace module::skill {
 
                 imu_reaction.enable(current_cfg.imu_active);
 
-                auto walking_state          = std::make_unique<WalkingState>();
-                walking_state->is_walking   = true;
-                walking_state->walk_command = Eigen::Vector3f::Zero();
-                emit(std::move(walking_state));
+                // Update the walking state
+                emit(std::make_unique<WalkingState>(true, Eigen::Vector3f::Zero()));
             });
 
         // Runs every time the Walk task is removed from the director tree
