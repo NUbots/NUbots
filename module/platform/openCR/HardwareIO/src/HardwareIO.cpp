@@ -86,18 +86,24 @@ namespace module::platform::openCR {
             }
 
             // Check what the hangup was
-            uint8_t dropout_id = uint8_t(NUgus::ID::NO_ID);
+            uint8_t dropout_id  = uint8_t(NUgus::ID::NO_ID);
+            bool packet_dropped = false;
             // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
             // any packets, otherwise is the nonzero ID of the timed out device
             while ((dropout_id = queue_item_waiting())) {
+                packet_dropped = true;
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
                 log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
             }
 
+            // Send a request for all servo packets, only if there were packets dropped
+            // In case the system stops for some other reason, we don't want the watchdog
+            // to make it automaticlaly restart
+            if (packet_dropped) {
             log<NUClear::WARN>("Requesting servo packets to restart system");
-            // Send a request for all servo packets
             send_servo_request();
+            }
         });
 
         // When we receive data back from the OpenCR it will arrive here
