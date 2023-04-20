@@ -102,8 +102,8 @@ namespace module::platform::openCR {
             // In case the system stops for some other reason, we don't want the watchdog
             // to make it automaticlaly restart
             if (packet_dropped) {
-            log<NUClear::WARN>("Requesting servo packets to restart system");
-            send_servo_request();
+                log<NUClear::WARN>("Requesting servo packets to restart system");
+                send_servo_request();
             }
         });
 
@@ -111,7 +111,7 @@ namespace module::platform::openCR {
         // Run a state machine to handle reception of packet header and data
         // If a packet is successfully emitted then we emit a StatusReturn message
         on<IO>(opencr.native_handle(), IO::READ).then([this] {
-            log<NUClear::WARN>("Received data");
+            // log<NUClear::WARN>("Received data");
             // Process the response packet and emit a StatusReturn if applicable
             handle_response();
         });
@@ -139,13 +139,15 @@ namespace module::platform::openCR {
                 info = packet_queue[packet.id].front();
                 packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
-                // log<NUClear::WARN>(fmt::format(
-                //     "Packet ID {}, Contents {}, Data size {}, Remaining in this
-                //     queue {} ",
-                //     packet.id,
-                //     (uint8_t) info,
-                //     packet.data.size(),
-                //     packet_queue[packet.id].size()));
+                /*
+                log<NUClear::WARN>(fmt::format(
+                    "Packet ID {}, Contents {}, Data size {}, Remaining in this
+                    queue {} ",
+                    packet.id,
+                    (uint8_t) info,
+                    packet.data.size(),
+                    packet_queue[packet.id].size()));
+                //*/
 
                 // Check for errors
                 if (packet.error != StatusReturn::CommandError::NO_ERROR) {
@@ -231,7 +233,7 @@ namespace module::platform::openCR {
                     || servoStates[command.id].goalPosition != command.position) {
 
 
-                    // log<NUClear::DEBUG>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
+                    log<NUClear::ERROR>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
 
                     servoStates[command.id].dirty = true;
 
