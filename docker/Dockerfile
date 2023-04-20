@@ -178,11 +178,7 @@ COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
 # Eigen3
-COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
-COPY usr/local/package/eigen3/cxx17-overalign.patch /usr/local/package/cxx17-overalign.patch
-RUN install-from-source-with-patches https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2 \
-    /usr/local/package/deprecated-copy.patch \
-    /usr/local/package/cxx17-overalign.patch --
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
 # tcmalloc
 RUN install-from-source \
@@ -280,6 +276,9 @@ RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a1
 
 # JSON for modern C++ (https://github.com/nlohmann/json)
 RUN install-header-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+
+# NLopt
+RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
 
 # TinyXML
 RUN install-package tinyxml2
