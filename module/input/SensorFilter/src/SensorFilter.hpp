@@ -44,7 +44,6 @@ namespace module::input {
     using message::input::Sensors;
     using message::platform::RawSensors;
 
-
     /**
      * @author Jade Fountain
      * @author Trent Houliston
@@ -53,12 +52,17 @@ namespace module::input {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
+        /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};
 
-        // Define the Kalman filter model dimensions
-        static const size_t n_states       = 4;  // Model has 4 states: x = [roll, pitch, roll rate, pitch rate]'
-        static const size_t n_inputs       = 0;  // Model has no inputs
-        static const size_t n_measurements = 4;  // Model has 4 measurements: y = [roll, pitch, roll rate, pitch rate]'
+        /// @brief Number of states in the Kalman filter. x = [roll, pitch, roll rate, pitch rate]'
+        static const size_t n_states = 4;
+
+        /// @brief Number of inputs in the Kalman filter. Model has no inputs
+        static const size_t n_inputs = 0;
+
+        /// @brief Number of measurements in the Kalman filter. y = [roll, pitch, roll rate, pitch rate]'
+        static const size_t n_measurements = 4;
 
         /// @brief Kalman filter for pose estimation
         utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf;
@@ -133,11 +137,10 @@ namespace module::input {
 
 
         struct Config {
-            Config() = default;
-
             /// @brief Config for the button debouncer
             struct Button {
-                Button()               = default;
+                Button() = default;
+                /// @brief The number of times a button must be pressed before it is considered pressed
                 int debounce_threshold = 0;
             } buttons{};
 
@@ -168,14 +171,12 @@ namespace module::input {
                 };
             } footDown;
 
-            // Config for Filtering Method
+            /// @brief Specifies the filtering method to use (UKF, KF, MAHONY)
             FilteringMethod filtering_method;
 
             //  **************************************** UKF Config ****************************************
             /// @brief Config for the UKF
             struct UKF {
-                UKF() = default;
-
                 Eigen::Vector3d velocity_decay = Eigen::Vector3d::Zero();
 
                 struct Noise {
@@ -213,29 +214,39 @@ namespace module::input {
                     } covariance{};
                 } initial{};
             } ukf{};
+
             /// @brief Initial state of the for the UKF filter
             MotionModel<double>::StateVec initial_mean;
+
             /// @brief Initial covariance of the for the UKF filter
             MotionModel<double>::StateVec initial_covariance;
+
             /// @brief Parameter for scaling the walk command to better match actual achieved velocity
             Eigen::Vector3d deadreckoning_scale = Eigen::Vector3d::Zero();
 
             //  **************************************** Kalman Filter Config ****************************************
             /// @brief Kalman Continuos time process model
             Eigen::Matrix<double, n_states, n_states> Ac;
+
             /// @brief Kalman Continuos time input model
             Eigen::Matrix<double, n_inputs, n_inputs> Bc;
+
             /// @brief Kalman Continuos time measurement model
             Eigen::Matrix<double, n_measurements, n_states> C;
+
             /// @brief Kalman Process noise
             Eigen::Matrix<double, n_states, n_states> Q;
+
             /// @brief Kalman Measurement noise
             Eigen::Matrix<double, n_measurements, n_measurements> R;
+
             //  **************************************** Mahony Filter Config ****************************************
             /// @brief Mahony filter bias
             Eigen::Vector3d bias = Eigen::Vector3d::Zero();
+
             /// @brief Mahony filter proportional gain
             double Ki = 0.0;
+
             /// @brief Mahony filter integral gain
             double Kp = 0.0;
         } cfg;

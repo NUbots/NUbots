@@ -42,13 +42,16 @@ namespace module::input {
     using utility::support::Expression;
 
     void SensorFilter::integrate_walkcommand(const double dt) {
-        // Integrate the walk command to estimate the change in position and yaw orientation
-        double dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
-        double dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
-        yaw += walk_command.z() * dt * cfg.deadreckoning_scale.z();
-        // Rotate the change in position into world coordinates before adding it to the current position
-        Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
-        Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
+        // Check if we are not currently falling and walking
+        if (!falling && walk_engine_enabled) {
+            // Integrate the walk command to estimate the change in position and yaw orientation
+            double dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
+            double dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
+            yaw += walk_command.z() * dt * cfg.deadreckoning_scale.z();
+            // Rotate the change in position into world coordinates before adding it to the current position
+            Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
+            Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
+        }
     }
 
     void SensorFilter::configure_mahony(const Configuration& config) {

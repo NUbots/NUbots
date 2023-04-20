@@ -11,12 +11,18 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief The maximum speed we can walk forwards
-            float speed = 0.0;
-            /// @brief The maximum speed we can turn
-            float max_turn_speed = 0.0;
-            /// @brief The minimum speed we can turn
-            float min_turn_speed = 0.0;
+            /// @brief Maximum walk command velocity for walking to ball
+            float max_forward_speed = 0;
+            /// @brief Minimum walk command velocity for walking to ball
+            float min_forward_speed = 0;
+            /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
+            float acceleration = 0;
+            /// @brief Region around ball to begin decelerating in
+            float approach_radius = 0;
+            /// @brief Maximum angular velocity command for walking to ball
+            float max_turn_speed = 0;
+            /// @brief Minimum angular velocity command for walking to ball
+            float min_turn_speed = 0;
             /// @brief Rotate on spot walk command angular velocity
             float rotate_speed = 0;
             /// @brief Rotate on spot walk command forward velocity
@@ -30,6 +36,9 @@ namespace module::planning {
             /// @brief Pivot ball side velocity
             float pivot_ball_speed_y = 0;
         } cfg;
+
+        /// @brief The current speed of the walk command
+        float speed = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
