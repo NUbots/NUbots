@@ -39,6 +39,10 @@ namespace module::localisation {
             double measurement_noise = 0;
             /// @brief Maximum distance a field line can be from a particle to be considered an observation [m]
             double max_range = 0;
+            /// @brief Initial state (x,y,theta) of the robot, saved for resetting
+            std::vector<Eigen::Matrix<double, 3, 1>> initial_state{};
+            /// @brief Initial covariance matrix of the robot's state, saved for resetting
+            Eigen::Matrix<double, 3, 3> initial_covariance = Eigen::Matrix<double, 3, 3>::Identity();
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
         } cfg;
@@ -58,7 +62,7 @@ namespace module::localisation {
         bool falling = false;
 
         /// @brief Particles used in the particle filter
-        std::vector<Particle> particles;
+        std::vector<Particle> particles{};
 
 
     public:
