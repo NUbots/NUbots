@@ -131,7 +131,7 @@ namespace utility::actuation::kinematics {
 
         // Hip pitch
         runningTransform = runningTransform.translate(
-            Eigen::Vector3d(model.leg.HIP_OFFSET_X, negativeIfRight * model.leg.HIP_OFFSET_Y, model.leg.HIP_OFFSET_Z));
+            Eigen::Vector3d(model.leg.HIP_OFFSET_X, negativeIfRight * model.leg.HIP_OFFSET_Y, -model.leg.HIP_OFFSET_Z));
         // Rotate to face down the leg (see above for definitions of terms, including 'facing')
         runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
         // Using right hand rule along global z gives positive direction of yaw:
