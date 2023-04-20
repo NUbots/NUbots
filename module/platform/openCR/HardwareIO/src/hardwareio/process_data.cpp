@@ -53,9 +53,9 @@ namespace module::platform::openCR {
         // Button Left = 0x04
         opencrState.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
-        opencrState.gyro = Eigen::Vector3f(convert::gyro(data.gyro[2]),   // X
-                                           convert::gyro(data.gyro[1]),   // Y
-                                           convert::gyro(data.gyro[0]));  // Z
+        opencrState.gyro = Eigen::Vector3f(convert::gyro(data.gyro[2]),    // X
+                                           convert::gyro(data.gyro[1]),    // Y
+                                           -convert::gyro(data.gyro[0]));  // Z
 
         opencrState.acc = Eigen::Vector3f(convert::acc(data.acc[0]),   // X
                                           convert::acc(data.acc[1]),   // Y
