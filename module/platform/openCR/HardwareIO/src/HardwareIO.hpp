@@ -87,16 +87,16 @@ namespace module::platform::openCR {
             bool torqueEnabled = true;
 
             // Cached values that are never read
-            float velocityIGain       = 0.0f;
-            float velocityPGain       = 0.0f;
+            float velocityIGain       = 1920.0f / 65536.0f;  // ROBOTIS default
+            float velocityPGain       = 100.0f / 128.0f;     // ROBOTIS default
             float positionDGain       = 0.0f;
             float positionIGain       = 0.0f;
-            float positionPGain       = 0.0f;
+            float positionPGain       = 850.0f / 128.0f;  // ROBOTIS default
             float feedforward1stGain  = 0.0f;
             float feedforward2ndGain  = 0.0f;
-            float goalPWM             = 0.0f;
-            float goalCurrent         = 0.0f;
-            float goalVelocity        = 0.0f;
+            float goalPWM             = 885.0f;               // ROBOTIS default
+            float goalCurrent         = 6.52176f / 0.00336f;  // ROBOTIS default
+            float goalVelocity        = 1.08775f;             // ROBOTIS default
             float goalPosition        = 0.0f;
             float profileAcceleration = 0.0f;
             /// @brief replaces "Moving speed" from v1 protocol, basically just the set speed.
