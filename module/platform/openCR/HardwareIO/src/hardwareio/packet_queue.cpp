@@ -2,6 +2,11 @@
 
 namespace module::platform::openCR {
 
+    /**
+     * @todo make a PacketQueue class with these as memeber functions and add wrappers
+     * for queue.push() and queue.pop() to clean everything up.
+     */
+
     uint8_t HardwareIO::servo_waiting() {
         // Loop through all servos in order
         for (auto& id : nugus.servo_ids()) {
