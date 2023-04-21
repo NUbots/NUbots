@@ -28,19 +28,8 @@ namespace module::platform::openCR {
                 servoStates[i].dirty = false;
 
                 // If our torque should be disabled then we disable our torque
-                if (servoStates[i].torqueEnabled
-                    && (std::isnan(servoStates[i].goalPosition) || servoStates[i].goalCurrent == 0)) {
-                    servoStates[i].torqueEnabled = false;
-                    data1[i].data.torqueEnable   = 0;
-                }
-                else {
-                    // If our torque was disabled but is now enabled
-                    if (!servoStates[i].torqueEnabled && !std::isnan(servoStates[i].goalPosition)
-                        && servoStates[i].goalCurrent != 0) {
-                        servoStates[i].torqueEnabled = true;
-                        data1[i].data.torqueEnable   = 1;
-                    }
-                }
+                data1[i].data.torqueEnable =
+                    uint8_t(servoStates[i].torqueEnabled && !std::isnan(servoStates[i].goalPosition));
 
                 // Pack our data
                 data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
