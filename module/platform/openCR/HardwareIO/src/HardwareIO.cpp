@@ -234,7 +234,7 @@ namespace module::platform::openCR {
                     || servoStates[command.id].goalPosition != command.position) {
 
 
-                    log<NUClear::ERROR>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
+                    log<NUClear::DEBUG>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
 
                     servoStates[command.id].dirty = true;
 
