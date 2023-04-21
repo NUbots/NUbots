@@ -23,6 +23,8 @@ namespace module::platform::openCR {
     using message::platform::StatusReturn;
     using utility::support::Expression;
 
+    using message::platform::ButtonMiddleDown;
+
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
@@ -63,6 +65,10 @@ namespace module::platform::openCR {
         on<Startup>().then("HardwareIO Startup", [this] {
             startup();
             log<NUClear::DEBUG>("HardwareIO started");
+            // debug
+            // trigger scriptrunner after 5 seconds
+            log<NUClear::INFO>("Simulating Middle Button Down");
+            emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(5));
         });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
