@@ -50,7 +50,7 @@ namespace dynamixel {
                 , length(3 + sizeof(address) + sizeof(size) + N * sizeof(data[0]))
                 , instruction(Instruction::SYNC_WRITE)
                 , address(address)
-                , size(sizeof(data[0]))
+                , size(sizeof(T))
                 , data(data)
                 , checksum(calculateChecksum(this)) {}
 
