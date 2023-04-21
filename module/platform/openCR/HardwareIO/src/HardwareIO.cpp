@@ -233,7 +233,7 @@ namespace module::platform::openCR {
                 }
 
                 // Update our internal state
-                if ((servoStates[command.id].torqueEnabled != command.torque > 0 ? true : false)
+                if ((servoStates[command.id].torqueEnabled != (command.torque > 0) ? true : false)
                     || servoStates[command.id].positionPGain != command.gain
                     || servoStates[command.id].positionIGain != command.gain * 0
                     || servoStates[command.id].positionDGain != command.gain * 0
@@ -246,7 +246,7 @@ namespace module::platform::openCR {
                     servoStates[command.id].dirty = true;
 
                     // We only have binary torque control in Position Control Mode
-                    servoStates[command.id].torqueEnabled = command.torque > 0 ? true : false;
+                    servoStates[command.id].torqueEnabled = (command.torque > 0) ? true : false;
 
                     servoStates[command.id].positionPGain = command.gain;
                     servoStates[command.id].positionIGain = command.gain * 0;
