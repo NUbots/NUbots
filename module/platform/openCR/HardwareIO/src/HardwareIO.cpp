@@ -119,91 +119,94 @@ namespace module::platform::openCR {
 
         // Single is used to process servos one at a time and increment the counter
         on<Trigger<StatusReturn>, Single, Sync<HardwareIO>>().then([this](const StatusReturn& packet) {
-            // to store what packet was last processed
-            PacketTypes info;
+            /* Error handling */
 
             // Check we can process this packet
             if (packet_queue.find(packet.id) == packet_queue.end()) {
                 log<NUClear::WARN>(fmt::format("Recieved packet for unexpected ID {}.", packet.id));
+                return;
             }
+
             // Check we're expecting the packet
-            else if (packet_queue[packet.id].size() == 0) {
+            if (packet_queue[packet.id].size() == 0) {
                 log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
+                return;
             }
-            // All good
-            else {
-                // Service the watchdog because we recieved a valid packet
-                emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
 
-                // Pop the front of the packet queue
-                info = packet_queue[packet.id].front();
-                packet_queue[packet.id].erase(packet_queue[packet.id].begin());
+            /* All good now */
 
-                /*
-                log<NUClear::WARN>(fmt::format(
-                    "Packet ID {}, Contents {}, Data size {}, Remaining in this
-                    queue {} ",
-                    packet.id,
-                    (uint8_t) info,
-                    packet.data.size(),
-                    packet_queue[packet.id].size()));
-                //*/
+            // Service the watchdog because we recieved a valid packet
+            emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
 
-                // Check for errors
-                if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet.id));
-                }
-                if (packet.alert) {
-                    log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert"));
-                }
+            // Pop the front of the packet queue
+            info = packet_queue[packet.id].front();
+            packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
-                /// @brief handle incoming packets, and send next request if all packets were handled
-                // -> Recieved model information packet
-                //    -> Trigger first servo request
-                // -> Received all servo packets
-                //    -> Request OpenCR packet
-                // -> Received OpenCR packet
-                //    -> Request servo packets
-                switch (info) {
-                    // Handles OpenCR model and version information
-                    case PacketTypes::MODEL_INFORMATION:
-                        // call packet handler
-                        process_model_information(packet);
-                        // check if we recieved the final packet we are expecting
-                        if (!queue_item_waiting()) {
-                            log<NUClear::INFO>("Initial data received, kickstarting system");
-                            send_servo_request();
-                        }
-                        break;
+            /*
+            log<NUClear::WARN>(fmt::format(
+                "Packet ID {}, Contents {}, Data size {}, Remaining in this
+                queue {} ",
+                packet.id,
+                (uint8_t) info,
+                packet.data.size(),
+                packet_queue[packet.id].size()));
+            //*/
 
-                    // Handles OpenCR sensor data
-                    case PacketTypes::OPENCR_DATA:
-                        // call packet handler
-                        process_opencr_data(packet);
-                        // check if we recieved the final packet we are expecting
-                        if (!queue_item_waiting()) {
-                            log<NUClear::INFO>("OpenCR data received, requesting servo data");
-                            send_servo_request();
-                        }
-                        break;
+            // Check for packet errors
+            /// @todo Do we want to handle packets differently if they have errors?
+            if (packet.error != StatusReturn::CommandError::NO_ERROR) {
+                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet.id));
+            }
+            if (packet.alert) {
+                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert"));
+            }
 
-                    // Handles servo data
-                    case PacketTypes::SERVO_DATA:
-                        // call packet handler
-                        process_servo_data(packet);
-                        // check if we recieved the final packet we are expecting
-                        if (!queue_item_waiting()) {
-                            log<NUClear::INFO>("OpenCR data received, requesting servo data");
-                            send_servo_request();
-                        }
-                        break;
+            /// @brief handle incoming packets, and send next request if all packets were handled
+            // -> Recieved model information packet
+            //    -> Trigger first servo request
+            // -> Received all servo packets
+            //    -> Request OpenCR packet
+            // -> Received OpenCR packet
+            //    -> Request servo packets
+            switch (info) {
+                // Handles OpenCR model and version information
+                case PacketTypes::MODEL_INFORMATION:
+                    // call packet handler
+                    process_model_information(packet);
+                    // check if we recieved the final packet we are expecting
+                    if (!queue_item_waiting()) {
+                        log<NUClear::INFO>("Initial data received, kickstarting system");
+                        send_servo_request();
+                    }
+                    break;
 
-                    // Handles FSR data
-                    // case PacketTypes::FSR_DATA: processFSRData(packet); break;
+                // Handles OpenCR sensor data
+                case PacketTypes::OPENCR_DATA:
+                    // call packet handler
+                    process_opencr_data(packet);
+                    // check if we recieved the final packet we are expecting
+                    if (!queue_item_waiting()) {
+                        log<NUClear::INFO>("OpenCR data received, requesting servo data");
+                        send_servo_request();
+                    }
+                    break;
 
-                    // What is this??
-                    default: log<NUClear::WARN>("Unknown packet data received"); break;
-                }
+                // Handles servo data
+                case PacketTypes::SERVO_DATA:
+                    // call packet handler
+                    process_servo_data(packet);
+                    // check if we recieved the final packet we are expecting
+                    if (!queue_item_waiting()) {
+                        log<NUClear::INFO>("All servos received, requesting OpenCR data");
+                        send_opencr_request();
+                    }
+                    break;
+
+                // Handles FSR data
+                // case PacketTypes::FSR_DATA: processFSRData(packet); break;
+
+                // What is this??
+                default: log<NUClear::WARN>("Unknown packet data received"); break;
             }
         });
 
