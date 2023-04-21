@@ -70,6 +70,12 @@ namespace module::platform::openCR {
             return int16_t(gs * INT16_MAX / 2);
         }
 
+        /// @todo Maybe store pwm internally as a float percentage?
+
+        int16_t PWM(float pwm) {
+            // Range: -885 - +885
+            return int16_t(utility::math::clamp(-885.0f, pwm, 885.0f));
+        }
 
         int16_t PWM(int16_t pwm) {
             // Range: -885 - +885
@@ -134,13 +140,13 @@ namespace module::platform::openCR {
         float velocity(int32_t velocity) {
             // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
             // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
-            return utility::math::clamp(int32_t(-210), velocity, int32_t(210)) * 0.229f / 60.0f;
+            return utility::math::clamp(int32_t(-1023), velocity, int32_t(1023)) * 0.229f / 60.0f;
         }
 
         int32_t velocity(float velocity) {
             // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
             // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
-            return int32_t(utility::math::clamp(-210.0f, velocity * 60.0f / 0.229f, 210.0f));
+            return int32_t(utility::math::clamp(-1023.0f, (velocity * 60.0f / 0.229f), 1023.0f));
         }
 
 
@@ -156,7 +162,11 @@ namespace module::platform::openCR {
             return int16_t(utility::math::clamp(-6.87792f, current, 6.87792f) / 0.00336f);
         }
 
+        /// @todo clamp gain values to [0,16383]
 
+        /**
+         * Controller gain = Ram table gain / 128
+         */
         float PGain(uint16_t p_gain) {
             return float(p_gain / 128.0f);
         }
@@ -165,7 +175,9 @@ namespace module::platform::openCR {
             return uint16_t(p_gain * 128.0f);
         }
 
-
+        /**
+         * Controller gain = Ram table gain / 65536
+         */
         float IGain(uint16_t i_gain) {
             return i_gain / 65536.0f;
         }
@@ -174,13 +186,15 @@ namespace module::platform::openCR {
             return uint16_t(i_gain * 65536.0f);
         }
 
-
+        /**
+         * Controller gain = Ram table gain / 16
+         */
         float DGain(uint16_t d_gain) {
-            return d_gain / 18.0f;
+            return d_gain / 16.0f;
         }
 
         uint16_t DGain(float d_gain) {
-            return uint16_t(d_gain * 18.0f);
+            return uint16_t(d_gain * 16.0f);
         }
 
 
