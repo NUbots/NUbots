@@ -10,6 +10,9 @@
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkToFieldPosition.hpp"
+
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
     using message::input::GameState;
@@ -23,14 +26,18 @@ namespace module::purpose {
     using GoalieTask = message::purpose::Goalie;
     using message::purpose::NormalGoalie;
     using message::purpose::PenaltyShootoutGoalie;
+    using message::strategy::WalkToFieldPosition;
 
     using extension::Configuration;
+
+    using utility::support::Expression;
 
     Goalie::Goalie(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Goalie.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Goalie.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ready_position = config["ready_position"].as<Expression>();
         });
 
         on<Provide<GoalieTask>, Optional<Trigger<GameState>>>().then(
@@ -53,8 +60,11 @@ namespace module::purpose {
             });
 
         // Normal READY state
-        on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then(
-            [this] { emit<Task>(std::make_unique<Ready>()); });
+        on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
+            emit<Task>(std::make_unique<WalkToFieldPosition>(
+                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                cfg.ready_position.z()));
+        });
 
         // Normal PLAYING state
         on<Provide<NormalGoalie>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
@@ -80,9 +90,13 @@ namespace module::purpose {
     void Goalie::play() {
         // Stop the ball!
         // Second argument is priority - higher number means higher priority
-        emit<Task>(std::make_unique<LookAround>(), 1);  // if the look at ball task is not running, find the ball
-        emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
-        emit<Task>(std::make_unique<DiveToBall>(), 3);  // dive to the ball
+        emit<Task>(
+            std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                                                  cfg.ready_position.z()),
+            1);
+        emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
+        emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
+        emit<Task>(std::make_unique<DiveToBall>(), 4);  // dive to the ball
     }
 
 }  // namespace module::purpose
