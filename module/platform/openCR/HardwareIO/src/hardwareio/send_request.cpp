@@ -32,13 +32,13 @@ namespace module::platform::openCR {
                     uint8_t(servoStates[i].torqueEnabled && !std::isnan(servoStates[i].goalPosition));
 
                 // Pack our data
-                data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
                 data1[i].data.velocityIGain = convert::IGain(servoStates[i].velocityIGain);
-                data1[i].data.velocityDGain = convert::DGain(servoStates[i].velocityDGain);
+                data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
                 // Warning this might be wrong since the conversion functions might be implicitly for velocity gain
                 // only.
-                data1[i].data.positionPGain = convert::PGain(servoStates[i].positionPGain);
+                data1[i].data.positionDGain = convert::DGain(servoStates[i].positionDGain);
                 data1[i].data.positionIGain = convert::IGain(servoStates[i].positionIGain);
+                data1[i].data.positionPGain = convert::PGain(servoStates[i].positionPGain);
 
                 data2[i].data.feedforward1stGain  = convert::FFGain(servoStates[i].feedforward1stGain);
                 data2[i].data.feedforward2ndGain  = convert::FFGain(servoStates[i].feedforward2ndGain);

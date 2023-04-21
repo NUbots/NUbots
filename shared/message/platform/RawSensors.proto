@@ -108,11 +108,11 @@ message RawSensors {
     message Servo {
         uint32 error_flags           = 1;
         bool   torque_enabled        = 2;
-        float  velocity_p_gain       = 3;
-        float  velocity_i_gain       = 4;
-        float  velocity_d_gain       = 5;
-        float  position_p_gain       = 6;
-        float  position_i_gain       = 7;
+        float  velocity_i_gain       = 3;
+        float  velocity_p_gain       = 4;
+        float  position_d_gain       = 5;
+        float  position_i_gain       = 6;
+        float  position_p_gain       = 7;
         float  feed_forward_1st_Gain = 8;
         float  feed_forward_2nd_Gain = 9;
         float  present_PWM           = 10;

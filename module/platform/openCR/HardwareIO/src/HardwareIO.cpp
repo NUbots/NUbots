@@ -234,9 +234,9 @@ namespace module::platform::openCR {
 
                 // Update our internal state
                 if ((servoStates[command.id].torqueEnabled != command.torque > 0 ? true : false)
-                    || servoStates[command.id].velocityPGain != command.gain
-                    || servoStates[command.id].velocityIGain != command.gain * 0
-                    || servoStates[command.id].velocityDGain != command.gain * 0
+                    || servoStates[command.id].positionPGain != command.gain
+                    || servoStates[command.id].positionIGain != command.gain * 0
+                    || servoStates[command.id].positionDGain != command.gain * 0
                     || servoStates[command.id].goalVelocity != speed
                     || servoStates[command.id].goalPosition != command.position) {
 
@@ -248,9 +248,9 @@ namespace module::platform::openCR {
                     // We only have binary torque control in Position Control Mode
                     servoStates[command.id].torqueEnabled = command.torque > 0 ? true : false;
 
-                    servoStates[command.id].velocityPGain = command.gain;
-                    servoStates[command.id].velocityIGain = command.gain * 0;
-                    servoStates[command.id].velocityDGain = command.gain * 0;
+                    servoStates[command.id].positionPGain = command.gain;
+                    servoStates[command.id].positionIGain = command.gain * 0;
+                    servoStates[command.id].positionDGain = command.gain * 0;
 
                     servoStates[command.id].goalVelocity = speed;
                     servoStates[command.id].goalPosition = command.position;

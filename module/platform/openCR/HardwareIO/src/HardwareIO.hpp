@@ -87,11 +87,11 @@ namespace module::platform::openCR {
             bool torqueEnabled = true;
 
             // Cached values that are never read
-            float velocityPGain       = 0.0f;
             float velocityIGain       = 0.0f;
-            float velocityDGain       = 0.0f;
-            float positionPGain       = 0.0f;
+            float velocityPGain       = 0.0f;
+            float positionDGain       = 0.0f;
             float positionIGain       = 0.0f;
+            float positionPGain       = 0.0f;
             float feedforward1stGain  = 0.0f;
             float feedforward2ndGain  = 0.0f;
             float goalPWM             = 0.0f;

@@ -36,9 +36,9 @@ namespace module::platform::openCR {
             servo.torque_enabled = servoStates[i].torqueEnabled;
 
             // Gain
-            servo.velocity_p_gain = servoStates[i].velocityPGain;
-            servo.velocity_i_gain = servoStates[i].velocityIGain;
-            servo.velocity_d_gain = servoStates[i].velocityDGain;
+            servo.position_p_gain = servoStates[i].positionPGain;
+            servo.position_i_gain = servoStates[i].positionIGain;
+            servo.position_d_gain = servoStates[i].positionDGain;
 
             // Targets
             servo.goal_position    = servoStates[i].goalPosition;

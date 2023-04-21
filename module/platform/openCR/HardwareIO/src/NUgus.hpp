@@ -136,7 +136,7 @@ namespace module::platform::openCR {
         uint8_t torqueEnable;
         uint16_t velocityIGain;
         uint16_t velocityPGain;
-        uint16_t velocityDGain;
+        uint16_t positionDGain;
         uint16_t positionIGain;
         uint16_t positionPGain;
     };
