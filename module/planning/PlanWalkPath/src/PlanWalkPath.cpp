@@ -45,27 +45,25 @@ namespace module::planning {
 
         // Path to walk to a particular point
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            Eigen::Vector3f rPTt = walk_to.rPTt;
+            Eigen::Vector3f rPRr = walk_to.rPRr;
 
-            // If robot getting close to the ball, begin to decelerate to minimum speed
-            if (rPTt.head(2).norm() < cfg.approach_radius) {
+            // If robot getting close to the point, begin to decelerate to minimum speed
+            if (rPRr.head(2).norm() < cfg.approach_radius) {
                 speed -= cfg.acceleration;
                 speed = std::max(speed, cfg.min_forward_speed);
             }
             else {
-                // If robot is far away from the ball, accelerate to max speed
+                // If robot is far away from the point, accelerate to max speed
                 speed += cfg.acceleration;
-                speed = std::min(speed, cfg.max_forward_speed);
+                speed = std::max(cfg.min_forward_speed, std::min(speed, cfg.max_forward_speed));
             }
 
-            // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
-            Eigen::Vector3f walk_command = rPTt.normalized() * speed;
+            // Obtain the unit vector to desired target in robot space and scale by cfg.forward_speed
+            Eigen::Vector3f walk_command = rPRr.normalized() * speed;
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed
-            walk_command.z() = utility::math::clamp(cfg.min_turn_speed,
-                                                    std::atan2(walk_command.y(), walk_command.x()),
-                                                    cfg.max_turn_speed);
+            walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_to.heading, cfg.max_turn_speed);
 
             emit<Task>(std::make_unique<Walk>(walk_command));
         });

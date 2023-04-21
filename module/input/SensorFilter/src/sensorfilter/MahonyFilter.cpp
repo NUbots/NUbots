@@ -95,12 +95,17 @@ namespace module::input {
             Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
         }
 
-        // **************** Construct Odometry Output (Htw) ****************
+        // **************** Construct Odometry Output ****************
         // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning of walk command
         const double roll  = rpy(0);
         const double pitch = rpy(1);
         Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
         sensors->Htw       = Hwt.inverse().matrix();
+
+        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
+        Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+        sensors->Hrw          = Hwr.inverse().matrix();
         update_loop.enable();
     }
 }  // namespace module::input

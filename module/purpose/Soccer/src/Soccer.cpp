@@ -7,6 +7,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/GameEvents.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/purpose/FindPurpose.hpp"
@@ -22,6 +23,7 @@ namespace module::purpose {
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using message::behaviour::state::Stability;
     using message::input::GameEvents;
+    using message::localisation::ResetRobotLocalisation;
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
     using message::purpose::Defender;
@@ -46,7 +48,7 @@ namespace module::purpose {
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
             // Without this emit, modules that need a Stability message may not run
-            emit(std::make_unique<Stability>(Stability::STANDING));
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>());
             // The robot should always try to recover from falling, if applicable, regardless of purpose
@@ -67,6 +69,8 @@ namespace module::purpose {
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
+                emit(std::make_unique<Stability>(Stability::UNKNOWN));
+                emit(std::make_unique<ResetRobotLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
                 // emit<Task>(std::make_unique<StandStill>());
             }

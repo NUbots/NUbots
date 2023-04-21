@@ -20,10 +20,6 @@ namespace module::localisation {
         /// @brief Current estimate of cartesian ball position
         Eigen::Vector3f filtered_rBCc = Eigen::Vector3f(1.0, 0.0, 0.0);
 
-        /// @brief Get distance to ball in x-y plane
-        float get_distance(Eigen::Matrix<float, 3, 1> v);
-
-
     public:
         /// @brief Called by the powerplant to build and setup the BallFilter reactor.
         explicit BallFilter(std::unique_ptr<NUClear::Environment> environment);
