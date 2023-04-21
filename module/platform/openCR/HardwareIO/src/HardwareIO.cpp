@@ -67,7 +67,7 @@ namespace module::platform::openCR {
             log<NUClear::DEBUG>("HardwareIO started");
             // debug
             // trigger scriptrunner after 5 seconds
-            log<NUClear::INFO>("Simulating Middle Button Down");
+            log<NUClear::INFO>("Simulating Middle Button Down in 5 seconds");
             emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(5));
         });
 

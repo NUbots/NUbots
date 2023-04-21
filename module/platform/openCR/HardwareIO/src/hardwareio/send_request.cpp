@@ -1,3 +1,5 @@
+#include <fmt/format.h>
+
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
@@ -15,6 +17,9 @@ namespace module::platform::openCR {
                                               servoStates.cend(),
                                               [](const ServoState& servo) -> bool { return servo.dirty; });
         if (servos_dirty) {
+
+            // log<NUClear::DEBUG>("Servos dirty, constructing SyncWrite");
+
             // Write data is split into two components
             std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, 20> data1;
             std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
@@ -31,11 +36,12 @@ namespace module::platform::openCR {
                 data1[i].data.torqueEnable =
                     uint8_t(servoStates[i].torqueEnabled && !std::isnan(servoStates[i].goalPosition));
 
+                // debugging
+                // data1[i].data.torqueEnable = uint8_t(1);
+
                 // Pack our data
                 data1[i].data.velocityIGain = convert::IGain(servoStates[i].velocityIGain);
                 data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
-                // Warning this might be wrong since the conversion functions might be implicitly for velocity gain
-                // only.
                 data1[i].data.positionDGain = convert::DGain(servoStates[i].positionDGain);
                 data1[i].data.positionIGain = convert::IGain(servoStates[i].positionIGain);
                 data1[i].data.positionPGain = convert::PGain(servoStates[i].positionPGain);
@@ -50,13 +56,18 @@ namespace module::platform::openCR {
                 data2[i].data.goalPosition =
                     convert::position(i, servoStates[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
             }
-
+            log<NUClear::DEBUG>(fmt::format("Servo ID 1\tgoalPosition: {}\ttorqueEnable: {} ({})",
+                                            data2[0].data.goalPosition,
+                                            data1[0].data.torqueEnable,
+                                            uint8_t(servoStates[0].torqueEnabled)));
             opencr.write(
                 dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(uint16_t(AddressBook::SERVO_WRITE_1),
                                                                                   data1));
             opencr.write(
                 dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, 20>(uint16_t(AddressBook::SERVO_WRITE_2),
                                                                                   data2));
+
+            // log<NUClear::DEBUG>("SyncWrite 1 and 2 both sent");
         }
 
         // Get updated servo data
@@ -68,11 +79,21 @@ namespace module::platform::openCR {
                                                         sizeof(DynamixelServoReadData),
                                                         nugus.servo_ids()));
 
+        // only send for ID 1 for debugging
+
+        // packet_queue[1].push_back(PacketTypes::SERVO_DATA);
+        // opencr.write(dynamixel::v2::SyncReadCommand<1>(uint16_t(AddressBook::SERVO_READ),
+        //                                                sizeof(DynamixelServoReadData),
+        //                                                {uint8_t(1)}));
+
 
         // Our final sensor output
         auto sensors = std::make_unique<RawSensors>();
         *sensors     = construct_sensors();
         emit(std::move(sensors));
+
+        // DEBUG
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 
     void HardwareIO::send_opencr_request() {
