@@ -297,28 +297,28 @@ namespace module::platform::openCR {
 
         /// @brief trigger the LEDs of all servos
         /// @details this is basically for debugging only
-        on<Every<10, std::chrono::seconds>>().then([this] {
-            // control vals
-            int msBetweenServos = 100;
-            int msBeforeOff     = 1000;
-            // create triggers for every servo
-            for (auto& id : nugus.servo_ids()) {
-                // create messages
-                auto onTarget  = std::make_unique<ServoLED>();
-                auto offTarget = std::make_unique<ServoLED>();
-                // fill messages
-                onTarget->id     = uint32_t(id);
-                offTarget->id    = uint32_t(id);
-                onTarget->state  = true;
-                offTarget->state = false;
-                // emit on with delay
-                int onDelay = (id - 1) * msBetweenServos;
-                emit<Scope::DELAY>(std::move(onTarget), std::chrono::milliseconds(onDelay));
-                // emit off with additional delay
-                int offDelay = (((20 - 1) + (id - 1)) * msBetweenServos) + msBeforeOff;
-                emit<Scope::DELAY>(std::move(offTarget), std::chrono::milliseconds(offDelay));
-            }
-        });
+        // on<Every<10, std::chrono::seconds>>().then([this] {
+        //     // control vals
+        //     int msBetweenServos = 100;
+        //     int msBeforeOff     = 1000;
+        //     // create triggers for every servo
+        //     for (auto& id : nugus.servo_ids()) {
+        //         // create messages
+        //         auto onTarget  = std::make_unique<ServoLED>();
+        //         auto offTarget = std::make_unique<ServoLED>();
+        //         // fill messages
+        //         onTarget->id     = uint32_t(id);
+        //         offTarget->id    = uint32_t(id);
+        //         onTarget->state  = true;
+        //         offTarget->state = false;
+        //         // emit on with delay
+        //         int onDelay = (id - 1) * msBetweenServos;
+        //         emit<Scope::DELAY>(std::move(onTarget), std::chrono::milliseconds(onDelay));
+        //         // emit off with additional delay
+        //         int offDelay = (((20 - 1) + (id - 1)) * msBetweenServos) + msBeforeOff;
+        //         emit<Scope::DELAY>(std::move(offTarget), std::chrono::milliseconds(offDelay));
+        //     }
+        // });
     }
 
 }  // namespace module::platform::openCR
