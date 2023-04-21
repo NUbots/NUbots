@@ -87,15 +87,15 @@ namespace module::platform::openCR {
             }
 
             // Check what the hangup was
-            uint8_t dropout_id  = uint8_t(NUgus::ID::NO_ID);
             bool packet_dropped = false;
             // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
             // any packets, otherwise is the nonzero ID of the timed out device
-            while ((dropout_id = queue_item_waiting())) {
-                packet_dropped = true;
+            while (uint8_t dropout_id = queue_item_waiting()) {
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
                 log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
+                // set flag
+                packet_dropped = true;
             }
 
             // Send a request for all servo packets, only if there were packets dropped
@@ -139,7 +139,7 @@ namespace module::platform::openCR {
             emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
 
             // Pop the front of the packet queue
-            info = packet_queue[packet.id].front();
+            auto& info = packet_queue[packet.id].front();
             packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
             /*
@@ -282,7 +282,7 @@ namespace module::platform::openCR {
 
         // If we get a ServoLED command then trigger it
         // Debugging so set priority HIGH
-        on<Trigger<ServoLED>, Single, Sync<HardwareIO>, Priority::HIGH>().then([this](const ServoLED& target) {
+        on<Trigger<ServoLED>, Sync<HardwareIO>, Priority::HIGH>().then([this](const ServoLED& target) {
             // check it's a valid ID
             if (target.id < 1 || target.id > 20) {
                 log<NUClear::WARN>(fmt::format("Bad ID {} for ServoLED command", target.id));
