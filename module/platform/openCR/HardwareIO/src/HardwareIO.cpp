@@ -116,9 +116,7 @@ namespace module::platform::openCR {
             handle_response();
         });
 
-
-        // Single is used to process servos one at a time and increment the counter
-        on<Trigger<StatusReturn>, Single, Sync<HardwareIO>>().then([this](const StatusReturn& packet) {
+        on<Trigger<StatusReturn>, Sync<HardwareIO>>().then([this](const StatusReturn& packet) {
             /* Error handling */
 
             // Check we can process this packet
