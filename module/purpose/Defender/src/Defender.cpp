@@ -66,14 +66,9 @@ Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : Behaviou
         on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
-<<<<<<< HEAD
             });
 
 
-=======
-        // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<DefenderTask>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
->>>>>>> defenderBehaviour
     }
 
     void Defender::play() {
