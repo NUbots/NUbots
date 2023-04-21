@@ -173,7 +173,7 @@ namespace module::platform::openCR {
                     process_model_information(packet);
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
-                        log<NUClear::INFO>("Initial data received, kickstarting system");
+                        log<NUClear::TRACE>("Initial data received, kickstarting system");
                         send_servo_request();
                     }
                     break;
@@ -184,7 +184,7 @@ namespace module::platform::openCR {
                     process_opencr_data(packet);
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
-                        log<NUClear::INFO>("OpenCR data received, requesting servo data");
+                        log<NUClear::TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
                     }
                     break;
@@ -195,7 +195,7 @@ namespace module::platform::openCR {
                     process_servo_data(packet);
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
-                        log<NUClear::INFO>("All servos received, requesting OpenCR data");
+                        log<NUClear::TRACE>("All servos received, requesting OpenCR data");
                         send_opencr_request();
                     }
                     break;
