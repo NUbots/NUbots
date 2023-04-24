@@ -33,6 +33,12 @@ message Vector3 {
     double Z = 3;
 }
 
+// message fvec3 {
+//     float x = 1;
+//     float y = 2;
+//     float z = 3;
+// }
+
 message PositionSensorMeasurement {
     string name  = 1;
     double value = 2;
@@ -102,6 +108,13 @@ message VisionGroundTruth {
     fvec3 rBWw = 2;
 }
 
+message LocalisationGroundTruth {
+    /// Indicates if this message exists
+    bool exists = 1;
+    /// field to robot in field space
+    repeated fvec3 rRFf = 2;
+}
+
 message SensorMeasurements {
     // simulation time stamp at which the measurements were performed expressed in [ms] from the start of the connection
     uint32 time = 1;
@@ -119,6 +132,7 @@ message SensorMeasurements {
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
     OdometryGroundTruth odometry_ground_truth = 100;
     VisionGroundTruth   vision_ground_truth   = 101;
+    LocalisationGroundTruth localisation_ground_truth = 102;
 }
 
 message MotorPosition {
