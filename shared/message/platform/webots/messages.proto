@@ -33,12 +33,6 @@ message Vector3 {
     double Z = 3;
 }
 
-// message fvec3 {
-//     float x = 1;
-//     float y = 2;
-//     float z = 3;
-// }
-
 message PositionSensorMeasurement {
     string name  = 1;
     double value = 2;

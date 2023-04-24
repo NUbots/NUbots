@@ -70,6 +70,7 @@ namespace module::platform {
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
+    using message::platform::webots::LocalisationGroundTruth;
 
     using utility::input::ServoID;
     using utility::platform::getRawServo;
@@ -789,6 +790,11 @@ namespace module::platform {
             if (sensor_measurements.odometry_ground_truth.exists) {
                 sensor_data->odometry_ground_truth.exists = true;
                 sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
+            }
+            if (sensor_measurements.localisation_ground_truth.exists) {
+                auto loc_msg = std::make_unique<LocalisationGroundTruth>(sensor_measurements.localisation_ground_truth);
+                emit(loc_msg);
+                log<NUClear::WARN>("loc_msg");
             }
 
             emit(sensor_data);
