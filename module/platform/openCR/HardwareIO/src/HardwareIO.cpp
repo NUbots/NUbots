@@ -13,6 +13,10 @@
 #include "utility/math/comparison.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+
+#define DEBUG_ENABLE_MAIN_LOOP 0
+#define DEBUG_ENABLE_LED_CYCLE 1
+
 namespace module::platform::openCR {
 
     using extension::Configuration;
@@ -104,6 +108,7 @@ namespace module::platform::openCR {
                 packet_dropped = true;
             }
 
+#if DEBUG_ENABLE_MAIN_LOOP
             // Send a request for all servo packets, only if there were packets dropped
             // In case the system stops for some other reason, we don't want the watchdog
             // to make it automaticlaly restart
@@ -111,6 +116,7 @@ namespace module::platform::openCR {
                 log<NUClear::WARN>("Requesting servo packets to restart system");
                 send_servo_request();
             }
+#endif  // DEBUG_ENABLE_MAIN_LOOP
         });
 
         // When we receive data back from the OpenCR it will arrive here
@@ -177,33 +183,39 @@ namespace module::platform::openCR {
                 case PacketTypes::MODEL_INFORMATION:
                     // call packet handler
                     process_model_information(packet);
+#if DEBUG_ENABLE_MAIN_LOOP
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
                         send_servo_request();
                     }
+#endif  // DEBUG_ENABLE_MAIN_LOOP
                     break;
 
                 // Handles OpenCR sensor data
                 case PacketTypes::OPENCR_DATA:
                     // call packet handler
                     process_opencr_data(packet);
+#if DEBUG_ENABLE_MAIN_LOOP
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
                         log<NUClear::TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
                     }
+#endif  // DEBUG_ENABLE_MAIN_LOOP
                     break;
 
                 // Handles servo data
                 case PacketTypes::SERVO_DATA:
                     // call packet handler
                     process_servo_data(packet);
+#if DEBUG_ENABLE_MAIN_LOOP
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
                         log<NUClear::TRACE>("All servos received, requesting OpenCR data");
                         send_opencr_request();
                     }
+#endif  // DEBUG_ENABLE_MAIN_LOOP
                     break;
 
                 // Handles FSR data
@@ -305,30 +317,32 @@ namespace module::platform::openCR {
             log<NUClear::DEBUG>(fmt::format("Turned servo {} LED {}", target.id, target.state ? "on" : "off"));
         });
 
+#if DEBUG_ENABLE_LED_CYCLE
         /// @brief trigger the LEDs of all servos
         /// @details this is basically for debugging only
-        // on<Every<10, std::chrono::seconds>>().then([this] {
-        //     // control vals
-        //     int msBetweenServos = 100;
-        //     int msBeforeOff     = 1000;
-        //     // create triggers for every servo
-        //     for (auto& id : nugus.servo_ids()) {
-        //         // create messages
-        //         auto onTarget  = std::make_unique<ServoLED>();
-        //         auto offTarget = std::make_unique<ServoLED>();
-        //         // fill messages
-        //         onTarget->id     = uint32_t(id);
-        //         offTarget->id    = uint32_t(id);
-        //         onTarget->state  = true;
-        //         offTarget->state = false;
-        //         // emit on with delay
-        //         int onDelay = (id - 1) * msBetweenServos;
-        //         emit<Scope::DELAY>(std::move(onTarget), std::chrono::milliseconds(onDelay));
-        //         // emit off with additional delay
-        //         int offDelay = (((20 - 1) + (id - 1)) * msBetweenServos) + msBeforeOff;
-        //         emit<Scope::DELAY>(std::move(offTarget), std::chrono::milliseconds(offDelay));
-        //     }
-        // });
+        on<Every<10, std::chrono::seconds>>().then([this] {
+            // control vals
+            int msBetweenServos = 100;
+            int msBeforeOff     = 1000;
+            // create triggers for every servo
+            for (auto& id : nugus.servo_ids()) {
+                // create messages
+                auto onTarget  = std::make_unique<ServoLED>();
+                auto offTarget = std::make_unique<ServoLED>();
+                // fill messages
+                onTarget->id     = uint32_t(id);
+                offTarget->id    = uint32_t(id);
+                onTarget->state  = true;
+                offTarget->state = false;
+                // emit on with delay
+                int onDelay = (id - 1) * msBetweenServos;
+                emit<Scope::DELAY>(std::move(onTarget), std::chrono::milliseconds(onDelay));
+                // emit off with additional delay
+                int offDelay = (((20 - 1) + (id - 1)) * msBetweenServos) + msBeforeOff;
+                emit<Scope::DELAY>(std::move(offTarget), std::chrono::milliseconds(offDelay));
+            }
+        });
+#endif  // DEBUG_ENABLE_LED_CYCLE
     }
 
 }  // namespace module::platform::openCR
