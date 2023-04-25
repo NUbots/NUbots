@@ -32,4 +32,6 @@ enum Stability {
     STATIC = 3;
     // The robot is standing upright on both feet
     STANDING = 4;
+    // We don't know yet what stability we are
+    UNKNOWN = 5;
 }

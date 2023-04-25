@@ -56,11 +56,12 @@ namespace module::localisation {
 
                 // Emit state
                 auto field(std::make_unique<Field>());
-                Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
-                position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
-                position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
-                field->Hfw             = position.matrix();
-                field->covariance      = filter.get_covariance();
+                Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+                Hfw.translation() = Eigen::Vector3d(state[RobotModel<double>::kX], state[RobotModel<double>::kY], 0);
+                Hfw.linear() =
+                    Eigen::AngleAxisd(state[RobotModel<double>::kAngle], Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                field->Hfw        = Hfw.matrix();
+                field->covariance = filter.get_covariance();
 
                 log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
                                                 state[RobotModel<double>::kX],

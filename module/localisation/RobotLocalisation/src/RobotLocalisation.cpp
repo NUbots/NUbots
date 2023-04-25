@@ -5,11 +5,16 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
+#include "message/support/FieldDescription.hpp"
+
 namespace module::localisation {
 
     using extension::Configuration;
 
+    using message::behaviour::state::Stability;
     using message::localisation::Field;
+    using message::localisation::ResetRobotLocalisation;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
@@ -33,16 +38,46 @@ namespace module::localisation {
             cfg.save_map    = config["save_map"].as<bool>();
 
             // Initial state, covariance and process noise
-            state                        = config["initial_state"].as<Expression>();
-            covariance.diagonal()        = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
-            cfg.process_noise.diagonal() = Eigen::Vector3d(config["process_noise"].as<Expression>());
-            cfg.measurement_noise        = config["measurement_noise"].as<double>();
-            cfg.max_range                = config["max_range"].as<double>();
+            cfg.initial_covariance.diagonal() = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
+            cfg.process_noise.diagonal()      = Eigen::Vector3d(config["process_noise"].as<Expression>());
+            cfg.measurement_noise             = config["measurement_noise"].as<double>();
+            cfg.max_range                     = config["max_range"].as<double>();
+
+            // Create vector of search positions
+            for (const auto& initial_state : config["initial_state"].config) {
+                cfg.initial_state.push_back(initial_state.as<Expression>());
+            }
 
             // Initialise the particles with a multivariate normal distribution
-            MultivariateNormal<double, 3> multivariate(state, covariance);
-            for (int i = 0; i < cfg.n_particles; i++) {
-                particles.push_back(Particle(multivariate.sample(), 1.0));
+            state      = cfg.initial_state[0];
+            covariance = cfg.initial_covariance;
+            particles.clear();
+
+            int n_particles_each = cfg.n_particles / cfg.initial_state.size();
+
+            // Loop over initial states and evenly distribute particles
+            for (auto& s : cfg.initial_state) {
+                MultivariateNormal<double, 3> multivariate(s, covariance);
+                for (int i = 0; i < n_particles_each; i++) {
+                    particles.push_back(Particle(multivariate.sample(), 1.0));
+                }
+            }
+        });
+
+        on<Trigger<ResetRobotLocalisation>>().then([this] {
+            // Reset the particles to the initial state
+            state      = cfg.initial_state[0];
+            covariance = cfg.initial_covariance;
+            particles.clear();
+
+            int n_particles_each = cfg.n_particles / cfg.initial_state.size();
+
+            // Loop over initial states and evenly distribute particles
+            for (auto& s : cfg.initial_state) {
+                MultivariateNormal<double, 3> multivariate(s, covariance);
+                for (int i = 0; i < n_particles_each; i++) {
+                    particles.push_back(Particle(multivariate.sample(), 1.0));
+                }
             }
         });
 
@@ -190,34 +225,18 @@ namespace module::localisation {
             last_time_update_time = NUClear::clock::now();
         });
 
-        on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
-            if (!walk_engine_enabled) {
-                const auto current_time = NUClear::clock::now();
-                last_time_update_time   = current_time;
-                walk_engine_enabled     = true;
-            }
-            walk_command = wc.command;
-        });
-
-        on<Trigger<EnableWalkEngineCommand>>().then([this]() {
-            walk_engine_enabled     = true;
-            const auto current_time = NUClear::clock::now();
-            last_time_update_time   = current_time;
-        });
-
-        on<Trigger<DisableWalkEngineCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
-
-        on<Trigger<StopCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
-
         on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
+
+        on<Trigger<Stability>>().then([this](const Stability& stability) {
+            if (stability == Stability::FALLEN) {
+                falling = true;
+            }
+            else {
+                falling = false;
+            }
+        });
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             if (!falling) {
@@ -277,9 +296,9 @@ namespace module::localisation {
 
                 // Build and emit the field message
                 auto field(std::make_unique<Field>());
-                Eigen::Isometry2d Hfw(Eigen::Isometry2d::Identity());
-                Hfw.translation() = Eigen::Vector2d(state.x(), state.y());
-                Hfw.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
+                Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+                Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
+                Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
                 field->Hfw        = Hfw.matrix();
                 field->covariance = covariance;
                 emit(field);
@@ -298,18 +317,15 @@ namespace module::localisation {
 
     Eigen::Vector2i RobotLocalisation::position_in_map(const Eigen::Matrix<double, 3, 1> particle,
                                                        const Eigen::Vector2d rPRw) {
-        // Create transform from world {w} to field {f} space
+        // Transform observations from world {w} to field {f} space
         Eigen::Isometry2d Hfw;
-        Hfw.translation() = Eigen::Vector2d(particle(0), particle(1));
-        Hfw.linear()      = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
-
-        // Transform the observations from robot space {r} to field space {f}
+        Hfw.translation()    = Eigen::Vector2d(particle(0), particle(1));
+        Hfw.linear()         = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
         Eigen::Vector2d rPFf = Hfw * rPRw;
 
         // Get the associated position/index in the map [x, y]
         int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
         int y_map = fieldline_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size);
-
         return Eigen::Vector2i(x_map, y_map);
     }
 
@@ -327,31 +343,13 @@ namespace module::localisation {
                 weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
                           / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
+            // If the observation is outside the max range, penalise it
             else {
-                weight += std::exp(-0.5 * std::pow(cfg.max_range / cfg.measurement_noise, 2))
-                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
+                weight *= (1 - 1 / observations.size());
             }
         }
 
         return std::max(weight, 0.0);
-    }
-
-    Eigen::Vector3d RobotLocalisation::compute_mean() {
-        Eigen::Vector3d mean = Eigen::Vector3d::Zero();
-        for (const auto& particle : particles) {
-            mean += particle.state;
-        }
-        return mean / cfg.n_particles;
-    }
-
-    Eigen::Matrix<double, 3, 3> RobotLocalisation::compute_covariance() {
-        Eigen::Matrix<double, 3, 3> cov_matrix = Eigen::Matrix<double, 3, 3>::Zero();
-        for (const auto& particle : particles) {
-            const Eigen::Matrix<double, 3, 1> deviation = particle.state - state;
-            cov_matrix += deviation * deviation.transpose();
-        }
-        cov_matrix /= (cfg.n_particles - 1);
-        return cov_matrix;
     }
 
     void RobotLocalisation::resample() {
@@ -361,7 +359,7 @@ namespace module::localisation {
         }
         double weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
         if (weight_sum == 0) {
-            log<NUClear::WARN>("All weights are zero, cannot resample");
+            log<NUClear::DEBUG>("All weights are zero, cannot resample");
             // Add some more noise to the particles
             add_noise();
             return;
@@ -380,6 +378,24 @@ namespace module::localisation {
         }
 
         particles = resampled_particles;
+    }
+
+    Eigen::Vector3d RobotLocalisation::compute_mean() {
+        Eigen::Vector3d mean = Eigen::Vector3d::Zero();
+        for (const auto& particle : particles) {
+            mean += particle.state;
+        }
+        return mean / cfg.n_particles;
+    }
+
+    Eigen::Matrix<double, 3, 3> RobotLocalisation::compute_covariance() {
+        Eigen::Matrix<double, 3, 3> cov_matrix = Eigen::Matrix<double, 3, 3>::Zero();
+        for (const auto& particle : particles) {
+            const Eigen::Matrix<double, 3, 1> deviation = particle.state - state;
+            cov_matrix += deviation * deviation.transpose();
+        }
+        cov_matrix /= (cfg.n_particles - 1);
+        return cov_matrix;
     }
 
     void RobotLocalisation::add_noise() {
