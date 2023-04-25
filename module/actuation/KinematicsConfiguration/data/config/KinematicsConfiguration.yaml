@@ -1,5 +1,5 @@
 leg:
-  hip_offset: [0.00, 0.055, 0.045] # [x, y, z]
+  hip_offset: [0.00, 0.055, -0.045] # [x, y, z]
   upper_leg_length: 0.2
   lower_leg_length: 0.2
   heel_length: 0.085 # measured
