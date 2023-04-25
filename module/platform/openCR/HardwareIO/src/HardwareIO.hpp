@@ -84,6 +84,9 @@ namespace module::platform::openCR {
             /// @note that we still write the commands to hardware
             bool simulated = false;
 
+            /// @brief Our internal system torque target, this is never sent to the servo
+            int torque = 0;
+            /// @brief Control table value for internal servo state
             bool torqueEnabled = true;
 
             // Cached values that are never read

@@ -14,8 +14,9 @@
 #include "utility/support/yaml_expression.hpp"
 
 
-#define DEBUG_ENABLE_MAIN_LOOP 0
-#define DEBUG_ENABLE_LED_CYCLE 1
+#define DEBUG_ENABLE_MAIN_LOOP    1
+#define DEBUG_ENABLE_LED_CYCLE    0
+#define DEBUG_ENABLE_BUTTON_SPOOF 1
 
 namespace module::platform::openCR {
 
@@ -69,10 +70,11 @@ namespace module::platform::openCR {
         on<Startup>().then("HardwareIO Startup", [this] {
             startup();
             log<NUClear::DEBUG>("HardwareIO started");
-            // debug
+#if DEBUG_ENABLE_BUTTON_SPOOF
             // trigger scriptrunner after 5 seconds
-            log<NUClear::INFO>("Simulating Middle Button Down in 5 seconds");
-            emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(5));
+            log<NUClear::INFO>("Simulating Middle Button Down in 2 seconds");
+            emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(2));
+#endif  // DEBUG_ENABLE_BUTTON_SPOOF
         });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
@@ -245,7 +247,7 @@ namespace module::platform::openCR {
                 }
 
                 // Update our internal state
-                if ((servoStates[command.id].torqueEnabled != (command.torque > 0) ? true : false)
+                if (servoStates[command.id].torque != command.torque
                     || servoStates[command.id].positionPGain != command.gain
                     || servoStates[command.id].positionIGain != command.gain * 0
                     || servoStates[command.id].positionDGain != command.gain * 0
@@ -253,12 +255,11 @@ namespace module::platform::openCR {
                     || servoStates[command.id].goalPosition != command.position) {
 
 
-                    log<NUClear::DEBUG>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
+                    // log<NUClear::DEBUG>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
 
                     servoStates[command.id].dirty = true;
 
-                    // We only have binary torque control in Position Control Mode
-                    servoStates[command.id].torqueEnabled = (command.torque > 0) ? true : false;
+                    servoStates[command.id].torque = command.torque;
 
                     servoStates[command.id].positionPGain = command.gain;
                     servoStates[command.id].positionIGain = command.gain * 0;
