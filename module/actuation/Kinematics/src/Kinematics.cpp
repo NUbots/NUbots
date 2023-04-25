@@ -1,5 +1,7 @@
 #include "Kinematics.hpp"
 
+#include <chrono>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -32,9 +34,20 @@ namespace module::actuation {
     Kinematics::Kinematics(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("Kinematics.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("Kinematics.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Kinematics.yaml
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+            // Create a tinyrobotics model of the NUgus URDF file description
+            cfg.urdf_path = config["urdf_path"].as<std::string>();
+            nugus_model1  = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
+            nugus_model2  = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
+            nugus_model1.show_details();
+
+            // IK options
+            options.tolerance      = config["ik_tolerance"].as<double>();
+            options.max_iterations = config["ik_max_iterations"].as<int>();
+            options.method         = InverseKinematicsMethod::LEVENBERG_MARQUARDT;
         });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
@@ -55,6 +68,32 @@ namespace module::actuation {
                     servos->servos[joint.first] =
                         ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
                 }
+
+                Eigen::Matrix<double, 20, 1> q0 = Eigen::Matrix<double, 20, 1>::Zero();
+                q0(5, 1)                        = servos->servos.at(ServoID::L_HIP_YAW).position;
+                q0(4, 1)                        = servos->servos.at(ServoID::L_HIP_ROLL).position;
+                q0(3, 1)                        = servos->servos.at(ServoID::L_HIP_PITCH).position;
+                q0(2, 1)                        = servos->servos.at(ServoID::L_KNEE).position;
+                q0(1, 1)                        = servos->servos.at(ServoID::L_ANKLE_PITCH).position;
+                q0(0, 1)                        = servos->servos.at(ServoID::L_ANKLE_ROLL).position;
+
+                std::string target_link = "left_foot_base";
+                std::string source_link = "torso";
+
+                auto q_sol = inverse_kinematics(nugus_model1,
+                                                target_link,
+                                                source_link,
+                                                Eigen::Isometry3d(leg_ik.Htl),
+                                                q0,
+                                                options);
+
+                servos->servos.at(ServoID::L_HIP_YAW).position     = q_sol(5, 1);
+                servos->servos.at(ServoID::L_HIP_ROLL).position    = q_sol(4, 1);
+                servos->servos.at(ServoID::L_HIP_PITCH).position   = q_sol(3, 1);
+                servos->servos.at(ServoID::L_KNEE).position        = q_sol(2, 1);
+                servos->servos.at(ServoID::L_ANKLE_PITCH).position = q_sol(1, 1);
+                servos->servos.at(ServoID::L_ANKLE_ROLL).position  = q_sol(0, 1);
+
 
                 emit<Task>(servos);
             });
@@ -77,6 +116,31 @@ namespace module::actuation {
                     servos->servos[joint.first] =
                         ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
                 }
+
+                // Warm start the IK with the analytical solution
+                Eigen::Matrix<double, 20, 1> q0 = Eigen::Matrix<double, 20, 1>::Zero();
+                q0(11, 1)                       = servos->servos.at(ServoID::R_HIP_YAW).position;
+                q0(10, 1)                       = servos->servos.at(ServoID::R_HIP_ROLL).position;
+                q0(9, 1)                        = servos->servos.at(ServoID::R_HIP_PITCH).position;
+                q0(8, 1)                        = servos->servos.at(ServoID::R_KNEE).position;
+                q0(7, 1)                        = servos->servos.at(ServoID::R_ANKLE_PITCH).position;
+                q0(6, 1)                        = servos->servos.at(ServoID::R_ANKLE_ROLL).position;
+
+                std::string target_link = "right_foot_base";
+                std::string source_link = "torso";
+                auto q_sol              = inverse_kinematics(nugus_model2,
+                                                target_link,
+                                                source_link,
+                                                Eigen::Isometry3d(leg_ik.Htr),
+                                                q0,
+                                                options);
+
+                servos->servos.at(ServoID::R_HIP_YAW).position     = q_sol(11, 1);
+                servos->servos.at(ServoID::R_HIP_ROLL).position    = q_sol(10, 1);
+                servos->servos.at(ServoID::R_HIP_PITCH).position   = q_sol(9, 1);
+                servos->servos.at(ServoID::R_KNEE).position        = q_sol(8, 1);
+                servos->servos.at(ServoID::R_ANKLE_PITCH).position = -q_sol(7, 1);  // TODO: Why is this negative?
+                servos->servos.at(ServoID::R_ANKLE_ROLL).position  = q_sol(6, 1);
 
                 emit<Task>(servos);
             });

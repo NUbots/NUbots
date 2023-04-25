@@ -1,2 +1,7 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
+
+urdf_path: "/home/nubots/NUbots/module/actuation/Kinematics/data/nugus.urdf"
+
+ik_tolerance: 1e-4
+ik_max_iterations: 1000
