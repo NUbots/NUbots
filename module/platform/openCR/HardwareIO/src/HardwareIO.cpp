@@ -71,9 +71,9 @@ namespace module::platform::openCR {
             startup();
             log<NUClear::DEBUG>("HardwareIO started");
 #if DEBUG_ENABLE_BUTTON_SPOOF
-            // trigger scriptrunner after 5 seconds
-            log<NUClear::INFO>("Simulating Middle Button Down in 2 seconds");
-            emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(2));
+            // trigger scriptrunner
+            log<NUClear::INFO>("Simulating Middle Button Down in 3 seconds");
+            emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(3));
 #endif  // DEBUG_ENABLE_BUTTON_SPOOF
         });
 
