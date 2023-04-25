@@ -16,7 +16,5 @@ var classmodule_1_1localisation_1_1RobotLocalisation =
     [ "fieldline_map", "classmodule_1_1localisation_1_1RobotLocalisation.html#afce4c256189deee8c2ce109fa754e9f5", null ],
     [ "last_time_update_time", "classmodule_1_1localisation_1_1RobotLocalisation.html#acdd9f05e1b9b8f018acb12fcfc0e901f", null ],
     [ "particles", "classmodule_1_1localisation_1_1RobotLocalisation.html#a370a60d032313cac50b0f6240f8307d6", null ],
-    [ "state", "classmodule_1_1localisation_1_1RobotLocalisation.html#aa1ec963df46175b02dc3910878262562", null ],
-    [ "walk_command", "classmodule_1_1localisation_1_1RobotLocalisation.html#a3b9404eecb0f77424e9691745407e67c", null ],
-    [ "walk_engine_enabled", "classmodule_1_1localisation_1_1RobotLocalisation.html#a1276948f0e973770d810bebb54da4f54", null ]
+    [ "state", "classmodule_1_1localisation_1_1RobotLocalisation.html#aa1ec963df46175b02dc3910878262562", null ]
 ];

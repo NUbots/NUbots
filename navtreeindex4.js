@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1input_1_1NatNet.html#a1aa2fba80b110702b5414100ef13720e":[1,0,2,3,9,23],
 "classmodule_1_1input_1_1NatNet.html#a21803c369f8192d21d17f08e3a13309f":[1,0,2,3,9,27],
 "classmodule_1_1input_1_1NatNet.html#a277ce4a4d71126a9e04487b44984076a":[1,0,2,3,9,24],
 "classmodule_1_1input_1_1NatNet.html#a39b30fd19737a0dbdbbb5346b69c42ee":[1,0,2,3,9,12],
@@ -93,9 +94,8 @@ var NAVTREEINDEX4 =
 "classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Factory.html#aabc9a32397d6009081c272ef75285722":[1,0,2,3,0,0,1,4],
 "classmodule_1_1localisation_1_1BallFilter.html":[1,0,2,4,0],
 "classmodule_1_1localisation_1_1BallFilter.html#a0d410b793057746d14c42638d46aedd7":[1,0,2,4,0,1],
-"classmodule_1_1localisation_1_1BallFilter.html#a4d8c627713dc5c9e67603397ba5fa299":[1,0,2,4,0,4],
-"classmodule_1_1localisation_1_1BallFilter.html#a7bb28c884ea8de57e36e04a7f390c8cb":[1,0,2,4,0,3],
-"classmodule_1_1localisation_1_1BallFilter.html#aa212e5940da03f8f9fe86242f1214a88":[1,0,2,4,0,2],
+"classmodule_1_1localisation_1_1BallFilter.html#a4d8c627713dc5c9e67603397ba5fa299":[1,0,2,4,0,3],
+"classmodule_1_1localisation_1_1BallFilter.html#a7bb28c884ea8de57e36e04a7f390c8cb":[1,0,2,4,0,2],
 "classmodule_1_1localisation_1_1BallLocalisation.html":[1,0,2,4,1],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a083f58d77fbc44eebdeeea80efbed85e":[1,0,2,4,1,4],
 "classmodule_1_1localisation_1_1BallLocalisation.html#a1b74f959a8666a57fe02c9f877dc4c71":[1,0,2,4,1,0],
@@ -145,11 +145,9 @@ var NAVTREEINDEX4 =
 "classmodule_1_1localisation_1_1RobotLocalisation.html":[1,0,2,4,6],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a086601fc1b6a76c65360367b6fa3a518":[1,0,2,4,6,8],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a0cf7175d5f567f7d8421d0e286111236":[1,0,2,4,6,7],
-"classmodule_1_1localisation_1_1RobotLocalisation.html#a1276948f0e973770d810bebb54da4f54":[1,0,2,4,6,18],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a2819753cbed9788441587545f1a7f6a4":[1,0,2,4,6,2],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a2da8acb48b179a3c54f96e30990519ee":[1,0,2,4,6,6],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a370a60d032313cac50b0f6240f8307d6":[1,0,2,4,6,15],
-"classmodule_1_1localisation_1_1RobotLocalisation.html#a3b9404eecb0f77424e9691745407e67c":[1,0,2,4,6,17],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a54629a860d8e32912ae8f5bd5f792f9d":[1,0,2,4,6,10],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a626145d3a591a61787b9741304157e30":[1,0,2,4,6,5],
 "classmodule_1_1localisation_1_1RobotLocalisation.html#a65f2a053920cf35e3a4efd8b746a5cfa":[1,0,2,4,6,4],
@@ -249,5 +247,7 @@ var NAVTREEINDEX4 =
 "classmodule_1_1motion_1_1Kicker.html#a8c3152148b924125c7c2188a1ccd419f":[1,0,2,5,7,0],
 "classmodule_1_1motion_1_1Kicker.html#a962487b4b69285bdd212f6fb71ea365b":[1,0,2,5,7,11],
 "classmodule_1_1motion_1_1Kicker.html#aa629b5396aae4747f7958205be2f9046":[1,0,2,5,7,7],
-"classmodule_1_1motion_1_1Kicker.html#aaa2fbb7903febb05b27478f6ee3ca94b":[1,0,2,5,7,13]
+"classmodule_1_1motion_1_1Kicker.html#aaa2fbb7903febb05b27478f6ee3ca94b":[1,0,2,5,7,13],
+"classmodule_1_1motion_1_1Kicker.html#aab24e457de3bbfdc3b760b163cf0f07f":[1,0,2,5,7,4],
+"classmodule_1_1motion_1_1Kicker.html#aad9c98d70c3bdc81cc4bd386f56e64ff":[1,0,2,5,7,10]
 };

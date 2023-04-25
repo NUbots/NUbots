@@ -259,7 +259,8 @@ var annotated_dup =
         [ "Ready", "classmodule_1_1strategy_1_1Ready.html", "classmodule_1_1strategy_1_1Ready" ],
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
-        [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ]
+        [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ],
+        [ "WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", "classmodule_1_1strategy_1_1WalkToFieldPosition" ]
       ] ],
       [ "support", null, [
         [ "configuration", null, [

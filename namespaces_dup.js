@@ -579,11 +579,13 @@ var namespaces_dup =
         [ "StandStill", "classmodule_1_1strategy_1_1StandStill.html", "classmodule_1_1strategy_1_1StandStill" ],
         [ "StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", "classmodule_1_1strategy_1_1StrategiseLook" ],
         [ "WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", "classmodule_1_1strategy_1_1WalkToBall" ],
+        [ "WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", "classmodule_1_1strategy_1_1WalkToFieldPosition" ],
         [ "DiveToBallTask", "DiveToBall_8cpp.html#a13d9363b2f126b9b014996b9c6938906", null ],
         [ "FallRecoveryTask", "FallRecovery_8cpp.html#a4a627b96cd02d6e31d1c95f7671b327c", null ],
         [ "ReadyTask", "Ready_8cpp.html#ad71cfd87761d266ccd997e1c01aee34f", null ],
         [ "StandStillTask", "StandStill_8cpp.html#a34f0cf0c4ada0c7e001c5f278b773f79", null ],
-        [ "WalkToBallTask", "WalkToBall_8cpp.html#a556666d019fe9e4e081a492782ffa34b", null ]
+        [ "WalkToBallTask", "WalkToBall_8cpp.html#a556666d019fe9e4e081a492782ffa34b", null ],
+        [ "WalkToFieldPositionTask", "WalkToFieldPosition_8cpp.html#a7b5f1c28072d68b1b9d5da47a55645f8", null ]
       ] ],
       [ "support", null, [
         [ "configuration", null, [

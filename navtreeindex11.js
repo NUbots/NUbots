@@ -1,5 +1,7 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a47ebd1c52848698bb922413e8b202b74":[1,0,2,1,0,1,0,11],
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a61d981bbaaad5a8b7b5e7c5155fa9a2e":[1,0,2,1,0,1,0,9],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a6b97786321aa7a60f27425c48e3b4f5c":[1,0,2,1,0,1,0,0],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a7fc402b6f828ed0f7db4d3878f6435c4":[1,0,2,1,0,1,0,1],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a89ab9776e39eda743e785a45e8c90271":[1,0,2,1,0,1,0,2],
@@ -247,7 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1input_1_1NatNet_1_1MarkerSetModel.html":[1,0,2,3,9,4],
 "structmodule_1_1input_1_1NatNet_1_1MarkerSetModel.html#a079e581abea3e674b25f420d43bdd62d":[1,0,2,3,9,4,0],
 "structmodule_1_1input_1_1NatNet_1_1MarkerSetModel.html#a1b3f5d38dd9be4d979df541303e4ea8f":[1,0,2,3,9,4,2],
-"structmodule_1_1input_1_1NatNet_1_1MarkerSetModel.html#a78da1b90e342e33d1a2059b167dd36a0":[1,0,2,3,9,4,1],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html":[1,0,2,3,9,5],
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20":[1,0,2,3,9,5,0]
+"structmodule_1_1input_1_1NatNet_1_1MarkerSetModel.html#a78da1b90e342e33d1a2059b167dd36a0":[1,0,2,3,9,4,1]
 };

@@ -1,5 +1,9 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig.html#ad33ae46e6b5bb804b73a8a4604c52b38":[1,0,2,9,0,2,0,0],
+"structmodule_1_1purpose_1_1Soccer_1_1Config.html":[1,0,2,10,0,0],
+"structmodule_1_1purpose_1_1Soccer_1_1Config.html#a3531788a0bcc3a269ed43d2ec3768b4b":[1,0,2,10,0,0,1],
+"structmodule_1_1purpose_1_1Soccer_1_1Config.html#a7ee256be4be71c5a8c29f258b7dca2f0":[1,0,2,10,0,0,0],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html":[1,0,2,10,0,1],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#a5063fd2579fd049281e45c4b5ef6a263":[1,0,2,10,0,1,1],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#aaff0518977d19cf09fff633a83ad64cd":[1,0,2,10,0,1,2],
@@ -9,6 +13,8 @@ var NAVTREEINDEX14 =
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8a5bba4daf02b02226b4774078afe1f811":[1,0,2,10,0,1,0,0],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8aecf65ed2ac54461cf254456c0b2972bb":[1,0,2,10,0,1,0,2],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#afe04122a3da30b52b02575066e866e81":[1,0,2,10,0,1,3],
+"structmodule_1_1purpose_1_1Striker_1_1Config.html":[1,0,2,10,1,0],
+"structmodule_1_1purpose_1_1Striker_1_1Config.html#a92be4939f75b369d452c20c2406b1aee":[1,0,2,10,1,0,0],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html":[1,0,2,11,1,0],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a15df7091f6c30e256529aafe4eba2f58":[1,0,2,11,1,0,5],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a518b29943f662419a208390bc46ff6d8":[1,0,2,11,1,0,4],
@@ -42,6 +48,8 @@ var NAVTREEINDEX14 =
 "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html":[1,0,2,12,6,0],
 "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb":[1,0,2,12,6,0,0],
 "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a82d2763570c209a41c41b431813e6244":[1,0,2,12,6,0,1],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html":[1,0,2,12,7,0],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#af76518d138e9399420767baba2aaa939":[1,0,2,12,7,0,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[1,0,2,13,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[1,0,2,13,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[1,0,2,13,1,1,0,3],
@@ -241,13 +249,5 @@ var NAVTREEINDEX14 =
 "structutility_1_1input_1_1ServoID.html#a7745a0f2e593fd787f46554b5c74f312":[1,0,5,3,1,15],
 "structutility_1_1input_1_1ServoID.html#a7936cbc5fdfe222298bbed233470b350":[1,0,5,3,1,13],
 "structutility_1_1input_1_1ServoID.html#a7a363bb9ce823219f88bb7c1b8c500d8":[1,0,5,3,1,24],
-"structutility_1_1input_1_1ServoID.html#a9a91032ba58b68be4f1371b8ae128f91":[1,0,5,3,1,9],
-"structutility_1_1input_1_1ServoID.html#aa12b9d1d95a89039262a3890fe1d0355":[1,0,5,3,1,23],
-"structutility_1_1input_1_1ServoID.html#aa7914c9340e6d751f4d59fa9ef342d03":[1,0,5,3,1,21],
-"structutility_1_1input_1_1ServoID.html#ab681676f79120b35ec980bddbff2dee3":[1,0,5,3,1,10],
-"structutility_1_1input_1_1ServoID.html#ab68907ea8e98560702431f382557bc49":[1,0,5,3,1,16],
-"structutility_1_1input_1_1ServoID.html#acdc635d12c7d05fb4972097be7140ba1":[1,0,5,3,1,18],
-"structutility_1_1input_1_1ServoID.html#ad54d525c5381e001195c9b68f9f0bddb":[1,0,5,3,1,19],
-"structutility_1_1input_1_1ServoID.html#ae288a8918d32fbcb246a1d7940d90935":[1,0,5,3,1,28],
-"structutility_1_1input_1_1ServoID.html#af184f60da6834cd3cb9211fa7ea1b6d4":[1,0,5,3,1,11]
+"structutility_1_1input_1_1ServoID.html#a9a91032ba58b68be4f1371b8ae128f91":[1,0,5,3,1,9]
 };

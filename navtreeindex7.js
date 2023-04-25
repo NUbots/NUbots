@@ -1,5 +1,7 @@
 var NAVTREEINDEX7 =
 {
+"classutility_1_1math_1_1geometry_1_1Quad.html#a5b51b6dc2d4f467dd277e65cb222a90f":[1,0,5,5,1,0,7],
+"classutility_1_1math_1_1geometry_1_1Quad.html#a5dcb813ce6ddff95c7e91e497d69bc82":[1,0,5,5,1,0,5],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a69211859f9c7512f72b79bbc876ecd6c":[1,0,5,5,1,0,23],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a73376f63b883f4afa949ff3a62c1dcb1":[1,0,5,5,1,0,10],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a74a0cd026475cfbe466042adccf168cf":[1,0,5,5,1,0,28],
@@ -247,7 +249,5 @@ var NAVTREEINDEX7 =
 "clock_8cpp.html#acc90412747e3582b7c210c3999af25ac":[0,0,5,2,1],
 "clock_8cpp.html#adca9c04254e1704be4e85278a7d0ced9":[0,0,5,2,5],
 "clock_8hpp.html#ac97f5461ef949723188525c4a74f45be":[0,0,5,2,4],
-"comparison_8hpp.html#a098b470ecc0b66d7d74a43f11d3e424a":[0,0,5,7,11],
-"comparison_8hpp.html#a2796da1263a4946e38169a472eddcb04":[0,0,5,7,9],
-"comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d":[0,0,5,7,13]
+"comparison_8hpp.html#a098b470ecc0b66d7d74a43f11d3e424a":[0,0,5,7,11]
 };

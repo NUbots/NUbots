@@ -1,6 +1,5 @@
 var NAVTREEINDEX6 =
 {
-"classmodule_1_1skill_1_1ScriptKick.html":[1,0,2,11,4],
 "classmodule_1_1skill_1_1ScriptKick.html#a90f1c96cb47b2946ad217493f2e665fa":[1,0,2,11,4,0],
 "classmodule_1_1strategy_1_1DiveToBall.html":[1,0,2,12,0],
 "classmodule_1_1strategy_1_1DiveToBall.html#a32b3486a6db4a988c906baec2f17419d":[1,0,2,12,0,2],
@@ -21,6 +20,9 @@ var NAVTREEINDEX6 =
 "classmodule_1_1strategy_1_1WalkToBall.html":[1,0,2,12,6],
 "classmodule_1_1strategy_1_1WalkToBall.html#a664cfc41e6bceef42e68124ff19f6328":[1,0,2,12,6,2],
 "classmodule_1_1strategy_1_1WalkToBall.html#aab2b0923992f7dd90b649d1552945ef9":[1,0,2,12,6,1],
+"classmodule_1_1strategy_1_1WalkToFieldPosition.html":[1,0,2,12,7],
+"classmodule_1_1strategy_1_1WalkToFieldPosition.html#a333c4470a037c16e70e4f2f4020966ff":[1,0,2,12,7,1],
+"classmodule_1_1strategy_1_1WalkToFieldPosition.html#ae35ee48cc5e26a3782f5705dea5c8382":[1,0,2,12,7,2],
 "classmodule_1_1support_1_1LocalisationSimulator.html":[1,0,2,13,2],
 "classmodule_1_1support_1_1LocalisationSimulator.html#acdd89907a1c92f9efbc23b0d8bc6dbcb":[1,0,2,13,2,1],
 "classmodule_1_1support_1_1LocalisationSimulator.html#ace700ce76a76e9289f0d830284497765":[1,0,2,13,2,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX6 =
 "classutility_1_1math_1_1geometry_1_1Quad.html#a3d44fa4a90c095efa1f57bd36d8c1a66":[1,0,5,5,1,0,24],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a435db4aca18e218dda8e77fd0cef02ec":[1,0,5,5,1,0,26],
 "classutility_1_1math_1_1geometry_1_1Quad.html#a4b008644d3503fc9dee54389b6697c1d":[1,0,5,5,1,0,37],
-"classutility_1_1math_1_1geometry_1_1Quad.html#a4b825e3a419c099083fa482842b17f2c":[1,0,5,5,1,0,33],
-"classutility_1_1math_1_1geometry_1_1Quad.html#a5b51b6dc2d4f467dd277e65cb222a90f":[1,0,5,5,1,0,7],
-"classutility_1_1math_1_1geometry_1_1Quad.html#a5dcb813ce6ddff95c7e91e497d69bc82":[1,0,5,5,1,0,5]
+"classutility_1_1math_1_1geometry_1_1Quad.html#a4b825e3a419c099083fa482842b17f2c":[1,0,5,5,1,0,33]
 };

@@ -1,5 +1,7 @@
 var NAVTREEINDEX10 =
 {
+"structRoboCupGameControlData.html#acb95e2b8d91bd9e3088527ff0aca71ff":[1,0,9,12],
+"structRoboCupGameControlData.html#ae12be8b1dcd6ebef795511b3ff213a14":[1,0,9,2],
 "structRoboCupGameControlData.html#aef4b5886a33b7faa2bbc183b90b09737":[1,0,9,3],
 "structRoboCupGameControlData.html#af94ee5056a82bc78bd5461da91e328a5":[1,0,9,4],
 "structRoboCupGameControlReturnData.html":[1,0,10],
@@ -247,7 +249,5 @@ var NAVTREEINDEX10 =
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a11bf2fcfd6c9598b75af09a4a2e2cfc9":[1,0,2,1,0,1,0,3],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a223be8f3f8922d59ab3660bdcc16397b":[1,0,2,1,0,1,0,10],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a3a393f5d86511514f1170669ba38064f":[1,0,2,1,0,1,0,13],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a410c4d3b41c3779bd2c758af84ab8c1c":[1,0,2,1,0,1,0,14],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a47ebd1c52848698bb922413e8b202b74":[1,0,2,1,0,1,0,11],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a61d981bbaaad5a8b7b5e7c5155fa9a2e":[1,0,2,1,0,1,0,9]
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a410c4d3b41c3779bd2c758af84ab8c1c":[1,0,2,1,0,1,0,14]
 };

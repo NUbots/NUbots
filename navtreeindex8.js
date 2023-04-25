@@ -1,5 +1,7 @@
 var NAVTREEINDEX8 =
 {
+"comparison_8hpp.html#a2796da1263a4946e38169a472eddcb04":[0,0,5,7,9],
+"comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d":[0,0,5,7,13],
 "comparison_8hpp.html#a75da193963fbe74dc2a6e535d6c04912":[0,0,5,7,12],
 "comparison_8hpp.html#aa24753b9ed1dfd45ca002ec042964392":[0,0,5,7,10],
 "create__surface_8cpp.html#a00feee931436ee31114ee37a251899f0":[0,0,2,7,0,1,1,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX8 =
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956aa2d9547b5d3dd9f05984475f7c926da0":[0,0,5,13,2,7],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956aa4aac4975a948a6fc67341d9141f47c9":[0,0,5,13,2,19],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956aaa8ab214aede7607dffb18e7a46b6a3d":[0,0,5,13,2,18],
-"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956ab5859d8721cfdc0312b2838b9c985bc1":[0,0,5,13,2,0],
-"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956abbbff6f584358c2ed346b96d54f970e2":[0,0,5,13,2,14],
-"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956abdea449d31a3975cf169e2b70a7e8c02":[0,0,5,13,2,21]
+"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956ab5859d8721cfdc0312b2838b9c985bc1":[0,0,5,13,2,0]
 };

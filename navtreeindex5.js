@@ -1,7 +1,5 @@
 var NAVTREEINDEX5 =
 {
-"classmodule_1_1motion_1_1Kicker.html#aab24e457de3bbfdc3b760b163cf0f07f":[1,0,2,5,7,4],
-"classmodule_1_1motion_1_1Kicker.html#aad9c98d70c3bdc81cc4bd386f56e64ff":[1,0,2,5,7,10],
 "classmodule_1_1motion_1_1Kicker.html#ab1447b89ef85abcc558d9fcc18e81b42":[1,0,2,5,7,12],
 "classmodule_1_1motion_1_1Kicker.html#acaec4a1c320816df6810f82eb0251f44":[1,0,2,5,7,8],
 "classmodule_1_1motion_1_1Kicker.html#aece8d1c9e961e045802211f1521c4575":[1,0,2,5,7,2],
@@ -221,8 +219,9 @@ var NAVTREEINDEX5 =
 "classmodule_1_1purpose_1_1Soccer.html#a1418b5cfbcd8a6b9b3f3914254fb7570":[1,0,2,10,0,3],
 "classmodule_1_1purpose_1_1Soccer.html#a647d6bb40c51b5cda14f6a00aecf3e15":[1,0,2,10,0,2],
 "classmodule_1_1purpose_1_1Striker.html":[1,0,2,10,1],
-"classmodule_1_1purpose_1_1Striker.html#ab411c64a928861e02c65fcebfd4ce5c8":[1,0,2,10,1,0],
-"classmodule_1_1purpose_1_1Striker.html#aca2f04ebd138f17e99277a15d8c371d4":[1,0,2,10,1,1],
+"classmodule_1_1purpose_1_1Striker.html#a00af52bbf9bc6d56ab5696373ecd02cf":[1,0,2,10,1,3],
+"classmodule_1_1purpose_1_1Striker.html#ab411c64a928861e02c65fcebfd4ce5c8":[1,0,2,10,1,1],
+"classmodule_1_1purpose_1_1Striker.html#aca2f04ebd138f17e99277a15d8c371d4":[1,0,2,10,1,2],
 "classmodule_1_1skill_1_1Dive.html":[1,0,2,11,0],
 "classmodule_1_1skill_1_1Dive.html#a2307823ee7fd23dca05b39a4706581ba":[1,0,2,11,0,0],
 "classmodule_1_1skill_1_1GetUp.html":[1,0,2,11,1],
@@ -249,5 +248,6 @@ var NAVTREEINDEX5 =
 "classmodule_1_1skill_1_1QuinticWalk.html#ae5f0e445b1d84f170260acad1a777516":[1,0,2,11,3,13],
 "classmodule_1_1skill_1_1QuinticWalk.html#ae75e3d0373b402aeffe7e831b8527795":[1,0,2,11,3,10],
 "classmodule_1_1skill_1_1QuinticWalk.html#ae9172f694bbe8428c8f8154e98b2f970":[1,0,2,11,3,6],
-"classmodule_1_1skill_1_1QuinticWalk.html#aea1bad7265d317af56cf94a398c29537":[1,0,2,11,3,9]
+"classmodule_1_1skill_1_1QuinticWalk.html#aea1bad7265d317af56cf94a398c29537":[1,0,2,11,3,9],
+"classmodule_1_1skill_1_1ScriptKick.html":[1,0,2,11,4]
 };

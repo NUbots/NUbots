@@ -1,5 +1,13 @@
 var NAVTREEINDEX16 =
 {
+"structutility_1_1vision_1_1Colour.html#ab4b88262873ba6e5221177d8e30777e2":[1,0,5,12,0,8],
+"structutility_1_1vision_1_1Colour.html#adc96af0bc0575b4cd66228019988e909":[1,0,5,12,0,4],
+"structutility_1_1vision_1_1Colour.html#ae220c6b2218148994bc8cbf42cf26ce4":[1,0,5,12,0,13],
+"structutility_1_1vision_1_1Colour.html#ae9e453d9b9f6701cbfedaeaa7dc92fb2":[1,0,5,12,0,10],
+"structutility_1_1vision_1_1Colour.html#aeb8aa59a9345724687661780dbc277a9":[1,0,5,12,0,11],
+"structutility_1_1vision_1_1Pixel.html":[1,0,5,12,2],
+"structutility_1_1vision_1_1Pixel.html#a042d4052eaa9fff25a605b3cda93a46e":[1,0,5,12,2,10],
+"structutility_1_1vision_1_1Pixel.html#a07aa97c9a002dd7597c64ceb69cc83b6":[1,0,5,12,2,7],
 "structutility_1_1vision_1_1Pixel.html#a0c8ccee8adc902938011887604e0cc43":[1,0,5,12,2,13],
 "structutility_1_1vision_1_1Pixel.html#a38b87840f4669c93177fd00d77ee44ab":[1,0,5,12,2,3],
 "structutility_1_1vision_1_1Pixel.html#a3cf057cc0281ad2642d67299d0176d60":[1,0,5,12,2,12],

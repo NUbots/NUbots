@@ -222,6 +222,7 @@ var hierarchy =
     [ "module::platform::Webots::ServoState", "structmodule_1_1platform_1_1Webots_1_1ServoState.html", null ],
     [ "module::purpose::Soccer::Config", "structmodule_1_1purpose_1_1Soccer_1_1Config.html", null ],
     [ "module::purpose::Soccer::Position", "structmodule_1_1purpose_1_1Soccer_1_1Position.html", null ],
+    [ "module::purpose::Striker::Config", "structmodule_1_1purpose_1_1Striker_1_1Config.html", null ],
     [ "module::skill::GetUp::Config", "structmodule_1_1skill_1_1GetUp_1_1Config.html", null ],
     [ "module::skill::Look::Config", "structmodule_1_1skill_1_1Look_1_1Config.html", null ],
     [ "module::skill::QuinticWalk::Config", "structmodule_1_1skill_1_1QuinticWalk_1_1Config.html", null ],
@@ -229,6 +230,7 @@ var hierarchy =
     [ "module::strategy::Ready::Config", "structmodule_1_1strategy_1_1Ready_1_1Config.html", null ],
     [ "module::strategy::StrategiseLook::Config", "structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html", null ],
     [ "module::strategy::WalkToBall::Config", "structmodule_1_1strategy_1_1WalkToBall_1_1Config.html", null ],
+    [ "module::strategy::WalkToFieldPosition::Config", "structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html", null ],
     [ "module::support::logging::DataLogging::DataLog", "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html", null ],
     [ "module::support::logging::DataPlayback::Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", null ],
     [ "module::support::logging::Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", null ],
@@ -268,7 +270,8 @@ var hierarchy =
         [ "module::strategy::Ready", "classmodule_1_1strategy_1_1Ready.html", null ],
         [ "module::strategy::StandStill", "classmodule_1_1strategy_1_1StandStill.html", null ],
         [ "module::strategy::StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", null ],
-        [ "module::strategy::WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", null ]
+        [ "module::strategy::WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", null ],
+        [ "module::strategy::WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],
       [ "module::behaviour::Controller", "classmodule_1_1behaviour_1_1Controller.html", null ],
