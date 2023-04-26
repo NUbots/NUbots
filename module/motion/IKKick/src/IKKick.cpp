@@ -257,10 +257,37 @@ namespace module::motion {
                 // Goal time is by next frame
                 NUClear::clock::time_point time = NUClear::clock::now();
 
-                // Push back each servo command
+                // ***HAck to stop the ankle roll glitch - LC***
+                // Just checks the difference between servo values and uses the previous if it's too large
+                double max_diff       = 1.0;  // set the maximum allowed difference between joint values
+                double prev_joint_val = 0.0;  // initialize the previous joint value
                 for (auto& joint : joints) {
-                    waypoints->commands.emplace_back(subsumptionId, time, joint.first, joint.second, gain_legs, torque);
+                    double curr_joint_val = joint.second;
+                    // check if the difference between the current and previous joint values is too large
+                    // NOTE: Might need to skip the first loop?
+                    if ((joint.first == ServoID::L_ANKLE_PITCH || joint.first == ServoID::R_ANKLE_PITCH)
+                        && std::abs(curr_joint_val - prev_joint_val) > max_diff) {
+                        NUClear::log<NUClear::DEBUG>("Joint ",
+                                                     joint.first,
+                                                     " value too large, replacing with previous value");
+                        curr_joint_val = prev_joint_val;
+                    }
+                    // add the joint value to the array
+                    NUClear::log<NUClear::DEBUG>("Servo ", joint.first, " command at push back: ", curr_joint_val);
+                    waypoints->commands
+                        .emplace_back(subsumptionId, time, joint.first, curr_joint_val, gain_legs, torque);
+                    // update the previous joint value
+                    prev_joint_val = curr_joint_val;
                 }
+                // **END HACK**
+
+                // Push back each servo command
+                // for (auto& joint : joints) {
+                //     NUClear::log<NUClear::DEBUG>("Servo ", joint.first, " command at push back: ", joint.second);
+                //     waypoints->commands.emplace_back(subsumptionId, time, joint.first, joint.second, gain_legs,
+                //     torque);
+                // }
+
                 // ****DEBUG - LC****
                 // NOTE: Want to check on the waypoints message
                 // NUClear::log<NUClear::DEBUG>("Just before waypoints emit - waypoints: ", waypoints);
