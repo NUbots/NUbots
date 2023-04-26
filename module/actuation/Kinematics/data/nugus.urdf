@@ -474,7 +474,7 @@
 <origin xyz="0.200203 3.29597e-17 2.27963e-09" rpy="3.14159 1.13004e-15 1.5708" />
 <parent link="right_lower_leg" />
 <child link="right_ankle" />
-<axis xyz="0 0 1"/>
+<axis xyz="0 0 -1"/>
 <limit effort="1.5" velocity="22" lower="-3.14159" upper="3.14159"/>
 <joint_properties friction="0.0"/>
 </joint>

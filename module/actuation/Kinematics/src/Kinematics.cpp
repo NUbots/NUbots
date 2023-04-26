@@ -69,30 +69,19 @@ namespace module::actuation {
                         ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
                 }
 
-                Eigen::Matrix<double, 20, 1> q0 = Eigen::Matrix<double, 20, 1>::Zero();
-                q0(5, 1)                        = servos->servos.at(ServoID::L_HIP_YAW).position;
-                q0(4, 1)                        = servos->servos.at(ServoID::L_HIP_ROLL).position;
-                q0(3, 1)                        = servos->servos.at(ServoID::L_HIP_PITCH).position;
-                q0(2, 1)                        = servos->servos.at(ServoID::L_KNEE).position;
-                q0(1, 1)                        = servos->servos.at(ServoID::L_ANKLE_PITCH).position;
-                q0(0, 1)                        = servos->servos.at(ServoID::L_ANKLE_ROLL).position;
+                // Warm start the IK with the analytical solution
+                Eigen::Matrix<double, 20, 1> q0 = servos_to_configuration(servos.get());
 
-                std::string target_link = "left_foot_base";
-                std::string source_link = "torso";
-
+                // Run the IK
                 auto q_sol = inverse_kinematics(nugus_model_left,
-                                                target_link,
-                                                source_link,
+                                                std::string("left_foot_base"),
+                                                std::string("torso"),
                                                 Eigen::Isometry3d(leg_ik.Htl),
                                                 q0,
                                                 options);
 
-                servos->servos.at(ServoID::L_HIP_YAW).position     = q_sol(5, 1);
-                servos->servos.at(ServoID::L_HIP_ROLL).position    = q_sol(4, 1);
-                servos->servos.at(ServoID::L_HIP_PITCH).position   = q_sol(3, 1);
-                servos->servos.at(ServoID::L_KNEE).position        = q_sol(2, 1);
-                servos->servos.at(ServoID::L_ANKLE_PITCH).position = q_sol(1, 1);
-                servos->servos.at(ServoID::L_ANKLE_ROLL).position  = q_sol(0, 1);
+                // Convert the IK solution back to servo commands
+                configuration_to_servos(servos.get(), q_sol);
 
                 emit<Task>(servos);
             });
@@ -117,29 +106,18 @@ namespace module::actuation {
                 }
 
                 // Warm start the IK with the analytical solution
-                Eigen::Matrix<double, 20, 1> q0 = Eigen::Matrix<double, 20, 1>::Zero();
-                q0(11, 1)                       = servos->servos.at(ServoID::R_HIP_YAW).position;
-                q0(10, 1)                       = servos->servos.at(ServoID::R_HIP_ROLL).position;
-                q0(9, 1)                        = servos->servos.at(ServoID::R_HIP_PITCH).position;
-                q0(8, 1)                        = servos->servos.at(ServoID::R_KNEE).position;
-                q0(7, 1)                        = servos->servos.at(ServoID::R_ANKLE_PITCH).position;
-                q0(6, 1)                        = servos->servos.at(ServoID::R_ANKLE_ROLL).position;
+                Eigen::Matrix<double, 20, 1> q0 = servos_to_configuration(servos.get());
 
-                std::string target_link = "right_foot_base";
-                std::string source_link = "torso";
-                auto q_sol              = inverse_kinematics(nugus_model_right,
-                                                target_link,
-                                                source_link,
+                // Run the IK
+                auto q_sol = inverse_kinematics(nugus_model_right,
+                                                std::string("right_foot_base"),
+                                                std::string("torso"),
                                                 Eigen::Isometry3d(leg_ik.Htr),
                                                 q0,
                                                 options);
 
-                servos->servos.at(ServoID::R_HIP_YAW).position     = q_sol(11, 1);
-                servos->servos.at(ServoID::R_HIP_ROLL).position    = q_sol(10, 1);
-                servos->servos.at(ServoID::R_HIP_PITCH).position   = q_sol(9, 1);
-                servos->servos.at(ServoID::R_KNEE).position        = q_sol(8, 1);
-                servos->servos.at(ServoID::R_ANKLE_PITCH).position = -q_sol(7, 1);  // TODO: Why is this negative?
-                servos->servos.at(ServoID::R_ANKLE_ROLL).position  = q_sol(6, 1);
+                // Convert the IK solution back to servo commands
+                configuration_to_servos(servos.get(), q_sol);
 
                 emit<Task>(servos);
             });

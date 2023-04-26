@@ -3,5 +3,5 @@ log_level: DEBUG
 
 urdf_path: "/home/nubots/NUbots/module/actuation/Kinematics/data/nugus.urdf"
 
-ik_tolerance: 1e-4
+ik_tolerance: 1e-5
 ik_max_iterations: 1000
