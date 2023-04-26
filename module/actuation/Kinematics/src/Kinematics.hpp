@@ -23,8 +23,8 @@ namespace module::actuation {
         static const int n_joints = 20;
 
         /// @brief tinyrobotics model of the NUgus robot
-        tinyrobotics::Model<double, n_joints> nugus_model1;
-        tinyrobotics::Model<double, n_joints> nugus_model2;
+        tinyrobotics::Model<double, n_joints> nugus_model_left;
+        tinyrobotics::Model<double, n_joints> nugus_model_right;
 
         /// @brief tinyrobotics inverse kinematics options
         InverseKinematicsOptions<double, n_joints> options;

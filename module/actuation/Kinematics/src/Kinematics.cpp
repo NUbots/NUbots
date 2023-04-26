@@ -39,10 +39,10 @@ namespace module::actuation {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Create a tinyrobotics model of the NUgus URDF file description
-            cfg.urdf_path = config["urdf_path"].as<std::string>();
-            nugus_model1  = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
-            nugus_model2  = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
-            nugus_model1.show_details();
+            cfg.urdf_path     = config["urdf_path"].as<std::string>();
+            nugus_model_left  = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
+            nugus_model_right = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
+            nugus_model_left.show_details();
 
             // IK options
             options.tolerance      = config["ik_tolerance"].as<double>();
@@ -80,7 +80,7 @@ namespace module::actuation {
                 std::string target_link = "left_foot_base";
                 std::string source_link = "torso";
 
-                auto q_sol = inverse_kinematics(nugus_model1,
+                auto q_sol = inverse_kinematics(nugus_model_left,
                                                 target_link,
                                                 source_link,
                                                 Eigen::Isometry3d(leg_ik.Htl),
@@ -93,7 +93,6 @@ namespace module::actuation {
                 servos->servos.at(ServoID::L_KNEE).position        = q_sol(2, 1);
                 servos->servos.at(ServoID::L_ANKLE_PITCH).position = q_sol(1, 1);
                 servos->servos.at(ServoID::L_ANKLE_ROLL).position  = q_sol(0, 1);
-
 
                 emit<Task>(servos);
             });
@@ -128,7 +127,7 @@ namespace module::actuation {
 
                 std::string target_link = "right_foot_base";
                 std::string source_link = "torso";
-                auto q_sol              = inverse_kinematics(nugus_model2,
+                auto q_sol              = inverse_kinematics(nugus_model_right,
                                                 target_link,
                                                 source_link,
                                                 Eigen::Isometry3d(leg_ik.Htr),
