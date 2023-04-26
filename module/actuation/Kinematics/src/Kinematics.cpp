@@ -10,6 +10,7 @@
 #include "message/actuation/ServoCommand.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
+#include "utility/actuation/tinyrobotics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/comparison.hpp"
@@ -28,6 +29,8 @@ namespace module::actuation {
     using message::actuation::ServoState;
     using utility::actuation::kinematics::calculateHeadJoints;
     using utility::actuation::kinematics::calculateLegJoints;
+    using utility::actuation::tinyrobotics::configuration_to_servos;
+    using utility::actuation::tinyrobotics::servos_to_configuration;
     using utility::input::LimbID;
     using utility::input::ServoID;
 
@@ -38,13 +41,17 @@ namespace module::actuation {
             // Use configuration here from file Kinematics.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Create a tinyrobotics model of the NUgus URDF file description
+            // Parse NUgus URDF file description
             cfg.urdf_path     = config["urdf_path"].as<std::string>();
             nugus_model_left  = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
             nugus_model_right = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
-            nugus_model_left.show_details();
 
-            // IK options
+            // Show the model if debug is enabled
+            if (log_level <= NUClear::DEBUG) {
+                nugus_model_left.show_details();
+            }
+
+            // tinyrobotics IK options
             options.tolerance      = config["ik_tolerance"].as<double>();
             options.max_iterations = config["ik_max_iterations"].as<int>();
             options.method         = InverseKinematicsMethod::LEVENBERG_MARQUARDT;
