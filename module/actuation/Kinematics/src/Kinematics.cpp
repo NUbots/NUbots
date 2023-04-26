@@ -87,6 +87,13 @@ namespace module::actuation {
                                                 q0,
                                                 options);
 
+                if (log_level <= NUClear::DEBUG) {
+                    // Compute error between the IK solution and desired pose
+                    auto Htl_sol = forward_kinematics(nugus_model_left, q_sol, std::string("left_foot_base"));
+                    auto error   = homogeneous_error(Eigen::Isometry3d(leg_ik.Htl), Htl_sol);
+                    log<NUClear::DEBUG>("IK left error: {}", error);
+                }
+
                 // Convert the IK solution back to servo commands
                 configuration_to_servos(servos.get(), q_sol);
 
@@ -122,6 +129,13 @@ namespace module::actuation {
                                                 Eigen::Isometry3d(leg_ik.Htr),
                                                 q0,
                                                 options);
+
+                if (log_level <= NUClear::DEBUG) {
+                    // Compute error between the IK solution and desired pose
+                    auto Htr_sol = forward_kinematics(nugus_model_right, q_sol, std::string("right_foot_base"));
+                    auto error   = homogeneous_error(Eigen::Isometry3d(leg_ik.Htr), Htr_sol);
+                    log<NUClear::DEBUG>("IK right error: {}", error);
+                }
 
                 // Convert the IK solution back to servo commands
                 configuration_to_servos(servos.get(), q_sol);
