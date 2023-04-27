@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package message.platform.webots;
 
+import "Vector.proto";
+
 // Copy of cyberbotics/webots projects/samples/contests/robocup/controllers/player/messages.proto
 
 
@@ -85,7 +87,7 @@ message Message {
 
 // NUbots-specific, used for the walk optimisation
 message OptimisationRobotPosition {
-    Vector3 value = 1;
+    vec3 value = 1;
 }
 
 message SensorMeasurements {
