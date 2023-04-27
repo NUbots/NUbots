@@ -38,7 +38,7 @@ namespace module::actuation {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Path to the URDF file
-            std::string urdf_path;
+            std::string urdf_path = "";
         } cfg;
     };
 
