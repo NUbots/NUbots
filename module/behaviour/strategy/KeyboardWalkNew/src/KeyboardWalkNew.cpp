@@ -39,7 +39,6 @@
 
 namespace module::behaviour::strategy {
 
-
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
     using extension::behaviour::Task;

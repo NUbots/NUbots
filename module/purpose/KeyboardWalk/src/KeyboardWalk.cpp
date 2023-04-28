@@ -32,7 +32,7 @@ namespace module::purpose {
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 1);
             // Stand Still on startup, TODO: Fix this preventing robot from being able to walk.
-            // emit<Task>(std::make_unique<StandStill>(), 2);
+            emit<Task>(std::make_unique<StandStill>());
         });
     }
 
