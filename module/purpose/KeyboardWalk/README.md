@@ -25,7 +25,6 @@ Keyboard walk uses **keyboard inputs** to control the robot. The inputs availabl
 | <kbd>r</kbd> | Resets keyboardwalk. Head rotation is set to 0. Walk command is set to 0.        |
 | <kbd>q</kbd> | Quits keyboardwalk.                                                              |
 
-
 ## Usage
 
 Include this in your role to start the Director tree to run KeyboardWalk.
