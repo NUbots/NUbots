@@ -52,8 +52,10 @@ namespace module::purpose {
             // At the start of the program, we should be standing
             // Without this emit, modules that need a Stability message may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 1);
+
             // Stand Still on startup
             emit<Task>(std::make_unique<StandStill>());
 
@@ -319,13 +321,12 @@ namespace module::purpose {
     }
 
     void KeyboardWalk::walk_toggle() {
-        if (moving) {
-            walk_command = Eigen::Vector3f::Zero();
-            emit<Task>(std::make_unique<Walk>(walk_command));
-            moving = false;
+        if (walk_enabled) {
+            walk_enabled = false;
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
         }
         else {
-            moving = true;
+            walk_enabled = true;
             update_command();
         }
         print_status();
@@ -341,7 +342,8 @@ namespace module::purpose {
     }
 
     void KeyboardWalk::update_command() {
-        if (moving) {
+        // If walking is enabled, update the walk command
+        if (walk_enabled) {
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(walk_command.x(), walk_command.y(), walk_command.z())),
                        2);
         }
@@ -361,14 +363,14 @@ namespace module::purpose {
         werase(command_window.get());
 
         // Construct the log command message
-        std::string message =
-            fmt::format("Velocity: {:.4f}, {:.4f}\nRotation: {:.4f}\nMoving: {}\nHead Yaw: {:.2f}, Head Pitch: {:.2f}",
-                        walk_command.x(),
-                        walk_command.y(),
-                        walk_command.z(),
-                        moving,
-                        head_yaw * 180.0f / float(M_PI),
-                        head_pitch * 180.0f / float(M_PI));
+        std::string message = fmt::format(
+            "Velocity: {:.4f}, {:.4f}\nRotation: {:.4f}\nWalk Enabled: {}\nHead Yaw: {:.2f}, Head Pitch: {:.2f}",
+            walk_command.x(),
+            walk_command.y(),
+            walk_command.z(),
+            walk_enabled,
+            head_yaw * 180.0f / float(M_PI),
+            head_pitch * 180.0f / float(M_PI));
 
         // Update the command window
         update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);

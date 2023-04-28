@@ -43,7 +43,9 @@ namespace module::purpose {
         /// @brief Increments the value of head yaw/pitch by this amount when a key is pressed
         static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
 
-        bool moving = false;
+
+        bool walk_enabled = false;
+
         /// @brief Walk command (dx, dy, dtheta)
         Eigen::Vector3f walk_command = Eigen::Vector3f::Zero();
 
