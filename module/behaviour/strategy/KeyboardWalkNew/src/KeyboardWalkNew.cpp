@@ -30,6 +30,7 @@
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
 #include "message/motion/KickCommand.hpp"
+#include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
@@ -42,6 +43,7 @@ namespace module::behaviour::strategy {
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
     using extension::behaviour::Task;
+    using message::skill::Kick;
     using message::skill::Walk;
 
     void quit() {
@@ -277,12 +279,11 @@ namespace module::behaviour::strategy {
     }
 
     void KeyboardWalkNew::kick(LimbID::Value l) {
-        message::motion::KickScriptCommand ks;
-        ks.leg          = l;
-        std::string leg = (l == 1) ? "left" : "right";
-        ks.type         = message::motion::KickCommandType::NORMAL;
-        emit(std::make_unique<message::motion::KickScriptCommand>(ks));
-        log<NUClear::INFO>(fmt::format("kick {}", leg));
+        switch (l) {
+            case LimbID::LEFT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG)); break;
+            case LimbID::RIGHT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG)); break;
+            default: log<NUClear::ERROR>("Invalid limb ID");
+        }
     }
 
     void KeyboardWalkNew::look_left() {
