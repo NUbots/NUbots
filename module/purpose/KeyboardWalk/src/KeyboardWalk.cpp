@@ -34,11 +34,6 @@ namespace module::purpose {
     using message::skill::Look;
     using message::skill::Walk;
 
-    void quit() {
-        endwin();
-        std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
-    }
-
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
@@ -339,6 +334,11 @@ namespace module::purpose {
         update_command();
         print_status();
         log<NUClear::INFO>("reset");
+    }
+
+    void KeyboardWalk::quit() {
+        endwin();
+        std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
     }
 
     void KeyboardWalk::update_command() {

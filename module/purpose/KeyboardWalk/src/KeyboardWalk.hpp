@@ -71,6 +71,7 @@ namespace module::purpose {
         void turn_right();
         void get_up();
         void reset();
+        void quit();
         void kick(utility::input::LimbID::Value l);
         void look_left();
         void look_right();
