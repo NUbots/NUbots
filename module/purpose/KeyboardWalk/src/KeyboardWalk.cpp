@@ -17,8 +17,6 @@
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 
-#include "utility/input/LimbID.hpp"
-
 namespace module::purpose {
 
     using extension::Configuration;
@@ -82,6 +80,8 @@ namespace module::purpose {
 
             // Set up windows
             create_windows();
+            update_command();
+            print_status();
         });
 
         // Trigger when stdin has something to read
@@ -142,9 +142,6 @@ namespace module::purpose {
         });
 
         on<Shutdown>().then(endwin);
-
-        update_command();
-        print_status();
     }
 
     void KeyboardWalk::create_windows() {
