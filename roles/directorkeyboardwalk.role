@@ -9,7 +9,7 @@ nuclear_role(
   network::PlotJuggler
   # Sensors
   input::SensorFilter
-  platform::Webots
+  platform::cm740::HardwareIO
   # Director
   extension::Director
   # Servos
