@@ -11,8 +11,6 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
-#include "message/motion/HeadCommand.hpp"
-#include "message/motion/KickCommand.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -24,15 +22,15 @@
 namespace module::purpose {
 
     using extension::Configuration;
-    using message::behaviour::state::Stability;
-    using message::strategy::FallRecovery;
-    using message::strategy::StandStill;
-    using NUClear::message::LogMessage;
-    using LimbID = utility::input::LimbID;
     using extension::behaviour::Task;
+    using message::behaviour::state::Stability;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
+    using message::strategy::FallRecovery;
+    using message::strategy::StandStill;
+    using NUClear::message::LogMessage;
+    using utility::input::LimbID;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -96,7 +94,6 @@ namespace module::purpose {
                 case 'z': turn_left(); break;
                 case 'x': turn_right(); break;
                 case 'r': reset(); break;
-                case 'g': get_up(); break;
                 case 'e': walk_toggle(); break;
                 case '.': kick(LimbID::RIGHT_LEG); break;
                 case ',': kick(LimbID::LEFT_LEG); break;
@@ -273,16 +270,10 @@ namespace module::purpose {
         log<NUClear::INFO>("turn right");
     }
 
-    void KeyboardWalk::get_up() {
-        update_command();
-        print_status();
-        log<NUClear::INFO>("getup");
-    }
-
     void KeyboardWalk::kick(LimbID::Value l) {
         switch (l) {
-            case LimbID::LEFT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG)); break;
-            case LimbID::RIGHT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG)); break;
+            case LimbID::LEFT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3); break;
+            case LimbID::RIGHT_LEG: emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3); break;
             default: log<NUClear::ERROR>("Invalid limb ID");
         }
     }
@@ -318,7 +309,7 @@ namespace module::purpose {
     void KeyboardWalk::walk_toggle() {
         if (walk_enabled) {
             walk_enabled = false;
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()), 2);
         }
         else {
             walk_enabled = true;
