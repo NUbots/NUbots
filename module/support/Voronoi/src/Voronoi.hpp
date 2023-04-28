@@ -1,9 +1,9 @@
-#ifndef MODULE_VORONOI_HPP
-#define MODULE_VORONOI_HPP
+#ifndef MODULE_SUPPORT_VORONOI_HPP
+#define MODULE_SUPPORT_VORONOI_HPP
 
 #include <nuclear>
 
-namespace module {
+namespace module::support {
 
 class Voronoi : public NUClear::Reactor {
 private:
@@ -16,6 +16,6 @@ public:
     explicit Voronoi(std::unique_ptr<NUClear::Environment> environment);
 };
 
-}  // namespace module
+}  // namespace module::support
 
-#endif  // MODULE_VORONOI_HPP
+#endif  // MODULE_SUPPORT_VORONOI_HPP
