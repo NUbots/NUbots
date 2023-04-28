@@ -31,6 +31,7 @@
 #include "message/motion/HeadCommand.hpp"
 #include "message/motion/KickCommand.hpp"
 #include "message/skill/Kick.hpp"
+#include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
@@ -38,12 +39,12 @@
 
 namespace module::behaviour::strategy {
 
-    using message::behaviour::MotionCommand;
-    using message::motion::HeadCommand;
+
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
     using extension::behaviour::Task;
     using message::skill::Kick;
+    using message::skill::Look;
     using message::skill::Walk;
 
     void quit() {
@@ -339,16 +340,15 @@ namespace module::behaviour::strategy {
 
     void KeyboardWalkNew::update_command() {
         if (moving) {
-            Eigen::Vector3f walk_command;
-            walk_command << velocity.x(), velocity.y(), rotation;
-            emit<Task>(std::make_unique<Walk>(walk_command));
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(velocity.x(), velocity.y(), rotation)), 2);
         }
 
-        auto head_command         = std::make_unique<HeadCommand>();
-        head_command->yaw         = head_yaw;
-        head_command->pitch       = head_pitch;
-        head_command->robot_space = true;
-        emit(head_command);
+        // Create a unit vector in the direction the head should be pointing
+        Eigen::Vector3d uPCt = (Eigen::AngleAxisd(head_yaw, Eigen::Vector3d::UnitZ())
+                                * Eigen::AngleAxisd(-head_pitch, Eigen::Vector3d::UnitY()))
+                                   .toRotationMatrix()
+                               * Eigen::Vector3d::UnitX();
+        emit<Task>(std::make_unique<Look>(uPCt, false));
     }
 
     void KeyboardWalkNew::print_status() {
