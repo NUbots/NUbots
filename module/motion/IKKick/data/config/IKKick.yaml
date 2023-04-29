@@ -8,16 +8,16 @@ servo:
 balancer:
   # Restricts the allowable error in the desired angle
   # and the current angle before playing the next frame
-  servo_angle_threshold: 1.0
+  servo_angle_threshold: 2.0
   foot_separation: 0.165 # 0.074 = hip separation
   # Adjusts how far the robot leans over it's support foot
-  adjustment: 0.000600 #default value is 0.
+  adjustment: 0.0014 #default value is 0.
   # Height to the robot's origin (somewhere near the bottom of the torso)
   #stand_height: 0.23 #m
   stand_height: 0.46
   # How far to move the torso forward.
   # Note: this tilts both the hips and ankles
-  forward_lean: 0.0680 #m
+  forward_lean: 0.0860 #m
 
   # Seems to be the forward duration of the kick movement
   # - Also seems to be related to an ankle glitch
@@ -55,11 +55,11 @@ kick:
   return_before_place_duration: 0.15
 
 kick_frames:
-  servo_angle_threshold: 1.5
+  servo_angle_threshold: 2.0
   # note that some of the following config is overwritten by planning processes
   lift_foot:
     #Note: pos does nothing
-    pos: [-0.05, 0, 0.05]
+    pos: [0.0, 0, 0.05]
     orientation: [0, 0, 0]
     duration: 0.25
 
