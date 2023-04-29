@@ -33,7 +33,11 @@ Include this in your role to start the Director tree to run KeyboardWalk.
 
 ## Emits
 
-- `message::strategy::StandStill` to make the robot still while penalised
-- `message::behaviour::state::Stability` to set the robot's initial stability state to standing
+- `message::strategy::StandStill` to make the robot still while not walking
+- `message::behaviour::state::Stability` to set the robot's initial stability state
+- `message::strategy::FallRecovery` to enable getting up when fallen
+- `message::skill::Kick` to kick with left/right leg
+- `message::skill::Look` to look in desired direction
+- `message::skill::Walk` to walk with desired velocity
 
 ## Dependencies
