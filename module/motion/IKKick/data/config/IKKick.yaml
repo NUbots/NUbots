@@ -61,16 +61,16 @@ kick_frames:
     #Note: pos does nothing
     pos: [0.0, 0, 0.05]
     orientation: [0, 0, 0]
-    duration: 0.05
+    duration: 0.01
 
   kick:
     #Note: pos and duration do nothing
     pos: [0, 0, 0]
     orientation: [0, 0, 0]
-    duration: 0.01
+    duration: 0.05
 
   place_foot:
     #This transform WILL entirely define the foot placement after kicking
     pos: [0.0, 0.00, -0.02]
     orientation: [0, 0, 0.0]
-    duration: 0.05
+    duration: 0.01
