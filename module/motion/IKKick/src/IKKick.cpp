@@ -259,13 +259,14 @@ namespace module::motion {
 
                 // ***HAck to stop the ankle roll glitch - LC***
                 // Just checks the difference between servo values and uses the previous if it's too large
-                double max_diff       = 1.0;  // set the maximum allowed difference between joint values
+                double max_diff       = 1.5;  // set the maximum allowed difference between joint values
                 double prev_joint_val = 0.0;  // initialize the previous joint value
                 for (auto& joint : joints) {
                     double curr_joint_val = joint.second;
                     // check if the difference between the current and previous joint values is too large
                     // NOTE: Might need to skip the first loop?
-                    if ((joint.first == ServoID::L_ANKLE_PITCH || joint.first == ServoID::R_ANKLE_PITCH)
+                    if ((joint.first == ServoID::L_ANKLE_ROLL || joint.first == ServoID::R_ANKLE_ROLL
+                         || joint.first == ServoID::L_HIP_ROLL || joint.first == ServoID::R_HIP_ROLL)
                         && std::abs(curr_joint_val - prev_joint_val) > max_diff) {
                         NUClear::log<NUClear::DEBUG>("Joint ",
                                                      joint.first,
