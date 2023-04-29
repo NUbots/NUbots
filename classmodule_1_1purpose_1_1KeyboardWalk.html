@@ -1,0 +1,428 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::purpose::KeyboardWalk Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1purpose_1_1KeyboardWalk.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
+<a href="classmodule_1_1purpose_1_1KeyboardWalk-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::purpose::KeyboardWalk Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+Inheritance diagram for module::purpose::KeyboardWalk:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1purpose_1_1KeyboardWalk__inherit__graph.png" border="0" usemap="#amodule_1_1purpose_1_1KeyboardWalk_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1purpose_1_1KeyboardWalk_inherit__map" id="amodule_1_1purpose_1_1KeyboardWalk_inherit__map">
+<area shape="rect" title=" " alt="" coords="5,169,237,196"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="42,80,201,121"/>
+<area shape="rect" title=" " alt="" coords="54,5,189,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::purpose::KeyboardWalk:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1purpose_1_1KeyboardWalk__coll__graph.png" border="0" usemap="#amodule_1_1purpose_1_1KeyboardWalk_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1purpose_1_1KeyboardWalk_coll__map" id="amodule_1_1purpose_1_1KeyboardWalk_coll__map">
+<area shape="rect" title=" " alt="" coords="5,169,237,196"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="42,80,201,121"/>
+<area shape="rect" title=" " alt="" coords="54,5,189,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a87bbd04ba1339edbe4382e94bbeaa345"><td class="memItemLeft" align="right" valign="top"><a id="a87bbd04ba1339edbe4382e94bbeaa345"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a87bbd04ba1339edbe4382e94bbeaa345">KeyboardWalk</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+<tr class="memdesc:a87bbd04ba1339edbe4382e94bbeaa345"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html">KeyboardWalk</a> reactor. <br /></td></tr>
+<tr class="separator:a87bbd04ba1339edbe4382e94bbeaa345"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ae51528edde1dfe10f6ebc3e560d60234"><td class="memItemLeft" align="right" valign="top"><a id="ae51528edde1dfe10f6ebc3e560d60234"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ae51528edde1dfe10f6ebc3e560d60234">back</a> ()</td></tr>
+<tr class="memdesc:ae51528edde1dfe10f6ebc3e560d60234"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dx) by -DIFF. <br /></td></tr>
+<tr class="separator:ae51528edde1dfe10f6ebc3e560d60234"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab38ef90c692e2898b1c6d666cc000330"><td class="memItemLeft" align="right" valign="top"><a id="ab38ef90c692e2898b1c6d666cc000330"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ab38ef90c692e2898b1c6d666cc000330">create_windows</a> ()</td></tr>
+<tr class="memdesc:ab38ef90c692e2898b1c6d666cc000330"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates windows for the command and log. <br /></td></tr>
+<tr class="separator:ab38ef90c692e2898b1c6d666cc000330"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3122d1fc5501a50e4290466e03404926"><td class="memItemLeft" align="right" valign="top"><a id="a3122d1fc5501a50e4290466e03404926"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a3122d1fc5501a50e4290466e03404926">forward</a> ()</td></tr>
+<tr class="memdesc:a3122d1fc5501a50e4290466e03404926"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dx) by DIFF. <br /></td></tr>
+<tr class="separator:a3122d1fc5501a50e4290466e03404926"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6ca8b7308870251bfff33d9ce1ed8c6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ac6ca8b7308870251bfff33d9ce1ed8c6">kick</a> (utility::input::LimbID::Value l)</td></tr>
+<tr class="memdesc:ac6ca8b7308870251bfff33d9ce1ed8c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits task to kick with specified leg.  <a href="classmodule_1_1purpose_1_1KeyboardWalk.html#ac6ca8b7308870251bfff33d9ce1ed8c6">More...</a><br /></td></tr>
+<tr class="separator:ac6ca8b7308870251bfff33d9ce1ed8c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac298d2e96a75b6985b037240ced23f41"><td class="memItemLeft" align="right" valign="top"><a id="ac298d2e96a75b6985b037240ced23f41"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ac298d2e96a75b6985b037240ced23f41">left</a> ()</td></tr>
+<tr class="memdesc:ac298d2e96a75b6985b037240ced23f41"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dy) by DIFF. <br /></td></tr>
+<tr class="separator:ac298d2e96a75b6985b037240ced23f41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb7f58f760d723e227547af2e71b477f"><td class="memItemLeft" align="right" valign="top"><a id="acb7f58f760d723e227547af2e71b477f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#acb7f58f760d723e227547af2e71b477f">look_down</a> ()</td></tr>
+<tr class="memdesc:acb7f58f760d723e227547af2e71b477f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of head pitch by -HEAD_DIFF. <br /></td></tr>
+<tr class="separator:acb7f58f760d723e227547af2e71b477f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf135b9cf37686cc6ab3d3ed05377220"><td class="memItemLeft" align="right" valign="top"><a id="acf135b9cf37686cc6ab3d3ed05377220"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#acf135b9cf37686cc6ab3d3ed05377220">look_left</a> ()</td></tr>
+<tr class="memdesc:acf135b9cf37686cc6ab3d3ed05377220"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of head yaw by HEAD_DIFF. <br /></td></tr>
+<tr class="separator:acf135b9cf37686cc6ab3d3ed05377220"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b826382d8823c8512341d28f7eed460"><td class="memItemLeft" align="right" valign="top"><a id="a9b826382d8823c8512341d28f7eed460"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a9b826382d8823c8512341d28f7eed460">look_right</a> ()</td></tr>
+<tr class="memdesc:a9b826382d8823c8512341d28f7eed460"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of head yaw by -HEAD_DIFF. <br /></td></tr>
+<tr class="separator:a9b826382d8823c8512341d28f7eed460"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa24b63e670d072063ca831c2c8e5cb04"><td class="memItemLeft" align="right" valign="top"><a id="aa24b63e670d072063ca831c2c8e5cb04"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#aa24b63e670d072063ca831c2c8e5cb04">look_up</a> ()</td></tr>
+<tr class="memdesc:aa24b63e670d072063ca831c2c8e5cb04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of head pitch by HEAD_DIFF. <br /></td></tr>
+<tr class="separator:aa24b63e670d072063ca831c2c8e5cb04"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ae6faa9c4517123f68315062e64a623"><td class="memItemLeft" align="right" valign="top"><a id="a7ae6faa9c4517123f68315062e64a623"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a7ae6faa9c4517123f68315062e64a623">print_status</a> ()</td></tr>
+<tr class="memdesc:a7ae6faa9c4517123f68315062e64a623"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints the current status of the walk command. <br /></td></tr>
+<tr class="separator:a7ae6faa9c4517123f68315062e64a623"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33f084842b41c692a5f7f38e4a93d5ac"><td class="memItemLeft" align="right" valign="top"><a id="a33f084842b41c692a5f7f38e4a93d5ac"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a33f084842b41c692a5f7f38e4a93d5ac">quit</a> ()</td></tr>
+<tr class="memdesc:a33f084842b41c692a5f7f38e4a93d5ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Quits the program. <br /></td></tr>
+<tr class="separator:a33f084842b41c692a5f7f38e4a93d5ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0fb72688886d8030ddeaa63d68e128be"><td class="memItemLeft" align="right" valign="top"><a id="a0fb72688886d8030ddeaa63d68e128be"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a0fb72688886d8030ddeaa63d68e128be">reset</a> ()</td></tr>
+<tr class="memdesc:a0fb72688886d8030ddeaa63d68e128be"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets the walk command to zero. <br /></td></tr>
+<tr class="separator:a0fb72688886d8030ddeaa63d68e128be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9970c386b529f62d6f9f0bff4632a1b"><td class="memItemLeft" align="right" valign="top"><a id="ad9970c386b529f62d6f9f0bff4632a1b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad9970c386b529f62d6f9f0bff4632a1b">right</a> ()</td></tr>
+<tr class="memdesc:ad9970c386b529f62d6f9f0bff4632a1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dy) by -DIFF. <br /></td></tr>
+<tr class="separator:ad9970c386b529f62d6f9f0bff4632a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adffa08f1ae3aeaf0b4bfac95f47a54b2"><td class="memItemLeft" align="right" valign="top"><a id="adffa08f1ae3aeaf0b4bfac95f47a54b2"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#adffa08f1ae3aeaf0b4bfac95f47a54b2">turn_left</a> ()</td></tr>
+<tr class="memdesc:adffa08f1ae3aeaf0b4bfac95f47a54b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dtheta) by ROT_DIFF. <br /></td></tr>
+<tr class="separator:adffa08f1ae3aeaf0b4bfac95f47a54b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c05b483da67885d055e4bff80054246"><td class="memItemLeft" align="right" valign="top"><a id="a1c05b483da67885d055e4bff80054246"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a1c05b483da67885d055e4bff80054246">turn_right</a> ()</td></tr>
+<tr class="memdesc:a1c05b483da67885d055e4bff80054246"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dtheta) by -ROT_DIFF. <br /></td></tr>
+<tr class="separator:a1c05b483da67885d055e4bff80054246"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a23945f468a263094ae42e9b90ec9334d"><td class="memItemLeft" align="right" valign="top"><a id="a23945f468a263094ae42e9b90ec9334d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a23945f468a263094ae42e9b90ec9334d">update_command</a> ()</td></tr>
+<tr class="memdesc:a23945f468a263094ae42e9b90ec9334d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits task to walk with current walk command. <br /></td></tr>
+<tr class="separator:a23945f468a263094ae42e9b90ec9334d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a43219beea928ee1a9bedcb1155283278"><td class="memItemLeft" align="right" valign="top"><a id="a43219beea928ee1a9bedcb1155283278"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a43219beea928ee1a9bedcb1155283278">update_window</a> (const std::shared_ptr&lt; WINDOW &gt; &amp;window, const LogColours &amp;colours, const std::string &amp;source, const std::string &amp;message, const bool &amp;print_level)</td></tr>
+<tr class="memdesc:a43219beea928ee1a9bedcb1155283278"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the window with the specified message. <br /></td></tr>
+<tr class="separator:a43219beea928ee1a9bedcb1155283278"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59890bcf3c94a08498020a3ef22e57c6"><td class="memItemLeft" align="right" valign="top"><a id="a59890bcf3c94a08498020a3ef22e57c6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a59890bcf3c94a08498020a3ef22e57c6">walk_toggle</a> ()</td></tr>
+<tr class="memdesc:a59890bcf3c94a08498020a3ef22e57c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Toggles the walk on/off. <br /></td></tr>
+<tr class="separator:a59890bcf3c94a08498020a3ef22e57c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ad4777b1d3d82f26e2d1c835dc4022e68"><td class="memItemLeft" align="right" valign="top"><a id="ad4777b1d3d82f26e2d1c835dc4022e68"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad4777b1d3d82f26e2d1c835dc4022e68">colours_enabled</a></td></tr>
+<tr class="memdesc:ad4777b1d3d82f26e2d1c835dc4022e68"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not colours are enabled. <br /></td></tr>
+<tr class="separator:ad4777b1d3d82f26e2d1c835dc4022e68"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25c01f8f70f249f5c79e5ea6faf67aa7"><td class="memItemLeft" align="right" valign="top"><a id="a25c01f8f70f249f5c79e5ea6faf67aa7"></a>
+std::shared_ptr&lt; WINDOW &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a25c01f8f70f249f5c79e5ea6faf67aa7">command_window</a></td></tr>
+<tr class="memdesc:a25c01f8f70f249f5c79e5ea6faf67aa7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Command window. <br /></td></tr>
+<tr class="separator:a25c01f8f70f249f5c79e5ea6faf67aa7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69b426f28c18378bbfbebd557b644c9b"><td class="memItemLeft" align="right" valign="top"><a id="a69b426f28c18378bbfbebd557b644c9b"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a69b426f28c18378bbfbebd557b644c9b">head_pitch</a> = 0.0f</td></tr>
+<tr class="memdesc:a69b426f28c18378bbfbebd557b644c9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Desired head pitch. <br /></td></tr>
+<tr class="separator:a69b426f28c18378bbfbebd557b644c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad7596a523b4d2e4f904922c1918bc1b1"><td class="memItemLeft" align="right" valign="top"><a id="ad7596a523b4d2e4f904922c1918bc1b1"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad7596a523b4d2e4f904922c1918bc1b1">head_yaw</a> = 0.0f</td></tr>
+<tr class="memdesc:ad7596a523b4d2e4f904922c1918bc1b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Desired head yaw. <br /></td></tr>
+<tr class="separator:ad7596a523b4d2e4f904922c1918bc1b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a14473a7814876bb532a5408f71ae3995"><td class="memItemLeft" align="right" valign="top"><a id="a14473a7814876bb532a5408f71ae3995"></a>
+std::shared_ptr&lt; WINDOW &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a14473a7814876bb532a5408f71ae3995">log_window</a></td></tr>
+<tr class="memdesc:a14473a7814876bb532a5408f71ae3995"><td class="mdescLeft">&#160;</td><td class="mdescRight">Log window. <br /></td></tr>
+<tr class="separator:a14473a7814876bb532a5408f71ae3995"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ebe9834663afea49ee4c0c52c3ff87b"><td class="memItemLeft" align="right" valign="top"><a id="a4ebe9834663afea49ee4c0c52c3ff87b"></a>
+std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a4ebe9834663afea49ee4c0c52c3ff87b">mutex</a></td></tr>
+<tr class="memdesc:a4ebe9834663afea49ee4c0c52c3ff87b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex to ensure that only one thread is writing to the log window at a time. <br /></td></tr>
+<tr class="separator:a4ebe9834663afea49ee4c0c52c3ff87b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d382ae1beaf0a6b5920623cb21fd93e"><td class="memItemLeft" align="right" valign="top"><a id="a9d382ae1beaf0a6b5920623cb21fd93e"></a>
+Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a9d382ae1beaf0a6b5920623cb21fd93e">walk_command</a> = Eigen::Vector3f::Zero()</td></tr>
+<tr class="memdesc:a9d382ae1beaf0a6b5920623cb21fd93e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Walk command (dx, dy, dtheta) <br /></td></tr>
+<tr class="separator:a9d382ae1beaf0a6b5920623cb21fd93e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd420e3f3dc12b167cd82ef5bf077803"><td class="memItemLeft" align="right" valign="top"><a id="acd420e3f3dc12b167cd82ef5bf077803"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#acd420e3f3dc12b167cd82ef5bf077803">walk_enabled</a> = false</td></tr>
+<tr class="memdesc:acd420e3f3dc12b167cd82ef5bf077803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not the walk is enabled. <br /></td></tr>
+<tr class="separator:acd420e3f3dc12b167cd82ef5bf077803"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a02cde6bd823a679bacd52488d64c4450"><td class="memItemLeft" align="right" valign="top"><a id="a02cde6bd823a679bacd52488d64c4450"></a>
+static constexpr const float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a02cde6bd823a679bacd52488d64c4450">DIFF</a> = 0.01f</td></tr>
+<tr class="memdesc:a02cde6bd823a679bacd52488d64c4450"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dx, dy) by this amount when a key is pressed. <br /></td></tr>
+<tr class="separator:a02cde6bd823a679bacd52488d64c4450"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a782b1c189a077786802cf5b08eb3b470"><td class="memItemLeft" align="right" valign="top"><a id="a782b1c189a077786802cf5b08eb3b470"></a>
+static constexpr const float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a782b1c189a077786802cf5b08eb3b470">HEAD_DIFF</a> = 1.0f * float(M_PI) / 180.0f</td></tr>
+<tr class="memdesc:a782b1c189a077786802cf5b08eb3b470"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of head yaw/pitch by this amount when a key is pressed. <br /></td></tr>
+<tr class="separator:a782b1c189a077786802cf5b08eb3b470"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae412702edddd81d11ce67eba1c9d115d"><td class="memItemLeft" align="right" valign="top"><a id="ae412702edddd81d11ce67eba1c9d115d"></a>
+static constexpr const float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ae412702edddd81d11ce67eba1c9d115d">ROT_DIFF</a> = 0.1f</td></tr>
+<tr class="memdesc:ae412702edddd81d11ce67eba1c9d115d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Increments the value of walk command (dtheta) by this amount when a key is pressed. <br /></td></tr>
+<tr class="separator:ae412702edddd81d11ce67eba1c9d115d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td colspan="2" onclick="javascript:toggleInherit('pro_types_classextension_1_1behaviour_1_1BehaviourReactor')"><img src="closed.png" alt="-"/>&#160;Protected Types inherited from <a class="el" href="classextension_1_1behaviour_1_1BehaviourReactor.html">extension::behaviour::BehaviourReactor</a></td></tr>
+<tr class="memitem:a6812db9db23210910859eeb041fbe7e3 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a6812db9db23210910859eeb041fbe7e3"></a>
+template&lt;typename State , State::Value value&gt; </td></tr>
+<tr class="memitem:a6812db9db23210910859eeb041fbe7e3 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Causing</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Causing.html">extension::behaviour::Causing</a>&lt; State, value &gt;</td></tr>
+<tr class="separator:a6812db9db23210910859eeb041fbe7e3 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2760227e5692c47ae2bf2fb48d37d2a inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="ae2760227e5692c47ae2bf2fb48d37d2a"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Done</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Done.html">extension::behaviour::Done</a></td></tr>
+<tr class="separator:ae2760227e5692c47ae2bf2fb48d37d2a inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a0002f2b43d8ade6e6504e84cb47391 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="a9a0002f2b43d8ade6e6504e84cb47391"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>GroupInfo</b> = ::<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">extension::behaviour::GroupInfo</a></td></tr>
+<tr class="separator:a9a0002f2b43d8ade6e6504e84cb47391 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90b86ed565ed3d1dfd5311714323b611 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="a90b86ed565ed3d1dfd5311714323b611"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Idle</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Idle.html">extension::behaviour::Idle</a></td></tr>
+<tr class="separator:a90b86ed565ed3d1dfd5311714323b611 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11ff7db6ef7c27ad993fbef780bc98c4 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a11ff7db6ef7c27ad993fbef780bc98c4"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a11ff7db6ef7c27ad993fbef780bc98c4 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Needs</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Needs.html">extension::behaviour::Needs</a>&lt; T &gt;</td></tr>
+<tr class="separator:a11ff7db6ef7c27ad993fbef780bc98c4 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae322aad29122aeb742de6ff6b4950a67 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="ae322aad29122aeb742de6ff6b4950a67"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ae322aad29122aeb742de6ff6b4950a67 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Provide</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Provide.html">extension::behaviour::Provide</a>&lt; T &gt;</td></tr>
+<tr class="separator:ae322aad29122aeb742de6ff6b4950a67 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acaf3947de0d8eb13b5cfed32b574bc52 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memItemLeft" align="right" valign="top"><a id="acaf3947de0d8eb13b5cfed32b574bc52"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>RunInfo</b> = ::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">extension::behaviour::RunInfo</a></td></tr>
+<tr class="separator:acaf3947de0d8eb13b5cfed32b574bc52 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2ed6b879ec18a39306e88ef73d2549e inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="ac2ed6b879ec18a39306e88ef73d2549e"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:ac2ed6b879ec18a39306e88ef73d2549e inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Start</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Start.html">extension::behaviour::Start</a>&lt; T &gt;</td></tr>
+<tr class="separator:ac2ed6b879ec18a39306e88ef73d2549e inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea1dfde4b3a5d35b48288405bc990caf inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="aea1dfde4b3a5d35b48288405bc990caf"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aea1dfde4b3a5d35b48288405bc990caf inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Stop</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Stop.html">extension::behaviour::Stop</a>&lt; T &gt;</td></tr>
+<tr class="separator:aea1dfde4b3a5d35b48288405bc990caf inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4513ce7303cfb0ce526bee9d5cf2470b inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a4513ce7303cfb0ce526bee9d5cf2470b"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a4513ce7303cfb0ce526bee9d5cf2470b inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Task</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Task.html">extension::behaviour::Task</a>&lt; T &gt;</td></tr>
+<tr class="separator:a4513ce7303cfb0ce526bee9d5cf2470b inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8bbea33283ec03979c745484242719b7 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a8bbea33283ec03979c745484242719b7"></a>
+template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a8bbea33283ec03979c745484242719b7 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>Uses</b> = ::<a class="el" href="structextension_1_1behaviour_1_1Uses.html">extension::behaviour::Uses</a>&lt; T &gt;</td></tr>
+<tr class="separator:a8bbea33283ec03979c745484242719b7 inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplParams" colspan="2"><a id="a5c9bec81a70b4ff798c6507379bfa7ee"></a>
+template&lt;typename State , template&lt; typename &gt; class expr, State::Value value&gt; </td></tr>
+<tr class="memitem:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memTemplItemLeft" align="right" valign="top">using&#160;</td><td class="memTemplItemRight" valign="bottom"><b>When</b> = ::<a class="el" href="structextension_1_1behaviour_1_1When.html">extension::behaviour::When</a>&lt; State, expr, value &gt;</td></tr>
+<tr class="separator:a5c9bec81a70b4ff798c6507379bfa7ee inherit pro_types_classextension_1_1behaviour_1_1BehaviourReactor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac6ca8b7308870251bfff33d9ce1ed8c6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac6ca8b7308870251bfff33d9ce1ed8c6">&#9670;&nbsp;</a></span>kick()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::purpose::KeyboardWalk::kick </td>
+          <td>(</td>
+          <td class="paramtype">utility::input::LimbID::Value&#160;</td>
+          <td class="paramname"><em>l</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Emits task to kick with specified leg. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">l</td><td>Leg to kick with (LEFT or RIGHT) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/purpose/KeyboardWalk/src/<a class="el" href="purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp_source.html">KeyboardWalk.hpp</a></li>
+<li>module/purpose/KeyboardWalk/src/KeyboardWalk.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>purpose</b></li><li class="navelem"><a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html">KeyboardWalk</a></li>
+    <li class="footer">Generated on Sat Apr 29 2023 04:58:51 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

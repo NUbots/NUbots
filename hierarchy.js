@@ -257,6 +257,7 @@ var hierarchy =
         [ "module::planning::PlanKick", "classmodule_1_1planning_1_1PlanKick.html", null ],
         [ "module::planning::PlanLook", "classmodule_1_1planning_1_1PlanLook.html", null ],
         [ "module::planning::PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", null ],
+        [ "module::purpose::KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", null ],
         [ "module::purpose::Soccer", "classmodule_1_1purpose_1_1Soccer.html", null ],
         [ "module::purpose::Striker", "classmodule_1_1purpose_1_1Striker.html", null ],
         [ "module::skill::Dive", "classmodule_1_1skill_1_1Dive.html", null ],

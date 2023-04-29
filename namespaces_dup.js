@@ -116,20 +116,20 @@ var namespaces_dup =
           [ "FilteredBall", "SoccerStrategy_8cpp.html#a188d9f5c8624f945069490b50e6a7e9f", null ],
           [ "GameMode", "SoccerStrategy_8cpp.html#a8fad8ed963c6dad1e02f4eb0a96a6585", null ],
           [ "KickOffTeam", "SoccerStrategy_8cpp.html#a6935be65b3388ffcac2b66aabb7372f3", null ],
-          [ "LimbID", "KeyboardWalk_8cpp.html#aea4d2d941460a64845429cc8997b0588", null ],
+          [ "LimbID", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8cpp.html#aea4d2d941460a64845429cc8997b0588", null ],
           [ "Penalisation", "SoccerStrategy_8cpp.html#a71c4805a25c5691864b93a873effe6ae", null ],
           [ "Phase", "SoccerStrategy_8cpp.html#a62d1de9b84b1d9915dd8d5c2c7446610", null ],
           [ "Unpenalisation", "SoccerStrategy_8cpp.html#a7f6b91188f8d0311dccba44e4b564898", null ],
           [ "VisionGoals", "SoccerStrategy_8cpp.html#a710c97c9bf8d73d8e7892d5467c10ba1", null ],
-          [ "LogColours", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9", [
-            [ "TRACE_COLOURS", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a03edadf0bc773fb94b4f5301fb3586b6", null ],
-            [ "DEBUG_COLOURS", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aabaeda8c8c137f659606924c7e40f2d5", null ],
-            [ "INFO_COLOURS", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a6923640867193c8fae67219aba2791d6", null ],
-            [ "WARN_COLOURS", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aa5a10ff337eea6adaa1db6393b3e3b26", null ],
-            [ "ERROR_COLOURS", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aa8d1b69a587431c229b8ccdabd630a3f", null ],
-            [ "FATAL_COLOURS", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a2b531f77b861aff440ebbbe673eb4ad4", null ]
+          [ "LogColours", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9", [
+            [ "TRACE_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a03edadf0bc773fb94b4f5301fb3586b6", null ],
+            [ "DEBUG_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aabaeda8c8c137f659606924c7e40f2d5", null ],
+            [ "INFO_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a6923640867193c8fae67219aba2791d6", null ],
+            [ "WARN_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aa5a10ff337eea6adaa1db6393b3e3b26", null ],
+            [ "ERROR_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aa8d1b69a587431c229b8ccdabd630a3f", null ],
+            [ "FATAL_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a2b531f77b861aff440ebbbe673eb4ad4", null ]
           ] ],
-          [ "quit", "KeyboardWalk_8cpp.html#af762514b48cdf7039e58a0ac8896f40f", null ]
+          [ "quit", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8cpp.html#af762514b48cdf7039e58a0ac8896f40f", null ]
         ] ],
         [ "tools", null, [
           [ "ExecuteNextScript", "structmodule_1_1behaviour_1_1tools_1_1ExecuteNextScript.html", null ],
@@ -553,13 +553,22 @@ var namespaces_dup =
         [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ]
       ] ],
       [ "purpose", null, [
+        [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "GameMode", "Striker_8cpp.html#af6f0bbbfc3739b1fdb947add452d4ae3", null ],
         [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
         [ "Phase", "Striker_8cpp.html#a9e287f8d3fac4776d448159cf92126d0", null ],
         [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
-        [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ]
+        [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],
+        [ "LogColours", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [
+          [ "TRACE_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a03edadf0bc773fb94b4f5301fb3586b6", null ],
+          [ "DEBUG_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aabaeda8c8c137f659606924c7e40f2d5", null ],
+          [ "INFO_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a6923640867193c8fae67219aba2791d6", null ],
+          [ "WARN_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aa5a10ff337eea6adaa1db6393b3e3b26", null ],
+          [ "ERROR_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aa8d1b69a587431c229b8ccdabd630a3f", null ],
+          [ "FATAL_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a2b531f77b861aff440ebbbe673eb4ad4", null ]
+        ] ]
       ] ],
       [ "skill", null, [
         [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
