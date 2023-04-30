@@ -1,2 +1,4 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+number_of_robots_per_team: 4

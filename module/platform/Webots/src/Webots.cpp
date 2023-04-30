@@ -792,9 +792,8 @@ namespace module::platform {
                 sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
             }
             if (sensor_measurements.localisation_ground_truth.exists) {
-                auto loc_msg = std::make_unique<LocalisationGroundTruth>(sensor_measurements.localisation_ground_truth);
-                emit(loc_msg);
-                log<NUClear::WARN>("loc_msg");
+                auto location_msg = std::make_unique<LocalisationGroundTruth>(sensor_measurements.localisation_ground_truth);
+                emit(location_msg);
             }
 
             emit(sensor_data);

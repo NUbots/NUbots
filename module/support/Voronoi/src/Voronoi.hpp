@@ -3,18 +3,22 @@
 
 #include <nuclear>
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 namespace module::support {
 
-class Voronoi : public NUClear::Reactor {
-private:
-    /// @brief Stores configuration values
-    struct Config {
-    } cfg;
+    class Voronoi : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            size_t robots_each_side = 0;
+        } cfg;
 
-public:
-    /// @brief Called by the powerplant to build and setup the Voronoi reactor.
-    explicit Voronoi(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the Voronoi reactor.
+        explicit Voronoi(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::support
 
