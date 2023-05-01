@@ -38,7 +38,6 @@ namespace module::localisation {
 
         on<Configuration>("BallFilter.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
-            // UKF Config
             // Set our measurement noise
             cfg.ukf.noise.measurement.position =
                 Eigen::Vector2f(config["ukf"]["noise"]["measurement"]["ball_position"].as<Expression>()).asDiagonal();
@@ -53,7 +52,7 @@ namespace module::localisation {
             process_noise.vBw       = cfg.ukf.noise.process.velocity;
             ukf.model.process_noise = process_noise;
 
-            // Set our initial means
+            // Set our initial mean
             cfg.ukf.initial.mean.position = config["ukf"]["initial"]["mean"]["position"].as<Expression>();
             cfg.ukf.initial.mean.velocity = config["ukf"]["initial"]["mean"]["velocity"].as<Expression>();
 
