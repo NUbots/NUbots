@@ -18,7 +18,7 @@ namespace module::localisation {
             // Ball position in world {w} space (x, y)
             Eigen::Matrix<Scalar, 2, 1> rBWw = Eigen::Matrix<Scalar, 2, 1>::Zero();
 
-            // Ball velocity in world {w} space (x, y)
+            // Ball velocity in world {w} space (dx, dy)
             Eigen::Matrix<Scalar, 2, 1> vBw = Eigen::Matrix<Scalar, 2, 1>::Zero();
 
             static constexpr size_t size = 4;
