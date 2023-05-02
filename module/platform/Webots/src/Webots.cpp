@@ -414,20 +414,20 @@ namespace module::platform {
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
             const int msg_command = msg.command;
             switch (msg_command) {
-                case OptimisationCommand::CommandType::RESET_WORLD  :
+                case OptimisationCommand::CommandType::RESET_WORLD:
                     // Set the reset world flag to send the reset command to webots with the next ActuatorRequests
                     reset_simulation_world = true;
-                break;
+                    break;
 
-                case OptimisationCommand::CommandType::RESET_TIME   :
+                case OptimisationCommand::CommandType::RESET_TIME:
                     // Set the reset flag to send the reset command to webots with the next ActuatorRequests
                     reset_simulation_time = true;
-                break;
+                    break;
 
-                case OptimisationCommand::CommandType::TERMINATE    :
+                case OptimisationCommand::CommandType::TERMINATE:
                     // Set the termination flag to send the terminate command to webots with the next ActuatorRequests
                     terminate_simulation = true;
-                break;
+                    break;
             }
         });
     }
@@ -602,13 +602,13 @@ namespace module::platform {
 
                         // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
                         if (reset_simulation_world) {
-                            std::cout << "Sending RESET_WORLD to ActuatorRequests" << std::endl;
+                            log<NUClear::DEBUG>("Sending RESET_WORLD to ActuatorRequests.");
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_WORLD;
                             reset_simulation_world = false;
                         }
                         else if (reset_simulation_time) {
-                            std::cout << "Sending RESET_TIME to ActuatorRequests" << std::endl;
+                            log<NUClear::DEBUG>("Sending RESET_TIME to ActuatorRequests.");
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_TIME;
                             reset_simulation_time = false;
@@ -652,8 +652,9 @@ namespace module::platform {
         // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
         // (which is something we do for the walk optimisation), so reset our local times
         if (sim_delta > 0 && sensor_measurements.time == 0) {
-            std::cout << "webots sim time reset to zero, resetting local sim_time. time before reset: "
-                      << current_sim_time << std::endl;
+            log<NUClear::DEBUG>(
+                fmt::format("Webots sim time reset to zero, resetting local sim_time. time before reset: {}",
+                    current_sim_time);
             sim_delta         = 0;
             real_delta        = 0;
             current_sim_time  = 0;
