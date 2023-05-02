@@ -1,0 +1,3 @@
+gravity:
+  MIN: 0.5
+  MAX: 9.2

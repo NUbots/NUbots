@@ -1,0 +1,43 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message.support.optimisation;
+
+message NSGA2EvaluationParameters {
+    repeated double real_params = 1;
+    repeated bool   bool_params = 2;
+}
+
+// Request an individual be created with the following parameters
+message NSGA2EvaluationRequest {
+    int32                     id                   = 1;
+    int32                     generation           = 2;
+    string                    task                 = 3;
+    string                    task_config_path     = 4;
+    int32                     trial_duration_limit = 5;
+    NSGA2EvaluationParameters parameters           = 6;
+}
+
+// Check if Optimiser is ready to go (not busy evaluating)
+message NSGA2EvaluatorReadinessQuery {}
+
+// Announce the NSGA2 algorithm is finished
+message NSGA2Terminate {}

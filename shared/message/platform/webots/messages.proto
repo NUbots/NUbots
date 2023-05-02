@@ -100,6 +100,9 @@ message VisionGroundTruth {
     bool exists = 1;
     /// Vector from the world to the ball in world space.
     fvec3 rBWw = 2;
+    // // NUbots-specific, used for the walk optimisation
+    // message OptimisationRobotPosition {
+    //     vec3 value = 1;
 }
 
 message SensorMeasurements {
@@ -119,6 +122,10 @@ message SensorMeasurements {
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
     OdometryGroundTruth odometry_ground_truth = 100;
     VisionGroundTruth   vision_ground_truth   = 101;
+
+    // NUbots-specific, used for the walk optimisation
+    OptimisationRobotPosition robot_position = 20;
+    bool                      reset_done     = 21;
 }
 
 message MotorPosition {
@@ -161,6 +168,17 @@ message CameraExposure {
     double exposure = 2;  // photometric exposure of the scene in joule per square meter [J/m^2]
 }
 
+// NUbots-specific, used for the walk optimisation
+message OptimisationCommand {
+    enum CommandType {
+        NO_COMMAND  = 0;
+        RESET_WORLD = 1;
+        RESET_TIME  = 2;
+        TERMINATE   = 3;
+    }
+    CommandType command = 1;
+}
+
 message ActuatorRequests {
     repeated MotorPosition  motor_positions   = 1;
     repeated MotorVelocity  motor_velocities  = 2;
@@ -170,4 +188,7 @@ message ActuatorRequests {
     repeated SensorTimeStep sensor_time_steps = 6;
     repeated CameraQuality  camera_qualities  = 7;
     repeated CameraExposure camera_exposures  = 8;
+
+    // NUbots-specific, used for the walk optimisation
+    OptimisationCommand optimisation_command = 20;
 }

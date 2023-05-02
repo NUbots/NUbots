@@ -32,6 +32,8 @@
 #include "message/input/Sensors.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/platform/webots/WebotsResetDone.hpp"
+#include "message/platform/webots/WebotsTimeUpdate.hpp"
 #include "message/platform/webots/messages.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -67,9 +69,13 @@ namespace module::platform {
     using message::platform::webots::MotorPosition;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::OdometryGroundTruth;
+    using message::platform::webots::OptimisationCommand;
+    using message::platform::webots::OptimisationRobotPosition;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
+    using message::platform::webots::WebotsResetDone;
+    using message::platform::webots::WebotsTimeUpdate;
 
     using utility::input::ServoID;
     using utility::platform::getRawServo;
@@ -406,6 +412,26 @@ namespace module::platform {
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(targets);
         });
+
+        on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
+            const int msg_command = msg.command;
+            switch (msg_command) {
+                case OptimisationCommand::CommandType::RESET_WORLD:
+                    // Set the reset world flag to send the reset command to webots with the next ActuatorRequests
+                    reset_simulation_world = true;
+                    break;
+
+                case OptimisationCommand::CommandType::RESET_TIME:
+                    // Set the reset flag to send the reset command to webots with the next ActuatorRequests
+                    reset_simulation_time = true;
+                    break;
+
+                case OptimisationCommand::CommandType::TERMINATE:
+                    // Set the termination flag to send the terminate command to webots with the next ActuatorRequests
+                    terminate_simulation = true;
+                    break;
+            }
+        });
     }
 
     void Webots::setup_connection() {
@@ -566,6 +592,29 @@ namespace module::platform {
                             actuator_requests.motor_pids.emplace_back(
                                 MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
                         }
+
+                        // Set the terminate command if the flag is set to terminate the simulator, used by the walk
+                        // simulator
+                        if (terminate_simulation) {
+                            log<NUClear::DEBUG>("Sending terminate on ActuatorRequests.");
+                            actuator_requests.optimisation_command.command =
+                                OptimisationCommand::CommandType::TERMINATE;
+                            terminate_simulation = false;
+                        }
+
+                        // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
+                        if (reset_simulation_world) {
+                            std::cout << "Sending RESET_WORLD to ActuatorRequests" << std::endl;
+                            actuator_requests.optimisation_command.command =
+                                OptimisationCommand::CommandType::RESET_WORLD;
+                            reset_simulation_world = false;
+                        }
+                        else if (reset_simulation_time) {
+                            std::cout << "Sending RESET_TIME to ActuatorRequests" << std::endl;
+                            actuator_requests.optimisation_command.command =
+                                OptimisationCommand::CommandType::RESET_TIME;
+                            reset_simulation_time = false;
+                        }
                     }
 
                     // Serialise ActuatorRequests
@@ -602,6 +651,20 @@ namespace module::platform {
         // ****************************** TIME **************************************
         // Deal with time first
 
+        // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
+        // (which is something we do for the walk optimisation), so reset our local times
+        if (sim_delta > 0 && sensor_measurements.time == 0) {
+            std::cout << "webots sim time reset to zero, resetting local sim_time. time before reset: "
+                      << current_sim_time << std::endl;
+            sim_delta         = 0;
+            real_delta        = 0;
+            current_sim_time  = 0;
+            current_real_time = 0;
+
+            // Reset the local raw sensors buffer
+            emit(std::make_unique<ResetWebotsServos>());
+        }
+
         // Save our previous deltas
         const uint32_t prev_sim_delta  = sim_delta;
         const uint64_t prev_real_delta = real_delta;
@@ -622,6 +685,14 @@ namespace module::platform {
         // Update our current times
         current_sim_time  = sensor_measurements.time;
         current_real_time = sensor_measurements.real_time;
+
+        // Emit the webots time update
+        auto time_update_msg        = std::make_unique<WebotsTimeUpdate>();
+        time_update_msg->sim_time   = current_sim_time;
+        time_update_msg->real_time  = current_real_time;
+        time_update_msg->sim_delta  = sim_delta;
+        time_update_msg->real_delta = real_delta;
+        emit(time_update_msg);
 
         // ************************* DEBUGGING LOGS *********************************
         log<NUClear::TRACE>("received SensorMeasurements:");
@@ -849,6 +920,18 @@ namespace module::platform {
                 image->vision_ground_truth = sensor_measurements.vision_ground_truth;
             }
             emit(image);
+        }
+
+        // Create and emit the OptimisationRobotPosition message used by the walk optimiser
+        auto robotPosition     = std::make_unique<OptimisationRobotPosition>();
+        robotPosition->value.X = sensor_measurements.robot_position.value.X;
+        robotPosition->value.Y = sensor_measurements.robot_position.value.Y;
+        robotPosition->value.Z = sensor_measurements.robot_position.value.Z;
+        emit(robotPosition);
+
+        // Create and emit the WebotsResetDone message used by the walk optimiser
+        if (sensor_measurements.reset_done) {
+            emit(std::make_unique<WebotsResetDone>());
         }
     }
 }  // namespace module::platform
