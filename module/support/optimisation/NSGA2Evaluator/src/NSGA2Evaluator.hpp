@@ -62,7 +62,7 @@ namespace module {
                 std::unique_ptr<EvaluatorTask> task;
 
                 /// @brief Subsumption priority ID for this module
-                size_t subsumptionId;
+                size_t subsumption_id;
 
                 /// @brief The number of the current generation
                 int generation = 0;
@@ -71,7 +71,7 @@ namespace module {
                 int individual = 0;
 
                 /// @brief Keeps track of the last messages we received
-                NSGA2EvaluationRequest lastEvalRequestMsg;
+                NSGA2EvaluationRequest last_eval_request_msg;
 
                 /// @brief Send the evaluated fitness scores
                 /// @param scores The evaluated fitness scores for the current individual (sway, distance travelled)

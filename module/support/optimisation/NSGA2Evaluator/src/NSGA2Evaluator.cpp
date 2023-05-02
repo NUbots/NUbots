@@ -57,11 +57,11 @@ namespace module {
             using utility::support::Expression;
 
             NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
-                    log<NUClear::INFO>("Setting up the NSGA2 evaluator");
+                : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
+                log<NUClear::INFO>("Setting up the NSGA2 evaluator");
 
                 emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
-                    subsumptionId,
+                    subsumption_id,
                     "NSGA2 Evaluator",
                     {std::pair<float, std::set<LimbID>>(
                         1,
@@ -69,13 +69,13 @@ namespace module {
                     [this](const std::set<LimbID>& given_limbs) {
                         if (given_limbs.find(LimbID::LEFT_LEG) != given_limbs.end()) {
                             // Enable the walk engine.},
-                            emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+                            emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumption_id));
                         }
                     },
                     [this](const std::set<LimbID>& taken_limbs) {
                         if (taken_limbs.find(LimbID::LEFT_LEG) != taken_limbs.end()) {
                             // Shut down the walk engine, since we don't need it right now.
-                            emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
+                            emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumption_id));
                         }
                     },
                     [this](const std::set<ServoID>&) {}}));
@@ -117,12 +117,15 @@ namespace module {
                             Finished();
                             break;
                         default:
-                            log<NUClear::WARN>("Unable to transition to unknown state from", current_state, "on", event);
+                            log<NUClear::WARN>("Unable to transition to unknown state from",
+                                               current_state,
+                                               "on",
+                                               event);
                     }
                 });
 
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
-                    lastEvalRequestMsg = request;
+                    last_eval_request_msg = request;
                     emit(std::make_unique<Event>(Event::EvaluateRequest));
                 });
 
@@ -163,18 +166,18 @@ namespace module {
                         if (current_state == State::EVALUATING) {
                             task->processOptimisationRobotPosition(position);
                         }
-                });
+                    });
             }
 
             NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State current_state,
                                                                    NSGA2Evaluator::Event event) {
                 switch (current_state) {
-                    case State::WAITING_FOR_REQUEST         : return TransitionEvents(event);
-                    case State::SETTING_UP_TRIAL            : return TransitionEvents(event);
-                    case State::RESETTING_SIMULATION        : return TransitionEvents(event);
-                    case State::EVALUATING                  : return TransitionEvents(event);
-                    case State::TERMINATING_EARLY           : return TransitionEvents(event);
-                    case State::TERMINATING_GRACEFULLY      : return TransitionEvents(event);
+                    case State::WAITING_FOR_REQUEST: return TransitionEvents(event);
+                    case State::SETTING_UP_TRIAL: return TransitionEvents(event);
+                    case State::RESETTING_SIMULATION: return TransitionEvents(event);
+                    case State::EVALUATING: return TransitionEvents(event);
+                    case State::TERMINATING_EARLY: return TransitionEvents(event);
+                    case State::TERMINATING_GRACEFULLY: return TransitionEvents(event);
                     case State::FINISHED:
                         // Arguably this should return FINISHED regardless of event, unless we want to be able to
                         // reset
@@ -191,14 +194,14 @@ namespace module {
 
             NSGA2Evaluator::State NSGA2Evaluator::TransitionEvents(NSGA2Evaluator::Event event) {
                 switch (event) {
-                    case Event::EvaluateRequest     : return State::SETTING_UP_TRIAL;
-                    case Event::CheckReady          : return State::WAITING_FOR_REQUEST;
-                    case Event::TerminateEvaluation : return State::FINISHED;
-                    case Event::TrialSetupDone      : return State::RESETTING_SIMULATION;
-                    case Event::ResetDone           : return State::EVALUATING;
-                    case Event::TerminateEarly      : return State::TERMINATING_EARLY;
-                    case Event::TrialCompleted      : return State::TERMINATING_GRACEFULLY;
-                    case Event::FitnessScoresSent   : return State::WAITING_FOR_REQUEST;
+                    case Event::EvaluateRequest: return State::SETTING_UP_TRIAL;
+                    case Event::CheckReady: return State::WAITING_FOR_REQUEST;
+                    case Event::TerminateEvaluation: return State::FINISHED;
+                    case Event::TrialSetupDone: return State::RESETTING_SIMULATION;
+                    case Event::ResetDone: return State::EVALUATING;
+                    case Event::TerminateEarly: return State::TERMINATING_EARLY;
+                    case Event::TrialCompleted: return State::TERMINATING_GRACEFULLY;
+                    case Event::FitnessScoresSent: return State::WAITING_FOR_REQUEST;
 
                     default: return State::UNKNOWN;
                 }
@@ -214,26 +217,26 @@ namespace module {
             void NSGA2Evaluator::SettingUpTrial() {
                 log<NUClear::DEBUG>("SettingUpTrial");
 
-                generation = lastEvalRequestMsg.generation;
-                individual = lastEvalRequestMsg.id;
+                generation = last_eval_request_msg.generation;
+                individual = last_eval_request_msg.id;
 
-                if (lastEvalRequestMsg.task == "walk") {
+                if (last_eval_request_msg.task == "walk") {
                     task = std::make_unique<WalkEvaluator>();
                 }
-                else if (lastEvalRequestMsg.task == "strafe") {
+                else if (last_eval_request_msg.task == "strafe") {
                     task = std::make_unique<StrafeEvaluator>();
                 }
-                else if (lastEvalRequestMsg.task == "rotation") {
+                else if (last_eval_request_msg.task == "rotation") {
                     task = std::make_unique<RotationEvaluator>();
                 }
-                else if (lastEvalRequestMsg.task == "stand") {
+                else if (last_eval_request_msg.task == "stand") {
                     task = std::make_unique<StandEvaluator>();
                 }
                 else {
-                    log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
+                    log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
                 }
 
-                task->setUpTrial(lastEvalRequestMsg);
+                task->setUpTrial(last_eval_request_msg);
 
                 emit(std::make_unique<Event>(Event::TrialSetupDone));
             }
@@ -255,14 +258,12 @@ namespace module {
                 log<NUClear::DEBUG>("Evaluating");
 
                 if (event == Event::ResetDone) {
-                    if (lastEvalRequestMsg.task == "walk"    ||
-                        lastEvalRequestMsg.task == "stand"   ||
-                        lastEvalRequestMsg.task == "strafe"  ||
-                        lastEvalRequestMsg.task == "rotation") {
-                        task->evaluatingState(subsumptionId, this);
+                    if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
+                        || last_eval_request_msg.task == "strafe" || last_eval_request_msg.task == "rotation") {
+                        task->evaluatingState(subsumption_id, this);
                     }
                     else {
-                        log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
+                        log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
                     }
                 }
             }
@@ -286,9 +287,9 @@ namespace module {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
                 // Send a zero walk command to stop walking
-                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
+                emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool early_termination = true;
-                auto fitness_scores    = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
+                auto fitness_scores = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
                 emit(fitness_scores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
@@ -299,9 +300,9 @@ namespace module {
                 log<NUClear::DEBUG>("TerminatingGracefully");
 
                 // Send a zero walk command to stop walking
-                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
+                emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool early_termination = false;
-                auto fitness_scores    = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
+                auto fitness_scores = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
                 emit(fitness_scores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
