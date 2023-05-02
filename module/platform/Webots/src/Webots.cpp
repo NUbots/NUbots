@@ -908,11 +908,9 @@ namespace module::platform {
         }
 
         // Create and emit the OptimisationRobotPosition message used by the walk optimiser
-        auto robotPosition     = std::make_unique<OptimisationRobotPosition>();
-        robotPosition->value.X = sensor_measurements.robot_position.value.X;
-        robotPosition->value.Y = sensor_measurements.robot_position.value.Y;
-        robotPosition->value.Z = sensor_measurements.robot_position.value.Z;
-        emit(robotPosition);
+        auto robot_position   = std::make_unique<OptimisationRobotPosition>();
+        robot_position->value = sensor_measurements.robot_position.value;
+        emit(robot_position);
 
         // Create and emit the WebotsResetDone message used by the walk optimiser
         if (sensor_measurements.reset_done) {
