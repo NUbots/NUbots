@@ -95,16 +95,16 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.25
+  x: 0.3
   # Maximal step length in Y
   # (in m, [0:1])
-  y: 0.25
+  y: 0.1
   # Maximal step turn in yaw
   # (in rad, [0:1.5])
-  z: 0.2
+  z: 0.1
   # Maximal step length in X and Y combined
   # (in m, [0:1])
-  xy: 0.2
+  xy: 0.1
 
 imu:
   # Activates the IMU to stop the walking when the robot gets unstable
@@ -127,5 +127,5 @@ arms:
   left_shoulder_pitch: 2.25
   right_shoulder_roll: -0.176
   left_shoulder_roll: 0.176
-  right_elbow: -1.8
-  left_elbow: -1.8
+  right_elbow: -1
+  left_elbow: -1
