@@ -39,9 +39,7 @@ namespace module {
             }
 
             void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
-                robot_position.x() = position.value.X;
-                robot_position.y() = position.value.Y;
-                robot_position.z() = position.value.Z;
+                robot_position = position.value;
             }
 
             void StandEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
