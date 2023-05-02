@@ -654,7 +654,7 @@ namespace module::platform {
         if (sim_delta > 0 && sensor_measurements.time == 0) {
             log<NUClear::DEBUG>(
                 fmt::format("Webots sim time reset to zero, resetting local sim_time. time before reset: {}",
-                    current_sim_time);
+                            current_sim_time));
             sim_delta         = 0;
             real_delta        = 0;
             current_sim_time  = 0;
