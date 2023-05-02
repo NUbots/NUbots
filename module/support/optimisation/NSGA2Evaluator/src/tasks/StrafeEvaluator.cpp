@@ -40,14 +40,10 @@ namespace module {
             void StrafeEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initial_position_set) {
                     initial_position_set       = true;
-                    initial_robot_position.x() = position.value.X;
-                    initial_robot_position.y() = position.value.Y;
-                    initial_robot_position.z() = position.value.Z;
+                    initial_robot_position = position.value;
                 }
 
-                robot_position.x() = position.value.X;
-                robot_position.y() = position.value.Y;
-                robot_position.z() = position.value.Z;
+                robot_position = position.value;
             }
 
             void StrafeEvaluator::setUpTrial(const NSGA2EvaluationRequest& current_request) {
