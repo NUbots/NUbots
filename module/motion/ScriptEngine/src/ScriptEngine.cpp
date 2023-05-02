@@ -57,7 +57,6 @@ namespace module::motion {
                 }
                 scriptList.push_back(script->second);
             }
-
             emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(command.sourceId,
                                                                 scriptList,
                                                                 command.duration_modifier,
