@@ -8,7 +8,6 @@
 namespace module::support {
 
 using extension::Configuration;
-//using utility::voronoi;
 using message::platform::webots::SensorMeasurements;
 using message::platform::webots::LocalisationGroundTruth;
 
@@ -28,31 +27,45 @@ using message::platform::webots::LocalisationGroundTruth;
             //for(auto& i : lgt.rRFf) {
             for(size_t i = 0; i < lgt.rRFf.size(); i++) {
                 if(i < cfg.robots_each_side){
-                    NUClear::log<NUClear::DEBUG>("Team A Robot ", i+1, " position ", Eigen::Vector3f(lgt.rRFf[i]).transpose());
+                    // NUClear::log<NUClear::DEBUG>("Team A Robot ", i+1, " position ", Eigen::Vector3f(lgt.rRFf[i]).transpose());
                     team_A.emplace_back(Eigen::Vector3f(lgt.rRFf[i]));
                 }
                 else {
-                    NUClear::log<NUClear::DEBUG>("Team B Robot ", i+1, " position ", Eigen::Vector3f(lgt.rRFf[i]).transpose());
+                    // NUClear::log<NUClear::DEBUG>("Team B Robot ", i+1, " position ", Eigen::Vector3f(lgt.rRFf[i]).transpose());
                     team_B.emplace_back(Eigen::Vector3f(lgt.rRFf[i]));
                 }
             }
 
             // calculate voronoi from team_A and team_B
 
-            // std::vector<utility::voronoi::Site*> sites = {
-            //     new utility::voronoi::Site(0, 0),
-            //     new utility::voronoi::Site(1, 1),
-            //     new utility::voronoi::Site(2, 2),
-            //     new utility::voronoi::Site(3, 1),
-            //     new utility::voronoi::Site(4, 0)
-            // };
+            std::vector<utility::voronoi::Site*> sites; // = {
+            for(int i = 0; i < team_A.size(); i++){
+                sites.push_back(new utility::voronoi::Site(team_A[i].x(), team_A[i].y()));
+                NUClear::log<NUClear::DEBUG>("Robot", i, "Position", team_A[i].x(), ",", team_A[i].y());
+            }
 
-            // utility::voronoi::Voronoi voronoi(sites);
-            // std::vector<utility::voronoi::Edge*> edges = voronoi.compute();
+            // sites.push_back(new utility::voronoi::Site{0, 0});
+            // sites.push_back(new utility::voronoi::Site{1, 1});
+            // sites.push_back(new utility::voronoi::Site{2, 2});
+            // sites.push_back(new utility::voronoi::Site{3, 3});
 
-            // for (auto edge : edges) {
-            //     log<NUClear::DEBUG>("(", edge->a->x, ", ", edge->a->y, ") - (", edge->b->x, ", ", edge->b->y, ")");
-            // }
+           // on<Trigger<>, Single>().then([this] {
+            utility::voronoi::Voronoi vd;
+            vd.computeVoronoi(sites);
+            std::vector<utility::voronoi::Edge> edges = vd.get_edges();
+            int n = 0;
+            if(!sites.empty()) {NUClear::log<NUClear::DEBUG>("Edge:", n);
+                for (const utility::voronoi::Edge& edge : edges) {
+                    NUClear::log<NUClear::DEBUG>("Edge: ");
+                    NUClear::log<NUClear::DEBUG>("(", edge.start->x, ", ", edge.start->y, ")");
+                    NUClear::log<NUClear::DEBUG>(" to ");
+                    NUClear::log<NUClear::DEBUG>("(", edge.end->x, ", ", edge.end->y, ")");
+
+                    delete edge.start;
+                    delete edge.end;
+                    n++;
+                }
+            }//});
 
 
             // Emit plotjuggler messages to visualise the voronoi diagram

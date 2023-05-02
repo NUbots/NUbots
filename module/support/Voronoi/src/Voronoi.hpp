@@ -6,6 +6,8 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "utility/voronoi/Voronoi.hpp"
+
 namespace module::support {
 
     class Voronoi : public NUClear::Reactor {
@@ -14,6 +16,8 @@ namespace module::support {
         struct Config {
             size_t robots_each_side = 0;
         } cfg;
+
+        //utility::voronoi::Voronoi Voronoi vd;
 
     public:
         /// @brief Called by the powerplant to build and setup the Voronoi reactor.
