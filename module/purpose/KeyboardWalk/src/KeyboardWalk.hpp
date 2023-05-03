@@ -17,6 +17,7 @@
 
 #include "utility/input/LimbID.hpp"
 
+
 namespace module::purpose {
 
     /// @brief Enum for log colours
@@ -90,6 +91,9 @@ namespace module::purpose {
 
         /// @brief Quits the program
         void quit();
+        
+        /// @brief Executes Clap Open move
+        void clap_open(); 
 
         /// @brief Emits task to kick with specified leg
         /// @param l Leg to kick with (LEFT or RIGHT)

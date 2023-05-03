@@ -10,6 +10,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
@@ -17,10 +18,13 @@
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 
+#include "utility/skill/Script.hpp"
+
 namespace module::purpose {
 
     using extension::Configuration;
     using extension::behaviour::Task;
+    using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::skill::Kick;
     using message::skill::Look;
@@ -29,6 +33,7 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using NUClear::message::LogMessage;
     using utility::input::LimbID;
+    using utility::skill::load_script;
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -102,6 +107,7 @@ namespace module::purpose {
                 case KEY_UP: look_up(); break;
                 case KEY_DOWN: look_down(); break;
                 case 'q': quit(); return;
+                case '1': clap_open(); break;
                 default:
                     log<NUClear::ERROR>("Unknown Command");
                     print_status();
@@ -328,6 +334,11 @@ namespace module::purpose {
     void KeyboardWalk::quit() {
         endwin();
         std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
+    }
+    
+    void KeyboardWalk::clap_open() {
+    	emit<Task>(load_script<BodySequence>("StepClap1.yaml"));
+    	log<NUClear::INFO>("Clap Open Move");
     }
 
     void KeyboardWalk::update_command() {
