@@ -122,25 +122,59 @@ namespace module::platform::openCR {
          */
 
         float position(uint8_t id,
-                       uint32_t position,
+                       uint32_t value,
                        std::array<int8_t, 20> servo_direction,
                        std::array<double, 20> servo_offset) {
             // Base unit: 0.088 degrees = 0.0015358897 rad
             // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
-            return utility::math::angle::normalizeAngle(
-                (utility::math::clamp(uint32_t(0), position, uint32_t(4095)) * 0.0015358897f * servo_direction[id])
-                + servo_offset[id]);
+
+            /**
+             * Servos are given position commands in terms of a 0-360deg rotation
+             * but the angles are normalised to (-pi, pi] so we need to apply a
+             * correction before we convert I think.
+             *
+             * (This is based on what is done in the cm740 hwIO branch.)
+             *
+             * We also do an additional check to ensure we don't cause integer underflow
+             * although this should never happen in practice.
+             */
+            value -= (value < 2048) ? value : 2048;
+
+            // Ensure we're working within our expected range
+            value = utility::math::clamp(uint32_t(0), value, uint32_t(4095));
+
+            // Do the actual converstion to angle
+            float angle = position * 0.0015358897f;
+
+            // Apply the servo specific operations
+            angle *= servo_direction[id];
+            angle += servo_offset[id];
+
+            // Normalise the angle to (-pi, pi] for internal use
+            return utility::math::angle::normalizeAngle(angle);
         }
 
         uint32_t position(uint8_t id,
-                          float position,
+                          float angle,
                           std::array<int8_t, 20> servo_direction,
                           std::array<double, 20> servo_offset) {
             // Base unit: 0.088 degrees = 0.0015358897 rad
             // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
-            float angle = utility::math::angle::normalizeAngle((position - servo_offset[id]) * servo_direction[id]);
 
-            return uint32_t(utility::math::clamp(0.0f, angle / 0.0015358897f, 4095.0f));
+            // first undo the servo specific operations
+            angle -= servo_offset[id];
+            angle *= servo_direction[id];
+
+            // Normalise the angle to (-pi, pi] in case the offset changed this
+            angle = utility::math::angle::normalizeAngle(angle);
+
+            // Do the actual conversion to the control table value
+            uint32_t value = angle / 0.0015358897f;
+
+            // Apply the correction as per the block comment in the function above.
+            value += 2048;
+
+            return utility::math::clamp(uint32_t(0), value, uint32_t(4095));
         }
 
 
