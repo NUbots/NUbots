@@ -114,6 +114,13 @@ namespace module::platform::openCR {
             return uint8_t(utility::math::clamp(9.5f, voltage * 10.f, 16.0f));
         }
 
+        /**
+         * @todo the servo offset can now be replaced by the Homing Offset in the control table I think
+         *       This still requires some verification and I think the offset may be the opposite of what
+         *       we currently have (i.e. will be added instead of subtracted).
+         *       See https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#homing-offset
+         */
+
         float position(uint8_t id,
                        uint32_t position,
                        std::array<int8_t, 20> servo_direction,
