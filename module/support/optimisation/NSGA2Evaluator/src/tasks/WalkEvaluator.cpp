@@ -37,13 +37,13 @@ namespace module {
             void WalkEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
                 if (checkForFall(sensors)) {
-                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
+                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
                 }
             }
 
             void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initial_position_set) {
-                    initial_position_set       = true;
+                    initial_position_set   = true;
                     initial_robot_position = position.value;
                 }
 
@@ -102,7 +102,7 @@ namespace module {
                 save_file_stream << YAML::Dump(walk_config);
                 save_file_stream.close();
 
-                    // Get constant variables
+                // Get constant variables
                 YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
                 gravity_Max = eval_config["gravity"]["MAX"].as<float>();
@@ -154,7 +154,7 @@ namespace module {
             std::vector<double> WalkEvaluator::calculateScores() {
                 auto robot_distance_travelled = std::fabs(initial_robot_position.x() - robot_position.x());
                 return {
-                    max_field_plane_sway,            // For now, we want to reduce this
+                    max_field_plane_sway,           // For now, we want to reduce this
                     1.0 / robot_distance_travelled  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
@@ -167,8 +167,8 @@ namespace module {
                 double trial_duration = sim_time - trial_start_time;
                 return {
                     trial_duration - max_trial_duration,  // Punish for falling over, based on how long the trial took
-                                                         // (more negative is worse)
-                    0.0                                  // Second constraint unused, fixed to 0
+                                                          // (more negative is worse)
+                    0.0                                   // Second constraint unused, fixed to 0
                 };
             }
 
@@ -200,7 +200,8 @@ namespace module {
                 auto accelerometer = sensors.accelerometer;
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)
-                double field_plane_sway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
+                double field_plane_sway =
+                    std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
                 if (field_plane_sway > max_field_plane_sway) {
                     max_field_plane_sway = field_plane_sway;
                 }

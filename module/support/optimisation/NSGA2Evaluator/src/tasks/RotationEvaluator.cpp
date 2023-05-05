@@ -34,7 +34,7 @@ namespace module {
 
                 updateMaxFieldPlaneSway(sensors);
                 if (checkForFall(sensors)) {
-                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
+                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
                 }
 
                 double sim_time = evaluator->sim_time;
@@ -46,7 +46,7 @@ namespace module {
 
             void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initial_position_set) {
-                    initial_position_set       = true;
+                    initial_position_set   = true;
                     initial_robot_position = position.value;
                 }
 
@@ -105,7 +105,7 @@ namespace module {
                 save_file_stream << YAML::Dump(walk_config);
                 save_file_stream.close();
 
-                    // Get constant variables
+                // Get constant variables
                 YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
                 gravity_Max = eval_config["gravity"]["MAX"].as<float>();
@@ -149,7 +149,7 @@ namespace module {
                 std::unique_ptr<NSGA2FitnessScores> fitness_scores = std::make_unique<NSGA2FitnessScores>();
                 fitness_scores->id                                 = individual;
                 fitness_scores->generation                         = generation;
-                fitness_scores->obj_score                           = scores;
+                fitness_scores->obj_score                          = scores;
                 fitness_scores->constraints                        = constraints;
                 return fitness_scores;
             }
@@ -157,7 +157,7 @@ namespace module {
             std::vector<double> RotationEvaluator::calculateScores() {
 
                 return {
-                    max_field_plane_sway,     // For now, we want to reduce this
+                    max_field_plane_sway,  // For now, we want to reduce this
                     1.0 / std::abs(theta)  // Minimiser!!!
                 };
             }
@@ -170,8 +170,8 @@ namespace module {
                 double trial_duration = sim_time - trial_start_time;
                 return {
                     trial_duration - max_trial_duration,  // Punish for falling over, based on how long the trial took
-                                                         // (more negative is worse)
-                    0.0                                  // Second constraint unused, fixed to 0
+                                                          // (more negative is worse)
+                    0.0                                   // Second constraint unused, fixed to 0
                 };
             }
 
@@ -203,7 +203,8 @@ namespace module {
                 auto accelerometer = sensors.accelerometer;
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)
-                double field_plane_sway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
+                double field_plane_sway =
+                    std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
                 if (field_plane_sway > max_field_plane_sway) {
                     max_field_plane_sway = field_plane_sway;
                 }

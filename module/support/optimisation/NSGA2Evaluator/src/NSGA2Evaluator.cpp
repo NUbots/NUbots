@@ -126,14 +126,14 @@ namespace module {
 
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
                     last_eval_request_msg = request;
-                    emit(std::make_unique<Event>(Event::EvaluateRequest));
+                    emit(std::make_unique<Event>(Event::EVALUATE_REQUEST));
                 });
 
                 on<Trigger<NSGA2TrialExpired>, Single>().then([this](const NSGA2TrialExpired& message) {
                     // Only start terminating gracefully if the trial that just expired is the current one
                     // (and not previous ones that have terminated early)
                     if (message.generation == generation && message.individual == individual) {
-                        emit(std::make_unique<Event>(Event::TrialCompleted));
+                        emit(std::make_unique<Event>(Event::TRIAL_COMPLETED));
                     }
                 });
 
@@ -145,7 +145,7 @@ namespace module {
 
                 on<Trigger<WebotsResetDone>, Single>().then([this](const WebotsResetDone&) {
                     log<NUClear::INFO>("Reset done");
-                    emit(std::make_unique<Event>(Event::ResetDone));
+                    emit(std::make_unique<Event>(Event::RESET_DONE));
                 });
 
                 on<Trigger<WebotsTimeUpdate>, Single>().then(
@@ -153,12 +153,12 @@ namespace module {
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this]() {
                     // NSGA2Terminate is emitted when we've finished all generations and all individuals
-                    emit(std::make_unique<Event>(Event::TerminateEvaluation));
+                    emit(std::make_unique<Event>(Event::TERMINATE_EVALUATION));
                 });
 
                 on<Trigger<NSGA2EvaluatorReadinessQuery>, Single>().then([this]() {
                     // NSGA2EvaluatorReadinessQuery is the optimiser checking if we're ready
-                    emit(std::make_unique<Event>(Event::CheckReady));
+                    emit(std::make_unique<Event>(Event::CHECK_READY));
                 });
 
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
@@ -181,7 +181,7 @@ namespace module {
                     case State::FINISHED:
                         // Arguably this should return FINISHED regardless of event, unless we want to be able to
                         // reset
-                        if (event == Event::FitnessScoresSent) {
+                        if (event == Event::FITNESS_SCORES_SENT) {
                             return State::FINISHED;
                         }
                         else {
@@ -194,14 +194,14 @@ namespace module {
 
             NSGA2Evaluator::State NSGA2Evaluator::TransitionEvents(NSGA2Evaluator::Event event) {
                 switch (event) {
-                    case Event::EvaluateRequest: return State::SETTING_UP_TRIAL;
-                    case Event::CheckReady: return State::WAITING_FOR_REQUEST;
-                    case Event::TerminateEvaluation: return State::FINISHED;
-                    case Event::TrialSetupDone: return State::RESETTING_SIMULATION;
-                    case Event::ResetDone: return State::EVALUATING;
-                    case Event::TerminateEarly: return State::TERMINATING_EARLY;
-                    case Event::TrialCompleted: return State::TERMINATING_GRACEFULLY;
-                    case Event::FitnessScoresSent: return State::WAITING_FOR_REQUEST;
+                    case Event::EVALUATE_REQUEST: return State::SETTING_UP_TRIAL;
+                    case Event::CHECK_READY: return State::WAITING_FOR_REQUEST;
+                    case Event::TERMINATE_EVALUATION: return State::FINISHED;
+                    case Event::TRIAL_SETUP_DONE: return State::RESETTING_SIMULATION;
+                    case Event::RESET_DONE: return State::EVALUATING;
+                    case Event::TERMINATE_EARLY: return State::TERMINATING_EARLY;
+                    case Event::TRIAL_COMPLETED: return State::TERMINATING_GRACEFULLY;
+                    case Event::FITNESS_SCORES_SENT: return State::WAITING_FOR_REQUEST;
 
                     default: return State::UNKNOWN;
                 }
@@ -238,7 +238,7 @@ namespace module {
 
                 task->setUpTrial(last_eval_request_msg);
 
-                emit(std::make_unique<Event>(Event::TrialSetupDone));
+                emit(std::make_unique<Event>(Event::TRIAL_SETUP_DONE));
             }
 
             /// @brief Handle the RESETTING_SIMULATION state
@@ -257,7 +257,7 @@ namespace module {
             void NSGA2Evaluator::Evaluating(NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
 
-                if (event == Event::ResetDone) {
+                if (event == Event::RESET_DONE) {
                     if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
                         || last_eval_request_msg.task == "strafe" || last_eval_request_msg.task == "rotation") {
                         task->evaluatingState(subsumption_id, this);
@@ -292,7 +292,7 @@ namespace module {
                 auto fitness_scores = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
                 emit(fitness_scores);
 
-                emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
+                emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
             }
 
             /// @brief Handle the TERMINATING_GRACEFULLY state
@@ -305,7 +305,7 @@ namespace module {
                 auto fitness_scores = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
                 emit(fitness_scores);
 
-                emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
+                emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
             }
 
             void NSGA2Evaluator::Finished() {

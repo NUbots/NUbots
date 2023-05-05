@@ -41,18 +41,18 @@ namespace module {
 
                 enum Event {
                     // From webots
-                    ResetDone = 0,
+                    RESET_DONE = 0,
 
                     // From optimiser
-                    CheckReady          = 1,
-                    EvaluateRequest     = 2,
-                    TerminateEvaluation = 3,
+                    CHECK_READY          = 1,
+                    EVALUATE_REQUEST     = 2,
+                    TERMINATE_EVALUATION = 3,
 
                     // Internal
-                    TrialSetupDone    = 4,
-                    TerminateEarly    = 5,
-                    TrialCompleted    = 6,
-                    FitnessScoresSent = 7
+                    TRIAL_SETUP_DONE    = 4,
+                    TERMINATE_EARLY     = 5,
+                    TRIAL_COMPLETED     = 6,
+                    FITNESS_SCORES_SENT = 7
                 };
 
                 /// @brief The current simulation time
