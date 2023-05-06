@@ -144,7 +144,7 @@ namespace module::platform::openCR {
             value = utility::math::clamp(uint32_t(0), value, uint32_t(4095));
 
             // Do the actual converstion to angle
-            float angle = position * 0.0015358897f;
+            float angle = value * 0.0015358897f;
 
             // Apply the servo specific operations
             angle *= servo_direction[id];
