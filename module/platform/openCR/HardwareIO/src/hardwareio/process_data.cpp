@@ -123,7 +123,23 @@ namespace module::platform::openCR {
 
         servoStates[servoIndex].torqueEnabled = (data.torqueEnable == 1);
         // Servo error status, NOT dynamixel status packet error.
-        servoStates[servoIndex].errorFlags     = data.hardwareErrorStatus;
+        servoStates[servoIndex].errorFlags = data.hardwareErrorStatus;
+        // Print error flags if there is an error
+        /**
+         * Bit      Item	                        Description
+         * Bit 7	-	                            Unused, Always ‘0’
+         * Bit 6	-	                            Unused, Always ‘0’
+         * Bit 5	Overload Error(default)	        Detects that persistent load that exceeds maximum output
+         * Bit 4	Electrical Shock Error(default)	Detects electric shock on the circuit or insufficient power to operate
+         * the motor Bit 3	Motor Encoder Error	            Detects malfunction of the motor encoder Bit 2	Overheating
+         * Error(default)	    Detects that internal temperature exceeds the configured operating temperature
+         * Bit 1	-	                            Unused, Always ‘0’
+         * Bit 0	Input Voltage Error	            Detects that input voltage exceeds the configured operating voltage
+         */
+        if (servoStates[servoIndex].errorFlags != 0) {
+            log<NUClear::ERROR>(
+                fmt::format("Servo {} error: {:#010b}", servoIndex + 1, servoStates[servoIndex].errorFlags));
+        }
         servoStates[servoIndex].presentPWM     = convert::PWM(data.presentPWM);
         servoStates[servoIndex].presentCurrent = convert::current(data.presentCurrent);
         // warning: no idea if the conversion below is correct, just trusting the existing
@@ -133,6 +149,7 @@ namespace module::platform::openCR {
         servoStates[servoIndex].presentVelocity = convert::velocity(data.presentVelocity);
         servoStates[servoIndex].presentPosition =
             convert::position(servoIndex, data.presentPosition, nugus.servo_direction, nugus.servo_offset);
+        log<NUClear::DEBUG>(fmt::format("Servo {}: {}", servoIndex + 1, servoStates[servoIndex].presentPosition));
         servoStates[servoIndex].voltage     = convert::voltage(data.presentVoltage);
         servoStates[servoIndex].temperature = convert::temperature(data.presentTemperature);
         log<NUClear::TRACE>("processServoData END");
