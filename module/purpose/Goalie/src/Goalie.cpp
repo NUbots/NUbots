@@ -8,7 +8,6 @@
 #include "message/purpose/Goalie.hpp"
 #include "message/strategy/DiveToBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
-#include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -21,7 +20,6 @@ namespace module::purpose {
     using message::planning::LookAround;
     using message::strategy::DiveToBall;
     using message::strategy::LookAtBall;
-    using message::strategy::Ready;
     using message::strategy::StandStill;
     using GoalieTask = message::purpose::Goalie;
     using message::purpose::NormalGoalie;

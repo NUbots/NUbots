@@ -24,7 +24,6 @@ Add this module to the role and emit a Goalie Task.
 
 - `message::strategy::NormalGoalie` a Task requesting to play as a Goalie in the normal game state
 - `message::strategy::PenaltyShootoutGoalie` a Task requesting to play as a Goalie in the penalty shootout game state
-- `message::strategy::Ready` a Task requesting to walk to the ready position
 - `message::strategy::StandStill` a Task requesting to stand still and not move
 - `message::planning:::LookAround` a Task requesting to look around for the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball
