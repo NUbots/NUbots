@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # Time to walk forward in ready (in seconds)
 walk_to_ready_time: 12

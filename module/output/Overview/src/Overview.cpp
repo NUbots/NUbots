@@ -91,15 +91,7 @@ namespace module::output {
                     // If we have field information
                     if (field) {
                         // Transform the field state into Hfw
-                        Eigen::Isometry3d Hfw;
-
-                        Eigen::Isometry2d position(field->Hfw);
-                        Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
-
-                        // Rotate field-position.rotation().angle() radians about the Z-axis
-                        Hfw.linear() =
-                            Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(), Eigen::Vector3d::UnitZ())
-                                .toRotationMatrix();
+                        Eigen::Isometry3d Hfw(field->Hfw);
 
                         // Get our torso in field space
                         Eigen::Isometry3d Hft = Hfw * Htw.inverse();

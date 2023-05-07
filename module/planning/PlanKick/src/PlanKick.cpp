@@ -58,8 +58,8 @@ namespace module::planning {
 
                 // CHECK IF CLOSE TO BALL
                 // Get the angle and distance to the ball
-                float ball_angle    = std::abs(std::atan2(ball.rBTt.y(), ball.rBTt.x()));
-                float ball_distance = ball.rBTt.head(2).norm();
+                float ball_angle    = std::abs(std::atan2(ball.rBRr.y(), ball.rBRr.x()));
+                float ball_distance = ball.rBRr.head(2).norm();
 
                 // Need to be near the ball to consider kicking it
                 if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
@@ -67,7 +67,7 @@ namespace module::planning {
                 }
 
                 // CHECK IF FACING POINT TO KICK TO
-                float align_angle = std::abs(std::atan2(kick_to.rPTt.y(), kick_to.rPTt.x()));
+                float align_angle = std::abs(std::atan2(kick_to.rPRr.y(), kick_to.rPRr.x()));
 
                 // Don't kick if we should align but we're not aligned to the target
                 if (align_angle > cfg.target_angle_threshold) {
@@ -88,9 +88,9 @@ namespace module::planning {
                     return;
                 }
 
-                // If the kick leg is forced left, kick left
-                // If the kick leg is auto, kick with left leg if ball is more to the left
-                if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && ball.rBTt.y() > 0.0)) {
+                // If the kick leg is forced left, kick left. If the kick leg is auto,
+                // kick with left leg if ball is more to the left
+                if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && ball.rBRr.y() > 0.0)) {
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
                 }
                 else {  // kick leg is forced right or ball is more to the right and kick leg is auto

@@ -26,7 +26,11 @@ namespace module::planning {
             // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.speed          = config["speed"].as<float>();
+            cfg.max_forward_speed = config["max_forward_speed"].as<float>();
+            cfg.min_forward_speed = config["min_forward_speed"].as<float>();
+            cfg.acceleration      = config["acceleration"].as<float>();
+            cfg.approach_radius   = config["approach_radius"].as<float>();
+
             cfg.max_turn_speed = config["max_turn_speed"].as<float>();
             cfg.min_turn_speed = config["min_turn_speed"].as<float>();
 
@@ -41,16 +45,25 @@ namespace module::planning {
 
         // Path to walk to a particular point
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            Eigen::Vector3f rPTt = walk_to.rPTt;
+            Eigen::Vector3f rPRr = walk_to.rPRr;
 
-            // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
-            Eigen::Vector3f walk_command = rPTt.normalized() * cfg.speed;
+            // If robot getting close to the point, begin to decelerate to minimum speed
+            if (rPRr.head(2).norm() < cfg.approach_radius) {
+                speed -= cfg.acceleration;
+                speed = std::max(speed, cfg.min_forward_speed);
+            }
+            else {
+                // If robot is far away from the point, accelerate to max speed
+                speed += cfg.acceleration;
+                speed = std::max(cfg.min_forward_speed, std::min(speed, cfg.max_forward_speed));
+            }
+
+            // Obtain the unit vector to desired target in robot space and scale by cfg.forward_speed
+            Eigen::Vector3f walk_command = rPRr.normalized() * speed;
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed
-            walk_command.z() = utility::math::clamp(cfg.min_turn_speed,
-                                                    std::atan2(walk_command.y(), walk_command.x()),
-                                                    cfg.max_turn_speed);
+            walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_to.heading, cfg.max_turn_speed);
 
             emit<Task>(std::make_unique<Walk>(walk_command));
         });
