@@ -128,6 +128,11 @@ namespace module::platform::openCR {
             // Base unit: 0.088 degrees = 0.0015358897 rad
             // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
 
+            // Ensure we're working within our expected range
+            // signed instead of unsigned for alter operations
+            int32_t data = int32_t(utility::math::clamp(uint32_t(0), value, uint32_t(4095)));
+
+
             /**
              * Servos are given position commands in terms of a 0-360deg rotation
              * but the angles are normalised to (-pi, pi] so we need to apply a
@@ -138,13 +143,10 @@ namespace module::platform::openCR {
              * We also do an additional check to ensure we don't cause integer underflow
              * although this should never happen in practice.
              */
-            value -= (value < 2048) ? value : 2048;
-
-            // Ensure we're working within our expected range
-            value = utility::math::clamp(uint32_t(0), value, uint32_t(4095));
+            data -= 2048;
 
             // Do the actual converstion to angle
-            float angle = position * 0.0015358897f;
+            float angle = data * 0.0015358897f;
 
             // Apply the servo specific operations
             angle *= servo_direction[id];
