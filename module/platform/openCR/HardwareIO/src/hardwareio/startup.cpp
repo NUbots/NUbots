@@ -13,7 +13,11 @@ namespace module::platform::openCR {
                                                           uint16_t(OpenCR::Address::RETURN_DELAY_TIME),
                                                           uint8_t(0)));
 
-        // Enable power to the servos
+        // Disable and then enable power to the servos
+        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
+                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
+                                                          uint8_t(0)));
+        std::this_thread::sleep_for(std::chrono::milliseconds(20));
         opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
                                                           uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
                                                           uint8_t(1)));
