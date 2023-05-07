@@ -42,6 +42,7 @@
 
         private:
             void computeEdges(std::vector<Site*>& sites);
+            bool done_all_edges = false;
 
             std::vector<Site*> sites;
             std::vector<Edge> edges;
@@ -50,6 +51,7 @@
         public:
             void computeVoronoi(std::vector<Site*>& sites);
             std::vector<Edge> get_edges();
+            bool has_made_all_edges();
 
     };
 }   // namespace utility::voronoi

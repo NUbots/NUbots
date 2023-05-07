@@ -50,22 +50,23 @@ using message::platform::webots::LocalisationGroundTruth;
             // sites.push_back(new utility::voronoi::Site{3, 3});
 
            // on<Trigger<>, Single>().then([this] {
-            utility::voronoi::Voronoi vd;
+            // utility::voronoi::Voronoi vd;
             vd.computeVoronoi(sites);
             std::vector<utility::voronoi::Edge> edges = vd.get_edges();
+            NUClear::log<NUClear::DEBUG>(" Edges", edges.size());
             int n = 0;
-            if(!sites.empty()) {NUClear::log<NUClear::DEBUG>("Edge:", n);
+            if(vd.has_made_all_edges() && !sites.empty()) {NUClear::log<NUClear::DEBUG>("Edge:", n);
                 for (const utility::voronoi::Edge& edge : edges) {
                     NUClear::log<NUClear::DEBUG>("Edge: ");
                     NUClear::log<NUClear::DEBUG>("(", edge.start->x, ", ", edge.start->y, ")");
                     NUClear::log<NUClear::DEBUG>(" to ");
                     NUClear::log<NUClear::DEBUG>("(", edge.end->x, ", ", edge.end->y, ")");
 
-                    delete edge.start;
-                    delete edge.end;
+                    // delete edge.start;
+                    // delete edge.end;
                     n++;
                 }
-            }//});
+            }
 
 
             // Emit plotjuggler messages to visualise the voronoi diagram

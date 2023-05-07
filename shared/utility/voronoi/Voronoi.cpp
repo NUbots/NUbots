@@ -15,6 +15,7 @@ namespace utility::voronoi {
             pq.push({site->x, site->y, site, nullptr});
         }
 
+        done_all_edges = false;
         while (!pq.empty()) {
             Event e = pq.top();
             pq.pop();
@@ -61,6 +62,7 @@ namespace utility::voronoi {
                 ce->valid = false;
             }
         }
+        done_all_edges = true;
     }
 
     void Voronoi::computeVoronoi(std::vector<Site*>& sites) {
@@ -77,6 +79,10 @@ namespace utility::voronoi {
 
     std::vector<Edge> Voronoi::get_edges()  {
         return edges;
+    }
+
+    bool Voronoi::has_made_all_edges() {
+        return done_all_edges;
     }
 
 }

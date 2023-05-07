@@ -17,7 +17,7 @@ namespace module::support {
             size_t robots_each_side = 0;
         } cfg;
 
-        //utility::voronoi::Voronoi Voronoi vd;
+        utility::voronoi::Voronoi vd;
 
     public:
         /// @brief Called by the powerplant to build and setup the Voronoi reactor.
