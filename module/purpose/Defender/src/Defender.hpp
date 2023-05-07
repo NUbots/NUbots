@@ -9,9 +9,11 @@ namespace module::purpose {
 
 class Defender : public ::extension::behaviour::BehaviourReactor {
     private:
-        // /// @brief Stores configuration values
-        // struct Config {
-        // } cfg;
+        /// @brief Stores configuration values
+        struct Config {
+        } cfg;
+
+        enum field_position {left_wing, right_wing, goal_box, centre_cirlce};
 
         /// @brief Calls Tasks to play soccer normally for a defender
         void play();
