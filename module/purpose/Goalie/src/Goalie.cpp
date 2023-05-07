@@ -88,10 +88,8 @@ namespace module::purpose {
     void Goalie::play() {
         // Stop the ball!
         // Second argument is priority - higher number means higher priority
-        emit<Task>(
-            std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                                                  cfg.ready_position.z()),
-            1);
+        Eigen::Vector3f position(cfg.ready_position.x(), cfg.ready_position.y(), 0);
+        emit<Task>(std::make_unique<WalkToFieldPosition>(position), cfg.ready_position.z()), 1);
         emit<Task>(std::make_unique<LookAround>(), 2);  // if the look at ball task is not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 3);  // try to track the ball
         emit<Task>(std::make_unique<DiveToBall>(), 4);  // dive to the ball
