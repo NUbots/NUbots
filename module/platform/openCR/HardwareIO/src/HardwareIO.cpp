@@ -170,7 +170,7 @@ namespace module::platform::openCR {
                 log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet.id));
             }
             if (packet.alert) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert"));
+                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", packet.id));
             }
 
             /// @brief handle incoming packets, and send next request if all packets were handled
