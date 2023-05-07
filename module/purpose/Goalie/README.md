@@ -4,7 +4,7 @@
 
 Play soccer in the goalie position. Either bypasses GameController and force playing, or uses GameController information to decide what to do.
 
-In the read state, walks to the goals.
+In the ready state, walks to the goals.
 
 In the playing state (for both normal game mode and penalty shootout), finds the ball, fixates on the ball and dives if the ball is close.
 
@@ -29,5 +29,6 @@ Add this module to the role and emit a Goalie Task.
 - `message::planning:::LookAround` a Task requesting to look around for the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball
 - `message::strategy::DiveToBall` a Task requesting to dive to the ball if it is close enough
+- `message::strategy::WalkToFieldPosition` Task requesting to walk to position on field
 
 ## Dependencies
