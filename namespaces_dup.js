@@ -553,12 +553,14 @@ var namespaces_dup =
         [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ]
       ] ],
       [ "purpose", null, [
+        [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
-        [ "GameMode", "Striker_8cpp.html#af6f0bbbfc3739b1fdb947add452d4ae3", null ],
+        [ "GameMode", "Goalie_8cpp.html#a2a5932ecf6b4477c7ba24d1de6dafb43", null ],
+        [ "GoalieTask", "Goalie_8cpp.html#a0ad4596d701cecf7cd4cc55d022ed6ad", null ],
         [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
-        [ "Phase", "Striker_8cpp.html#a9e287f8d3fac4776d448159cf92126d0", null ],
+        [ "Phase", "Goalie_8cpp.html#a19ac08a0be5f41ccc26e7b0186c14e68", null ],
         [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],
         [ "LogColours", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [

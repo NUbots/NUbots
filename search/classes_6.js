@@ -8,8 +8,9 @@ var searchData=
   ['getupplanner_1202',['GetUpPlanner',['../classmodule_1_1planning_1_1GetUpPlanner.html',1,'module::planning']]],
   ['globalconfig_1203',['GlobalConfig',['../classmodule_1_1support_1_1configuration_1_1GlobalConfig.html',1,'module::support::configuration']]],
   ['goaldetector_1204',['GoalDetector',['../classmodule_1_1vision_1_1GoalDetector.html',1,'module::vision']]],
-  ['greenhorizondetector_1205',['GreenHorizonDetector',['../classmodule_1_1vision_1_1GreenHorizonDetector.html',1,'module::vision']]],
-  ['groupinfo_1206',['GroupInfo',['../structextension_1_1behaviour_1_1GroupInfo.html',1,'extension::behaviour']]],
-  ['gyro_1207',['Gyro',['../structCM740_1_1Types_1_1Gyro.html',1,'CM740::Types']]],
-  ['gyroscope_1208',['GYROSCOPE',['../structmodule_1_1input_1_1MeasurementType_1_1GYROSCOPE.html',1,'module::input::MeasurementType']]]
+  ['goalie_1205',['Goalie',['../classmodule_1_1purpose_1_1Goalie.html',1,'module::purpose']]],
+  ['greenhorizondetector_1206',['GreenHorizonDetector',['../classmodule_1_1vision_1_1GreenHorizonDetector.html',1,'module::vision']]],
+  ['groupinfo_1207',['GroupInfo',['../structextension_1_1behaviour_1_1GroupInfo.html',1,'extension::behaviour']]],
+  ['gyro_1208',['Gyro',['../structCM740_1_1Types_1_1Gyro.html',1,'CM740::Types']]],
+  ['gyroscope_1209',['GYROSCOPE',['../structmodule_1_1input_1_1MeasurementType_1_1GYROSCOPE.html',1,'module::input::MeasurementType']]]
 ];

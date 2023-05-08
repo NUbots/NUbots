@@ -242,6 +242,7 @@ var annotated_dup =
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ]
       ] ],
       [ "purpose", null, [
+        [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ]
