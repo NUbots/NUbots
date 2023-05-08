@@ -120,6 +120,16 @@ DNS=10.1.3.1
 DNS=8.8.8.8
 EOF
 
+# Provide udevd configuration for network interfaces
+cat << EOF > /etc/systemd/99-default.link
+[Match]
+OriginalName=*
+
+[Link]
+NamePolicy=path
+MACAddressPolicy=persistent
+EOF
+
 # Setup wpa_supplicant networks
 cat << EOF > /etc/wpa_supplicant/wpa_supplicant-${WIFI_INTERFACE}.conf
 ctrl_interface=/var/run/wpa_supplicant
