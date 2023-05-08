@@ -1,5 +1,5 @@
 [Match]
-Name=wlp58s0
+Name={wireless_interface}
 
 [Network]
 Bond=bond0

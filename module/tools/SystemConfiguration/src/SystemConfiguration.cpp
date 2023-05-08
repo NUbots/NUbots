@@ -107,6 +107,12 @@ namespace module::tools {
             // The base path that stores the files
             fs::path base_path = "system";
 
+            // The base path that stores template files
+            fs::path template_path = base_path / "template";
+
+            // The path that stores generated files
+            fs::path generated_path = base_path / "generated";
+
             // Our default, and platform specific paths
             fs::path default_path = base_path / "default";
             fs::path device_path  = base_path / hostname;
@@ -114,11 +120,20 @@ namespace module::tools {
             /******************************
              * SYSTEM CONFIGURATION FILES *
              ******************************/
+            wireless_interface = config["wireless_interface"].as<std::string>();
+            wired_interface    = config["wired_interface"].as<std::string>();
+
             log<NUClear::INFO>(
                 fmt::format("Scanning for system files in {} and {}", default_path.string(), device_path.string()));
             for (const auto& p : fs::recursive_directory_iterator(default_path)) {
                 if (p.is_regular_file()) {
-                    fs::path in_file  = p.path();
+                    fs::path in_file = p.path();
+
+                    fmt::format(in_file.string(),
+                                fmt::arg("wireless_interface", wireless_interface),
+                                fmt::arg("wired_interface", wired_interface));
+                    String in_file_contents = read_file(in_file);
+
                     fs::path relative = fs::relative(in_file, default_path);
 
                     fs::path default_file = default_path / relative;
@@ -130,9 +145,25 @@ namespace module::tools {
                         in_file = device_file;
                         log<NUClear::TRACE>(fmt::format("Using {} config for {}", hostname, out_file.string()));
                     }
+
                     else {
                         in_file = default_file;
                         log<NUClear::TRACE>(fmt::format("Using default config for {}", out_file.string()));
+                    }
+
+                    if (in_file.search("{wireless_interface}")) {
+                        in_file        = fmt::format(in_file.string(), "wireless_interface", wireless_interface);
+                        generated_file = base_path / "generated";
+                        std::ofstream generated_file(generated_path / relative);
+                        generated_file << fmt::format(in_file.string(), "wireless_interface", wireless_interface);
+                        in_file = generated_file;
+                    }
+                    else if (in_file.search("{wired_interface}")) {
+                        in_file        = fmt::format(in_file.string(), "wired_interface", wired_interface);
+                        generated_file = base_path / "generated";
+                        std::ofstream generated_file(generated_path / relative);
+                        generated_file << fmt::format(in_file.string(), "wired_interface", wired_interface);
+                        in_file = generated_file;
                     }
 
                     // If they are not the same, overwrite the old file with the new one
@@ -141,6 +172,35 @@ namespace module::tools {
                         fs::create_directories(out_file.parent_path());
                         fs::copy_file(in_file, out_file, fs::copy_options::overwrite_existing);
                     }
+                }
+            }
+            // Generate system configurations based on config if necessary
+            for (const auto& p : fs::recursive_directory_iterator(template_path)) {
+                if (p.is_regular_file()) {
+                    fs::path in_file = p.path();
+
+                    fs::path relative = fs::relative(in_file, default_path);
+
+                    fs::path generated_file = fmt::format(in_file.str(),
+                                                          fmt::arg("wireless_interface", wireless_interface),
+                                                          fmt::arg("wired_interface", wired_interface));
+
+                    fs::path generated_file
+
+                        fs::path out_file   = "/" / relative;
+                    fs::path generated_file = generated_path / relative;
+
+                    ifstream in_file_stream(in_file);
+                    std::string in_file_contents;
+                    if (in_file_stream) {
+                        std::stringstream buffer;
+                        buffer << in_file_stream.rdbuf();
+                        in_file_contents = buffer.str();
+                    }
+
+                    in_file_contents = fmt::format(in_file_contents,
+                                                   fmt::arg("wireless_interface", wireless_interface),
+                                                   fmt::arg("wired_interface", wired_interface));
                 }
             }
 
