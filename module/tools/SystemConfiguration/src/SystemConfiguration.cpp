@@ -151,21 +151,6 @@ namespace module::tools {
                         log<NUClear::TRACE>(fmt::format("Using default config for {}", out_file.string()));
                     }
 
-                    if (in_file.search("{wireless_interface}")) {
-                        in_file        = fmt::format(in_file.string(), "wireless_interface", wireless_interface);
-                        generated_file = base_path / "generated";
-                        std::ofstream generated_file(generated_path / relative);
-                        generated_file << fmt::format(in_file.string(), "wireless_interface", wireless_interface);
-                        in_file = generated_file;
-                    }
-                    else if (in_file.search("{wired_interface}")) {
-                        in_file        = fmt::format(in_file.string(), "wired_interface", wired_interface);
-                        generated_file = base_path / "generated";
-                        std::ofstream generated_file(generated_path / relative);
-                        generated_file << fmt::format(in_file.string(), "wired_interface", wired_interface);
-                        in_file = generated_file;
-                    }
-
                     // If they are not the same, overwrite the old file with the new one
                     if (!files_equal(in_file, out_file)) {
                         log<NUClear::DEBUG>(fmt::format("Updating file {}", out_file.string()));
@@ -179,17 +164,15 @@ namespace module::tools {
                 if (p.is_regular_file()) {
                     fs::path in_file = p.path();
 
-                    fs::path relative = fs::relative(in_file, default_path);
-
-                    fs::path generated_file = fmt::format(in_file.str(),
+                    // Generate output file name based on config and file template
+                    fs::path relative       = fs::relative(in_file, default_path);
+                    generated_file          = generated_path / relative;
+                    fs::path generated_file = fmt::format(generated_file.str(),
                                                           fmt::arg("wireless_interface", wireless_interface),
                                                           fmt::arg("wired_interface", wired_interface));
+                    fs::path out_file       = "/" / relative;
 
-                    fs::path generated_file
-
-                        fs::path out_file   = "/" / relative;
-                    fs::path generated_file = generated_path / relative;
-
+                    // Read template file contents
                     ifstream in_file_stream(in_file);
                     std::string in_file_contents;
                     if (in_file_stream) {
@@ -198,9 +181,20 @@ namespace module::tools {
                         in_file_contents = buffer.str();
                     }
 
-                    in_file_contents = fmt::format(in_file_contents,
+                    // Fill template file with config values and write to generated files directory
+                    ofstream out_file_stream;
+                    out_file_stream.open(generated_file);
+                    out_file_stream << fmt::format(in_file_contents,
                                                    fmt::arg("wireless_interface", wireless_interface),
                                                    fmt::arg("wired_interface", wired_interface));
+                    out_file_stream.close();
+
+                    // If they are not the same, overwrite the system file with the newly generated one
+                    if (!files_equal(in_file, out_file)) {
+                        log<NUClear::DEBUG>(fmt::format("Updating file {}", out_file.string()));
+                        fs::create_directories(out_file.parent_path());
+                        fs::copy_file(in_file, out_file, fs::copy_options::overwrite_existing);
+                    }
                 }
             }
 
