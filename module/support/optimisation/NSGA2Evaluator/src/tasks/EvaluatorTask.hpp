@@ -23,15 +23,15 @@ namespace module {
 
             class EvaluatorTask {
             public:
-                virtual void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator)   = 0;
-                virtual void processOptimisationRobotPosition(const OptimisationRobotPosition& position) = 0;
-                virtual void setUpTrial(const NSGA2EvaluationRequest& request)                           = 0;
-                virtual void resetSimulation()                                                           = 0;
-                virtual void evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator)            = 0;
-                virtual std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool earlyTermination,
-                                                                                   double simTime,
-                                                                                   int generation,
-                                                                                   int individual)       = 0;
+                virtual void process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator)   = 0;
+                virtual void process_optimisation_robot_position(const OptimisationRobotPosition& position) = 0;
+                virtual void set_up_trial(const NSGA2EvaluationRequest& request)                            = 0;
+                virtual void reset_simulation()                                                             = 0;
+                virtual void evaluating_state(size_t subsumptionId, NSGA2Evaluator* evaluator)              = 0;
+                virtual std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool earlyTermination,
+                                                                                     double simTime,
+                                                                                     int generation,
+                                                                                     int individual)        = 0;
             };
 
         }  // namespace optimisation

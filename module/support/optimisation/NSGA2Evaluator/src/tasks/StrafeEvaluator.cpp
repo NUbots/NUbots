@@ -30,14 +30,14 @@ namespace module {
             using utility::input::ServoID;
             using utility::support::Expression;
 
-            void StrafeEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
-                updateMaxFieldPlaneSway(sensors);
-                if (checkForFall(sensors)) {
+            void StrafeEvaluator::process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+                update_max_field_plane_sway(sensors);
+                if (check_for_fall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
                 }
             }
 
-            void StrafeEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
+            void StrafeEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
                 if (!initial_position_set) {
                     initial_position_set   = true;
                     initial_robot_position = position.value;
@@ -46,7 +46,7 @@ namespace module {
                 robot_position = position.value;
             }
 
-            void StrafeEvaluator::setUpTrial(const NSGA2EvaluationRequest& current_request) {
+            void StrafeEvaluator::set_up_trial(const NSGA2EvaluationRequest& current_request) {
                 // Set our generation and individual identifiers from the request
 
                 trial_duration_limit = std::chrono::seconds(current_request.trial_duration_limit);
@@ -105,7 +105,7 @@ namespace module {
                 gravity_Min = eval_config["gravity"]["MIN"].as<float>();
             }
 
-            void StrafeEvaluator::resetSimulation() {
+            void StrafeEvaluator::reset_simulation() {
                 // Reset our local stateconst OptimisationRobotPosition& position
                 trial_start_time       = 0.0;
                 robot_position         = Eigen::Vector3d::Zero();
@@ -113,7 +113,7 @@ namespace module {
                 max_field_plane_sway   = 0.0;
             }
 
-            void StrafeEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+            void StrafeEvaluator::evaluating_state(size_t subsumptionId, NSGA2Evaluator* evaluator) {
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
                                                          walk_command_velocity.x(),
                                                          walk_command_velocity.y(),
@@ -122,15 +122,15 @@ namespace module {
                 evaluator->emit(std::make_unique<WalkCommand>(
                     subsumptionId,
                     Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
-                evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
+                evaluator->schedule_trial_expired_message(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> StrafeEvaluator::calculateFitnessScores(bool earlyTermination,
-                                                                                        double sim_time,
-                                                                                        int generation,
-                                                                                        int individual) {
-                auto scores      = calculateScores();
-                auto constraints = earlyTermination ? calculateConstraints(sim_time) : constraintsNotViolated();
+            std::unique_ptr<NSGA2FitnessScores> StrafeEvaluator::calculate_fitness_scores(bool earlyTermination,
+                                                                                          double sim_time,
+                                                                                          int generation,
+                                                                                          int individual) {
+                auto scores      = calculate_scores();
+                auto constraints = earlyTermination ? calculate_constraints(sim_time) : constraints_not_violated();
 
                 double trial_duration = sim_time - trial_start_time;
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
@@ -147,7 +147,7 @@ namespace module {
                 return fitness_scores;
             }
             // I want a pattern here passed as an arg
-            std::vector<double> StrafeEvaluator::calculateScores() {
+            std::vector<double> StrafeEvaluator::calculate_scores() {
                 auto robot_distance_travelled = std::fabs(initial_robot_position.y() - robot_position.y());
                 return {
                     max_field_plane_sway,           // For now, we want to reduce this
@@ -155,7 +155,7 @@ namespace module {
                 };
             }
 
-            std::vector<double> StrafeEvaluator::calculateConstraints(double sim_time) {
+            std::vector<double> StrafeEvaluator::calculate_constraints(double sim_time) {
                 // Convert trial duration limit to ms, add 1 for overhead
                 const auto overhead = std::chrono::seconds(1);
                 double max_trial_duration =
@@ -168,7 +168,7 @@ namespace module {
                 };
             }
 
-            std::vector<double> StrafeEvaluator::constraintsNotViolated() {
+            std::vector<double> StrafeEvaluator::constraints_not_violated() {
                 return {
                     0,  // Robot didn't fall
                     0   // Second constraint unused, fixed to 0
@@ -176,7 +176,7 @@ namespace module {
             }
 
 
-            bool StrafeEvaluator::checkForFall(const RawSensors& sensors) {
+            bool StrafeEvaluator::check_for_fall(const RawSensors& sensors) {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
@@ -192,7 +192,7 @@ namespace module {
                 return fallen;
             }
 
-            void StrafeEvaluator::updateMaxFieldPlaneSway(const RawSensors& sensors) {
+            void StrafeEvaluator::update_max_field_plane_sway(const RawSensors& sensors) {
                 auto accelerometer = sensors.accelerometer;
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)

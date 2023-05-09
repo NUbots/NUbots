@@ -83,38 +83,38 @@ namespace module {
                 // Handle a state transition event
                 on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
                     State old_state = current_state;
-                    State new_state = HandleTransition(current_state, event);
+                    State new_state = handle_transition(current_state, event);
 
                     log<NUClear::DEBUG>("Transitioning on", event, ", from state", old_state, "to state", new_state);
 
                     switch (new_state) {
                         case State::WAITING_FOR_REQUEST:
                             current_state = new_state;
-                            WaitingForRequest();
+                            waiting_for_request();
                             break;
                         case State::SETTING_UP_TRIAL:
                             current_state = new_state;
-                            SettingUpTrial();
+                            setting_up_trial();
                             break;
                         case State::RESETTING_SIMULATION:
                             current_state = new_state;
-                            ResettingSimulation();
+                            resetting_simulation();
                             break;
                         case State::EVALUATING:
                             current_state = new_state;
-                            Evaluating(event);
+                            evaluating(event);
                             break;
                         case State::TERMINATING_EARLY:
                             current_state = new_state;
-                            TerminatingEarly();
+                            terminating_early();
                             break;
                         case State::TERMINATING_GRACEFULLY:
                             current_state = new_state;
-                            TerminatingGracefully();
+                            terminating_gracefully();
                             break;
                         case State::FINISHED:
                             current_state = new_state;
-                            Finished();
+                            finished();
                             break;
                         default:
                             log<NUClear::WARN>("Unable to transition to unknown state from",
@@ -139,7 +139,7 @@ namespace module {
 
                 on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
                     if (current_state == State::EVALUATING) {
-                        task->processRawSensorMsg(sensors, this);
+                        task->process_raw_sensor_msg(sensors, this);
                     }
                 });
 
@@ -164,20 +164,20 @@ namespace module {
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
                         if (current_state == State::EVALUATING) {
-                            task->processOptimisationRobotPosition(position);
+                            task->process_optimisation_robot_position(position);
                         }
                     });
             }
 
-            NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State current_state,
-                                                                   NSGA2Evaluator::Event event) {
+            NSGA2Evaluator::State NSGA2Evaluator::handle_transition(NSGA2Evaluator::State current_state,
+                                                                    NSGA2Evaluator::Event event) {
                 switch (current_state) {
-                    case State::WAITING_FOR_REQUEST: return TransitionEvents(event);
-                    case State::SETTING_UP_TRIAL: return TransitionEvents(event);
-                    case State::RESETTING_SIMULATION: return TransitionEvents(event);
-                    case State::EVALUATING: return TransitionEvents(event);
-                    case State::TERMINATING_EARLY: return TransitionEvents(event);
-                    case State::TERMINATING_GRACEFULLY: return TransitionEvents(event);
+                    case State::WAITING_FOR_REQUEST: return transition_events(event);
+                    case State::SETTING_UP_TRIAL: return transition_events(event);
+                    case State::RESETTING_SIMULATION: return transition_events(event);
+                    case State::EVALUATING: return transition_events(event);
+                    case State::TERMINATING_EARLY: return transition_events(event);
+                    case State::TERMINATING_GRACEFULLY: return transition_events(event);
                     case State::FINISHED:
                         // Arguably this should return FINISHED regardless of event, unless we want to be able to
                         // reset
@@ -185,14 +185,14 @@ namespace module {
                             return State::FINISHED;
                         }
                         else {
-                            return TransitionEvents(event);
+                            return transition_events(event);
                         }
 
                     default: return State::UNKNOWN;
                 }
             }
 
-            NSGA2Evaluator::State NSGA2Evaluator::TransitionEvents(NSGA2Evaluator::Event event) {
+            NSGA2Evaluator::State NSGA2Evaluator::transition_events(NSGA2Evaluator::Event event) {
                 switch (event) {
                     case Event::EVALUATE_REQUEST: return State::SETTING_UP_TRIAL;
                     case Event::CHECK_READY: return State::WAITING_FOR_REQUEST;
@@ -208,14 +208,14 @@ namespace module {
             }
 
             /// @brief Handle the WAITING_FOR_REQUEST state
-            void NSGA2Evaluator::WaitingForRequest() {
-                log<NUClear::DEBUG>("WaitingForRequest");
+            void NSGA2Evaluator::waiting_for_request() {
+                log<NUClear::DEBUG>("waiting_for_request");
                 emit(std::make_unique<NSGA2EvaluatorReady>());  // Let the optimiser know we're ready
             }
 
             /// @brief Handle the SETTING_UP_TRIAL state
-            void NSGA2Evaluator::SettingUpTrial() {
-                log<NUClear::DEBUG>("SettingUpTrial");
+            void NSGA2Evaluator::setting_up_trial() {
+                log<NUClear::DEBUG>("setting_up_trial");
 
                 generation = last_eval_request_msg.generation;
                 individual = last_eval_request_msg.id;
@@ -236,16 +236,16 @@ namespace module {
                     log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
                 }
 
-                task->setUpTrial(last_eval_request_msg);
+                task->set_up_trial(last_eval_request_msg);
 
                 emit(std::make_unique<Event>(Event::TRIAL_SETUP_DONE));
             }
 
             /// @brief Handle the RESETTING_SIMULATION state
-            void NSGA2Evaluator::ResettingSimulation() {
-                log<NUClear::DEBUG>("ResettingSimulation");
+            void NSGA2Evaluator::resetting_simulation() {
+                log<NUClear::DEBUG>("resetting_simulation");
 
-                task->resetSimulation();
+                task->reset_simulation();
 
                 // Tell Webots to reset the world
                 std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
@@ -254,13 +254,13 @@ namespace module {
             }
 
             /// @brief Handle the EVALUATING state
-            void NSGA2Evaluator::Evaluating(NSGA2Evaluator::Event event) {
-                log<NUClear::DEBUG>("Evaluating");
+            void NSGA2Evaluator::evaluating(NSGA2Evaluator::Event event) {
+                log<NUClear::DEBUG>("evaluating");
 
                 if (event == Event::RESET_DONE) {
                     if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
                         || last_eval_request_msg.task == "strafe" || last_eval_request_msg.task == "rotation") {
-                        task->evaluatingState(subsumption_id, this);
+                        task->evaluating_state(subsumption_id, this);
                     }
                     else {
                         log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
@@ -268,8 +268,8 @@ namespace module {
                 }
             }
 
-            void NSGA2Evaluator::ScheduleTrialExpiredMessage(const int trial_stage,
-                                                             const std::chrono::seconds delay_time) {
+            void NSGA2Evaluator::schedule_trial_expired_message(const int trial_stage,
+                                                                const std::chrono::seconds delay_time) {
                 // Prepare the trial expired message
                 std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
                 message->time_started                      = sim_time;
@@ -283,33 +283,35 @@ namespace module {
             }
 
             /// @brief Handle the TERMINATING_EARLY state
-            void NSGA2Evaluator::TerminatingEarly() {
-                log<NUClear::DEBUG>("TerminatingEarly");
+            void NSGA2Evaluator::terminating_early() {
+                log<NUClear::DEBUG>("terminating_early");
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool early_termination = true;
-                auto fitness_scores = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
+                auto fitness_scores =
+                    task->calculate_fitness_scores(early_termination, sim_time, generation, individual);
                 emit(fitness_scores);
 
                 emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
             }
 
             /// @brief Handle the TERMINATING_GRACEFULLY state
-            void NSGA2Evaluator::TerminatingGracefully() {
-                log<NUClear::DEBUG>("TerminatingGracefully");
+            void NSGA2Evaluator::terminating_gracefully() {
+                log<NUClear::DEBUG>("terminating_gracefully");
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool early_termination = false;
-                auto fitness_scores = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
+                auto fitness_scores =
+                    task->calculate_fitness_scores(early_termination, sim_time, generation, individual);
                 emit(fitness_scores);
 
                 emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
             }
 
-            void NSGA2Evaluator::Finished() {
-                log<NUClear::INFO>("Finished");
+            void NSGA2Evaluator::finished() {
+                log<NUClear::INFO>("finished");
             }
         }  // namespace optimisation
     }      // namespace support

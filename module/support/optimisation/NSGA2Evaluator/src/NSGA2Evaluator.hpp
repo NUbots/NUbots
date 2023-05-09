@@ -26,7 +26,7 @@ namespace module {
             public:
                 /// @brief Called by the powerplant to build and setup the NSGA2Evaluator reactor.
                 explicit NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment);
-                void ScheduleTrialExpiredMessage(const int trial_stage, const std::chrono::seconds delay_time);
+                void schedule_trial_expired_message(const int trial_stage, const std::chrono::seconds delay_time);
 
                 enum State {
                     UNKNOWN                = 0,
@@ -80,48 +80,48 @@ namespace module {
                 /// second one if it's swayed too too much. The more negative the constraint value is, the more it has
                 /// violated the constriant, which means it will be dominated by other individuals that have violated
                 /// less.
-                void SendFitnessScores(std::vector<double> scores, std::vector<double> constraints);
+                void send_fitness_scores(std::vector<double> scores, std::vector<double> constraints);
 
                 /// @brief Implementation of the fitness function (i.e. how well the individual did)
-                std::vector<double> CalculateScores();
+                std::vector<double> calculate_scores();
 
                 /// @brief Implementation of the constraints function (i.e. how much to penalise for violations)
-                std::vector<double> CalculateConstraints();
+                std::vector<double> calculate_constraints();
 
                 /// @brief Returns the appropriate values for the case where no constraints are violated
-                std::vector<double> ConstraintsNotViolated();
+                std::vector<double> constraints_not_violated();
 
                 /// @brief The current state of the evaluation
                 State current_state = State::WAITING_FOR_REQUEST;
 
                 /// @brief Get the next state to transition to given the current state and an event
-                State HandleTransition(State current_state, Event event);
+                State handle_transition(State current_state, Event event);
 
-                State TransitionEvents(NSGA2Evaluator::Event event);
+                State transition_events(NSGA2Evaluator::Event event);
 
                 /// @brief Handle the WAITING_FOR_REQUEST state
-                void WaitingForRequest();
+                void waiting_for_request();
 
                 /// @brief Handle the SETTING_UP_TRIAL state
-                void SettingUpTrial();
+                void setting_up_trial();
 
                 /// @brief Handle the RESETTING_SIMULATION state
-                void ResettingSimulation();
+                void resetting_simulation();
 
                 /// @brief Handle the STANDING state
-                void Standing();
+                void standing();
 
                 /// @brief Handle the EVALUATING state
-                void Evaluating(Event event);
+                void evaluating(Event event);
 
                 /// @brief Handle the TERMINATING_EARLY state
-                void TerminatingEarly();
+                void terminating_early();
 
                 /// @brief Handle the TERMINATING_GRACEFULLY state
-                void TerminatingGracefully();
+                void terminating_gracefully();
 
                 /// @brief Handle the FINISHED state
-                void Finished();
+                void finished();
             };
 
         }  // namespace optimisation

@@ -30,10 +30,10 @@ namespace module {
             using utility::input::ServoID;
             using utility::support::Expression;
 
-            void RotationEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+            void RotationEvaluator::process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
 
-                updateMaxFieldPlaneSway(sensors);
-                if (checkForFall(sensors)) {
+                update_max_field_plane_sway(sensors);
+                if (check_for_fall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
                 }
 
@@ -44,7 +44,7 @@ namespace module {
                 theta += omega * deltaT / 1000;
             }
 
-            void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
+            void RotationEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
                 if (!initial_position_set) {
                     initial_position_set   = true;
                     initial_robot_position = position.value;
@@ -53,7 +53,7 @@ namespace module {
                 robot_position = position.value;
             }
 
-            void RotationEvaluator::setUpTrial(const NSGA2EvaluationRequest& current_request) {
+            void RotationEvaluator::set_up_trial(const NSGA2EvaluationRequest& current_request) {
                 // Set our generation and individual identifiers from the request
 
                 trial_duration_limit = std::chrono::seconds(current_request.trial_duration_limit);
@@ -112,7 +112,7 @@ namespace module {
                 gravity_Min = eval_config["gravity"]["MIN"].as<float>();
             }
 
-            void RotationEvaluator::resetSimulation() {
+            void RotationEvaluator::reset_simulation() {
                 // Reset our local stateconst OptimisationRobotPosition& position
                 trial_start_time       = 0.0;
                 robot_position         = Eigen::Vector3d::Zero();
@@ -120,7 +120,7 @@ namespace module {
                 max_field_plane_sway   = 0.0;
             }
 
-            void RotationEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+            void RotationEvaluator::evaluating_state(size_t subsumptionId, NSGA2Evaluator* evaluator) {
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
                                                          walk_command_velocity.x(),
                                                          walk_command_velocity.y(),
@@ -129,15 +129,15 @@ namespace module {
                 evaluator->emit(std::make_unique<WalkCommand>(
                     subsumptionId,
                     Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
-                evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
+                evaluator->schedule_trial_expired_message(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> RotationEvaluator::calculateFitnessScores(bool earlyTermination,
-                                                                                          double sim_time,
-                                                                                          int generation,
-                                                                                          int individual) {
-                auto scores      = calculateScores();
-                auto constraints = earlyTermination ? calculateConstraints(sim_time) : constraintsNotViolated();
+            std::unique_ptr<NSGA2FitnessScores> RotationEvaluator::calculate_fitness_scores(bool earlyTermination,
+                                                                                            double sim_time,
+                                                                                            int generation,
+                                                                                            int individual) {
+                auto scores      = calculate_scores();
+                auto constraints = earlyTermination ? calculate_constraints(sim_time) : constraints_not_violated();
 
                 double trial_duration = sim_time - trial_start_time;
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
@@ -154,7 +154,7 @@ namespace module {
                 return fitness_scores;
             }
 
-            std::vector<double> RotationEvaluator::calculateScores() {
+            std::vector<double> RotationEvaluator::calculate_scores() {
 
                 return {
                     max_field_plane_sway,  // For now, we want to reduce this
@@ -162,7 +162,7 @@ namespace module {
                 };
             }
 
-            std::vector<double> RotationEvaluator::calculateConstraints(double sim_time) {
+            std::vector<double> RotationEvaluator::calculate_constraints(double sim_time) {
                 // Convert trial duration limit to ms, add 1 for overhead
                 const auto overhead = std::chrono::seconds(1);
                 double max_trial_duration =
@@ -175,7 +175,7 @@ namespace module {
                 };
             }
 
-            std::vector<double> RotationEvaluator::constraintsNotViolated() {
+            std::vector<double> RotationEvaluator::constraints_not_violated() {
                 return {
                     0,  // Robot didn't fall
                     0   // Second constraint unused, fixed to 0
@@ -183,7 +183,7 @@ namespace module {
             }
 
 
-            bool RotationEvaluator::checkForFall(const RawSensors& sensors) {
+            bool RotationEvaluator::check_for_fall(const RawSensors& sensors) {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
@@ -199,7 +199,7 @@ namespace module {
                 return fallen;
             }
 
-            void RotationEvaluator::updateMaxFieldPlaneSway(const RawSensors& sensors) {
+            void RotationEvaluator::update_max_field_plane_sway(const RawSensors& sensors) {
                 auto accelerometer = sensors.accelerometer;
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)

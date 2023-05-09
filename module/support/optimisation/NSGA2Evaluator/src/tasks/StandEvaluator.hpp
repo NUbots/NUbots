@@ -23,21 +23,21 @@ namespace module {
             class StandEvaluator : public EvaluatorTask {
             public:
                 // Implementing the EvaluatorTask interface
-                void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
-                void processOptimisationRobotPosition(const OptimisationRobotPosition& position);
-                void setUpTrial(const NSGA2EvaluationRequest& request);
-                void resetSimulation();
-                void evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator);
-                std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool earlyTermination,
-                                                                           double sim_time,
-                                                                           int generation,
-                                                                           int individual);
+                void process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
+                void process_optimisation_robot_position(const OptimisationRobotPosition& position);
+                void set_up_trial(const NSGA2EvaluationRequest& request);
+                void reset_simulation();
+                void evaluating_state(size_t subsumptionId, NSGA2Evaluator* evaluator);
+                std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool earlyTermination,
+                                                                             double sim_time,
+                                                                             int generation,
+                                                                             int individual);
 
                 // Task-specific functions
-                std::vector<double> calculateScores(double trialDuration);
-                std::vector<double> calculateConstraints();
-                bool checkForFall(const RawSensors& sensors);
-                void updateMaxFieldPlaneSway(const RawSensors& sensors);
+                std::vector<double> calculate_scores(double trialDuration);
+                std::vector<double> calculate_constraints();
+                bool check_for_fall(const RawSensors& sensors);
+                void update_max_field_plane_sway(const RawSensors& sensors);
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
@@ -51,9 +51,9 @@ namespace module {
                 /// @brief Keep track of when the trial started
                 double trial_start_time = 0.0;
 
-                void loadScript(std::string script_path);
-                void saveScript(std::string script_path);
-                void runScript(size_t subsumptionId, NSGA2Evaluator* evaluator);
+                void load_script(std::string script_path);
+                void save_script(std::string script_path);
+                void run_script(size_t subsumptionId, NSGA2Evaluator* evaluator);
 
                 /// @brief The script object we are using
                 ::extension::Script script;
