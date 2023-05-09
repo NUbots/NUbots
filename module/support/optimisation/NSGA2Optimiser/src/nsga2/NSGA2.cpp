@@ -9,11 +9,11 @@ namespace nsga2 {
         const Population& pop;
         sort_n(const Population& population) : pop(population) {}
         bool operator()(int i, int j) {
-            const Individual& ind1 = pop.inds[i];
-            const Individual& ind2 = pop.inds[j];
-            if (ind1.rank < ind2.rank)
+            const Individual& ind_1 = pop.inds[i];
+            const Individual& ind_2 = pop.inds[j];
+            if (ind_1.rank < ind_2.rank)
                 return true;
-            else if (ind1.rank == ind2.rank && ind1.crowdDist > ind2.crowdDist)
+            else if (ind_1.rank == ind_2.rank && ind_1.crowd_dist > ind_2.crowd_dist)
                 return true;
             return false;
         }
@@ -66,7 +66,7 @@ namespace nsga2 {
             NUClear::log<NUClear::INFO>("Invalid distribution index for crossover");
             return false;
         }
-        else if (etaM <= 0) {
+        else if (eta_m <= 0) {
             NUClear::log<NUClear::INFO>("Invalid distribution index for mutation");
             return false;
         }
@@ -98,6 +98,21 @@ namespace nsga2 {
 
     void NSGA2::CreateStartingPopulations() {
         parent_pop = std::make_shared<Population>(pop_size,
+                                                  real_vars,
+                                                  bin_vars,
+                                                  constraints,
+                                                  bin_bits,
+                                                  real_limits,
+                                                  bin_limits,
+                                                  objectives,
+                                                  real_mut_prob,
+                                                  bin_mut_prob,
+                                                  eta_m,
+                                                  eps_c,
+                                                  rand_gen,
+                                                  initial_real_vars);
+
+        child_pop = std::make_shared<Population>(pop_size,
                                                  real_vars,
                                                  bin_vars,
                                                  constraints,
@@ -107,40 +122,25 @@ namespace nsga2 {
                                                  objectives,
                                                  real_mut_prob,
                                                  bin_mut_prob,
-                                                 etaM,
-                                                 epsC,
+                                                 eta_m,
+                                                 eps_c,
                                                  rand_gen,
                                                  initial_real_vars);
 
-        child_pop = std::make_shared<Population>(pop_size,
-                                                real_vars,
-                                                bin_vars,
-                                                constraints,
-                                                bin_bits,
-                                                real_limits,
-                                                bin_limits,
-                                                objectives,
-                                                real_mut_prob,
-                                                bin_mut_prob,
-                                                etaM,
-                                                epsC,
-                                                rand_gen,
-                                                initial_real_vars);
-
         combined_pop = std::make_shared<Population>(pop_size * 2,
-                                                   real_vars,
-                                                   bin_vars,
-                                                   constraints,
-                                                   bin_bits,
-                                                   real_limits,
-                                                   bin_limits,
-                                                   objectives,
-                                                   real_mut_prob,
-                                                   bin_mut_prob,
-                                                   etaM,
-                                                   epsC,
-                                                   rand_gen,
-                                                   initial_real_vars);
+                                                    real_vars,
+                                                    bin_vars,
+                                                    constraints,
+                                                    bin_bits,
+                                                    real_limits,
+                                                    bin_limits,
+                                                    objectives,
+                                                    real_mut_prob,
+                                                    bin_mut_prob,
+                                                    eta_m,
+                                                    eps_c,
+                                                    rand_gen,
+                                                    initial_real_vars);
     }
 
     std::shared_ptr<Population> NSGA2::getCurrentPop() {
@@ -170,11 +170,11 @@ namespace nsga2 {
         current_gen = 0;
         parent_pop->Initialize();
 
-        if(supplied_pop){
+        if (supplied_pop) {
             std::vector<double> reals;
             for (size_t i = 1; i < parent_pop->inds.size(); i++) {
                 reals = parent_pop->inds[i].reals;
-                for (size_t j = 0; j < reals.size(); j++) { 
+                for (size_t j = 0; j < reals.size(); j++) {
                     reals[j] = supplied_population_real_vars[i][j];
                 }
                 parent_pop->inds[i].reals = reals;
@@ -203,7 +203,7 @@ namespace nsga2 {
 
 
     bool NSGA2::HasMetOptimisationTerminalCondition() {
-        return (current_gen >= generations) || (earlyStoppingNoImprovement && earlyStoppingOneFront);
+        return (current_gen >= generations) || (early_stopping_no_improvement && early_stopping_one_front);
     }
 
     void NSGA2::CompleteGeneration() {
@@ -217,12 +217,12 @@ namespace nsga2 {
         else {
             combined_pop->Merge(
                 *parent_pop,
-                *child_pop);          // Create combined population from parent and child populations. Rt = Pt U Qt
-            combined_pop->FastNDS();  // Calculate the fronts
+                *child_pop);           // Create combined population from parent and child populations. Rt = Pt U Qt
+            combined_pop->FastNDS();   // Calculate the fronts
 
             parent_pop->inds.clear();  // Empty the new parent population, ready to be repopulated
 
-            int i = 0;  // we need `i` after the loop, for the final (partial) front, so hold on to it here
+            int i = 0;            // we need `i` after the loop, for the final (partial) front, so hold on to it here
             while (parent_pop->GetSize() + int(combined_pop->fronts[i].size())
                    < pop_size) {  // stop when adding the next front would go past the population size
                 std::vector<int>& front_i = combined_pop->fronts[i];
@@ -241,8 +241,8 @@ namespace nsga2 {
                       partial_front.end(),
                       sort_n(*combined_pop));  // sort remaining front using operator <n
 
-            const int remainingSpace = pop_size - parent_pop->GetSize();
-            for (int j = 0; j < remainingSpace; j++) {
+            const int remaining_space = pop_size - parent_pop->GetSize();
+            for (int j = 0; j < remaining_space; j++) {
                 // Include the best members from the remaining front in the next parent population
                 parent_pop->inds.push_back(combined_pop->inds[partial_front[j]]);
             }
@@ -250,18 +250,18 @@ namespace nsga2 {
             // Early stopping checks
             if (i == 0) {
                 // If `i` is still 0, that means we only have one front carrying over
-                earlyStoppingOneFront = true;
+                early_stopping_one_front = true;
                 NUClear::log<NUClear::INFO>("A single front this generation, could stop early");
             }
-            bool aChildSurvivesThisGen = false;
+            bool a_child_survives_this_gen = false;
             for (auto& ind : parent_pop->inds) {
                 if (ind.generation == current_gen) {
-                    aChildSurvivesThisGen = true;
+                    a_child_survives_this_gen = true;
                     break;
                 }
             }
-            if (!aChildSurvivesThisGen) {
-                earlyStoppingNoImprovement = true;
+            if (!a_child_survives_this_gen) {
+                early_stopping_no_improvement = true;
                 NUClear::log<NUClear::INFO>("No improvement this generation, could stop early");
             }
         }
@@ -273,10 +273,10 @@ namespace nsga2 {
     void NSGA2::InitializeNextGeneration() {
         // create next child population, Q_t
         Selection(parent_pop, child_pop);
-        std::pair<int, int> mutationsCount = child_pop->Mutate();
+        std::pair<int, int> mutations_count = child_pop->Mutate();
         // mutation book-keeping
-        real_mut_count += mutationsCount.first;
-        bin_mut_count  += mutationsCount.second;
+        real_mut_count += mutations_count.first;
+        bin_mut_count += mutations_count.second;
 
         child_pop->SetIndividualsGeneration(current_gen);
         child_pop->SetIds();
@@ -286,184 +286,184 @@ namespace nsga2 {
     }
 
     // Selection implements the tournament and crossover steps of generating the new pop
-    void NSGA2::Selection(const std::shared_ptr<Population>& _oldPop, std::shared_ptr<Population>& _newPop) {
-        const int oldPopSize = _oldPop->GetSize();
-        if (_newPop->GetSize() != oldPopSize) {
+    void NSGA2::Selection(const std::shared_ptr<Population>& _old_pop, std::shared_ptr<Population>& _new_pop) {
+        const int old_pop_size = _old_pop->GetSize();
+        if (_new_pop->GetSize() != old_pop_size) {
             NUClear::log<NUClear::ERROR>("Selection error: new and old pops don't have the same size");
         }
 
         // Set up lists, ready for random scrambling
-        std::vector<int> indList1(oldPopSize), indList2(oldPopSize);
-        for (int i = 0; i < oldPopSize; i++) {
-            indList1[i] = i;
-            indList2[i] = i;
+        std::vector<int> ind_list_1(old_pop_size), ind_list_2(old_pop_size);
+        for (int i = 0; i < old_pop_size; i++) {
+            ind_list_1[i] = i;
+            ind_list_2[i] = i;
         }
 
         // Create random pairings
-        for (int i = 0; i < oldPopSize; i++) {
-            int randInt = rand_gen->Integer(i, oldPopSize - 1);
-            std::swap(indList1[randInt], indList1[i]);
-            randInt = rand_gen->Integer(i, oldPopSize - 1);
-            std::swap(indList2[randInt], indList2[i]);
+        for (int i = 0; i < old_pop_size; i++) {
+            int rand_int = rand_gen->Integer(i, old_pop_size - 1);
+            std::swap(ind_list_1[rand_int], ind_list_1[i]);
+            rand_int = rand_gen->Integer(i, old_pop_size - 1);
+            std::swap(ind_list_2[rand_int], ind_list_2[i]);
         }
 
         // Tournament to select the best parents from the pairings, then crossover to combine their params
-        for (int i = 0; i < oldPopSize; i += 4) {
-            const Individual& p11 = Tournament(_oldPop->inds[indList1[i]], _oldPop->inds[indList1[i + 1]]);
-            const Individual& p12 = Tournament(_oldPop->inds[indList1[i + 2]], _oldPop->inds[indList1[i + 3]]);
-            Crossover(p11, p12, _newPop->inds[i], _newPop->inds[i + 1]);
+        for (int i = 0; i < old_pop_size; i += 4) {
+            const Individual& p11 = Tournament(_old_pop->inds[ind_list_1[i]], _old_pop->inds[ind_list_1[i + 1]]);
+            const Individual& p12 = Tournament(_old_pop->inds[ind_list_1[i + 2]], _old_pop->inds[ind_list_1[i + 3]]);
+            Crossover(p11, p12, _new_pop->inds[i], _new_pop->inds[i + 1]);
 
-            const Individual& p21 = Tournament(_oldPop->inds[indList2[i]], _oldPop->inds[indList2[i + 1]]);
-            const Individual& p22 = Tournament(_oldPop->inds[indList2[i + 2]], _oldPop->inds[indList2[i + 3]]);
-            Crossover(p21, p22, _newPop->inds[i + 2], _newPop->inds[i + 3]);
+            const Individual& p21 = Tournament(_old_pop->inds[ind_list_2[i]], _old_pop->inds[ind_list_2[i + 1]]);
+            const Individual& p22 = Tournament(_old_pop->inds[ind_list_2[i + 2]], _old_pop->inds[ind_list_2[i + 3]]);
+            Crossover(p21, p22, _new_pop->inds[i + 2], _new_pop->inds[i + 3]);
         }
     }
 
     // Tournament decides which individual is allowed to reproduce
-    const Individual& NSGA2::Tournament(const Individual& _ind1, const Individual& _ind2) const {
-        const int comparison = _ind1.CheckDominance(_ind2);
-        if (comparison == 1) {  // ind1 dominates ind2
-            return _ind1;
+    const Individual& NSGA2::Tournament(const Individual& _ind_1, const Individual& _ind_2) const {
+        const int comparison = _ind_1.CheckDominance(_ind_2);
+        if (comparison == 1) {  // ind_1 dominates ind_2
+            return _ind_1;
         }
-        else if (comparison == -1) {  // ind2 dominates ind1
-            return _ind2;
+        else if (comparison == -1) {  // ind_2 dominates ind_1
+            return _ind_2;
         }
-        else if (_ind1.crowdDist > _ind2.crowdDist) {
-            return _ind1;
+        else if (_ind_1.crowd_dist > _ind_2.crowd_dist) {
+            return _ind_1;
         }
-        else if (_ind2.crowdDist > _ind1.crowdDist) {
-            return _ind2;
+        else if (_ind_2.crowd_dist > _ind_1.crowd_dist) {
+            return _ind_2;
         }
         else if (rand_gen->Realu() <= 0.5) {
-            return _ind1;
+            return _ind_1;
         }
         else {
-            return _ind2;
+            return _ind_2;
         }
     }
 
     // Mix the parameters of the parents
-    void NSGA2::Crossover(const Individual& _parent1,
-                          const Individual& _parent2,
-                          Individual& _child1,
-                          Individual& _child2) {
+    void NSGA2::Crossover(const Individual& _parent_1,
+                          const Individual& _parent_2,
+                          Individual& _child_1,
+                          Individual& _child_2) {
         if (real_vars) {
-            SelfAdaptiveSBX(_parent1, _parent2, _child1, _child2);
+            SelfAdaptiveSBX(_parent_1, _parent_2, _child_1, _child_2);
         }
         if (bin_vars) {
-            Bincross(_parent1, _parent2, _child1, _child2);
+            Bincross(_parent_1, _parent_2, _child_1, _child_2);
         }
 
-        _child1.evaluated = false;
-        _child2.evaluated = false;
+        _child_1.evaluated = false;
+        _child_2.evaluated = false;
     }
 
     // Self Adaptive Simulated Binary Crossover (SBX) is a particular implementation of crossover
-    void NSGA2::SelfAdaptiveSBX(const Individual& _parent1,
-                                const Individual& _parent2,
-                                Individual& _child1,
-                                Individual& _child2) {
-        double y1, y2, yLower, yUpper;
+    void NSGA2::SelfAdaptiveSBX(const Individual& _parent_1,
+                                const Individual& _parent_2,
+                                Individual& _child_1,
+                                Individual& _child_2) {
+        double y1, y2, y_lower, y_upper;
         double c1, c2;
-        double alpha, beta, betaQ;
+        double alpha, beta, beta_q;
 
         if (rand_gen->Realu() <= real_cross_prob) {  // If we should crossover (determined by RNG)
-            real_cross_count++;                     // Keep track of the number of times we do crossover
-            for (int i = 0; i < real_vars; i++) {  // for each real parameter
+            real_cross_count++;                      // Keep track of the number of times we do crossover
+            for (int i = 0; i < real_vars; i++) {    // for each real parameter
                 // If the parameters are different
-                if (std::fabs(_parent1.reals[i] - _parent2.reals[i]) > std::numeric_limits<double>::epsilon()) {
+                if (std::fabs(_parent_1.reals[i] - _parent_2.reals[i]) > std::numeric_limits<double>::epsilon()) {
                     // hold the smaller param in y1, the larger param in y2
-                    if (_parent1.reals[i] < _parent2.reals[i]) {
-                        y1 = _parent1.reals[i];
-                        y2 = _parent2.reals[i];
+                    if (_parent_1.reals[i] < _parent_2.reals[i]) {
+                        y1 = _parent_1.reals[i];
+                        y2 = _parent_2.reals[i];
                     }
                     else {
-                        y1 = _parent2.reals[i];
-                        y2 = _parent1.reals[i];
+                        y1 = _parent_2.reals[i];
+                        y2 = _parent_1.reals[i];
                     }
 
                     // keep track of the parameter limits
-                    yLower = real_limits[i].first;
-                    yUpper = real_limits[i].second;
+                    y_lower = real_limits[i].first;
+                    y_upper = real_limits[i].second;
 
-                    double randDouble = rand_gen->Realu();
-                    beta              = 1.0 + (2.0 * (y1 - yLower) / (y2 - y1));
-                    alpha             = 2.0 - std::pow(beta, -(etaC + 1.0));
-                    if (randDouble <= (1.0 / alpha))
-                        betaQ = std::pow((randDouble * alpha), (1.0 / (etaC + 1.0)));
+                    double rand_double = rand_gen->Realu();
+                    beta               = 1.0 + (2.0 * (y1 - y_lower) / (y2 - y1));
+                    alpha              = 2.0 - std::pow(beta, -(etaC + 1.0));
+                    if (rand_double <= (1.0 / alpha))
+                        beta_q = std::pow((rand_double * alpha), (1.0 / (etaC + 1.0)));
                     else
-                        betaQ = std::pow((1.0 / (2.0 - randDouble * alpha)), (1.0 / (etaC + 1.0)));
+                        beta_q = std::pow((1.0 / (2.0 - rand_double * alpha)), (1.0 / (etaC + 1.0)));
 
-                    c1    = 0.5 * ((y1 + y2) - betaQ * (y2 - y1));
-                    beta  = 1.0 + (2.0 * (yUpper - y2) / (y2 - y1));
+                    c1    = 0.5 * ((y1 + y2) - beta_q * (y2 - y1));
+                    beta  = 1.0 + (2.0 * (y_upper - y2) / (y2 - y1));
                     alpha = 2.0 - std::pow(beta, -(etaC + 1.0));
 
-                    if (randDouble <= (1.0 / alpha))
-                        betaQ = std::pow((randDouble * alpha), (1.0 / (etaC + 1.0)));
+                    if (rand_double <= (1.0 / alpha))
+                        beta_q = std::pow((rand_double * alpha), (1.0 / (etaC + 1.0)));
                     else
-                        betaQ = std::pow((1.0 / (2.0 - randDouble * alpha)), (1.0 / (etaC + 1.0)));
+                        beta_q = std::pow((1.0 / (2.0 - rand_double * alpha)), (1.0 / (etaC + 1.0)));
 
-                    c2 = 0.5 * ((y1 + y2) + betaQ * (y2 - y1));
-                    c1 = std::min(std::max(c1, yLower), yUpper);
-                    c2 = std::min(std::max(c2, yLower), yUpper);
+                    c2 = 0.5 * ((y1 + y2) + beta_q * (y2 - y1));
+                    c1 = std::min(std::max(c1, y_lower), y_upper);
+                    c2 = std::min(std::max(c2, y_lower), y_upper);
 
                     if (rand_gen->Realu() <= 0.5) {
-                        _child1.reals[i] = c2;
-                        _child2.reals[i] = c1;
+                        _child_1.reals[i] = c2;
+                        _child_2.reals[i] = c1;
                     }
                     else {
-                        _child1.reals[i] = c1;
-                        _child2.reals[i] = c2;
+                        _child_1.reals[i] = c1;
+                        _child_2.reals[i] = c2;
                     }
                 }
                 else {  // If the parameters are the same, then we can just copy them
-                    _child1.reals[i] = _parent1.reals[i];
-                    _child2.reals[i] = _parent2.reals[i];
+                    _child_1.reals[i] = _parent_1.reals[i];
+                    _child_2.reals[i] = _parent_2.reals[i];
                 }
             }
         }
         else {  // If we shoudn't crossover (determined by RNG)
             for (int i = 0; i < real_vars; i++) {
-                _child1.reals[i] = _parent1.reals[i];
-                _child2.reals[i] = _parent2.reals[i];
+                _child_1.reals[i] = _parent_1.reals[i];
+                _child_2.reals[i] = _parent_2.reals[i];
             }
         }
     }
 
-    void NSGA2::Bincross(const Individual& _parent1,
-                         const Individual& _parent2,
-                         Individual& _child1,
-                         Individual& _child2) {
-        int temp, site1, site2;
+    void NSGA2::Bincross(const Individual& _parent_1,
+                         const Individual& _parent_2,
+                         Individual& _child_1,
+                         Individual& _child_2) {
+        int temp, site_1, site_2;
         for (int i = 0; i < bin_vars; i++) {
-            double randDouble = rand_gen->Realu();
-            if (randDouble <= bin_cross_prob) {
+            double rand_double = rand_gen->Realu();
+            if (rand_double <= bin_cross_prob) {
                 bin_cross_count++;
-                site1 = rand_gen->Integer(0, bin_bits[i] - 1);
-                site2 = rand_gen->Integer(0, bin_bits[i] - 1);
-                if (site1 > site2) {
-                    temp  = site1;
-                    site1 = site2;
-                    site2 = temp;
+                site_1 = rand_gen->Integer(0, bin_bits[i] - 1);
+                site_2 = rand_gen->Integer(0, bin_bits[i] - 1);
+                if (site_1 > site_2) {
+                    temp   = site_1;
+                    site_1 = site_2;
+                    site_2 = temp;
                 }
 
-                for (int j = 0; j < site1; j++) {
-                    _child1.gene[i][j] = _parent1.gene[i][j];
-                    _child2.gene[i][j] = _parent2.gene[i][j];
+                for (int j = 0; j < site_1; j++) {
+                    _child_1.gene[i][j] = _parent_1.gene[i][j];
+                    _child_2.gene[i][j] = _parent_2.gene[i][j];
                 }
-                for (int j = site1; j < site2; j++) {
-                    _child1.gene[i][j] = _parent2.gene[i][j];
-                    _child2.gene[i][j] = _parent1.gene[i][j];
+                for (int j = site_1; j < site_2; j++) {
+                    _child_1.gene[i][j] = _parent_2.gene[i][j];
+                    _child_2.gene[i][j] = _parent_1.gene[i][j];
                 }
-                for (int j = site2; j < bin_bits[i]; j++) {
-                    _child1.gene[i][j] = _parent1.gene[i][j];
-                    _child2.gene[i][j] = _parent2.gene[i][j];
+                for (int j = site_2; j < bin_bits[i]; j++) {
+                    _child_1.gene[i][j] = _parent_1.gene[i][j];
+                    _child_2.gene[i][j] = _parent_2.gene[i][j];
                 }
             }
             else {
                 for (int j = 0; j < bin_bits[i]; j++) {
-                    _child1.gene[i][j] = _parent1.gene[i][j];
-                    _child2.gene[i][j] = _parent2.gene[i][j];
+                    _child_1.gene[i][j] = _parent_1.gene[i][j];
+                    _child_2.gene[i][j] = _parent_2.gene[i][j];
                 }
             }
         }
@@ -535,7 +535,7 @@ namespace nsga2 {
             << ",num_binary_vars,binary_var_crossover_prob,binary_var_mutation_prob" << std::endl;
 
         _os << pop_size << "," << generations << "," << objectives << "," << constraints << "," << rand_gen->GetSeed()
-            << "," << real_vars << "," << real_cross_prob << "," << real_mut_prob << "," << etaC << "," << etaM << ","
+            << "," << real_vars << "," << real_cross_prob << "," << real_mut_prob << "," << etaC << "," << eta_m << ","
             << "," << bin_vars << "," << bin_cross_prob << "," << bin_mut_prob << std::endl;
 
 
@@ -558,7 +558,8 @@ namespace nsga2 {
             _os << "index,lower_limit,upper_limit,num_bits" << std::endl;
 
             for (int i = 0; i < bin_vars; i++) {
-                _os << i << "," << bin_limits[i].first << "," << bin_limits[i].second << "," << bin_bits[i] << std::endl;
+                _os << i << "," << bin_limits[i].first << "," << bin_limits[i].second << "," << bin_bits[i]
+                    << std::endl;
             }
         }
         _os.flush();

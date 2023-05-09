@@ -35,8 +35,8 @@ namespace nsga2 {
         void SetRealMutationProbability(const double& real_mut_prob_) { real_mut_prob = real_mut_prob_; }
         void SetBinMutationProbability(const double& bin_mut_prob_) { bin_mut_prob = bin_mut_prob_; }
         void SetEtaC(const double& etaC_) { etaC = etaC_; }
-        void SetEtaM(const double& etaM_) { etaM = etaM_; }
-        void SetEpsC(const double& epsC_) { epsC = epsC_; }
+        void SetEtaM(const double& eta_m_) { eta_m = eta_m_; }
+        void SetEpsC(const double& eps_c_) { eps_c = eps_c_; }
         void SetBitCount(const std::vector<int>& bin_bits_) { bin_bits = bin_bits_; }
         void SetRealVarLimits(const std::vector<std::pair<double, double>>& real_limits_) { real_limits = real_limits_; }
         void SetBinVarLimits(const std::vector<std::pair<double, double>>& bin_limits_) { bin_limits = bin_limits_; }
@@ -61,17 +61,17 @@ namespace nsga2 {
         int generations;
 
     private:
-        int real_vars            = -1;
-        int bin_vars             = -1;
-        int objectives           = -1;
-        int constraints          = -1;
-        double real_cross_prob   = -1.0;
-        double bin_cross_prob    = -1.0;
-        double real_mut_prob     = -1.0;
-        double bin_mut_prob      = -1.0;
-        double etaC              = -1.0;
-        double etaM              = -1.0;
-        double epsC              = std::numeric_limits<double>::epsilon();
+        int real_vars             = -1;
+        int bin_vars              = -1;
+        int objectives            = -1;
+        int constraints           = -1;
+        double real_cross_prob    = -1.0;
+        double bin_cross_prob     = -1.0;
+        double real_mut_prob      = -1.0;
+        double bin_mut_prob       = -1.0;
+        double etaC               = -1.0;
+        double eta_m              = -1.0;
+        double eps_c              = std::numeric_limits<double>::epsilon();
         std::vector<int> bin_bits = {};
         std::vector<double> initial_real_vars;
         bool random_initialize                             = {};
@@ -93,8 +93,8 @@ namespace nsga2 {
         std::ofstream nsga2_params_file;
 
         // EarlyStopping
-        bool earlyStoppingOneFront      = false;
-        bool earlyStoppingNoImprovement = false;
+        bool early_stopping_one_front      = false;
+        bool early_stopping_no_improvement = false;
 
         bool ConfigurationIsValid();
         void CreateStartingPopulations();
@@ -106,13 +106,16 @@ namespace nsga2 {
         void CompleteGeneration();
 
         void Selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
-        const Individual& Tournament(const Individual& ind1, const Individual& ind2) const;
-        void Crossover(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
-        void SelfAdaptiveSBX(const Individual& parent1,
-                             const Individual& parent2,
-                             Individual& child1,
-                             Individual& child2);
-        void Bincross(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
+        const Individual& Tournament(const Individual& ind_1, const Individual& ind_2) const;
+        void Crossover(const Individual& parent_1,
+                       const Individual& parent_2,
+                       Individual& child_1,
+                       Individual& child_2);
+        void SelfAdaptiveSBX(const Individual& parent_1,
+                             const Individual& parent_2,
+                             Individual& child_1,
+                             Individual& child_2);
+        void Bincross(const Individual& parent_1, const Individual& parent_2, Individual& child_1, Individual& child_2);
     };
 }  // namespace nsga2
 

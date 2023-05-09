@@ -9,19 +9,19 @@
 
 namespace nsga2 {
     struct IndividualConfigurator {
-        int realVars;
-        std::vector<std::pair<double, double>> realLimits;
-        double realMutProb;
-        int binVars;
-        std::vector<int> binBits;
-        std::vector<std::pair<double, double>> binLimits;
-        double binMutProb;
+        int real_vars;
+        std::vector<std::pair<double, double>> real_limits;
+        double real_mut_prob;
+        int bin_vars;
+        std::vector<int> bin_bits;
+        std::vector<std::pair<double, double>> bin_limits;
+        double bin_mut_prob;
         int objectives;
         int constraints;
-        double etaM;
-        double epsC;
-        std::shared_ptr<RandomGenerator<>> randGen;
-        std::vector<double> initialRealVars;
+        double eta_m;
+        double eps_c;
+        std::shared_ptr<RandomGenerator<>> rand_gen;
+        std::vector<double> initial_real_vars;
     };
 
     class Individual {
@@ -35,15 +35,15 @@ namespace nsga2 {
         void CheckConstraints();
 
         int rank;
-        double constrViolation;
+        double constr_violation;
         std::vector<std::vector<int>> gene;
-        std::vector<double> reals;        // Real Parameters
-        std::vector<double> objScore;     // Evaluation score
-        std::vector<double> constr;       // Constraint violations
-        std::vector<int> dominationList;  // S_p, the set of individuals that this individual domintates
-        int dominatedByCounter;           // n_p, the number of individuals that dominate this individual
-        double crowdDist;  // Crowding distance, i.e. how close is the next nearest solution. Boundary solutions have
-                           // infinite distance.
+        std::vector<double> reals;         // Real Parameters
+        std::vector<double> obj_score;     // Evaluation score
+        std::vector<double> constr;        // Constraint violations
+        std::vector<int> domination_list;  // S_p, the set of individuals that this individual domintates
+        int dominated_by_counter;          // n_p, the number of individuals that dominate this individual
+        double crowd_dist;  // Crowding distance, i.e. how close is the next nearest solution. Boundary solutions have
+                            // infinite distance.
         bool evaluated;
 
         void Report(std::ostream& _os, int population_generation) const;
