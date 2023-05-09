@@ -15,7 +15,7 @@ namespace module {
     namespace support {
         namespace optimisation {
 
-            using RawSensorsMsg = message::platform::RawSensors;
+            using message::platform::RawSensors;
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2TrialExpired;
 

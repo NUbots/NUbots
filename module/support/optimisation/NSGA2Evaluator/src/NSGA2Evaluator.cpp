@@ -32,14 +32,13 @@ namespace module {
         namespace optimisation {
 
             using extension::Configuration;
-            using extension::ExecuteScriptByName;
 
             using message::behaviour::MotionCommand;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::EnableWalkEngineCommand;
             using message::motion::StopCommand;
             using message::motion::WalkCommand;
-            using RawSensorsMsg = message::platform::RawSensors;
+            using message::platform::RawSensors;
             using message::platform::webots::OptimisationCommand;
             using message::platform::webots::OptimisationRobotPosition;
             using message::platform::webots::WebotsResetDone;
@@ -137,7 +136,7 @@ namespace module {
                     }
                 });
 
-                on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
+                on<Trigger<RawSensors>, Single>().then([this](const RawSensors& sensors) {
                     if (current_state == State::EVALUATING) {
                         task->process_raw_sensor_msg(sensors, this);
                     }
