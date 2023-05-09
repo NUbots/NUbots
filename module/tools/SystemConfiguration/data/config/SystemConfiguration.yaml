@@ -10,9 +10,6 @@ permissions:
   /etc/sudoers.d/wheel: 0440
   /home/nubots/.ssh/authorized_keys: 0600
 
-wireless_interface: wlp58s0
-wired_interface: enp0s31f6
-
 # Pacman packages that should be installed and updated
 pacman:
   - linux-headers

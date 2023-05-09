@@ -1,8 +1,8 @@
 [Match]
-Name={wired_interface}
+Name=wlp58s0
 
 [Network]
-Address=10.1.1.{host_number}/16
+Address=10.1.1.3/16
 Gateway=10.1.3.1
 DNS=10.1.3.1
 DNS=8.8.8.8
