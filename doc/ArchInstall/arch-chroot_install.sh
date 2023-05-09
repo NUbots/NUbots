@@ -9,7 +9,7 @@ HOSTNAME="${HOST}${ROBOT_NUMBER}"
 IP_ADDR="10.1.1.${ROBOT_NUMBER}"
 ETHERNET_INTERFACE=${ETHERNET_INTERFACE:-"eno1"}
 WIFI_INTERFACE=${WIFI_INTERFACE:-"wlp58s0"}
-WIFI_INTERFACE=${WIFI_INTERFACE:-$(udevadm test-builtin net_id /sys/class/net/${WIFI_INTERFACE} 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)}
+WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/${WIFI_INTERFACE} 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
 
 # Setup timezone information
 ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
