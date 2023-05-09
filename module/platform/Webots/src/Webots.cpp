@@ -652,9 +652,8 @@ namespace module::platform {
         // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
         // (which is something we do for the walk optimisation), so reset our local times
         if (sim_delta > 0 && sensor_measurements.time == 0) {
-            log<NUClear::DEBUG>(
-                fmt::format("Webots sim time reset to zero, resetting local sim_time. time before reset: {}",
-                            current_sim_time));
+            log<NUClear::DEBUG>("Webots sim time reset to zero, resetting local sim_time. time before reset:",
+                                current_sim_time);
             sim_delta         = 0;
             real_delta        = 0;
             current_sim_time  = 0;
