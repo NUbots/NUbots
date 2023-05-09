@@ -33,10 +33,8 @@ namespace module {
 
             using extension::Configuration;
 
-            using message::behaviour::MotionCommand;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::EnableWalkEngineCommand;
-            using message::motion::StopCommand;
             using message::motion::WalkCommand;
             using message::platform::RawSensors;
             using message::platform::webots::OptimisationCommand;
