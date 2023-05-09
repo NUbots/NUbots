@@ -10,25 +10,22 @@
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
-namespace module {
-    namespace support {
-        namespace optimisation {
-            using message::support::optimisation::NSGA2EvaluationRequest;
+namespace module::support::optimisation {
 
-            class NSGA2Optimiser : public NUClear::Reactor {
-            private:
-                /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
-                /// including the populations, scores, etc
-                nsga2::NSGA2 nsga2_algorithm{};
-                std::unique_ptr<OptimiserTask> task;
+    using message::support::optimisation::NSGA2EvaluationRequest;
 
-            public:
-                /// @brief Called by the powerplant to build and setup the NSGA2Optimiser reactor.
-                explicit NSGA2Optimiser(std::unique_ptr<NUClear::Environment> environment);
-            };
+    class NSGA2Optimiser : public NUClear::Reactor {
+    private:
+        /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
+        /// including the populations, scores, etc
+        nsga2::NSGA2 nsga2_algorithm{};
+        std::unique_ptr<OptimiserTask> task;
 
-        }  // namespace optimisation
-    }      // namespace support
-}  // namespace module
+    public:
+        /// @brief Called by the powerplant to build and setup the NSGA2Optimiser reactor.
+        explicit NSGA2Optimiser(std::unique_ptr<NUClear::Environment> environment);
+    };
+
+}  // namespace module::support::optimisation
 
 #endif  // MODULE_SUPPORT_OPTIMISATION_NSGA2OPTIMISER_H
