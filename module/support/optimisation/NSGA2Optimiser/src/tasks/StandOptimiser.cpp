@@ -17,13 +17,13 @@ namespace module {
             using message::support::optimisation::NSGA2EvaluationRequest;
             using utility::support::Expression;
 
-            void StandOptimiser::SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm) {
+            void StandOptimiser::SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
                 NUClear::log<NUClear::INFO>("Stand Optimiser Setting up NSGA2");
                 // The initial values of the parameters to optimise
-                std::vector<double> paramInitialValues;
+                std::vector<double> param_initial_values;
 
-                // Parallel to paramInitialValues, sets the limit (min, max) of each parameter value
-                std::vector<std::pair<double, double>> paramLimits;
+                // Parallel to param_initial_values, sets the limit (min, max) of each parameter value
+                std::vector<std::pair<double, double>> param_limits;
 
                 // Extract the initial values and limits and from config file, for all of the parameters
                 script_path = config["task_config_path"].as<std::string>();
@@ -31,19 +31,19 @@ namespace module {
                 auto stand = config["stand"];
                 for (const auto& element : stand) {
                     // This is iterating through each frame of the script
-                    paramInitialValues.emplace_back(element["duration"][0].as<Expression>());
-                    paramLimits.emplace_back(element["duration"][1].as<Expression>(),
+                    param_initial_values.emplace_back(element["duration"][0].as<Expression>());
+                    param_limits.emplace_back(element["duration"][1].as<Expression>(),
                                              element["duration"][2].as<Expression>());
                 }
 
                 // Set configuration for real variables
-                NUClear::log<NUClear::INFO>("Real Var Count: ", paramInitialValues.size());
-                nsga2Algorithm.SetRealVariableCount(paramInitialValues.size());
-                nsga2Algorithm.SetRealVarLimits(paramLimits);
-                nsga2Algorithm.SetInitialRealVars(paramInitialValues);
+                NUClear::log<NUClear::INFO>("Real Var Count: ", param_initial_values.size());
+                nsga2_algorithm.SetRealVariableCount(param_initial_values.size());
+                nsga2_algorithm.SetRealVarLimits(param_limits);
+                nsga2_algorithm.SetInitialRealVars(param_initial_values);
 
                 // Set configuration for binary variables
-                nsga2Algorithm.SetBinVariableCount(0);
+                nsga2_algorithm.SetBinVariableCount(0);
             }
 
             std::unique_ptr<NSGA2EvaluationRequest> StandOptimiser::MakeEvaluationRequest(const int id,

@@ -19,7 +19,7 @@ namespace module {
             private:
                 /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
                 /// including the populations, scores, etc
-                nsga2::NSGA2 nsga2Algorithm{};
+                nsga2::NSGA2 nsga2_algorithm{};
                 std::unique_ptr<OptimiserTask> task;
 
             public:

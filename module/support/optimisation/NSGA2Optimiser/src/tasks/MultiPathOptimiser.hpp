@@ -19,7 +19,7 @@ namespace module {
 
             class MultiPathOptimiser : public OptimiserTask {
             public:
-                void SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm);
+                void SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm);
                 std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id,
                                                                               const int generation,
                                                                               std::vector<double> reals);
