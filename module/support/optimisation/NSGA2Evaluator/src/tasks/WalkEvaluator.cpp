@@ -105,8 +105,8 @@ namespace module {
                 // Get constant variables
                 YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
-                gravity_Max = eval_config["gravity"]["MAX"].as<float>();
-                gravity_Min = eval_config["gravity"]["MIN"].as<float>();
+                gravity_max = eval_config["gravity"]["MAX"].as<float>();
+                gravity_min = eval_config["gravity"]["MIN"].as<float>();
             }
 
             void WalkEvaluator::reset_simulation() {
@@ -117,24 +117,24 @@ namespace module {
                 max_field_plane_sway   = 0.0;
             }
 
-            void WalkEvaluator::evaluating_state(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+            void WalkEvaluator::evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator) {
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
                                                          walk_command_velocity.x(),
                                                          walk_command_velocity.y(),
                                                          walk_command_rotation));
 
                 evaluator->emit(std::make_unique<WalkCommand>(
-                    subsumptionId,
+                    subsumption_id,
                     Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
                 evaluator->schedule_trial_expired_message(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculate_fitness_scores(bool earlyTermination,
+            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculate_fitness_scores(bool early_termination,
                                                                                         double sim_time,
                                                                                         int generation,
                                                                                         int individual) {
                 auto scores      = calculate_scores();
-                auto constraints = earlyTermination ? calculate_constraints(sim_time) : constraints_not_violated();
+                auto constraints = early_termination ? calculate_constraints(sim_time) : constraints_not_violated();
 
                 double trial_duration = sim_time - trial_start_time;
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
@@ -184,8 +184,8 @@ namespace module {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
-                if ((std::fabs(accelerometer.x()) > gravity_Max || std::fabs(accelerometer.y()) > gravity_Max)
-                    && std::fabs(accelerometer.z()) < gravity_Min) {
+                if ((std::fabs(accelerometer.x()) > gravity_max || std::fabs(accelerometer.y()) > gravity_max)
+                    && std::fabs(accelerometer.z()) < gravity_min) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
                     NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
                                                  std::fabs(accelerometer.x()),

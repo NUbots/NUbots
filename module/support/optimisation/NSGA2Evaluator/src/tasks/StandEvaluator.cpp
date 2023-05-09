@@ -67,20 +67,20 @@ namespace module {
                 max_field_plane_sway = 0.0;
             }
 
-            void StandEvaluator::evaluating_state(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+            void StandEvaluator::evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator) {
                 NUClear::log<NUClear::DEBUG>("Running Script");
-                run_script(subsumptionId, evaluator);
+                run_script(subsumption_id, evaluator);
                 NUClear::log<NUClear::DEBUG>("schedule expire");
                 evaluator->schedule_trial_expired_message(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculate_fitness_scores(bool earlyTermination,
+            std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculate_fitness_scores(bool early_termination,
                                                                                          double sim_time,
                                                                                          int generation,
                                                                                          int individual) {
                 double trial_duration = sim_time - trial_start_time;
                 auto scores           = calculate_scores(trial_duration);
-                auto constraints      = earlyTermination ? calculate_constraints() : calculate_constraints();
+                auto constraints      = early_termination ? calculate_constraints() : calculate_constraints();
 
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
@@ -138,9 +138,9 @@ namespace module {
                 utility::file::writeToFile(script_path, n);
             }
 
-            void StandEvaluator::run_script(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+            void StandEvaluator::run_script(size_t subsumption_id, NSGA2Evaluator* evaluator) {
                 evaluator->emit(
-                    std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
+                    std::make_unique<extension::ExecuteScript>(subsumption_id, script, NUClear::clock::now()));
             }
 
             void StandEvaluator::update_max_field_plane_sway(const RawSensors& sensors) {

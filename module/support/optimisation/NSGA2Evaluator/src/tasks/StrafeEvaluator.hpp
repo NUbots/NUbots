@@ -25,8 +25,8 @@ namespace module {
                 void process_optimisation_robot_position(const OptimisationRobotPosition& position);
                 void set_up_trial(const NSGA2EvaluationRequest& request);
                 void reset_simulation();
-                void evaluating_state(size_t subsumptionId, NSGA2Evaluator* evaluator);
-                std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool earlyTermination,
+                void evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator);
+                std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
                                                                              double sim_time,
                                                                              int generation,
                                                                              int individual);
@@ -59,8 +59,8 @@ namespace module {
                 double walk_command_rotation = 0.0;
 
                 /// @brief Configuration Min and Max values
-                float gravity_Max = 0.0;
-                float gravity_Min = 0.0;
+                float gravity_max = 0.0;
+                float gravity_min = 0.0;
             };
 
         }  // namespace optimisation
