@@ -17,7 +17,7 @@ namespace module::support::optimisation {
     using message::support::optimisation::NSGA2EvaluationRequest;
     using utility::support::Expression;
 
-    void MultiPathOptimiser::SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
+    void MultiPathOptimiser::setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
         NUClear::log<NUClear::INFO>("Multipath Optimiser Setting up NSGA2");
         // The initial values of the parameters to optimise
         std::vector<double> param_initial_values;
@@ -31,7 +31,7 @@ namespace module::support::optimisation {
         std::string input_file_name =
             "../NUbots/module/support/optimisation/NSGA2Optimiser/data/config/Supplied_Pop_Reals.csv";
 
-        population_data = readInPopulationFile(input_file_name);
+        population_data = read_in_population_file(input_file_name);
         NUClear::log<NUClear::INFO>("Data file size is", population_data.size());
 
 
@@ -87,17 +87,17 @@ namespace module::support::optimisation {
 
         // Set configuration for real variables
         NUClear::log<NUClear::INFO>("Real Var Count: ", param_initial_values.size());
-        nsga2_algorithm.SetRealVariableCount(param_initial_values.size());
-        nsga2_algorithm.SetRealVarLimits(param_limits);
-        nsga2_algorithm.SetInitialRealVars(param_initial_values);
-        nsga2_algorithm.SetInitialPopulationRealVars(population_data);
-        nsga2_algorithm.setSuppliedPop(true);
+        nsga2_algorithm.set_real_variable_count(param_initial_values.size());
+        nsga2_algorithm.set_real_var_limits(param_limits);
+        nsga2_algorithm.set_initial_real_vars(param_initial_values);
+        nsga2_algorithm.set_initial_population_real_vars(population_data);
+        nsga2_algorithm.set_supplied_pop(true);
 
         // Set configuration for binary variables
-        nsga2_algorithm.SetBinVariableCount(0);
+        nsga2_algorithm.set_bin_variable_count(0);
     }
 
-    std::unique_ptr<NSGA2EvaluationRequest> MultiPathOptimiser::MakeEvaluationRequest(const int id,
+    std::unique_ptr<NSGA2EvaluationRequest> MultiPathOptimiser::make_evaluation_request(const int id,
                                                                                       const int generation,
                                                                                       std::vector<double> reals) {
         auto request              = std::make_unique<NSGA2EvaluationRequest>();
@@ -113,7 +113,7 @@ namespace module::support::optimisation {
         return request;
     }
 
-    std::vector<std::vector<double>> MultiPathOptimiser::readInPopulationFile(const std::string file_name) {
+    std::vector<std::vector<double>> MultiPathOptimiser::read_in_population_file(const std::string file_name) {
         std::vector<std::vector<double>> data;
         std::ifstream inputFile(file_name);
         int l = 0;

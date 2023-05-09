@@ -37,34 +37,34 @@ namespace nsga2 {
         }
     }
 
-    void Population::Initialize() {
+    void Population::initialize() {
         for (int i = 0; i < size; i++) {
-            inds[i].Initialize(i);
+            inds[i].initialize(i);
         }
     }
-    void Population::Decode() {
+    void Population::decode() {
         for (auto& ind : inds) {
-            ind.Decode();
+            ind.decode();
         }
     }
 
-    void Population::SetIndividualsGeneration(const int generation_) {
+    void Population::set_individuals_generation(const int generation_) {
         for (auto& ind : inds) {
             ind.generation = generation_;
         }
     }
 
-    void Population::SetIds() {
+    void Population::set_ids() {
         for (std::size_t i = 0; i < inds.size(); i++) {
             inds[i].id = i;
         }
     }
 
-    void Population::resetCurrentIndividualIndex() {
+    void Population::reset_current_individual_index() {
         current_ind = 0;
     }
 
-    std::optional<Individual> Population::GetNextIndividual() {
+    std::optional<Individual> Population::get_next_individual() {
         if (!initialised || current_ind >= inds.size()) {
             return std::nullopt;
         }
@@ -73,7 +73,7 @@ namespace nsga2 {
         }
     }
 
-    bool Population::AreAllEvaluated() const {
+    bool Population::are_all_evaluated() const {
         for (auto& ind : inds) {
             if (!ind.evaluated) {
                 return false;
@@ -82,16 +82,16 @@ namespace nsga2 {
         return true;
     }
 
-    void Population::SetEvaluationResults(const int& _id,
+    void Population::set_evaluation_results(const int& _id,
                                           const std::vector<double>& obj_score_,
                                           const std::vector<double>& constraints_) {
         inds[_id].obj_score = obj_score_;
         inds[_id].constr    = constraints_;
-        inds[_id].CheckConstraints();
+        inds[_id].check_constraints();
     }
 
     // Fast Non-Dominated Sort. This calculates the fronts in the population.
-    void Population::FastNDS() {
+    void Population::fast_nds() {
         // Reset Front
         fronts.resize(1);
         fronts[0].clear();
@@ -105,7 +105,7 @@ namespace nsga2 {
             for (std::size_t q = 0; q < inds.size(); q++) {
                 const auto& ind_q = inds[q];
 
-                int comparison = ind_p.CheckDominance(ind_q);
+                int comparison = ind_p.check_dominance(ind_q);
                 if (comparison == 1) {
                     // If P dominates Q, Add Q to the solutions that P dominates
                     ind_p.domination_list.push_back(q);
@@ -150,15 +150,15 @@ namespace nsga2 {
         }
     }
 
-    void Population::CrowdingDistanceAll() {
+    void Population::crowding_distance_all() {
         for (std::size_t i = 0; i < fronts.size(); i++) {
-            CrowdingDistance(i);
+            crowding_distance(i);
         }
     }
 
     // Calculate how close the next nearest solution is. Boundary solutions have infinite distance.
     // This allows us to prioritise boundary solutions over solutions crowded together.
-    void Population::CrowdingDistance(const int& front_index_) {
+    void Population::crowding_distance(const int& front_index_) {
         std::vector<int>& F          = fronts[front_index_];
         const std::size_t front_size = F.size();
         if (front_size == 0) {
@@ -191,32 +191,32 @@ namespace nsga2 {
         }
     }
 
-    void Population::Merge(const Population& pop_1_, const Population& pop_2_) {
-        if (GetSize() < pop_1_.GetSize() + pop_2_.GetSize()) {
-            NUClear::log<NUClear::WARN>("Merge: target population not big enough");
-            inds.reserve(pop_1_.GetSize() + pop_2_.GetSize());
+    void Population::merge(const Population& pop_1_, const Population& pop_2_) {
+        if (get_size() < pop_1_.get_size() + pop_2_.get_size()) {
+            NUClear::log<NUClear::WARN>("merge: target population not big enough");
+            inds.reserve(pop_1_.get_size() + pop_2_.get_size());
         }
 
         std::copy(pop_1_.inds.begin(), pop_1_.inds.end(), inds.begin());
-        std::copy(pop_2_.inds.begin(), pop_2_.inds.end(), inds.begin() + pop_1_.GetSize());
+        std::copy(pop_2_.inds.begin(), pop_2_.inds.end(), inds.begin() + pop_1_.get_size());
     }
 
 
-    std::pair<int, int> Population::Mutate() {
+    std::pair<int, int> Population::mutate() {
         std::pair<int, int> mut_count     = std::make_pair(0, 0);
         std::pair<int, int> ind_mut_count = std::make_pair(0, 0);
         std::vector<Individual>::iterator it;
         for (it = inds.begin(); it != inds.end(); it++) {
-            ind_mut_count = it->Mutate();
+            ind_mut_count = it->mutate();
             mut_count.first += ind_mut_count.first;
             mut_count.second += ind_mut_count.second;
         }
         return mut_count;
     }
 
-    void Population::Report(std::ostream& os, int current_gen) const {
+    void Population::report(std::ostream& os, int current_gen) const {
         for (auto it = inds.begin(); it != inds.end(); it++) {
-            it->Report(os, current_gen);
+            it->report(os, current_gen);
         }
     }
 }  // namespace nsga2

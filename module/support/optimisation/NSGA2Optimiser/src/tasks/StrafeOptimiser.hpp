@@ -17,8 +17,8 @@ namespace module::support::optimisation {
 
     class StrafeOptimiser : public OptimiserTask {
     public:
-        void SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm);
-        std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id,
+        void setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm);
+        std::unique_ptr<NSGA2EvaluationRequest> make_evaluation_request(const int id,
                                                                       const int generation,
                                                                       std::vector<double> reals);
 

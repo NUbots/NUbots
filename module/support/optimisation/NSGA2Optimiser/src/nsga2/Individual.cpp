@@ -34,7 +34,7 @@ namespace nsga2 {
         constr.resize(config.constraints, 0);
     }
 
-    void Individual::Initialize(const int& _id) {
+    void Individual::initialize(const int& _id) {
         id = _id;
 
         if (id == 0) {
@@ -58,7 +58,7 @@ namespace nsga2 {
         }
     }
 
-    void Individual::Decode() {
+    void Individual::decode() {
         int sum;
         for (int i = 0; i < config.bin_vars; i++) {
             sum = 0;
@@ -72,7 +72,7 @@ namespace nsga2 {
         }
     }
 
-    void Individual::CheckConstraints() {
+    void Individual::check_constraints() {
         if (config.constraints) {
             constr_violation = 0.0;
             for (int i = 0; i < config.constraints; i++) {
@@ -89,7 +89,7 @@ namespace nsga2 {
     // returns:  1 if this < _b (this dominates _b),
     //          -1 if this > _b (this is dominated by _b),
     //           0 if they are nondominated
-    int Individual::CheckDominance(const Individual& _b) const {
+    int Individual::check_dominance(const Individual& _b) const {
         if (constr_violation < 0.0 && _b.constr_violation < 0.0) {
             // both have constraint violations
             if (constr_violation > _b.constr_violation)
@@ -142,18 +142,18 @@ namespace nsga2 {
         }
     }
 
-    std::pair<int, int> Individual::Mutate() {
+    std::pair<int, int> Individual::mutate() {
         std::pair<int, int> mutation_count = std::make_pair(0, 0);
         if (config.real_vars) {
-            mutation_count.first += realMutate();
+            mutation_count.first += real_mutate();
         }
         if (config.bin_vars) {
-            mutation_count.second += binMutate();
+            mutation_count.second += bin_mutate();
         }
         return mutation_count;
     }
 
-    int Individual::realMutate() {
+    int Individual::real_mutate() {
         int mutation_count = 0;
         for (int i = 0; i < config.real_vars; i++) {
             if (config.rand_gen->Realu() <= config.real_mut_prob) {
@@ -192,7 +192,7 @@ namespace nsga2 {
         return mutation_count;
     }
 
-    int Individual::binMutate() {
+    int Individual::bin_mutate() {
         int mutation_count = 0;
         for (int i = 0; i < config.bin_vars; i++) {
             for (int j = 0; j < config.bin_bits[i]; j++) {
@@ -209,7 +209,7 @@ namespace nsga2 {
         return mutation_count;
     }
 
-    void Individual::Report(std::ostream& os, int population_generation) const {
+    void Individual::report(std::ostream& os, int population_generation) const {
         os << population_generation << "," << generation << "," << id << "," << constr_violation << "," << rank << ","
            << crowd_dist;
 

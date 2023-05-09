@@ -31,34 +31,34 @@ namespace nsga2 {
                                    // evaluating before the individuals are initialised)
         int generation = -1;
 
-        void resetCurrentIndividualIndex();
-        void SetIndividualsGeneration(const int generation_);
-        std::optional<Individual> GetNextIndividual();
+        void reset_current_individual_index();
+        void set_individuals_generation(const int generation_);
+        std::optional<Individual> get_next_individual();
 
-        void SetIds();
+        void set_ids();
 
-        void Initialize();
-        void Decode();
+        void initialize();
+        void decode();
 
-        int GetSize() const {
+        int get_size() const {
             return int(inds.size());
         }
 
-        bool IsReadyToEvalulate() const;
+        bool is_ready_to_evalulate() const;
 
-        bool AreAllEvaluated() const;
-        void SetEvaluationResults(const int& _id,
-                                  const std::vector<double>& obj_score_,
-                                  const std::vector<double>& constraints_);
+        bool are_all_evaluated() const;
+        void set_evaluation_results(const int& _id,
+                                    const std::vector<double>& obj_score_,
+                                    const std::vector<double>& constraints_);
 
-        void FastNDS();
-        void CrowdingDistanceAll();
-        void CrowdingDistance(const int& front_index_);
+        void fast_nds();
+        void crowding_distance_all();
+        void crowding_distance(const int& front_index_);
 
-        std::pair<int, int> Mutate();
+        std::pair<int, int> mutate();
 
-        void Merge(const Population& pop_1_, const Population& pop_2_);
-        void Report(std::ostream& os_, int current_gen) const;
+        void merge(const Population& pop_1_, const Population& pop_2_);
+        void report(std::ostream& os_, int current_gen) const;
 
         std::vector<Individual> inds;  // Got to extend class
 

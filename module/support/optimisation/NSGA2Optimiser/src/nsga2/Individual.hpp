@@ -28,11 +28,11 @@ namespace nsga2 {
     public:
         Individual(const IndividualConfigurator& _config);
         virtual ~Individual() = default;
-        void Initialize(const int& _id);
-        void Decode();
-        std::pair<int, int> Mutate();
-        int CheckDominance(const Individual& _b) const;
-        void CheckConstraints();
+        void initialize(const int& _id);
+        void decode();
+        std::pair<int, int> mutate();
+        int check_dominance(const Individual& _b) const;
+        void check_constraints();
 
         int rank;
         double constr_violation;
@@ -46,14 +46,14 @@ namespace nsga2 {
                             // infinite distance.
         bool evaluated;
 
-        void Report(std::ostream& _os, int population_generation) const;
+        void report(std::ostream& _os, int population_generation) const;
         int id;
         int generation;
 
     private:
         std::vector<double> bins;
-        int realMutate();
-        int binMutate();
+        int real_mutate();
+        int bin_mutate();
         IndividualConfigurator config;
     };
 }  // namespace nsga2

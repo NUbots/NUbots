@@ -27,7 +27,7 @@ The task must be specfied in this file. Eg./ task: "walk"
 - `NSGA2EvaluatorReady`(Initialisation succeeded, evaluate the first individual of the first generation)
 - `NSGA2Terminate` (to NSGA2Evaluator, to stop the optimisation. Shut down powerplant)
 - `NSGA2EvaluationRequest` (to NSGA2Evaluator, to request evaluation of an individual)
-- `task->MakeEvaluationRequest` (to NSGA2Elvaluator.  Request an evaluation of an individual)
+- `task->make_evaluation_request` (to NSGA2Elvaluator.  Request an evaluation of an individual)
 
 ## Dependencies
 

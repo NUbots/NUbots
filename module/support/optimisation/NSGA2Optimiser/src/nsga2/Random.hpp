@@ -20,11 +20,11 @@ namespace nsga2 {
             uintd.param(typename std::uniform_int_distribution<IntType>::param_type(low, high));
             return uintd(generator);
         }
-        void SetSeed(const uint32_t& seed_) {
+        void set_seed(const uint32_t& seed_) {
             seed = seed_;
             generator.seed(seed_);
         }
-        uint32_t GetSeed() const {
+        uint32_t get_seed() const {
             return seed;
         }
 

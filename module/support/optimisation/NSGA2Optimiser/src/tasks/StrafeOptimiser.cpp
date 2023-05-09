@@ -15,7 +15,7 @@ namespace module::support::optimisation {
     using message::support::optimisation::NSGA2EvaluationRequest;
     using utility::support::Expression;
 
-    void StrafeOptimiser::SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
+    void StrafeOptimiser::setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
         NUClear::log<NUClear::INFO>("Strafe Optimiser Setting up NSGA2");
         // The initial values of the parameters to optimise
         std::vector<double> param_initial_values;
@@ -66,15 +66,15 @@ namespace module::support::optimisation {
 
         // Set configuration for real variables
         NUClear::log<NUClear::INFO>("Real Var Count: ", param_initial_values.size());
-        nsga2_algorithm.SetRealVariableCount(param_initial_values.size());
-        nsga2_algorithm.SetRealVarLimits(param_limits);
-        nsga2_algorithm.SetInitialRealVars(param_initial_values);
+        nsga2_algorithm.set_real_variable_count(param_initial_values.size());
+        nsga2_algorithm.set_real_var_limits(param_limits);
+        nsga2_algorithm.set_initial_real_vars(param_initial_values);
 
         // Set configuration for binary variables
-        nsga2_algorithm.SetBinVariableCount(0);
+        nsga2_algorithm.set_bin_variable_count(0);
     }
 
-    std::unique_ptr<NSGA2EvaluationRequest> StrafeOptimiser::MakeEvaluationRequest(const int id,
+    std::unique_ptr<NSGA2EvaluationRequest> StrafeOptimiser::make_evaluation_request(const int id,
                                                                                    const int generation,
                                                                                    std::vector<double> reals) {
         auto request              = std::make_unique<NSGA2EvaluationRequest>();

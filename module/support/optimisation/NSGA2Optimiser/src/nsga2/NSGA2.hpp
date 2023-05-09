@@ -17,36 +17,36 @@ namespace nsga2 {
     public:
         NSGA2() : rand_gen(std::make_shared<RandomGenerator<>>()) {}
 
-        bool InitializeFirstGeneration();
-        void CompleteGenerationAndAdvance();
-        void InitializeNextGeneration();
-        bool HasMetOptimisationTerminalCondition();
+        bool initialize_first_generation();
+        void complete_generation_and_advance();
+        void initialize_next_generation();
+        bool has_met_optimisation_terminal_condition();
 
         // clang-format off
-        void SetSeed(const int& _seed) { rand_gen->SetSeed(_seed); }
-        void SetRealVariableCount(const int& real_vars_) { real_vars = real_vars_; }
-        void SetBinVariableCount(const int& bin_vars_) { bin_vars = bin_vars_; }
-        void SetObjectiveCount(const int& objectives_) { objectives = objectives_; }
-        void SetContraintCount(const int& constraints_) { constraints = constraints_; }
-        void SetPopulationSize(const int& pop_size_) { pop_size = pop_size_; }
-        void SetTargetGenerations(const int& _generations) { generations = _generations; }
-        void SetRealCrossoverProbability(const double& real_cross_prob_) { real_cross_prob = real_cross_prob_; }
-        void SetBinCrossoverProbability(const double& bin_cross_prob_) { bin_cross_prob = bin_cross_prob_; }
-        void SetRealMutationProbability(const double& real_mut_prob_) { real_mut_prob = real_mut_prob_; }
-        void SetBinMutationProbability(const double& bin_mut_prob_) { bin_mut_prob = bin_mut_prob_; }
-        void SetEtaC(const double& etaC_) { etaC = etaC_; }
-        void SetEtaM(const double& eta_m_) { eta_m = eta_m_; }
-        void SetEpsC(const double& eps_c_) { eps_c = eps_c_; }
-        void SetBitCount(const std::vector<int>& bin_bits_) { bin_bits = bin_bits_; }
-        void SetRealVarLimits(const std::vector<std::pair<double, double>>& real_limits_) { real_limits = real_limits_; }
-        void SetBinVarLimits(const std::vector<std::pair<double, double>>& bin_limits_) { bin_limits = bin_limits_; }
-        void SetInitialRealVars(const std::vector<double>& init_real_vars_) { initial_real_vars = init_real_vars_; }
-        void SetInitialPopulationRealVars(const std::vector<std::vector<double>>& supplied_population_real_vars_)
+        void set_seed(const int& _seed) { rand_gen->set_seed(_seed); }
+        void set_real_variable_count(const int& real_vars_) { real_vars = real_vars_; }
+        void set_bin_variable_count(const int& bin_vars_) { bin_vars = bin_vars_; }
+        void set_objective_count(const int& objectives_) { objectives = objectives_; }
+        void set_constraint_count(const int& constraints_) { constraints = constraints_; }
+        void set_population_size(const int& pop_size_) { pop_size = pop_size_; }
+        void set_target_generations(const int& _generations) { generations = _generations; }
+        void set_real_crossover_probability(const double& real_cross_prob_) { real_cross_prob = real_cross_prob_; }
+        void set_bin_crossover_probability(const double& bin_cross_prob_) { bin_cross_prob = bin_cross_prob_; }
+        void set_real_mutation_probability(const double& real_mut_prob_) { real_mut_prob = real_mut_prob_; }
+        void set_bin_mutation_probability(const double& bin_mut_prob_) { bin_mut_prob = bin_mut_prob_; }
+        void set_eta_c(const double& eta_c_) { etaC = eta_c_; }
+        void set_eta_m(const double& eta_m_) { eta_m = eta_m_; }
+        void set_eps_c(const double& eps_c_) { eps_c = eps_c_; }
+        void set_bit_count(const std::vector<int>& bin_bits_) { bin_bits = bin_bits_; }
+        void set_real_var_limits(const std::vector<std::pair<double, double>>& real_limits_) { real_limits = real_limits_; }
+        void set_bin_var_limits(const std::vector<std::pair<double, double>>& bin_limits_) { bin_limits = bin_limits_; }
+        void set_initial_real_vars(const std::vector<double>& init_real_vars_) { initial_real_vars = init_real_vars_; }
+        void set_initial_population_real_vars(const std::vector<std::vector<double>>& supplied_population_real_vars_)
                                                 { supplied_population_real_vars = supplied_population_real_vars_;}
-        void setSuppliedPop(const bool& supplied_pop_) {supplied_pop = supplied_pop_;}
+        void set_supplied_pop(const bool& supplied_pop_) {supplied_pop = supplied_pop_;}
         // clang-format on
 
-        std::shared_ptr<Population> getCurrentPop();
+        std::shared_ptr<Population> get_current_pop();
 
         bool crowd_obj       = true;
         int report_count     = 0;
@@ -96,26 +96,26 @@ namespace nsga2 {
         bool early_stopping_one_front      = false;
         bool early_stopping_no_improvement = false;
 
-        bool ConfigurationIsValid();
-        void CreateStartingPopulations();
-        void InitializeReportingStreams();
-        void WriteReportHeaders(std::ofstream& _os, std::string file_name) const;
-        void ReportParams(std::ofstream& _os, std::string file_name) const;
-        void ReportPop(const std::shared_ptr<Population>& pop, std::ofstream& os) const;
+        bool configuration_is_valid();
+        void create_starting_populations();
+        void initialize_reporting_streams();
+        void write_report_headers(std::ofstream& _os, std::string file_name) const;
+        void report_params(std::ofstream& _os, std::string file_name) const;
+        void report_pop(const std::shared_ptr<Population>& pop, std::ofstream& os) const;
 
-        void CompleteGeneration();
+        void complete_generation();
 
-        void Selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
-        const Individual& Tournament(const Individual& ind_1, const Individual& ind_2) const;
-        void Crossover(const Individual& parent_1,
+        void selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
+        const Individual& tournament(const Individual& ind_1, const Individual& ind_2) const;
+        void crossover(const Individual& parent_1,
                        const Individual& parent_2,
                        Individual& child_1,
                        Individual& child_2);
-        void SelfAdaptiveSBX(const Individual& parent_1,
-                             const Individual& parent_2,
-                             Individual& child_1,
-                             Individual& child_2);
-        void Bincross(const Individual& parent_1, const Individual& parent_2, Individual& child_1, Individual& child_2);
+        void self_adaptive_sbx(const Individual& parent_1,
+                               const Individual& parent_2,
+                               Individual& child_1,
+                               Individual& child_2);
+        void bincross(const Individual& parent_1, const Individual& parent_2, Individual& child_1, Individual& child_2);
     };
 }  // namespace nsga2
 
