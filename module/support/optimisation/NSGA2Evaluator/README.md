@@ -15,15 +15,11 @@ The NSGA2Optimiser module uses this module. Please see 'NSGA2Evaluator.yaml' to 
 - `module::support::optimisation::StrafeEvaluator` A walk strafe evaluation task.
 - `module::support::optimisation::RotationEvaluator` A walk rotation evaluation task.
 - `module::support::optimisation::StandEvaluator` A stand evaluation task.
+- `message::support::optimisation::NSGA2Terminate` Coordinates shutting down of the evaluator.
+- `message::support::optimisation::NSGA2EvaluationRequest` Enables the evaluation of individuals.
 
 ## Emits
-
 - `message::support::optimisation::NSGA2FitnessScores` Containing the score evaluation of an individual, to be used by the NSGA2Optimiser.
-- `MotionCommand` (to WalkEngine)
-- `ExecuteScript` (to ScriptEngine, to stand up, and stand still)
 
 ## Dependencies
-
-- `NSGA2Terminate` (from NSGA2Optimiser, to finish the optimisation)
-- `NSGA2EvaluationRequest` (from NSGA2Optimiser, to request evaluation of an individual)
 - `message::platform::RawSensors` Contains sensor data from the simulation which is used for calculating an individual's fitness.
