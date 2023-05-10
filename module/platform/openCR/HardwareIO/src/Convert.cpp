@@ -181,26 +181,30 @@ namespace module::platform::openCR {
         float velocity(int32_t velocity) {
             // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
             // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
-            return utility::math::clamp(int32_t(-1023), velocity, int32_t(1023)) * 0.229f / 60.0f;
+            // Default servo limits for velocity
+            return utility::math::clamp(int32_t(-210), velocity, int32_t(210)) * 0.229f / 60.0f;
         }
 
         int32_t velocity(float velocity) {
             // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
             // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
-            return int32_t(utility::math::clamp(-1023.0f, (velocity * 60.0f / 0.229f), 1023.0f));
+            // Default servo limits for velocity
+            return int32_t(utility::math::clamp(-210.0f, (velocity * 60.0f / 0.229f), 210.0f));
         }
 
 
         float current(int16_t current) {
             // Base unit: 3.36mA = 0.00336A
-            // Range: -2047 - +2047 = -6.87792A - +6.87792A
-            return utility::math::clamp(int16_t(-2047), current, int16_t(2047)) * 0.00336f;
+            // Range: -1941 - +1941
+            // Default servo limits for current
+            return utility::math::clamp(int16_t(-1941), current, int16_t(1941)) * 0.00336f;
         }
 
         int16_t current(float current) {
             // Base unit: 3.36mA = 0.00336A
-            // Range: -2047 - +2047 = -6.87792A - +6.87792A
-            return int16_t(utility::math::clamp(-6.87792f, current, 6.87792f) / 0.00336f);
+            // Range: -1941 - +1941
+            // Default servo limits for current
+            return int16_t(utility::math::clamp(-1941, int(current / 0.00336f), 1941));
         }
 
         /// @todo clamp gain values to [0,16383]
