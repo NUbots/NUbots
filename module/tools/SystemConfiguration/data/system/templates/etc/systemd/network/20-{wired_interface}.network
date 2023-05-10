@@ -1,5 +1,5 @@
 [Match]
-Name=eno1
+Name={wired_interface}
 
 [Network]
 Bond=bond0

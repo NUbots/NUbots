@@ -107,6 +107,12 @@ namespace module::tools {
             // The base path that stores the files
             fs::path base_path = "system";
 
+            // The base path that stores template files
+            fs::path template_path = base_path / "template";
+
+            // The path that stores generated files
+            fs::path generated_path = base_path / "generated";
+
             // Our default, and platform specific paths
             fs::path default_path = base_path / "default";
             fs::path device_path  = base_path / hostname;
@@ -114,6 +120,9 @@ namespace module::tools {
             /******************************
              * SYSTEM CONFIGURATION FILES *
              ******************************/
+            wireless_interface = config["wireless_interface"].as<std::string>();
+            wired_interface    = config["wired_interface"].as<std::string>();
+
             log<NUClear::INFO>(
                 fmt::format("Scanning for system files in {} and {}", default_path.string(), device_path.string()));
             for (const auto& p : fs::recursive_directory_iterator(default_path)) {
@@ -140,6 +149,44 @@ namespace module::tools {
                         log<NUClear::DEBUG>(fmt::format("Updating file {}", out_file.string()));
                         fs::create_directories(out_file.parent_path());
                         fs::copy_file(in_file, out_file, fs::copy_options::overwrite_existing);
+                    }
+                }
+            }
+            // Generate system configurations based on config if necessary
+            for (const auto& p : fs::recursive_directory_iterator(template_path)) {
+                if (p.is_regular_file()) {
+                    fs::path in_file = p.path();
+
+                    // Generate output file name based on config and file template
+                    fs::path relative       = fs::relative(in_file, default_path);
+                    generated_file          = generated_path / relative;
+                    fs::path generated_file = fmt::format(generated_file.str(),
+                                                          fmt::arg("wireless_interface", wireless_interface),
+                                                          fmt::arg("wired_interface", wired_interface));
+                    fs::path out_file       = "/" / relative;
+
+                    // Read template file contents
+                    ifstream in_file_stream(in_file);
+                    std::string in_file_contents;
+                    if (in_file_stream) {
+                        std::stringstream buffer;
+                        buffer << in_file_stream.rdbuf();
+                        in_file_contents = buffer.str();
+                    }
+
+                    // Fill template file with config values and write to generated files directory
+                    ofstream out_file_stream;
+                    out_file_stream.open(generated_file);
+                    out_file_stream << fmt::format(in_file_contents,
+                                                   fmt::arg("wireless_interface", wireless_interface),
+                                                   fmt::arg("wired_interface", wired_interface));
+                    out_file_stream.close();
+
+                    // If they are not the same, overwrite the system file with the newly generated one
+                    if (!files_equal(generated_file, out_file)) {
+                        log<NUClear::DEBUG>(fmt::format("Updating file {}", out_file.string()));
+                        fs::create_directories(out_file.parent_path());
+                        fs::copy_file(generated_file, out_file, fs::copy_options::overwrite_existing);
                     }
                 }
             }
