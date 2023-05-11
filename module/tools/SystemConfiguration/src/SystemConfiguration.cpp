@@ -108,7 +108,7 @@ namespace module::tools {
             fs::path base_path = "system";
 
             // The base path that stores template files
-            fs::path template_path = base_path / "template";
+            fs::path template_path = base_path / "templates";
 
             // The path that stores generated files
             fs::path generated_path = base_path / "generated";
@@ -120,8 +120,9 @@ namespace module::tools {
             /******************************
              * SYSTEM CONFIGURATION FILES *
              ******************************/
-            wireless_interface = config["wireless_interface"].as<std::string>();
-            wired_interface    = config["wired_interface"].as<std::string>();
+            std::string wireless_interface = config["wireless_interface"].as<std::string>();
+            std::string wired_interface    = config["wired_interface"].as<std::string>();
+            std::string host_number = config["host_number"].as<std::string>();
 
             log<NUClear::INFO>(
                 fmt::format("Scanning for system files in {} and {}", default_path.string(), device_path.string()));
@@ -157,16 +158,18 @@ namespace module::tools {
                 if (p.is_regular_file()) {
                     fs::path in_file = p.path();
 
+                    log<NUClear::INFO>("Parsing template {}", in_file.string());
+
                     // Generate output file name based on config and file template
-                    fs::path relative       = fs::relative(in_file, default_path);
-                    generated_file          = generated_path / relative;
-                    fs::path generated_file = fmt::format(generated_file.str(),
+                    fs::path relative       = fs::relative(in_file, template_path);
+                    relative = fmt::format(relative.string(),
                                                           fmt::arg("wireless_interface", wireless_interface),
                                                           fmt::arg("wired_interface", wired_interface));
+                    fs::path generated_file          = generated_path / relative;
                     fs::path out_file       = "/" / relative;
 
                     // Read template file contents
-                    ifstream in_file_stream(in_file);
+                    std::ifstream in_file_stream(in_file);
                     std::string in_file_contents;
                     if (in_file_stream) {
                         std::stringstream buffer;
@@ -175,16 +178,21 @@ namespace module::tools {
                     }
 
                     // Fill template file with config values and write to generated files directory
-                    ofstream out_file_stream;
+                    std::ofstream out_file_stream;
+                    fs::create_directories(generated_file.parent_path());
                     out_file_stream.open(generated_file);
+                    log<NUClear::INFO>(fmt::format("in_file contents {}", in_file_contents));
                     out_file_stream << fmt::format(in_file_contents,
                                                    fmt::arg("wireless_interface", wireless_interface),
-                                                   fmt::arg("wired_interface", wired_interface));
+                                                   fmt::arg("wired_interface", wired_interface),
+                                                   fmt::arg("host_number", host_number));
                     out_file_stream.close();
+
+                    log<NUClear::INFO>("Generated file {}", generated_file);
 
                     // If they are not the same, overwrite the system file with the newly generated one
                     if (!files_equal(generated_file, out_file)) {
-                        log<NUClear::DEBUG>(fmt::format("Updating file {}", out_file.string()));
+                        log<NUClear::INFO>(fmt::format("Updating file {}", out_file.string()));
                         fs::create_directories(out_file.parent_path());
                         fs::copy_file(generated_file, out_file, fs::copy_options::overwrite_existing);
                     }

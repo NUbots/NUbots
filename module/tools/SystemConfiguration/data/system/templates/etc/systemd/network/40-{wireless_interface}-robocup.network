@@ -2,7 +2,7 @@
 Name={wireless_interface}
 
 [Network]
-Address=192.168.0.{hostnumber}/16
+Address=192.168.0.{host_number}/16
 Gateway=192.168.3.1
 DNS=192.168.3.1
 DNS=8.8.8.8
