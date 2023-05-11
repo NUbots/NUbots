@@ -1,4 +1,5 @@
 #include <fmt/format.h>
+// #include <algorithm>
 
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
@@ -13,61 +14,58 @@ namespace module::platform::openCR {
         // We need to do 2 sync writes here.
         // We always write to all servos if at least one of them is dirty
 
-        const bool servos_dirty = std::any_of(servoStates.cbegin(),
-                                              servoStates.cend(),
-                                              [](const ServoState& servo) -> bool { return servo.dirty; });
-        if (servos_dirty) {
-
-            // log<NUClear::DEBUG>("Servos dirty, constructing SyncWrite");
+        const int num_servos_dirty = std::count_if(servoStates.cbegin(),
+                                                   servoStates.cend(),
+                                                   [](const ServoState& servo) -> bool { return servo.dirty; });
+        if (num_servos_dirty) {
 
             // Write data is split into two components
-            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, 20> data1;
-            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
+            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, num_servos_dirty> block1;
+            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, num_servos_dirty> block2;
 
-            for (uint i = 0; i < servoStates.size(); ++i) {
-                // Servo ID is sequential, but not 0-indexed
-                data1[i].id = nugus.servo_ids()[i];
-                data2[i].id = nugus.servo_ids()[i];
+            // loop through each servo with an index
+            for (uint i = 0, block_index = 0; i < servoStates.size(); ++i) {
+                if (servoStates[i].dirty) {
+                    // Clear our dirty flag
+                    servoStates[i].dirty = false;
 
-                // Clear our dirty flag
-                servoStates[i].dirty = false;
+                    // Servo ID is sequential, but not 0-indexed
+                    block1[block_index].id = nugus.servo_ids()[i];
+                    block2[block_index].id = nugus.servo_ids()[i];
 
-                // If our torque should be disabled then we disable our torque
-                data1[i].data.torqueEnable =
-                    uint8_t(servoStates[i].torque != 0 && !std::isnan(servoStates[i].goalPosition));
+                    // If our torque should be disabled then we disable our torque
+                    block1[block_index].data.torqueEnable =
+                        uint8_t(servoStates[i].torque != 0 && !std::isnan(servoStates[i].goalPosition));
 
-                // log<NUClear::DEBUG>(fmt::format(
-                //     "Servo ID {}:\tservo state torque = {}\t data send torque = {}\tgoal position is NaN = {}",
-                //     i + 1,
-                //     servoStates[i].torqueEnabled,
-                //     data1[i].data.torqueEnable,
-                //     std::isnan(servoStates[i].goalPosition)));
+                    // Pack our data
+                    block1[block_index].data.velocityIGain       = convert::IGain(servoStates[i].velocityIGain);
+                    block1[block_index].data.velocityPGain       = convert::PGain(servoStates[i].velocityPGain);
+                    block1[block_index].data.positionDGain       = convert::DGain(servoStates[i].positionDGain);
+                    block1[block_index].data.positionIGain       = convert::IGain(servoStates[i].positionIGain);
+                    block1[block_index].data.positionPGain       = convert::PGain(servoStates[i].positionPGain);
+                    block2[block_index].data.feedforward1stGain  = convert::FFGain(servoStates[i].feedforward1stGain);
+                    block2[block_index].data.feedforward2ndGain  = convert::FFGain(servoStates[i].feedforward2ndGain);
+                    block2[block_index].data.goalPWM             = convert::PWM(servoStates[i].goalPWM);
+                    block2[block_index].data.goalCurrent         = convert::current(servoStates[i].goalCurrent);
+                    block2[block_index].data.goalVelocity        = convert::velocity(servoStates[i].goalVelocity);
+                    block2[block_index].data.profileAcceleration = convert::FFGain(servoStates[i].profileAcceleration);
+                    block2[block_index].data.profileVelocity     = convert::FFGain(servoStates[i].profileVelocity);
+                    block2[block_index].data.goalPosition =
+                        convert::position(i, servoStates[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
 
-                // Pack our data
-                data1[i].data.velocityIGain = convert::IGain(servoStates[i].velocityIGain);
-                data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
-                data1[i].data.positionDGain = convert::DGain(servoStates[i].positionDGain);
-                data1[i].data.positionIGain = convert::IGain(servoStates[i].positionIGain);
-                data1[i].data.positionPGain = convert::PGain(servoStates[i].positionPGain);
-
-                data2[i].data.feedforward1stGain  = convert::FFGain(servoStates[i].feedforward1stGain);
-                data2[i].data.feedforward2ndGain  = convert::FFGain(servoStates[i].feedforward2ndGain);
-                data2[i].data.goalPWM             = convert::PWM(servoStates[i].goalPWM);
-                data2[i].data.goalCurrent         = convert::current(servoStates[i].goalCurrent);
-                data2[i].data.goalVelocity        = convert::velocity(servoStates[i].goalVelocity);
-                data2[i].data.profileAcceleration = convert::FFGain(servoStates[i].profileAcceleration);
-                data2[i].data.profileVelocity     = convert::FFGain(servoStates[i].profileVelocity);
-                data2[i].data.goalPosition =
-                    convert::position(i, servoStates[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
+                    // next block index
+                    ++block_index;
+                }
             }
 
-            opencr.write(
-                dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(uint16_t(AddressBook::SERVO_WRITE_1),
-                                                                                  data1));
-            opencr.write(
-                dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, 20>(uint16_t(AddressBook::SERVO_WRITE_2),
-                                                                                  data2));
+            opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, num_servos_dirty>(
+                uint16_t(AddressBook::SERVO_WRITE_1),
+                block1));
+            opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, num_servos_dirty>(
+                uint16_t(AddressBook::SERVO_WRITE_2),
+                block2));
         }
+
 
         // Get updated servo data
         // SYNC_READ (read the same memory addresses on all devices)
