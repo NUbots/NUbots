@@ -121,7 +121,7 @@ namespace module::platform::openCR {
          *       See https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#homing-offset
          */
 
-        float position(uint8_t id,
+        float position(uint8_t index,
                        uint32_t data,
                        std::array<int8_t, 20> servo_direction,
                        std::array<double, 20> servo_offset) {
@@ -147,14 +147,14 @@ namespace module::platform::openCR {
             float angle = scaled_value * 0.0015358897f;
 
             // Apply the servo specific operations
-            angle *= servo_direction[id];
-            angle += servo_offset[id];
+            angle *= servo_direction[index];
+            angle += servo_offset[index];
 
             // Normalise the angle to (-pi, pi] for internal use
             return utility::math::angle::normalizeAngle(angle);
         }
 
-        uint32_t position(uint8_t id,
+        uint32_t position(uint8_t index,
                           float angle,
                           std::array<int8_t, 20> servo_direction,
                           std::array<double, 20> servo_offset) {
@@ -162,8 +162,8 @@ namespace module::platform::openCR {
             // Range: 0 - 4095 = 0 - 360.36 = 6.2894683215 rad
 
             // first undo the servo specific operations
-            angle -= servo_offset[id];
-            angle *= servo_direction[id];
+            angle -= servo_offset[index];
+            angle *= servo_direction[index];
 
             // Normalise the angle to (-pi, pi] in case the offset changed this
             angle = utility::math::angle::normalizeAngle(angle);
