@@ -266,7 +266,12 @@ namespace module::platform::openCR {
                     servoStates[command.id].positionDGain = command.gain * 0;
 
                     servoStates[command.id].goalVelocity = speed;
-                    servoStates[command.id].goalPosition = command.position;
+
+                    // Don't update the goal posistion if we're unlocking the servo so that we never
+                    // write a NaN value to the servos (or, rather, the conversion functions)
+                    if (!(command.torque == 0 && std::isnan(command.position))) {
+                        servoStates[command.id].goalPosition = command.position;
+                    }
                 }
             }
         });
