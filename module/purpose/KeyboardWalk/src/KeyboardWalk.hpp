@@ -95,6 +95,27 @@ namespace module::purpose {
         /// @brief Executes Clap Open move
         void clap_open(); 
 
+        /// @brief Executes Clap Close move
+        void clap_close(); 
+
+        /// @brief Executes Overhead Thrust Right move
+        void OH_thrust_r(); 
+
+        /// @brief Executes Overhead Thrust Left move
+        void OH_thrust_l()); 
+
+        /// @brief Executes Star 1 move
+        void star_1(); 
+
+        /// @brief Executes Star 2 move
+        void star_2(); 
+
+        /// @brief Executes Crouch 1 move
+        void crouch_1(); 
+
+        /// @brief Executes Crouch 2 move
+        void crouch_2(); 
+
         /// @brief Emits task to kick with specified leg
         /// @param l Leg to kick with (LEFT or RIGHT)
         void kick(utility::input::LimbID::Value l);

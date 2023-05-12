@@ -108,6 +108,13 @@ namespace module::purpose {
                 case KEY_DOWN: look_down(); break;
                 case 'q': quit(); return;
                 case '1': clap_open(); break;
+                case '2': clap_close(); break;
+                case '3': OH_thrust_r(); break;
+                case '4': OH_thrust_l(); break;
+                case '5': star_1(); break;
+                case '6': star_2(); break;
+                case '7': crouch_1(); break;
+                case '8': crouch_2(); break;
                 default:
                     log<NUClear::ERROR>("Unknown Command");
                     print_status();
@@ -341,6 +348,40 @@ namespace module::purpose {
     	log<NUClear::INFO>("Clap Open Move");
     }
 
+    void KeyboardWalk::clap_close() {
+    	emit<Task>(load_script<BodySequence>("StepClap2.yaml"));
+    	log<NUClear::INFO>("Clap Close Move");
+    }
+
+    void KeyboardWalk::OH_thrust_r() {
+    	emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"));
+    	log<NUClear::INFO>("Overhead Thrust Right Move");
+    }
+
+    void KeyboardWalk::OH_thrust_l() {
+    	emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"));
+    	log<NUClear::INFO>("Overhead Thrust Left Move");
+    }
+
+    void KeyboardWalk::star_1()) {
+    	emit<Task>(load_script<BodySequence>("Star1.yaml"));
+    	log<NUClear::INFO>("Star 1 Move");
+    }
+
+    void KeyboardWalk::star_2() {
+    	emit<Task>(load_script<BodySequence>("Star2.yaml"));
+    	log<NUClear::INFO>("Star 2 Move");
+    }
+
+    void KeyboardWalk::crouch_1() {
+    	emit<Task>(load_script<BodySequence>("Crouch1.yaml"));
+    	log<NUClear::INFO>("Crouch 1 Move");
+    }
+
+    void KeyboardWalk::crouch_2() {
+    	emit<Task>(load_script<BodySequence>("Crouch2.yaml"));
+    	log<NUClear::INFO>("Crouch 2 Move");
+    }
     void KeyboardWalk::update_command() {
         // If walking is enabled, update the walk command
         if (walk_enabled) {
