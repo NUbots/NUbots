@@ -20,8 +20,8 @@ namespace module::platform::openCR {
         if (num_servos_dirty) {
 
             // Write data is split into two components
-            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, num_servos_dirty> block1;
-            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, num_servos_dirty> block2;
+            std::vector<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>> block1(num_servos_dirty);
+            std::vector<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>> block2(num_servos_dirty);
 
             // loop through each servo with an index
             for (uint i = 0, block_index = 0; i < servoStates.size(); ++i) {
@@ -58,12 +58,12 @@ namespace module::platform::openCR {
                 }
             }
 
-            opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, num_servos_dirty>(
-                uint16_t(AddressBook::SERVO_WRITE_1),
-                block1));
-            opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, num_servos_dirty>(
-                uint16_t(AddressBook::SERVO_WRITE_2),
-                block2));
+            opencr.write(
+                dynamixel::v2::VarSyncWriteCommand<DynamixelServoWriteDataPart1>(uint16_t(AddressBook::SERVO_WRITE_1),
+                                                                                 block1));
+            opencr.write(
+                dynamixel::v2::VarSyncWriteCommand<DynamixelServoWriteDataPart2>(uint16_t(AddressBook::SERVO_WRITE_2),
+                                                                                 block2));
         }
 
 

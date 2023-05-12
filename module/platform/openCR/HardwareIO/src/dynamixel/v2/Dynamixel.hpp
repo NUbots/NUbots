@@ -119,6 +119,7 @@ namespace dynamixel {
 #include "StatusReturn.hpp"
 #include "SyncRead.hpp"
 #include "SyncWrite.hpp"
+#include "VarSyncWrite.hpp"
 #include "Write.hpp"
 #undef DYNAMIXEL_V2_INTERNAL
 
