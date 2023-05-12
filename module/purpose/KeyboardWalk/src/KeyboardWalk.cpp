@@ -344,43 +344,51 @@ namespace module::purpose {
     }
     
     void KeyboardWalk::clap_open() {
-    	emit<Task>(load_script<BodySequence>("StepClap1.yaml"));
+        reset();
+    	emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
     	log<NUClear::INFO>("Clap Open Move");
     }
 
     void KeyboardWalk::clap_close() {
-    	emit<Task>(load_script<BodySequence>("StepClap2.yaml"));
+        reset();
+    	emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
     	log<NUClear::INFO>("Clap Close Move");
     }
 
     void KeyboardWalk::OH_thrust_r() {
-    	emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"));
+        reset();
+    	emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
     	log<NUClear::INFO>("Overhead Thrust Right Move");
     }
 
     void KeyboardWalk::OH_thrust_l() {
-    	emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"));
+        reset();
+    	emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
     	log<NUClear::INFO>("Overhead Thrust Left Move");
     }
 
-    void KeyboardWalk::star_1()) {
-    	emit<Task>(load_script<BodySequence>("Star1.yaml"));
+    void KeyboardWalk::star_1() {
+        reset();
+    	emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
     	log<NUClear::INFO>("Star 1 Move");
     }
 
     void KeyboardWalk::star_2() {
-    	emit<Task>(load_script<BodySequence>("Star2.yaml"));
+        reset();
+    	emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
     	log<NUClear::INFO>("Star 2 Move");
     }
 
     void KeyboardWalk::crouch_1() {
-    	emit<Task>(load_script<BodySequence>("Crouch1.yaml"));
+        reset();
+    	emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
     	log<NUClear::INFO>("Crouch 1 Move");
     }
 
     void KeyboardWalk::crouch_2() {
-    	emit<Task>(load_script<BodySequence>("Crouch2.yaml"));
-    	log<NUClear::INFO>("Crouch 2 Move");
+        reset();
+    	emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);
+    	log<NUClear::INFO>("Crouch 2./b Move");
     }
     void KeyboardWalk::update_command() {
         // If walking is enabled, update the walk command

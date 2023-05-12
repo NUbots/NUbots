@@ -102,7 +102,7 @@ namespace module::purpose {
         void OH_thrust_r(); 
 
         /// @brief Executes Overhead Thrust Left move
-        void OH_thrust_l()); 
+        void OH_thrust_l(); 
 
         /// @brief Executes Star 1 move
         void star_1(); 
