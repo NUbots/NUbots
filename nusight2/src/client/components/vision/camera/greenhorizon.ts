@@ -1,33 +1,29 @@
-import { computed } from 'mobx'
-import * as THREE from 'three'
+import { computed } from "mobx";
+import * as THREE from "three";
 
-import { Matrix4 } from '../../../math/matrix4'
-import { Vector3 } from '../../../math/vector3'
-import { Vector4 } from '../../../math/vector4'
-import { group } from '../../three/builders'
-import { Canvas } from '../../three/three'
+import { Matrix4 } from "../../../math/matrix4";
+import { Vector3 } from "../../../math/vector3";
+import { Vector4 } from "../../../math/vector4";
+import { group } from "../../three/builders";
+import { Canvas } from "../../three/three";
 
-import { LineProjection } from './line_projection'
-import { GreenHorizon } from './model'
-import { CameraParams } from './model'
+import { LineProjection } from "./line_projection";
+import { GreenHorizon } from "./model";
+import { CameraParams } from "./model";
 
 export class GreenHorizonViewModel {
-  private readonly greenHorizon: GreenHorizon
-  private readonly params: CameraParams
-  private readonly lineProjection: LineProjection
+  private readonly greenHorizon: GreenHorizon;
+  private readonly params: CameraParams;
+  private readonly lineProjection: LineProjection;
 
   constructor(greenHorizon: GreenHorizon, params: CameraParams, lineProjection: LineProjection) {
-    this.greenHorizon = greenHorizon
-    this.params = params
-    this.lineProjection = lineProjection
+    this.greenHorizon = greenHorizon;
+    this.params = params;
+    this.lineProjection = lineProjection;
   }
 
-  static of(
-    canvas: Canvas,
-    greenHorizon: GreenHorizon,
-    params: CameraParams,
-  ): GreenHorizonViewModel {
-    return new GreenHorizonViewModel(greenHorizon, params, LineProjection.of(canvas, params.lens))
+  static of(canvas: Canvas, greenHorizon: GreenHorizon, params: CameraParams): GreenHorizonViewModel {
+    return new GreenHorizonViewModel(greenHorizon, params, LineProjection.of(canvas, params.lens));
   }
 
   readonly greenhorizon = group(() => ({
@@ -40,9 +36,9 @@ export class GreenHorizonViewModel {
             color: new Vector4(0, 0.8, 0, 0.8),
             lineWidth: 10,
           })
-        : undefined
+        : undefined;
     }),
-  }))
+  }));
 
   @computed
   private get rays() {
@@ -57,13 +53,11 @@ export class GreenHorizonViewModel {
     // Once we have ground points in the world space, we use any Hcw matrix to transform them to that camera's view.
     // This effectively remaps the rays to the perspective of the new camera image.
 
-    const { horizon, Hcw: greenHorizonHcw } = this.greenHorizon
-    const imageHcw = this.params.Hcw
-    const greenHorizonHwc = Matrix4.fromThree(
-      new THREE.Matrix4().getInverse(greenHorizonHcw.toThree()),
-    )
-    const rCWw = greenHorizonHwc.t.vec3()
-    return horizon.map(ray =>
+    const { horizon, Hcw: greenHorizonHcw } = this.greenHorizon;
+    const imageHcw = this.params.Hcw;
+    const greenHorizonHwc = Matrix4.fromThree(new THREE.Matrix4().getInverse(greenHorizonHcw.toThree()));
+    const rCWw = greenHorizonHwc.t.vec3();
+    return horizon.map((ray) =>
       Vector3.fromThree(
         ray
           .toThree() // rUCw
@@ -76,6 +70,6 @@ export class GreenHorizonViewModel {
           // Normalize to get the final camera space direction vector/ray.
           .normalize(), // rUCc
       ),
-    )
+    );
   }
 }

@@ -1,6 +1,6 @@
-import * as THREE from 'three'
+import * as THREE from "three";
 
-import { Vector4 } from './vector4'
+import { Vector4 } from "./vector4";
 
 export class Matrix4 {
   constructor(readonly x: Vector4, readonly y: Vector4, readonly z: Vector4, readonly t: Vector4) {}
@@ -11,30 +11,25 @@ export class Matrix4 {
       new Vector4(0, 1, 0, 0),
       new Vector4(0, 0, 1, 0),
       new Vector4(0, 0, 0, 1),
-    )
+    );
   }
 
   static from(
     mat?: {
-      x?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
-      y?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
-      z?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
-      t?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null
+      x?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null;
+      y?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null;
+      z?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null;
+      t?: { x?: number | null; y?: number | null; z?: number | null; t?: number | null } | null;
     } | null,
   ): Matrix4 {
     if (!mat) {
-      return Matrix4.of()
+      return Matrix4.of();
     }
-    return new Matrix4(
-      Vector4.from(mat.x),
-      Vector4.from(mat.y),
-      Vector4.from(mat.z),
-      Vector4.from(mat.t),
-    )
+    return new Matrix4(Vector4.from(mat.x), Vector4.from(mat.y), Vector4.from(mat.z), Vector4.from(mat.t));
   }
 
   get trace(): number {
-    return this.x.x + this.y.y + this.z.z + this.t.t
+    return this.x.x + this.y.y + this.z.z + this.t.t;
   }
 
   static fromThree(mat4: THREE.Matrix4) {
@@ -43,7 +38,7 @@ export class Matrix4 {
       new Vector4(mat4.elements[4], mat4.elements[5], mat4.elements[6], mat4.elements[7]),
       new Vector4(mat4.elements[8], mat4.elements[9], mat4.elements[10], mat4.elements[11]),
       new Vector4(mat4.elements[12], mat4.elements[13], mat4.elements[14], mat4.elements[15]),
-    )
+    );
   }
 
   toThree(): THREE.Matrix4 {
@@ -62,8 +57,8 @@ export class Matrix4 {
       `${format(this.x.y)} ${format(this.y.y)} ${format(this.z.y)} ${format(this.t.y)}`,
       `${format(this.x.z)} ${format(this.y.z)} ${format(this.z.z)} ${format(this.t.z)}`,
       `${format(this.x.t)} ${format(this.y.t)} ${format(this.z.t)} ${format(this.t.t)}`,
-    ].join('\n')
+    ].join("\n");
   }
 }
 
-const format = (x: number) => x.toFixed(2).padStart(7)
+const format = (x: number) => x.toFixed(2).padStart(7);

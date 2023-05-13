@@ -1,27 +1,27 @@
-import { observer } from 'mobx-react'
-import { PropsWithChildren } from 'react'
-import React from 'react'
-import { Component } from 'react'
-import { ComponentType } from 'react'
+import { observer } from "mobx-react";
+import { PropsWithChildren } from "react";
+import React from "react";
+import { Component } from "react";
+import { ComponentType } from "react";
 
-import { NUsightNetwork } from '../../network/nusight_network'
-import { TreeNodeModel } from '../checkbox_tree/model'
-import { CheckboxTree } from '../checkbox_tree/view'
+import { NUsightNetwork } from "../../network/nusight_network";
+import { TreeNodeModel } from "../checkbox_tree/model";
+import { CheckboxTree } from "../checkbox_tree/view";
 
-import { ChartController } from './controller'
-import { LineChartProps } from './line_chart/view'
-import { ChartModel } from './model'
-import { ChartNetwork } from './network'
-import style from './style.module.css'
-import { TreeLabel } from './tree_label/view'
+import { ChartController } from "./controller";
+import { LineChartProps } from "./line_chart/view";
+import { ChartModel } from "./model";
+import { ChartNetwork } from "./network";
+import style from "./style.module.css";
+import { TreeLabel } from "./tree_label/view";
 
 @observer
 export class ChartView extends Component<{
-  Menu: ComponentType<PropsWithChildren>
-  model: ChartModel
-  network: ChartNetwork
-  controller: ChartController
-  LineChart: ComponentType<LineChartProps>
+  Menu: ComponentType<PropsWithChildren>;
+  model: ChartModel;
+  network: ChartNetwork;
+  controller: ChartController;
+  LineChart: ComponentType<LineChartProps>;
 }> {
   static of({
     model,
@@ -29,32 +29,24 @@ export class ChartView extends Component<{
     nusightNetwork,
     LineChart,
   }: {
-    model: ChartModel
-    menu: ComponentType<PropsWithChildren>
-    nusightNetwork: NUsightNetwork
-    LineChart: ComponentType<LineChartProps>
+    model: ChartModel;
+    menu: ComponentType<PropsWithChildren>;
+    nusightNetwork: NUsightNetwork;
+    LineChart: ComponentType<LineChartProps>;
   }): ComponentType {
-    const controller = ChartController.of({ model })
+    const controller = ChartController.of({ model });
     return () => {
-      const network = ChartNetwork.of(nusightNetwork, model)
-      return (
-        <ChartView
-          controller={controller}
-          Menu={menu}
-          model={model}
-          network={network}
-          LineChart={LineChart}
-        />
-      )
-    }
+      const network = ChartNetwork.of(nusightNetwork, model);
+      return <ChartView controller={controller} Menu={menu} model={model} network={network} LineChart={LineChart} />;
+    };
   }
 
   componentWillUnmount(): void {
-    this.props.network.destroy()
+    this.props.network.destroy();
   }
 
   render() {
-    const { Menu, model, controller, LineChart } = this.props
+    const { Menu, model, controller, LineChart } = this.props;
     return (
       <div className={style.page}>
         <Menu>
@@ -79,7 +71,7 @@ export class ChartView extends Component<{
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   renderLabel = (node: TreeNodeModel): JSX.Element | string => {
@@ -90,6 +82,6 @@ export class ChartView extends Component<{
         onMouseEnter={this.props.controller.onHighlight}
         onMouseLeave={this.props.controller.onUnhighlight}
       />
-    )
-  }
+    );
+  };
 }

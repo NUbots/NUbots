@@ -1,21 +1,21 @@
-import { Vector4 } from '../../../math/vector4'
-import { group } from '../../three/builders'
-import { Canvas } from '../../three/three'
+import { Vector4 } from "../../../math/vector4";
+import { group } from "../../three/builders";
+import { Canvas } from "../../three/three";
 
-import { LineProjection } from './line_projection'
-import { CameraParams } from './model'
+import { LineProjection } from "./line_projection";
+import { CameraParams } from "./model";
 
 export class HorizonViewModel {
-  private readonly params: CameraParams
-  private readonly lineProjection: LineProjection
+  private readonly params: CameraParams;
+  private readonly lineProjection: LineProjection;
 
   constructor(params: CameraParams, lineProjection: LineProjection) {
-    this.params = params
-    this.lineProjection = lineProjection
+    this.params = params;
+    this.lineProjection = lineProjection;
   }
 
   static of(canvas: Canvas, params: CameraParams): HorizonViewModel {
-    return new HorizonViewModel(params, LineProjection.of(canvas, params.lens))
+    return new HorizonViewModel(params, LineProjection.of(canvas, params.lens));
   }
 
   readonly horizon = group(() => ({
@@ -26,5 +26,5 @@ export class HorizonViewModel {
         lineWidth: 10,
       }),
     ],
-  }))
+  }));
 }

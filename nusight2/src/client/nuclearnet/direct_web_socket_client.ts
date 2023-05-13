@@ -1,8 +1,8 @@
-import { io, Socket, SocketOptions } from 'socket.io-client'
+import { io, Socket, SocketOptions } from "socket.io-client";
 
-import * as NUClearNetProxyParser from '../../shared/nuclearnet/nuclearnet_proxy_parser'
+import * as NUClearNetProxyParser from "../../shared/nuclearnet/nuclearnet_proxy_parser";
 
-import { WebSocketClient } from './web_socket_client'
+import { WebSocketClient } from "./web_socket_client";
 
 /**
  * The thinnest wrapper possible around the Socket IO client interface. This exists to assist testing
@@ -14,27 +14,27 @@ export class DirectWebSocketClient implements WebSocketClient {
   constructor(private socket: Socket) {}
 
   static of(uri: string, opts: SocketOptions) {
-    const socket = io(uri, { ...opts, parser: NUClearNetProxyParser } as any)
-    return new DirectWebSocketClient(socket)
+    const socket = io(uri, { ...opts, parser: NUClearNetProxyParser } as any);
+    return new DirectWebSocketClient(socket);
   }
 
   connect() {
-    this.socket = this.socket.connect()
+    this.socket = this.socket.connect();
   }
 
   disconnect() {
-    this.socket.disconnect()
+    this.socket.disconnect();
   }
 
   on(event: string, fn: (...args: any[]) => void) {
-    this.socket.on(event, fn)
+    this.socket.on(event, fn);
   }
 
   off(event: string, fn?: Function) {
-    this.socket.off(event, fn)
+    this.socket.off(event, fn);
   }
 
   send(event: string, ...args: any[]) {
-    this.socket.emit(event, ...args)
+    this.socket.emit(event, ...args);
   }
 }

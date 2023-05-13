@@ -1,21 +1,21 @@
-import { IComputedValue } from 'mobx'
+import { IComputedValue } from "mobx";
 
-export type Image = DataImage | ElementOrBitmapImage
+export type Image = DataImage | ElementOrBitmapImage;
 
 interface BaseImage {
-  width: number
-  height: number
-  format: ImageFormat
+  width: number;
+  height: number;
+  format: ImageFormat;
 }
 
 export interface DataImage extends BaseImage {
-  type: 'data'
-  image: IComputedValue<Uint8Array>
+  type: "data";
+  image: IComputedValue<Uint8Array>;
 }
 
 export interface ElementOrBitmapImage extends BaseImage {
-  type: 'element-or-bitmap'
-  image: HTMLImageElement | ImageBitmap
+  type: "element-or-bitmap";
+  image: HTMLImageElement | ImageBitmap;
 }
 
 export enum ImageFormat {
@@ -50,4 +50,4 @@ export type BayerImageFormat =
   | ImageFormat.PJGR
   | ImageFormat.PJGB
   | ImageFormat.PJBG
-  | ImageFormat.JPGB
+  | ImageFormat.JPGB;
