@@ -71,7 +71,7 @@ servos:
     offset: pi / 4
     simulated: false
   - # [14] R_ANKLE_PITCH
-    direction: 1
+    direction: -1
     offset: 0.0
     simulated: false
   - # [15] L_ANKLE_PITCH
