@@ -181,15 +181,17 @@ namespace module::platform::openCR {
         float velocity(int32_t velocity) {
             // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
             // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
-            // Default servo limits for velocity
-            return utility::math::clamp(int32_t(-210), velocity, int32_t(210)) * 0.229f / 60.0f;
+            // Default servo limits for velocity - minimum of all for X-Series, MX-106 and MX-64
+            // X-Series has the minimum at 167
+            return utility::math::clamp(int32_t(-167), velocity, int32_t(167)) * 0.229f / 60.0f;
         }
 
         int32_t velocity(float velocity) {
             // Base unit: 0.229 rpm = 0.0038166667 Hz (factor = 1/60)
             // Range: -210 - +210 = -48.09 rpm - +48.09 rpm
-            // Default servo limits for velocity
-            return int32_t(utility::math::clamp(-210.0f, (velocity * 60.0f / 0.229f), 210.0f));
+            // Default servo limits for velocity - minimum of all for X-Series, MX-106 and MX-64
+            // X-Series has the minimum at 167
+            return int32_t(utility::math::clamp(-167.0f, (velocity * 60.0f / 0.229f), 167.0f));
         }
 
 
