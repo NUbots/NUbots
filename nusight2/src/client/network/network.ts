@@ -1,8 +1,8 @@
-import { NUClearNetSend } from 'nuclearnet.js'
+import { NUClearNetSend } from "nuclearnet.js";
 
-import { NUsightNetwork } from './nusight_network'
-import { MessageType } from './nusight_network'
-import { MessageCallback } from './nusight_network'
+import { NUsightNetwork } from "./nusight_network";
+import { MessageType } from "./nusight_network";
+import { MessageCallback } from "./nusight_network";
 
 /**
  * A convenience helper class to be used at the component-level.
@@ -11,14 +11,14 @@ import { MessageCallback } from './nusight_network'
  */
 export class Network {
   // Store all event listener removers, so we can call them all in off().
-  private offNUClearMessages: Set<() => void>
+  private offNUClearMessages: Set<() => void>;
 
   constructor(private nusightNetwork: NUsightNetwork) {
-    this.offNUClearMessages = new Set()
+    this.offNUClearMessages = new Set();
   }
 
   static of(nusightNetwork: NUsightNetwork): Network {
-    return new Network(nusightNetwork)
+    return new Network(nusightNetwork);
   }
 
   /**
@@ -29,12 +29,12 @@ export class Network {
    * @returns A unsubscriber function.
    */
   on<T>(messageType: MessageType<T>, cb: MessageCallback<T>): () => void {
-    const offNUClearMessage = this.nusightNetwork.onNUClearMessage(messageType, cb)
-    this.offNUClearMessages.add(offNUClearMessage)
+    const offNUClearMessage = this.nusightNetwork.onNUClearMessage(messageType, cb);
+    this.offNUClearMessages.add(offNUClearMessage);
     return () => {
-      offNUClearMessage()
-      this.offNUClearMessages.delete(offNUClearMessage)
-    }
+      offNUClearMessage();
+      this.offNUClearMessages.delete(offNUClearMessage);
+    };
   }
 
   /**
@@ -42,15 +42,15 @@ export class Network {
    */
   off() {
     for (const offNUClearMessage of this.offNUClearMessages.values()) {
-      offNUClearMessage()
+      offNUClearMessage();
     }
-    this.offNUClearMessages.clear()
+    this.offNUClearMessages.clear();
   }
 
   /**
    * Send the given message on the network
    */
   send(opts: NUClearNetSend): void {
-    this.nusightNetwork.send(opts)
+    this.nusightNetwork.send(opts);
   }
 }

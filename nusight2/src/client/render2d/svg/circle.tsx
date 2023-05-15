@@ -1,13 +1,13 @@
-import { observer } from 'mobx-react'
-import React from 'react'
+import { observer } from "mobx-react";
+import React from "react";
 
-import { Transform } from '../../math/transform'
-import { CircleGeometry } from '../geometry/circle_geometry'
-import { Shape } from '../object/shape'
+import { Transform } from "../../math/transform";
+import { CircleGeometry } from "../geometry/circle_geometry";
+import { Shape } from "../object/shape";
 
-import { toSvgProps } from './rendering'
+import { toSvgProps } from "./rendering";
 
-type Props = { model: Shape<CircleGeometry>; world: Transform }
+type Props = { model: Shape<CircleGeometry>; world: Transform };
 export const Circle = observer(
   ({
     model: {
@@ -15,4 +15,4 @@ export const Circle = observer(
       appearance,
     },
   }: Props) => <circle cx={x} cy={y} r={radius} {...toSvgProps(appearance)} />,
-)
+);

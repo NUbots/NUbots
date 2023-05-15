@@ -1,19 +1,19 @@
-import { action } from '@storybook/addon-actions'
-import { storiesOf } from '@storybook/react'
-import React from 'react'
+import { action } from "@storybook/addon-actions";
+import { storiesOf } from "@storybook/react";
+import React from "react";
 
-import { Button } from '../view'
+import { Button } from "../view";
 
-import IconAfter from './icon-after.svg'
-import IconBefore from './icon-before.svg'
+import IconAfter from "./icon-after.svg";
+import IconBefore from "./icon-before.svg";
 
-const onClick = action('onClick')
+const onClick = action("onClick");
 
-const HSpacer = () => <span style={{ display: 'inline-block', width: '4px' }} />
-const VSpacer = () => <div style={{ height: '4px' }} />
+const HSpacer = () => <span style={{ display: "inline-block", width: "4px" }} />;
+const VSpacer = () => <div style={{ height: "4px" }} />;
 
-storiesOf('components.button', module)
-  .add('renders basic', () => {
+storiesOf("components.button", module)
+  .add("renders basic", () => {
     return (
       <div>
         <Button onClick={onClick}>Normal</Button>
@@ -22,9 +22,9 @@ storiesOf('components.button', module)
           Primary
         </Button>
       </div>
-    )
+    );
   })
-  .add('renders fullwidth', () => {
+  .add("renders fullwidth", () => {
     return (
       <div>
         <Button fullwidth onClick={onClick}>
@@ -35,9 +35,9 @@ storiesOf('components.button', module)
           Primary
         </Button>
       </div>
-    )
+    );
   })
-  .add('renders aligned left', () => {
+  .add("renders aligned left", () => {
     return (
       <div>
         <Button fullwidth textAlign="left" onClick={onClick}>
@@ -48,9 +48,9 @@ storiesOf('components.button', module)
           Primary
         </Button>
       </div>
-    )
+    );
   })
-  .add('renders aligned right', () => {
+  .add("renders aligned right", () => {
     return (
       <div>
         <Button fullwidth textAlign="right" onClick={onClick}>
@@ -61,9 +61,9 @@ storiesOf('components.button', module)
           Primary
         </Button>
       </div>
-    )
+    );
   })
-  .add('renders icon before', () => {
+  .add("renders icon before", () => {
     return (
       <div>
         <Button iconBefore={<IconBefore />} onClick={onClick}>
@@ -82,9 +82,9 @@ storiesOf('components.button', module)
           Fullwidth, aligned right
         </Button>
       </div>
-    )
+    );
   })
-  .add('renders icon after', () => {
+  .add("renders icon after", () => {
     return (
       <div>
         <Button iconAfter={<IconAfter />} onClick={onClick}>
@@ -99,13 +99,7 @@ storiesOf('components.button', module)
           Fullwidth, aligned left
         </Button>
         <VSpacer />
-        <Button
-          iconAfter={<IconAfter />}
-          iconAfterAlignedRight
-          fullwidth
-          textAlign="left"
-          onClick={onClick}
-        >
+        <Button iconAfter={<IconAfter />} iconAfterAlignedRight fullwidth textAlign="left" onClick={onClick}>
           Fullwidth, aligned left, icon aligned right
         </Button>
         <VSpacer />
@@ -113,9 +107,9 @@ storiesOf('components.button', module)
           Fullwidth, aligned right
         </Button>
       </div>
-    )
+    );
   })
-  .add('renders disabled', () => {
+  .add("renders disabled", () => {
     return (
       <div>
         <Button disabled>Normal</Button>
@@ -124,5 +118,5 @@ storiesOf('components.button', module)
           Primary
         </Button>
       </div>
-    )
-  })
+    );
+  });

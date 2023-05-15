@@ -1,18 +1,18 @@
-import CopyWebpackPlugin from 'copy-webpack-plugin'
-import HtmlWebpackPlugin from 'html-webpack-plugin'
-import MiniCssExtractPlugin from 'mini-css-extract-plugin'
-import path from 'path'
-import ProgressBarPlugin from 'progress-bar-webpack-plugin'
-import webpack from 'webpack'
-import nodeExternals from 'webpack-node-externals'
+import CopyWebpackPlugin from "copy-webpack-plugin";
+import HtmlWebpackPlugin from "html-webpack-plugin";
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import path from "path";
+import ProgressBarPlugin from "progress-bar-webpack-plugin";
+import webpack from "webpack";
+import nodeExternals from "webpack-node-externals";
 
 export type ConfigOptions = {
-  mode: 'production' | 'development'
-  context?: string
-  sourceMap?: 'source-map' | 'eval-source-map' | false
-  transpileOnly?: boolean
-  rootDir?: string
-}
+  mode: "production" | "development";
+  context?: string;
+  sourceMap?: "source-map" | "eval-source-map" | false;
+  transpileOnly?: boolean;
+  rootDir?: string;
+};
 
 export function getClientConfig({
   mode,
@@ -21,37 +21,37 @@ export function getClientConfig({
   transpileOnly,
   rootDir = __dirname,
 }: ConfigOptions): webpack.Configuration {
-  const isProduction = mode === 'production'
+  const isProduction = mode === "production";
   return {
-    mode: isProduction ? 'production' : 'development',
+    mode: isProduction ? "production" : "development",
     devtool: sourceMap,
     context,
     entry: {
-      main: './client/main.tsx',
+      main: "./client/main.tsx",
     },
     output: {
-      path: path.join(rootDir, 'dist', 'public'),
-      filename: '[name].js',
-      publicPath: '/',
-      globalObject: 'this',
+      path: path.join(rootDir, "dist", "public"),
+      filename: "[name].js",
+      publicPath: "/",
+      globalObject: "this",
     },
-    target: 'web',
+    target: "web",
     resolve: {
-      extensions: ['.js', '.ts', '.tsx'],
+      extensions: [".js", ".ts", ".tsx"],
       // Fix webpack's default behavior to not load packages with jsnext:main module
       // (jsnext:main directs not usually distributable es6 format, but es6 sources)
-      mainFields: ['module', 'browser', 'main'],
+      mainFields: ["module", "browser", "main"],
     },
     module: {
       rules: [
         // webworkers
-        { test: /\.worker\.ts$/, use: 'worker-loader' },
+        { test: /\.worker\.ts$/, use: "worker-loader" },
         // .ts, .tsx
         {
           test: /\.tsx?$/,
-          exclude: [path.resolve(rootDir, 'node_modules')],
+          exclude: [path.resolve(rootDir, "node_modules")],
           use: {
-            loader: 'ts-loader',
+            loader: "ts-loader",
             options: {
               onlyCompileBundledFiles: true,
               transpileOnly,
@@ -61,27 +61,27 @@ export function getClientConfig({
         // local css
         {
           test: /\.css$/,
-          exclude: [path.resolve(rootDir, 'node_modules')],
+          exclude: [path.resolve(rootDir, "node_modules")],
           use: [
-            isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+            isProduction ? MiniCssExtractPlugin.loader : "style-loader",
             {
-              loader: 'css-loader',
+              loader: "css-loader",
               options: {
                 modules: {
                   // Enable CSS modules for files matching *.module.css
                   // See https://github.com/webpack-contrib/css-loader#auto
                   auto: true,
-                  localIdentName: '[local]_[hash:base64:5]',
+                  localIdentName: "[local]_[hash:base64:5]",
                 },
                 sourceMap: !isProduction,
                 importLoaders: 1,
               },
             },
             {
-              loader: 'postcss-loader',
+              loader: "postcss-loader",
               options: {
                 postcssOptions: {
-                  plugins: ['postcss-import', 'postcss-url', 'tailwindcss'],
+                  plugins: ["postcss-import", "postcss-url", "tailwindcss"],
                 },
               },
             },
@@ -93,15 +93,15 @@ export function getClientConfig({
         */
         {
           test: /\.css$/,
-          include: [path.resolve(rootDir, 'node_modules')],
-          use: ['style-loader', 'css-loader'],
+          include: [path.resolve(rootDir, "node_modules")],
+          use: ["style-loader", "css-loader"],
         },
-        { test: /\.file.svg$/, use: 'url-loader' },
+        { test: /\.file.svg$/, use: "url-loader" },
         {
           test: /\.svg$/,
           exclude: /\.file.svg$/,
           use: {
-            loader: 'react-svg-loader',
+            loader: "react-svg-loader",
             options: {
               svgo: {
                 // svgo options
@@ -112,10 +112,10 @@ export function getClientConfig({
           },
         },
         // static assets
-        { test: /\.html$/, use: 'html-loader' },
-        { test: /\.png$/, use: 'url-loader?limit=10000' },
-        { test: /\.(jpg|glb|bin)$/, use: 'file-loader' },
-        { test: /\.(vert|frag)$/, use: path.resolve('build_scripts/glsl_loader.js') },
+        { test: /\.html$/, use: "html-loader" },
+        { test: /\.png$/, use: "url-loader?limit=10000" },
+        { test: /\.(jpg|glb|bin)$/, use: "file-loader" },
+        { test: /\.(vert|frag)$/, use: path.resolve("build_scripts/glsl_loader.js") },
       ],
     },
     optimization: {
@@ -123,31 +123,31 @@ export function getClientConfig({
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
-            chunks: 'all',
+            chunks: "all",
             priority: -10,
           },
           proto: {
             test: /src[\\/]shared[\\/]proto/,
-            chunks: 'all',
+            chunks: "all",
             priority: -10,
           },
         },
       },
     },
     plugins: [
-      new CopyWebpackPlugin({ patterns: [{ from: 'assets', context }] }),
+      new CopyWebpackPlugin({ patterns: [{ from: "assets", context }] }),
       isProduction
         ? new MiniCssExtractPlugin({
-            filename: 'styles.css',
+            filename: "styles.css",
           })
         : undefined,
       new HtmlWebpackPlugin({
-        template: 'client/index.ejs',
-        title: 'NUsight2',
+        template: "client/index.ejs",
+        title: "NUsight2",
       }),
       new ProgressBarPlugin(),
-    ].filter(x => !!x),
-  }
+    ].filter((x) => !!x),
+  };
 }
 
 export function getServerConfig({
@@ -162,26 +162,26 @@ export function getServerConfig({
     devtool: sourceMap,
     context,
     entry: {
-      ...(mode === 'production' ? { prod: './server/prod.ts' } : {}),
-      ...(mode === 'development' ? { dev: './server/dev.ts' } : {}),
+      ...(mode === "production" ? { prod: "./server/prod.ts" } : {}),
+      ...(mode === "development" ? { dev: "./server/dev.ts" } : {}),
     },
     output: {
-      path: path.join(rootDir, 'dist'),
-      filename: '[name].js',
-      globalObject: 'this',
+      path: path.join(rootDir, "dist"),
+      filename: "[name].js",
+      globalObject: "this",
     },
-    target: 'node',
+    target: "node",
     resolve: {
-      extensions: ['.js', '.ts'],
+      extensions: [".js", ".ts"],
     },
-    externals: [nodeExternals()] as webpack.Configuration['externals'],
+    externals: [nodeExternals()] as webpack.Configuration["externals"],
     module: {
       rules: [
         {
           test: /\.ts$/,
-          exclude: [path.resolve(rootDir, 'node_modules')],
+          exclude: [path.resolve(rootDir, "node_modules")],
           use: {
-            loader: 'ts-loader',
+            loader: "ts-loader",
             options: {
               onlyCompileBundledFiles: true,
               transpileOnly,
@@ -191,10 +191,10 @@ export function getServerConfig({
         {
           test: /\.(jpg|ico)$/,
           use: {
-            loader: 'file-loader',
+            loader: "file-loader",
             options: {
-              outputPath: 'assets',
-              publicPath: path.join('dist', 'assets'),
+              outputPath: "assets",
+              publicPath: path.join("dist", "assets"),
             },
           },
         },
@@ -208,5 +208,5 @@ export function getServerConfig({
       __dirname: false,
       __filename: false,
     },
-  }
+  };
 }

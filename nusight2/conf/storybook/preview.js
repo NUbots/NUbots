@@ -1,1 +1,1 @@
-import './preview.css'
+import "./preview.css";

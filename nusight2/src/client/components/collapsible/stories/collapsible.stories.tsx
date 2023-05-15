@@ -1,52 +1,52 @@
-import { action } from '@storybook/addon-actions'
-import { storiesOf } from '@storybook/react'
-import { action as mobxAction, observable } from 'mobx'
-import { observer } from 'mobx-react'
-import React from 'react'
+import { action } from "@storybook/addon-actions";
+import { storiesOf } from "@storybook/react";
+import { action as mobxAction, observable } from "mobx";
+import { observer } from "mobx-react";
+import React from "react";
 
-import { Collapsible } from '../view'
+import { Collapsible } from "../view";
 
 const actions = {
-  onToggle: action('onToggle'),
-}
+  onToggle: action("onToggle"),
+};
 
-storiesOf('components.collapsible', module)
-  .addDecorator(story => <div style={{ maxWidth: '320px' }}>{story()}</div>)
-  .add('basic', () => {
+storiesOf("components.collapsible", module)
+  .addDecorator((story) => <div style={{ maxWidth: "320px" }}>{story()}</div>)
+  .add("basic", () => {
     return (
       <Collapsible open={true} onToggle={actions.onToggle}>
         <div>Collapsible content</div>
         <div>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum,
-          tenetur eveniet. Adipisci sed, labore eos molestias.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum, tenetur eveniet.
+          Adipisci sed, labore eos molestias.
         </div>
       </Collapsible>
-    )
+    );
   })
-  .add('with header', () => {
-    const header = <div>Collapsible Header</div>
+  .add("with header", () => {
+    const header = <div>Collapsible Header</div>;
     return (
       <Collapsible open={true} onToggle={actions.onToggle} header={header}>
         <div>Collapsible content</div>
         <div>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum,
-          tenetur eveniet. Adipisci sed, labore eos molestias.
+          Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum, tenetur eveniet.
+          Adipisci sed, labore eos molestias.
         </div>
       </Collapsible>
-    )
+    );
   })
-  .add('interactive', () => {
+  .add("interactive", () => {
     const model = observable({
       open: true,
       animate: true,
-    })
+    });
 
-    const onToggle = mobxAction(() => (model.open = !model.open))
+    const onToggle = mobxAction(() => (model.open = !model.open));
     const onCheckboxChange = mobxAction((event: React.ChangeEvent<HTMLInputElement>) => {
-      model.animate = event.target.checked
-    })
+      model.animate = event.target.checked;
+    });
 
-    const header = <div>Click to toggle</div>
+    const header = <div>Click to toggle</div>;
     const Component = observer(() => (
       <div>
         <label>
@@ -55,12 +55,12 @@ storiesOf('components.collapsible', module)
         <Collapsible open={model.open} onToggle={onToggle} header={header} animate={model.animate}>
           <div>Collapsible content</div>
           <div>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum,
-            tenetur eveniet. Adipisci sed, labore eos molestias.
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quis quam, beatae ut ipsum, tenetur eveniet.
+            Adipisci sed, labore eos molestias.
           </div>
         </Collapsible>
       </div>
-    ))
+    ));
 
-    return <Component />
-  })
+    return <Component />;
+  });

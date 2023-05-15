@@ -1,29 +1,29 @@
-import { computed } from 'mobx'
-import { observable } from 'mobx'
+import { computed } from "mobx";
+import { observable } from "mobx";
 
-import { RobotModel } from '../robot/model'
+import { RobotModel } from "../robot/model";
 
-import { DashboardRobotModel } from './dashboard_robot/model'
-import { FieldModel } from './field/model'
+import { DashboardRobotModel } from "./dashboard_robot/model";
+import { FieldModel } from "./field/model";
 
 export class DashboardModel {
-  @observable private robotModels: RobotModel[]
+  @observable private robotModels: RobotModel[];
 
   constructor(robotModels: RobotModel[]) {
-    this.robotModels = robotModels
+    this.robotModels = robotModels;
   }
 
   static of(robots: RobotModel[]): DashboardModel {
-    return new DashboardModel(robots)
+    return new DashboardModel(robots);
   }
 
   @computed
   get field(): FieldModel {
-    return FieldModel.of(this.robots)
+    return FieldModel.of(this.robots);
   }
 
   @computed
   get robots(): DashboardRobotModel[] {
-    return this.robotModels.map(robot => DashboardRobotModel.of(robot))
+    return this.robotModels.map((robot) => DashboardRobotModel.of(robot));
   }
 }

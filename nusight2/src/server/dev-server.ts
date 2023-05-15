@@ -1,9 +1,9 @@
-import minimist from 'minimist'
-import nodemon from 'nodemon'
-import * as path from 'path'
-import webpack from 'webpack'
+import minimist from "minimist";
+import nodemon from "nodemon";
+import * as path from "path";
+import webpack from "webpack";
 
-import { getServerConfig } from '../../webpack.config'
+import { getServerConfig } from "../../webpack.config";
 
 // This dev server achieves the following:
 //
@@ -17,37 +17,37 @@ import { getServerConfig } from '../../webpack.config'
 //
 // Both instances listen for updates, and restart and recompile appropriately.
 
-const args = minimist(process.argv.slice(2))
+const args = minimist(process.argv.slice(2));
 const compiler = webpack(
   getServerConfig({
-    mode: 'development',
-    context: path.join(__dirname, '..'),
+    mode: "development",
+    context: path.join(__dirname, ".."),
     transpileOnly: args.t || args.transpileOnly || false,
-    rootDir: path.join(__dirname, '..', '..'),
+    rootDir: path.join(__dirname, "..", ".."),
   }),
-)
+);
 
-let startedServer = false
+let startedServer = false;
 compiler.watch({}, (err, stats) => {
   if (err) {
-    process.stderr.write(err + '\n')
-    return
+    process.stderr.write(err + "\n");
+    return;
   }
-  stats && process.stdout.write(stats.toString({ colors: true }) + '\n')
+  stats && process.stdout.write(stats.toString({ colors: true }) + "\n");
 
   if (!startedServer) {
     nodemon({
-      script: 'dist/dev.js',
-      exec: 'node',
-      args: ['--context', path.join(__dirname, '..'), ...process.argv.slice(2)],
-      watch: ['dist/dev.js'],
-      ext: 'js',
+      script: "dist/dev.js",
+      exec: "node",
+      args: ["--context", path.join(__dirname, ".."), ...process.argv.slice(2)],
+      watch: ["dist/dev.js"],
+      ext: "js",
     })
       // tslint:disable-next-line no-console
-      .on('start', () => console.log('Starting server'))
+      .on("start", () => console.log("Starting server"))
       // tslint:disable-next-line no-console
-      .on('restart', () => console.log('Changes detected, restarting server'))
-      .on('quit', () => process.exit())
-    startedServer = true
+      .on("restart", () => console.log("Changes detected, restarting server"))
+      .on("quit", () => process.exit());
+    startedServer = true;
   }
-})
+});

@@ -1,26 +1,26 @@
-import classNames from 'classnames'
-import React from 'react'
-import { ReactNode } from 'react'
+import classNames from "classnames";
+import React from "react";
+import { ReactNode } from "react";
 
-import styles from './style.module.css'
+import styles from "./style.module.css";
 
 export type ButtonProps = {
-  type?: 'normal' | 'primary'
-  fullwidth?: boolean
-  textAlign?: 'left' | 'center' | 'right'
-  disabled?: boolean
-  iconBefore?: ReactNode
-  iconAfter?: ReactNode
-  iconAfterAlignedRight?: boolean
-  children?: any
-  onClick?(): void
-}
+  type?: "normal" | "primary";
+  fullwidth?: boolean;
+  textAlign?: "left" | "center" | "right";
+  disabled?: boolean;
+  iconBefore?: ReactNode;
+  iconAfter?: ReactNode;
+  iconAfterAlignedRight?: boolean;
+  children?: any;
+  onClick?(): void;
+};
 
 export class Button extends React.PureComponent<ButtonProps> {
   render() {
     const {
-      type = 'normal',
-      textAlign = 'center',
+      type = "normal",
+      textAlign = "center",
       fullwidth,
       disabled,
       iconBefore,
@@ -28,18 +28,18 @@ export class Button extends React.PureComponent<ButtonProps> {
       iconAfterAlignedRight,
       children,
       onClick,
-    } = this.props
+    } = this.props;
     return (
       <button
         onClick={onClick}
         disabled={disabled}
         className={classNames(styles.button, {
-          [styles.buttonPrimary]: type === 'primary',
-          [styles.buttonNormal]: type === 'normal',
+          [styles.buttonPrimary]: type === "primary",
+          [styles.buttonNormal]: type === "normal",
           [styles.fullwidth]: fullwidth,
           [styles.iconAfterAlignedRight]: iconAfterAlignedRight,
-          [styles.alignLeft]: textAlign === 'left',
-          [styles.alignRight]: textAlign === 'right',
+          [styles.alignLeft]: textAlign === "left",
+          [styles.alignRight]: textAlign === "right",
         })}
       >
         {iconBefore && <span className={styles.iconBefore}>{iconBefore}</span>}
@@ -54,6 +54,6 @@ export class Button extends React.PureComponent<ButtonProps> {
           </span>
         )}
       </button>
-    )
+    );
   }
 }
