@@ -1,0 +1,4 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+port: // find port of virtual season. 4 digit
+broadcast_ip: 10.1.255.255
