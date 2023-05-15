@@ -64,11 +64,11 @@ servos:
     simulated: false
   - # [12] R_KNEE
     direction: -1
-    offset: pi / 4
+    offset: pi / 8
     simulated: false
   - # [13] L_KNEE
     direction: 1
-    offset: pi / 4
+    offset: pi / 8
     simulated: false
   - # [14] R_ANKLE_PITCH
     direction: -1
