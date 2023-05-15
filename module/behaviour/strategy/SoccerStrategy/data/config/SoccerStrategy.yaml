@@ -1,10 +1,11 @@
-log_level: WARN
+log_level: INFO
 
 ball_last_seen_max_time: 2 # time in seconds
 goal_last_seen_max_time: 10 # time in seconds
 start_position_offensive: [-0.2, 0]
 start_position_defensive: [1.5, 0]
 is_goalie: false
+goalie_max_ball_distance: 1.8
 
 ball_search_walk_start_speed: 0.01
 ball_search_walk_stop_speed: 0.01
@@ -25,4 +26,10 @@ force_playing: false
 force_penalty_shootout: false
 
 # Time to walk forward in ready (in seconds)
-walk_to_ready_time: 20
+walk_to_ready_time: 12
+
+# Distance to begin the kick on the ball while normally playing (in metres)
+kicking_distance_threshold: 0.35
+
+# Angle from the front to begin kicking the ball (in radians) absolute value so either direction
+kicking_angle_threshold: 0.5

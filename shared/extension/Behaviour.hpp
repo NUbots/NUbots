@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef EXTENSION_BEHAVIOUR_HPP
 #define EXTENSION_BEHAVIOUR_HPP
 
@@ -48,7 +49,7 @@ namespace extension::behaviour {
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit(
+            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(
                 std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
@@ -68,12 +69,16 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline std::shared_ptr<T> get(NUClear::threading::Reaction& r) {
-            return std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
+        static inline std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
+            NUClear::threading::Reaction& r) {
+
+            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(r.id));
+            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
+            return std::make_tuple(run_data, run_info);
         }
 
         /**
-         * Executes once a Provider has finished executing it's reaction so the Director knows which tasks it emitted
+         * Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted
          *
          * @tparam DSL the NUClear dsl for the on statement
          *
@@ -82,7 +87,8 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void postcondition(NUClear::threading::ReactionTask& task) {
             // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent.reactor.emit(std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+            task.parent.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
         }
     };
 
@@ -127,7 +133,7 @@ namespace extension::behaviour {
      * @tparam expr     the function used for the comparison (e.g. std::less)
      * @tparam value    the value that the when condition is looking for
      */
-    template <typename State, template <typename> class expr, enum State::Value value>
+    template <typename State, template <typename> class expr, State::Value value>
     struct When {
 
         /**
@@ -147,7 +153,7 @@ namespace extension::behaviour {
                 typeid(State),
                 // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) -> bool { return expr<int>()(v, value); },
-                // Function that uses get to get the current state of the reaction
+                // Function that uses get to get the current state of the condition
                 [reaction]() -> int {
                     // Check if there is cached data, and if not throw an exception
                     auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction);
@@ -173,7 +179,7 @@ namespace extension::behaviour {
      * @tparam State    the smart enum that this causing condition is going to manipulate
      * @tparam value    the value that will result when the causing is successful
      */
-    template <typename State, enum State::Value value>
+    template <typename State, State::Value value>
     struct Causing {
 
         /**
@@ -192,32 +198,6 @@ namespace extension::behaviour {
     };
 
     /**
-     * Create a Needs relationship between this provider and the provider specified by `T`.
-     *
-     * A needs relationship ensures that this provider will only run if it is able to run the provider specified by `T`.
-     * This relationship operates recursively, as if the provider specified by `T` needs another provider, this provider
-     * will only run if it will be able to obtain those providers as well.
-     *
-     * @tparam Provider the provider that this provider needs
-     */
-    template <typename Provider>
-    struct Needs {
-
-        /**
-         * Bind a needs expression in the Director.
-         *
-         * @tparam DSL the DSL from NUClear
-         *
-         * @param reaction the reaction that is having this needs condition bound to it
-         */
-        template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
-        }
-    };
-
-    /**
      * Adds a Uses object to the callback to allow access to information from the context of this provider.
      *
      * The uses object provides information about what would happen if you were to emit a specific task from this
@@ -232,10 +212,48 @@ namespace extension::behaviour {
      */
     template <typename Provider>
     struct Uses {
+        GroupInfo::RunState run_state;
+        bool done;
 
-        template <typename T = Provider>
-        static inline std::shared_ptr<Uses<T>> get(NUClear::threading::Reaction& /*r*/) {
-            // TODO(@TrentHouliston) get the data from the director from the context of this reaction
+        template <typename DSL>
+        static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::Reaction& r) {
+
+            auto group_info = information::InformationSource::get_group_info(r.id,
+                                                                             typeid(Provider),
+                                                                             typeid(commands::RootType<Provider>));
+
+            auto data = std::make_shared<Uses<Provider>>();
+
+            data->run_state = group_info.run_state;
+            data->done      = group_info.done;
+
+            return data;
+        }
+    };
+
+    /**
+     * Create a Needs relationship between this provider and the provider specified by `T`.
+     *
+     * A needs relationship ensures that this provider will only run if it is able to run the provider specified by `T`.
+     * This relationship operates recursively, as if the provider specified by `T` needs another provider, this provider
+     * will only run if it will be able to obtain those providers as well.
+     *
+     * @tparam Provider the provider that this provider needs
+     */
+    template <typename Provider>
+    struct Needs : public Uses<Provider> {  // Needs implies uses
+
+        /**
+         * Bind a needs expression in the Director.
+         *
+         * @tparam DSL the DSL from NUClear
+         *
+         * @param reaction the reaction that is having this needs condition bound to it
+         */
+        template <typename DSL>
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
         }
     };
 
@@ -292,6 +310,7 @@ namespace extension::behaviour {
             NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
                 powerplant,
                 std::make_shared<commands::BehaviourTask>(typeid(T),
+                                                          typeid(commands::RootType<T>),
                                                           reaction_id,
                                                           task_id,
                                                           data,
@@ -312,6 +331,16 @@ namespace extension::behaviour {
     struct Done {};
 
     /**
+     * This is a special task that should be emitted when a Provider doesn't want to change what it is doing.
+     * When this is emitted the director will just continue with whatever was previously emitted by this provider.
+     *
+     * ```
+     * emit<Task>(std::make_unique<Idle>());
+     * ```
+     */
+    struct Idle {};
+
+    /**
      * A reactor subtype that can be used when making a behaviour reactor.
      *
      * It exposes the additional DSL words that are added by the Behaviour DSL so they can be used without the need for
@@ -328,17 +357,20 @@ namespace extension::behaviour {
         using Start = ::extension::behaviour::Start<T>;
         template <typename T>
         using Stop = ::extension::behaviour::Stop<T>;
-        template <typename State, template <typename> class expr, enum State::Value value>
+        template <typename State, template <typename> class expr, State::Value value>
         using When = ::extension::behaviour::When<State, expr, value>;
-        template <typename State, enum State::Value value>
+        template <typename State, State::Value value>
         using Causing = ::extension::behaviour::Causing<State, value>;
         template <typename T>
         using Needs = ::extension::behaviour::Needs<T>;
         template <typename T>
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
-        using Task = ::extension::behaviour::Task<T>;
-        using Done = ::extension::behaviour::Done;
+        using Task      = ::extension::behaviour::Task<T>;
+        using RunInfo   = ::extension::behaviour::RunInfo;
+        using GroupInfo = ::extension::behaviour::GroupInfo;
+        using Done      = ::extension::behaviour::Done;
+        using Idle      = ::extension::behaviour::Idle;
     };
 
 }  // namespace extension::behaviour

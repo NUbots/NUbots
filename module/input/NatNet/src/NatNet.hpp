@@ -26,6 +26,20 @@
 namespace module::input {
 
     class NatNet : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Motive Multicast Address
+            std::string multicast_address = "";
+            /// @brief UDP Command port for communicating with motive
+            uint32_t command_port = 0;
+            /// @brief UDP Data port for communicating with motive
+            uint32_t data_port = 0;
+            /// @brief Allows motive packets to be dumped to file
+            bool dump_packets = false;
+        } cfg;
+
     public:
         struct Packet {
             enum class Type : uint16_t {
@@ -50,46 +64,86 @@ namespace module::input {
         struct MarkerSetModel {
             MarkerSetModel() = default;
             std::string name{};
-            std::vector<std::string> markerNames;
+            std::vector<std::string> marker_names;
+        };
+
+        struct RigidBodyMarker {
+            Eigen::Vector3f position = Eigen::Vector3f::Zero();
+            uint32_t active_label;
+            std::string marker_name;
         };
 
         struct RigidBodyModel {
             RigidBodyModel() = default;
             std::string name{};
             uint32_t id{0};
-            uint32_t parentId{0};
-            Eigen::Vector3f offset = Eigen::Vector3f::Zero();
+            uint32_t parent_id{0};
+            Eigen::Vector3f offset   = Eigen::Vector3f::Zero();
+            Eigen::Vector3f rotation = Eigen::Vector3f::Zero();
+            std::map<uint32_t, RigidBodyMarker> rigid_body_markers;
         };
 
         struct SkeletonModel {
             SkeletonModel() = default;
             std::string name{};
             uint32_t id{0};
-            std::map<uint32_t, RigidBodyModel> boneModels;
+            std::map<uint32_t, RigidBodyModel> bone_models;
+        };
+
+        struct ForcePlateModel {
+            ForcePlateModel() = default;
+            std::string name{};
+            uint32_t id{0};
+            uint32_t width{0};
+            uint32_t length{0};
+            Eigen::Vector3f origin = Eigen::Vector3f::Zero();
+            Eigen::Matrix<uint32_t, 12, 12> calibration_matrix;
+            Eigen::Matrix<uint32_t, 4, 3> corners;
+            uint32_t plate_type{0};
+            uint32_t channel_type{0};
+            uint32_t channels{0};
+        };
+
+        struct DeviceModel {
+            DeviceModel() = default;
+            std::string name{};
+            uint32_t id{0};
+            std::string serial_no{};
+            uint32_t device_type{0};
+            uint32_t channel_data_type{0};
+            uint32_t channels{0};
+        };
+
+        struct CameraModel {
+            CameraModel() = default;
+            std::string name;
+            Eigen::Vector3f position    = Eigen::Vector3f::Zero();
+            Eigen::Vector4f orientation = Eigen::Vector4f::Zero();
         };
 
         // Models we are using
-        std::map<std::string, MarkerSetModel> markerSetModels;
-        std::map<uint32_t, RigidBodyModel> rigidBodyModels;
-        std::map<uint32_t, SkeletonModel> skeletonModels;
+        std::map<std::string, MarkerSetModel> marker_set_models = {};
+        std::map<uint32_t, RigidBodyModel> rigid_body_models    = {};
+        std::map<uint32_t, SkeletonModel> skeleton_models       = {};
+        std::map<uint32_t, ForcePlateModel> force_plate_models  = {};
+        std::map<uint32_t, DeviceModel> device_models           = {};
+        /// @brief Camera model number in motive is not associated with map key number
+        std::map<uint32_t, CameraModel> camera_models = {};
 
         // The version of NatNet we are running with
         uint32_t remote  = 0;
         uint32_t version = 0;
 
-        uint16_t commandPort         = 0;
-        uint16_t dataPort            = 0;
-        std::string multicastAddress = "";
-        ReactionHandle commandHandle;
-        ReactionHandle dataHandle;
+        ReactionHandle command_handle;
+        ReactionHandle data_handle;
         int commandFd = 0;
 
-        void processFrame(const Packet& packet);
-        void sendCommand(Packet::Type type, std::vector<char> data = std::vector<char>());
-        void processModel(const Packet& packet);
-        void processPing(const Packet& packet);
-        void processResponse(const Packet& packet);
-        static void processString(const Packet& packet);
+        void process_frame(const Packet& packet);
+        void send_command(Packet::Type type, std::vector<char> data = std::vector<char>());
+        void process_model(const Packet& packet);
+        void process_ping(const Packet& packet);
+        void process_response(const Packet& packet);
+        static void process_string(const Packet& packet);
         void process(const std::vector<char>& input);
 
         /// @brief Called by the powerplant to build and setup the NatNet reactor.

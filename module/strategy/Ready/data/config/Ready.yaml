@@ -1,0 +1,10 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Time to walk forward in ready (in seconds)
+walk_to_ready_time: 12
+
+# Walk to ready position tuning values
+walk_to_ready_speed_x: 0.1 # m/s
+walk_to_ready_speed_y: 0.05 # m/s
+walk_to_ready_rotation: 0.4 # radians/s

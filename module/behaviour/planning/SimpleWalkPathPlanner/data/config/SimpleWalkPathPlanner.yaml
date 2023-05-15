@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 # Priority in subsumption system
 walk_path_planner_priority: 3
@@ -14,7 +14,15 @@ rotate_speed: 0.2
 rotate_speed_x: -0.04
 rotate_speed_y: 0
 
+# rotate_around_ball tuning values
+rotate_around_ball_speed: 0.4
+rotate_around_ball_speed_x: 0
+rotate_around_ball_speed_y: -0.4
+
 # Walk to ready position tuning values
 walk_to_ready_speed_x: 0.1
 walk_to_ready_speed_y: 0.05
 walk_to_ready_rotation: 0.4
+
+# Y - Offset for ball position such that ball is approached with foot behind ball
+ball_y_offset: 0.1

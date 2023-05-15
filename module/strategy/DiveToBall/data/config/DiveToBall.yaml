@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Distance to begin the dive to stop the ball (in meters)
+diving_distance_threshold: 1.0

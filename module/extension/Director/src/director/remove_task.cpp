@@ -14,44 +14,66 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include "Director.hpp"
-#include "provider/ProviderGroup.hpp"
+#include "component/ProviderGroup.hpp"
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::BehaviourTask;
-    using ::extension::behaviour::commands::ProviderClassification;
+    using component::DirectorTask;
+    using component::Provider;
+    using ::extension::behaviour::RunInfo;
 
-    void Director::remove_task(const std::shared_ptr<const BehaviourTask>& task) {
+    void Director::remove_task(const std::shared_ptr<DirectorTask>& task) {
 
         // Get the group for this task
-        auto& group = groups[task->type];
+        auto& group = groups.at(task->type);
+
+        // Store the original task so we can use it in stops later if needed
+        auto original_task = group.active_task;
 
         // Check if this task is the currently active task this provider is running
         if (task == group.active_task) {
 
             // Remove this task, we are no longer doing it
             group.active_task = nullptr;
+            group.done        = false;
 
-            // Re-evaluate the queue of tasks for this group
+            // We are now a zombie, we are dead but we are still in the tree
+            group.zombie = true;
+
+            // Re-evaluate the group since things may now have changed
             // This may set `group.active_task` to a valid value if a new task is picked up
-            reevaluate_queue(group);
+            reevaluate_group(group);
 
             // If nothing in the queue updated the active task to a new task we are now idle
             // That also means we need to remove any subtasks this group had recursively
             if (group.active_task == nullptr) {
 
+
                 // Run the Stop reactions for this provider group since it is no longer running
+                // First we restore the original task so we have data for the stop reaction
+                group.active_task = original_task;
                 for (auto& provider : group.providers) {
-                    if (provider->classification == ProviderClassification::STOP) {
-                        auto task = provider->reaction->get_task();
+                    if (provider->classification == Provider::Classification::STOP) {
+                        group.active_provider = provider;
+                        auto lock             = hold_run_reason(RunInfo::RunReason::STOPPED);
+                        auto task             = provider->reaction->get_task();
                         if (task) {
                             task->run(std::move(task));
                         }
                     }
+                }
+                group.active_task     = nullptr;
+                group.active_provider = nullptr;
+
+                // If anyone was pushing this group they can't push anymore since we are not active
+                if (group.pushing_task != nullptr) {
+                    // Reevaluate whoever pushed us
+                    auto pusher = providers.at(group.pushing_task->requester_id)->group;
+                    reevaluate_group(pusher);
                 }
 
                 // Remove any subtasks this group had recursively
@@ -59,14 +81,12 @@ namespace module::extension {
                     remove_task(t);
                 }
 
+
                 // We now have no subtasks
                 group.subtasks.clear();
             }
-        }
-        else {
-            // Erase this task from the queued tasks
-            group.task_queue.erase(std::remove(group.task_queue.begin(), group.task_queue.end(), task),
-                                   group.task_queue.end());
+            // After we have removed all our subtasks we are no longer a zombie, we are just dead
+            group.zombie = false;
         }
     }
 

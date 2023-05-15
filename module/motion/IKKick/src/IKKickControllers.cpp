@@ -19,7 +19,7 @@
 
 #include "IKKickControllers.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
 namespace module::motion {
 
@@ -28,7 +28,7 @@ namespace module::motion {
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using message::motion::KinematicsModel;
+    using message::actuation::KinematicsModel;
 
     void KickBalancer::configure(const Configuration& config) {
         servo_angle_threshold = config["balancer"]["servo_angle_threshold"].as<float>();
@@ -41,11 +41,11 @@ namespace module::motion {
     }
 
     void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        Eigen::Affine3d torsoToFoot = getTorsoPose(sensors);
-        Eigen::Affine3d startPose   = torsoToFoot.inverse();
+        Eigen::Isometry3d torsoToFoot = getTorsoPose(sensors);
+        Eigen::Isometry3d startPose   = torsoToFoot.inverse();
 
-        int negativeIfRight        = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
-        Eigen::Affine3d finishPose = torsoToFoot;
+        int negativeIfRight          = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
+        Eigen::Isometry3d finishPose = torsoToFoot;
         finishPose.translation() =
             Eigen::Vector3d(forward_lean,
                             negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE),
@@ -82,18 +82,18 @@ namespace module::motion {
     }
 
     void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        Eigen::Affine3d startPose = Eigen::Affine3d::Identity();
+        Eigen::Isometry3d startPose = Eigen::Isometry3d::Identity();
 
         // Convert torso to support foot
-        Eigen::Affine3d currentTorso = getTorsoPose(sensors);
+        Eigen::Isometry3d currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Eigen::Affine3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                              ? Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
-                                              : Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+        Eigen::Isometry3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
+                                                ? Eigen::Isometry3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
+                                                : Eigen::Isometry3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to
         // torso
-        Eigen::Affine3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
+        Eigen::Isometry3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
         // Convert ball position from support foot coordinates to kick foot coordinates
         Eigen::Vector3d ballFromKickFoot = supportToKickFoot * ballPosition;
         Eigen::Vector3d goalFromKickFoot = supportToKickFoot * goalPosition;
