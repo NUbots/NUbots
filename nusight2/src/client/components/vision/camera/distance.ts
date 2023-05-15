@@ -1,20 +1,20 @@
-import { computed } from 'mobx'
-import * as THREE from 'three'
+import { computed } from "mobx";
+import * as THREE from "three";
 
-import { range } from '../../../../shared/base/range'
-import { Vector4 } from '../../../math/vector4'
-import { group } from '../../three/builders'
-import { Canvas } from '../../three/three'
-import { CameraParams } from '../camera/model'
+import { range } from "../../../../shared/base/range";
+import { Vector4 } from "../../../math/vector4";
+import { group } from "../../three/builders";
+import { Canvas } from "../../three/three";
+import { CameraParams } from "../camera/model";
 
-import { LineProjection } from './line_projection'
+import { LineProjection } from "./line_projection";
 
 export class DistanceViewModel {
-  private readonly params: CameraParams
-  private readonly lineProjection: LineProjection
-  private readonly majorStep: number
-  private readonly minorLines: number
-  private readonly maxDistance: number
+  private readonly params: CameraParams;
+  private readonly lineProjection: LineProjection;
+  private readonly majorStep: number;
+  private readonly minorLines: number;
+  private readonly maxDistance: number;
 
   constructor({
     params,
@@ -23,17 +23,17 @@ export class DistanceViewModel {
     minorLines,
     maxDistance,
   }: {
-    params: CameraParams
-    lineProjection: LineProjection
-    majorStep: number
-    minorLines: number
-    maxDistance: number
+    params: CameraParams;
+    lineProjection: LineProjection;
+    majorStep: number;
+    minorLines: number;
+    maxDistance: number;
   }) {
-    this.params = params
-    this.lineProjection = lineProjection
-    this.majorStep = majorStep
-    this.minorLines = minorLines
-    this.maxDistance = maxDistance
+    this.params = params;
+    this.lineProjection = lineProjection;
+    this.majorStep = majorStep;
+    this.minorLines = minorLines;
+    this.maxDistance = maxDistance;
   }
 
   static of(canvas: Canvas, params: CameraParams): DistanceViewModel {
@@ -43,11 +43,11 @@ export class DistanceViewModel {
       majorStep: 1,
       minorLines: 3,
       maxDistance: 5,
-    })
+    });
   }
 
   readonly distance = group(() => ({
-    children: range(((this.minorLines + 1) * this.maxDistance) / this.majorStep).map(i =>
+    children: range(((this.minorLines + 1) * this.maxDistance) / this.majorStep).map((i) =>
       this.lineProjection.cone({
         axis: this.params.Hcw.z.vec3().multiplyScalar(-1),
         radius: Math.cos(Math.atan((i + 1) / (this.minorLines + 1) / this.cameraHeight)),
@@ -55,10 +55,10 @@ export class DistanceViewModel {
         lineWidth: (i + 1) % (this.minorLines + 1) ? 2 : 3,
       }),
     ),
-  }))
+  }));
 
   @computed
   private get cameraHeight(): number {
-    return new THREE.Matrix4().getInverse(this.params.Hcw.toThree()).elements[15]
+    return new THREE.Matrix4().getInverse(this.params.Hcw.toThree()).elements[15];
   }
 }

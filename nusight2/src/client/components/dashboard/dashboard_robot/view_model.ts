@@ -1,40 +1,40 @@
-import { computed } from 'mobx'
-import { createTransformer } from 'mobx-utils'
+import { computed } from "mobx";
+import { createTransformer } from "mobx-utils";
 
-import { Transform } from '../../../math/transform'
-import { Vector2 } from '../../../math/vector2'
-import { BasicAppearance } from '../../../render2d/appearance/basic_appearance'
-import { LineAppearance } from '../../../render2d/appearance/line_appearance'
-import { ArcGeometry } from '../../../render2d/geometry/arc_geometry'
-import { ArrowGeometry } from '../../../render2d/geometry/arrow_geometry'
-import { CircleGeometry } from '../../../render2d/geometry/circle_geometry'
-import { LineGeometry } from '../../../render2d/geometry/line_geometry'
-import { MarkerGeometry } from '../../../render2d/geometry/marker_geometry'
-import { TextGeometry } from '../../../render2d/geometry/text_geometry'
-import { Group } from '../../../render2d/object/group'
-import { Shape } from '../../../render2d/object/shape'
+import { Transform } from "../../../math/transform";
+import { Vector2 } from "../../../math/vector2";
+import { BasicAppearance } from "../../../render2d/appearance/basic_appearance";
+import { LineAppearance } from "../../../render2d/appearance/line_appearance";
+import { ArcGeometry } from "../../../render2d/geometry/arc_geometry";
+import { ArrowGeometry } from "../../../render2d/geometry/arrow_geometry";
+import { CircleGeometry } from "../../../render2d/geometry/circle_geometry";
+import { LineGeometry } from "../../../render2d/geometry/line_geometry";
+import { MarkerGeometry } from "../../../render2d/geometry/marker_geometry";
+import { TextGeometry } from "../../../render2d/geometry/text_geometry";
+import { Group } from "../../../render2d/object/group";
+import { Shape } from "../../../render2d/object/shape";
 
-import { DashboardRobotModel } from './model'
+import { DashboardRobotModel } from "./model";
 
 export class DashboardRobotViewModel {
   constructor(private model: DashboardRobotModel) {}
 
   static of = createTransformer((model: DashboardRobotModel): DashboardRobotViewModel => {
-    return new DashboardRobotViewModel(model)
-  })
+    return new DashboardRobotViewModel(model);
+  });
 
   @computed
   get robot(): Group {
     return Group.of({
       children: [this.fieldSpaceGroup, this.robotSpaceGroup],
-    })
+    });
   }
 
   @computed
   get fieldSpaceGroup() {
     return Group.of({
       children: [this.ballSight, this.kickTarget, this.ball],
-    })
+    });
   }
 
   @computed
@@ -48,21 +48,21 @@ export class DashboardRobotViewModel {
           y: this.model.robotPosition.y,
         },
       }),
-    })
+    });
   }
 
   @computed
   private get walkCommand() {
-    const t = 2
-    const translation = Vector2.from(this.model.walkCommand)
-    const rotation = this.model.walkCommand.z
-    const radius = translation.length / (Math.abs(rotation) + 1e-10)
-    const origin = Vector2.of(-translation.y, translation.x).divideScalar(rotation)
-    const arcLength = rotation * t
-    const angle = Math.atan2(translation.y / rotation, translation.x / rotation) - Math.PI / 2
+    const t = 2;
+    const translation = Vector2.from(this.model.walkCommand);
+    const rotation = this.model.walkCommand.z;
+    const radius = translation.length / (Math.abs(rotation) + 1e-10);
+    const origin = Vector2.of(-translation.y, translation.x).divideScalar(rotation);
+    const arcLength = rotation * t;
+    const angle = Math.atan2(translation.y / rotation, translation.x / rotation) - Math.PI / 2;
 
-    const startAngle = angle
-    const endAngle = startAngle + arcLength
+    const startAngle = angle;
+    const endAngle = startAngle + arcLength;
 
     return Shape.of(
       ArcGeometry.of({
@@ -73,9 +73,9 @@ export class DashboardRobotViewModel {
         anticlockwise: rotation < 0,
       }),
       BasicAppearance.of({
-        stroke: { width: 0.025, color: '#000000' },
+        stroke: { width: 0.025, color: "#000000" },
       }),
-    )
+    );
   }
 
   @computed
@@ -89,7 +89,7 @@ export class DashboardRobotViewModel {
       BasicAppearance.of({
         fill: { color: this.model.ballColor },
       }),
-    )
+    );
   }
 
   @computed
@@ -102,13 +102,13 @@ export class DashboardRobotViewModel {
       LineAppearance.of({
         stroke: { width: 0.025, color: this.model.ballSightColor },
       }),
-    )
+    );
   }
 
   @computed
   private get kickTarget() {
-    const origin = this.model.ballPosition
-    const difference = this.model.kickTarget.subtract(origin)
+    const origin = this.model.ballPosition;
+    const difference = this.model.kickTarget.subtract(origin);
     return Shape.of(
       ArrowGeometry.of({
         direction: difference.normalize(),
@@ -121,12 +121,12 @@ export class DashboardRobotViewModel {
       BasicAppearance.of({
         fill: { color: this.model.kickTargetColor },
       }),
-    )
+    );
   }
 
   @computed
   private get robotMarker() {
-    const radius = 0.15
+    const radius = 0.15;
     return Group.of({
       children: [
         Shape.of(
@@ -143,8 +143,8 @@ export class DashboardRobotViewModel {
           TextGeometry.of({
             text: this.model.playerId.toString(),
             worldAlignment: true,
-            textAlign: 'middle',
-            textBaseline: 'middle',
+            textAlign: "middle",
+            textBaseline: "middle",
             fontSize: `${radius * 1.9}px`,
             x: 0,
             y: 0,
@@ -154,6 +154,6 @@ export class DashboardRobotViewModel {
           }),
         ),
       ],
-    })
+    });
   }
 }

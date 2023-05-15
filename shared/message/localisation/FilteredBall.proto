@@ -27,8 +27,8 @@ message FilteredBall {
     /// Ball's filtered cartesian position measured in torso space {t} from the torso {T}
     fvec3 rBTt = 1;
 
-    /// Ball's filtered cartesian position measured in camera space {c} from the camera {C}
-    fvec3 rBCc = 2;
+    /// Ball's filtered cartesian position measured in robot space {r} from the robot {R}
+    fvec3 rBRr = 2;
 
     /// Ball's filtered cartesian position measured in torso space {t} from the camera {C}
     fvec3 rBCt = 3;

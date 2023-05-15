@@ -7,6 +7,8 @@ nuclear_role(
   support::configuration::SoccerConfig
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
+  # Network
+  network::PlotJuggler
   # Sensors
   input::GameController
   input::SensorFilter
@@ -15,7 +17,9 @@ nuclear_role(
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::BallDetector
+  vision::FieldLineDetector
   # Localisation
+  localisation::RobotLocalisation
   localisation::BallFilter
   # Director
   extension::Director
@@ -39,10 +43,12 @@ nuclear_role(
   strategy::StandStill
   strategy::StrategiseLook
   strategy::WalkToBall
+  strategy::WalkToFieldPosition
   strategy::FindObject
   strategy::Ready
   strategy::DiveToBall
   # Purposes
   purpose::Striker
   purpose::Soccer
+  purpose::Goalie
 )

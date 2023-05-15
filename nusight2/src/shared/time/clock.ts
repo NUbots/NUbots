@@ -1,15 +1,15 @@
 export interface Clock {
-  now(): number
+  now(): number;
 
-  date(): Date
+  date(): Date;
 
-  performanceNow(): number
+  performanceNow(): number;
 
-  setTimeout(cb: () => void, seconds: number): CancelTimer
+  setTimeout(cb: () => void, seconds: number): CancelTimer;
 
-  setInterval(cb: () => void, seconds: number): CancelTimer
+  setInterval(cb: () => void, seconds: number): CancelTimer;
 
-  nextTick(cb: () => void): void
+  nextTick(cb: () => void): void;
 }
 
-export type CancelTimer = () => void
+export type CancelTimer = () => void;

@@ -1,20 +1,20 @@
-import { computed } from 'mobx'
-import { observer } from 'mobx-react'
-import { Component } from 'react'
-import React from 'react'
+import { computed } from "mobx";
+import { observer } from "mobx-react";
+import { Component } from "react";
+import React from "react";
 
-import { Canvas } from '../../three/three'
-import { Three } from '../../three/three'
+import { Canvas } from "../../three/three";
+import { Three } from "../../three/three";
 
-import { VisualizerController } from './controller'
-import { VisualizerModel } from './model'
-import styles from './style.module.css'
-import { VisualizerViewModel } from './view_model'
+import { VisualizerController } from "./controller";
+import { VisualizerModel } from "./model";
+import styles from "./style.module.css";
+import { VisualizerViewModel } from "./view_model";
 
 @observer
 export class VisualizerView extends Component<{
-  controller: VisualizerController
-  model: VisualizerModel
+  controller: VisualizerController;
+  model: VisualizerModel;
 }> {
   render() {
     return (
@@ -27,11 +27,11 @@ export class VisualizerView extends Component<{
           onWheel={this.props.controller.onWheel}
         />
       </div>
-    )
+    );
   }
 
   private stage = (canvas: Canvas) => {
-    const viewModel = VisualizerViewModel.of(canvas, this.props.model)
-    return computed(() => viewModel.stage)
-  }
+    const viewModel = VisualizerViewModel.of(canvas, this.props.model);
+    return computed(() => viewModel.stage);
+  };
 }

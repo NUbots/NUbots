@@ -1,77 +1,77 @@
-import Emitter from 'component-emitter'
-import { SocketOptions } from 'socket.io-client'
+import Emitter from "component-emitter";
+import { SocketOptions } from "socket.io-client";
 
-import WebSocketWorker from './webworker_web_socket_client.worker'
-import { WebSocketClient } from './web_socket_client'
+import WebSocketWorker from "./webworker_web_socket_client.worker";
+import { WebSocketClient } from "./web_socket_client";
 
 export class WebWorkerWebSocketClient extends Emitter implements WebSocketClient {
   constructor(private worker: Worker) {
-    super()
-    worker.addEventListener('message', this.handleMessage)
+    super();
+    worker.addEventListener("message", this.handleMessage);
   }
 
   static of(uri: string, opts: SocketOptions) {
-    const worker = new WebSocketWorker()
+    const worker = new WebSocketWorker();
     worker.postMessage({
-      command: 'construct',
+      command: "construct",
       uri,
       opts,
-    })
-    return new WebWorkerWebSocketClient(worker)
+    });
+    return new WebWorkerWebSocketClient(worker);
   }
 
   private handleMessage = (e: MessageEvent) => {
     const args = e.data.args.map((v: any) => {
       // If this is a webworker callback we need to remap it into a function
-      if (typeof v._webworkerCallback === 'number') {
+      if (typeof v._webworkerCallback === "number") {
         return (...args: any[]) => {
           this.worker.postMessage({
-            command: 'callback',
+            command: "callback",
             id: v._webworkerCallback,
             args,
-          })
-        }
+          });
+        };
       } else {
-        return v
+        return v;
       }
-    })
+    });
 
-    this.emit(e.data.event, ...args)
-  }
+    this.emit(e.data.event, ...args);
+  };
 
   connect() {
     this.worker.postMessage({
-      command: 'connect',
-    })
+      command: "connect",
+    });
   }
 
   disconnect() {
     this.worker.postMessage({
-      command: 'disconnect',
-    })
+      command: "disconnect",
+    });
   }
 
   on(event: string, fn: Function) {
     this.worker.postMessage({
-      command: 'on',
+      command: "on",
       event,
-    })
-    return super.on(event, fn)
+    });
+    return super.on(event, fn);
   }
 
   off(event: string, fn?: Function) {
     this.worker.postMessage({
-      command: 'off',
+      command: "off",
       event,
-    })
-    return super.off(event, fn)
+    });
+    return super.off(event, fn);
   }
 
   send(event: string, ...args: any[]) {
     this.worker.postMessage({
-      command: 'send',
+      command: "send",
       event,
       args,
-    })
+    });
   }
 }

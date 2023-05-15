@@ -1,8 +1,8 @@
-const storybook = require('@storybook/react/standalone')
+const storybook = require("@storybook/react/standalone");
 
 storybook({
-  mode: 'static',
-  staticDir: ['src/assets'],
-  outputDir: 'dist/public/storybook',
+  mode: "static",
+  staticDir: ["src/assets"],
+  outputDir: "dist/public/storybook",
   configDir: __dirname,
-})
+});

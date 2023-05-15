@@ -11,6 +11,7 @@
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToBall.hpp"
+#include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -28,6 +29,8 @@ namespace module::purpose {
     using message::strategy::Ready;
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
+    using message::strategy::WalkToFieldPosition;
+
     using StrikerTask = message::purpose::Striker;
     using utility::support::Expression;
 
@@ -35,7 +38,8 @@ namespace module::purpose {
 
         on<Configuration>("Striker.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Striker.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ready_position = config["ready_position"].as<Expression>();
         });
 
         on<Provide<StrikerTask>, Optional<Trigger<GameState>>>().then(
@@ -58,8 +62,12 @@ namespace module::purpose {
             });
 
         // Normal READY state
-        on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then(
-            [this] { emit<Task>(std::make_unique<Ready>()); });
+        on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
+            // If we are stable, walk to the ready field position
+            emit<Task>(std::make_unique<WalkToFieldPosition>(
+                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                cfg.ready_position.z()));
+        });
 
         // Normal PLAYING state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
