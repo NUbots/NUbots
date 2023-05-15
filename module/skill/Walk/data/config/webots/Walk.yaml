@@ -1,0 +1,22 @@
+log_level: DEBUG
+
+step_limits: [1, 1, 0.4]
+step_height: 0.075
+step_period: 0.2
+step_width: 0.18
+
+torso_height: 0.44
+torso_pitch: 0.4
+torso_offset_y: 0
+
+gains:
+  legs: 40
+  arms: 13
+
+arms:
+  right_shoulder_pitch: 2.25
+  left_shoulder_pitch: 2.25
+  right_shoulder_roll: -0.176
+  left_shoulder_roll: 0.176
+  right_elbow: -1
+  left_elbow: -1
