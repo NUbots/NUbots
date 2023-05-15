@@ -56,7 +56,7 @@ namespace module::platform::openCR {
                 data2[i].data.goalCurrent         = convert::current(servoStates[i].goalCurrent);
                 data2[i].data.goalVelocity        = convert::velocity(servoStates[i].goalVelocity);
                 data2[i].data.profileAcceleration = convert::FFGain(servoStates[i].profileAcceleration);
-                data2[i].data.profileVelocity     = convert::FFGain(servoStates[i].profileVelocity);
+                data2[i].data.profileVelocity     = convert::velocity(servoStates[i].profileVelocity);
                 data2[i].data.goalPosition =
                     convert::position(i, servoStates[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
             }

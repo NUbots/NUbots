@@ -265,8 +265,9 @@ namespace module::platform::openCR {
                     servoStates[command.id].positionIGain = command.gain * 0;
                     servoStates[command.id].positionDGain = command.gain * 0;
 
-                    servoStates[command.id].goalVelocity = speed;
-                    servoStates[command.id].goalPosition = command.position;
+                    servoStates[command.id].goalVelocity    = speed;
+                    servoStates[command.id].goalPosition    = command.position;
+                    servoStates[command.id].profileVelocity = float(speed);
                 }
             }
         });
