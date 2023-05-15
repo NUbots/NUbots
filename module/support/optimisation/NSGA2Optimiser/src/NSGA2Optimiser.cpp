@@ -83,6 +83,7 @@ namespace module::support::optimisation {
             std::unique_ptr<WebotsReady> message = std::make_unique<WebotsReady>();
             log<NUClear::INFO>("Starting up in 4 seconds");
             emit<Scope::DELAY>(message, std::chrono::seconds(4));
+            // Update to use sleep
         });
 
         on<Trigger<WebotsReady>, Single>().then([this]() {
