@@ -219,6 +219,33 @@ namespace utility::skill {
         }
 
         /**
+         * @brief Get the left or right foot pose at the given time in the torso {t} frame.
+         * @param t Time.
+         * @param left_foot True for left foot, false for right foot.
+         * @return Swing foot pose at time t.
+         */
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(bool left_foot) const {
+            Eigen::Transform<float, 3, Eigen::Isometry> Htl = Eigen::Transform<float, 3, Eigen::Isometry>::Identity();
+            Eigen::Transform<float, 3, Eigen::Isometry> Htr = Eigen::Transform<float, 3, Eigen::Isometry>::Identity();
+            if (left_foot_is_planted) {
+                Htl = get_torso_pose(t).inverse();
+                Htr = Htl * get_swing_foot_pose();
+            }
+            else {
+                Htr = get_torso_pose(t).inverse();
+                Htl = Htr * get_swing_foot_pose();
+            }
+
+            // Return the desired pose
+            if (left_foot) {
+                return Htl;
+            }
+            else {
+                return Htr;
+            }
+        }
+
+        /**
          * @brief Get the torso trajectory
          * @return Trajectory of torso.
          */

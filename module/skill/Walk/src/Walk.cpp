@@ -104,17 +104,16 @@ namespace module::skill {
             .then([this](const WalkTask& walk) {
                 const float dt = get_time_delta();
                 walk_engine.update_state(dt, walk.velocity_target.cast<float>());
-
                 // Set the robot stability value based on the walk engine state
                 if (walk_engine.get_state() == utility::skill::MotionGenerationState::STANDING) {
                     emit(std::make_unique<Stability>(Stability::STANDING));
+                    emit(std::make_unique<WalkingState>(false, walk.velocity_target));
                 }
                 else {
                     update_desired_pose();
                     emit(std::make_unique<Stability>(Stability::DYNAMIC));
+                    emit(std::make_unique<WalkingState>(true, walk.velocity_target));
                 }
-
-                emit(std::make_unique<WalkingState>(true, walk.velocity_target));
             });
 
         // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
@@ -168,20 +167,12 @@ namespace module::skill {
     }
 
     void Walk::update_desired_pose() {
-        // Transform desired poses from the planted foot {p} frame into the torso {t} frame
-        Eigen::Transform<float, 3, Eigen::Isometry> Htl = Eigen::Transform<float, 3, Eigen::Isometry>::Identity();
-        Eigen::Transform<float, 3, Eigen::Isometry> Htr = Eigen::Transform<float, 3, Eigen::Isometry>::Identity();
-        if (walk_engine.is_left_foot_planted()) {
-            Htl = walk_engine.get_torso_pose().inverse();
-            Htr = Htl * walk_engine.get_swing_foot_pose();
-        }
-        else {
-            Htr = walk_engine.get_torso_pose().inverse();
-            Htl = Htr * walk_engine.get_swing_foot_pose();
-        }
-
-        // ****Create limb tasks****
+        // Compute the goal position time
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+
+        // Get desired feet poses in the torso {t} frame
+        Eigen::Transform<float, 3, Eigen::Isometry> Htl = walk_engine.get_foot_pose(true);
+        Eigen::Transform<float, 3, Eigen::Isometry> Htr = walk_engine.get_foot_pose(false);
 
         // Legs
         auto left_leg   = std::make_unique<LeftLegIK>();
