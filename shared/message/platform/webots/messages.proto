@@ -126,8 +126,8 @@ message SensorMeasurements {
     VisionGroundTruth   vision_ground_truth   = 101;
 
     // NUbots-specific, used for the walk optimisation
-    OptimisationRobotPosition robot_position = 20;
-    bool                      reset_done     = 21;
+    OptimisationRobotPosition robot_position = 102;
+    bool                      reset_done     = 103;
 }
 
 message MotorPosition {
