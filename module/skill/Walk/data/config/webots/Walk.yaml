@@ -1,16 +1,16 @@
 log_level: DEBUG
 
 step_limits: [1, 1, 0.4]
-step_height: 0.075
-step_period: 0.2
+step_height: 0.055
+step_period: 0.175
 step_width: 0.18
 
 torso_height: 0.44
 torso_pitch: 0.4
-torso_offset_y: 0
+torso_offset_y: 0.05
 
 gains:
-  legs: 40
+  legs: 50
   arms: 13
 
 arms:

@@ -97,6 +97,10 @@ namespace utility::skill {
             Hpt_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height);
             Hpt_start.linear() =
                 Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
+
+            // Initialize swing foot and torso trajectory
+            generate_swingfoot_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
+            generate_torso_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
         }
 
         /**
