@@ -6,7 +6,7 @@ nuclear_role(
   support::logging::ConsoleLogHandler
 
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
 
   support::configuration::GlobalConfig
 
@@ -17,7 +17,7 @@ nuclear_role(
 
   motion::ScriptEngine
   motion::QuinticWalk
-  
+
   support::optimisation::NSGA2Evaluator
   support::optimisation::NSGA2Optimiser
 )
