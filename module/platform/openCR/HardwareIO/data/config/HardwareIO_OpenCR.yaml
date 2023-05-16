@@ -56,11 +56,11 @@ servos:
     simulated: false
   - # [10] R_HIP_PITCH
     direction: 1
-    offset: 0.0
+    offset: pi / 8
     simulated: false
   - # [11] L_HIP_PITCH
     direction: -1
-    offset: 0.0
+    offset: pi / 8
     simulated: false
   - # [12] R_KNEE
     direction: -1
