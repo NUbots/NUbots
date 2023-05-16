@@ -12,7 +12,6 @@ The task must be specfied in this file. Eg./ task: "walk"
 
 ## Consumes
 
-- `message::platform::webots::WebotsReady` Starts the first evaluation once Webots is ready.
 - `message::support::optimisation::NSGA2FitnessScores` Containing the score evaluation of an individual, received from NSGA2Evaluator.
 - `module::support::optimisation::WalkOptimiser` A walk optimisation task.
 - `module::support::optimisation::StrafeOptimiser` A walk strafe optimisation task.
@@ -22,7 +21,6 @@ The task must be specfied in this file. Eg./ task: "walk"
 
 ## Emits
 
-- `message::platform::webots::WebotsReady` (to Webots. On startup ready)
 - `message::support::optimisation::NSGA2EvaluatorReady` Emitted when initialisation has been completed to signal that evaluation can begin.
 - `message::support::optimisation::NSGA2Terminate` Sent to NSGA2Evaluator to stop the optimisation and shut down the powerplant.
 - `message::support::optimisation::NSGA2EvaluationRequest` Sent to NSGA2Evaluator to trigger the evaluation of a new individual.(to NSGA2Evaluator, to request evaluation of an individual)

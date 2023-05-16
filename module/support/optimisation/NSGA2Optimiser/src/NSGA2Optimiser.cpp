@@ -80,14 +80,10 @@ namespace module::support::optimisation {
 
         on<Startup>().then([this]() {
             // Create a message to request an evaluation of an individual
-            std::unique_ptr<WebotsReady> message = std::make_unique<WebotsReady>();
             log<NUClear::INFO>("Starting up in 4 seconds");
-            emit<Scope::DELAY>(message, std::chrono::seconds(4));
-            // Update to use sleep
-        });
+            std::this_thread::sleep_for(std::chrono::seconds(4));
 
-        on<Trigger<WebotsReady>, Single>().then([this]() {
-            log<NUClear::INFO>("webots ready, starting first evaluation");
+            log<NUClear::INFO>("Webots ready, starting first evaluation");
 
             // If initialisation succeeded, evaluate the first individual of the first generation
             // Subsequent individuals will be evaluated after we get the evaluation scores for this
