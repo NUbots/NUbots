@@ -44,8 +44,8 @@ namespace module::support::optimisation {
     }
 
     std::unique_ptr<NSGA2EvaluationRequest> StandOptimiser::make_evaluation_request(const int id,
-                                                                                  const int generation,
-                                                                                  std::vector<double> reals) {
+                                                                                    const int generation,
+                                                                                    std::vector<double> reals) {
         auto request              = std::make_unique<NSGA2EvaluationRequest>();
         request->id               = id;
         request->generation       = generation;

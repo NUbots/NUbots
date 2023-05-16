@@ -222,7 +222,7 @@ namespace nsga2 {
 
             parent_pop->inds.clear();  // Empty the new parent population, ready to be repopulated
 
-            int i = 0;            // we need `i` after the loop, for the final (partial) front, so hold on to it here
+            int i = 0;  // we need `i` after the loop, for the final (partial) front, so hold on to it here
             while (parent_pop->get_size() + int(combined_pop->fronts[i].size())
                    < pop_size) {  // stop when adding the next front would go past the population size
                 std::vector<int>& front_i = combined_pop->fronts[i];

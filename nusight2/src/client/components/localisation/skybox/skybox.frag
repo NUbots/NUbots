@@ -71,7 +71,7 @@ void main() {
     float rPhase    = rayleighPhase(cosTheta * 0.5 + 0.5);
     vec3 betaRTheta = vBetaR * rPhase;
 
-    float mPhase    = hgPhase(cosTheta, mieDirectionalG);
+    float mPhase     = hgPhase(cosTheta, mieDirectionalG);
     vec3 beta_mTheta = vBeta_m * mPhase;
 
     vec3 Lin = pow(vSunE * ((betaRTheta + beta_mTheta) / (vBetaR + vBeta_m)) * (1.0 - Fex), vec3(1.5));

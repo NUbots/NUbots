@@ -93,11 +93,11 @@ namespace nsga2 {
         if (constr_violation < 0.0 && _b.constr_violation < 0.0) {
             // both have constraint violations
             if (constr_violation > _b.constr_violation)
-                return 1;   // this violates less
+                return 1;  // this violates less
             else if (constr_violation < _b.constr_violation)
                 return -1;  // _b violates less
             else
-                return 0;   // they both violate equally
+                return 0;  // they both violate equally
         }
         else if (constr_violation < 0 && _b.constr_violation == 0) {
             // this violates and _b doesn't => _b dominates

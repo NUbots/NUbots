@@ -24,8 +24,8 @@ eta:
 
 task: "walk"
 task_config_path: "config/webots/QuinticWalk.yaml"
-initial_translation: [-7.0, -3.0, 0.51]  # x, y, z
-intial_rotation: [0, 0, 1, 0]  # x, y, z, angle (rads)
+initial_translation: [-7.0, -3.0, 0.51] # x, y, z
+intial_rotation: [0, 0, 1, 0] # x, y, z, angle (rads)
 # The following values are setting the initial values and limits for the walk engine parameters.
 # Each param is the tuple [initial value, minimum, maximum]. These values are merged with the
 # values in QuinticWalk.yaml for an individual, and then evaluated with the walk.

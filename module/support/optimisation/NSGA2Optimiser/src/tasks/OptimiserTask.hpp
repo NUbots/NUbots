@@ -16,10 +16,10 @@ namespace module::support::optimisation {
 
     class OptimiserTask {
     public:
-        virtual void setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) = 0;
+        virtual void setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm)  = 0;
         virtual std::unique_ptr<NSGA2EvaluationRequest> make_evaluation_request(const int id,
-                                                                              const int generation,
-                                                                              std::vector<double> reals) = 0;
+                                                                                const int generation,
+                                                                                std::vector<double> reals) = 0;
     };
 
 }  // namespace module::support::optimisation

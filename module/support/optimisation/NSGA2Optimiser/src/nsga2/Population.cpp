@@ -83,8 +83,8 @@ namespace nsga2 {
     }
 
     void Population::set_evaluation_results(const int& _id,
-                                          const std::vector<double>& obj_score_,
-                                          const std::vector<double>& constraints_) {
+                                            const std::vector<double>& obj_score_,
+                                            const std::vector<double>& constraints_) {
         inds[_id].obj_score = obj_score_;
         inds[_id].constr    = constraints_;
         inds[_id].check_constraints();

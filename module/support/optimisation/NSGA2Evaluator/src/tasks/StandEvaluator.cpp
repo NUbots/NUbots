@@ -99,7 +99,7 @@ namespace module::support::optimisation {
     }
 
     std::vector<double> StandEvaluator::calculate_constraints() {
-        bool fallen             = check_for_fall(current_sensors);
+        bool fallen              = check_for_fall(current_sensors);
         double fallen_constraint = fallen ? -1.0 : 0;
         return {
             fallen_constraint,

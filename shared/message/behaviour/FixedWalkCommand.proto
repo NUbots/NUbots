@@ -33,11 +33,11 @@ message WalkOptimiserCommand {
 
 message FixedWalkCommand {
     message WalkSegment {
-        vec2                     direction                 = 1;
-        double                   curve_period               = 2;
-        double                   normalised_velocity        = 3;
+        vec2                     direction                   = 1;
+        double                   curve_period                = 2;
+        double                   normalised_velocity         = 3;
         double                   normalised_angular_velocity = 4;
-        google.protobuf.Duration duration                  = 5;
+        google.protobuf.Duration duration                    = 5;
     };
 
     repeated WalkSegment segments = 1;
