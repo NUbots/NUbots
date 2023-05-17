@@ -10,8 +10,8 @@ import { Server } from "socket.io";
 import * as NUClearNetProxyParser from "../shared/nuclearnet/nuclearnet_proxy_parser";
 import { VirtualRobots } from "../virtual_robots/virtual_robots";
 
-import { WebSocketProxyNUClearNetServer } from "./nuclearnet/web_socket_proxy_nuclearnet_server";
-import { WebSocketServer } from "./nuclearnet/web_socket_server";
+import { NUsightServer } from "./nusight_server";
+import { WebSocketServer } from "./web_socket/web_socket_server";
 
 const args = minimist(process.argv.slice(2));
 const withVirtualRobots = args["virtual-robots"] || false;
@@ -30,8 +30,8 @@ app.use(
   }),
 );
 app.use(compression());
-app.use(express.static(path.join("dist", "public")));
-app.use(favicon(path.join("dist", "public", "favicon.ico")));
+app.use(express.static(path.join("dist")));
+app.use(favicon(path.join("dist", "favicon.ico")));
 
 const port = process.env.PORT || 9090;
 server.listen(port, () => {
@@ -44,7 +44,7 @@ if (withVirtualRobots) {
   virtualRobots.start();
 }
 
-WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
+NUsightServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
   fakeNetworking: withVirtualRobots,
   connectionOpts: { name: "nusight", address: nuclearnetAddress },
 });

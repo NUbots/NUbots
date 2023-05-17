@@ -1,8 +1,8 @@
-import { observer } from "mobx-react";
 import { PropsWithChildren } from "react";
 import React from "react";
 import { Component } from "react";
 import { ComponentType } from "react";
+import { observer } from "mobx-react";
 
 import { NUsightNetwork } from "../../network/nusight_network";
 import { TreeNodeModel } from "../checkbox_tree/model";
@@ -12,7 +12,6 @@ import { ChartController } from "./controller";
 import { LineChartProps } from "./line_chart/view";
 import { ChartModel } from "./model";
 import { ChartNetwork } from "./network";
-import style from "./style.module.css";
 import { TreeLabel } from "./tree_label/view";
 
 @observer
@@ -25,19 +24,19 @@ export class ChartView extends Component<{
 }> {
   static of({
     model,
-    menu,
+    Menu,
     nusightNetwork,
     LineChart,
   }: {
     model: ChartModel;
-    menu: ComponentType<PropsWithChildren>;
+    Menu: ComponentType<PropsWithChildren>;
     nusightNetwork: NUsightNetwork;
     LineChart: ComponentType<LineChartProps>;
   }): ComponentType {
     const controller = ChartController.of({ model });
     return () => {
       const network = ChartNetwork.of(nusightNetwork, model);
-      return <ChartView controller={controller} Menu={menu} model={model} network={network} LineChart={LineChart} />;
+      return <ChartView controller={controller} Menu={Menu} model={model} network={network} LineChart={LineChart} />;
     };
   }
 
@@ -48,20 +47,13 @@ export class ChartView extends Component<{
   render() {
     const { Menu, model, controller, LineChart } = this.props;
     return (
-      <div className={style.page}>
-        <Menu>
-          <ul className={style.menu}>
-            <li className={style.menuItem}>
-              <button className={style.menuButton}>Line Chart</button>
-              <button className={style.menuButton}>2D Scatter</button>
-            </li>
-          </ul>
-        </Menu>
-        <div className={style.chart}>
-          <div className={style.main}>
+      <div className="flex flex-col w-full">
+        <Menu />
+        <div className="flex flex-1">
+          <div className="flex-grow flex flex-col">
             <LineChart />
           </div>
-          <div className={style.sidebar}>
+          <div className="w-[400px] border-l border-gray-300">
             <CheckboxTree
               model={model.tree}
               onCheck={controller.onNodeCheck}

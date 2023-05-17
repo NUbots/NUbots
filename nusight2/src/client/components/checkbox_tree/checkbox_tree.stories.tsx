@@ -1,11 +1,19 @@
 import React from "react";
-import { storiesOf } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import { action, computed, observable } from "mobx";
 import { createTransformer } from "mobx-utils";
 
 import { CheckedState, TreeModel, TreeNodeModel } from "./model";
-
 import { CheckboxTree } from "./view";
+
+const meta: Meta<typeof CheckboxTree> = {
+  title: "components/CheckboxTree",
+  component: CheckboxTree,
+};
+
+export default meta;
+
+type Story = StoryObj<typeof CheckboxTree>;
 
 class TreeData {
   @observable checked: CheckedState;
@@ -83,9 +91,9 @@ class ToggleTree {
   }
 }
 
-storiesOf("components/CheckboxTree", module)
-  .addDecorator((story) => <div style={{ maxWidth: "320px" }}>{story()}</div>)
-  .add("renders", () => {
+export const Default: Story = {
+  name: "default",
+  render: () => {
     const rawData: ToggleTreeChildren = {
       "Robot 1": {
         "Debug Waves": {
@@ -136,5 +144,10 @@ storiesOf("components/CheckboxTree", module)
       return <span>{node.label}</span>;
     };
 
-    return <CheckboxTree model={model} onCheck={onNodeCheck} onExpand={onNodeExpand} renderLabel={renderLabel} />;
-  });
+    return (
+      <div className="max-w-[320px]">
+        <CheckboxTree model={model} onCheck={onNodeCheck} onExpand={onNodeExpand} renderLabel={renderLabel} />
+      </div>
+    );
+  },
+};

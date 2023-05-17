@@ -1,12 +1,27 @@
-import { storiesOf } from "@storybook/react";
 import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 
 import { LoadingIcon } from "../view";
 
-storiesOf("components.loading_icon", module)
-  .add("renders animated", () => {
+const meta: Meta<typeof LoadingIcon> = {
+  title: "components/LoadingIcon",
+  component: LoadingIcon,
+};
+
+export default meta;
+
+type Story = StoryObj<typeof LoadingIcon>;
+
+export const Animated: Story = {
+  name: "default",
+  render: () => {
     return <LoadingIcon />;
-  })
-  .add("renders with custom size", () => {
+  },
+};
+
+export const CustomSize: Story = {
+  name: "custom size",
+  render: () => {
     return <LoadingIcon size={64} />;
-  });
+  },
+};

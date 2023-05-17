@@ -1,4 +1,6 @@
-import { storiesOf } from "@storybook/react";
+import { Component } from "react";
+import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 import { action } from "mobx";
 import { computed } from "mobx";
 import { reaction } from "mobx";
@@ -6,18 +8,15 @@ import { observable } from "mobx";
 import { disposeOnUnmount } from "mobx-react";
 import { createTransformer } from "mobx-utils";
 import { now } from "mobx-utils";
-import { Component } from "react";
-import React from "react";
 import { Color } from "three";
-import { Geometry } from "three";
+import { BufferGeometry } from "three";
 import { PointLight } from "three";
 import { BoxGeometry } from "three";
 import { Light } from "three";
 
+import { Vector2 } from "../../../../shared/math/vector2";
+import { Vector3 } from "../../../../shared/math/vector3";
 import { disposableComputed } from "../../../base/disposable_computed";
-import { Vector2 } from "../../../math/vector2";
-import { Vector3 } from "../../../math/vector3";
-import { fullscreen } from "../../storybook/fullscreen";
 import { scene } from "../builders";
 import { perspectiveCamera } from "../builders";
 import { meshPhongMaterial } from "../builders";
@@ -26,13 +25,30 @@ import { Stage } from "../three";
 import { Canvas } from "../three";
 import { Three } from "../three";
 
-fullscreen(storiesOf("component.three", module))
-  .add("renders static scene", () => {
+type StoryComponent = React.FunctionComponent<{}>;
+
+const meta: Meta<StoryComponent> = {
+  title: "components/Three",
+  parameters: {
+    layout: "fullscreen",
+  },
+};
+
+export default meta;
+
+export const StaticScene: StoryObj<StoryComponent> = {
+  name: "static scene",
+  render: () => {
     return <BoxVisualiser />;
-  })
-  .add("renders animated scene", () => {
+  },
+};
+
+export const AnimatedScene: StoryObj<StoryComponent> = {
+  name: "animated scene",
+  render: () => {
     return <BoxVisualiser animate />;
-  });
+  },
+};
 
 type Model = { boxes: BoxModel[] };
 type BoxModel = { color: string; size: number; position: Vector3; rotation: Vector3 };
@@ -123,7 +139,7 @@ class ViewModel {
 class BoxViewModel {
   private readonly model: BoxModel;
 
-  private static geometry = disposableComputed<Geometry>(() => new BoxGeometry(1, 1, 1));
+  private static geometry = disposableComputed<BufferGeometry>(() => new BoxGeometry(1, 1, 1));
 
   constructor(model: BoxModel) {
     this.model = model;

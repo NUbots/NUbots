@@ -1,6 +1,6 @@
+import React from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
-import React from "react";
 
 import style from "./style.module.css";
 

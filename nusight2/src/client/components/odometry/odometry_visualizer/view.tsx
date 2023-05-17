@@ -1,11 +1,13 @@
-import styles from "./style.module.css";
+import React from "react";
 import { action } from "mobx";
 import { computed } from "mobx";
-import React from "react";
-import { Vector2 } from "../../../math/vector2";
+
+import { Vector2 } from "../../../../shared/math/vector2";
 import { Canvas } from "../../three/three";
 import { Three } from "../../three/three";
+
 import { OdometryVisualizerModel } from "./model";
+import styles from "./style.module.css";
 import { OdometryVisualizerViewModel } from "./view_model";
 
 export class OdometryVisualizer extends React.Component<{ model: OdometryVisualizerModel }> {

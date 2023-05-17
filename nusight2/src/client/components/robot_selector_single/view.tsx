@@ -1,12 +1,12 @@
+import React from "react";
 import { autorun, computed } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
 
 import { RobotModel } from "../robot/model";
 import { Option, Select } from "../select/view";
 
-import PlugIcon from "./plug.svg";
-import RobotIcon from "./robot.svg";
+import IconPlug from "./icon_plug";
+import IconRobot from "./icon_robot";
 import style from "./style.module.css";
 
 export type RobotSelectorSingleProps = {
@@ -57,7 +57,7 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
           onChange={this.onChange}
           placeholder="Select a robot..."
           empty={this.renderEmpty}
-          icon={<RobotIcon />}
+          icon={<IconRobot />}
           dropDirection={dropDirection}
         />
       </div>
@@ -69,7 +69,7 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
     return (
       <div className={style.empty}>
         <div className={style.emptyIcon}>
-          <PlugIcon />
+          <IconPlug />
         </div>
         <div className={style.emptyTitle}>No connected robots</div>
         <span className={style.emptyDescription}>Run yarn start:sim to simulate robots</span>

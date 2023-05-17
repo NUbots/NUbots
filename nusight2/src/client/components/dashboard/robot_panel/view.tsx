@@ -1,13 +1,10 @@
-import classNames from "classnames";
 import React from "react";
+import classNames from "classnames";
 
-import { Vector3 } from "../../../math/vector3";
+import { Vector3 } from "../../../../shared/math/vector3";
+import { Icon } from "../../icon/view";
 
-import BallIcon from "./icon/ball.svg";
-import BatteryIcon from "./icon/battery.svg";
-import CameraIcon from "./icon/camera.svg";
-import GoalIcon from "./icon/goal.svg";
-import WarningIcon from "./icon/warning.svg";
+import GoalIcon from "./icon/goal";
 import style from "./style.module.css";
 
 export type LastStatus = "okay" | "warning" | "danger";
@@ -71,7 +68,11 @@ export const RobotPanel = (props: RobotPanelProps) => {
             <span className={style.label}>Penalty</span>
             <div className={style.value}>
               <span className={style.penalty}>{props.penalty}</span>
-              {props.penalised && <WarningIcon className={style.penaltyIcon} />}
+              {props.penalised && (
+                <Icon className={style.penaltyIcon} fill>
+                  warning
+                </Icon>
+              )}
             </div>
           </div>
           <div className={style.row}>
@@ -81,10 +82,10 @@ export const RobotPanel = (props: RobotPanelProps) => {
         </div>
         <div className={style.icons}>
           <span className={cameraClassName}>
-            <CameraIcon />
+            <Icon>photo_camera</Icon>
           </span>
           <span className={ballClassName}>
-            <BallIcon />
+            <Icon>sports_soccer</Icon>
           </span>
           <span className={goalClassName}>
             <GoalIcon />
@@ -98,6 +99,6 @@ export const RobotPanel = (props: RobotPanelProps) => {
 const Battery = (props: { value: string }) => (
   <span className={style.battery}>
     <span className={style.batteryValue}>{props.value}</span>
-    <BatteryIcon className={style.batteryIcon} />
+    <Icon className={style.batteryIcon}>battery_full</Icon>
   </span>
 );

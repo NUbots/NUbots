@@ -8,15 +8,17 @@ import { NUClearEventListener } from "../../shared/nuclearnet/nuclearnet_client"
 import { NUClearPacketListener } from "../../shared/nuclearnet/nuclearnet_client";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 
+import { decodePacketId } from "./decode_packet_id";
 import { FakeNUClearNetServer } from "./fake_nuclearnet_server";
-import { hashType } from "./fake_nuclearnet_server";
+import { hashType } from "./hash_type";
+import { parseEventString } from "./parse_event_string";
 
 /**
  * A fake NUClearNetClient, which collaborates with FakeNUClearNetServer. Designed to allow completely offline
  * development of networked components, with the idea that if a component is built and tested using fake networking,
  * there should be a high level of confidence it will work with a real network and a real robot.
  *
- * The fake helpers are public, but only should be used by FakeNUClearNetServer.
+ * The fake helpers are public, but should only be used by FakeNUClearNetServer.
  */
 export class FakeNUClearNetClient implements NUClearNetClient {
   peer?: NUClearNetPeer;
@@ -73,12 +75,25 @@ export class FakeNUClearNetClient implements NUClearNetClient {
   }
 
   on(event: string, cb: NUClearPacketListener): () => void {
-    const hash = hashType(event).toString("hex");
-    const listener = (packet: NUClearNetPacket) => {
-      if (this.connected) {
-        cb(packet);
-      }
-    };
+    const { type, subtype } = parseEventString(event);
+    const hash = hashType(type).toString("hex");
+
+    // Filter out packets that don't match the given subtype if one was specified
+    const listener =
+      subtype !== undefined
+        ? (packet: NUClearNetPacket) => {
+            if (this.connected) {
+              const id = decodePacketId(type, packet);
+              if (id === subtype) {
+                cb(packet, { subtype });
+              }
+            }
+          }
+        : (packet: NUClearNetPacket) => {
+            if (this.connected) {
+              cb(packet);
+            }
+          };
     this.events.on(hash, listener);
     return () => this.events.removeListener(hash, listener);
   }

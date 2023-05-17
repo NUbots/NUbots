@@ -3,8 +3,8 @@ import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 import { now } from "mobx-utils";
 
-import { Transform } from "../../../math/transform";
-import { Vector2 } from "../../../math/vector2";
+import { Transform } from "../../../../shared/math/transform";
+import { Vector2 } from "../../../../shared/math/vector2";
 import { BasicAppearance } from "../../../render2d/appearance/basic_appearance";
 import { LineAppearance } from "../../../render2d/appearance/line_appearance";
 import { LineGeometry } from "../../../render2d/geometry/line_geometry";
@@ -33,8 +33,8 @@ export class LineChartViewModel {
 
   @computed
   get camera(): Transform {
-    const yScale = 0.9 / (this.maxValue - this.minValue); // 0.9 so there is a little extra above and below the plot
-    const xScale = 1 / this.model.bufferSeconds;
+    const yScale = (this.maxValue - this.minValue) / 0.9; // 0.9 so there is a little extra above and below the plot
+    const xScale = this.model.bufferSeconds;
 
     return Transform.of({
       scale: {
@@ -99,21 +99,21 @@ export class LineChartViewModel {
       if (lineNo % nMinor === 0) {
         // Major gridline
         lines.push(
-          Shape.of(
+          Shape.of({
             geometry,
-            LineAppearance.of({
+            appearance: LineAppearance.of({
               stroke: {
                 color: "#555555",
                 width: 1,
                 nonScaling: true,
               },
             }),
-          ),
+          }),
         );
 
         lines.push(
-          Shape.of(
-            TextGeometry.of({
+          Shape.of({
+            geometry: TextGeometry.of({
               text: y.toPrecision(2).toString(),
               worldScale: true,
               textAlign: "end",
@@ -121,26 +121,26 @@ export class LineChartViewModel {
               x: this.model.bufferSeconds / 2,
               y: y - offset,
             }),
-            BasicAppearance.of({
+            appearance: BasicAppearance.of({
               fill: {
                 color: "#000000",
               },
             }),
-          ),
+          }),
         );
       } else {
         // Minor gridline
         lines.push(
-          Shape.of(
+          Shape.of({
             geometry,
-            LineAppearance.of({
+            appearance: LineAppearance.of({
               stroke: {
                 color: "#999999",
                 width: 0.5,
                 nonScaling: true,
               },
             }),
-          ),
+          }),
         );
       }
 
@@ -180,30 +180,30 @@ export class LineChartViewModel {
       if (lineNo % nMinor === 0) {
         // Major gridline
         lines.push(
-          Shape.of(
+          Shape.of({
             geometry,
-            LineAppearance.of({
+            appearance: LineAppearance.of({
               stroke: {
                 color: "#555555",
                 width: 1,
                 nonScaling: true,
               },
             }),
-          ),
+          }),
         );
       } else {
         // Minor gridline
         lines.push(
-          Shape.of(
+          Shape.of({
             geometry,
-            LineAppearance.of({
+            appearance: LineAppearance.of({
               stroke: {
                 color: "#999999",
                 width: 0.5,
                 nonScaling: true,
               },
             }),
-          ),
+          }),
         );
       }
 
@@ -322,30 +322,30 @@ export class LineChartViewModel {
 
     if (series.highlight) {
       lines.push(
-        Shape.of(
-          PathGeometry.of(values),
-          LineAppearance.of({
+        Shape.of({
+          geometry: PathGeometry.of(values),
+          appearance: LineAppearance.of({
             stroke: {
               color: "#ffff00",
               width: 8,
               nonScaling: true,
             },
           }),
-        ),
+        }),
       );
     }
 
     lines.push(
-      Shape.of(
-        PathGeometry.of(values),
-        LineAppearance.of({
+      Shape.of({
+        geometry: PathGeometry.of(values),
+        appearance: LineAppearance.of({
           stroke: {
             color: series.color,
             width: 2,
             nonScaling: true,
           },
         }),
-      ),
+      }),
     );
 
     // Apply our time delta

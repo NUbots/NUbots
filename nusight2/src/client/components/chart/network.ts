@@ -1,11 +1,11 @@
 import bounds from "binary-search-bounds";
 import { action } from "mobx";
 
-import { BrowserSystemClock } from "../../time/browser_clock";
+import { BrowserSystemClock } from "../../../client/time/browser_clock";
+import { Vector2 } from "../../../shared/math/vector2";
 import { message } from "../../../shared/messages";
 import { Clock } from "../../../shared/time/clock";
 import { toSeconds } from "../../../shared/time/timestamp";
-import { Vector2 } from "../../math/vector2";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -13,8 +13,9 @@ import { RobotModel } from "../robot/model";
 import { ChartModel } from "./model";
 import { DataSeries } from "./model";
 import { TreeData } from "./model";
+
 import Sensors = message.input.Sensors;
-import DataPoint = message.support.nusight.DataPoint;
+import DataPoint = message.eye.DataPoint;
 
 const ServoIds = [
   "Right Shoulder Pitch",

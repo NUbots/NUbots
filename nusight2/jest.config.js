@@ -1,3 +1,4 @@
+/* eslint-env node */
 module.exports = {
   coverageDirectory: "coverage",
   coveragePathIgnorePatterns: ["/node_modules/"],
@@ -25,4 +26,5 @@ module.exports = {
   modulePaths: ["<rootDir>/src"],
   testMatch: ["**/tests/**/*.tests.{ts,tsx}"],
   preset: "ts-jest/presets/js-with-ts",
+  resolver: "<rootDir>/jest.resolver.js",
 };
