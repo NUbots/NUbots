@@ -63,7 +63,7 @@ namespace module::support::optimisation {
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [this](const std::set<LimbID>& given_limbs) {
                 if (given_limbs.find(LimbID::LEFT_LEG) != given_limbs.end()) {
-                    // Enable the walk engine.},
+                    // Enable the walk engine.
                     emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumption_id));
                 }
             },
