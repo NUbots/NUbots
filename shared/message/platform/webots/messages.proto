@@ -192,5 +192,5 @@ message ActuatorRequests {
     repeated CameraExposure camera_exposures  = 8;
 
     // NUbots-specific, used for the walk optimisation
-    OptimisationCommand optimisation_command = 20;
+    OptimisationCommand optimisation_command = 100;
 }
