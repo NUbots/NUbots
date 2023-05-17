@@ -7,7 +7,7 @@
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/FieldDescription.hpp"
-#include "message/support/nusight/DataPoint.hpp"
+#include "message/eye/DataPoint.hpp"
 #include "message/vision/FieldLines.hpp"
 
 #include "utility/localisation/OccupancyMap.hpp"
