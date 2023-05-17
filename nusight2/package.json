@@ -3,9 +3,9 @@
   "version": "2.0.0",
   "license": "MIT",
   "private": true,
-  "repository": "github:NUbots/NUsight2",
+  "repository": "github:NUbots/NUbots",
   "engines": {
-    "node": ">=14.0.0",
+    "node": ">=16.0.0",
     "yarn": "1.x"
   },
   "scripts": {
