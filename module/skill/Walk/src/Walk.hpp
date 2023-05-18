@@ -16,7 +16,7 @@ namespace module::skill {
     class Walk : public ::extension::behaviour::BehaviourReactor {
 
     public:
-        /// @brief Called by the powerplant to build and setup the Walk reactor.
+        /// @brief Called by the powerplant to build and setup the Walk reactor
         explicit Walk(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Frequency of walk engine updates
@@ -24,7 +24,7 @@ namespace module::skill {
 
     private:
         struct Config {
-            /// @brief Stores the gains each servo (for joint position requests)
+            /// @brief Stores the gains for each servo
             std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
 
             /// @brief Desired arm positions while walking
@@ -34,13 +34,18 @@ namespace module::skill {
         /// @brief Last time we updated the walk engine
         NUClear::clock::time_point last_update_time{};
 
-        /// @brief Walk engine, generates swing foot and torso trajectories for walking
+        /// @brief Walk engine, generates swing foot and torso trajectories for walk velocity target
         utility::skill::MotionGeneration<float> walk_engine{};
 
-        /// @brief Emits task to go to desired joint positions to follow walking trajectories
-        void update_desired_pose();
+        /**
+         * @brief Emits task to achieve desired joint positions to follow walking trajectories
+         */
+        void walk();
 
-        /// @brief Computes the time delta since the last time we updated the desired joint positions
+        /**
+         * @brief Computes the time delta since the last time we updated the desired joint positions
+         * @return Time since the last update
+         */
         [[nodiscard]] float compute_time_delta();
     };
 }  // namespace module::skill

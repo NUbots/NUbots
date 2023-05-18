@@ -1,8 +1,8 @@
-# QuinticWalk
+# Walk
 
 ## Description
 
-Open loop walk engine that uses quintic splines to create trajectories.
+Open loop walk engine that uses quintic splines to create swing foot and torso trajectories.
 
 ## Usage
 
@@ -23,6 +23,3 @@ Include this module to allow the robot to walk.
 ## Dependencies
 
 - Eigen
-- KinematicsModel
-- Sensors
-- `utility::motion::splines::*`

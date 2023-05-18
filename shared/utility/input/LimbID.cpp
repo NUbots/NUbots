@@ -119,7 +119,7 @@ namespace utility::input {
         return out << static_cast<std::string>(val);
     }
 
-    std::set<ServoID> servos_for_legs() {
+    std::set<ServoID> LimbID::servos_for_legs() {
         return {ServoID::L_ANKLE_PITCH,
                 ServoID::L_ANKLE_ROLL,
                 ServoID::L_HIP_PITCH,
@@ -134,7 +134,7 @@ namespace utility::input {
                 ServoID::R_KNEE};
     }
 
-    std::set<ServoID> servos_for_arms() {
+    std::set<ServoID> LimbID::servos_for_arms() {
         return {ServoID::L_SHOULDER_PITCH,
                 ServoID::L_SHOULDER_ROLL,
                 ServoID::L_ELBOW,

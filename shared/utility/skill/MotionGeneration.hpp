@@ -11,12 +11,14 @@ https://github.com/Rhoban/model/
 
 #include "message/behaviour/state/WalkState.hpp"
 
+#include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/motion/splines/Trajectory.hpp"
 
 namespace utility::skill {
 
     using message::behaviour::state::WalkState;
+    using utility::input::LimbID;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::TrajectoryDimension::PITCH;
@@ -207,36 +209,22 @@ namespace utility::skill {
         /**
          * @brief Get the left or right foot pose at the given time in the torso {t} frame.
          * @param t Time.
-         * @param left_foot True for left foot, false for right foot.
+         * @param limb Limb ID of foot to get pose of.
          * @return Swing foot pose at time t.
          */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(bool left_foot) const {
-            Eigen::Transform<float, 3, Eigen::Isometry> Htl = Eigen::Transform<float, 3, Eigen::Isometry>::Identity();
-            Eigen::Transform<float, 3, Eigen::Isometry> Htr = Eigen::Transform<float, 3, Eigen::Isometry>::Identity();
-            if (left_foot_is_planted) {
-                Htl = get_torso_pose().inverse();
-                Htr = Htl * get_swing_foot_pose();
-            }
-            else {
-                Htr = get_torso_pose().inverse();
-                Htl = Htr * get_swing_foot_pose();
-            }
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(const LimbID& limb) const {
+            // Assign the value based on the foot planted
+            Eigen::Transform<float, 3, Eigen::Isometry> Htl =
+                left_foot_is_planted ? get_torso_pose().inverse() : get_torso_pose().inverse() * get_swing_foot_pose();
+            Eigen::Transform<float, 3, Eigen::Isometry> Htr =
+                left_foot_is_planted ? get_torso_pose().inverse() * get_swing_foot_pose() : get_torso_pose().inverse();
 
-            // Return the desired pose
-            if (left_foot) {
+            // Return the desired pose of the specified foot
+            if (limb == LimbID::LEFT_LEG)
                 return Htl;
-            }
-            else {
+            if (limb == LimbID::RIGHT_LEG)
                 return Htr;
-            }
-        }
-
-        /**
-         * @brief Get whether the left foot is planted.
-         * @return True if left foot is planted, false otherwise.
-         */
-        bool is_left_foot_planted() const {
-            return left_foot_is_planted;
+            throw std::runtime_error("Invalid Limb ID");
         }
 
         /**
@@ -244,10 +232,10 @@ namespace utility::skill {
          * @details This function switches the planted foot and updates the start torso and start swing foot poses.
          */
         void switch_planted_foot() {
-            // Transform planted foot into swing foot frame at next foot placement
+            // Transform planted foot to swing foot frame at end of step
             Hps_start = get_swing_foot_pose(step_period).inverse();
 
-            // Transform torso into end torso frame at end foot placement
+            // Transform torso to end torso frame at end of step, in the new planted foot frame
             Hpt_start = Hps_start * get_torso_pose(step_period);
 
             // Switch planted foot indicator
@@ -267,6 +255,7 @@ namespace utility::skill {
                 NUClear::log<NUClear::WARN>("dt <= 0.0f");
                 return;
             }
+
             // Check for too long dt
             if (dt > step_period) {
                 NUClear::log<NUClear::WARN>("dt > params.step_period");

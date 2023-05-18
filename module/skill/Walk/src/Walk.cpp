@@ -2,7 +2,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
 #include "message/behaviour/Behaviour.hpp"
@@ -21,7 +20,6 @@ namespace module::skill {
 
     using extension::Configuration;
 
-    using message::actuation::KinematicsModel;
     using message::actuation::LeftArm;
     using message::actuation::LeftLegIK;
     using message::actuation::RightArm;
@@ -59,14 +57,13 @@ namespace module::skill {
             walk_engine.reset();
             last_update_time = NUClear::clock::now();
 
-            for (auto id : utility::input::servos_for_legs()) {
+            for (auto id : utility::input::LimbID::servos_for_legs()) {
                 cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
             }
 
-            for (auto id : utility::input::servos_for_arms()) {
+            for (auto id : utility::input::LimbID::servos_for_arms()) {
                 cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
             }
-
 
             cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH,
                                            config["arms"]["right_shoulder_pitch"].as<float>());
@@ -78,39 +75,36 @@ namespace module::skill {
             cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<float>());
         });
 
-        // Runs every time the Walk provider starts (wasn't running)
+        // Start - Runs every time the Walk provider starts (wasn't running)
         on<Start<WalkTask>>().then([this]() {
             last_update_time = NUClear::clock::now();
             walk_engine.reset();
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero()));
         });
 
-        // Runs every time the Walk task is removed from the director tree
+        // Stop - Runs every time the Walk task is removed from the director tree
         on<Stop<WalkTask>>().then(
             [this] { emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero())); });
 
-        // MAIN LOOP
+        // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk) {
-                switch (walk_engine.update(compute_time_delta(), walk.velocity_target).value) {
+            .then([this](const WalkTask& walk_task) {
+                switch (walk_engine.update(compute_time_delta(), walk_task.velocity_target).value) {
                     case WalkState::State::WALKING:
-                    case WalkState::State::STOPPING:
-                        update_desired_pose();
-                        emit(std::make_unique<Stability>(Stability::DYNAMIC));
-                        break;
+                    case WalkState::State::STOPPING: walk(); break;
                     case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                     case WalkState::State::UNKNOWN:
-                    default: NUClear::log<NUClear::WARN>("Unknown state"); break;
+                    default: NUClear::log<NUClear::WARN>("Unknown state."); break;
                 }
                 // Emit the walking state
                 emit(std::make_unique<WalkState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
             });
 
-        // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
+        // Stand Reaction - Sets walk_engine commands to zero, checks walk engine state and sets stability state
         on<Provide<WalkTask>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
@@ -121,13 +115,8 @@ namespace module::skill {
                 // Stop the walk engine (request zero velocity)
                 switch (walk_engine.update(compute_time_delta(), Eigen::Vector3f::Zero()).value) {
                     case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
-                    case WalkState::State::STOPPING:
-                        update_desired_pose();
-                        emit(std::make_unique<Stability>(Stability::DYNAMIC));
-                        break;
-                    case WalkState::State::WALKING:
-                        log<NUClear::WARN>("Walk engine state should be either STOPPING or STOPPED");
-                        break;
+                    case WalkState::State::STOPPING: walk(); break;
+                    case WalkState::State::WALKING: log<NUClear::WARN>("Walk engine state shouldn't be here."); break;
                     case WalkState::State::UNKNOWN:
                     default: NUClear::log<NUClear::WARN>("Unknown state"); break;
                 }
@@ -144,15 +133,15 @@ namespace module::skill {
         return time_delta;
     }
 
-    void Walk::update_desired_pose() {
+    void Walk::walk() {
         // Compute the goal position time
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
-        // Get desired feet poses in the torso {t} frame
-        Eigen::Transform<float, 3, Eigen::Isometry> Htl = walk_engine.get_foot_pose(true);
-        Eigen::Transform<float, 3, Eigen::Isometry> Htr = walk_engine.get_foot_pose(false);
+        // Get desired feet poses in the torso {t} frame from the walk engine
+        Eigen::Transform<float, 3, Eigen::Isometry> Htl = walk_engine.get_foot_pose(LimbID::LEFT_LEG);
+        Eigen::Transform<float, 3, Eigen::Isometry> Htr = walk_engine.get_foot_pose(LimbID::RIGHT_LEG);
 
-        // Legs
+        // Construct Leg IK tasks
         auto left_leg   = std::make_unique<LeftLegIK>();
         left_leg->time  = time;
         left_leg->Htl   = Htl.cast<double>().matrix();
@@ -166,7 +155,7 @@ namespace module::skill {
             left_leg->servos[id] = cfg.servo_states[ServoID(id)];
         }
 
-        // Arms
+        // Construct Arm IK tasks
         auto left_arm  = std::make_unique<LeftArm>();
         auto right_arm = std::make_unique<RightArm>();
         for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
@@ -178,12 +167,16 @@ namespace module::skill {
                 ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
         }
 
+        // Emit IK tasks to achieve the desired poses
         emit<Task>(left_leg, 0, false, "Walk left leg");
         emit<Task>(right_leg, 0, false, "Walk right leg");
         emit<Task>(left_arm, 0, true, "Walk left arm");
         emit<Task>(right_arm, 0, true, "Walk right arm");
 
-        // Plot graphs of desired trajectories
+        // Emit stability state of dynamic
+        emit(std::make_unique<Stability>(Stability::DYNAMIC));
+
+        // Plot the desired feet poses in the torso {t} frame
         if (log_level <= NUClear::DEBUG) {
             Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
