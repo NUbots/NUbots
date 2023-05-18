@@ -1,19 +1,32 @@
-import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useContext, useMemo } from "react";
+import { observer } from "mobx-react";
 
-import { Transform } from '../../math/transform'
-import { Group as GroupGeometry } from '../object/group'
+import { Group as GroupGeometry } from "../object/group";
+import { rendererTransformsContext } from "../svg_renderer";
 
-import { GeometryView, toSvgTransform } from './rendering'
+import { ShapeView, toSvgTransform } from "./rendering";
 
-type Props = { model: GroupGeometry; world: Transform }
+type Props = { model: GroupGeometry };
+export const Group = observer(({ model: { children, transform } }: Props) => {
+  const { camera, world, getSVGOffset } = useContext(rendererTransformsContext);
+  const transforms = useMemo(
+    () => ({ camera, getSVGOffset, world: world.then(transform) }),
+    [camera, world, transform],
+  );
 
-export const Group = observer(({ model: { children, transform }, world }: Props) => {
-  const objWorld = transform.then(world)
-  const elems = children.map((obj, i) => <GeometryView key={i} obj={obj} world={objWorld} />)
+  const elems = children.map((obj, i) => {
+    return obj instanceof GroupGeometry ? <Group key={i} model={obj} /> : <ShapeView key={i} obj={obj} />;
+  });
+
   return transform.isIdentity() ? (
     <>{elems}</> // If we have the identity transform forgo the group to save on dom elements
   ) : (
-    <g transform={toSvgTransform(transform)}>{elems}</g>
-  )
-})
+    <g transform={toSvgTransform(transform)}>
+      {/*
+        Update the world transform so that it transforms a coordinate in this group back to
+        the equivalent world coordinate
+      */}
+      <rendererTransformsContext.Provider value={transforms}>{elems}</rendererTransformsContext.Provider>
+    </g>
+  );
+});

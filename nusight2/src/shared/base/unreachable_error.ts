@@ -15,6 +15,6 @@
  */
 export class UnreachableError extends Error {
   constructor(x: never) {
-    super(`Unhandled case: ${JSON.stringify(x)}`)
+    super(`Unhandled case: ${JSON.stringify(x)}`);
   }
 }

@@ -1,42 +1,39 @@
-import classNames from 'classnames'
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React from "react";
+import { NavLink } from "react-router-dom";
 
-import { NavigationConfiguration } from '../../navigation'
-
-import style from './style.module.css'
+import { NavigationConfiguration } from "../../navigation";
 
 interface NavigationItemViewProps {
-  url: string
-  Icon: any
-  children?: any
+  url: string;
+  Icon: any;
+  children?: any;
 }
 
 const NavigationItemView = ({ url, Icon, children }: NavigationItemViewProps) => (
-  <li className={style.header__item}>
+  <li className="whitespace-nowrap">
     <NavLink
-      className={({ isActive }) =>
-        classNames(style.header__link, {
-          [style['header__link--active']]: isActive,
-        })
-      }
+      className={({ isActive }) => {
+        return `p-4 flex flex-col items-center text-white text-xs leading-5 transition-colors duration-300 hover:bg-nusight-600 focus:bg-nusight-600 ${
+          isActive ? "!bg-nusight-700" : ""
+        }`;
+      }}
       to={url}
     >
-      <Icon className={style.header__icon} />
+      <Icon className="w-6 h-6" />
       <span>{children}</span>
     </NavLink>
   </li>
-)
+);
 
 export const NavigationView = ({ nav }: { nav: NavigationConfiguration }) => (
-  <header className={style.header}>
-    <h1 className={style.header__title}>NUsight</h1>
-    <ul className={style.header__list}>
-      {...nav.getRoutes().map(config => (
+  <header className="bg-nusight-500 text-white text-center ">
+    <h1 className="flex justify-center items-center bg-white text-nusight-500 text-xl font-medium h-[60px]">NUsight</h1>
+    <ul>
+      {nav.getRoutes().map((config) => (
         <NavigationItemView key={config.path} url={config.path} Icon={config.Icon}>
           {config.label}
         </NavigationItemView>
       ))}
     </ul>
   </header>
-)
+);
