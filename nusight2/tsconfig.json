@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "experimentalDecorators": true,
     "declaration": false,
     "removeComments": true,

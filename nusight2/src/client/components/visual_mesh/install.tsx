@@ -5,7 +5,7 @@ import { NavigationConfiguration } from "../../navigation";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { AppModel } from "../app/model";
 
-import Icon from "./icon.svg";
+import Icon from "./icon";
 
 export function installVisualMesh({
   nav,

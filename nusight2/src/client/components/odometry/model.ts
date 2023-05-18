@@ -1,9 +1,11 @@
 import { computed } from "mobx";
 import { observable } from "mobx";
+
+import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
-import { Vector3 } from "../../math/vector3";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
+
 import { OdometryVisualizerModel } from "./odometry_visualizer/model";
 
 export class OdometryModel {

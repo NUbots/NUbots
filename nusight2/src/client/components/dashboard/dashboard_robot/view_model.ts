@@ -1,8 +1,8 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
-import { Transform } from "../../../math/transform";
-import { Vector2 } from "../../../math/vector2";
+import { Transform } from "../../../../shared/math/transform";
+import { Vector2 } from "../../../../shared/math/vector2";
 import { BasicAppearance } from "../../../render2d/appearance/basic_appearance";
 import { LineAppearance } from "../../../render2d/appearance/line_appearance";
 import { ArcGeometry } from "../../../render2d/geometry/arc_geometry";
@@ -64,53 +64,53 @@ export class DashboardRobotViewModel {
     const startAngle = angle;
     const endAngle = startAngle + arcLength;
 
-    return Shape.of(
-      ArcGeometry.of({
+    return Shape.of({
+      geometry: ArcGeometry.of({
         origin,
         radius,
         startAngle,
         endAngle,
-        anticlockwise: rotation < 0,
+        anticlockwise: rotation > 0,
       }),
-      BasicAppearance.of({
+      appearance: BasicAppearance.of({
         stroke: { width: 0.025, color: "#000000" },
       }),
-    );
+    });
   }
 
   @computed
   private get ball() {
-    return Shape.of(
-      CircleGeometry.of({
+    return Shape.of({
+      geometry: CircleGeometry.of({
         radius: 0.1,
         x: this.model.ballPosition.x,
         y: this.model.ballPosition.y,
       }),
-      BasicAppearance.of({
+      appearance: BasicAppearance.of({
         fill: { color: this.model.ballColor },
       }),
-    );
+    });
   }
 
   @computed
   private get ballSight() {
-    return Shape.of(
-      LineGeometry.of({
+    return Shape.of({
+      geometry: LineGeometry.of({
         origin: Vector2.from(this.model.robotPosition),
         target: this.model.ballPosition,
       }),
-      LineAppearance.of({
+      appearance: LineAppearance.of({
         stroke: { width: 0.025, color: this.model.ballSightColor },
       }),
-    );
+    });
   }
 
   @computed
   private get kickTarget() {
     const origin = this.model.ballPosition;
     const difference = this.model.kickTarget.subtract(origin);
-    return Shape.of(
-      ArrowGeometry.of({
+    return Shape.of({
+      geometry: ArrowGeometry.of({
         direction: difference.normalize(),
         headLength: 0.3,
         headWidth: 0.15,
@@ -118,10 +118,10 @@ export class DashboardRobotViewModel {
         origin,
         width: 0.025,
       }),
-      BasicAppearance.of({
+      appearance: BasicAppearance.of({
         fill: { color: this.model.kickTargetColor },
       }),
-    );
+    });
   }
 
   @computed
@@ -129,18 +129,18 @@ export class DashboardRobotViewModel {
     const radius = 0.15;
     return Group.of({
       children: [
-        Shape.of(
-          MarkerGeometry.of({
+        Shape.of({
+          geometry: MarkerGeometry.of({
             radius,
             x: 0,
             y: 0,
           }),
-          BasicAppearance.of({
+          appearance: BasicAppearance.of({
             fill: { color: this.model.robotColor },
           }),
-        ),
-        Shape.of(
-          TextGeometry.of({
+        }),
+        Shape.of({
+          geometry: TextGeometry.of({
             text: this.model.playerId.toString(),
             worldAlignment: true,
             textAlign: "middle",
@@ -149,10 +149,10 @@ export class DashboardRobotViewModel {
             x: 0,
             y: 0,
           }),
-          BasicAppearance.of({
+          appearance: BasicAppearance.of({
             fill: { color: this.model.textColor },
           }),
-        ),
+        }),
       ],
     });
   }

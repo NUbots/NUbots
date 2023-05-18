@@ -1,9 +1,9 @@
-import { action } from "mobx";
-import { observable } from "mobx";
-import { observer } from "mobx-react";
 import React from "react";
 import { ComponentType } from "react";
 import { ReactNode } from "react";
+import { action } from "mobx";
+import { observable } from "mobx";
+import { observer } from "mobx-react";
 
 import { DropdownProps } from "../dropdown/view";
 import { Dropdown } from "../dropdown/view";

@@ -1,7 +1,7 @@
 import { action } from "mobx";
 import * as THREE from "three";
 
-import { Vector3 } from "../../math/vector3";
+import { Vector3 } from "../../../shared/math/vector3";
 
 import { KeyCode } from "./keycodes";
 import { LocalisationModel } from "./model";

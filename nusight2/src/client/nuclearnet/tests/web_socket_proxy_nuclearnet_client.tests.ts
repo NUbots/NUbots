@@ -16,7 +16,6 @@ describe("WebSocketProxyNUClearNetClient", () => {
     const opts = { name: "bob" };
     client.connect(opts);
     expect(mockWebSocket.connect).toHaveBeenCalled();
-    expect(mockWebSocket.send).toHaveBeenCalledWith("nuclear_connect", opts);
   });
 
   it("forwards disconnect calls to socket", () => {

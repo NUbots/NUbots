@@ -1,12 +1,12 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
-import { PlaneGeometry } from "three";
+import { PlaneBufferGeometry, PlaneGeometry, RingBufferGeometry } from "three";
 import { Matrix4 } from "three";
 import { MeshBasicMaterial } from "three";
-import { RingGeometry } from "three";
 import { Object3D } from "three";
 import { Mesh } from "three";
-import { Geometry } from "three";
+import { BufferGeometry } from "three";
+import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils";
 
 import { FieldModel } from "./model";
 
@@ -31,10 +31,10 @@ export class FieldViewModel {
   }
 
   @computed
-  private get groundGeometry(): Geometry {
+  private get groundGeometry(): BufferGeometry {
     const dimensions = this.model.dimensions;
     const { fieldLength, fieldWidth, borderStripMinWidth, goalDepth } = dimensions;
-    return new PlaneGeometry(
+    return new PlaneBufferGeometry(
       fieldLength + goalDepth * 2 + borderStripMinWidth * 2,
       fieldWidth + borderStripMinWidth * 2,
     );
@@ -54,7 +54,6 @@ export class FieldViewModel {
 
   @computed
   private get fieldLinesGeometry() {
-    const geometry = new Geometry();
     const centerCircle = this.centerCircle;
 
     const fieldWidth = this.model.dimensions.fieldWidth;
@@ -93,23 +92,22 @@ export class FieldViewModel {
     const yellowHalfGoal = this.buildRectangle(halfLength, -halfGoalWidth, goalDepth, goalWidth, lineWidth);
     const yellowHalfPenaltyMark = this.buildRectangle(halfLength - penaltyMarkDistance, 0, 0, 0, lineWidth);
 
-    const identity = new Matrix4();
-    geometry.merge(centerCircle, identity);
-    geometry.merge(blueHalf, identity);
-    geometry.merge(blueHalfGoalArea, identity);
-    geometry.merge(blueHalfGoal, identity);
-    geometry.merge(blueHalfPenaltyMark, identity);
-    geometry.merge(yellowHalf, identity);
-    geometry.merge(yellowHalfGoalArea, identity);
-    geometry.merge(yellowHalfGoal, identity);
-    geometry.merge(yellowHalfPenaltyMark, identity);
-
-    return geometry;
+    return BufferGeometryUtils.mergeBufferGeometries([
+      centerCircle,
+      blueHalf,
+      blueHalfGoalArea,
+      blueHalfGoal,
+      blueHalfPenaltyMark,
+      yellowHalf,
+      yellowHalfGoalArea,
+      yellowHalfGoal,
+      yellowHalfPenaltyMark,
+    ]);
   }
 
   @computed
   private get centerCircle() {
-    return new RingGeometry(
+    return new RingBufferGeometry(
       (this.model.dimensions.centerCircleDiameter - this.model.dimensions.lineWidth) * 0.5,
       (this.model.dimensions.centerCircleDiameter + this.model.dimensions.lineWidth) * 0.5,
       128,
@@ -131,26 +129,20 @@ export class FieldViewModel {
     const leftLine = this.buildVerticalLine(y, y + h, x, lw);
     const rightLine = this.buildVerticalLine(y, y + h, x + w, lw);
 
-    const identity = new Matrix4();
-    const rect = new Geometry();
-    rect.merge(topLine, identity);
-    rect.merge(bottomLine, identity);
-    rect.merge(leftLine, identity);
-    rect.merge(rightLine, identity);
-    return rect;
+    return BufferGeometryUtils.mergeBufferGeometries([topLine, bottomLine, leftLine, rightLine]);
   }
 
   private buildHorizontalLine(x1: number, x2: number, y: number, width: number) {
     const length = x2 - x1;
     const hLine = new PlaneGeometry(length, width);
-    hLine.applyMatrix(new Matrix4().makeTranslation(x1 + length * 0.5, y, 0));
+    hLine.applyMatrix4(new Matrix4().makeTranslation(x1 + length * 0.5, y, 0));
     return hLine;
   }
 
   private buildVerticalLine(y1: number, y2: number, x: number, width: number) {
     const length = y2 - y1;
     const vLine = new PlaneGeometry(width, length);
-    vLine.applyMatrix(new Matrix4().makeTranslation(x, y1 + length * 0.5, 0));
+    vLine.applyMatrix4(new Matrix4().makeTranslation(x, y1 + length * 0.5, 0));
     return vLine;
   }
 }

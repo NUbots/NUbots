@@ -1,14 +1,14 @@
+import { Component } from "react";
+import React from "react";
 import { computed } from "mobx";
 import { action } from "mobx";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
-import { Component } from "react";
-import React from "react";
 import { ContentRect } from "react-measure";
 import Measure from "react-measure";
 import { debounce } from "throttle-debounce";
+
 import { objectFit } from "../../three/three";
-import styles from "./style.module.css";
 
 @observer
 export class GridLayout extends Component<{
@@ -23,7 +23,7 @@ export class GridLayout extends Component<{
     return (
       <Measure onResize={this.onContainerResize} bounds={true}>
         {({ measureRef }) => (
-          <div ref={measureRef} className={styles.gridLayout} style={{ gridTemplateColumns }}>
+          <div ref={measureRef} className="grid w-full h-full" style={{ gridTemplateColumns }}>
             {React.Children.map(this.props.children, (child) => (
               <div style={{ position: "relative" }}>{child}</div>
             ))}

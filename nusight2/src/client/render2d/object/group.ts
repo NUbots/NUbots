@@ -1,6 +1,6 @@
 import { observable } from "mobx";
 
-import { Transform } from "../../math/transform";
+import { Transform } from "../../../shared/math/transform";
 
 import { Geometry } from "./geometry";
 import { Shape } from "./shape";

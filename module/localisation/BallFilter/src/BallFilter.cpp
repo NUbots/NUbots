@@ -5,9 +5,9 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/eye/DataPoint.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/FilteredBall.hpp"
-#include "message/support/nusight/DataPoint.hpp"
 #include "message/vision/Ball.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -22,8 +22,8 @@ namespace module::localisation {
     using VisionBalls  = message::vision::Balls;
     using VisionBall   = message::vision::Ball;
 
+    using message::eye::DataPoint;
     using message::input::Sensors;
-    using message::support::nusight::DataPoint;
 
     using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::nusight::graph;

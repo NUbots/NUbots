@@ -1,7 +1,7 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
-import { Transform } from "../../../math/transform";
+import { Transform } from "../../../../shared/math/transform";
 import { Group } from "../../../render2d/object/group";
 import { DashboardRobotViewModel } from "../dashboard_robot/view_model";
 import { GroundViewModel } from "../ground/view_model";
@@ -29,7 +29,7 @@ export class FieldViewModel {
   @computed
   get camera(): Transform {
     return Transform.of({
-      scale: { x: 1.0 / this.model.fieldLength, y: 1.0 / this.model.fieldLength },
+      scale: { x: this.model.fieldLength, y: this.model.fieldLength },
     });
   }
 

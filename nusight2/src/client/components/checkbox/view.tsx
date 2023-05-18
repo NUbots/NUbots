@@ -1,9 +1,8 @@
-import classNames from "classnames";
 import React from "react";
 import { ChangeEvent } from "react";
-import { StatelessComponent } from "react";
+import classNames from "classnames";
 
-import CheckIcon from "./check.svg";
+import IconCheck from "./icon_check";
 import style from "./style.module.css";
 
 export interface CheckboxProps {
@@ -13,7 +12,7 @@ export interface CheckboxProps {
   onChange(event: ChangeEvent<HTMLInputElement>): void;
 }
 
-export const Checkbox: StatelessComponent<CheckboxProps> = (props: CheckboxProps) => {
+export const Checkbox = (props: CheckboxProps) => {
   const { checked, disabled, onChange } = props;
 
   const backgroundClassName = classNames(style.background, {
@@ -21,7 +20,7 @@ export const Checkbox: StatelessComponent<CheckboxProps> = (props: CheckboxProps
     [style.disabled]: disabled,
   });
 
-  const checkIconClassName = classNames(style.checkIcon, {
+  const iconClassName = classNames(style.checkIcon, {
     [style.checkIconChecked]: checked,
   });
 
@@ -35,7 +34,7 @@ export const Checkbox: StatelessComponent<CheckboxProps> = (props: CheckboxProps
         onChange={onChange}
       />
       <span className={backgroundClassName}>
-        <CheckIcon className={checkIconClassName} />
+        <IconCheck className={iconClassName} />
       </span>
     </span>
   );

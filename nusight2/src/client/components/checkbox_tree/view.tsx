@@ -9,6 +9,8 @@ export type CheckboxTreeProps = {
   renderLabel?(node: TreeNodeModel): JSX.Element | string;
   onCheck?(node: TreeNodeModel): void;
   onExpand?(node: TreeNodeModel): void;
+  onMouseEnter?(node: TreeNodeModel): void;
+  onMouseLeave?(node: TreeNodeModel): void;
 };
 
 export const CheckboxTree = (props: CheckboxTreeProps) => {
@@ -22,6 +24,8 @@ export const CheckboxTree = (props: CheckboxTreeProps) => {
           renderLabel={props.renderLabel}
           onCheck={props.onCheck}
           onExpand={props.onExpand}
+          onMouseEnter={props.onMouseEnter}
+          onMouseLeave={props.onMouseLeave}
         />
       ))}
     </div>

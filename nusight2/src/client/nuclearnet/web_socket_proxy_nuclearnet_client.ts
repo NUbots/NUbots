@@ -6,10 +6,10 @@ import { NUClearPacketListener } from "../../shared/nuclearnet/nuclearnet_client
 import { NUClearEventListener } from "../../shared/nuclearnet/nuclearnet_client";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 
-import { WebWorkerWebSocketClient } from "./webworker_web_socket_client";
+import { DirectWebSocketClient } from "./direct_web_socket_client";
 import { WebSocketClient } from "./web_socket_client";
 
-type PacketListener = (packet: NUClearNetPacket, ack?: () => void) => void;
+type PacketListener = (packet: NUClearNetPacket, ack?: (time?: number) => void) => void;
 
 /**
  * A client-side interface for interacting with NUClearNet. Allows a browser to connect transparently connect to
@@ -34,7 +34,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   static of() {
     const uri = `${document.location!.origin}/nuclearnet`;
     return new WebSocketProxyNUClearNetClient(
-      WebWorkerWebSocketClient.of(uri, {
+      DirectWebSocketClient.of(uri, {
         upgrade: false,
         transports: ["websocket"],
       } as any),
@@ -44,9 +44,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
   connect(options: NUClearNetOptions): () => void {
     this.socket.on("reconnect", this.onReconnect.bind(this, options));
     this.socket.connect();
-    this.socket.send("nuclear_connect", options);
 
-    // Does not send a nuclear_disconnect message, as all clients share a single server-side NUClearNet connection.
     return () => this.socket.disconnect();
   }
 
@@ -85,29 +83,36 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
      */
     const requestToken = String(this.nextRequestToken++);
     this.socket.send("listen", event, requestToken);
-    const listener = (packet: NUClearNetPacket, ack?: () => void) => {
-      cb(packet);
+
+    const onEventPacket: PacketListener = async (packet, ack) => {
+      // Any async work in the packet callback should be awaited, to have an
+      // accurate measurement of the time it took to process the packet.
+      await cb(packet);
+
       if (ack) {
-        ack();
+        // We acknowledge the packet with the current time, so the server can calculate
+        // the time spent processing and rendering a packet.
+        ack(Date.now());
       }
     };
-    this.socket.on(event, listener);
+    this.socket.on(event, onEventPacket);
 
-    let packetListeners = this.packetListeners.get(event);
-    if (!packetListeners) {
-      packetListeners = new Set();
-      this.packetListeners.set(event, packetListeners);
+    let existingListeners = this.packetListeners.get(event);
+    if (!existingListeners) {
+      existingListeners = new Set();
+      this.packetListeners.set(event, existingListeners);
     }
-    const packetListener = { requestToken, listener };
-    packetListeners.add(packetListener);
+
+    const newListener = { requestToken, listener: onEventPacket };
+    existingListeners.add(newListener);
 
     return () => {
       this.socket.send("unlisten", requestToken);
-      this.socket.off(event, listener);
+      this.socket.off(event, onEventPacket);
 
-      const packetListeners = this.packetListeners.get(event);
-      if (packetListeners) {
-        packetListeners.delete(packetListener);
+      const packetListenersForEvent = this.packetListeners.get(event);
+      if (packetListenersForEvent) {
+        packetListenersForEvent.delete(newListener);
       }
     };
   }
@@ -120,9 +125,7 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
     this.socket.send("packet", options);
   }
 
-  private onReconnect = (options: NUClearNetOptions) => {
-    this.socket.send("nuclear_connect", options);
-
+  private onReconnect = (_options: NUClearNetOptions) => {
     // We assume the server could have crashed during a reconnection. We need to restore all our listeners so that
     // a browser refresh is not necessary.
     for (const joinListener of this.joinListeners) {
@@ -140,4 +143,11 @@ export class WebSocketProxyNUClearNetClient implements NUClearNetClient {
       }
     }
   };
+
+  /**
+   * Provide the given callback access to the underlying websocket transport
+   */
+  useSocket(cb: (socket: WebSocketClient) => void) {
+    cb(this.socket);
+  }
 }

@@ -1,12 +1,14 @@
 import { autorun } from "mobx";
-import { Vector2 } from "../../client/math/vector2";
-import { Vector3 } from "../../client/math/vector3";
+
 import { SeededRandom } from "../../shared/base/random/seeded_random";
 import { FieldDimensions } from "../../shared/field/dimensions";
+import { Vector2 } from "../../shared/math/vector2";
+import { Vector3 } from "../../shared/math/vector3";
 import { Ivec2, message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { toTimestamp } from "../../shared/time/timestamp";
 import { Message, Simulator } from "../simulator";
+
 import { periodic } from "./periodic";
 
 import State = message.behaviour.Behaviour.State;
