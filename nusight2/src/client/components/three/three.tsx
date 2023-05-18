@@ -1,3 +1,7 @@
+import { WheelEvent } from "react";
+import { MouseEvent } from "react";
+import React from "react";
+import { Component } from "react";
 import { reaction } from "mobx";
 import { IComputedValue } from "mobx";
 import { observable } from "mobx";
@@ -5,10 +9,6 @@ import { action } from "mobx";
 import { autorun } from "mobx";
 import { disposeOnUnmount } from "mobx-react";
 import { observer } from "mobx-react";
-import { WheelEvent } from "react";
-import { MouseEvent } from "react";
-import React from "react";
-import { Component } from "react";
 import { ContentRect } from "react-measure";
 import Measure from "react-measure";
 import { Color } from "three";
@@ -16,10 +16,11 @@ import { WebGLRenderTarget } from "three";
 import { WebGLRenderer } from "three";
 import { Scene } from "three";
 import { Camera } from "three";
-import { debounce } from "throttle-debounce";
+import { throttle } from "throttle-debounce";
+
 import { compose } from "../../../shared/base/compose";
 
-import styles from "./style.module.css";
+import style from "./style.module.css";
 
 export type Stage = { scene: Scene; camera: Camera; target?: WebGLRenderTarget };
 export type Canvas = { width: number; height: number };
@@ -34,6 +35,7 @@ export class Three extends Component<{
   onMouseMove?(x: number, y: number): void;
   onMouseUp?(x: number, y: number): void;
   onWheel?(deltaY: number, preventDefault: () => void): void;
+  renderScheduler?: (callback: () => void) => any;
 }> {
   @observable private containerSize = { width: 0, height: 0 };
   @observable private canvas: Canvas = { width: 0, height: 0 };
@@ -58,10 +60,16 @@ export class Three extends Component<{
           if (stages instanceof Array) {
             // Create individual reactions for each stage, so they may react and re-render independently.
             dispose = compose(
-              stages.map((stage) => autorun(() => this.renderStage(stage()), { scheduler: requestAnimationFrame })),
+              stages.map((stage) =>
+                autorun(() => this.renderStage(stage()), {
+                  scheduler: this.props.renderScheduler ?? requestAnimationFrame,
+                }),
+              ),
             );
           } else {
-            dispose = autorun(() => this.renderStage(stages), { scheduler: requestAnimationFrame });
+            dispose = autorun(() => this.renderStage(stages), {
+              scheduler: this.props.renderScheduler ?? requestAnimationFrame,
+            });
           }
           disposeOnUnmount(this, dispose);
         },
@@ -69,8 +77,8 @@ export class Three extends Component<{
       ),
       reaction(
         () => objectFit(this.containerSize, this.props.objectFit),
-        debounce(
-          80,
+        throttle(
+          100,
           action(({ width, height }: { width: number; height: number }) => {
             this.canvas.width = width;
             this.canvas.height = height;
@@ -82,7 +90,9 @@ export class Three extends Component<{
   }
 
   componentWillUnmount() {
-    this.renderer!.dispose();
+    this.renderer?.forceContextLoss();
+    this.renderer?.dispose();
+    delete this.renderer;
   }
 
   render() {
@@ -94,12 +104,13 @@ export class Three extends Component<{
             ref={measureRef}
             // Use 'none' instead of fill to avoid stretching the visuals during a resize.
             style={{ objectFit: objectFit.type === "fill" ? "none" : objectFit.type }}
-            className={styles.canvas}
+            className={style.canvas}
             onClick={this.props.onClick}
             onMouseDown={this.onMouseDown}
             onMouseMove={this.onMouseMove}
             onMouseUp={this.onMouseUp}
             onWheel={this.onWheel}
+            onMouseLeave={this.onMouseLeave}
           />
         )}
       </Measure>
@@ -146,6 +157,11 @@ export class Three extends Component<{
   private onMouseUp = (e: MouseEvent<HTMLCanvasElement>) => {
     // TODO: Remove deprecated layerX
     this.props.onMouseUp && this.props.onMouseUp((e.nativeEvent as any).layerX, (e.nativeEvent as any).layerY);
+  };
+
+  // Prevent dragging actions from becoming stuck when dragging off the canvas
+  private onMouseLeave = (e: MouseEvent<HTMLCanvasElement>) => {
+    this.onMouseUp(e);
   };
 
   private onWheel = (e: WheelEvent<HTMLCanvasElement>) => {

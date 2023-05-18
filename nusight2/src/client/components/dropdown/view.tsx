@@ -1,12 +1,12 @@
-import classNames from "classnames";
 import React from "react";
 import { ReactNode } from "react";
 import { MouseEvent } from "react";
+import classNames from "classnames";
 
 import style from "./style.module.css";
 
 export interface DropdownProps {
-  children?: ReactNode;
+  children: ReactNode;
   className?: string;
   dropdownToggle: ReactNode;
   isOpen: boolean;

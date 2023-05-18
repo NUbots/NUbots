@@ -1,8 +1,8 @@
 import { computed } from "mobx";
 import { createTransformer } from "mobx-utils";
 
+import { Vector3 } from "../../../../shared/math/vector3";
 import { message } from "../../../../shared/messages";
-import { Vector3 } from "../../../math/vector3";
 import { DashboardRobotModel } from "../dashboard_robot/model";
 
 import { LastStatus } from "./view";

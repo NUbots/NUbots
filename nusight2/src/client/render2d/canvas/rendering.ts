@@ -1,4 +1,4 @@
-import { Transform } from "../../math/transform";
+import { Transform } from "../../../shared/math/transform";
 import { Appearance } from "../appearance/appearance";
 import { BasicAppearance } from "../appearance/basic_appearance";
 import { LineAppearance } from "../appearance/line_appearance";
@@ -25,15 +25,22 @@ import { renderText } from "./text";
 
 export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Group | Shape<Geometry>, world: Transform) {
   if (obj instanceof Group) {
+    // Cumulative transform of the camera + parent groups
     const objWorld = world.then(obj.transform);
-
     for (const o of obj.children) {
       ctx.save();
-      applyTransform(ctx, obj.transform);
       renderObject2d(ctx, o, objWorld);
       ctx.restore();
     }
+  } else if (obj instanceof Shape && obj.geometry instanceof TextGeometry) {
+    // Special case for text drawing, since it cannot be drawn in
+    // ctx.beginPath() mode.
+    applyTransform(ctx, world);
+    renderText(ctx, obj as Shape<TextGeometry>, world);
+    ctx.resetTransform();
   } else if (obj instanceof Shape) {
+    applyTransform(ctx, world);
+
     if (obj.geometry instanceof ArcGeometry) {
       renderArc(ctx, obj as Shape<ArcGeometry>);
     } else if (obj.geometry instanceof ArrowGeometry) {
@@ -48,10 +55,21 @@ export function renderObject2d(ctx: CanvasRenderingContext2D, obj: Group | Shape
       renderPath(ctx, obj as Shape<PathGeometry>);
     } else if (obj.geometry instanceof PolygonGeometry) {
       renderPolygon(ctx, obj as Shape<PolygonGeometry>);
-    } else if (obj.geometry instanceof TextGeometry) {
-      renderText(ctx, obj as Shape<TextGeometry>, world);
     } else {
       throw new Error(`Unsupported geometry type: ${obj.geometry}`);
+    }
+
+    // Line width is affected by the scaling so we reset the transform
+    // and only apply the dpi scaling.
+    ctx.resetTransform();
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    applyAppearance(ctx, obj.appearance);
+    if (obj.appearance.stroke) {
+      ctx.stroke();
+    }
+    if (obj.appearance instanceof BasicAppearance && obj.appearance.fill) {
+      ctx.fill();
     }
   } else {
     throw new Error(`Unsupported Object2d type: ${obj}`);

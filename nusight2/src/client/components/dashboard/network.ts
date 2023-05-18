@@ -1,13 +1,15 @@
 import { action } from "mobx";
+
+import { Matrix2 } from "../../../shared/math/matrix2";
+import { Matrix3 } from "../../../shared/math/matrix3";
+import { Vector2 } from "../../../shared/math/vector2";
+import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { toSeconds } from "../../../shared/time/timestamp";
-import { Matrix2 } from "../../math/matrix2";
-import { Matrix3 } from "../../math/matrix3";
-import { Vector2 } from "../../math/vector2";
-import { Vector3 } from "../../math/vector3";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
+
 import { DashboardRobotModel } from "./dashboard_robot/model";
 
 import Overview = message.support.nusight.Overview;

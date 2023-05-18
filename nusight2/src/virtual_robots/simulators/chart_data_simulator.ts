@@ -1,13 +1,13 @@
 import { autorun } from "mobx";
 
-import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { message } from "../../shared/messages";
+import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { toTimestamp } from "../../shared/time/timestamp";
 import { Simulator } from "../simulator";
 import { Message } from "../simulator";
 
 import { periodic } from "./periodic";
-import DataPoint = message.support.nusight.DataPoint;
+import DataPoint = message.eye.DataPoint;
 
 export class ChartSimulator extends Simulator {
   static of({ nuclearnetClient }: { nuclearnetClient: NUClearNetClient }): ChartSimulator {
@@ -22,7 +22,7 @@ export class ChartSimulator extends Simulator {
     // Offset our time to test the adaptive window
     const time = periodic(60) - 3;
 
-    const messageType = "message.support.nusight.DataPoint";
+    const messageType = "message.eye.DataPoint";
     const period = 10;
     const theta = (2 * Math.PI * time) / period;
     const sin = Math.sin(theta);

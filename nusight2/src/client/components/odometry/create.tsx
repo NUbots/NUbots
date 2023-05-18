@@ -3,8 +3,8 @@ import { ComponentType } from "react";
 
 import { NUsightNetwork } from "../../network/nusight_network";
 import { AppModel } from "../app/model";
-import { OdometryController } from "./controller";
 
+import { OdometryController } from "./controller";
 import { OdometryModel } from "./model";
 import { OdometryNetwork } from "./network";
 import { OdometryView } from "./view";

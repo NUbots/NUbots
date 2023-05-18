@@ -1,19 +1,32 @@
-import { storiesOf } from "@storybook/react";
+import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 import { reaction } from "mobx";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
-import React from "react";
 
-import { Vector3 } from "../../../../math/vector3";
+import { Vector3 } from "../../../../../shared/math/vector3";
 import { RobotModel } from "../../../robot/model";
-import { fullscreen } from "../../../storybook/fullscreen";
-import { LocalisationRobotModel } from "../../darwin_robot/model";
-import { ModelVisualiser } from "../../darwin_robot/stories/model_visualizer";
+import { LocalisationRobotModel } from "../../robot_model";
 import { NUgusViewModel } from "../view_model";
 
-fullscreen(storiesOf("component.localisation.nugus_robot", module))
-  .add("renders statically", () => <NUgusVisualizer />)
-  .add("renders animated", () => <NUgusVisualizer animate />);
+import { ModelVisualiser } from "./model_visualizer";
+
+interface StoryProps {}
+
+const meta: Meta<StoryProps> = {
+  title: "components/localisation/NUgus Robot",
+  parameters: { layout: "fullscreen" },
+};
+
+export default meta;
+
+export const Static: StoryObj<StoryProps> = {
+  render: () => <NUgusVisualizer />,
+};
+
+export const Animated: StoryObj<StoryProps> = {
+  render: () => <NUgusVisualizer animate />,
+};
 
 class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
   render() {

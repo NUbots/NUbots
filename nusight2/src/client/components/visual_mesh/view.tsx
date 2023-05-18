@@ -1,7 +1,7 @@
-import { observer } from "mobx-react";
 import React from "react";
 import { Component } from "react";
 import { ComponentType } from "react";
+import { observer } from "mobx-react";
 
 import { CameraView } from "./camera/view";
 import { VisualMeshNetwork } from "./network";

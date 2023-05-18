@@ -1,18 +1,36 @@
+import React from "react";
 import { action } from "@storybook/addon-actions";
-import { storiesOf } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
 
 import { Collapsible } from "../view";
+
+const meta: Meta<typeof Collapsible> = {
+  title: "components/Collapsible",
+  component: Collapsible,
+  decorators: [
+    (Story) => {
+      return (
+        <div className="max-w-[320px]">
+          <Story />
+        </div>
+      );
+    },
+  ],
+};
+
+export default meta;
+
+type Story = StoryObj<typeof Collapsible>;
 
 const actions = {
   onToggle: action("onToggle"),
 };
 
-storiesOf("components.collapsible", module)
-  .addDecorator((story) => <div style={{ maxWidth: "320px" }}>{story()}</div>)
-  .add("basic", () => {
+export const Default: Story = {
+  name: "default",
+  render: () => {
     return (
       <Collapsible open={true} onToggle={actions.onToggle}>
         <div>Collapsible content</div>
@@ -22,8 +40,12 @@ storiesOf("components.collapsible", module)
         </div>
       </Collapsible>
     );
-  })
-  .add("with header", () => {
+  },
+};
+
+export const WithHeader: Story = {
+  name: "with header",
+  render: () => {
     const header = <div>Collapsible Header</div>;
     return (
       <Collapsible open={true} onToggle={actions.onToggle} header={header}>
@@ -34,8 +56,12 @@ storiesOf("components.collapsible", module)
         </div>
       </Collapsible>
     );
-  })
-  .add("interactive", () => {
+  },
+};
+
+export const Interactive: Story = {
+  name: "interactive",
+  render: () => {
     const model = observable({
       open: true,
       animate: true,
@@ -48,9 +74,10 @@ storiesOf("components.collapsible", module)
 
     const header = <div>Click to toggle</div>;
     const Component = observer(() => (
-      <div>
-        <label>
-          <input type="checkbox" checked={model.animate} onChange={onCheckboxChange} /> Animate
+      <>
+        <label className="flex gap-2 mb-3">
+          <input type="checkbox" checked={model.animate} onChange={onCheckboxChange} />
+          <span>Animate</span>
         </label>
         <Collapsible open={model.open} onToggle={onToggle} header={header} animate={model.animate}>
           <div>Collapsible content</div>
@@ -59,8 +86,9 @@ storiesOf("components.collapsible", module)
             Adipisci sed, labore eos molestias.
           </div>
         </Collapsible>
-      </div>
+      </>
     ));
 
     return <Component />;
-  });
+  },
+};

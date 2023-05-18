@@ -2,15 +2,18 @@ import fs from "fs";
 import { autorun } from "mobx";
 import { computedFn } from "mobx-utils";
 import { Matrix4, Vector3 } from "three";
+
 import { FieldDimensions } from "../../shared/field/dimensions";
 import { fourcc } from "../../shared/image_decoder/fourcc";
-import { Imat4, message } from "../../shared/messages";
+import { Imat4 } from "../../shared/messages";
+import { message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
 import { toTimestamp } from "../../shared/time/timestamp";
-import { Message, Simulator } from "../simulator";
+import { Simulator } from "../simulator";
+import { Message } from "../simulator";
+
 import image0 from "./images/0.jpg";
 import image1 from "./images/1.jpg";
-import image10 from "./images/10.jpg";
 import image2 from "./images/2.jpg";
 import image3 from "./images/3.jpg";
 import image4 from "./images/4.jpg";
@@ -19,8 +22,8 @@ import image6 from "./images/6.jpg";
 import image7 from "./images/7.jpg";
 import image8 from "./images/8.jpg";
 import image9 from "./images/9.jpg";
+import image10 from "./images/10.jpg";
 import { periodic } from "./periodic";
-
 import CompressedImage = message.output.CompressedImage;
 import Projection = message.output.CompressedImage.Lens.Projection;
 import MeasurementType = message.vision.Ball.MeasurementType;

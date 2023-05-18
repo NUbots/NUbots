@@ -1,27 +1,26 @@
+import { Component } from "react";
+import { MouseEvent } from "react";
+import React from "react";
 import classNames from "classnames";
 import { autorun } from "mobx";
 import { IReactionDisposer } from "mobx";
 import { observer } from "mobx-react";
-import { Component } from "react";
-import { MouseEvent } from "react";
-import React from "react";
 
 import { CheckedState } from "../model";
 import { TreeNodeModel } from "../model";
 
-import IconChevronDown from "./chevron_down.svg";
-import IconChevronRight from "./chevron_right.svg";
+import IconChevronDown from "./icon_chevron_down";
+import IconChevronRight from "./icon_chevron_right";
 import style from "./style.module.css";
 
 export interface TreeNodeProps {
   node: TreeNodeModel;
   level?: number;
-
   renderLabel?(node: TreeNodeModel): JSX.Element | string;
-
   onCheck?(node: TreeNodeModel): void;
-
   onExpand?(node: TreeNodeModel): void;
+  onMouseEnter?(node: TreeNodeModel): void;
+  onMouseLeave?(node: TreeNodeModel): void;
 }
 
 @observer
@@ -61,7 +60,13 @@ export class TreeNode extends Component<TreeNodeProps> {
     return (
       <ul className={classes}>
         <li>
-          <div className={style.treenode__header} style={headerInlineStyle} onClick={this.onClick}>
+          <div
+            className={style.treenode__header}
+            style={headerInlineStyle}
+            onClick={this.props.onExpand ? this.onClick : undefined}
+            onMouseEnter={this.props.onMouseEnter ? this.onMouseEnter : undefined}
+            onMouseLeave={this.props.onMouseLeave ? this.onMouseLeave : undefined}
+          >
             <div className={style.treenode__icon}>
               {hasChildren ? this.props.node.expanded ? <IconChevronDown /> : <IconChevronRight /> : null}
             </div>
@@ -84,6 +89,8 @@ export class TreeNode extends Component<TreeNodeProps> {
                 renderLabel={this.props.renderLabel}
                 onCheck={this.props.onCheck}
                 onExpand={this.props.onExpand}
+                onMouseEnter={this.props.onMouseEnter}
+                onMouseLeave={this.props.onMouseLeave}
               />
             ))}
         </li>
@@ -96,9 +103,15 @@ export class TreeNode extends Component<TreeNodeProps> {
   };
 
   private onClick = () => {
-    if (this.props.onExpand) {
-      this.props.onExpand(this.props.node);
-    }
+    this.props.onExpand?.(this.props.node);
+  };
+
+  private onMouseEnter = () => {
+    this.props.onMouseEnter?.(this.props.node);
+  };
+
+  private onMouseLeave = () => {
+    this.props.onMouseLeave?.(this.props.node);
   };
 
   private updateCheckbox = () => {

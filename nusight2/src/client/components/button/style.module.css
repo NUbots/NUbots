@@ -46,6 +46,11 @@
   margin-left: auto;
 }
 
+.iconBefore,
+.iconAfter {
+  line-height: 0;
+}
+
 .iconBefore svg,
 .iconAfter svg {
   height: 20px;

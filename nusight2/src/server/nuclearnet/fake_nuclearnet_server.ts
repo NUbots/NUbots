@@ -1,15 +1,15 @@
 import { EventEmitter } from "events";
 import { NUClearNetSend } from "nuclearnet.js";
-import XXH from "xxhashjs";
 
 import { createSingletonFactory } from "../../shared/base/create_singleton_factory";
 
 import { FakeNUClearNetClient } from "./fake_nuclearnet_client";
+import { hashType } from "./hash_type";
 
 /**
  * A fake in-memory NUClearNet 'server' which routes messages between each FakeNUClearNetClient.
  *
- * All messages are 'reliable' in that nothing is intentially dropped.
+ * All messages are 'reliable' in that nothing is intentionally dropped.
  * Targeted messages are supported.
  */
 export class FakeNUClearNetServer {
@@ -85,14 +85,4 @@ export class FakeNUClearNetServer {
       client.fakePacket(hashString, packet);
     }
   }
-}
-
-export function hashType(type: string): Buffer {
-  // Matches hashing implementation from NUClearNet
-  // See https://goo.gl/6NDPo2
-  let hashString: string = XXH.h64(type, 0x4e55436c).toString(16);
-  // The hash string may truncate if it's smaller than 16 characters so we pad it with 0s
-  hashString = ("0".repeat(16) + hashString).slice(-16);
-
-  return Buffer.from((hashString.match(/../g) as string[]).reverse().join(""), "hex");
 }

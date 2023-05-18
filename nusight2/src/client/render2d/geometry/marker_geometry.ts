@@ -1,6 +1,6 @@
 import { observable } from "mobx";
 
-import { Vector2 } from "../../math/vector2";
+import { Vector2 } from "../../../shared/math/vector2";
 
 export class MarkerGeometry {
   @observable heading: Vector2;
