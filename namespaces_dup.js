@@ -907,7 +907,7 @@ var namespaces_dup =
           [ "buildGraph", "NUhelpers_8hpp.html#aefa578b0bb603fc8d766ece8adc3c146", null ],
           [ "buildGraph", "NUhelpers_8hpp.html#afb4c6084208e40da11c1f15e5c51858d", null ]
         ] ],
-        [ "graph", "NUhelpers_8hpp.html#a82f4a32139d9015da2b34e50813c8517", null ]
+        [ "graph", "NUhelpers_8hpp.html#aac2d4f8c0c2aa3defb6820b2bdef61b0", null ]
       ] ],
       [ "platform", null, [
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],

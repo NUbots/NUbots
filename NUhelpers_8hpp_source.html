@@ -195,16 +195,16 @@ $(document).ready(function(){initNavTree('NUhelpers_8hpp_source.html',''); initR
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#include &lt;utility&gt;</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160; </div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#include &quot;message/support/nusight/DataPoint.hpp&quot;</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="preprocessor">#include &quot;message/eye/DataPoint.hpp&quot;</span></div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#include &quot;utility/type_traits/is_iterable.hpp&quot;</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="keyword">namespace </span>utility::nusight {</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keyword">using</span> message::support::nusight::DataPoint;</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keyword">using</span> message::eye::DataPoint;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    <span class="keyword">namespace </span>helpers {</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <span class="keyword">using</span> message::support::nusight::DataPoint;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        <span class="keyword">using</span> message::eye::DataPoint;</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        <span class="keyword">using</span> <a class="code" href="structutility_1_1type__traits_1_1is__iterable.html">utility::type_traits::is_iterable</a>;</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <span class="keyword">inline</span> <span class="keywordtype">void</span> buildGraph(DataPoint&amp; <span class="comment">/*dataPoint*/</span>) {}</div>
@@ -229,7 +229,7 @@ $(document).ready(function(){initNavTree('NUhelpers_8hpp_source.html',''); initR
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    }  <span class="comment">// namespace helpers</span></div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span>... Values&gt;</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">inline</span> std::unique_ptr&lt;message::support::nusight::DataPoint&gt; graph(std::string label, Values... values) {</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">inline</span> std::unique_ptr&lt;message::eye::DataPoint&gt; graph(std::string label, Values... values) {</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keyword">auto</span> dataPoint   = std::make_unique&lt;DataPoint&gt;();</div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        dataPoint-&gt;label = std::move(label);</div>
 <div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        helpers::buildGraph(*dataPoint, values...);</div>
@@ -245,7 +245,7 @@ $(document).ready(function(){initNavTree('NUhelpers_8hpp_source.html',''); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_a51ae46f1482c3f842040662a6f9903a.html">nusight</a></li><li class="navelem"><b>NUhelpers.hpp</b></li>
-    <li class="footer">Generated on Wed May 17 2023 11:30:02 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu May 18 2023 04:05:49 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
