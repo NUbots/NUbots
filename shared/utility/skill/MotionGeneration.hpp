@@ -9,11 +9,14 @@ https://github.com/Rhoban/model/
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "message/behaviour/state/WalkingState.hpp"
+
 #include "utility/math/euler.hpp"
 #include "utility/motion/splines/Trajectory.hpp"
 
 namespace utility::skill {
 
+    using message::behaviour::state::WalkingState;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::TrajectoryDimension::PITCH;
@@ -48,9 +51,6 @@ namespace utility::skill {
         Eigen::Matrix<Scalar, 3, 1> torso_midpoint_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
     };
 
-    /// @brief Motion states
-    enum class MotionGenerationState { WALKING, STOPPING, STANDING };
-
     template <typename Scalar>
     class MotionGeneration {
 
@@ -70,7 +70,7 @@ namespace utility::skill {
             torso_midpoint_offset = options.torso_midpoint_offset;
             // Start time at step period to avoid taking a step when starting
             t            = step_period;
-            engine_state = MotionGenerationState::STANDING;
+            engine_state = WalkingState::State::STOPPED;
             // Initialize foot and torso placement
             reset();
         }
@@ -308,37 +308,40 @@ namespace utility::skill {
          * @param dt Time step.
          * @param walk_command Walk command (dx, dy, dtheta).
          */
-        MotionGenerationState update_state(const Scalar& dt, const Eigen::Matrix<Scalar, 3, 1>& walk_command) {
+        WalkingState::State update_state(const Scalar& dt, const Eigen::Matrix<Scalar, 3, 1>& walk_command) {
             const bool walk_command_zero = walk_command.isZero();
 
-            // Determine the state of the walk engine based on the walk command and time
             if (walk_command_zero && t < step_period) {
-                engine_state = MotionGenerationState::STOPPING;
+                // Walk command is zero and we havent finished taking a step, continue stopping.
+                engine_state = WalkingState::State::STOPPING;
             }
-            else if (walk_command_zero && t == step_period) {
-                engine_state = MotionGenerationState::STANDING;
+            else if (walk_command_zero && t >= step_period) {
+                // Walk command is zero and we have finished taking a step, remain stopped.
+                engine_state = WalkingState::State::STOPPED;
             }
             else {
-                engine_state = MotionGenerationState::WALKING;
+                // Walk command is greater than zero, walk.
+                engine_state = WalkingState::State::WALKING;
             }
 
-            switch (engine_state) {
-                case MotionGenerationState::WALKING:
+            switch (engine_state.value) {
+                case WalkingState::State::WALKING:
                     update_time(dt);
                     // If we are at the end of the step, switch the planted foot and reset time
                     if (t >= step_period) {
                         switch_planted_foot();
                     }
                     break;
-                case MotionGenerationState::STOPPING:
+                case WalkingState::State::STOPPING:
                     update_time(dt);
                     // We do not switch the planted foot here because we want to transition to the standing state
                     break;
-                case MotionGenerationState::STANDING:
-                    // We do not update the time here because we want to stay in the standing state
+                case WalkingState::State::STOPPED:
+                    // We do not update the time here because we want to remain in the standing state
                     break;
                 default: NUClear::log<NUClear::WARN>("Unknown state"); break;
             }
+
             // Generate the torso and swing foot trajectories
             generate_swingfoot_trajectory(walk_command);
             generate_torso_trajectory(walk_command);
@@ -350,7 +353,7 @@ namespace utility::skill {
          * @brief Get the current state of the walk engine.
          * @return Current state of the walk engine.
          */
-        MotionGenerationState get_state() const {
+        WalkingState::State get_state() const {
             return engine_state;
         }
 
@@ -384,7 +387,7 @@ namespace utility::skill {
         // ******************************** State ********************************
 
         /// @brief Current engine state.
-        MotionGenerationState engine_state = MotionGenerationState::STANDING;
+        WalkingState::State engine_state = WalkingState::State::STOPPED;
 
         /// @brief Transform from planted {p} foot to swing {s} foot current placement at start of step.
         Eigen::Transform<Scalar, 3, Eigen::Isometry> Hps_start =

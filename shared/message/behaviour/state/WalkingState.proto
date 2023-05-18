@@ -24,8 +24,15 @@ package message.behaviour.state;
 import "Vector.proto";
 
 message WalkingState {
-    /// Whether the robot is walking or not
-    bool is_walking = 1;
+    enum State {
+        UNKNOWN          = 0;
+        WALKING          = 1;
+        STOPPING         = 2;
+        STOPPED          = 3;
+    }
+
+    /// Walking state
+    State state = 1;
 
     /// Current walk command (dx, dy, dtheta)
     fvec3 walk_command = 2;

@@ -35,6 +35,7 @@ namespace module::skill {
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkingState;
+
     using message::input::Sensors;
     using WalkTask = message::skill::Walk;
 
@@ -89,11 +90,12 @@ namespace module::skill {
             // Reset the walk engine
             first_run = true;
             walk_engine.reset();
-            emit(std::make_unique<WalkingState>(true, Eigen::Vector3f::Zero()));
+            emit(std::make_unique<WalkingState>(WalkingState::State::STOPPED, Eigen::Vector3f::Zero()));
         });
 
         // Runs every time the Walk task is removed from the director tree
-        on<Stop<WalkTask>>().then([this] { emit(std::make_unique<WalkingState>(false, Eigen::Vector3f::Zero())); });
+        on<Stop<WalkTask>>().then(
+            [this] { emit(std::make_unique<WalkingState>(WalkingState::State::STOPPED, Eigen::Vector3f::Zero())); });
 
         // MAIN LOOP
         on<Provide<WalkTask>,
@@ -103,17 +105,18 @@ namespace module::skill {
            Single>()
             .then([this](const WalkTask& walk) {
                 const float dt = get_time_delta();
-                walk_engine.update_state(dt, walk.velocity_target.cast<float>());
-                // Set the robot stability value based on the walk engine state
-                if (walk_engine.get_state() == utility::skill::MotionGenerationState::STANDING) {
-                    emit(std::make_unique<Stability>(Stability::STANDING));
-                    emit(std::make_unique<WalkingState>(false, walk.velocity_target));
+                switch (walk_engine.update_state(dt, walk.velocity_target).value) {
+                    case WalkingState::State::WALKING:
+                    case WalkingState::State::STOPPING:
+                        update_desired_pose();
+                        emit(std::make_unique<Stability>(Stability::DYNAMIC));
+                        break;
+                    case WalkingState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                    case WalkingState::State::UNKNOWN:
+                    default: NUClear::log<NUClear::WARN>("Unknown state"); break;
                 }
-                else {
-                    update_desired_pose();
-                    emit(std::make_unique<Stability>(Stability::DYNAMIC));
-                    emit(std::make_unique<WalkingState>(true, walk.velocity_target));
-                }
+                // Emit the walking state
+                emit(std::make_unique<WalkingState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
             });
 
         // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
@@ -126,44 +129,39 @@ namespace module::skill {
             .then([this] {
                 // Stop the walk engine (request zero velocity)
                 const float dt = get_time_delta();
-                walk_engine.update_state(dt, Eigen::Vector3f::Zero());
-
-                switch (walk_engine.get_state()) {
-                    case utility::skill::MotionGenerationState::STANDING:
-                        emit(std::make_unique<Stability>(Stability::STANDING));
-                        break;
-                    case utility::skill::MotionGenerationState::STOPPING:
+                switch (walk_engine.update_state(dt, Eigen::Vector3f::Zero()).value) {
+                    case WalkingState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                    case WalkingState::State::STOPPING:
                         update_desired_pose();
                         emit(std::make_unique<Stability>(Stability::DYNAMIC));
                         break;
-                    case utility::skill::MotionGenerationState::WALKING:
-                        log<NUClear::WARN>("Walk engine stat should be either IDLE or STOP");
+                    case WalkingState::State::WALKING:
+                        log<NUClear::WARN>("Walk engine state should be either STOPPING or STOPPED");
                         break;
+                    case WalkingState::State::UNKNOWN:
+                    default: NUClear::log<NUClear::WARN>("Unknown state"); break;
                 }
 
-                // Update the walking state
-                emit(std::make_unique<WalkingState>(false, Eigen::Vector3f::Zero()));
+                // Emit the walking state
+                emit(std::make_unique<WalkingState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
             });
     }
 
     float Walk::get_time_delta() {
-        // compute time delta depended if we are currently in simulation or reality
-        const auto current_time = NUClear::clock::now();
-        float dt =
-            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
-
-        if (dt == 0.0f) {
-            dt = 0.001f;
-        }
-
-        // time is wrong when we run it for the first time
+        // Time is wrong when we run it for the first time
+        float time_delta = 0;
         if (first_run) {
-            first_run = false;
-            dt        = 1.0f / UPDATE_FREQUENCY;
+            first_run  = false;
+            time_delta = 1.0f / UPDATE_FREQUENCY;
         }
-
-        last_update_time = current_time;
-        return dt;
+        else {
+            // Compute time delta
+            const auto current_time = NUClear::clock::now();
+            time_delta =
+                std::chrono::duration_cast<std::chrono::duration<float>>(current_time - last_update_time).count();
+            last_update_time = current_time;
+        }
+        return time_delta;
     }
 
     void Walk::update_desired_pose() {
@@ -181,7 +179,6 @@ namespace module::skill {
         auto right_leg  = std::make_unique<RightLegIK>();
         right_leg->time = time;
         right_leg->Htr  = Htr.cast<double>().matrix();
-
         // Arms
         auto left_arm  = std::make_unique<LeftArm>();
         auto right_arm = std::make_unique<RightArm>();
@@ -206,17 +203,16 @@ namespace module::skill {
             }
         }
 
-        emit<Task>(left_leg, 0, false, "quintic left leg");
-        emit<Task>(right_leg, 0, false, "quintic right leg");
-        emit<Task>(left_arm, 0, true, "quintic left arm");
-        emit<Task>(right_arm, 0, true, "quintic right arm");
+        emit<Task>(left_leg, 0, false, "Walk left leg");
+        emit<Task>(right_leg, 0, false, "Walk right leg");
+        emit<Task>(left_arm, 0, true, "Walk left arm");
+        emit<Task>(right_arm, 0, true, "Walk right arm");
 
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
             Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
             emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
-
             Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
             emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
             emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));

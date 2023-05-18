@@ -30,6 +30,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkingState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
@@ -41,6 +43,8 @@ using extension::Configuration;
 namespace module::input {
 
     using message::actuation::KinematicsModel;
+    using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkingState;
     using message::input::Sensors;
     using message::platform::RawSensors;
 
@@ -272,11 +276,9 @@ namespace module::input {
                                const RawSensors& raw_sensors);
 
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
-        /// @param sensors The sensors message to update
-        /// @param previous_sensors The previous sensors message
-        /// @param raw_sensors The raw sensor data
         /// @param dt The time since the last update
-        void integrate_walkcommand(const double dt);
+        /// @param walking_state Current state of walk engine
+        void integrate_walkcommand(const double dt, const Stability& stability, const WalkingState& walking_state);
 
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
@@ -303,7 +305,9 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry_kf(std::unique_ptr<Sensors>& sensors,
                                 const std::shared_ptr<const Sensors>& previous_sensors,
-                                const RawSensors& raw_sensors);
+                                const RawSensors& raw_sensors,
+                                const Stability& stability,
+                                const WalkingState& walking_state);
 
 
         /// @brief Updates the sensors message with odometry data filtered using MahonyFilter. This includes the
@@ -313,7 +317,9 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
-                                    const RawSensors& raw_sensors);
+                                    const RawSensors& raw_sensors,
+                                    const Stability& stability,
+                                    const WalkingState& walking_state);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update

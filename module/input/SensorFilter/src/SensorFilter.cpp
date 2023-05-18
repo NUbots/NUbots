@@ -20,8 +20,6 @@
 #include "SensorFilter.hpp"
 
 #include "message/actuation/BodySide.hpp"
-#include "message/behaviour/state/Stability.hpp"
-#include "message/behaviour/state/WalkingState.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 
@@ -106,78 +104,54 @@ namespace module::input {
                 detect_button_press(sensors);
             });
 
-        on<Trigger<WalkingState>>().then([this](const WalkingState& walking_state) {
-            walk_command        = walking_state.walk_command.cast<double>();
-            walk_engine_enabled = walking_state.is_walking;
-        });
+        update_loop =
+            on<Trigger<RawSensors>,
+               Optional<With<Sensors>>,
+               With<KinematicsModel>,
+               With<Stability>,
+               With<WalkingState>,
+               Single,
+               Priority::HIGH>()
+                .then("Main Sensors Loop",
+                      [this](const RawSensors& raw_sensors,
+                             const std::shared_ptr<const Sensors>& previous_sensors,
+                             const KinematicsModel& kinematics_model,
+                             const Stability& stability,
+                             const WalkingState& walking_state) {
+                          auto sensors = std::make_unique<Sensors>();
 
-        on<Trigger<Stability>>().then([this](const Stability& stability) {
-            if (stability == Stability::FALLEN) {
-                falling = true;
-            }
-            else {
-                falling = false;
-            }
-        });
+                          // Updates message with raw sensor data
+                          update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
-        on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
-            if (!walk_engine_enabled) {
-                walk_engine_enabled = true;
-            }
-            walk_command = wc.command;
-        });
+                          // Updates the message with kinematics data
+                          update_kinematics(sensors, kinematics_model, raw_sensors);
 
-        on<Trigger<EnableWalkEngineCommand>>().then([this]() { walk_engine_enabled = true; });
+                          // Updates the Sensors message with odometry data filtered using specified filter
+                          switch (cfg.filtering_method.value) {
+                              case FilteringMethod::UKF:
+                                  update_odometry_ukf(sensors, previous_sensors, raw_sensors);
+                                  break;
+                              case FilteringMethod::KF:
+                                  update_odometry_kf(sensors, previous_sensors, raw_sensors, stability, walking_state);
+                                  break;
+                              case FilteringMethod::MAHONY:
+                                  update_odometry_mahony(sensors,
+                                                         previous_sensors,
+                                                         raw_sensors,
+                                                         stability,
+                                                         walking_state);
+                                  break;
+                              default: log<NUClear::WARN>("Unknown Filtering Method"); break;
+                          }
 
-        on<Trigger<DisableWalkEngineCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
+                          // Graph debug information
+                          if (log_level <= NUClear::DEBUG) {
+                              debug_sensor_filter(sensors, raw_sensors);
+                          }
 
-        on<Trigger<StopCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
-
-        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
-
-        on<Trigger<KillGetup>>().then([this]() { falling = false; });
-
-        update_loop = on<Trigger<RawSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>()
-                          .then("Main Sensors Loop",
-                                [this](const RawSensors& raw_sensors,
-                                       const std::shared_ptr<const Sensors>& previous_sensors,
-                                       const KinematicsModel& kinematics_model) {
-                                    auto sensors = std::make_unique<Sensors>();
-
-                                    // Updates message with raw sensor data
-                                    update_raw_sensors(sensors, previous_sensors, raw_sensors);
-
-                                    // Updates the message with kinematics data
-                                    update_kinematics(sensors, kinematics_model, raw_sensors);
-
-                                    // Updates the Sensors message with odometry data filtered using specified filter
-                                    switch (cfg.filtering_method.value) {
-                                        case FilteringMethod::UKF:
-                                            update_odometry_ukf(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        case FilteringMethod::KF:
-                                            update_odometry_kf(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        case FilteringMethod::MAHONY:
-                                            update_odometry_mahony(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        default: log<NUClear::WARN>("Unknown Filtering Method"); break;
-                                    }
-
-                                    // Graph debug information
-                                    if (log_level <= NUClear::DEBUG) {
-                                        debug_sensor_filter(sensors, raw_sensors);
-                                    }
-
-                                    emit(std::move(sensors));
-                                })
-                          .disable();
+                          emit(std::move(sensors));
+                      })
+                .disable();
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
