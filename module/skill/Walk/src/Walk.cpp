@@ -10,7 +10,7 @@
 #include "message/actuation/ServoCommand.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
-#include "message/behaviour/state/WalkingState.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
@@ -34,7 +34,7 @@ namespace module::skill {
     using message::actuation::ServoState;
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkingState;
+    using message::behaviour::state::WalkState;
 
     using message::input::Sensors;
     using WalkTask = message::skill::Walk;
@@ -62,6 +62,7 @@ namespace module::skill {
             walk_engine_options.torso_pitch           = config["torso_pitch"].as<float>();
             walk_engine_options.torso_midpoint_offset = config["torso_midpoint_offset"].as<Expression>();
             walk_engine.configure(walk_engine_options);
+            walk_engine.reset();
             last_update_time = NUClear::clock::now();
 
             for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
@@ -90,12 +91,12 @@ namespace module::skill {
             // Reset the walk engine
             first_run = true;
             walk_engine.reset();
-            emit(std::make_unique<WalkingState>(WalkingState::State::STOPPED, Eigen::Vector3f::Zero()));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero()));
         });
 
         // Runs every time the Walk task is removed from the director tree
         on<Stop<WalkTask>>().then(
-            [this] { emit(std::make_unique<WalkingState>(WalkingState::State::STOPPED, Eigen::Vector3f::Zero())); });
+            [this] { emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero())); });
 
         // MAIN LOOP
         on<Provide<WalkTask>,
@@ -105,18 +106,18 @@ namespace module::skill {
            Single>()
             .then([this](const WalkTask& walk) {
                 const float dt = get_time_delta();
-                switch (walk_engine.update_state(dt, walk.velocity_target).value) {
-                    case WalkingState::State::WALKING:
-                    case WalkingState::State::STOPPING:
+                switch (walk_engine.update(dt, walk.velocity_target).value) {
+                    case WalkState::State::WALKING:
+                    case WalkState::State::STOPPING:
                         update_desired_pose();
                         emit(std::make_unique<Stability>(Stability::DYNAMIC));
                         break;
-                    case WalkingState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
-                    case WalkingState::State::UNKNOWN:
+                    case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                    case WalkState::State::UNKNOWN:
                     default: NUClear::log<NUClear::WARN>("Unknown state"); break;
                 }
                 // Emit the walking state
-                emit(std::make_unique<WalkingState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
             });
 
         // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
@@ -129,21 +130,21 @@ namespace module::skill {
             .then([this] {
                 // Stop the walk engine (request zero velocity)
                 const float dt = get_time_delta();
-                switch (walk_engine.update_state(dt, Eigen::Vector3f::Zero()).value) {
-                    case WalkingState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
-                    case WalkingState::State::STOPPING:
+                switch (walk_engine.update(dt, Eigen::Vector3f::Zero()).value) {
+                    case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                    case WalkState::State::STOPPING:
                         update_desired_pose();
                         emit(std::make_unique<Stability>(Stability::DYNAMIC));
                         break;
-                    case WalkingState::State::WALKING:
+                    case WalkState::State::WALKING:
                         log<NUClear::WARN>("Walk engine state should be either STOPPING or STOPPED");
                         break;
-                    case WalkingState::State::UNKNOWN:
+                    case WalkState::State::UNKNOWN:
                     default: NUClear::log<NUClear::WARN>("Unknown state"); break;
                 }
 
                 // Emit the walking state
-                emit(std::make_unique<WalkingState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
             });
     }
 

@@ -37,7 +37,7 @@ namespace module::input {
     using utility::support::Expression;
 
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkingState;
+    using message::behaviour::state::WalkState;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
@@ -109,7 +109,7 @@ namespace module::input {
                Optional<With<Sensors>>,
                With<KinematicsModel>,
                With<Stability>,
-               With<WalkingState>,
+               With<WalkState>,
                Single,
                Priority::HIGH>()
                 .then("Main Sensors Loop",
@@ -117,7 +117,7 @@ namespace module::input {
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const KinematicsModel& kinematics_model,
                              const Stability& stability,
-                             const WalkingState& walking_state) {
+                             const WalkState& walk_state) {
                           auto sensors = std::make_unique<Sensors>();
 
                           // Updates message with raw sensor data
@@ -132,14 +132,10 @@ namespace module::input {
                                   update_odometry_ukf(sensors, previous_sensors, raw_sensors);
                                   break;
                               case FilteringMethod::KF:
-                                  update_odometry_kf(sensors, previous_sensors, raw_sensors, stability, walking_state);
+                                  update_odometry_kf(sensors, previous_sensors, raw_sensors, stability, walk_state);
                                   break;
                               case FilteringMethod::MAHONY:
-                                  update_odometry_mahony(sensors,
-                                                         previous_sensors,
-                                                         raw_sensors,
-                                                         stability,
-                                                         walking_state);
+                                  update_odometry_mahony(sensors, previous_sensors, raw_sensors, stability, walk_state);
                                   break;
                               default: log<NUClear::WARN>("Unknown Filtering Method"); break;
                           }

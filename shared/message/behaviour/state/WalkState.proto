@@ -23,17 +23,17 @@ package message.behaviour.state;
 
 import "Vector.proto";
 
-message WalkingState {
+message WalkState {
     enum State {
-        UNKNOWN          = 0;
-        WALKING          = 1;
-        STOPPING         = 2;
-        STOPPED          = 3;
+        UNKNOWN  = 0;
+        WALKING  = 1;
+        STOPPING = 2;
+        STOPPED  = 3;
     }
 
     /// Walking state
     State state = 1;
 
-    /// Current walk command (dx, dy, dtheta)
-    fvec3 walk_command = 2;
+    /// Current requested velocity target (dx, dy, dtheta)
+    fvec3 velocity_target = 2;
 }

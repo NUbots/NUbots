@@ -10,7 +10,7 @@
 #include "message/actuation/ServoCommand.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
-#include "message/behaviour/state/WalkingState.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
@@ -34,7 +34,7 @@ namespace module::skill {
     using message::actuation::ServoState;
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkingState;
+    using message::behaviour::state::WalkState;
     using message::input::Sensors;
     using message::skill::Walk;
 
@@ -180,14 +180,14 @@ namespace module::skill {
                 imu_reaction.enable(current_cfg.imu_active);
 
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(WalkingState::State::WALKING, Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkState>(WalkState::State::WALKING, Eigen::Vector3f::Zero()));
             });
 
         // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] {
             imu_reaction.enable(false);
             // Update the walking state
-            emit(std::make_unique<WalkingState>(WalkingState::State::STOPPED, Eigen::Vector3f::Zero()));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero()));
         });
 
         // MAIN LOOP
@@ -243,7 +243,7 @@ namespace module::skill {
                     calculate_joint_goals();
                 }
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(WalkingState::State::WALKING, walk.velocity_target));
+                emit(std::make_unique<WalkState>(WalkState::State::WALKING, walk.velocity_target));
             });
 
         // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
@@ -265,7 +265,7 @@ namespace module::skill {
                 calculate_joint_goals();
 
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(WalkingState::State::STOPPED, Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero()));
             });
     }
 

@@ -9,14 +9,14 @@ https://github.com/Rhoban/model/
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "message/behaviour/state/WalkingState.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 
 #include "utility/math/euler.hpp"
 #include "utility/motion/splines/Trajectory.hpp"
 
 namespace utility::skill {
 
-    using message::behaviour::state::WalkingState;
+    using message::behaviour::state::WalkState;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::TrajectoryDimension::PITCH;
@@ -53,7 +53,6 @@ namespace utility::skill {
 
     template <typename Scalar>
     class MotionGeneration {
-
     public:
         /**
          * @brief Configure motion generation options.
@@ -68,11 +67,6 @@ namespace utility::skill {
             torso_height          = options.torso_height;
             torso_pitch           = options.torso_pitch;
             torso_midpoint_offset = options.torso_midpoint_offset;
-            // Start time at step period to avoid taking a step when starting
-            t            = step_period;
-            engine_state = WalkingState::State::STOPPED;
-            // Initialize foot and torso placement
-            reset();
         }
 
         /// @brief Get the lateral distance between feet in current planted foot frame.
@@ -82,47 +76,32 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Reset torso and swing foot pose.
-         */
-        void reset() {
-            // Initialize swing foot pose
-            Hps_start.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset(), 0.0));
-            Hps_start.linear().setIdentity();
-
-            // Initialize torso pose
-            Hpt_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height);
-            Hpt_start.linear() =
-                Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
-
-            // Initialize swing foot and torso trajectory
-            generate_swingfoot_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
-            generate_torso_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
-        }
-
-        /**
          * @brief Generate swing foot trajectory.
-         * @param walk_command Walk command (dx, dy, dtheta).
+         * @param velocity_target Requested velocity target (dx, dy, dtheta).
          * @param Hps_end Next foot placement.
          * @return Trajectory of swing foot to follow to reach next foot placement.
          */
-        void generate_swingfoot_trajectory(const Eigen::Matrix<Scalar, 3, 1>& walk_command) {
+        void generate_swingfoot_trajectory(const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
             // Clear current trajectory
             swingfoot_trajectory.clear();
 
             // Compute next foot placement and clamp with step limits
             Eigen::Matrix<Scalar, 3, 1> step_placement;
-            step_placement.x() = std::max(std::min(walk_command.x() * step_period, step_limits.x()), -step_limits.x());
-            step_placement.y() = std::max(std::min(walk_command.y() * step_period, step_limits.y()), -step_limits.y());
-            step_placement.z() = std::max(std::min(walk_command.z() * step_period, step_limits.z()), -step_limits.z());
+            step_placement.x() =
+                std::max(std::min(velocity_target.x() * step_period, step_limits.x()), -step_limits.x());
+            step_placement.y() =
+                std::max(std::min(velocity_target.y() * step_period, step_limits.y()), -step_limits.y());
+            step_placement.z() =
+                std::max(std::min(velocity_target.z() * step_period, step_limits.z()), -step_limits.z());
 
             // X position trajectory
             swingfoot_trajectory.add_waypoint(X, 0, Hps_start.translation().x(), 0);
-            swingfoot_trajectory.add_waypoint(X, half_step_period, 0, walk_command.x());
+            swingfoot_trajectory.add_waypoint(X, half_step_period, 0, velocity_target.x());
             swingfoot_trajectory.add_waypoint(X, step_period, step_placement.x(), 0);
 
             // Y position trajectory
             swingfoot_trajectory.add_waypoint(Y, 0, Hps_start.translation().y(), 0);
-            swingfoot_trajectory.add_waypoint(Y, half_step_period, get_foot_width_offset(), walk_command.y());
+            swingfoot_trajectory.add_waypoint(Y, half_step_period, get_foot_width_offset(), velocity_target.y());
             swingfoot_trajectory.add_waypoint(Y, step_period, get_foot_width_offset() + step_placement.y(), 0);
 
             // Z position trajectory
@@ -142,32 +121,32 @@ namespace utility::skill {
 
             // Yaw trajectory
             swingfoot_trajectory.add_waypoint(YAW, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(YAW, half_step_period, walk_command.z() * half_step_period, 0);
+            swingfoot_trajectory.add_waypoint(YAW, half_step_period, velocity_target.z() * half_step_period, 0);
             swingfoot_trajectory.add_waypoint(YAW, step_period, step_placement.z(), 0);
         }
 
         /**
          * @brief Generate torso trajectory.
-         * @param walk_command Walk command (dx, dy, dtheta).
+         * @param velocity_target Requested velocity target (dx, dy, dtheta).
          * @param Hps_end Next foot placement.
          * @return Trajectory of torso to follow to reach next torso placement.
          */
-        void generate_torso_trajectory(const Eigen::Matrix<Scalar, 3, 1>& walk_command) {
+        void generate_torso_trajectory(const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
             // Clear current trajectory
             torso_trajectory.clear();
 
             // X position trajectory
             torso_trajectory.add_waypoint(X, 0, Hpt_start.translation().x(), 0);
-            torso_trajectory.add_waypoint(X, half_step_period, torso_midpoint_offset.x(), walk_command.x());
-            torso_trajectory.add_waypoint(X, step_period, walk_command.x() * half_step_period, 0);
+            torso_trajectory.add_waypoint(X, half_step_period, torso_midpoint_offset.x(), velocity_target.x());
+            torso_trajectory.add_waypoint(X, step_period, velocity_target.x() * half_step_period, 0);
 
             // Y position trajectory
             torso_trajectory.add_waypoint(Y, 0, Hpt_start.translation().y(), 0);
             Scalar torso_offset_y = left_foot_is_planted ? -torso_midpoint_offset.y() : torso_midpoint_offset.y();
-            torso_trajectory.add_waypoint(Y, half_step_period, torso_offset_y, walk_command.y());
+            torso_trajectory.add_waypoint(Y, half_step_period, torso_offset_y, velocity_target.y());
             torso_trajectory.add_waypoint(Y,
                                           step_period,
-                                          get_foot_width_offset() / 2 + walk_command.y() * half_step_period,
+                                          get_foot_width_offset() / 2 + velocity_target.y() * half_step_period,
                                           0);
 
             // Z position trajectory
@@ -187,8 +166,8 @@ namespace utility::skill {
 
             // Yaw trajectory
             torso_trajectory.add_waypoint(YAW, 0, MatrixToEulerIntrinsic(Hpt_start.linear()).z(), 0);
-            torso_trajectory.add_waypoint(YAW, half_step_period, walk_command.z() * half_step_period, 0);
-            torso_trajectory.add_waypoint(YAW, step_period, walk_command.z() * step_period, 0);
+            torso_trajectory.add_waypoint(YAW, half_step_period, velocity_target.z() * half_step_period, 0);
+            torso_trajectory.add_waypoint(YAW, step_period, velocity_target.z() * step_period, 0);
         }
 
         /**
@@ -304,47 +283,72 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Update the state of the walk engine.
-         * @param dt Time step.
-         * @param walk_command Walk command (dx, dy, dtheta).
+         * @brief Reset walk engine.
          */
-        WalkingState::State update_state(const Scalar& dt, const Eigen::Matrix<Scalar, 3, 1>& walk_command) {
-            const bool walk_command_zero = walk_command.isZero();
+        void reset() {
+            // Initialize swing foot pose
+            Hps_start.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset(), 0.0));
+            Hps_start.linear().setIdentity();
 
-            if (walk_command_zero && t < step_period) {
-                // Walk command is zero and we havent finished taking a step, continue stopping.
-                engine_state = WalkingState::State::STOPPING;
+            // Initialize torso pose
+            Hpt_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height);
+            Hpt_start.linear() =
+                Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
+
+            // Initialize swing foot and torso trajectory
+            generate_swingfoot_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
+            generate_torso_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
+
+            // Start time at end of step period to avoid taking a step when starting.
+            t = step_period;
+
+            // Set engine state to stopped
+            engine_state = WalkState::State::STOPPED;
+        }
+
+        /**
+         * @brief Run an update of the walk engine, updating the time and engine state and trajectories.
+         * @param dt Time step.
+         * @param velocity_target Requested velocity target (dx, dy, dtheta).
+         * @return Engine state.
+         */
+        WalkState::State update(const Scalar& dt, const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
+            const bool velocity_target_zero = velocity_target.isZero();
+
+            if (velocity_target_zero && t < step_period) {
+                // Requested velocity target is zero and we haven't finished taking a step, continue stopping.
+                engine_state = WalkState::State::STOPPING;
             }
-            else if (walk_command_zero && t >= step_period) {
-                // Walk command is zero and we have finished taking a step, remain stopped.
-                engine_state = WalkingState::State::STOPPED;
+            else if (velocity_target_zero && t >= step_period) {
+                // Requested velocity target is zero and we have finished taking a step, remain stopped.
+                engine_state = WalkState::State::STOPPED;
             }
             else {
-                // Walk command is greater than zero, walk.
-                engine_state = WalkingState::State::WALKING;
+                // Requested velocity target is greater than zero, walk.
+                engine_state = WalkState::State::WALKING;
             }
 
             switch (engine_state.value) {
-                case WalkingState::State::WALKING:
+                case WalkState::State::WALKING:
                     update_time(dt);
                     // If we are at the end of the step, switch the planted foot and reset time
                     if (t >= step_period) {
                         switch_planted_foot();
                     }
                     break;
-                case WalkingState::State::STOPPING:
+                case WalkState::State::STOPPING:
                     update_time(dt);
                     // We do not switch the planted foot here because we want to transition to the standing state
                     break;
-                case WalkingState::State::STOPPED:
+                case WalkState::State::STOPPED:
                     // We do not update the time here because we want to remain in the standing state
                     break;
                 default: NUClear::log<NUClear::WARN>("Unknown state"); break;
             }
 
             // Generate the torso and swing foot trajectories
-            generate_swingfoot_trajectory(walk_command);
-            generate_torso_trajectory(walk_command);
+            generate_swingfoot_trajectory(velocity_target);
+            generate_torso_trajectory(velocity_target);
 
             return engine_state;
         }
@@ -353,7 +357,7 @@ namespace utility::skill {
          * @brief Get the current state of the walk engine.
          * @return Current state of the walk engine.
          */
-        WalkingState::State get_state() const {
+        WalkState::State get_state() const {
             return engine_state;
         }
 
@@ -387,7 +391,7 @@ namespace utility::skill {
         // ******************************** State ********************************
 
         /// @brief Current engine state.
-        WalkingState::State engine_state = WalkingState::State::STOPPED;
+        WalkState::State engine_state = WalkState::State::STOPPED;
 
         /// @brief Transform from planted {p} foot to swing {s} foot current placement at start of step.
         Eigen::Transform<Scalar, 3, Eigen::Isometry> Hps_start =
