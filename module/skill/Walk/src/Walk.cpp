@@ -53,13 +53,13 @@ namespace module::skill {
 
             // Configure the motion generation options
             utility::skill::MotionGenerationOptions<float> walk_engine_options;
-            walk_engine_options.step_limits    = config["step_limits"].as<Expression>();
-            walk_engine_options.step_height    = config["step_height"].as<float>();
-            walk_engine_options.step_period    = config["step_period"].as<float>();
-            walk_engine_options.step_width     = config["step_width"].as<float>();
-            walk_engine_options.torso_height   = config["torso_height"].as<float>();
-            walk_engine_options.torso_pitch    = config["torso_pitch"].as<float>();
-            walk_engine_options.torso_offset_y = config["torso_offset_y"].as<float>();
+            walk_engine_options.step_limits           = config["step_limits"].as<Expression>();
+            walk_engine_options.step_height           = config["step_height"].as<float>();
+            walk_engine_options.step_period           = config["step_period"].as<float>();
+            walk_engine_options.step_width            = config["step_width"].as<float>();
+            walk_engine_options.torso_height          = config["torso_height"].as<float>();
+            walk_engine_options.torso_pitch           = config["torso_pitch"].as<float>();
+            walk_engine_options.torso_midpoint_offset = config["torso_midpoint_offset"].as<Expression>();
             walk_engine.configure(walk_engine_options);
             last_update_time = NUClear::clock::now();
 
@@ -85,7 +85,7 @@ namespace module::skill {
         });
 
         // Runs every time the Walk provider starts (wasn't running)
-        on<Start<WalkTask>, With<Behaviour::State>>().then([this](const Behaviour::State& behaviour) {
+        on<Start<WalkTask>>().then([this]() {
             // Reset the walk engine
             first_run = true;
             walk_engine.reset();
