@@ -1,22 +1,18 @@
 #include "Walk.hpp"
 
-#include <fmt/format.h>
-
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
-#include "message/actuation/ServoCommand.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
-#include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
-#include "utility/math/comparison.hpp"
+#include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -35,17 +31,15 @@ namespace module::skill {
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
-
     using message::input::Sensors;
     using WalkTask = message::skill::Walk;
 
     using utility::actuation::kinematics::calculateLegJoints;
+    using utility::input::LimbID;
     using utility::input::ServoID;
-    using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
-
 
     Walk::Walk(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -54,27 +48,25 @@ namespace module::skill {
 
             // Configure the motion generation options
             utility::skill::MotionGenerationOptions<float> walk_engine_options;
-            walk_engine_options.step_limits           = config["step_limits"].as<Expression>();
-            walk_engine_options.step_height           = config["step_height"].as<float>();
-            walk_engine_options.step_period           = config["step_period"].as<float>();
-            walk_engine_options.step_width            = config["step_width"].as<float>();
-            walk_engine_options.torso_height          = config["torso_height"].as<float>();
-            walk_engine_options.torso_pitch           = config["torso_pitch"].as<float>();
-            walk_engine_options.torso_midpoint_offset = config["torso_midpoint_offset"].as<Expression>();
+            walk_engine_options.step_period           = config["walk"]["period"].as<float>();
+            walk_engine_options.step_limits           = config["walk"]["step"]["limits"].as<Expression>();
+            walk_engine_options.step_height           = config["walk"]["step"]["height"].as<float>();
+            walk_engine_options.step_width            = config["walk"]["step"]["width"].as<float>();
+            walk_engine_options.torso_height          = config["walk"]["torso"]["height"].as<float>();
+            walk_engine_options.torso_pitch           = config["walk"]["torso"]["pitch"].as<float>();
+            walk_engine_options.torso_midpoint_offset = config["walk"]["torso"]["midpoint_offset"].as<Expression>();
             walk_engine.configure(walk_engine_options);
             walk_engine.reset();
             last_update_time = NUClear::clock::now();
 
-            for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
-                // Sets the leg gains
-                if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
-                    cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
-                }
-                // Sets the arm gains
-                if (id < ServoID::R_HIP_YAW) {
-                    cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
-                }
+            for (auto id : utility::input::servos_for_legs()) {
+                cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
             }
+
+            for (auto id : utility::input::servos_for_arms()) {
+                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
+            }
+
 
             cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH,
                                            config["arms"]["right_shoulder_pitch"].as<float>());
@@ -88,8 +80,7 @@ namespace module::skill {
 
         // Runs every time the Walk provider starts (wasn't running)
         on<Start<WalkTask>>().then([this]() {
-            // Reset the walk engine
-            first_run = true;
+            last_update_time = NUClear::clock::now();
             walk_engine.reset();
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero()));
         });
@@ -105,8 +96,7 @@ namespace module::skill {
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
             .then([this](const WalkTask& walk) {
-                const float dt = get_time_delta();
-                switch (walk_engine.update(dt, walk.velocity_target).value) {
+                switch (walk_engine.update(compute_time_delta(), walk.velocity_target).value) {
                     case WalkState::State::WALKING:
                     case WalkState::State::STOPPING:
                         update_desired_pose();
@@ -129,8 +119,7 @@ namespace module::skill {
            Single>()
             .then([this] {
                 // Stop the walk engine (request zero velocity)
-                const float dt = get_time_delta();
-                switch (walk_engine.update(dt, Eigen::Vector3f::Zero()).value) {
+                switch (walk_engine.update(compute_time_delta(), Eigen::Vector3f::Zero()).value) {
                     case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                     case WalkState::State::STOPPING:
                         update_desired_pose();
@@ -148,20 +137,10 @@ namespace module::skill {
             });
     }
 
-    float Walk::get_time_delta() {
-        // Time is wrong when we run it for the first time
-        float time_delta = 0;
-        if (first_run) {
-            first_run  = false;
-            time_delta = 1.0f / UPDATE_FREQUENCY;
-        }
-        else {
-            // Compute time delta
-            const auto current_time = NUClear::clock::now();
-            time_delta =
-                std::chrono::duration_cast<std::chrono::duration<float>>(current_time - last_update_time).count();
-            last_update_time = current_time;
-        }
+    float Walk::compute_time_delta() {
+        auto time_delta =
+            std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - last_update_time).count();
+        last_update_time = NUClear::clock::now();
         return time_delta;
     }
 
@@ -180,28 +159,23 @@ namespace module::skill {
         auto right_leg  = std::make_unique<RightLegIK>();
         right_leg->time = time;
         right_leg->Htr  = Htr.cast<double>().matrix();
+        for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {
+            right_leg->servos[id] = cfg.servo_states[ServoID(id)];
+        }
+        for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
+            left_leg->servos[id] = cfg.servo_states[ServoID(id)];
+        }
+
         // Arms
         auto left_arm  = std::make_unique<LeftArm>();
         auto right_arm = std::make_unique<RightArm>();
-
-        // Loop to set the servo states
-        for (int id = 0; id < ServoID::NUMBER_OF_SERVOS - 2; ++id) {
-            // Set the legs
-            if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right legs
-                right_leg->servos[id] = cfg.servo_states[ServoID(id)];
-            }
-            else if ((id >= ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left legs
-
-                left_leg->servos[id] = cfg.servo_states[ServoID(id)];
-            }
-            else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 0)) {  // right arms
-                right_arm->servos[id] =
-                    ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
-            }
-            else if ((id < ServoID::R_HIP_YAW) && (id % 2 == 1)) {  // left arms
-                left_arm->servos[id] =
-                    ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
-            }
+        for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
+            right_arm->servos[id] =
+                ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
+        }
+        for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_ARM)) {
+            left_arm->servos[id] =
+                ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
         }
 
         emit<Task>(left_leg, 0, false, "Walk left leg");

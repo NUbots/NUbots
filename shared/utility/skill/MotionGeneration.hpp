@@ -414,9 +414,6 @@ namespace utility::skill {
 
         // 6D piecewise polynomial trajectory for torso.
         Trajectory<Scalar> torso_trajectory;
-
-        // 6D piecewise polynomial trajectory for center of mass.
-        Trajectory<Scalar> com_trajectory;
     };
 }  // namespace utility::skill
 #endif
