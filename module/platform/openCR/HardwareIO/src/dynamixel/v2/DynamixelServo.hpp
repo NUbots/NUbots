@@ -1,9 +1,9 @@
-#ifndef MODULE_PLATFORM_OPENCR_SERVOS_H
-#define MODULE_PLATFORM_OPENCR_SERVOS_H
+#ifndef MODULE_PLATFORM_OPENCR_SERVOS_HPP
+#define MODULE_PLATFORM_OPENCR_SERVOS_HPP
 
 #include <cstdint>
 
-#include "dynamixel/v2/DynamixelDevice.h"
+#include "dynamixel/v2/DynamixelDevice.hpp"
 
 namespace module::platform::openCR {
     struct DynamixelServo : public DynamixelDevice {
@@ -303,4 +303,4 @@ namespace module::platform::openCR {
     };
 }  // namespace module::platform::openCR
 
-#endif  // MODULE_PLATFORM_OPENCR_SERVOS_H
+#endif  // MODULE_PLATFORM_OPENCR_SERVOS_HPP

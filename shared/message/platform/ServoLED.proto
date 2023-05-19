@@ -16,16 +16,16 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.platform;
+package message.platform;
 
- /**
-  * Used for triggering Servo LEDs, mainly for debugging
-  *
-  * @author Dexter Konijn
-  */
+/**
+ * Used for triggering Servo LEDs, mainly for debugging
+ *
+ * @author Dexter Konijn
+ */
 message ServoLED {
-    uint32 id    = 1; // The ID of the servo to target
-    bool   state = 2; // The target state of the LED
+    uint32 id    = 1;  // The ID of the servo to target
+    bool   state = 2;  // The target state of the LED
 }

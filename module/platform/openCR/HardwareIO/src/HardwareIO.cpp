@@ -13,9 +13,6 @@
 #include "utility/math/comparison.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-
-#define DEBUG_ENABLE_MAIN_LOOP    1
-#define DEBUG_ENABLE_LED_CYCLE    0
 #define DEBUG_ENABLE_BUTTON_SPOOF 1
 
 namespace module::platform::openCR {
@@ -24,7 +21,6 @@ namespace module::platform::openCR {
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::platform::RawSensors;
-    using message::platform::ServoLED;
     using message::platform::StatusReturn;
     using utility::support::Expression;
 
@@ -54,22 +50,16 @@ namespace module::platform::openCR {
                 packet_queue[id] = std::vector<PacketTypes>();
             }
 
-
-            // FSRs
-            // packet_queue[uint8_t(NUgus::ID::R_FSR)] = std::vector<PacketTypes>();
-            // packet_queue[uint8_t(NUgus::ID::L_FSR)] = std::vector<PacketTypes>();
-
-
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
-                nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
-                servoStates[i].simulated = config["servos"][i]["simulated"].as<bool>();
+                nugus.servo_offset[i]     = config["servos"][i]["offset"].as<Expression>();
+                nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
+                servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
             startup();
-            log<NUClear::DEBUG>("HardwareIO started");
+
 #if DEBUG_ENABLE_BUTTON_SPOOF
             // trigger scriptrunner
             log<NUClear::INFO>("Simulating Middle Button Down in 3 seconds");
@@ -78,7 +68,6 @@ namespace module::platform::openCR {
         });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
-            // log<NUClear::TRACE>("Shutdown");
             // Close our connection to the OpenCR
             if (opencr.connected()) {
                 opencr.close();
@@ -110,22 +99,20 @@ namespace module::platform::openCR {
                 packet_dropped = true;
             }
 
-#if DEBUG_ENABLE_MAIN_LOOP
+
             // Send a request for all servo packets, only if there were packets dropped
             // In case the system stops for some other reason, we don't want the watchdog
-            // to make it automaticlaly restart
+            // to make it automatically restart
             if (packet_dropped) {
                 log<NUClear::WARN>("Requesting servo packets to restart system");
                 send_servo_request();
             }
-#endif  // DEBUG_ENABLE_MAIN_LOOP
         });
 
         // When we receive data back from the OpenCR it will arrive here
         // Run a state machine to handle reception of packet header and data
         // If a packet is successfully emitted then we emit a StatusReturn message
         on<IO>(opencr.native_handle(), IO::READ).then([this] {
-            // log<NUClear::WARN>("Received data");
             // Process the response packet and emit a StatusReturn if applicable
             handle_response();
         });
@@ -154,16 +141,6 @@ namespace module::platform::openCR {
             auto& info = packet_queue[packet.id].front();
             packet_queue[packet.id].erase(packet_queue[packet.id].begin());
 
-            /*
-            log<NUClear::WARN>(fmt::format(
-                "Packet ID {}, Contents {}, Data size {}, Remaining in this
-                queue {} ",
-                packet.id,
-                (uint8_t) info,
-                packet.data.size(),
-                packet_queue[packet.id].size()));
-            //*/
-
             // Check for packet errors
             /// @todo Do we want to handle packets differently if they have errors?
             if (packet.error != StatusReturn::CommandError::NO_ERROR) {
@@ -185,45 +162,41 @@ namespace module::platform::openCR {
                 case PacketTypes::MODEL_INFORMATION:
                     // call packet handler
                     process_model_information(packet);
-#if DEBUG_ENABLE_MAIN_LOOP
+
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
                         send_servo_request();
                     }
-#endif  // DEBUG_ENABLE_MAIN_LOOP
+
                     break;
 
                 // Handles OpenCR sensor data
                 case PacketTypes::OPENCR_DATA:
                     // call packet handler
                     process_opencr_data(packet);
-#if DEBUG_ENABLE_MAIN_LOOP
+
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
                         log<NUClear::TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
                     }
-#endif  // DEBUG_ENABLE_MAIN_LOOP
+
                     break;
 
                 // Handles servo data
                 case PacketTypes::SERVO_DATA:
                     // call packet handler
                     process_servo_data(packet);
-#if DEBUG_ENABLE_MAIN_LOOP
+
                     // check if we recieved the final packet we are expecting
                     if (!queue_item_waiting()) {
                         log<NUClear::TRACE>("All servos received, requesting OpenCR data");
                         send_opencr_request();
                     }
-#endif  // DEBUG_ENABLE_MAIN_LOOP
+
                     break;
 
-                // Handles FSR data
-                // case PacketTypes::FSR_DATA: processFSRData(packet); break;
-
-                // What is this??
                 default: log<NUClear::WARN>("Unknown packet data received"); break;
             }
         });
@@ -231,11 +204,11 @@ namespace module::platform::openCR {
         // REACTIONS FOR RECEIVING HARDWARE REQUESTS FROM THE SYSTEM
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            // log<NUClear::TRACE>("ServoTargets START");
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
+                // Get the difference between the current and goal servo position to calculate speed
                 float diff =
-                    utility::math::angle::difference(command.position, servoStates[command.id].presentPosition);
+                    utility::math::angle::difference(command.position, servo_states[command.id].present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
@@ -243,48 +216,44 @@ namespace module::platform::openCR {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
                 else {
-                    speed = 0;
+                    speed = 0.0f;
                 }
 
                 // Update our internal state
-                if (servoStates[command.id].torque != command.torque
-                    || servoStates[command.id].positionPGain != command.gain
-                    || servoStates[command.id].positionIGain != command.gain * 0
-                    || servoStates[command.id].positionDGain != command.gain * 0
-                    || servoStates[command.id].goalVelocity != speed
-                    || servoStates[command.id].goalPosition != command.position) {
+                if (servo_states[command.id].torque != command.torque
+                    || servo_states[command.id].position_p_gain != command.gain
+                    || servo_states[command.id].position_i_gain != command.gain * 0
+                    || servo_states[command.id].position_d_gain != command.gain * 0
+                    || servo_states[command.id].profile_velocity != speed
+                    || servo_states[command.id].goal_position != command.position) {
 
+                    servo_states[command.id].dirty = true;
 
-                    // log<NUClear::DEBUG>(fmt::format("ServoTarget ID {} to {}", command.id, command.position));
+                    servo_states[command.id].torque = command.torque;
 
-                    servoStates[command.id].dirty = true;
+                    servo_states[command.id].position_p_gain = command.gain;
+                    servo_states[command.id].position_i_gain = command.gain * 0;
+                    servo_states[command.id].position_d_gain = command.gain * 0;
 
-                    servoStates[command.id].torque = command.torque;
-
-                    servoStates[command.id].positionPGain = command.gain;
-                    servoStates[command.id].positionIGain = command.gain * 0;
-                    servoStates[command.id].positionDGain = command.gain * 0;
-
-                    servoStates[command.id].goalVelocity    = speed;
-                    servoStates[command.id].goalPosition    = command.position;
-                    servoStates[command.id].profileVelocity = float(speed);
+                    servo_states[command.id].goal_position    = command.position;
+                    servo_states[command.id].profile_velocity = speed;
                 }
             }
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            auto commandList = std::make_unique<ServoTargets>();
-            commandList->targets.push_back(command);
+            auto command_list = std::make_unique<ServoTargets>();
+            command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(commandList));
+            emit<Scope::DIRECT>(std::move(command_list));
         });
 
-        // If we get a HeadLED command then write it
+        // If we get a head_led command then write it
         on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
             // Update our internal state
-            opencrState.headLED = led.RGB;
-            opencrState.dirty   = true;
+            opencr_state.head_led = led.RGB;
+            opencr_state.dirty    = true;
         });
 
         // If we get a EyeLED command then write it
@@ -293,58 +262,14 @@ namespace module::platform::openCR {
             // OpenCR can only use 1 RGB LED
         });
 
-        // If we get a EyeLED command then write it
+        // If we get an LED panel command then write it
         on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
-            opencrState.ledPanel.led2 = led.led2;
-            opencrState.ledPanel.led3 = led.led3;
-            opencrState.ledPanel.led4 = led.led4;
-            opencrState.dirty         = true;
+            opencr_state.led_panel.led2 = led.led2;
+            opencr_state.led_panel.led3 = led.led3;
+            opencr_state.led_panel.led4 = led.led4;
+            opencr_state.dirty          = true;
         });
-
-        // If we get a ServoLED command then trigger it
-        // Debugging so set priority HIGH
-        on<Trigger<ServoLED>, Sync<HardwareIO>, Priority::HIGH>().then([this](const ServoLED& target) {
-            // check it's a valid ID
-            if (target.id < 1 || target.id > 20) {
-                log<NUClear::WARN>(fmt::format("Bad ID {} for ServoLED command", target.id));
-                return;
-            }
-            // create the write command and send it
-            // the target state is casted from a bool to a byte (0x00 or 0x01)
-            opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(target.id),
-                                                              uint16_t(DynamixelServo::Address::LED),
-                                                              uint8_t(target.state)));
-            // logging
-            log<NUClear::DEBUG>(fmt::format("Turned servo {} LED {}", target.id, target.state ? "on" : "off"));
-        });
-
-#if DEBUG_ENABLE_LED_CYCLE
-        /// @brief trigger the LEDs of all servos
-        /// @details this is basically for debugging only
-        on<Every<10, std::chrono::seconds>>().then([this] {
-            // control vals
-            int msBetweenServos = 100;
-            int msBeforeOff     = 1000;
-            // create triggers for every servo
-            for (auto& id : nugus.servo_ids()) {
-                // create messages
-                auto onTarget  = std::make_unique<ServoLED>();
-                auto offTarget = std::make_unique<ServoLED>();
-                // fill messages
-                onTarget->id     = uint32_t(id);
-                offTarget->id    = uint32_t(id);
-                onTarget->state  = true;
-                offTarget->state = false;
-                // emit on with delay
-                int onDelay = (id - 1) * msBetweenServos;
-                emit<Scope::DELAY>(std::move(onTarget), std::chrono::milliseconds(onDelay));
-                // emit off with additional delay
-                int offDelay = (((20 - 1) + (id - 1)) * msBetweenServos) + msBeforeOff;
-                emit<Scope::DELAY>(std::move(offTarget), std::chrono::milliseconds(offDelay));
-            }
-        });
-#endif  // DEBUG_ENABLE_LED_CYCLE
     }
 
 }  // namespace module::platform::openCR

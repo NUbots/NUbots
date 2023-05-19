@@ -25,27 +25,25 @@ namespace module::platform::openCR {
         // Wait about 300ms for the dynamixels to start up
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-        // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
+        // Set all dynamixels to not return a status packet when written to (to allow consecutive writes)
         std::array<dynamixel::v2::SyncWriteData<uint8_t>, 20> data;
         for (int i = 0; i < 20; ++i) {
             // ensure write command targets the ID (ID != i)
             data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 1);
         }
-
         opencr.write(
             dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::STATUS_RETURN_LEVEL), data));
 
-        // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been
+        // Now that all dynamixels should have started up, set their delay time to 0 (it may not have been
         // configured before)
         for (int i = 0; i < 20; ++i) {
             // ensure write command targets the ID (ID != i)
             data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 0);
         }
-
         opencr.write(
             dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::RETURN_DELAY_TIME), data));
 
-        // Set up indirect addressing for read addresses
+        // Set up indirect addressing for read addresses for each dynamixel
         std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>>, 20> read_data;
 
         for (int i = 0; i < 20; ++i) {
@@ -129,8 +127,8 @@ namespace module::platform::openCR {
                                                                           write_data2));
 
 
-        /// @brief Find OpenCR firmware and model versions
-        /// @warning this has to be called last, as we need to wait for the response packet before starting
+        // Find OpenCR firmware and model versions
+        // This has to be called last, as we need to wait for the response packet before starting
         packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::MODEL_INFORMATION);
         opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
                                                 uint16_t(OpenCR::Address::MODEL_NUMBER_L),

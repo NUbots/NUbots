@@ -6,8 +6,7 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   actuation::KinematicsConfiguration
-  # Hardware for button testing
-  # platform::cm740::HardwareIO
+  # Hardware for button testing platform::cm740::HardwareIO
   platform::openCR::HardwareIO
   input::SensorFilter
   # Support and Configuration

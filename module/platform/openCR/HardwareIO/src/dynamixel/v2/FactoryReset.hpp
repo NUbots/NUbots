@@ -31,7 +31,7 @@ namespace dynamixel {
                 , length(4)
                 , instruction(Instruction::FACTORY_RESET)
                 , reset(reset)
-                , checksum(calculateChecksum(this)) {}
+                , checksum(calculate_checksum(this)) {}
 
             /// Magic number that heads up every packet
             const uint32_t magic;

@@ -40,7 +40,7 @@ namespace dynamixel {
         };
 
         template <typename T>
-        inline uint16_t calculateChecksum(const T* packet, uint16_t crc_accum = 0) {
+        inline uint16_t calculate_checksum(const T* packet, uint16_t crc_accum = 0) {
             static constexpr uint16_t crc_table[256] = {
                 0x0000, 0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011, 0x8033, 0x0036, 0x003C, 0x8039, 0x0028,
                 0x802D, 0x8027, 0x0022, 0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D, 0x8077, 0x0072, 0x0050, 0x8055,
@@ -74,7 +74,7 @@ namespace dynamixel {
             return crc_accum;
         }
 
-        inline uint16_t calculateChecksum(const std::vector<uint8_t>& packet, uint16_t crc_accum = 0) {
+        inline uint16_t calculate_checksum(const std::vector<uint8_t>& packet, uint16_t crc_accum = 0) {
             static constexpr uint16_t crc_table[256] = {
                 0x0000, 0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011, 0x8033, 0x0036, 0x003C, 0x8039, 0x0028,
                 0x802D, 0x8027, 0x0022, 0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D, 0x8077, 0x0072, 0x0050, 0x8055,

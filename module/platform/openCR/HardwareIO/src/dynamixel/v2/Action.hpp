@@ -30,7 +30,7 @@ namespace dynamixel {
                 , id(id)
                 , length(3)
                 , instruction(Instruction::ACTION)
-                , checksum(calculateChecksum(this)) {}
+                , checksum(calculate_checksum(this)) {}
 
             /// Magic number that heads up every packet
             const uint32_t magic;

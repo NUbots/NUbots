@@ -8,57 +8,55 @@ namespace module::platform::openCR {
     using message::platform::RawSensors;
 
     void HardwareIO::send_servo_request() {
+
         // Write out servo data
         // SYNC_WRITE (write the same memory addresses on all devices)
         // We need to do 2 sync writes here.
         // We always write to all servos if at least one of them is dirty
-
-        const bool servos_dirty = std::any_of(servoStates.cbegin(),
-                                              servoStates.cend(),
+        const bool servos_dirty = std::any_of(servo_states.cbegin(),
+                                              servo_states.cend(),
                                               [](const ServoState& servo) -> bool { return servo.dirty; });
+
         if (servos_dirty) {
-
-            // log<NUClear::DEBUG>("Servos dirty, constructing SyncWrite");
-
             // Write data is split into two components
             std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, 20> data1;
             std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
 
-            for (uint i = 0; i < servoStates.size(); ++i) {
+            for (uint i = 0; i < servo_states.size(); ++i) {
                 // Servo ID is sequential, but not 0-indexed
                 data1[i].id = nugus.servo_ids()[i];
                 data2[i].id = nugus.servo_ids()[i];
 
                 // Clear our dirty flag
-                servoStates[i].dirty = false;
+                servo_states[i].dirty = false;
 
                 // If our torque should be disabled then we disable our torque
-                data1[i].data.torqueEnable =
-                    uint8_t(servoStates[i].torque != 0 && !std::isnan(servoStates[i].goalPosition));
+                data1[i].data.torque_enable =
+                    uint8_t(servo_states[i].torque != 0 && !std::isnan(servo_states[i].goal_position));
 
                 // log<NUClear::DEBUG>(fmt::format(
                 //     "Servo ID {}:\tservo state torque = {}\t data send torque = {}\tgoal position is NaN = {}",
                 //     i + 1,
-                //     servoStates[i].torqueEnabled,
-                //     data1[i].data.torqueEnable,
-                //     std::isnan(servoStates[i].goalPosition)));
+                //     servo_states[i].torque_enabled,
+                //     data1[i].data.torque_enable,
+                //     std::isnan(servo_states[i].goal_position)));
 
                 // Pack our data
-                data1[i].data.velocityIGain = convert::IGain(servoStates[i].velocityIGain);
-                data1[i].data.velocityPGain = convert::PGain(servoStates[i].velocityPGain);
-                data1[i].data.positionDGain = convert::DGain(servoStates[i].positionDGain);
-                data1[i].data.positionIGain = convert::IGain(servoStates[i].positionIGain);
-                data1[i].data.positionPGain = convert::PGain(servoStates[i].positionPGain);
+                data1[i].data.velocity_i_gain = convert::i_gain(servo_states[i].velocity_i_gain);
+                data1[i].data.velocity_p_gain = convert::p_gain(servo_states[i].velocity_p_gain);
+                data1[i].data.position_d_gain = convert::d_gain(servo_states[i].position_d_gain);
+                data1[i].data.position_i_gain = convert::i_gain(servo_states[i].position_i_gain);
+                data1[i].data.position_p_gain = convert::p_gain(servo_states[i].position_p_gain);
 
-                data2[i].data.feedforward1stGain  = convert::FFGain(servoStates[i].feedforward1stGain);
-                data2[i].data.feedforward2ndGain  = convert::FFGain(servoStates[i].feedforward2ndGain);
-                data2[i].data.goalPWM             = convert::PWM(servoStates[i].goalPWM);
-                data2[i].data.goalCurrent         = convert::current(servoStates[i].goalCurrent);
-                data2[i].data.goalVelocity        = convert::velocity(servoStates[i].goalVelocity);
-                data2[i].data.profileAcceleration = convert::FFGain(servoStates[i].profileAcceleration);
-                data2[i].data.profileVelocity     = convert::velocity(servoStates[i].profileVelocity);
-                data2[i].data.goalPosition =
-                    convert::position(i, servoStates[i].goalPosition, nugus.servo_direction, nugus.servo_offset);
+                data2[i].data.feedforward_1st_gain = convert::ff_gain(servo_states[i].feedforward_1st_gain);
+                data2[i].data.feedforward_2nd_gain = convert::ff_gain(servo_states[i].feedforward_2nd_gain);
+                data2[i].data.goal_pwm             = convert::PWM(servo_states[i].goal_pwm);
+                data2[i].data.goal_current         = convert::current(servo_states[i].goal_current);
+                data2[i].data.goal_velocity        = convert::velocity(servo_states[i].goal_velocity);
+                data2[i].data.profile_acceleration = convert::ff_gain(servo_states[i].profile_acceleration);
+                data2[i].data.profile_velocity     = convert::velocity(servo_states[i].profile_velocity);
+                data2[i].data.goal_position =
+                    convert::position(i, servo_states[i].goal_position, nugus.servo_direction, nugus.servo_offset);
             }
 
             opencr.write(
@@ -85,19 +83,19 @@ namespace module::platform::openCR {
 
     void HardwareIO::send_opencr_request() {
         // Write out OpenCR data
-        if (opencrState.dirty) {
+        if (opencr_state.dirty) {
             // Clear the dirty flag
-            opencrState.dirty = false;
+            opencr_state.dirty = false;
 
             // Pack our data
             OpenCRWriteData data;
-            data.led = opencrState.ledPanel.led4 ? 0x04 : 0x00;
-            data.led |= opencrState.ledPanel.led3 ? 0x02 : 0x00;
-            data.led |= opencrState.ledPanel.led2 ? 0x01 : 0x00;
-            data.rgbLED = (uint8_t(0x000000FF & opencrState.headLED.RGB) & 0x1F) << 10;         // R
-            data.rgbLED |= ((uint8_t(0x0000FF00 & opencrState.headLED.RGB) >> 8) & 0x1F) << 5;  // G
-            data.rgbLED |= (uint8_t(0x00FF0000 & opencrState.headLED.RGB) >> 16) & 0x1F;        // B
-            data.buzzer = opencrState.buzzer;
+            data.led = opencr_state.led_panel.led4 ? 0x04 : 0x00;
+            data.led |= opencr_state.led_panel.led3 ? 0x02 : 0x00;
+            data.led |= opencr_state.led_panel.led2 ? 0x01 : 0x00;
+            data.rgb_led = (uint8_t(0x000000FF & opencr_state.head_led.RGB) & 0x1F) << 10;         // R
+            data.rgb_led |= ((uint8_t(0x0000FF00 & opencr_state.head_led.RGB) >> 8) & 0x1F) << 5;  // G
+            data.rgb_led |= (uint8_t(0x00FF0000 & opencr_state.head_led.RGB) >> 16) & 0x1F;        // B
+            data.buzzer = opencr_state.buzzer;
 
             // Write our data
             opencr.write(dynamixel::v2::WriteCommand<OpenCRWriteData>(uint8_t(NUgus::ID::OPENCR),
@@ -112,16 +110,5 @@ namespace module::platform::openCR {
                                                 uint16_t(OpenCR::Address::LED),
                                                 sizeof(OpenCRReadData)));
     }
-
-    /**
-     * Not really sure if any of this is correct, just one big massive guess
-     */
-    // Get FSR data
-    // SYNC_READ from both FSRs
-    // packet_queue[uint8_t(NUgus::ID::R_FSR)].push_back(PacketTypes::FSR_DATA);
-    // packet_queue[uint8_t(NUgus::ID::L_FSR)].push_back(PacketTypes::FSR_DATA);
-    // opencr.write(dynamixel::v2::SyncReadCommand<2>(uint16_t(AddressBook::FSR_READ),
-    //                                                sizeof(FSRReadData),
-    //                                                nugus.fsr_ids()));
 
 }  // namespace module::platform::openCR

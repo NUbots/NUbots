@@ -214,67 +214,45 @@ namespace module::platform::openCR {
         /**
          * Controller gain = Ram table gain / 128
          */
-        float PGain(uint16_t p_gain) {
+        float p_gain(uint16_t p_gain) {
             return float(p_gain / 128.0f);
         }
 
-        uint16_t PGain(float p_gain) {
+        uint16_t p_gain(float p_gain) {
             return uint16_t(p_gain * 128.0f);
         }
 
         /**
          * Controller gain = Ram table gain / 65536
          */
-        float IGain(uint16_t i_gain) {
+        float i_gain(uint16_t i_gain) {
             return i_gain / 65536.0f;
         }
 
-        uint16_t IGain(float i_gain) {
+        uint16_t i_gain(float i_gain) {
             return uint16_t(i_gain * 65536.0f);
         }
 
         /**
          * Controller gain = Ram table gain / 16
          */
-        float DGain(uint16_t d_gain) {
+        float d_gain(uint16_t d_gain) {
             return d_gain / 16.0f;
         }
 
-        uint16_t DGain(float d_gain) {
+        uint16_t d_gain(float d_gain) {
             return uint16_t(d_gain * 16.0f);
         }
 
 
-        float FFGain(uint16_t ff_gain) {
+        float ff_gain(uint16_t ff_gain) {
             return ff_gain / 4.0f;
         }
 
-        uint16_t FFGain(float ff_gain) {
+        uint16_t ff_gain(float ff_gain) {
             return uint16_t(ff_gain * 4.0f);
         }
 
-
-        // float fsrForce(const uint16_t& value) {
-        //     // Base unit: 1mN = 0.001N
-        //     return value * 0.001;
-        // }
-
-        // float fsrCentre(const bool& left, const uint8_t& value) {
-        //     if (value == 0xFF) {
-        //         // Return NaN if there is no centre
-        //         return std::numeric_limits<float>::quiet_NaN();
-        //     }
-        //     // Flips right foot coordinates to match robot coords
-        //     // See:
-        //     //
-        //     http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
-        //     if (left) {
-        //         // This normalises the value between -1 and 1
-        //         return double(value - 127) / 127.0;
-        //     }
-        //     // This normalises the value between -1 and 1
-        //     return double(127 - value) / 127.0;
-        // }
     }  // namespace convert
 
 }  // namespace module::platform::openCR

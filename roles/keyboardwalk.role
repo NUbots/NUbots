@@ -10,8 +10,7 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
-  # Hardware Interface
-  # platform::cm740::HardwareIO
+  # Hardware Interface platform::cm740::HardwareIO
   platform::openCR::HardwareIO
   input::SensorFilter
   # Motion

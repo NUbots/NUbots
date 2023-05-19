@@ -4,9 +4,9 @@
 #include <array>
 #include <stdexcept>
 
-#include "dynamixel/v2/DynamixelServo.h"
-#include "dynamixel/v2/FSR.h"
-#include "dynamixel/v2/OpenCR.h"
+#include "dynamixel/v2/DynamixelServo.hpp"
+#include "dynamixel/v2/FSR.hpp"
+#include "dynamixel/v2/OpenCR.hpp"
 
 namespace module::platform::openCR {
 
@@ -133,45 +133,45 @@ namespace module::platform::openCR {
 
 #pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
     struct DynamixelServoWriteDataPart1 {
-        uint8_t torqueEnable;
-        uint16_t velocityIGain;
-        uint16_t velocityPGain;
-        uint16_t positionDGain;
-        uint16_t positionIGain;
-        uint16_t positionPGain;
+        uint8_t torque_enable;
+        uint16_t velocity_i_gain;
+        uint16_t velocity_p_gain;
+        uint16_t position_d_gain;
+        uint16_t position_i_gain;
+        uint16_t position_p_gain;
     };
 
     struct DynamixelServoWriteDataPart2 {
-        uint16_t feedforward1stGain;
-        uint16_t feedforward2ndGain;
-        int16_t goalPWM;
-        int16_t goalCurrent;
-        int32_t goalVelocity;
-        uint32_t profileAcceleration;
-        uint32_t profileVelocity;
-        uint32_t goalPosition;
+        uint16_t feedforward_1st_gain;
+        uint16_t feedforward_2nd_gain;
+        int16_t goal_pwm;
+        int16_t goal_current;
+        int32_t goal_velocity;
+        uint32_t profile_acceleration;
+        uint32_t profile_velocity;
+        uint32_t goal_position;
     };
 
     struct DynamixelServoReadData {
-        uint8_t torqueEnable;
-        uint8_t hardwareErrorStatus;
-        int16_t presentPWM;
-        int16_t presentCurrent;
-        int32_t presentVelocity;
-        uint32_t presentPosition;
-        uint16_t presentVoltage;
-        uint8_t presentTemperature;
+        uint8_t torque_enable;
+        uint8_t hardware_error_status;
+        int16_t present_pwm;
+        int16_t present_current;
+        int32_t present_velocity;
+        uint32_t present_position;
+        uint16_t present_voltage;
+        uint8_t present_temperature;
     };
 
     struct OpenCRWriteData {
         uint8_t led;
-        uint16_t rgbLED;
+        uint16_t rgb_led;
         uint8_t buzzer;
     };
 
     struct OpenCRReadData {
         uint8_t led;
-        uint16_t rgbLed;
+        uint16_t rgb_led;
         uint16_t buzzer;
         uint8_t button;
         uint8_t voltage;

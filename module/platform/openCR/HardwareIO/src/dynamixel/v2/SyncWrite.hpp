@@ -52,7 +52,7 @@ namespace dynamixel {
                 , address(address)
                 , size(sizeof(T))
                 , data(data)
-                , checksum(calculateChecksum(this)) {}
+                , checksum(calculate_checksum(this)) {}
 
             /// Magic number that heads up every packet
             const uint32_t magic;

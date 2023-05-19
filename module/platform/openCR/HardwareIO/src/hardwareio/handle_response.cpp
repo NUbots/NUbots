@@ -7,7 +7,6 @@ namespace module::platform::openCR {
     enum Phases : uint8_t { IDLE, HEADER_SYNC, PREAMBLE, DATA, FINISH, TIMEOUT };
 
     void HardwareIO::handle_response() {
-        // log<NUClear::TRACE>("IO Start");
         static constexpr uint8_t packet_header[4]           = {0xFF, 0xFF, 0xFD, 0x00};
         static Phases current_phase                         = Phases::IDLE;
         static uint8_t sync_point                           = 0;
@@ -41,7 +40,7 @@ namespace module::platform::openCR {
             msg->timestamp = NUClear::clock::now();
 
             // Check CRC
-            if (dynamixel::v2::calculateChecksum(response) != msg->checksum) {
+            if (dynamixel::v2::calculate_checksum(response) != msg->checksum) {
                 log<NUClear::WARN>("Invalid CRC detected.");
                 return;  // without emit
             }

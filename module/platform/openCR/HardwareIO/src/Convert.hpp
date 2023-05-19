@@ -4,7 +4,7 @@
 #include <array>
 #include <stdexcept>
 
-#include "dynamixel/v2/OpenCR.h"
+#include "dynamixel/v2/OpenCR.hpp"
 
 namespace module::platform::openCR {
 
@@ -48,18 +48,14 @@ namespace module::platform::openCR {
         int16_t current(float current);
 
         // Convert P, I, D, and feed-forward gain readings between control table values and actual values
-        float PGain(uint16_t p_gain);
-        uint16_t PGain(float p_gain);
-        float IGain(uint16_t i_gain);
-        uint16_t IGain(float i_gain);
-        float DGain(uint16_t d_gain);
-        uint16_t DGain(float d_gain);
-        float FFGain(uint16_t ff_gain);
-        uint16_t FFGain(float ff_gain);
-
-        // Convert FSR readings
-        // float fsrForce(const uint16_t& value);
-        // float fsrCentre(const bool& left, const uint8_t& value);
+        float p_gain(uint16_t p_gain);
+        uint16_t p_gain(float p_gain);
+        float i_gain(uint16_t i_gain);
+        uint16_t i_gain(float i_gain);
+        float d_gain(uint16_t d_gain);
+        uint16_t d_gain(float d_gain);
+        float ff_gain(uint16_t ff_gain);
+        uint16_t ff_gain(float ff_gain);
 
     }  // namespace convert
 

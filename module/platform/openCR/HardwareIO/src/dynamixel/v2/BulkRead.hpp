@@ -49,7 +49,7 @@ namespace dynamixel {
                 , length(3 + N * data[0])
                 , instruction(Instruction::BULK_READ)
                 , data(data)
-                , checksum(calculateChecksum(this)) {}
+                , checksum(calculate_checksum(this)) {}
 
             /// Magic number that heads up every packet
             const uint32_t magic;

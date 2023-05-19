@@ -1,7 +1,7 @@
-#ifndef MODULE_PLATFORM_OPENCR_OPENCR_H
-#define MODULE_PLATFORM_OPENCR_OPENCR_H
+#ifndef MODULE_PLATFORM_OPENCR_OPENCR_HPP
+#define MODULE_PLATFORM_OPENCR_OPENCR_HPP
 
-#include "dynamixel/v2/DynamixelDevice.h"
+#include "dynamixel/v2/DynamixelDevice.hpp"
 
 namespace module::platform::openCR {
     class OpenCR : public DynamixelDevice {
@@ -57,4 +57,4 @@ namespace module::platform::openCR {
 
 }  // namespace module::platform::openCR
 
-#endif  // MODULE_PLATFORM_OPENCR_OPENCR_H
+#endif  // MODULE_PLATFORM_OPENCR_OPENCR_HPP
