@@ -1,11 +1,11 @@
+import { PropsWithChildren } from "react";
+import React from "react";
+import { ComponentType } from "react";
 import { reaction } from "mobx";
 import { computed } from "mobx";
 import { disposeOnUnmount } from "mobx-react";
 import { observer } from "mobx-react";
 import { now } from "mobx-utils";
-import { PropsWithChildren } from "react";
-import React from "react";
-import { ComponentType } from "react";
 
 import { Canvas } from "../three/three";
 import { Three } from "../three/three";

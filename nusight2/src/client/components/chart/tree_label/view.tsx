@@ -1,13 +1,11 @@
-import { observer } from "mobx-react";
 import React from "react";
 import { Component } from "react";
+import { observer } from "mobx-react";
 import { ColorResult } from "react-color";
 import { TwitterPicker } from "react-color";
 
 import { TreeNodeModel } from "../../checkbox_tree/model";
 import { TreeViewModel } from "../view_model";
-
-import style from "./style.module.css";
 
 type TreeLabelProps = {
   node: TreeNodeModel;
@@ -31,25 +29,25 @@ export class TreeLabel extends Component<TreeLabelProps> {
 
     if (!node.leaf) {
       return (
-        <div className={style.label} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
+        <div className="flex items-center mr-4" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
           {node.label}
         </div>
       );
     }
 
     return (
-      <div className={style.label} onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
-        <span className={style.labelName}>{node.label}</span>
+      <div className="flex items-center mr-4" onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave}>
+        <span className="flex-grow">{node.label}</span>
 
         <button
-          className={style.pickerButton}
+          className="w-[12px] h-[12px] rounded-full"
           onClick={this.togglePicker}
           style={{ backgroundColor: node.color }}
         ></button>
 
         {this.state.showColorPicker && (
-          <div className={style.pickerPopover}>
-            <div className={style.pickerPopoverCover} onClick={this.closePicker}></div>
+          <div className="absolute z-10 right-2">
+            <div className="fixed top-0 right-0 bottom-0 left-0" onClick={this.closePicker}></div>
             <TwitterPicker color={node.color} onChangeComplete={this.onColorChange} triangle="hide" />
           </div>
         )}

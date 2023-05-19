@@ -12,7 +12,7 @@ targets:
     message.support.nusight.Overview: true
 
     # DataPoints power the chart view
-    message.support.nusight.DataPoint: true
+    message.eye.DataPoint: true
 
     # Sensor data
     message.input.Sensors: true

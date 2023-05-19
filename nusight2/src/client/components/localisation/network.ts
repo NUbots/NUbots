@@ -1,16 +1,16 @@
 import { action } from "mobx";
 import * as THREE from "three";
 
+import { Quaternion } from "../../../shared/math/quaternion";
+import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
-import { Quaternion } from "../../math/quaternion";
-import { Vector3 } from "../../math/vector3";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
-import { LocalisationRobotModel } from "./darwin_robot/model";
 import { LocalisationModel } from "./model";
+import { LocalisationRobotModel } from "./robot_model";
 import Sensors = message.input.Sensors;
 
 export class LocalisationNetwork {
@@ -29,10 +29,16 @@ export class LocalisationNetwork {
 
   @action
   private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
+    // Ignore empty Sensors packets which may be emitted by the nbs scrubber
+    // when there's no Sensors data at a requested timestamp).
+    if (!sensors.Htw) {
+      return;
+    }
+
     const robot = LocalisationRobotModel.of(robotModel);
 
     const { translation: rWTt, rotation: Rwt } = decompose(
-      new THREE.Matrix4().getInverse(fromProtoMat44(sensors.Htw!)),
+      new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert(),
     );
     robot.rWTt = new Vector3(rWTt.x, rWTt.y, rWTt.z);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);

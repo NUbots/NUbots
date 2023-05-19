@@ -1,9 +1,9 @@
+import React from "react";
 import { action } from "@storybook/addon-actions";
-import { storiesOf } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import { action as mobxAction, observable, reaction } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import { now } from "mobx-utils";
-import React from "react";
 
 import { SeededRandom } from "../../../../shared/base/random/seeded_random";
 import { RobotNetworkStatsModel } from "../../../network/model";
@@ -14,23 +14,45 @@ const actions = {
   selectRobot: action("selectRobot"),
 };
 
-storiesOf("components.robot_selector", module)
-  .addDecorator((story) => <div style={{ maxWidth: "320px" }}>{story()}</div>)
-  .add("renders empty", () => {
+const meta: Meta<typeof RobotSelector> = {
+  title: "components/RobotSelector",
+  component: RobotSelector,
+  decorators: [(story) => <div style={{ maxWidth: "320px" }}>{story()}</div>],
+};
+
+export default meta;
+
+type Story = StoryObj<typeof RobotSelector>;
+
+export const Empty: Story = {
+  name: "empty",
+  render: () => {
     return <RobotSelector robots={[]} selectRobot={actions.selectRobot} />;
-  })
-  .add("renders with robots", () => {
+  },
+};
+
+export const WithRobots: Story = {
+  name: "with robots",
+  render: () => {
     const robots = getRobots();
     return <RobotSelector robots={robots} selectRobot={actions.selectRobot} />;
-  })
-  .add("renders with updating stats", () => {
+  },
+};
+
+export const WithUpdatingStats: Story = {
+  name: "with updating stats",
+  render: () => {
     const robots = getRobots();
     const model = observable({
       robots,
     });
     return <UpdatingStatsStory robots={model.robots} />;
-  })
-  .add("interactive", () => {
+  },
+};
+
+export const Interactive: Story = {
+  name: "interactive",
+  render: () => {
     const robots = getRobots();
     const model = observable({
       robots,
@@ -38,7 +60,8 @@ storiesOf("components.robot_selector", module)
     const selectRobot = mobxAction((robot: RobotModel) => (robot.enabled = !robot.enabled));
     const Component = observer(() => <RobotSelector robots={model.robots} selectRobot={selectRobot} />);
     return <Component />;
-  });
+  },
+};
 
 function getRobots(): RobotModel[] {
   return [
@@ -47,24 +70,24 @@ function getRobots(): RobotModel[] {
       name: "Virtual Robot 1",
       connected: true,
       enabled: true,
-      address: "10.222.10.14",
-      port: 57619,
+      address: "",
+      port: 0,
     },
     {
       id: "2",
       name: "Virtual Robot 2",
       connected: true,
       enabled: true,
-      address: "10.222.10.19",
-      port: 36261,
+      address: "",
+      port: 0,
     },
     {
       id: "3",
       name: "Virtual Robot 3",
       connected: false,
       enabled: true,
-      address: "10.222.10.20",
-      port: 67341,
+      address: "",
+      port: 0,
     },
   ];
 }

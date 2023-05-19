@@ -1,6 +1,5 @@
 import { AppModel } from "../client/components/app/model";
 import { AppNetwork } from "../client/components/app/network";
-import { MessageTypePath } from "../client/network/message_type_names";
 import { Network } from "../client/network/network";
 import { NUsightNetwork } from "../client/network/nusight_network";
 import { FakeNUClearNetClient } from "../server/nuclearnet/fake_nuclearnet_client";
@@ -32,8 +31,7 @@ describe("Networking Integration", () => {
   function createNUsightNetwork() {
     const appModel = AppModel.of();
     const nuclearnetClient = new FakeNUClearNetClient(nuclearnetServer);
-    const messageTypePath = new MessageTypePath();
-    const nusightNetwork = new NUsightNetwork(nuclearnetClient, appModel, messageTypePath);
+    const nusightNetwork = new NUsightNetwork(nuclearnetClient, appModel);
     AppNetwork.of(nusightNetwork, appModel);
     return nusightNetwork;
   }

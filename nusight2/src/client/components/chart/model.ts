@@ -1,7 +1,7 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
 
-import { Vector2 } from "../../math/vector2";
+import { Vector2 } from "../../../shared/math/vector2";
 import { BrowserSystemClock } from "../../time/browser_clock";
 import { CheckedState } from "../checkbox_tree/model";
 import { RobotModel } from "../robot/model";

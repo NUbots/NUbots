@@ -1,10 +1,10 @@
-import { observer } from "mobx-react";
 import React from "react";
+import { observer } from "mobx-react";
 
 import { dropdownContainer } from "../dropdown_container/view";
 import { Switch } from "../switch/view";
 
-import MenuIcon from "./menu_icon.svg";
+import IconMenu from "./icon_menu";
 import style from "./style.module.css";
 
 export type SwitchesMenuOption = {
@@ -22,7 +22,7 @@ export const SwitchesMenu = observer((props: SwitchesMenuProps) => {
   const { options } = props;
   const dropdownToggle = (
     <button className={style.button}>
-      <MenuIcon />
+      <IconMenu />
     </button>
   );
   return (

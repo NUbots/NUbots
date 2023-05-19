@@ -3,9 +3,8 @@ import { Matrix4 } from "three";
 import { Vector3 } from "three";
 import { Quaternion } from "three";
 
+import { Imat4, message } from "../../shared/messages";
 import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
-import { message } from "../../shared/messages";
-import { Imat4 } from "../../shared/messages";
 import { Message, Simulator } from "../simulator";
 
 import { periodic } from "./periodic";
@@ -96,7 +95,7 @@ function toHtw(x: number, y: number, z: number, heading: number): Matrix4 {
   const translation = new Vector3(x, y, z);
   const rotation = new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), heading);
   const scale = new Vector3(1, 1, 1);
-  return new Matrix4().getInverse(new Matrix4().compose(translation, rotation, scale));
+  return new Matrix4().copy(new Matrix4().compose(translation, rotation, scale)).invert();
 }
 
 function toProtoMat44(m: Matrix4): Imat4 {

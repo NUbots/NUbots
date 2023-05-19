@@ -1,9 +1,11 @@
-import { action } from "mobx";
-import { observer } from "mobx-react";
 import { PropsWithChildren } from "react";
 import React from "react";
+import { action } from "mobx";
+import { observer } from "mobx-react";
+
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
+
 import { OdometryController } from "./controller";
 import { OdometryModel } from "./model";
 import { OdometryVisualizer } from "./odometry_visualizer/view";
@@ -34,7 +36,7 @@ export class OdometryView extends React.Component<{
         </Menu>
         {selectedRobot && (
           <div className={styles.content}>
-            <OdometryVisualizer model={selectedRobot.visualizerModel} />
+            <OdometryVisualizer model={selectedRobot.visualizerModel} key={selectedRobot.robotModel.id} />
           </div>
         )}
       </div>

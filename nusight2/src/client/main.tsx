@@ -1,5 +1,7 @@
-import { configure } from "mobx";
+import "./tailwind.css";
+
 import React from "react";
+import { configure } from "mobx";
 import { createRoot } from "react-dom/client";
 
 import { AppController } from "./components/app/controller";
@@ -16,8 +18,6 @@ import { installVisualMesh } from "./components/visual_mesh/install";
 import { NavigationConfiguration } from "./navigation";
 import { NUsightNetwork } from "./network/nusight_network";
 
-import "./main.css";
-
 const nav = NavigationConfiguration.of();
 const appModel = AppModel.of();
 const nusightNetwork = NUsightNetwork.of(appModel);
@@ -25,7 +25,7 @@ nusightNetwork.connect({ name: "nusight" });
 
 const appController = AppController.of();
 AppNetwork.of(nusightNetwork, appModel);
-const Menu = withRobotSelectorMenuBar(appModel.robots, appController.toggleRobotEnabled);
+const Menu = withRobotSelectorMenuBar(appModel.robots, appController.toggleRobotEnabled, nusightNetwork);
 
 installDashboard({ nav, appModel, nusightNetwork, Menu });
 installLocalisation({ nav, appModel, nusightNetwork, Menu });

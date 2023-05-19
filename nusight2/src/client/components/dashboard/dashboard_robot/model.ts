@@ -1,11 +1,12 @@
 import { computed, observable } from "mobx";
+
+import { Matrix2 } from "../../../../shared/math/matrix2";
+import { Matrix3 } from "../../../../shared/math/matrix3";
+import { Transform } from "../../../../shared/math/transform";
+import { Vector2 } from "../../../../shared/math/vector2";
+import { Vector3 } from "../../../../shared/math/vector3";
 import { message } from "../../../../shared/messages";
 import { memoize } from "../../../base/memoize";
-import { Matrix2 } from "../../../math/matrix2";
-import { Matrix3 } from "../../../math/matrix3";
-import { Transform } from "../../../math/transform";
-import { Vector2 } from "../../../math/vector2";
-import { Vector3 } from "../../../math/vector3";
 import { BrowserSystemClock } from "../../../time/browser_clock";
 import { RobotModel } from "../../robot/model";
 

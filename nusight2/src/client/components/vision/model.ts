@@ -5,10 +5,11 @@ import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
 
-import { CameraModel } from "./camera/model";
+import { VisionCameraModel } from "./vision_camera/model";
 
 export class VisionModel {
   @observable.ref selectedRobot?: VisionRobotModel;
+  @observable.ref selectedCameraIndex = -1;
 
   constructor(private appModel: AppModel) {}
 
@@ -25,10 +26,16 @@ export class VisionModel {
   get visionRobots(): VisionRobotModel[] {
     return this.robots.map(VisionRobotModel.of);
   }
+
+  @computed
+  get selectedCamera(): VisionCameraModel | undefined {
+    return this.selectedRobot?.cameraList[this.selectedCameraIndex];
+  }
 }
 
 export class VisionRobotModel {
-  @observable cameras: Map<number, CameraModel> = new Map();
+  /** A map of camera ids to their associated model */
+  @observable cameras: Map<number, VisionCameraModel> = new Map();
 
   constructor(readonly robotModel: RobotModel) {}
 

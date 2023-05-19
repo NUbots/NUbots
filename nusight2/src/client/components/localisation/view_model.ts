@@ -3,7 +3,7 @@ import { HemisphereLight } from "three";
 import { PointLight } from "three";
 import { Object3D } from "three";
 
-import { Vector3 } from "../../math/vector3";
+import { Vector3 } from "../../../shared/math/vector3";
 import { stage } from "../three/builders";
 import { scene } from "../three/builders";
 import { perspectiveCamera } from "../three/builders";

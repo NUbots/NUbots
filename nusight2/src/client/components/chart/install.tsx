@@ -1,11 +1,10 @@
-import React from "react";
-import { ComponentType } from "react";
+import React, { ComponentType } from "react";
 
 import { NavigationConfiguration } from "../../navigation";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { AppModel } from "../app/model";
 
-import Icon from "./icon.svg";
+import IconChart from "./icon";
 
 export function installChart({
   nav,
@@ -20,7 +19,7 @@ export function installChart({
 }) {
   nav.addRoute({
     path: "/chart",
-    Icon,
+    Icon: IconChart,
     label: "Chart",
     Content: React.lazy(async () => {
       const { createChartView } = await import("./create");
