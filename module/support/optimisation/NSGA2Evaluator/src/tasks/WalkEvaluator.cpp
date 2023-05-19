@@ -103,8 +103,8 @@ namespace module::support::optimisation {
         // Get constant variables
         YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
-        gravity_max = eval_config["gravity"]["MAX"].as<float>();
-        gravity_min = eval_config["gravity"]["MIN"].as<float>();
+        gravity_max = eval_config["gravity"]["max"].as<float>();
+        gravity_min = eval_config["gravity"]["min"].as<float>();
     }
 
     void WalkEvaluator::reset_simulation() {
