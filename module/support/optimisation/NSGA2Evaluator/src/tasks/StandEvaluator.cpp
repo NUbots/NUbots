@@ -71,13 +71,13 @@ namespace module::support::optimisation {
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
     }
 
-    std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculate_fitness_scores(bool early_termination,
+    std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculate_fitness_scores(bool /* early_termination */,
                                                                                  double sim_time,
                                                                                  int generation,
                                                                                  int individual) {
         double trial_duration = sim_time - trial_start_time;
         auto scores           = calculate_scores(trial_duration);
-        auto constraints      = early_termination ? calculate_constraints() : calculate_constraints();
+        auto constraints      = calculate_constraints();
 
         NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
         NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
