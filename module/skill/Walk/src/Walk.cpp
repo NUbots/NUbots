@@ -46,13 +46,15 @@ namespace module::skill {
 
             // Configure the motion generation options
             utility::skill::MotionGenerationOptions<float> walk_engine_options;
-            walk_engine_options.step_period           = config["walk"]["period"].as<float>();
-            walk_engine_options.step_limits           = config["walk"]["step"]["limits"].as<Expression>();
-            walk_engine_options.step_height           = config["walk"]["step"]["height"].as<float>();
-            walk_engine_options.step_width            = config["walk"]["step"]["width"].as<float>();
-            walk_engine_options.torso_height          = config["walk"]["torso"]["height"].as<float>();
-            walk_engine_options.torso_pitch           = config["walk"]["torso"]["pitch"].as<float>();
-            walk_engine_options.torso_midpoint_offset = config["walk"]["torso"]["midpoint_offset"].as<Expression>();
+            walk_engine_options.step_period       = config["walk"]["period"].as<float>();
+            walk_engine_options.step_apex_ratio   = config["walk"]["step"]["apex_ratio"].as<float>();
+            walk_engine_options.step_limits       = config["walk"]["step"]["limits"].as<Expression>();
+            walk_engine_options.step_height       = config["walk"]["step"]["height"].as<float>();
+            walk_engine_options.step_width        = config["walk"]["step"]["width"].as<float>();
+            walk_engine_options.torso_height      = config["walk"]["torso"]["height"].as<float>();
+            walk_engine_options.torso_pitch       = config["walk"]["torso"]["pitch"].as<float>();
+            walk_engine_options.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
+            walk_engine_options.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<float>();
             walk_engine.configure(walk_engine_options);
             walk_engine.reset();
             last_update_time = NUClear::clock::now();

@@ -43,14 +43,20 @@ namespace utility::skill {
         /// @brief Lateral distance between feet (how spread apart the feet should be)
         Scalar step_width = 0.0;
 
+        /// @brief Ratio of the step_period where the foot should be at its highest point, between [0 1].
+        Scalar step_apex_ratio = 0.0;
+
         /// @brief Torso height.
         Scalar torso_height = 0.0;
 
         /// @brief Torso pitch.
         Scalar torso_pitch = 0.0;
 
-        /// @brief Torso offset at half step period from the planted foot.
-        Eigen::Matrix<Scalar, 3, 1> torso_midpoint_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+        /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1].
+        Scalar torso_sway_ratio = 0.0;
+
+        /// @brief Torso offset at torso_sway_ratio*step_period from the planted foot.
+        Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
     };
 
     template <typename Scalar>
@@ -61,14 +67,16 @@ namespace utility::skill {
          * @param options Motion generation options.
          */
         void configure(const MotionGenerationOptions<Scalar>& options) {
-            step_limits           = options.step_limits;
-            step_height           = options.step_height;
-            step_period           = options.step_period;
-            half_step_period      = step_period / 2.0;
-            step_width            = options.step_width;
-            torso_height          = options.torso_height;
-            torso_pitch           = options.torso_pitch;
-            torso_midpoint_offset = options.torso_midpoint_offset;
+            step_limits       = options.step_limits;
+            step_height       = options.step_height;
+            step_period       = options.step_period;
+            half_step_period  = step_period / 2.0;
+            step_width        = options.step_width;
+            step_apex_ratio   = options.step_apex_ratio;
+            torso_height      = options.torso_height;
+            torso_pitch       = options.torso_pitch;
+            torso_sway_offset = options.torso_sway_offset;
+            torso_sway_ratio  = options.torso_sway_ratio;
         }
 
         /// @brief Get the lateral distance between feet in current planted foot frame.
@@ -98,32 +106,38 @@ namespace utility::skill {
 
             // X position trajectory
             swingfoot_trajectory.add_waypoint(X, 0, Hps_start.translation().x(), 0);
-            swingfoot_trajectory.add_waypoint(X, half_step_period, 0, velocity_target.x());
+            swingfoot_trajectory.add_waypoint(X, step_apex_ratio * step_period, 0, velocity_target.x());
             swingfoot_trajectory.add_waypoint(X, step_period, step_placement.x(), 0);
 
             // Y position trajectory
             swingfoot_trajectory.add_waypoint(Y, 0, Hps_start.translation().y(), 0);
-            swingfoot_trajectory.add_waypoint(Y, half_step_period, get_foot_width_offset(), velocity_target.y());
+            swingfoot_trajectory.add_waypoint(Y,
+                                              step_apex_ratio * step_period,
+                                              get_foot_width_offset(),
+                                              velocity_target.y());
             swingfoot_trajectory.add_waypoint(Y, step_period, get_foot_width_offset() + step_placement.y(), 0);
 
             // Z position trajectory
             swingfoot_trajectory.add_waypoint(Z, 0, Hps_start.translation().z(), 0);
-            swingfoot_trajectory.add_waypoint(Z, half_step_period, step_height, 0);
+            swingfoot_trajectory.add_waypoint(Z, step_apex_ratio * step_period, step_height, 0);
             swingfoot_trajectory.add_waypoint(Z, step_period, 0, 0);
 
             // Roll trajectory
             swingfoot_trajectory.add_waypoint(ROLL, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(ROLL, half_step_period, 0, 0);
+            swingfoot_trajectory.add_waypoint(ROLL, step_apex_ratio * step_period, 0, 0);
             swingfoot_trajectory.add_waypoint(ROLL, step_period, 0, 0);
 
             // Pitch trajectory
             swingfoot_trajectory.add_waypoint(PITCH, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(PITCH, half_step_period, 0, 0);
+            swingfoot_trajectory.add_waypoint(PITCH, step_apex_ratio * step_period, 0, 0);
             swingfoot_trajectory.add_waypoint(PITCH, step_period, 0, 0);
 
             // Yaw trajectory
             swingfoot_trajectory.add_waypoint(YAW, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(YAW, half_step_period, velocity_target.z() * half_step_period, 0);
+            swingfoot_trajectory.add_waypoint(YAW,
+                                              step_apex_ratio * step_period,
+                                              velocity_target.z() * step_apex_ratio * step_period,
+                                              0);
             swingfoot_trajectory.add_waypoint(YAW, step_period, step_placement.z(), 0);
         }
 
@@ -139,13 +153,16 @@ namespace utility::skill {
 
             // X position trajectory
             torso_trajectory.add_waypoint(X, 0, Hpt_start.translation().x(), 0);
-            torso_trajectory.add_waypoint(X, half_step_period, torso_midpoint_offset.x(), velocity_target.x());
+            torso_trajectory.add_waypoint(X,
+                                          torso_sway_ratio * step_period,
+                                          torso_sway_offset.x(),
+                                          velocity_target.x());
             torso_trajectory.add_waypoint(X, step_period, velocity_target.x() * half_step_period, 0);
 
             // Y position trajectory
             torso_trajectory.add_waypoint(Y, 0, Hpt_start.translation().y(), 0);
-            Scalar torso_offset_y = left_foot_is_planted ? -torso_midpoint_offset.y() : torso_midpoint_offset.y();
-            torso_trajectory.add_waypoint(Y, half_step_period, torso_offset_y, velocity_target.y());
+            Scalar torso_offset_y = left_foot_is_planted ? -torso_sway_offset.y() : torso_sway_offset.y();
+            torso_trajectory.add_waypoint(Y, torso_sway_ratio * step_period, torso_offset_y, velocity_target.y());
             torso_trajectory.add_waypoint(Y,
                                           step_period,
                                           get_foot_width_offset() / 2 + velocity_target.y() * half_step_period,
@@ -153,22 +170,25 @@ namespace utility::skill {
 
             // Z position trajectory
             torso_trajectory.add_waypoint(Z, 0, Hpt_start.translation().z(), 0);
-            torso_trajectory.add_waypoint(Z, half_step_period, torso_height + torso_midpoint_offset.z(), 0);
+            torso_trajectory.add_waypoint(Z, torso_sway_ratio * step_period, torso_height + torso_sway_offset.z(), 0);
             torso_trajectory.add_waypoint(Z, step_period, torso_height, 0);
 
             // Roll trajectory
             torso_trajectory.add_waypoint(ROLL, 0, 0, 0);
-            torso_trajectory.add_waypoint(ROLL, half_step_period, 0, 0);
+            torso_trajectory.add_waypoint(ROLL, torso_sway_ratio * step_period, 0, 0);
             torso_trajectory.add_waypoint(ROLL, step_period, 0, 0);
 
             // Pitch trajectory
             torso_trajectory.add_waypoint(PITCH, 0, torso_pitch, 0);
-            torso_trajectory.add_waypoint(PITCH, half_step_period, torso_pitch, 0);
+            torso_trajectory.add_waypoint(PITCH, torso_sway_ratio * step_period, torso_pitch, 0);
             torso_trajectory.add_waypoint(PITCH, step_period, torso_pitch, 0);
 
             // Yaw trajectory
             torso_trajectory.add_waypoint(YAW, 0, MatrixToEulerIntrinsic(Hpt_start.linear()).z(), 0);
-            torso_trajectory.add_waypoint(YAW, half_step_period, velocity_target.z() * half_step_period, 0);
+            torso_trajectory.add_waypoint(YAW,
+                                          torso_sway_ratio * step_period,
+                                          velocity_target.z() * torso_sway_ratio * step_period,
+                                          0);
             torso_trajectory.add_waypoint(YAW, step_period, velocity_target.z() * step_period, 0);
         }
 
@@ -365,6 +385,9 @@ namespace utility::skill {
         /// @brief Half of step period (in seconds).
         Scalar half_step_period = 0.0;
 
+        /// @brief Ratio of the step_period where the swing foot should be at its maximum height, between [0 1].
+        Scalar step_apex_ratio = 0.0;
+
         /// @brief Lateral distance between feet. (how spread apart the feet should be)
         Scalar step_width = 0.0;
 
@@ -375,7 +398,10 @@ namespace utility::skill {
         Scalar torso_pitch = 0.0;
 
         /// @brief Torso offset at half step period from the planted foot.
-        Eigen::Matrix<Scalar, 3, 1> torso_midpoint_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+        Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1].
+        Scalar torso_sway_ratio = 0.0;
 
         // ******************************** State ********************************
 
