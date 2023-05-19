@@ -2,11 +2,15 @@
 
 ## Description
 
-The evaluator half of the Multi-Objective Non-Dominated Sorting Genetic Algorithm II (NSGA2) optimisation of our walk engine. Evaluates walk engine parameters for an individual from the NSGA2Optimiser module for fitness, using the robot sway and robot travel distance or distance in radians of rotation.
+The evaluator half of the Multi-Objective Non-Dominated Sorting Genetic Algorithm II (NSGA2) optimisation algorithm. Evaluates parameters for an individual from the NSGA2Optimiser module based on fitness.
+
+Currently contains implementations for optimising the walk engine.
 
 ## Usage
 
-The NSGA2Optimiser module uses this module. Please see 'NSGA2Evaluator.yaml' to set constants for boundary testing and scalars for multipath. No other human intervention is required in this module.
+The NSGA2Optimiser module uses this module. Please see 'NSGA2Evaluator.yaml' to set constants for boundary testing and scalars for multipath.
+
+To implement the evaluator for a new optimisation scenario, extend from the EvaluatorTask class.
 
 ## Consumes
 
@@ -17,6 +21,7 @@ The NSGA2Optimiser module uses this module. Please see 'NSGA2Evaluator.yaml' to 
 - `module::support::optimisation::StandEvaluator` A stand evaluation task.
 - `message::support::optimisation::NSGA2Terminate` Coordinates shutting down of the evaluator.
 - `message::support::optimisation::NSGA2EvaluationRequest` Enables the evaluation of individuals.
+- `message::platform::RawSensors` Contains sensor data from the simulation which is used for calculating an individual's fitness.
 
 ## Emits
 
@@ -24,4 +29,4 @@ The NSGA2Optimiser module uses this module. Please see 'NSGA2Evaluator.yaml' to 
 
 ## Dependencies
 
-- `message::platform::RawSensors` Contains sensor data from the simulation which is used for calculating an individual's fitness.
+- `module::support::optimisation::NSGA2Optimiser`

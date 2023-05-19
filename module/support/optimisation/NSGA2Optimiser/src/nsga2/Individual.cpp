@@ -5,8 +5,8 @@
 #include <nuclear>
 
 namespace nsga2 {
-    Individual::Individual(const IndividualConfigurator& _config) : config(_config), id(0),
-        rank(0), constr_violation(0.0), crowd_dist(0.0), evaluated(false), generation(-1) {
+    Individual::Individual(const IndividualConfigurator& _config)
+        : rank(0), constr_violation(0.0), crowd_dist(0.0), evaluated(false), id(0), generation(-1), config(_config) {
         reals.clear();
         gene.clear();
         bins.clear();

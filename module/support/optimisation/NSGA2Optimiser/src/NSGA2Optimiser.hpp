@@ -19,7 +19,9 @@ namespace module::support::optimisation {
         /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
         /// including the populations, scores, etc
         nsga2::NSGA2 nsga2_algorithm{};
-        std::unique_ptr<OptimiserTask> task;
+
+        /// @brief A pointer to the specific type of task that is being optimised.
+        std::unique_ptr<OptimiserTask> task = nullptr;
 
     public:
         /// @brief Called by the powerplant to build and setup the NSGA2Optimiser reactor.
