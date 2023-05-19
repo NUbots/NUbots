@@ -42,13 +42,13 @@ class DoxygenAwesomeDarkModeToggle extends HTMLElement {
     DoxygenAwesomeDarkModeToggle.enableDarkMode(DoxygenAwesomeDarkModeToggle.userPreference);
     // Update the color scheme when the browsers preference changes
     // without user interaction on the website.
-    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
       DoxygenAwesomeDarkModeToggle.onSystemPreferenceChanged();
     });
     // Update the color scheme when the tab is made visible again.
     // It is possible that the appearance was changed in another tab
     // while this tab was in the background.
-    document.addEventListener("visibilitychange", visibilityState => {
+    document.addEventListener("visibilitychange", (visibilityState) => {
       if (document.visibilityState === "visible") {
         DoxygenAwesomeDarkModeToggle.onSystemPreferenceChanged();
       }
@@ -62,10 +62,10 @@ class DoxygenAwesomeDarkModeToggle extends HTMLElement {
         toggleButton.title = DoxygenAwesomeDarkModeToggle.title;
         toggleButton.updateIcon();
 
-        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", event => {
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
           toggleButton.updateIcon();
         });
-        document.addEventListener("visibilitychange", visibilityState => {
+        document.addEventListener("visibilitychange", (visibilityState) => {
           if (document.visibilityState === "visible") {
             toggleButton.updateIcon();
           }

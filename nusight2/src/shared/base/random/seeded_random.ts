@@ -1,4 +1,4 @@
-import seedrandom from 'seedrandom'
+import seedrandom from "seedrandom";
 
 /**
  * A seeded pseudo-random number generator. When given the same seed, it will always produce the same set of values.
@@ -9,19 +9,19 @@ export class SeededRandom {
   constructor(private prng: () => number) {}
 
   static of(seed: string) {
-    return new SeededRandom(seedrandom(seed))
+    return new SeededRandom(seedrandom(seed));
   }
 
   float(): number {
-    return this.prng()
+    return this.prng();
   }
 
   integer(min: number, max: number): number {
-    return Math.floor(this.prng() * (max - min) + min)
+    return Math.floor(this.prng() * (max - min) + min);
   }
 
   choice<T>(arr: ReadonlyArray<T>): T {
-    const index = this.integer(0, arr.length)
-    return arr[index]
+    const index = this.integer(0, arr.length);
+    return arr[index];
   }
 }
