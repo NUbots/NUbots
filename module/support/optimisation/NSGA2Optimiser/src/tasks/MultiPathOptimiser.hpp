@@ -1,5 +1,5 @@
-#ifndef MODULE_SUPPORT_OPTIMISATION_MULTIPATH_H
-#define MODULE_SUPPORT_OPTIMISATION_MULTIPATH_H
+#ifndef MODULE_SUPPORT_OPTIMISATION_MULTIPATH_HPP
+#define MODULE_SUPPORT_OPTIMISATION_MULTIPATH_HPP
 
 #include <nuclear>
 #include <vector>
@@ -30,4 +30,4 @@ namespace module::support::optimisation {
 
 }  // namespace module::support::optimisation
 
-#endif  // MODULE_SUPPORT_OPTIMISATION_MULTIPATH_H
+#endif  // MODULE_SUPPORT_OPTIMISATION_MULTIPATH_HPP
