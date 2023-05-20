@@ -45,9 +45,7 @@ export class LocalisationNetwork {
 
     const robot = LocalisationRobotModel.of(robotModel);
 
-    const { rotation: Rwt } = decompose(
-      new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert(),
-    );
+    const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
 
