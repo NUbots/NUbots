@@ -34,13 +34,6 @@ namespace module::platform::OpenCR {
                 data1[i].data.torque_enable =
                     uint8_t(servo_states[i].torque != 0 && !std::isnan(servo_states[i].goal_position));
 
-                // log<NUClear::DEBUG>(fmt::format(
-                //     "Servo ID {}:\tservo state torque = {}\t data send torque = {}\tgoal position is NaN = {}",
-                //     i + 1,
-                //     servo_states[i].torque_enabled,
-                //     data1[i].data.torque_enable,
-                //     std::isnan(servo_states[i].goal_position)));
-
                 // Pack our data
                 data1[i].data.velocity_i_gain = convert::i_gain(servo_states[i].velocity_i_gain);
                 data1[i].data.velocity_p_gain = convert::p_gain(servo_states[i].velocity_p_gain);
