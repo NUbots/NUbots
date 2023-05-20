@@ -3,7 +3,7 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     using message::platform::RawSensors;
 
@@ -111,4 +111,4 @@ namespace module::platform::openCR {
                                                 sizeof(OpenCRReadData)));
     }
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

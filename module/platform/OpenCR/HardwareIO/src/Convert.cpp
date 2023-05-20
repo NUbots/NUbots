@@ -9,7 +9,7 @@
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     namespace convert {
 
@@ -255,4 +255,4 @@ namespace module::platform::openCR {
 
     }  // namespace convert
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

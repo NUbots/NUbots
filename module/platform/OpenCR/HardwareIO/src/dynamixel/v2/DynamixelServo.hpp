@@ -5,7 +5,7 @@
 
 #include "dynamixel/v2/DynamixelDevice.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
     struct DynamixelServo : public DynamixelDevice {
         /**
          * @brief Holds the addresses of the various bytes in the RAM table of a Dynamixel V2 servo.
@@ -301,6 +301,6 @@ namespace module::platform::openCR {
             INDIRECT_DATA_56        = 661
         };
     };
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR
 
 #endif  // MODULE_PLATFORM_OPENCR_SERVOS_HPP

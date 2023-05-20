@@ -2,7 +2,7 @@
 
 #include "utility/math/angle.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     using message::platform::RawSensors;
 
@@ -100,4 +100,4 @@ namespace module::platform::openCR {
         return sensors;
     }
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

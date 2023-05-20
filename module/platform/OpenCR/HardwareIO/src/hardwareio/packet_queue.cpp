@@ -1,6 +1,6 @@
 #include "HardwareIO.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     /**
      * @todo make a PacketQueue class with these as memeber functions and add wrappers
@@ -48,4 +48,4 @@ namespace module::platform::openCR {
         return packets_cleared;
     }
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

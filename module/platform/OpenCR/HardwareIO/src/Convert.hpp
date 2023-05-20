@@ -6,7 +6,7 @@
 
 #include "dynamixel/v2/OpenCR.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     namespace convert {
         // Convert gyroscope readings between control table values and actual values
@@ -59,6 +59,6 @@ namespace module::platform::openCR {
 
     }  // namespace convert
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR
 
 #endif  // MODULE_PLATFOR_OPENCR_CONVERT_HPP

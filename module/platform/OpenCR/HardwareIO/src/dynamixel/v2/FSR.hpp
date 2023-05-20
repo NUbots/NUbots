@@ -5,7 +5,7 @@
 
 #include "dynamixel/v2/DynamixelDevice.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
     struct FSR : public DynamixelDevice {
         /**
          * @brief This struct holds the addresses of the various bytes in the FSR (Force Sensitive Resistors in the
@@ -42,6 +42,6 @@ namespace module::platform::openCR {
             LOCK                   = 47
         };
     };
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR
 
 #endif  // MODULE_PLATFORM_OPENCR_FSR_HPP

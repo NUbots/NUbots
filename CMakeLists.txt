@@ -103,6 +103,14 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang)
   add_compile_options(-fcolor-diagnostics)
 endif()
 
+# Allow selection of subcontroller for conditional build
+set(SUBCONTROLLER
+    "OpenCR"
+    CACHE STRING "Select what subcontroller to build for"
+)
+# Set the possible values of subcontroller for cmake-gui
+set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR" "cm740" "NUSense")
+
 # Our banner file for placing at the top of the roles
 set(NUCLEAR_ROLE_BANNER_FILE
     "${PROJECT_SOURCE_DIR}/cmake/banner.png"
@@ -140,25 +148,3 @@ add_custom_command(
   COMMENT "Generating VSCode launch configurations"
 )
 add_custom_target(generate_launch_configurations ALL DEPENDS "${PROJECT_SOURCE_DIR}/.vscode/launch.json")
-
-# Allow selection of subcontroller for conditional build
-set(SUBCONTROLLER
-    "OPENCR"
-    CACHE STRING "Select what subcontroller to build for" FORCE
-)
-# Set the possible values of subcontroller for cmake-gui
-set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OPENCR" "CM740" "NUSENSE")
-
-# ~~~
-# Don't know why this doesn't work so leaving it here for future reference.
-# Intent was to be able to centrally identify files which are included/excluded
-# based on subcontroller. Instead, adding `return()` statements to each
-# individual file mentioned below.
-# ~~~
-# # Collect relevant directories for each subcontroller set(OPENCR "module/platform/openCR/HardwareIO") set(CM740
-# "module/platform/cm740/HardwareIO" "module/platform/cm740/HardwareSimulator") # Loop through all directories and
-# exclude if they don't match subcontroller foreach(OPENCR_DIR, CM740_DIR, NUSENSE_DIR IN ZIP_LISTS OPENCR, CM740,
-# NUSENSE) if(EXISTS OPENCR_DIR AND NOT SUBCONTROLLER STREQUAL OPENCR) add_subdirectory(OPENCR_DIR EXCLUDE_FROM_ALL)
-# endif() if(EXISTS CM740_DIR AND NOT SUBCONTROLLER STREQUAL CM740) add_subdirectory(CM740_DIR EXCLUDE_FROM_ALL) endif()
-# if(EXISTS NUSENSE_DIR AND NOT SUBCONTROLLER STREQUAL NUSENSE) add_subdirectory(NUSENSE_DIR EXCLUDE_FROM_ALL) endif()
-# endforeach()

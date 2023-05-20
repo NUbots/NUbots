@@ -15,7 +15,7 @@
 #include "utility/io/uart.hpp"
 #include "utility/platform/RawSensors.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     class HardwareIO : public NUClear::Reactor {
 
@@ -199,6 +199,6 @@ namespace module::platform::openCR {
         int queue_clear_all();
     };
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR
 
 #endif  // MODULE_PLATFORM_OPENCR_HARDWAREIO_H

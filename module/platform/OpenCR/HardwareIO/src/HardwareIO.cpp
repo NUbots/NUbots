@@ -15,7 +15,7 @@
 
 #define DEBUG_ENABLE_BUTTON_SPOOF 1
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     using extension::Configuration;
     using message::actuation::ServoTarget;
@@ -272,4 +272,4 @@ namespace module::platform::openCR {
         });
     }
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

@@ -5,7 +5,7 @@
 
 #include "utility/math/comparison.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
@@ -144,4 +144,4 @@ namespace module::platform::openCR {
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
     }
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

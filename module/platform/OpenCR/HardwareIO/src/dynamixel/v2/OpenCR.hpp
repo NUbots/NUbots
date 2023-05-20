@@ -3,7 +3,7 @@
 
 #include "dynamixel/v2/DynamixelDevice.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
     class OpenCR : public DynamixelDevice {
     public:
         OpenCR(uint8_t ID) : ID(ID) {}
@@ -55,6 +55,6 @@ namespace module::platform::openCR {
         };
     };
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR
 
 #endif  // MODULE_PLATFORM_OPENCR_OPENCR_HPP

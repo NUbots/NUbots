@@ -1,6 +1,6 @@
 #include "NUgus.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     NUgus::NUgus()
         : OPENCR(uint8_t(ID::OPENCR))
@@ -25,4 +25,4 @@ namespace module::platform::openCR {
         , HEAD_YAW(uint8_t(ID::HEAD_YAW))
         , HEAD_PITCH(uint8_t(ID::HEAD_PITCH)) {}
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

@@ -1,6 +1,6 @@
 #include "HardwareIO.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     void HardwareIO::startup() {
         // Set the OpenCR to not return a status packet when written to (to allow consecutive writes)
@@ -134,4 +134,4 @@ namespace module::platform::openCR {
                                                 uint16_t(OpenCR::Address::MODEL_NUMBER_L),
                                                 uint8_t(3)));
     }
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

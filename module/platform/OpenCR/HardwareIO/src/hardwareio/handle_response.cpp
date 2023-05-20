@@ -1,6 +1,6 @@
 #include "HardwareIO.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     using message::platform::StatusReturn;
 
@@ -179,4 +179,4 @@ namespace module::platform::openCR {
         }
     }
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR

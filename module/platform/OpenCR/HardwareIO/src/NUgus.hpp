@@ -8,7 +8,7 @@
 #include "dynamixel/v2/FSR.hpp"
 #include "dynamixel/v2/OpenCR.hpp"
 
-namespace module::platform::openCR {
+namespace module::platform::OpenCR {
 
     struct MX64 : public DynamixelServo {
         MX64(uint8_t ID) : ID(ID) {}
@@ -205,6 +205,6 @@ namespace module::platform::openCR {
         FSR_READ              = uint16_t(FSR::Address::FSR1_L)
     };
 
-}  // namespace module::platform::openCR
+}  // namespace module::platform::OpenCR
 
 #endif  // MODULE_PLATFOR_OPENCR_NUGUS_HPP
