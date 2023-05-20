@@ -1,5 +1,7 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
+import { Matrix4 } from "../../../shared/math/matrix4";
+import * as THREE from "three";
 
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
@@ -114,7 +116,8 @@ export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
   @observable color?: string;
-  @observable rWTt: Vector3; // Torso to world translation in torso space.
+  @observable Htw: Matrix4; // World to torso
+  @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
 
@@ -122,21 +125,24 @@ export class LocalisationRobotModel {
     model,
     name,
     color,
-    rWTt,
+    Htw,
+    Hfw,
     Rwt,
     motors,
   }: {
     model: RobotModel;
     name: string;
     color?: string;
-    rWTt: Vector3;
+    Htw: Matrix4;
+    Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
   }) {
     this.model = model;
     this.name = name;
     this.color = color;
-    this.rWTt = rWTt;
+    this.Htw = Htw;
+    this.Hfw = Hfw;
     this.Rwt = Rwt;
     this.motors = motors;
   }
@@ -145,7 +151,8 @@ export class LocalisationRobotModel {
     return new LocalisationRobotModel({
       model,
       name: model.name,
-      rWTt: Vector3.of(),
+      Htw: Matrix4.of(),
+      Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
     });
@@ -154,4 +161,36 @@ export class LocalisationRobotModel {
   @computed get visible() {
     return this.model.enabled;
   }
+
+  /** Field to torso translation in field space. */
+  @computed get rTFf(): Vector3 {
+    return this.position.rTFf;
+  }
+
+  /* Field to torso rotation in field space. */
+  @computed get Rtf(): Quaternion {
+    return this.position.Rtf;
+  }
+
+  @computed
+  private get position() {
+    const Hwf = this.Hfw.toThree().invert();
+    const Htf = this.Htw.toThree().multiply(Hwf);
+    const { rotation: Rtf } = decompose(Htf);
+    const Hft = Htf.invert();
+    const { translation: rTFf } = decompose(Hft);
+    return { Htf, rTFf, Rtf };
+  }
+}
+
+function decompose(m: THREE.Matrix4): { translation: Vector3; rotation: Quaternion; scale: Vector3 } {
+  const translation = new THREE.Vector3();
+  const rotation = new THREE.Quaternion();
+  const scale = new THREE.Vector3();
+  m.decompose(translation, rotation, scale);
+  return {
+    translation: Vector3.from(translation),
+    rotation: Quaternion.from(rotation),
+    scale: Vector3.from(scale),
+  };
 }
