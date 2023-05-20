@@ -69,9 +69,9 @@ namespace module::platform::cm740 {
         sensors.buttons.middle = Convert::getBit<1>(data.cm740.buttons);
 
         // Voltage (in volts)
-        sensors.voltage = Convert::voltage(data.cm740.voltage);
+        sensors.battery = Convert::voltage(data.cm740.voltage);
 
-        if (sensors.voltage <= cfg.battery.charged_voltage) {
+        if (sensors.battery <= cfg.battery.charged_voltage) {
             sensors.platform_error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
         }
 
@@ -146,16 +146,13 @@ namespace module::platform::cm740 {
             servo.torque_enabled = servo_state[i].torque_enabled;
 
             // Gain
-            servo.p_gain = servo_state[i].p_gain;
-            servo.i_gain = servo_state[i].i_gain;
-            servo.d_gain = servo_state[i].d_gain;
-
-            // Torque
-            servo.torque = servo_state[i].torque;
+            servo.position_p_gain = servo_state[i].p_gain;
+            servo.position_i_gain = servo_state[i].i_gain;
+            servo.position_d_gain = servo_state[i].d_gain;
 
             // Targets
-            servo.goal_position = servo_state[i].goal_position;
-            servo.moving_speed  = servo_state[i].moving_speed;
+            servo.goal_position    = servo_state[i].goal_position;
+            servo.profile_velocity = servo_state[i].moving_speed;
 
             // If we are faking this hardware, simulate its motion
             if (servo_state[i].simulated) {
@@ -184,8 +181,7 @@ namespace module::platform::cm740 {
 
                 // Store our simulated values
                 servo.present_position = servo_state[i].present_position;
-                servo.present_speed    = servo_state[i].goal_position;
-                servo.load             = servo_state[i].load;
+                servo.present_velocity = servo_state[i].present_speed;
                 servo.voltage          = servo_state[i].voltage;
                 servo.temperature      = servo_state[i].temperature;
             }
@@ -198,8 +194,7 @@ namespace module::platform::cm740 {
 
                 // Present Data
                 servo.present_position = Convert::servoPosition(i, data.servos[i].presentPosition);
-                servo.present_speed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
-                servo.load             = Convert::servoLoad(i, data.servos[i].load);
+                servo.present_velocity = Convert::servoSpeed(i, data.servos[i].presentSpeed);
 
                 // Diagnostic Information
                 servo.voltage     = Convert::voltage(data.servos[i].voltage);
@@ -319,8 +314,8 @@ namespace module::platform::cm740 {
             *sensors = parseSensors(data);
 
             // Work out a battery charged percentage
-            sensors->voltage = std::max(0.0f,
-                                        (sensors->voltage - cfg.battery.flat_voltage)
+            sensors->battery = std::max(0.0f,
+                                        (sensors->battery - cfg.battery.flat_voltage)
                                             / (cfg.battery.charged_voltage - cfg.battery.flat_voltage));
 
             // cm740 leds to display battery voltage
@@ -328,32 +323,32 @@ namespace module::platform::cm740 {
             uint32_t ledr            = 0;
             std::array<bool, 3> ledp = {false, false, false};
 
-            if (sensors->voltage > 0.9) {
+            if (sensors->battery > 0.9) {
                 ledp = {true, true, true};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.7) {
+            else if (sensors->battery > 0.7) {
                 ledp = {false, true, true};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.5) {
+            else if (sensors->battery > 0.5) {
                 ledp = {false, false, true};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.3) {
+            else if (sensors->battery > 0.3) {
                 ledp = {false, false, false};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.2) {
+            else if (sensors->battery > 0.2) {
                 ledp = {false, false, false};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0) {
+            else if (sensors->battery > 0) {
                 ledp = {false, false, false};
                 ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
