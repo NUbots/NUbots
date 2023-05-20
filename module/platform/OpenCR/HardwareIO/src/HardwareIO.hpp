@@ -24,40 +24,53 @@ namespace module::platform::OpenCR {
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        // How often we read the servos
+        /// @brief Manages the connection with OpenCR
+        utility::io::uart opencr{};
+
+        /// @brief How frequently the servos are read
         static constexpr int UPDATE_FREQUENCY = 90;
 
-        utility::io::uart opencr;
-        NUgus nugus;
+        /// @brief Contains device information specific to the NUgus robot
+        NUgus nugus{};
 
-        uint32_t byte_wait;
-        uint32_t packet_wait;
+        uint32_t byte_wait   = 0;
+        uint32_t packet_wait = 0;
 
-        // Maps device IDs to expected packet data
+        /// @brief Maps device IDs to expected packet data
         enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA, FSR_DATA };
         std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
 
         /// @see opencr_state
-        struct opencr_state {
+        struct OpenCRState {
             bool dirty = false;
 
+            /// @brief State of the LED panel, whether the lights are on or off
             message::platform::RawSensors::LEDPanel led_panel = {false, false, false};
-            //  0x00, 0xRR, 0xGG, 0xBB
-            message::platform::RawSensors::HeadLED head_led = {0x0000FF00};
-            message::platform::RawSensors::EyeLED eye_led   = {0x000000FF};
 
-            // Left, middle, right
+            /// @brief Colour of the head LED
+            ///  @details In the form of 0x00, 0xRR, 0xGG, 0xBB
+            message::platform::RawSensors::HeadLED head_led = {0x0000FF00};
+
+            /// @brief Colour of the eye LED
+            ///  @details In the form of 0x00, 0xRR, 0xGG, 0xBB
+            message::platform::RawSensors::EyeLED eye_led = {0x000000FF};
+
+            /// @brief Pushed state of the buttons - left, middle, right
             message::platform::RawSensors::Buttons buttons = {false, false, false};
 
-            // X, Y, Z
-            Eigen::Vector3f acc  = Eigen::Vector3f::Zero();
+            /// @brief Accelerometer value of the OpenCR IMU
+            Eigen::Vector3f acc = Eigen::Vector3f::Zero();
+
+            /// @brief Gyroscope value of the OpenCR IMU
             Eigen::Vector3f gyro = Eigen::Vector3f::Zero();
 
-            // Buzzer
+            /// @brief Buzzer sound level of the OpenCR device
             uint16_t buzzer = 0;
 
-            // Error status
-            bool alert_flag      = 0;
+            /// @brief Error status of the OpenCR device
+            bool alert_flag = false;
+
+            /// @brief Specific error from the OpenCR device
             uint8_t error_number = 0;
         };
 
@@ -102,7 +115,9 @@ namespace module::platform::OpenCR {
             float goal_velocity        = 1.08775f;             // ROBOTIS default
             float goal_position        = 0.0f;
             float profile_acceleration = 0.0f;
-            /// @brief replaces "Moving speed" from v1 protocol, basically just the set speed.
+
+            /// @brief The target velocity of the servo
+            /// @details Replaces moving speed in v1 protocol
             float profile_velocity = 0.0f;
 
             // Values that are either simulated or read
@@ -118,25 +133,19 @@ namespace module::platform::OpenCR {
          * @brief Our state for our OpenCR for variables we send to it
          * Written to by processOpenCRData() and Read by constructSensors()
          */
-        opencr_state opencr_state;
+        OpenCRState opencr_state{};
 
         /**
          * @brief Our state for our servos for variables we send to it
          * Written to by processServoData() and Read by constructSensors()
          */
-        std::array<ServoState, 20> servo_states;
+        std::array<ServoState, 20> servo_states{};
 
         /**
          * @brief Our state for our battery
          * Written to by processOpenCRData() and Read by constructSensors()
          */
-        Battery battery_state;
-
-        /**
-         * @brief Our state for the 2 force sensitive resistors, stored as Right Left
-         * Written to by processFSRData and Read by constructSensors()
-         */
-        // std::array<FSRState, 2> fsrStates;
+        Battery battery_state{};
 
         /**
          * @brief Reads information from an OpenCR packet and logs the model and firmware version.
@@ -156,13 +165,6 @@ namespace module::platform::OpenCR {
          * @note Although we do a Sync Write to all servos, data is returned one by one
          */
         void process_servo_data(const message::platform::StatusReturn& packet);
-
-        /**
-         * @brief Reads information from an OpenCR packet and populares fsrStates
-         * @param packet a preprocessed OpenCR packet
-         * @note we sync write to both FSRs but data is returned one by one
-         */
-        // void processFSRData(const message::platform::StatusReturn& packet);
 
         /**
          * @brief Reads info from the state variables and processes it into a RawSensors message
