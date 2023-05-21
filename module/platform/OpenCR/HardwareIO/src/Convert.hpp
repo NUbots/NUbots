@@ -95,16 +95,50 @@ namespace module::platform::OpenCR {
         /// @param current The current value between -1941 and 1941 where each unit is 3.36mA
         /// @return The current value in amps
         float current(int16_t current);
+
+        /// @brief Converts the current value in amps to the raw dynamixel current value
+        /// @param current The current value in amps
+        /// @return The current value between -1941 and 1941 where each unit is 3.36mA
         int16_t current(float current);
 
-        // Convert P, I, D, and feed-forward gain readings between control table values and actual values
+        /// @brief Converts the raw dynamixel p gain value to the p gain by dividing by 128
+        /// @param p_gain The raw dynamixel p gain
+        /// @return The converted p gain
         float p_gain(uint16_t p_gain);
+
+        /// @brief Converts the p gain to the raw dynamixel p gain value by multiplying by 128
+        /// @param p_gain The stored p gain value
+        /// @return The raw dynamixel p gain value
         uint16_t p_gain(float p_gain);
+
+        /// @brief Converts the raw dynamixel i gain value to the i gain by dividing by 65536
+        /// @param i_gain The raw dynamixel i gain
+        /// @return The converted i gain
         float i_gain(uint16_t i_gain);
+
+        /// @brief Converts the i gain to the raw dynamixel i gain value by multiplying by 65536
+        /// @param i_gain The stored i gain value
+        /// @return The raw dynamixel i gain value
         uint16_t i_gain(float i_gain);
+
+        /// @brief Converts the raw dynamixel d gain value to the d gain by dividing by 16
+        /// @param d_gain The raw dynamixel d gain
+        /// @return The converted d gain
         float d_gain(uint16_t d_gain);
+
+        /// @brief Converts the d gain to the raw dynamixel d gain value by multiplying by 16
+        /// @param d_gain The stored d gain value
+        /// @return The raw dynamixel d gain value
         uint16_t d_gain(float d_gain);
+
+        /// @brief Converts the raw dynamixel ff1 gain value to the ff1 gain by dividing by 4
+        /// @param ff_gain The raw dynamixel ff1 gain
+        /// @return The converted ff1 gain
         float ff_gain(uint16_t ff_gain);
+
+        /// @brief Converts the ff1 gain to the raw dynamixel ff1 gain value by multiplying by 4
+        /// @param ff_gain The stored ff1 gain value
+        /// @return The raw dynamixel ff1 gain value
         uint16_t ff_gain(float ff_gain);
 
     }  // namespace convert
