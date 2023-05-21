@@ -33,7 +33,10 @@ namespace module::platform::OpenCR {
         /// @brief Contains device information specific to the NUgus robot
         NUgus nugus{};
 
-        uint32_t byte_wait   = 0;
+        /// @brief How long we expect to wait per byte of data being sent
+        uint32_t byte_wait = 0;
+
+        /// @brief How long we expect to wait for a packet
         uint32_t packet_wait = 0;
 
         /// @brief Maps device IDs to expected packet data
@@ -48,11 +51,11 @@ namespace module::platform::OpenCR {
             message::platform::RawSensors::LEDPanel led_panel = {false, false, false};
 
             /// @brief Colour of the head LED
-            ///  @details In the form of 0x00, 0xRR, 0xGG, 0xBB
+            /// @details In the form of 0x00, 0xRR, 0xGG, 0xBB
             message::platform::RawSensors::HeadLED head_led = {0x0000FF00};
 
             /// @brief Colour of the eye LED
-            ///  @details In the form of 0x00, 0xRR, 0xGG, 0xBB
+            /// @details In the form of 0x00, 0xRR, 0xGG, 0xBB
             message::platform::RawSensors::EyeLED eye_led = {0x000000FF};
 
             /// @brief Pushed state of the buttons - left, middle, right
