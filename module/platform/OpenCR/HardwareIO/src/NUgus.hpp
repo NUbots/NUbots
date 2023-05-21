@@ -26,11 +26,11 @@ namespace module::platform::OpenCR {
 
         /// Picks which direction a motor should be measured in (forward or reverse) -- configurable based on the
         /// specific humanoid being used.
-        std::array<int8_t, 20> servo_direction;
+        std::array<int8_t, 20> servo_direction{};
 
         /// Offsets the radian angles of motors to change their 0 position -- configurable based on the specific
         /// humanoid being used.
-        std::array<double, 20> servo_offset;
+        std::array<double, 20> servo_offset{};
 
         enum class ID : uint8_t {
             NO_ID            = 0,
