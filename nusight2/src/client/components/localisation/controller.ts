@@ -218,8 +218,8 @@ export class LocalisationController {
     // This camera position hack will not work with orientation/head movement.
     // TODO (Annable): Sync camera position/rotation properly using kinematic chain.
     model.camera.position = new Vector3(target.rTFf.x, target.rTFf.y, target.rTFf.z + 0.15);
-    const Rtf = new THREE.Quaternion(target.Rtf.x, target.Rtf.y, target.Rtf.z, target.Rtf.w);
-    model.camera.yaw = new THREE.Euler().setFromQuaternion(Rtf).z;
+    const Rft = new THREE.Quaternion(target.Rft.x, target.Rft.y, target.Rft.z, target.Rft.w);
+    model.camera.yaw = new THREE.Euler().setFromQuaternion(Rft).z;
     model.camera.pitch = 0;
   }
 
