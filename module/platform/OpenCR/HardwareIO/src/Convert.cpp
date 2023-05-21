@@ -70,13 +70,6 @@ namespace module::platform::OpenCR {
             return int16_t(gs * INT16_MAX / 2);
         }
 
-        /// @todo Maybe store pwm internally as a float percentage?
-
-        int16_t PWM(float pwm) {
-            // Range: -885 - +885
-            return int16_t(utility::math::clamp(-885.0f, pwm, 885.0f));
-        }
-
         int16_t PWM(int16_t pwm) {
             // Range: -885 - +885
             return utility::math::clamp(int16_t(-885), pwm, int16_t(885));
@@ -113,13 +106,6 @@ namespace module::platform::OpenCR {
             // Range: 95 - 160 =  9.5V - 16.0V
             return uint8_t(utility::math::clamp(9.5f, voltage * 10.f, 16.0f));
         }
-
-        /**
-         * @todo the servo offset can now be replaced by the Homing Offset in the control table I think
-         *       This still requires some verification and I think the offset may be the opposite of what
-         *       we currently have (i.e. will be added instead of subtracted).
-         *       See https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#homing-offset
-         */
 
         float position(uint8_t id,
                        uint32_t data,
