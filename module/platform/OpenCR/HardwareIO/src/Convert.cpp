@@ -154,11 +154,11 @@ namespace module::platform::OpenCR {
             // Normalise the angle to (-pi, pi] in case the offset changed this
             angle = utility::math::angle::normalizeAngle(angle);
 
-            // Do the actual conversion to the control table data
-            uint32_t data = (angle / 0.0015358897f);
+            // Do the actual conversion to the control table data and apply the correction as per the block comment in
+            // the function above.
+            // Note the addition must happen inline as it ensures `data` doesn't hold a negative value.
+            uint32_t data = (angle / 0.0015358897f) + 2048;
 
-            // Apply the correction as per the block comment in the function above.
-            data += 2048;
 
             return utility::math::clamp(uint32_t(0), data, uint32_t(4095));
         }
