@@ -168,18 +168,17 @@ export class LocalisationRobotModel {
   }
 
   /* Field to torso rotation in field space. */
-  @computed get Rtf(): Quaternion {
-    return this.position.Rtf;
+  @computed get Rft(): Quaternion {
+    return this.position.Rft;
   }
 
   @computed
   private get position() {
     const Hwf = this.Hfw.toThree().invert();
     const Htf = this.Htw.toThree().multiply(Hwf);
-    const { rotation: Rtf } = decompose(Htf);
     const Hft = Htf.invert();
-    const { translation: rTFf } = decompose(Hft);
-    return { Htf, rTFf, Rtf };
+    const { translation: rTFf , rotation: Rft } = decompose(Hft);
+    return { Htf, rTFf, Rft };
   }
 }
 

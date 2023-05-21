@@ -33,7 +33,7 @@ export class NUgusViewModel {
     robot.position.x = this.model.rTFf.x;
     robot.position.y = this.model.rTFf.y;
     robot.position.z = this.model.rTFf.z;
-    const rotation = new Quaternion(this.model.Rtf.x, this.model.Rtf.y, this.model.Rtf.z, this.model.Rtf.w);
+    const rotation = new Quaternion(this.model.Rft.x, this.model.Rft.y, this.model.Rft.z, this.model.Rft.w);
     rotation.multiply(new Quaternion().setFromEuler(new Euler(PI_2, 0, 0)));
     robot.setRotationFromQuaternion(rotation);
     findMesh(robot, "R_Shoulder").rotation.set(0, 0, PI_2 - motors.rightShoulderPitch.angle);
