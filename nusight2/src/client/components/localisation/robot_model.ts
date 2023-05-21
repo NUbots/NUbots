@@ -167,7 +167,7 @@ export class LocalisationRobotModel {
     return this.position.rTFf;
   }
 
-  /* Field to torso rotation in field space. */
+  /* Rotation matrix from torso space to field space. */
   @computed get Rft(): Quaternion {
     return this.position.Rft;
   }
