@@ -24,9 +24,11 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated protocol buffer files
-/src/shared/messages.js
-/src/shared/messages.d.ts
-src/shared/message_fields_index.ts
+src/shared/messages/*.ts
+src/shared/messages/*.js
 
 # NBS recordings
-/recordings
+recordings
+
+# Generated tailwind output
+src/client/tailwind.css
