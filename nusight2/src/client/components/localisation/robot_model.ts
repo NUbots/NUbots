@@ -178,7 +178,7 @@ export class LocalisationRobotModel {
     const Htf = this.Htw.toThree().multiply(Hwf);
     const Hft = Htf.invert();
     const { translation: rTFf, rotation: Rft } = decompose(Hft);
-    return { Htf, rTFf, Rft };
+    return { Hft, rTFf, Rft };
   }
 }
 
