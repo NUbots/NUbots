@@ -14,14 +14,12 @@ namespace module::platform::OpenCR {
 
         /* OpenCR data */
         sensors.platform_error_flags = RawSensors::Error::OK;
-        /// @todo Add proper error handling to translate new errors into rawsensors errors, using
-        /// opencr_state.error_flags.error_number and opencr_state.error_flags.alert_flag
-        sensors.led_panel     = opencr_state.led_panel;
-        sensors.head_led      = opencr_state.head_led;
-        sensors.eye_led       = opencr_state.eye_led;
-        sensors.buttons       = opencr_state.buttons;
-        sensors.accelerometer = opencr_state.acc;
-        sensors.gyroscope     = opencr_state.gyro;
+        sensors.led_panel            = opencr_state.led_panel;
+        sensors.head_led             = opencr_state.head_led;
+        sensors.eye_led              = opencr_state.eye_led;
+        sensors.buttons              = opencr_state.buttons;
+        sensors.accelerometer        = opencr_state.acc;
+        sensors.gyroscope            = opencr_state.gyro;
 
         /* Battery data */
         sensors.battery = battery_state.current_voltage;
@@ -81,6 +79,11 @@ namespace module::platform::OpenCR {
             else {
                 // Error code
                 servo.error_flags = servo_states[i].error_flags;
+
+                // Add relevant servo error flags to platform error flags
+                sensors.platform_error_flags |= (servo.error_flags
+                                                 & (RawSensors::Error::INPUT_VOLTAGE | RawSensors::Error::OVERHEATING
+                                                    | RawSensors::Error::OVERLOAD));
 
                 // Present Data
                 servo.present_position = servo_states[i].present_position;

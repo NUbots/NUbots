@@ -32,12 +32,10 @@ message RawSensors {
     /// Set of error flags/statuses.
     /// bitmask values.
 
-    /// @todo  update to protocol2 error bits (all different)
-    /// changes errors entirely which also influences error handling in SensorFilter
-    /// new error flags already in StatusReturn.proto - was something planned with this?
-    /// Maybe add different error handling based on hardware and packet handling errors
-    /// separately?
-    /// @see SensorFilter.cpp, StatusReturn.proto
+    /// @note these are kind of out of date or are triggered elsewhere in Dynamixel v2
+    ///       ANGLE_LIMIT, CORRUPT_DATA and TIMEOUT won't get triggered
+    ///       RANGE, CHECKSUM and INSTRUCTION are processed per status-return packet so
+    ///       will never make it to a RawSensors message.
     enum Error {
         OK            = 0;  // not really a flag but the lack of any other flag
         INPUT_VOLTAGE = 1;
