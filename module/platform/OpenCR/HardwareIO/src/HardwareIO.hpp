@@ -41,10 +41,13 @@ namespace module::platform::OpenCR {
 
         /// @brief Maps device IDs to expected packet data
         enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA, FSR_DATA };
+
+        /// @brief The packets we are currently waiting to receive
         std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
 
         /// @see opencr_state
         struct OpenCRState {
+            /// @brief Whether any of the variables in this struct have changed
             bool dirty = false;
 
             /// @brief State of the LED panel, whether the lights are on or off
@@ -79,12 +82,18 @@ namespace module::platform::OpenCR {
 
         /// @see battery_state
         struct Battery {
+            /// @brief The voltage of the battery at full charge
             float charged_voltage = 0.0f;
+            /// @brief The manufacturer's nominal voltage of the battery
             float nominal_voltage = 0.0f;
-            float flat_voltage    = 0.0f;
+            /// @brief The voltage of the battery when it is flat
+            float flat_voltage = 0.0f;
+            /// @brief The current voltage of the battery
             float current_voltage = 0.0f;
-            float percentage      = 0.0f;
-            bool dirty            = false;
+            /// @brief The percentage of the battery charge that is remaining
+            float percentage = 0.0f;
+            /// @brief Whether any battery values have changed
+            bool dirty = false;
         };
 
         /// @see servo_states
@@ -102,77 +111,77 @@ namespace module::platform::OpenCR {
 
             /// @brief Our internal system torque target, this is never sent to the servo
             int torque = 0;
-            /// @brief Control table value for internal servo state
+            /// @brief Whether the servo's torque is enabled, allowing it to move
             bool torque_enabled = true;
 
-            // Cached values that are never read
-            float velocity_i_gain      = 1920.0f / 65536.0f;  // ROBOTIS default
-            float velocity_p_gain      = 100.0f / 128.0f;     // ROBOTIS default
-            float position_d_gain      = 0.0f;
-            float position_i_gain      = 0.0f;
-            float position_p_gain      = 850.0f / 128.0f;  // ROBOTIS default
+            // Cached values that are never read and are sent to the servos
+            /// @brief The integral gain of the velocity
+            float velocity_i_gain = 1920.0f / 65536.0f;  // ROBOTIS default
+            /// @brief The proportional gain of the velocity
+            float velocity_p_gain = 100.0f / 128.0f;  // ROBOTIS default
+            /// @brief The derivative gain of the position
+            float position_d_gain = 0.0f;
+            /// @brief The integral gain of the position
+            float position_i_gain = 0.0f;
+            /// @brief The proportional gain of the position
+            float position_p_gain = 850.0f / 128.0f;  // ROBOTIS default
+            /// @brief The first feedforward torque coefficient
             float feedforward_1st_gain = 0.0f;
+            /// @brief The second feedforward torque coefficient
             float feedforward_2nd_gain = 0.0f;
-            float goal_pwm             = 885.0f;               // ROBOTIS default
-            float goal_current         = 6.52176f / 0.00336f;  // ROBOTIS default
-            float goal_velocity        = 1.08775f;             // ROBOTIS default
-            float goal_position        = 0.0f;
+            /// @brief The target pulse width modulation of the servo
+            float goal_pwm = 885.0f;  // ROBOTIS default
+            /// @brief The target current of the servo
+            float goal_current = 6.52176f / 0.00336f;  // ROBOTIS default
+            /// @brief The target velocity of the servo, not used by the servos
+            float goal_velocity = 1.08775f;  // ROBOTIS default
+            /// @brief The target position of the servo
+            float goal_position = 0.0f;
+            /// @brief The target acceleration of the servo
             float profile_acceleration = 0.0f;
-
-            /// @brief The target velocity of the servo
-            /// @details Replaces moving speed in v1 protocol
+            /// @brief The target velocity of the servo, replacing moving speed in v1 protocol
             float profile_velocity = 0.0f;
 
-            // Values that are either simulated or read
-            float present_pwm      = 0.0f;
-            float present_current  = 0.0f;
+            // Values that are either simulated or read from the servos
+            /// @brief The last read pulse width modulation of the servo
+            float present_pwm = 0.0f;
+            /// @brief The last read current of the servo
+            float present_current = 0.0f;
+            /// @brief The last read velocity of the servo
             float present_velocity = 0.0f;
+            /// @brief The last read position of the servo
             float present_position = 0.0f;
-            float voltage          = 0.0f;
-            float temperature      = 0.0f;
+            /// @brief The last read voltage of the servo
+            float voltage = 0.0f;
+            /// @brief The last read temperature of the servo
+            float temperature = 0.0f;
         };
 
-        /**
-         * @brief Our state for our OpenCR for variables we send to it
-         * Written to by processOpenCRData() and Read by constructSensors()
-         */
+        /// @brief Contains the current state of the OpenCR device
+        /// The state is both read from the device (eg reading IMU and buttons) and set (eg setting LEDs)
         OpenCRState opencr_state{};
 
-        /**
-         * @brief Our state for our servos for variables we send to it
-         * Written to by processServoData() and Read by constructSensors()
-         */
+        /// @brief The state of the servos, used to store read values and to store values to be written
         std::array<ServoState, 20> servo_states{};
 
-        /**
-         * @brief Our state for our battery
-         * Written to by processOpenCRData() and Read by constructSensors()
-         */
+        /// @brief The state of the battery
         Battery battery_state{};
 
-        /**
-         * @brief Reads information from an OpenCR packet and logs the model and firmware version.
-         * @param packet a preprocessed OpenCR packet
-         */
+        /// @brief Reads information from an OpenCR packet and logs the model and firmware version
+        /// @param packet a preprocessed OpenCR packet
         void process_model_information(const message::platform::StatusReturn& packet);
 
-        /**
-         * @brief Reads information from an OpenCR packet and populates opencr_state and battery_state
-         * @param packet a preprocessed OpenCR packet
-         */
+        /// @brief Reads information from an OpenCR packet and populates opencr_state and battery_state
+        /// @param packet a preprocessed OpenCR packet
         void process_opencr_data(const message::platform::StatusReturn& packet);
 
-        /**
-         * @brief Reads information from an OpenCR packet and populates servo_states
-         * @param packet a preprocessed OpenCR packet
-         * @note Although we do a Sync Write to all servos, data is returned one by one
-         */
+        /// @brief Reads information from an OpenCR packet and populates servo_states
+        /// @param packet a preprocessed OpenCR packet
+        /// @note Although we do a Sync Write to all servos, data is returned one by one
         void process_servo_data(const message::platform::StatusReturn& packet);
 
-        /**
-         * @brief Reads info from the state variables and processes it into a RawSensors message
-         * @return A RawSensors message created from the current state variables
-         */
+        /// @brief Reads info from the state variables and processes it into a RawSensors message
+        /// @return A RawSensors message created from the current state variables
         message::platform::RawSensors construct_sensors();
 
         /// @brief Runs the setup for the devices
