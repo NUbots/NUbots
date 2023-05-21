@@ -38,7 +38,7 @@ namespace module::platform::OpenCR {
         std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
 
         /// @see opencr_state
-        struct opencr_state {
+        struct OpenCR {
             bool dirty = false;
 
             message::platform::RawSensors::LEDPanel led_panel = {false, false, false};
@@ -118,7 +118,7 @@ namespace module::platform::OpenCR {
          * @brief Our state for our OpenCR for variables we send to it
          * Written to by processOpenCRData() and Read by constructSensors()
          */
-        opencr_state opencr_state;
+        OpenCR opencr_state;
 
         /**
          * @brief Our state for our servos for variables we send to it
