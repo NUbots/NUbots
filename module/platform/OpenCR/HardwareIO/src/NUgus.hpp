@@ -24,12 +24,10 @@ namespace module::platform::OpenCR {
     public:
         NUgus();
 
-        /// Picks which direction a motor should be measured in (forward or reverse) -- configurable based on the
-        /// specific humanoid being used.
+        /// @brief The direction (clockwise or anticlockwise) to measure each motor in
         std::array<int8_t, 20> servo_direction{};
 
-        /// Offsets the radian angles of motors to change their 0 position -- configurable based on the specific
-        /// humanoid being used.
+        /// @brief Offsets the radian angles of motors to change their 0 position
         std::array<double, 20> servo_offset{};
 
         enum class ID : uint8_t {
@@ -82,6 +80,9 @@ namespace module::platform::OpenCR {
         MX64 HEAD_YAW;
         MX64 HEAD_PITCH;
 
+        /// @brief Get a reference to the DynamixelDevice with the given ID
+        /// @param id The ID of the device to get
+        /// @return A reference to the DynamixelDevice with the given ID
         constexpr DynamixelDevice& operator[](const ID& id) {
             switch (id) {
                 case ID::OPENCR: return OPENCR;
@@ -124,6 +125,7 @@ namespace module::platform::OpenCR {
     };
 
 #pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
+    /// @brief The first part of the servo data to write to the dynamixel
     struct DynamixelServoWriteDataPart1 {
         uint8_t torque_enable;
         uint16_t velocity_i_gain;
@@ -133,6 +135,7 @@ namespace module::platform::OpenCR {
         uint16_t position_p_gain;
     };
 
+    /// @brief The second part of the servo data to write to the dynamixel
     struct DynamixelServoWriteDataPart2 {
         uint16_t feedforward_1st_gain;
         uint16_t feedforward_2nd_gain;
@@ -144,6 +147,7 @@ namespace module::platform::OpenCR {
         uint32_t goal_position;
     };
 
+    /// @brief The servo data to read from the dynamixel
     struct DynamixelServoReadData {
         uint8_t torque_enable;
         uint8_t hardware_error_status;
@@ -155,12 +159,14 @@ namespace module::platform::OpenCR {
         uint8_t present_temperature;
     };
 
+    /// @brief The data to write to the OpenCR device
     struct OpenCRWriteData {
         uint8_t led;
         uint16_t rgb_led;
         uint8_t buzzer;
     };
 
+    /// @brief The data to read from the OpenCR device
     struct OpenCRReadData {
         uint8_t led;
         uint16_t rgb_led;

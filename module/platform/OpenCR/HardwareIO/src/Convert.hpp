@@ -9,13 +9,25 @@
 namespace module::platform::OpenCR {
 
     namespace convert {
-        // Convert gyroscope readings between control table values and actual values
+        /// @brief Converts a gyroscope reading from the dynamixel to the radian value
+        /// @param gyro The dynamixel value to convert
+        /// @return The gyro value in radians/second
         float gyro(int16_t gyro);
+
+        /// @brief Converts a radian gyro value to the dynamixel gyro value
+        /// @param gyro The gyro value in radians/second to convert
+        /// @return The dynamixel gyro value
         int16_t gyro(float gyro);
 
-        // Convert accelerometer readings between control table values and actual values
-        float acc(int16_t gyro);
-        int16_t acc(float gyro);
+        /// @brief Converts an accelerometer reading from the dynamixel to a gravity-based value
+        /// @param acc The dynamixel value to convert
+        /// @return The acc value in g's
+        float acc(int16_t acc);
+
+        /// @brief Converts a gravity-based accelerometer value to the dynamixel accelerometer value
+        /// @param acc The gravity-based accelerometer value to convert
+        /// @return The dynamixel accelerometer value
+        int16_t acc(float acc);
 
         // Convert PWM readings between control table values and actual values
         int16_t PWM(int16_t pwm);
