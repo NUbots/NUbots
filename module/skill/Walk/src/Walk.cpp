@@ -186,6 +186,13 @@ namespace module::skill {
             Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
             emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
             emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
+            Eigen::Isometry3f Hpt   = walk_engine.get_torso_pose();
+            Eigen::Vector3f thetaPT = MatrixToEulerIntrinsic(Hpt.linear());
+            emit(graph("Torso desired position (x,y,z)",
+                       Hpt.translation().x(),
+                       Hpt.translation().y(),
+                       Hpt.translation().z()));
+            emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
         }
     }
 

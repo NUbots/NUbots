@@ -173,6 +173,19 @@ namespace module::input {
         emit(graph("Left Foot Actual Orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
         emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
         emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
+        Eigen::Isometry3d Hpt = Eigen::Isometry3d::Identity();
+        if (sensors->feet[BodySide::LEFT].down) {
+            Hpt = Htl.inverse();
+        }
+        else {
+            Hpt = Htr.inverse();
+        }
+        Eigen::Vector3d thetaPT = MatrixToEulerIntrinsic(Hpt.linear());
+        emit(graph("Torso actual position (x,y,z)",
+                   Hpt.translation().x(),
+                   Hpt.translation().y(),
+                   Hpt.translation().z()));
+        emit(graph("Torso actual orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
