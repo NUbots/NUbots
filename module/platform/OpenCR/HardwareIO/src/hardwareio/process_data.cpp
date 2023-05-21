@@ -51,9 +51,9 @@ namespace module::platform::OpenCR {
                                             convert::gyro(data.gyro[1]),    // Y
                                             -convert::gyro(data.gyro[0]));  // Z
 
-        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),   // X
-                                           convert::acc(data.acc[1]),   // Y
-                                           convert::acc(data.acc[2]));  // Z
+        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),       // X
+                                           convert::acc(data.acc[1]),       // Y
+                                           convert::acc(data.acc[2]));      // Z
 
         // Command send/receive errors only
         opencr_state.alert_flag   = static_cast<bool>(packet.alert);
@@ -125,10 +125,12 @@ namespace module::platform::OpenCR {
          * Bit 6	-	                            Unused, Always ‘0’
          * Bit 5	Overload Error(default)	        Detects that persistent load that exceeds maximum output
          * Bit 4	Electrical Shock Error(default)	Detects electric shock on the circuit or insufficient power to
-         * operate the motor Bit 3	Motor Encoder Error	            Detects malfunction of the motor encoder Bit 2
-         * Overheating Error(default)	    Detects that internal temperature exceeds the configured operating
-         * temperature Bit 1	-	                            Unused, Always ‘0’ Bit 0	Input Voltage Error Detects
-         * that input voltage exceeds the configured operating voltage
+         *                                          operate the motor
+         * Bit 3	Motor Encoder Error	            Detects malfunction of the motor encoder
+         * Bit 2    Overheating Error(default)	    Detects that internal temperature exceeds the configured operating
+         *                                          temperature
+         * Bit 1	-	                            Unused, Always ‘0’
+         * Bit 0	Input Voltage Error             Detects that input voltage exceeds the configured operating voltage
          */
         if (servo_states[servo_index].error_flags != 0) {
             log<NUClear::ERROR>(

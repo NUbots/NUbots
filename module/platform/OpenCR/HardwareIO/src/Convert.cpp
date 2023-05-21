@@ -155,10 +155,10 @@ namespace module::platform::OpenCR {
             angle = utility::math::angle::normalizeAngle(angle);
 
             // Do the actual conversion to the control table data
-            uint32_t data = (angle / 0.0015358897f) + 2048;
+            uint32_t data = (angle / 0.0015358897f);
 
             // Apply the correction as per the block comment in the function above.
-            // data += 2048;
+            data += 2048;
 
             return utility::math::clamp(uint32_t(0), data, uint32_t(4095));
         }
