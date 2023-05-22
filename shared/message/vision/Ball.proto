@@ -23,29 +23,34 @@ package message.vision;
 
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
-import "message/Geometry.proto";
 import "Matrix.proto";
 
 message Ball {
+    /// Method of measuring the ball position
     enum MeasurementType {
-        UNKNOWN      = 0;
-        REPROJECTION = 1;
-        WIDTH_BASED  = 2;
+        UNKNOWN    = 0;
+        PROJECTION = 1;  // project the axis vector to the ball plane
+        ANGULAR    = 2;  // use angular distance formula
     }
+    /// Contains the way the ball measurement was determined, the position of the ball given this measurement type,
+    /// and the certainty of the measurement
     message Measurement {
         MeasurementType type = 1;
-        /// Vector from camera to ball in camera coordinates
-        fvec3 srBCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+        /// Spherical Reciprocal Coordinates (1/distance, phi, theta)
+        /// Gives a better representation of the error of the measurement, since error comes from the angular position
+        fvec3 srBCc = 2;
+        /// Confidence of this measurement, for localisation
         fmat3 covariance = 3;
     }
-    /// Cone describing the ball from the camera's perspective
-    Cone                 cone         = 1;
-    repeated Measurement measurements = 2;
-    /// Angular positions from the camera
-    fvec2 screen_angular = 3;
-
-    fvec2 angular_size = 4;
-    /// Colour of the ball for NUsight. Changes depending on the perceived ball location
+    /// Central axis unit vector of the ball from the camera in camera space
+    fvec3 uBCc = 1;
+    /// Angular radius of the ball
+    /// Cosine of the angle from the centre of the ball to the edge of the ball
+    float radius = 2;
+    /// Different methods of measurements are taken to help ball localisation determine the true position
+    repeated Measurement measurements = 4;
+    /// Colour of the ball for NUsight. In debug mode, discarded balls are emitted in different colours depending on
+    /// the reason it was discarded
     fvec4 colour = 5;
 }
 message Balls {
@@ -53,8 +58,8 @@ message Balls {
     uint32 id = 1;
     /// When the image was taken that this measurement is derived from
     google.protobuf.Timestamp timestamp = 2;
-    /// Affine3d transform from world space to camera space at the time that the image was taken
+    /// Isometry3d transform from world space to camera space at the time that the image was taken
     mat4 Hcw = 3;
-
+    /// Could be empty, if there were no balls detected in the image
     repeated Ball balls = 4;
 }

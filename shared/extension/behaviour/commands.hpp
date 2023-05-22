@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef EXTENSION_BEHAVIOUR_COMMANDS_HPP
 #define EXTENSION_BEHAVIOUR_COMMANDS_HPP
 
@@ -27,7 +28,7 @@
 
 /**
  * This namespace holds all of the communication primitives that are used by the Behaviour header to send messages to
- * the Director algorithm. You shouln't be emitting any of these messages outside of the behaviour header.
+ * the behaviour system. You shouldn't be emitting any of these messages outside of the behaviour header.
  */
 namespace extension::behaviour::commands {
 
@@ -43,13 +44,18 @@ namespace extension::behaviour::commands {
         STOP
     };
 
+    template <typename T>
+    struct RootType {
+        RootType() = delete;
+    };
+
     /**
-     * Message used to tell the Director about a new Provides reaction
+     * Message used to tell the behaviour system about a new Provides reaction
      */
     struct ProvideReaction {
 
         /**
-         * @brief Construct a new Provide Reaction object to send to the Director
+         * @brief Construct a new Provide Reaction object to send to the behaviour system
          *
          * @param reaction_         the reaction for this provides object
          * @param type_             the type that this Provider provides for
@@ -69,12 +75,12 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * Message used to tell the Director about a new When condition on a Provider
+     * Message used to tell the behaviour system about a new When condition on a Provider
      */
     struct WhenExpression {
 
         /**
-         * Constructs a new WhenExpression object to send to the Director
+         * Constructs a new WhenExpression object to send to the behaviour system
          *
          * @param reaction_     the reaction this when condition is for
          * @param type_         the enum type that this when condition is monitoring
@@ -107,12 +113,12 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * Message used to tell the Director about a new Causing relationship for this Provider
+     * Message used to tell the behaviour system about a new Causing relationship for this Provider
      */
     struct CausingExpression {
 
         /**
-         * Construct a new Causing Expression object to send to the Director
+         * Construct a new Causing Expression object to send to the behaviour system
          *
          * @param reaction_         the reaction this causing condition is for
          * @param type_             the enum type that this causing condition is going to manipulate
@@ -131,12 +137,12 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * Message used to tell the Director about a new Needs relationship on a Provider
+     * Message used to tell the behaviour system about a new Needs relationship on a Provider
      */
     struct NeedsExpression {
 
         /**
-         * Construct a new Needs Expression object to send to the Director
+         * Construct a new Needs Expression object to send to the behaviour system
          *
          * @param reaction_         the reaction this needs relationship is for
          * @param type_             the provider type that this needs relationship is referring to
@@ -150,7 +156,7 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * Message to tell the Director that a Provider task has finished executing
+     * Message to tell the behaviour system that a Provider task has finished executing
      */
     struct ProviderDone {
 
@@ -170,14 +176,15 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * A task message that is to be sent to the Director for execution
+     * A task message that is to be sent to the behaviour system for execution
      */
-    struct DirectorTask {
+    struct BehaviourTask {
 
         /**
-         * Construct a new Task object to send to the Director
+         * Construct a new Task object to send to the behaviour system
          *
          * @param type_                 the type that this task is for
+         * @param root_type_            a secondary type to use if this is a root task
          * @param requester_id_         the id of the reaction that emitted this task
          * @param requester_task_id_    the task_id of the reaction task that emitted this
          * @param data_                 the task data to be sent to the provider
@@ -185,14 +192,16 @@ namespace extension::behaviour::commands {
          * @param priority_             the priority that this task is to run with
          * @param optional_             whether this task is optional or not
          */
-        DirectorTask(const std::type_index& type_,
-                     const uint64_t& requester_id_,
-                     const uint64_t& requester_task_id_,
-                     std::shared_ptr<void> data_,
-                     std::string name_,
-                     const int& priority_,
-                     const bool& optional_)
+        BehaviourTask(const std::type_index& type_,
+                      const std::type_index& root_type_,
+                      const uint64_t& requester_id_,
+                      const uint64_t& requester_task_id_,
+                      std::shared_ptr<void> data_,
+                      std::string name_,
+                      const int& priority_,
+                      const bool& optional_)
             : type(type_)
+            , root_type(root_type_)
             , requester_id(requester_id_)
             , requester_task_id(requester_task_id_)
             , data(std::move(data_))
@@ -200,13 +209,15 @@ namespace extension::behaviour::commands {
             , priority(priority_)
             , optional(optional_) {}
 
-        /// The Provider type this Director task is for
+        /// The Provider type this task is for
         std::type_index type;
+        /// A secondary provider type to use if this is a root task
+        std::type_index root_type;
         /// The reaction id of the requester (could be the id of a Provider)
         uint64_t requester_id;
         /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)
         uint64_t requester_task_id;
-        /// The data for the command, (the data that will be given to the Provider)
+        /// The data for the command, (the data that will be given to the Provider) if null counts as no task
         std::shared_ptr<void> data;
         /// A name for this task to be shown in debugging systems
         std::string name;

@@ -1,53 +1,81 @@
-import classNames from 'classnames'
-import { observable } from 'mobx'
-import { action } from 'mobx'
-import { observer } from 'mobx-react'
-import React from 'react'
-import { Component } from 'react'
-import ReactResizeDetector from 'react-resize-detector'
+import React, { useMemo, useRef, useState } from "react";
+import classNames from "classnames";
+import ReactResizeDetector from "react-resize-detector";
 
-import { Transform } from '../math/transform'
-import { Vector2 } from '../math/vector2'
+import { Transform } from "../../shared/math/transform";
+import { Vector2 } from "../../shared/math/vector2";
 
-import { RendererProps } from './renderer_props'
-import style from './style.css'
-import { Group } from './svg/group'
-import { toSvgTransform } from './svg/rendering'
+import { RendererProps } from "./renderer";
+import style from "./style.module.css";
+import { Group } from "./svg/group";
+import { toSvgEventHandlers, toSvgTransform } from "./svg/rendering";
 
-@observer
-export class SVGRenderer extends Component<RendererProps> {
-  @observable private resolution: Transform = Transform.of()
+export interface SVGRendererTransforms {
+  camera: Transform;
+  world: Transform;
+  getSVGOffset: () => Vector2;
+}
 
-  render() {
-    const { className, scene, camera } = this.props
+export const rendererTransformsContext = React.createContext<SVGRendererTransforms>({
+  camera: Transform.of(),
+  world: Transform.of(),
+  getSVGOffset: () => Vector2.of(),
+});
 
-    const cam = this.resolution.inverse().then(camera)
-    return (
-      <div className={classNames(className, style.container)}>
-        <ReactResizeDetector handleWidth handleHeight onResize={this.onResize} />
-        <svg className={style.container}>
-          <g transform={toSvgTransform(cam)}>
-            <Group model={scene} world={cam} />
-          </g>
-        </svg>
-      </div>
-    )
-  }
+export const SVGRenderer = (props: RendererProps) => {
+  const { className, scene, camera, aspectRatio, eventHandlers = {} } = props;
+  const [resolution, setResolution] = useState(Transform.of());
+  const svgElement = useRef<SVGSVGElement | null>(null);
 
-  @action
-  private onResize = (width: number, height: number) => {
-    // Translate to the center
-    const translate = Vector2.of(-width * 0.5, -height * 0.5)
+  const onResize = (width: number, height: number) => {
+    setResolution(calculateResolution(width, height, aspectRatio));
+    props.onResize?.(width, height);
+  };
 
-    // If we have an aspect ratio, use it to scale the canvas to unit size
-    if (this.props.aspectRatio !== undefined) {
-      const canvasAspect = width / height
-      const scale =
-        canvasAspect < this.props.aspectRatio ? 1 / width : 1 / (height * this.props.aspectRatio)
-      // Scale to fit
-      this.resolution = Transform.of({ scale: { x: scale, y: -scale }, translate })
-    } else {
-      this.resolution = Transform.of({ scale: { x: 1 / width, y: -1 / height }, translate })
-    }
+  const transforms = useMemo(() => {
+    const getSVGOffset = () => {
+      if (!svgElement.current) {
+        return Vector2.of(0, 0);
+      }
+
+      const bounds = svgElement.current.getBoundingClientRect();
+      return Vector2.of(bounds.x, bounds.y);
+    };
+
+    const world = resolution.then(camera.inverse());
+
+    return {
+      world,
+      svg: { camera: resolution, world, getSVGOffset },
+      scene: { camera: world, world, getSVGOffset },
+    };
+  }, [resolution, camera]);
+
+  return (
+    <div className={classNames(className, style.container)}>
+      <ReactResizeDetector handleWidth handleHeight onResize={onResize} />
+      <svg ref={svgElement} className={style.container} {...toSvgEventHandlers(eventHandlers, transforms.svg)}>
+        <g transform={toSvgTransform(transforms.world)}>
+          <rendererTransformsContext.Provider value={transforms.scene}>
+            <Group model={scene} />
+          </rendererTransformsContext.Provider>
+        </g>
+      </svg>
+    </div>
+  );
+};
+
+function calculateResolution(width: number, height: number, aspectRatio?: number) {
+  // Translate to the center
+  const translate = Vector2.of(width * 0.5, height * 0.5);
+
+  // If we have an aspect ratio, use it to scale the canvas to unit size
+  if (aspectRatio !== undefined) {
+    const canvasAspect = width / height;
+    const scale = canvasAspect < aspectRatio ? width : height * aspectRatio;
+    // Scale to fit
+    return Transform.of({ scale: { x: scale, y: -scale }, translate });
+  } else {
+    return Transform.of({ scale: { x: width, y: -height }, translate });
   }
 }

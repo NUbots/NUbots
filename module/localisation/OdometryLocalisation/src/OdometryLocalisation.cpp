@@ -23,7 +23,7 @@ namespace module::localisation {
     using utility::support::Expression;
 
     OdometryLocalisation::OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), localisationOffset(Eigen::Affine2d::Identity()) {
+        : Reactor(std::move(environment)), localisationOffset(Eigen::Isometry2d::Identity()) {
 
         on<Configuration>("OdometryLocalisation.yaml").then([this](const Configuration& config) {
             // Use configuration here from file OdometryLocalisation.yaml
@@ -36,23 +36,23 @@ namespace module::localisation {
                 emit(std::make_unique<Nod>(true));
                 // Set localisationOffset = Hrw
                 localisationOffset =
-                    projectTo2D(Eigen::Affine3d(sensors.Htw), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
+                    projectTo2D(Eigen::Isometry3d(sensors.Htw), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
             });
 
 
         on<Trigger<Sensors>, Sync<OdometryLocalisation>, Single>().then("Odometry Loc", [this](const Sensors& sensors) {
-            const Eigen::Affine2d Hrw =
-                projectTo2D(Eigen::Affine3d(sensors.Htw), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
-            const Eigen::Affine2d Hwr = Hrw.inverse();
+            const Eigen::Isometry2d Hrw =
+                projectTo2D(Eigen::Isometry3d(sensors.Htw), Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
+            const Eigen::Isometry2d Hwr = Hrw.inverse();
 
             // Assign the local to world transform to `state`, which becomes the field's position transform
-            Eigen::Affine2d state;
+            Eigen::Isometry2d state;
             state.translation() =
                 localisationOffset.translation() + (localisationOffset.rotation() * Hwr.translation());
             state.linear() = localisationOffset.rotation() * Hwr.rotation();
 
             auto field        = std::make_unique<Field>();
-            field->position   = state.matrix();
+            field->Hfw        = state.matrix();
             field->covariance = Eigen::Matrix3d::Identity();
 
             emit(std::make_unique<std::vector<Field>>(1, *field));

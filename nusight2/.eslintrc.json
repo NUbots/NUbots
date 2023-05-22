@@ -6,8 +6,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
-    "plugin:prettier/recommended",
-    "plugin:@typescript-eslint/eslint-recommended"
+    "plugin:@typescript-eslint/eslint-recommended",
+    "prettier"
   ],
   "globals": {
     "Atomics": "readonly",
@@ -21,54 +21,58 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": [
-    "prettier",
-    "react",
-    "@typescript-eslint"
-  ],
+  "plugins": ["react", "@typescript-eslint", "simple-import-sort"],
   "settings": {
     "react": {
       "version": "detect"
     }
   },
+  "ignorePatterns": [
+    // Don't ignore files in ".storybook"
+    "!.storybook"
+  ],
   "rules": {
-    "prettier/prettier": "error",
     "react/display-name": 0,
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["error", {
-      "vars": "all",
-      "args": "after-used",
-      "ignoreRestSiblings": false
-    }],
-    "@typescript-eslint/member-delimiter-style": [
+    "react/no-unknown-property": "off",
+    "@typescript-eslint/no-unused-vars": [
       "error",
       {
-        "multiline": {
-          "delimiter": "none",
-          "requireLast": false
-        },
-        "singleline": {
-          "delimiter": "semi",
-          "requireLast": false
-        }
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": false,
+        "varsIgnorePattern": "^_",
+        "argsIgnorePattern": "^_"
       }
     ],
     "indent": "off",
-    "linebreak-style": [
+    "simple-import-sort/imports": [
       "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "semi": [
-      "error",
-      "never"
-    ],
-    "arrow-parens": [
-      "error",
-      "as-needed"
+      {
+        "groups": [
+          // Magic regex token, matches side effect imports.
+          ["^\\u0000"],
+          // Node.js builtins prefixed with `node:`.
+          ["^node:"],
+          // Packages, with React first.
+          // Matches imports starting with a letter (or digit or underscore), or `@` followed by a letter.
+          ["^react$", "^@?\\w"],
+          // Absolute imports and aliased imports like `@/foo`, as well as anything not matched in another group.
+          ["^"],
+          // Relative imports from "parents": imports that start with two dots.
+          ["^\\.\\."],
+          // Relative imports from siblings or "children": imports that start with one dot.
+          ["^\\."]
+        ]
+      }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.tsx"],
+      "rules": {
+        "react/prop-types": "off"
+      }
+    }
+  ]
 }

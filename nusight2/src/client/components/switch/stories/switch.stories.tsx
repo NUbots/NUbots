@@ -1,21 +1,40 @@
-import { action } from '@storybook/addon-actions'
-import { storiesOf } from '@storybook/react'
-import { action as mobxAction, observable } from 'mobx'
-import { observer } from 'mobx-react'
-import React from 'react'
+import React from "react";
+import { action } from "@storybook/addon-actions";
+import { Meta, StoryObj } from "@storybook/react";
+import { action as mobxAction, observable } from "mobx";
+import { observer } from "mobx-react";
 
-import { Switch } from '../view'
+import { Switch } from "../view";
 
-storiesOf('component.switch', module)
-  .add('Interactive', () => {
-    const model = observable({ on: false })
-    const onChange = mobxAction(() => (model.on = !model.on))
-    const Component = observer(() => <Switch on={model.on} onChange={onChange} />)
-    return <Component />
-  })
-  .add('on', () => {
-    return <Switch on={true} onChange={action('onChange')} />
-  })
-  .add('off', () => {
-    return <Switch on={false} onChange={action('onChange')} />
-  })
+const meta: Meta<typeof Switch> = {
+  title: "components/Switch",
+  component: Switch,
+};
+
+export default meta;
+
+type Story = StoryObj<typeof Switch>;
+
+export const on: Story = {
+  name: "on",
+  render: () => {
+    return <Switch on={true} onChange={action("onChange")} />;
+  },
+};
+
+export const off: Story = {
+  name: "off",
+  render: () => {
+    return <Switch on={false} onChange={action("onChange")} />;
+  },
+};
+
+export const Interactive: Story = {
+  name: "Interactive",
+  render: () => {
+    const model = observable({ on: false });
+    const onChange = mobxAction(() => (model.on = !model.on));
+    const Component = observer(() => <Switch on={model.on} onChange={onChange} />);
+    return <Component />;
+  },
+};

@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 # List the message types you want to send
 # Depending on what value you put it will influence how it is sent:
@@ -12,7 +12,7 @@ targets:
     message.support.nusight.Overview: true
 
     # DataPoints power the chart view
-    message.support.nusight.DataPoint: true
+    message.eye.DataPoint: true
 
     # Sensor data
     message.input.Sensors: true

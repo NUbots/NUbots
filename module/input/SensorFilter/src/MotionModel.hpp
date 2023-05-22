@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2016 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULE_INPUT_MOTIONMODEL_HPP

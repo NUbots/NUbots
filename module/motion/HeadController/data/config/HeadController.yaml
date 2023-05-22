@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 # Priority in subsumption system
 head_controller_priority: 5
@@ -12,4 +12,4 @@ initial:
   yaw: 0
   pitch: 0
 # Smoothing factor for goal angle to reduce look judder and oscillation, https://en.wikipedia.org/wiki/Exponential_smoothing
-smoothing_factor: 0.01
+smoothing_factor: 0.1

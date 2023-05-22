@@ -14,12 +14,8 @@ https://github.com/Rhoban/model/
 namespace utility::math::euler {
 
     /**
-     * All combinations
-     * of Euler angles types
-     * in same order as rotation application
-     *
-     * EulerYawPitchRoll is built as
-     * Roll * Pitch * Yaw.
+     * @brief All combinations of Euler angles types in same order as rotation application,
+     * EulerYawPitchRoll is built as Roll * Pitch * Yaw.
      */
     enum EulerType {
         EulerYawPitchRoll,
@@ -31,15 +27,16 @@ namespace utility::math::euler {
     };
 
     /**
-     * Valid Euler angles (0, 1, 2) range
-     * are (bound included):
+     * @brief Valid Euler angles (0, 1, 2) range are (bound included):
      * 0: -M_PI : M_PI
      * 1: -M_PI/2.0 : M_PI/2.0
      * 2: 0.0 : M_PI
      */
 
     /**
-     * Return false if given Euler angles range are no valid
+     * @brief Check if given Euler angles range are not valid
+     * @param type Euler angles
+     * @return false if angles are not valid
      */
     template <typename T, std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 1))>* = nullptr>
     inline bool CheckEulerBounds(const T& angles) {
@@ -50,8 +47,10 @@ namespace utility::math::euler {
     }
 
     /**
-     * Convert given Euler angles of given
-     * convention type to rotation matrix
+     * @brief Convert given Euler angles of given convention type to rotation matrix
+     * @param angles Euler angles
+     * @param eulerType Euler angles convention type
+     * @return Rotation matrix
      */
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
@@ -103,8 +102,10 @@ namespace utility::math::euler {
     }
 
     /**
-     * Convert the given rotation matrix into
-     * Euler angles of given convention
+     * @brief Convert the given rotation matrix into Euler angles of given convention
+     * @param mat Rotation matrix
+     * @param eulerType Euler angles convention
+     * @return Euler angles
      */
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
@@ -135,27 +136,29 @@ namespace utility::math::euler {
     }
 
     /**
-     * Manually convert the given rotation matrix
-     * to [Roll, Pitch, Yaw] ZYX intrinsic euler
-     * angle (Better range than Eigen conversion).
+     * @brief Manually convert the given rotation matrix to [Roll, Pitch, Yaw] ZYX intrinsic euler angle (Better range
+     * than Eigen conversion).
+     * @param mat Rotation matrix
+     * @return [Roll, Pitch, Yaw] ZYX intrinsic euler angle
      */
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
               std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 3))>* = nullptr>
     inline Eigen::Matrix<Scalar, 3, 1> MatrixToEulerIntrinsic(const T& mat) {
-        // Eigen euler angles and with better range)
+        // Eigen euler angles and with better range
         return Eigen::Matrix<Scalar, 3, 1>(
             // Roll
             std::atan2(mat(2, 1), mat(2, 2)),
             // Pitch
-            std::atan2(-mat(2, 0), std::sqrt(mat(0, 0) * mat(0, 0) + mat(1, 0) * mat(1, 0))),
+            std::atan2(-mat(2, 0), std::sqrt(mat(2, 1) * mat(2, 1) + mat(2, 2) * mat(2, 2))),
             // Yaw
             std::atan2(mat(1, 0), mat(0, 0)));
     }
 
     /**
-     * Convert given Euler angles in [Roll, Pitch, Yaw]
-     * ZYX intrinsic format to rotation matrix
+     * @brief Convert given Euler angles in [Roll, Pitch, Yaw] ZYX intrinsic format to rotation matrix
+     * @param angles [Roll, Pitch, Yaw] ZYX intrinsic euler angles
+     * @return Rotation matrix corresponding to given euler angles
      */
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
@@ -167,7 +170,6 @@ namespace utility::math::euler {
         Eigen::Quaternion<Scalar> quat = yawRot * pitchRot * rollRot;
         return quat.matrix();
     }
-
 }  // namespace utility::math::euler
 
 #endif

@@ -1,5 +1,4 @@
-FakeCamera
-==========
+# FakeCamera
 
 ## Description
 
@@ -22,23 +21,21 @@ All images are assumed to be JPEGs with either a `.jpg` or `.jpeg` extension. Al
 Lens files should contain the following information
 
 ```yaml
-projection: EQUISOLID   # Either RECTILINEAR, EQUIDUSTANT, or EQUISOLID
-focal_length: 420       # Un-normalised focal length in pixels
-centre: [0, 0]          # Distance between the camera centre axis and optical axis in pixels (measured from the centre of the image)
-k: [0, 0]               # Distortion coefficients
-fov: 1.59286            # Field of view in radians
-Hoc:                    # Camera to observation plane (world) homogeneous transformation
+projection: EQUISOLID # Either RECTILINEAR, EQUIDUSTANT, or EQUISOLID
+focal_length: 420 # Un-normalised focal length in pixels
+centre: [0, 0] # Distance between the camera centre axis and optical axis in pixels (measured from the centre of the image)
+k: [0, 0] # Distortion coefficients
+fov: 1.59286 # Field of view in radians
+Hoc: # Camera to observation plane (world) homogeneous transformation
   - [-0.308872, 0.945477, 0.103304, 0]
   - [-0.84664, -0.223831, -0.482805, 0]
   - [-0.433359, -0.236586, 0.869613, 0.9]
   - [0, 0, 0, 1]
 ```
 
-
 ## Emits
 
 `message::output::CompressedImage` with a `JPEG` FOURCC code
-
 
 ## Dependencies
 

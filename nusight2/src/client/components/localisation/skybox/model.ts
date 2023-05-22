@@ -1,14 +1,14 @@
-import { observable } from 'mobx'
+import { observable } from "mobx";
 
 export class SkyboxModel {
-  @observable turbidity: number
-  @observable rayleigh: number
-  @observable mieCoefficient: number
-  @observable mieDirectionalG: number // default 0.8
-  @observable luminance: number
-  @observable inclination: number // elevation / inclination
-  @observable azimuth: number // Facing front,
-  @observable showSun: boolean
+  @observable turbidity: number;
+  @observable rayleigh: number;
+  @observable mieCoefficient: number;
+  @observable mieDirectionalG: number; // default 0.8
+  @observable luminance: number;
+  @observable inclination: number; // elevation / inclination
+  @observable azimuth: number; // Facing front,
+  @observable showSun: boolean;
 
   constructor({
     turbidity,
@@ -20,14 +20,14 @@ export class SkyboxModel {
     azimuth,
     showSun,
   }: SkyboxModel) {
-    this.turbidity = turbidity
-    this.rayleigh = rayleigh
-    this.mieCoefficient = mieCoefficient
-    this.mieDirectionalG = mieDirectionalG
-    this.luminance = luminance
-    this.inclination = inclination
-    this.azimuth = azimuth
-    this.showSun = showSun
+    this.turbidity = turbidity;
+    this.rayleigh = rayleigh;
+    this.mieCoefficient = mieCoefficient;
+    this.mieDirectionalG = mieDirectionalG;
+    this.luminance = luminance;
+    this.inclination = inclination;
+    this.azimuth = azimuth;
+    this.showSun = showSun;
   }
 
   static of() {
@@ -40,6 +40,6 @@ export class SkyboxModel {
       inclination: 0.49, // elevation / inclination
       azimuth: 0.25, // Facing front,
       showSun: false,
-    })
+    });
   }
 }

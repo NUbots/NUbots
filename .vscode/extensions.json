@@ -1,14 +1,18 @@
 {
-    "recommendations": [
-        "ms-vscode.cpptools",
-        "twxs.cmake",
-        "ms-vscode.cmake-tools",
-        "cheshirekow.cmake-format",
-        "ms-azuretools.vscode-docker",
-        "galarius.vscode-opencl",
-        "ms-python.python",
-        "ms-vscode-remote.remote-containers",
-        "zxh404.vscode-proto3",
-        "redhat.vscode-yaml"
-    ]
+  "recommendations": [
+    "cheshirekow.cmake-format",
+    "coolbear.systemd-unit-file",
+    "cschlosser.doxdocgen",
+    "esbenp.prettier-vscode",
+    "github.vscode-pull-request-github",
+    "ms-azuretools.vscode-docker",
+    "ms-python.isort",
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode.cpptools-extension-pack",
+    "slevesque.shader",
+    "streetsidesoftware.code-spell-checker",
+    "zxh404.vscode-proto3"
+  ]
 }

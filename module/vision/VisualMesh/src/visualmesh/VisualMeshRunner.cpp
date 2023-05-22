@@ -1,5 +1,6 @@
 #include "VisualMeshRunner.hpp"
 
+#include <filesystem>
 #include <visualmesh/engine/cpu/engine.hpp>
 #include <visualmesh/engine/opencl/engine.hpp>
 #include <visualmesh/geometry/Circle.hpp>
@@ -24,12 +25,14 @@
 namespace module::vision::visualmesh {
 
     using message::input::Image;
+    namespace fs = std::filesystem;
 
     struct VisualMeshModelConfig {
         std::string engine;
         ::visualmesh::NetworkStructure<float> model;
         std::string mesh_model;
         int num_classes = 0;
+        std::string cache_directory;
 
         struct {
             double intersection_tolerance = 0.0;
@@ -50,9 +53,32 @@ namespace module::vision::visualmesh {
 
     namespace generate_runner {
 
+        template <template <typename> class Engine, typename Scalar>
+        struct BuildEngine;
+
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::opencl::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::opencl::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string cache) {
+                fs::create_directories(cache);  // create the cache folder if it doesn't exist
+                return std::make_shared<::visualmesh::engine::opencl::Engine<Scalar>>(net, cache);
+            }
+        };
+
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::cpu::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::cpu::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string /* cache */) {
+                return std::make_shared<::visualmesh::engine::cpu::Engine<float>>(net);
+            }
+        };
+
         template <template <typename> class Model, template <typename> class Engine, typename Shape>
-        std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> runner(const VisualMeshModelConfig& cfg,
-                                                                                      const Shape& shape) {
+        std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> runner(
+            const VisualMeshModelConfig& cfg,
+            const Shape& shape) {
 
             // Make the model and the engine
             auto mesh = std::make_shared<::visualmesh::VisualMesh<float, Model>>(
@@ -62,9 +88,9 @@ namespace module::vision::visualmesh {
                                                         cfg.mesh.geometry.intersections,
                                                         cfg.mesh.intersection_tolerance,
                                                         cfg.mesh.classifier.max_distance));
-            auto engine = std::make_shared<Engine<float>>(cfg.model);
+            auto engine = BuildEngine<Engine, float>::build(cfg.model, cfg.cache_directory);
 
-            return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
+            return [shape, mesh, engine](const Image& img, const Eigen::Isometry3f& Hcw) {
                 // Create the lens
                 ::visualmesh::Lens<float> lens{};
                 lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
@@ -130,8 +156,9 @@ namespace module::vision::visualmesh {
         }
 
         template <template <typename> class Model, typename Shape>
-        std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> engine(const VisualMeshModelConfig& cfg,
-                                                                                      const Shape& shape) {
+        std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> engine(
+            const VisualMeshModelConfig& cfg,
+            const Shape& shape) {
 
             // clang-format off
             if (cfg.engine == "opencl") { return runner<Model, ::visualmesh::engine::opencl::Engine>(cfg, shape); }
@@ -141,8 +168,8 @@ namespace module::vision::visualmesh {
         }
 
         template <typename Shape>
-        std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> model(const VisualMeshModelConfig& cfg,
-                                                                                     const Shape& shape) {
+        std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> model(const VisualMeshModelConfig& cfg,
+                                                                                       const Shape& shape) {
             // clang-format off
             if (cfg.mesh_model == "RING4")   { return engine<::visualmesh::model::Ring4>(cfg, shape);   }
             if (cfg.mesh_model == "RING6")   { return engine<::visualmesh::model::Ring6>(cfg, shape);   }
@@ -160,7 +187,7 @@ namespace module::vision::visualmesh {
             throw std::runtime_error("Unknown visual mesh model type " + cfg.mesh_model);
         }
 
-        inline std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> geometry(
+        inline std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> geometry(
             const VisualMeshModelConfig& cfg) {
 
             // clang-format off
@@ -179,7 +206,8 @@ namespace module::vision::visualmesh {
                                        const double& max_height,
                                        const double& max_distance,
                                        const double& intersection_tolerance,
-                                       const std::string& path)
+                                       const std::string& path,
+                                       const std::string& cache_directory)
         : active(std::make_unique<std::atomic<bool>>()) {
 
         // Add the configuration properties we were passed
@@ -189,6 +217,7 @@ namespace module::vision::visualmesh {
         cfg.mesh.classifier.min_height   = min_height;
         cfg.mesh.classifier.max_height   = max_height;
         cfg.mesh.classifier.max_distance = max_distance;
+        cfg.cache_directory              = cache_directory;
 
         // Load the properties from the model
         auto loaded                     = load_model(path);
@@ -203,7 +232,7 @@ namespace module::vision::visualmesh {
         runner = generate_runner::geometry(cfg);
     }
 
-    VisualMeshResults VisualMeshRunner::operator()(const Image& image, const Eigen::Affine3f& Htc) {
+    VisualMeshResults VisualMeshRunner::operator()(const Image& image, const Eigen::Isometry3f& Htc) {
         // Run our lambda
         return runner(image, Htc);
     }

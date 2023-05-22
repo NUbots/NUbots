@@ -22,10 +22,11 @@ namespace module::vision {
             engines.clear();
 
             for (const auto& camera : config["cameras"].config) {
-                auto name        = camera.first.as<std::string>();
-                auto engine_type = camera.second["engine"].as<std::string>();
-                int concurrent   = camera.second["concurrent"].as<int>();
-                auto network     = camera.second["network"].as<std::string>();
+                auto name            = camera.first.as<std::string>();
+                auto engine_type     = camera.second["engine"].as<std::string>();
+                int concurrent       = camera.second["concurrent"].as<int>();
+                auto network         = camera.second["network"].as<std::string>();
+                auto cache_directory = camera.second["cache_directory"].as<std::string>();
 
                 auto min_height   = camera.second["classifier"]["height"][0].as<double>();
                 auto max_height   = camera.second["classifier"]["height"][1].as<double>();
@@ -35,7 +36,13 @@ namespace module::vision {
                 // Create a network runner for each concurrent system
                 auto& runners = engines[name];
                 for (int i = 0; i < concurrent; ++i) {
-                    runners.emplace_back(engine_type, min_height, max_height, max_distance, tolerance, network);
+                    runners.emplace_back(engine_type,
+                                         min_height,
+                                         max_height,
+                                         max_distance,
+                                         tolerance,
+                                         network,
+                                         cache_directory);
                 }
             }
         });
@@ -52,7 +59,7 @@ namespace module::vision {
                     if (!runner.active->exchange(true)) {
 
                         // Extract the camera position now that we need it
-                        Eigen::Affine3d Hcw(image.Hcw);
+                        Eigen::Isometry3d Hcw(image.Hcw);
 
                         std::exception_ptr eptr;
                         try {
@@ -76,6 +83,10 @@ namespace module::vision {
                                 msg->indices         = std::move(result.indices);
                                 msg->classifications = std::move(result.classifications);
                                 msg->class_map       = runner.class_map;
+
+                                if (image.vision_ground_truth.exists) {
+                                    msg->vision_ground_truth = image.vision_ground_truth;
+                                }
 
                                 // Emit the inference
                                 emit(msg);

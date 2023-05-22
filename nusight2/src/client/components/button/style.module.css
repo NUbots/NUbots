@@ -1,0 +1,103 @@
+.button {
+  display: inline-flex;
+  height: 32px;
+  min-width: 64px;
+  padding: 0 12px;
+  align-items: center;
+  font-family: inherit;
+  border-radius: 4px;
+  outline: none;
+  font-size: 14px;
+  justify-content: center;
+  align-items: center;
+  border-width: 1px;
+  border-style: solid;
+}
+
+.button:hover:not([disabled]) {
+  cursor: pointer;
+}
+
+.button[disabled] {
+  opacity: 0.65;
+}
+
+.alignLeft {
+  justify-content: flex-start;
+}
+
+.alignRight {
+  justify-content: flex-end;
+}
+
+.fullwidth {
+  width: 100%;
+}
+
+.iconBefore {
+  margin-right: 8px;
+}
+
+.iconAfter {
+  padding-left: 4px;
+}
+
+.iconAfterAlignedRight {
+  margin-left: auto;
+}
+
+.iconBefore,
+.iconAfter {
+  line-height: 0;
+}
+
+.iconBefore svg,
+.iconAfter svg {
+  height: 20px;
+  width: 20px;
+  fill: currentColor;
+}
+
+/* Type: normal ================================== */
+
+.buttonNormal {
+  background-color: #eee;
+  border-color: #ccc;
+}
+
+.buttonNormal:hover:not([disabled]) {
+  border-color: #aaa;
+}
+
+.buttonNormal:active:not([disabled]) {
+  background-color: #ddd;
+}
+
+.buttonNormal .iconBefore {
+  color: #1197d3;
+}
+
+.buttonNormal .iconAfter {
+  color: #777;
+}
+
+/* Type: primary ================================= */
+
+.buttonPrimary {
+  background-color: #1197d3;
+  border-color: #0f86bd;
+  color: #fff;
+}
+
+.buttonPrimary:hover:not([disabled]) {
+  border-color: #0f86bd;
+}
+
+.buttonPrimary:active:not([disabled]) {
+  background-color: #108cc6;
+}
+
+.buttonPrimary .iconBefore,
+.buttonPrimary .iconAfter {
+  color: white;
+}

@@ -5,7 +5,7 @@ nuclear_role(
   support::SignalCatcher
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
@@ -24,7 +24,7 @@ nuclear_role(
   vision::GoalDetector
   vision::BallDetector
   # Localisation
-  localisation::BallLocalisation
+  localisation::BallFilter
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
@@ -32,7 +32,6 @@ nuclear_role(
   behaviour::skills::KickScript
   behaviour::skills::HeadBehaviourSoccer
   behaviour::skills::Stand
-  behaviour::planning::KickPlanner
   behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
   behaviour::skills::Nod

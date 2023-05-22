@@ -1,14 +1,14 @@
-import { action } from 'mobx'
+import { action } from "mobx";
 
-import { DashboardModel } from './model'
+import { DashboardModel } from "./model";
 
 export class DashboardController {
   static of() {
-    return new DashboardController()
+    return new DashboardController();
   }
 
   @action
   toggleOrientation(model: DashboardModel) {
-    model.field.orientation = model.field.orientation === 'left' ? 'right' : 'left'
+    model.field.orientation = model.field.orientation === "left" ? "right" : "left";
   }
 }

@@ -1,0 +1,57 @@
+# Change this to debug or lower to see the files getting checked
+log_level: INFO
+
+# Username
+user: nubots
+
+# File permissions that need to be set
+permissions:
+  /etc/sudoers.d/insults: 0440
+  /etc/sudoers.d/wheel: 0440
+  /home/nubots/.ssh/authorized_keys: 0600
+
+# Pacman packages that should be installed and updated
+pacman:
+  - linux-headers
+  - screen
+  - wpa_supplicant
+  - openssh
+  - vim
+  - nano
+  - wget
+  - htop
+  - gdb
+  - bluez
+  - bluez-utils
+  - rsync
+  - fzf
+  - zsh
+  - zsh-completions
+  - git
+
+# Systemd units that should be enabled
+systemd:
+  - systemd-networkd.service
+  - systemd-resolved.service
+  - systemd-timesyncd.service
+  - sshd.service
+  - wpa_supplicant@wlp58s0.service
+
+# Groups that should exist and that the user should be a member of
+groups:
+  - wheel
+  - lp
+  - u3v
+
+# Necessary symlinks
+# target: name
+# will create a link to target with name
+links:
+  /run/systemd/resolve/stub-resolv.conf: /etc/resolv.conf
+  /usr/share/zoneinfo/Australia/Sydney: /etc/localtime
+
+# Generate locale
+generate_locale: True
+
+# Generate grub config
+generate_grub: True

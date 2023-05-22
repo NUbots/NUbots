@@ -1,15 +1,11 @@
-import React from 'react'
-import { ComponentType } from 'react'
+import React from "react";
+import { ComponentType } from "react";
 
-import { NavigationConfiguration } from '../../navigation'
-import { NUsightNetwork } from '../../network/nusight_network'
-import { AppModel } from '../app/model'
-import { OdometryController } from './controller'
+import { NavigationConfiguration } from "../../navigation";
+import { NUsightNetwork } from "../../network/nusight_network";
+import { AppModel } from "../app/model";
 
-import Icon from './icon.svg'
-import { OdometryModel } from './model'
-import { OdometryNetwork } from './network'
-import { OdometryView } from './view'
+import Icon from "./icon";
 
 export function installOdometry({
   nav,
@@ -17,20 +13,20 @@ export function installOdometry({
   nusightNetwork,
   Menu,
 }: {
-  nav: NavigationConfiguration
-  appModel: AppModel
-  nusightNetwork: NUsightNetwork
-  Menu: ComponentType
+  nav: NavigationConfiguration;
+  appModel: AppModel;
+  nusightNetwork: NUsightNetwork;
+  Menu: ComponentType;
 }) {
-  const model = OdometryModel.of(appModel)
   nav.addRoute({
-    path: '/odometry',
+    path: "/odometry",
     Icon,
-    label: 'Odometry',
-    Content: () => {
-      React.useEffect(() => OdometryNetwork.of(nusightNetwork).destroy)
-      const controller = OdometryController.of()
-      return <OdometryView controller={controller} model={model} Menu={Menu} />
-    },
-  })
+    label: "Odometry",
+    Content: React.lazy(async () => {
+      const { createOdometryView } = await import("./create");
+      return {
+        default: createOdometryView({ appModel, nusightNetwork, Menu }),
+      };
+    }),
+  });
 }
