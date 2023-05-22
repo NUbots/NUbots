@@ -105,7 +105,7 @@ namespace utility::actuation::kinematics {
 
         const Eigen::Matrix<Scalar, 3, 1> hipOffset(LENGTH_BETWEEN_LEGS * 0.5,
                                                     HIP_OFFSET_X,
-                                                    -DISTANCE_FROM_BODY_TO_HIP_JOINT);
+                                                    DISTANCE_FROM_BODY_TO_HIP_JOINT);
 
         Eigen::Matrix<Scalar, 3, 1> targetLeg = anklePos - hipOffset;
 
