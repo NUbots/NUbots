@@ -209,7 +209,7 @@ namespace module::platform::OpenCR {
                 // Get the difference between the current and goal servo position to calculate speed
                 float diff =
                     utility::math::angle::difference(command.position, servo_states[command.id].present_position);
-                    
+
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
