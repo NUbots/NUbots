@@ -34,6 +34,14 @@ export class Matrix4 {
     return this.x.x + this.y.y + this.z.z + this.t.t;
   }
 
+  multiply(m: Matrix4): Matrix4 {
+    return Matrix4.fromThree(this.toThree().multiply(m.toThree()));
+  }
+
+  invert(): Matrix4 {
+    return Matrix4.fromThree(this.toThree().invert());
+  }
+
   decompose() {
     const translation = new THREE.Vector3();
     const rotation = new THREE.Quaternion();
