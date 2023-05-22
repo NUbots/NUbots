@@ -5,3 +5,8 @@ urdf_path: "/home/nubots/NUbots/module/actuation/Kinematics/data/nugus.urdf"
 
 ik_tolerance: 1e-5
 ik_max_iterations: 500
+
+links:
+  torso: "torso"
+  left_foot: "left_foot_base"
+  right_foot: "right_foot_base"

@@ -2,7 +2,6 @@
 #define MODULE_ACTUATION_KINEMATICS_HPP
 
 #include <extension/Behaviour.hpp>
-#include <map>
 #include <nuclear>
 #include <tinyrobotics/inversekinematics.hpp>
 #include <tinyrobotics/kinematics.hpp>
@@ -17,8 +16,6 @@
 
 namespace module::actuation {
 
-    using namespace tinyrobotics;
-
     class Kinematics : public ::extension::behaviour::BehaviourReactor {
     public:
         /// @brief Called by the powerplant to build and setup the Kinematics reactor.
@@ -27,18 +24,29 @@ namespace module::actuation {
         /// @brief Number of actuatable joints in the NUgus robot
         static const int n_joints = 20;
 
-        /// @brief tinyrobotics model of the NUgus robot TODO: Make this work with only one model
-        Model<double, n_joints> nugus_model_left;
-        Model<double, n_joints> nugus_model_right;
+        /// @brief tinyrobotics model of the NUgus robot for left leg IK
+        tinyrobotics::Model<double, n_joints> nugus_model_left;
+
+        /// @brief tinyrobotics model of the NUgus robot for right leg IK
+        tinyrobotics::Model<double, n_joints> nugus_model_right;
 
         /// @brief tinyrobotics inverse kinematics options
-        InverseKinematicsOptions<double, n_joints> options;
+        tinyrobotics::InverseKinematicsOptions<double, n_joints> options;
 
     private:
         /// @brief Stores configuration values
         struct Config {
             /// @brief Path to the URDF file
             std::string urdf_path = "";
+
+            /// @brief Name of torso link in tinyrobotics model
+            std::string torso_name = "torso";
+
+            /// @brief Name of left foot base link in tinyrobotics model
+            std::string left_foot_name = "left_foot_base";
+
+            /// @brief Name of right foot base link in tinyrobotics model
+            std::string right_foot_name = "right_foot_base";
         } cfg;
     };
 
