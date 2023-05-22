@@ -73,10 +73,6 @@ namespace module::input {
 
             // Deadreckoning
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
-
-            // ****************************************  Kinematics Model ****************************************
-            cfg.urdf_path = config["urdf_path"].as<std::string>();
-            nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
         });
 
         on<Last<20, Trigger<RawSensors>>, Single>().then(

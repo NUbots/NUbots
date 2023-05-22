@@ -23,8 +23,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
-#include <tinyrobotics/kinematics.hpp>
-#include <tinyrobotics/parser.hpp>
 
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
@@ -38,7 +36,6 @@
 #include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
 
-
 using extension::Configuration;
 
 namespace module::input {
@@ -47,8 +44,6 @@ namespace module::input {
     using message::input::Sensors;
     using message::platform::RawSensors;
 
-    using namespace tinyrobotics;
-
     /**
      * @author Jade Fountain
      * @author Trent Houliston
@@ -56,12 +51,6 @@ namespace module::input {
     class SensorFilter : public NUClear::Reactor {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
-
-        // /// @brief Number of actuatable joints in the NUgus robot
-        static const int n_joints = 20;
-
-        // /// @brief tinyrobotics NUgus model
-        Model<double, n_joints> nugus_model;
 
         /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};
@@ -148,9 +137,6 @@ namespace module::input {
 
 
         struct Config {
-            /// @brief Path to NUgus URDF file
-            std::string urdf_path = "";
-
             /// @brief Config for the button debouncer
             struct Button {
                 Button() = default;
