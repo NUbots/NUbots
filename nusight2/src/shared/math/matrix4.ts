@@ -1,4 +1,6 @@
 import * as THREE from "three";
+import { Quaternion } from "./quaternion";
+import { Vector3 } from "./vector3";
 
 import { Vector4 } from "./vector4";
 
@@ -30,6 +32,18 @@ export class Matrix4 {
 
   get trace(): number {
     return this.x.x + this.y.y + this.z.z + this.t.t;
+  }
+
+  decompose() {
+    const translation = new THREE.Vector3();
+    const rotation = new THREE.Quaternion();
+    const scale = new THREE.Vector3();
+    this.toThree().decompose(translation, rotation, scale);
+    return {
+      translation: Vector3.fromThree(translation),
+      rotation: Quaternion.fromThree(rotation),
+      scale: Vector3.fromThree(scale),
+    };
   }
 
   static fromThree(mat4: THREE.Matrix4) {
