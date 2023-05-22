@@ -42,7 +42,11 @@ export class Matrix4 {
     return Matrix4.fromThree(this.toThree().invert());
   }
 
-  decompose() {
+  decompose(): {
+    translation: Vector3;
+    rotation: Quaternion;
+    scale: Vector3;
+  } {
     const translation = new THREE.Vector3();
     const rotation = new THREE.Quaternion();
     const scale = new THREE.Vector3();
