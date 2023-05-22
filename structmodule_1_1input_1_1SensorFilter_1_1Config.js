@@ -4,7 +4,7 @@ var structmodule_1_1input_1_1SensorFilter_1_1Config =
     [ "FootDown", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown" ],
     [ "UKF", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1UKF.html", "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1UKF" ],
     [ "Ac", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a3847624313916e92fd8c1628f7a51916", null ],
-    [ "Bc", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#acc6580614df6c4fba6b8c536601701ca", null ],
+    [ "Bc", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a7bbec7e3d22d886b1ff2389be8f1afde", null ],
     [ "bias", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#afa4f4e84a00899d094570244b5a71d1c", null ],
     [ "buttons", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#aea88c1529974c0e1b638d8cd2fe4482c", null ],
     [ "C", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#aaaf75ee0ce8498d3ad7e48d1a1a8f4b8", null ],

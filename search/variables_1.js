@@ -8,7 +8,7 @@ var searchData=
   ['ball_5fsearch_5ftimeout_1816',['ball_search_timeout',['../structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3',1,'module::strategy::StrategiseLook::Config::ball_search_timeout()'],['../structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb',1,'module::strategy::WalkToBall::Config::ball_search_timeout()']]],
   ['ball_5fy_5foffset_1817',['ball_y_offset',['../structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a7fc402b6f828ed0f7db4d3878f6435c4',1,'module::behaviour::planning::SimpleWalkPathPlanner::Config::ball_y_offset()'],['../structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a82d2763570c209a41c41b431813e6244',1,'module::strategy::WalkToBall::Config::ball_y_offset()']]],
   ['bars_1818',['bars',['../classutility_1_1support_1_1ProgressBar.html#a9e4c8f6233e32fabe19d2b96d445e99e',1,'utility::support::ProgressBar']]],
-  ['bc_1819',['Bc',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#acc6580614df6c4fba6b8c536601701ca',1,'module::input::SensorFilter::Config']]],
+  ['bc_1819',['Bc',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#a7bbec7e3d22d886b1ff2389be8f1afde',1,'module::input::SensorFilter::Config']]],
   ['bias_1820',['bias',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#afa4f4e84a00899d094570244b5a71d1c',1,'module::input::SensorFilter::Config']]],
   ['binary_1821',['binary',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a8a513440735cc1c0b1d2846c48d8e17f',1,'module::support::logging::DataLogging']]],
   ['binder_1822',['binder',['../structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a20fd09a60a363d6bf78b667d7ff2baf2',1,'extension::behaviour::commands::WhenExpression']]],

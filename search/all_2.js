@@ -16,7 +16,7 @@ var searchData=
   ['ballmodel_76',['BallModel',['../classmodule_1_1localisation_1_1BallModel.html',1,'module::localisation']]],
   ['bars_77',['bars',['../classutility_1_1support_1_1ProgressBar.html#a9e4c8f6233e32fabe19d2b96d445e99e',1,'utility::support::ProgressBar']]],
   ['battery_78',['Battery',['../structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html',1,'module::platform::cm740::HardwareIO::Config']]],
-  ['bc_79',['Bc',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#acc6580614df6c4fba6b8c536601701ca',1,'module::input::SensorFilter::Config']]],
+  ['bc_79',['Bc',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#a7bbec7e3d22d886b1ff2389be8f1afde',1,'module::input::SensorFilter::Config']]],
   ['begin_80',['begin',['../classutility_1_1nbs_1_1Index.html#a99da9d60d8b19e3231f24290fb774db7',1,'utility::nbs::Index']]],
   ['behaviourreactor_81',['BehaviourReactor',['../classextension_1_1behaviour_1_1BehaviourReactor.html',1,'extension::behaviour']]],
   ['behaviourtask_82',['BehaviourTask',['../structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a752889ae5e959bc28b66cbb8b007f30a',1,'extension::behaviour::commands::BehaviourTask::BehaviourTask()'],['../structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html',1,'extension::behaviour::commands::BehaviourTask']]],
