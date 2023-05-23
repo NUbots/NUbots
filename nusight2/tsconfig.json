@@ -3,34 +3,21 @@
     "allowJs": true,
     "esModuleInterop": true,
     "sourceMap": true,
-    "target": "ES2019",
+    "target": "ESNext",
+    "useDefineForClassFields": false,
     "jsx": "react",
     "skipLibCheck": true,
     "module": "commonjs",
     "moduleResolution": "node",
+    "resolveJsonModule": true,
     "experimentalDecorators": true,
     "declaration": false,
     "removeComments": true,
     "strict": true,
-    "outDir": "build",
-    "lib": [
-      "ES2015",
-      "ES2016",
-      "ES2017",
-      "ES2018",
-      "ES2019",
-      "dom",
-      "webworker"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./typings"
-    ]
+    "outDir": "dist",
+    "lib": ["ESNext", "dom", "webworker"],
+    "typeRoots": ["./node_modules/@types", "./typings"]
   },
-  "include": [
-    "./src/**/*"
-  ],
-  "exclude": [
-    "**/tests/**/*"
-  ]
+  "include": ["./src/**/*"],
+  "exclude": ["**/tests/**/*"]
 }

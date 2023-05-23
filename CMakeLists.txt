@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.20)
 project(NUbots)
+
+# The GENERATED source file property is now visible in all directories
+cmake_policy(SET CMP0118 NEW)
 
 # ~~~
 # This is needed so we can link in the custom clock object library to the message and utility libraries
@@ -15,27 +18,26 @@ if(BUILD_TESTS)
   enable_testing()
 endif()
 
-# Set on to prefer .a files over .so files for linking
-option(STATIC_LIBRARIES
-       "Prefer using static .a files rather than .so files. NOTE: This must be enabled from an empty build directory!"
-       OFF
-)
-
-if(STATIC_LIBRARIES)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
-endif()
-
 # We use additional modules that cmake needs to know about
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
 
 # If this option is set we are building using continous integration
 option(CI_BUILD "Enable build options for building in the CI server" OFF)
 
-# Default to do a debug build
+# TODO(DevOpsTeam): Remove this once we have fixed warnings (including clang-tidy warnings) codebase wide to add
+# clang-tidy to the builds and prevent new warnings being introduced
+set(CI_BUILD
+    OFF
+    CACHE
+      BOOL
+      "This disables the effects of the CI_BUILD variable. We should remove this set() once warnings have been fixed."
+)
+
+# Default to do a release build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE
-      Debug
+      Release
       CACHE STRING "Choose the type of build." FORCE
   )
   # Set the possible values of build type for cmake-gui
@@ -88,6 +90,9 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 # This is needed everywhere so that we can catch segmentation faults
 add_compile_options(-fnon-call-exceptions)
 
+# We use C++20
+add_compile_options(-std=c++20)
+
 # Make NUClear use the system clock, as we are syncing it with ptp
 add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::steady_clock)
 
@@ -104,6 +109,9 @@ set(NUCLEAR_ROLE_BANNER_FILE
     CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
 
+# Build **ALL** modules, even those which aren't otherwise in a role
+option(BUILD_ALL_MODULES "Create a role with all modules included" OFF)
+
 # Include the NUClear roles system
 add_subdirectory(nuclear)
 
@@ -117,3 +125,18 @@ endif()
 if(BUILD_TESTS)
   add_subdirectory(${NUCLEAR_SHARED_DIR}/tests)
 endif()
+
+# Generate VSCode launch configurations
+find_package(PythonInterp 3 REQUIRED)
+list(JOIN NUCLEAR_ROLES " " launch_roles)
+add_custom_command(
+  OUTPUT "${PROJECT_SOURCE_DIR}/.vscode/launch.json"
+  COMMAND
+    ${PYTHON_EXECUTABLE} ARGS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py" "-s"
+    "${PROJECT_SOURCE_DIR}" "-b" "${PROJECT_BINARY_DIR}" "-l" "${PROJECT_SOURCE_DIR}/.vscode/launch.json" "-a"
+    "${USE_ASAN}" "${launch_roles}"
+  DEPENDS "${PROJECT_SOURCE_DIR}/cmake/scripts/generate_launch_configurations.py"
+  USES_TERMINAL
+  COMMENT "Generating VSCode launch configurations"
+)
+add_custom_target(generate_launch_configurations ALL DEPENDS "${PROJECT_SOURCE_DIR}/.vscode/launch.json")

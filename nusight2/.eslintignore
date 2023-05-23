@@ -1,2 +1,2 @@
-/src/shared/messages.js
-/src/shared/messages.d.ts
+/src/shared/messages/*.js
+/src/shared/messages/*.ts

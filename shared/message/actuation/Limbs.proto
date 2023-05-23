@@ -1,0 +1,104 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2022 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.actuation;
+
+import "message/actuation/ServoCommand.proto";
+
+/// Left leg servo command information including time, gain, torque, position
+message LeftLeg {
+    /// Information for each servo in the left leg, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LeftLegSequence {
+    repeated LeftLeg frames = 1;
+}
+
+/// Right leg servo command information including time, gain, torque, position
+message RightLeg {
+    /// Information for each servo in the right leg, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message RightLegSequence {
+    repeated RightLeg frames = 1;
+}
+
+/// Right and left leg servo command information including time, gain, torque, position
+message Legs {
+    /// Information for each servo in the legs, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LegsSequence {
+    repeated Legs frames = 1;
+}
+
+/// Left arm servo command information including time, gain, torque, position
+message LeftArm {
+    /// Information for each servo in the left arm, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LeftArmSequence {
+    repeated LeftArm frames = 1;
+}
+
+/// Right arm servo command information including time, gain, torque, position
+message RightArm {
+    /// Information for each servo in the right arm, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message RightArmSequence {
+    repeated RightArm frames = 1;
+}
+
+/// Left and right arm servo command information including time, gain, torque, position
+message Arms {
+    /// Information for each servo in the arms, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message ArmsSequence {
+    repeated Arms frames = 1;
+}
+
+/// Left and right arm and leg servo command information including time, gain, torque, position
+message Limbs {
+    /// Information for each servo in the arms and legs, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LimbsSequence {
+    repeated Limbs frames = 1;
+}
+
+/// Head servo command information including time, gain, torque, position
+message Head {
+    /// Information for each servo in the head, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message HeadSequence {
+    repeated Head frames = 1;
+}
+
+/// Arms, legs and head servo command information including time, gain, torque, position
+message Body {
+    /// Information for each servo in the body, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message BodySequence {
+    repeated Body frames = 1;
+}

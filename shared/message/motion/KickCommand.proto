@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
@@ -27,13 +27,16 @@ import "Vector.proto";
  * @author Brendan Annable
  */
 enum KickCommandType {
-    NORMAL = 0;
-    POWER  = 1;
+    NORMAL  = 0;
+    PENALTY = 1;
 }
 
 message KickCommand {
-    vec3            target            = 1;  // The point to kick
-    vec3            direction         = 2;  // force is the magnitude
+    /// The point to kick
+    vec3 target = 1;
+    /// The direction to kick in, with the magnitude of the vector
+    /// corresponding to the force of the kick
+    vec3            direction         = 2;
     KickCommandType kick_command_type = 3;
 }
 
@@ -42,15 +45,9 @@ message KickCommand {
  * @author Brendan Annable
  */
 message KickScriptCommand {
-    vec3   direction = 1;  // Direction to kick with magnitude determining force
-    uint32 leg       = 2;  // Leg to kick with
-}
-
-message KickPlannerConfig {
-    float max_ball_distance        = 1;
-    float kick_corridor_width      = 2;
-    float seconds_not_seen_limit   = 3;
-    float kick_forward_angle_limit = 4;
+    /// Leg to kick with
+    uint32          leg  = 1;
+    KickCommandType type = 2;
 }
 
 message KickFinished {}

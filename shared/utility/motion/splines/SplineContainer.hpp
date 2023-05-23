@@ -53,7 +53,7 @@ namespace utility::motion::splines {
          * Reset spline to be empty
          */
         inline void reset() {
-            typename Map::iterator it = container.begin();
+            auto it = container.begin();
 
             for (size_t i = 0; i < size(); i++) {
                 container[it->first].reset();
@@ -151,7 +151,7 @@ namespace utility::motion::splines {
         /**
          * Export to and Import from given file name in "spline" CSV format prefixed with spline name
          */
-        constexpr void exportData(const std::string& file_name) const {
+        void exportData(const std::string& file_name) const {
             if (container.size() == 0) {
                 throw std::logic_error("SplineContainer empty");
             }
@@ -169,34 +169,38 @@ namespace utility::motion::splines {
             file.close();
         }
 
-        constexpr void importData(const std::string& file_name) {
+        void importData(const std::string& file_name) const {
             std::ifstream file(file_name);
             if (!file.is_open()) {
                 throw std::runtime_error(fmt::format("SplineContainer unable to read file: ", file_name));
             }
 
-            bool isParseError;
+            bool isParseError = true;
             while (file.good()) {
                 isParseError = true;
                 // Skip name delimitor
-                if (file.peek() != '\'')
+                if (file.peek() != '\'') {
                     break;
+                }
                 file.ignore();
-                if (!file.good())
+                if (!file.good()) {
                     break;
+                }
                 // Parse spline name
                 char name[256];
                 file.getline(name, 256, '\'');
                 // Import founded spline
                 add(U(name));
-                if (!file.good())
+                if (!file.good()) {
                     break;
+                }
                 container.at(U(name)).importData(file);
                 isParseError = false;
                 // Skip end line
                 while (file.peek() == ' ' || file.peek() == '\n') {
-                    if (!file.good())
+                    if (!file.good()) {
                         break;
+                    }
                     file.ignore();
                 }
             }

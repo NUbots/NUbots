@@ -1,81 +1,16 @@
-#The angular padding to place between an object and the edge of the screen as a fraction of the largest field of view
-fractional_view_padding: 0.1
+log_level: INFO
 
-#Minimum time before search starts
-search_timeout_ms: 3000
+# Search path positions
+min_yaw: &min_yaw -0.7
+max_yaw: &max_yaw 0.7
+min_pitch: &min_pitch -0.4
+positions: [[*min_yaw, *min_pitch], [0, *min_pitch], [*max_yaw, *min_pitch], [0, *min_pitch]]
 
-#fraction of the larger FOV which will result in plan updating given this amount of key object displacement
-fractional_angular_update_threshold: 0.1
+# Minimum time before search starts (seconds)
+search_timeout: 4.5
 
-#Time between saccades
-fixation_time_ms: 500
+# Time between switching search positions (seconds)
+fixation_time: 2
 
-#Time before replanning of search when already searching
-replan_angle_threshold: 0.5
-
-#Threshold for compensating for body pitch
-pitch_plan_threshold: 20
-pitch_plan_value: 20
-
-initial:
-  priority:
-    ball: 1
-    goal: 0
-
-oscillate_search: false
-
-searches:
-  - #enum type for search
-    search_type: "LOST"
-    #Points in absolute angle (degrees) relative to the horizon and x-xis of robot
-    points:
-      - [0, -45]
-      - [0, 0]
-      - [0, 30]
-      - [-45, -15]
-      - [-45, -30]
-      - [-120, -30]
-      - [-50, -15]
-      - [-30, 30]
-      - [0, 30]
-      - [-20, -30]
-      - [0, -60]
-      - [20, -30]
-      - [0, 0]
-      - [0, 30]
-      - [30,  30]
-      - [50,  -15]
-      - [120,  -30]
-      - [45,  -15]
-      - [45, -30]
-  - search_type: "FIND_ADDITIONAL_OBJECTS"
-    #Points for this search are relative to the padded bounding box containing the already visible objects
-    points:
-      - [-1,-1]
-      - [0,-1]
-      - [1,-1]
-      - [1,0]
-      - [0,0]
-      - [-1,0]
-  - search_type: "GOAL_SEARCH"
-    points:
-      - [-0.4, 1]
-      - [0, 1]
-      - [0.4, 1]
-  - search_type: "GOAL_LEFT"
-    #Points for this search are relative to the padded bounding box containing the already visible objects
-    points:
-      - [0.5,0]
-  - search_type: "GOAL_RIGHT"
-    #Points for this search are relative to the padded bounding box containing the already visible objects
-    points:
-      - [-0.5,0]
-  - search_type: "GROUND_LEFT"
-    #Points for this search are relative to the padded bounding box containing the already visible objects
-    points:
-      - [0.5,-1]
-  - search_type: "GROUND_RIGHT"
-    #Points for this search are relative to the padded bounding box containing the already visible objects
-    points:
-      - [-0.5,-1]
-
+# Added pitch offset to ball tracking
+pitch_offset: -0.5

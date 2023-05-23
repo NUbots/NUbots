@@ -5,17 +5,18 @@ nuclear_role(
   support::SignalCatcher
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
-  support::NUsight
+  network::NetworkForwarder
+  output::Overview
   support::configuration::SoccerConfig
   # input
   input::GameController
   # Sensors
   input::Camera
-  platform::darwin::HardwareIO
+  platform::cm740::HardwareIO
   input::SensorFilter
   # Vision
   vision::VisualMesh
@@ -23,18 +24,15 @@ nuclear_role(
   vision::GoalDetector
   vision::BallDetector
   # Localisation
-  localisation::BallLocalisation
+  localisation::BallFilter
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
-  behaviour::skills::Stand
-  behaviour::skills::FallingRelax
   behaviour::skills::Getup
   behaviour::skills::KickScript
   behaviour::skills::HeadBehaviourSoccer
-  behaviour::planning::KickPlanner
-  behaviour::planning::SimpleWalkPathPlanner # Creates WalkPaths. behaviour::planning::BezierWalkPathPlanner  # Creates
-                                             # WalkPaths.
+  behaviour::skills::Stand
+  behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
   behaviour::skills::Nod
   # Motion

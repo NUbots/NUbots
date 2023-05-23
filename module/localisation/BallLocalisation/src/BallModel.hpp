@@ -32,6 +32,7 @@ namespace module::localisation {
 
     using message::input::Sensors;
     using message::support::FieldDescription;
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
 
     template <typename Scalar>
@@ -52,7 +53,10 @@ namespace module::localisation {
 
         // Local variables for this model. Set their values from config file
         // Number of reset particles
-        int n_rogues;
+        int n_rogues = 0;
+
+        // Number of particles
+        int n_particles = 100;
         // Range of reset particles
         Eigen::Matrix<Scalar, 2, 1> resetRange;
         // Diagonal noise matrix
@@ -60,20 +64,21 @@ namespace module::localisation {
 
         BallModel() : n_rogues(10), resetRange(10, 10), processNoiseDiagonal() {}
 
-        StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
+        [[nodiscard]] StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
             return state;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                            const message::support::FieldDescription& field,
-                                            const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
+        [[nodiscard]] Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                                          const message::support::FieldDescription& field,
+                                                          const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
 
             const Eigen::Matrix<Scalar, 3, 1> rBWw(state[PX], state[PY], field.ball_radius);
-            const Eigen::Matrix<Scalar, 3, 1> rBCc_cart(Eigen::Affine3d(Hcw) * rBWw);
-            return cartesianToSpherical(rBCc_cart);
+            const Eigen::Matrix<Scalar, 3, 1> rBCc(Eigen::Isometry3d(Hcw) * rBWw);
+
+            return cartesianToReciprocalSpherical(rBCc);
         }
 
-        StateVec limit(const StateVec& state) const {
+        [[nodiscard]] StateVec limit(const StateVec& state) const {
             return state;
         }
 
@@ -87,11 +92,15 @@ namespace module::localisation {
         }
 
         // Getters
-        inline int getRogueCount() const {
+        [[nodiscard]] inline int getRogueCount() const {
             return n_rogues;
         }
-        Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
+        [[nodiscard]] StateVec get_rogue() const {
             return resetRange;
+        }
+
+        [[nodiscard]] int getParticleCount() const {
+            return n_particles;
         }
     };
 }  // namespace module::localisation

@@ -55,7 +55,6 @@ namespace module::support::configuration {
 
         FieldDescription::FieldDimensions& d = desc.dimensions;
         d.line_width                         = config["LineWidth"].as<double>();
-        d.mark_width                         = config["MarkWidth"].as<double>();
         d.field_length                       = config["FieldLength"].as<double>();
         d.field_width                        = config["FieldWidth"].as<double>();
         d.goal_depth                         = config["GoalDepth"].as<double>();
@@ -72,8 +71,9 @@ namespace module::support::configuration {
         d.penalty_mark_distance              = config["PenaltyMarkDistance"].as<double>();
         d.center_circle_diameter             = config["CenterCircleDiameter"].as<double>();
         d.border_strip_min_width             = config["BorderStripMinWidth"].as<double>();
+        d.penalty_area_length                = config["PenaltyAreaLength"].as<double>();
+        d.penalty_area_width                 = config["PenaltyAreaWidth"].as<double>();
 
-        desc.penalty_robot_start = config["PenaltyRobotStart"].as<double>();
         desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_width;
 
         SetGoalpostPositions(desc);
@@ -85,7 +85,8 @@ namespace module::support::configuration {
 
         on<Configuration>("FieldDescription.yaml")
             .then("FieldDescriptionConfig Update", [this](const Configuration& config) {
-                auto fd = std::make_unique<message::support::FieldDescription>(LoadFieldDescription(config));
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+                auto fd   = std::make_unique<message::support::FieldDescription>(LoadFieldDescription(config));
                 emit(std::move(fd));
             });
     }

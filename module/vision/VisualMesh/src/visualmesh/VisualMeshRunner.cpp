@@ -1,5 +1,6 @@
 #include "VisualMeshRunner.hpp"
 
+#include <filesystem>
 #include <visualmesh/engine/cpu/engine.hpp>
 #include <visualmesh/engine/opencl/engine.hpp>
 #include <visualmesh/geometry/Circle.hpp>
@@ -24,35 +25,60 @@
 namespace module::vision::visualmesh {
 
     using message::input::Image;
+    namespace fs = std::filesystem;
 
     struct VisualMeshModelConfig {
         std::string engine;
         ::visualmesh::NetworkStructure<float> model;
         std::string mesh_model;
-        int num_classes;
+        int num_classes = 0;
+        std::string cache_directory;
 
         struct {
-            double intersection_tolerance;
+            double intersection_tolerance = 0.0;
 
             struct {
                 double min_height;
                 double max_height;
                 double max_distance;
-            } classifier;
+            } classifier{};
 
             struct {
                 std::string shape;
-                double radius;
-                double intersections;
+                double radius        = 0.0;
+                double intersections = 0.0;
             } geometry;
         } mesh;
     };
 
     namespace generate_runner {
 
+        template <template <typename> class Engine, typename Scalar>
+        struct BuildEngine;
+
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::opencl::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::opencl::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string cache) {
+                fs::create_directories(cache);  // create the cache folder if it doesn't exist
+                return std::make_shared<::visualmesh::engine::opencl::Engine<Scalar>>(net, cache);
+            }
+        };
+
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::cpu::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::cpu::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string /* cache */) {
+                return std::make_shared<::visualmesh::engine::cpu::Engine<float>>(net);
+            }
+        };
+
         template <template <typename> class Model, template <typename> class Engine, typename Shape>
-        std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> runner(const VisualMeshModelConfig& cfg,
-                                                                                      const Shape& shape) {
+        std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> runner(
+            const VisualMeshModelConfig& cfg,
+            const Shape& shape) {
 
             // Make the model and the engine
             auto mesh = std::make_shared<::visualmesh::VisualMesh<float, Model>>(
@@ -62,18 +88,18 @@ namespace module::vision::visualmesh {
                                                         cfg.mesh.geometry.intersections,
                                                         cfg.mesh.intersection_tolerance,
                                                         cfg.mesh.classifier.max_distance));
-            auto engine = std::make_shared<Engine<float>>(cfg.model);
+            auto engine = BuildEngine<Engine, float>::build(cfg.model, cfg.cache_directory);
 
-            return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
+            return [shape, mesh, engine](const Image& img, const Eigen::Isometry3f& Hcw) {
                 // Create the lens
-                ::visualmesh::Lens<float> lens;
+                ::visualmesh::Lens<float> lens{};
                 lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
                 lens.focal_length = img.lens.focal_length * img.dimensions[0];
                 lens.fov          = img.lens.fov;
                 lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
                 lens.k            = std::array<float, 2>{
-                    float(img.lens.k[0] * std::pow(img.dimensions[0], 2)),
-                    float(img.lens.k[1] * std::pow(img.dimensions[0], 4)),
+                    float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
+                    float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
                 };
                 switch (img.lens.projection.value) {
                     case Image::Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;
@@ -83,7 +109,7 @@ namespace module::vision::visualmesh {
                 }
 
                 // Convert our orientation matrix
-                std::array<std::array<float, 4>, 4> Hoc;
+                std::array<std::array<float, 4>, 4> Hoc{};
                 Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
                 // Run the network
@@ -130,46 +156,47 @@ namespace module::vision::visualmesh {
         }
 
         template <template <typename> class Model, typename Shape>
-        std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> engine(const VisualMeshModelConfig& cfg,
-                                                                                      const Shape& shape) {
+        std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> engine(
+            const VisualMeshModelConfig& cfg,
+            const Shape& shape) {
 
             // clang-format off
-        if (cfg.engine      == "opencl") { return runner<Model, ::visualmesh::engine::opencl::Engine>(cfg, shape); }
-        else if (cfg.engine == "cpu")    { return runner<Model, ::visualmesh::engine::cpu::Engine>(cfg, shape);    }
-        else { throw std::runtime_error("Unknown visual mesh engine type " + cfg.engine); }
+            if (cfg.engine == "opencl") { return runner<Model, ::visualmesh::engine::opencl::Engine>(cfg, shape); }
+            if (cfg.engine == "cpu")    { return runner<Model, ::visualmesh::engine::cpu::Engine>(cfg, shape);    }
             // clang-format on
+            throw std::runtime_error("Unknown visual mesh engine type " + cfg.engine);
         }
 
         template <typename Shape>
-        std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> model(const VisualMeshModelConfig& cfg,
-                                                                                     const Shape& shape) {
+        std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> model(const VisualMeshModelConfig& cfg,
+                                                                                       const Shape& shape) {
             // clang-format off
-        if (cfg.mesh_model      == "RING4")   { return engine<::visualmesh::model::Ring4>(cfg, shape);   }
-        else if (cfg.mesh_model == "RING6")   { return engine<::visualmesh::model::Ring6>(cfg, shape);   }
-        else if (cfg.mesh_model == "RING8")   { return engine<::visualmesh::model::Ring8>(cfg, shape);   }
-        else if (cfg.mesh_model == "XYGRID4") { return engine<::visualmesh::model::XYGrid4>(cfg, shape); }
-        else if (cfg.mesh_model == "XYGRID6") { return engine<::visualmesh::model::XYGrid6>(cfg, shape); }
-        else if (cfg.mesh_model == "XYGRID8") { return engine<::visualmesh::model::XYGrid8>(cfg, shape); }
-        else if (cfg.mesh_model == "XMGRID4") { return engine<::visualmesh::model::XMGrid4>(cfg, shape); }
-        else if (cfg.mesh_model == "XMGRID6") { return engine<::visualmesh::model::XMGrid6>(cfg, shape); }
-        else if (cfg.mesh_model == "XMGRID8") { return engine<::visualmesh::model::XMGrid8>(cfg, shape); }
-        else if (cfg.mesh_model == "NMGRID4") { return engine<::visualmesh::model::NMGrid4>(cfg, shape); }
-        else if (cfg.mesh_model == "NMGRID6") { return engine<::visualmesh::model::NMGrid6>(cfg, shape); }
-        else if (cfg.mesh_model == "NMGRID8") { return engine<::visualmesh::model::NMGrid8>(cfg, shape); }
-        else { throw std::runtime_error("Unknown visual mesh model type " + cfg.mesh_model); }
+            if (cfg.mesh_model == "RING4")   { return engine<::visualmesh::model::Ring4>(cfg, shape);   }
+            if (cfg.mesh_model == "RING6")   { return engine<::visualmesh::model::Ring6>(cfg, shape);   }
+            if (cfg.mesh_model == "RING8")   { return engine<::visualmesh::model::Ring8>(cfg, shape);   }
+            if (cfg.mesh_model == "XYGRID4") { return engine<::visualmesh::model::XYGrid4>(cfg, shape); }
+            if (cfg.mesh_model == "XYGRID6") { return engine<::visualmesh::model::XYGrid6>(cfg, shape); }
+            if (cfg.mesh_model == "XYGRID8") { return engine<::visualmesh::model::XYGrid8>(cfg, shape); }
+            if (cfg.mesh_model == "XMGRID4") { return engine<::visualmesh::model::XMGrid4>(cfg, shape); }
+            if (cfg.mesh_model == "XMGRID6") { return engine<::visualmesh::model::XMGrid6>(cfg, shape); }
+            if (cfg.mesh_model == "XMGRID8") { return engine<::visualmesh::model::XMGrid8>(cfg, shape); }
+            if (cfg.mesh_model == "NMGRID4") { return engine<::visualmesh::model::NMGrid4>(cfg, shape); }
+            if (cfg.mesh_model == "NMGRID6") { return engine<::visualmesh::model::NMGrid6>(cfg, shape); }
+            if (cfg.mesh_model == "NMGRID8") { return engine<::visualmesh::model::NMGrid8>(cfg, shape); }
             // clang-format on
+            throw std::runtime_error("Unknown visual mesh model type " + cfg.mesh_model);
         }
 
-        inline std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> geometry(
+        inline std::function<VisualMeshResults(const Image&, const Eigen::Isometry3f&)> geometry(
             const VisualMeshModelConfig& cfg) {
 
             // clang-format off
-        if (cfg.mesh.geometry.shape == "SPHERE") {
-            return model(cfg, ::visualmesh::geometry::Sphere<double>(cfg.mesh.geometry.radius)); }
-        else if (cfg.mesh.geometry.shape == "CIRCLE") {
-            return model(cfg, ::visualmesh::geometry::Circle<double>(cfg.mesh.geometry.radius)); }
-        else { throw std::runtime_error("Unknown visual mesh geometry type " + cfg.mesh.geometry.shape); }
+            if (cfg.mesh.geometry.shape == "SPHERE") {
+                return model(cfg, ::visualmesh::geometry::Sphere<double>(cfg.mesh.geometry.radius)); }
+            if (cfg.mesh.geometry.shape == "CIRCLE") {
+                return model(cfg, ::visualmesh::geometry::Circle<double>(cfg.mesh.geometry.radius)); }
             // clang-format on
+            throw std::runtime_error("Unknown visual mesh geometry type " + cfg.mesh.geometry.shape);
         }
 
     }  // namespace generate_runner
@@ -179,7 +206,8 @@ namespace module::vision::visualmesh {
                                        const double& max_height,
                                        const double& max_distance,
                                        const double& intersection_tolerance,
-                                       const std::string& path)
+                                       const std::string& path,
+                                       const std::string& cache_directory)
         : active(std::make_unique<std::atomic<bool>>()) {
 
         // Add the configuration properties we were passed
@@ -189,6 +217,7 @@ namespace module::vision::visualmesh {
         cfg.mesh.classifier.min_height   = min_height;
         cfg.mesh.classifier.max_height   = max_height;
         cfg.mesh.classifier.max_distance = max_distance;
+        cfg.cache_directory              = cache_directory;
 
         // Load the properties from the model
         auto loaded                     = load_model(path);
@@ -203,7 +232,7 @@ namespace module::vision::visualmesh {
         runner = generate_runner::geometry(cfg);
     }
 
-    VisualMeshResults VisualMeshRunner::operator()(const Image& image, const Eigen::Affine3f& Htc) {
+    VisualMeshResults VisualMeshRunner::operator()(const Image& image, const Eigen::Isometry3f& Htc) {
         // Run our lambda
         return runner(image, Htc);
     }

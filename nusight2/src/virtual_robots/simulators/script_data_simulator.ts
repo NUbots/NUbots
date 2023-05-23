@@ -1,22 +1,22 @@
-import { action } from 'mobx'
-import { NUClearNetPacket } from 'nuclearnet.js'
+import { action } from "mobx";
+import { NUClearNetPacket } from "nuclearnet.js";
 
-import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
-import { Simulator } from '../simulator'
+import { NUClearNetClient } from "../../shared/nuclearnet/nuclearnet_client";
+import { Simulator } from "../simulator";
 
 export class ScriptDataSimulator extends Simulator {
   constructor(nuclearnetClient: NUClearNetClient) {
-    super(nuclearnetClient)
-    this.nuclearnetClient.on('message.input.Sensors', this.onSensors)
+    super(nuclearnetClient);
+    this.nuclearnetClient.on("message.input.Sensors", this.onSensors);
   }
 
   static of({ nuclearnetClient }: { nuclearnetClient: NUClearNetClient }) {
-    return new ScriptDataSimulator(nuclearnetClient)
+    return new ScriptDataSimulator(nuclearnetClient);
   }
 
   start() {
     // TODO
-    return () => 0
+    return () => 0;
   }
 
   @action.bound

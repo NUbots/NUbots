@@ -44,16 +44,16 @@ namespace utility::vision {
             // Ambiguous Classifications
             WHITE_GREEN = 'f'
         };
-        Value value;
+        Value value{Value::UNCLASSIFIED};
 
         // Constructors
-        Colour() : value(Value::UNCLASSIFIED) {}
+        Colour() = default;
         Colour(int const& value) : value(static_cast<Value>(value)) {}
         Colour(uint8_t const& value) : value(static_cast<Value>(value)) {}
         Colour(uint32_t const& value) : value(static_cast<Value>(value)) {}
         Colour(char const& value) : value(static_cast<Value>(value)) {}
         Colour(Value const& value) : value(value) {}
-        Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
+        Colour(std::string const& str) {
             // clang-format off
             if      (str == "UNCLASSIFIED") { value = Value::UNCLASSIFIED; }
             else if (str == "WHITE")        { value = Value::WHITE; }
@@ -144,10 +144,10 @@ namespace utility::vision {
     };
 
     struct Pixel {
-        Pixel() : rgba(0) {}
+        Pixel() = default;
         Pixel(uint32_t rgba) : rgba(rgba) {}
-        Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({r, g, b, a}) {}
-        Pixel(uint8_t r, uint8_t g, uint8_t b) : components({r, g, b, 0}) {}
+        Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({{r}, {g}, {b}, a}) {}
+        Pixel(uint8_t r, uint8_t g, uint8_t b) : components({{r}, {g}, {b}, 0}) {}
         Pixel(const Pixel& pixel) : rgba(pixel.rgba) {}
 
         union {
@@ -170,7 +170,7 @@ namespace utility::vision {
                 uint8_t a;
             } components;
 
-            uint32_t rgba;
+            uint32_t rgba{};
         };
     };
 
@@ -258,14 +258,14 @@ namespace utility::vision {
         std::string height;
         std::string max_val;
         uint8_t bytes_per_pixel = 0;
-        bool RGB                = 0;
+        bool RGB                = false;
         ifs >> magic_number;
 
-        if (magic_number.compare("P6") == 0) {
+        if (magic_number == "P6") {
             RGB = true;
         }
 
-        else if (magic_number.compare("P5") == 0) {
+        else if (magic_number == "P5") {
             RGB = false;
         }
 
@@ -296,7 +296,7 @@ namespace utility::vision {
         ifs.close();
     }
 
-    const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
+    auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
     uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
                    const Eigen::Matrix<int8_t, 5, 5>& kernel,
                    uint8_t normalisation = BAYER_SCALE);

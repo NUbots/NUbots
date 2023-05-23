@@ -32,20 +32,31 @@ namespace module::behaviour::skills {
      */
     class Getup : public NUClear::Reactor {
     private:
-        const size_t id;
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
 
-        bool isFront;
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Value that priority is set to when getup is requested
+            float getup_priority = 0.0f;
+            /// @brief Threshold angle for executing getup, between torso z axis and world z axis
+            float fallen_angle = 0.0f;
+            /// @brief Script sequence to run when getting from lying on the front to standing
+            std::vector<std::string> getup_front;
+            /// @brief Script sequence to run when getting from lying on the back to standing
+            std::vector<std::string> getup_back;
+        } cfg;
 
-        bool gettingUp;
-        ReactionHandle fallenCheck;
-        ReactionHandle getUp;
+        /// @brief Bool to indicate if the robot has fallen on its front or back
+        bool is_front = false;
 
-        /// config settings
-        float FALLEN_ANGLE;
-        float GETUP_PRIORITY;
-        float EXECUTION_PRIORITY;
+        /// @brief Bool to indicate if the robot is currently getting up
+        bool getting_up = false;
 
-        void updatePriority(const float& priority);
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
 
     public:
         explicit Getup(std::unique_ptr<NUClear::Environment> environment);

@@ -1,0 +1,37 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.localisation;
+
+import "Matrix.proto";
+import "Vector.proto";
+
+message ResetBallHypotheses {
+
+    message Ball {
+        /// Estimate of the balls position in world space
+        vec2 rBWw       = 1;
+        mat2 covariance = 2;
+    }
+
+    repeated Ball hypotheses = 1;
+    // Robot localisation has been reset. Flag to not use Htf on ball reset
+    bool self_reset = 2;
+}

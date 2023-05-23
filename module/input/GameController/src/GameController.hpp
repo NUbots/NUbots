@@ -51,8 +51,7 @@ namespace module::input {
         std::string udp_filter_address;
         std::set<std::string> ignored_ip_addresses;
 
-        bool penaltyOverride = false;
-        bool selfPenalised   = true;
+        bool selfPenalised = true;
         ReactionHandle listenHandle;
 
         gamecontroller::GameControllerPacket packet;
@@ -63,12 +62,13 @@ namespace module::input {
                      const gamecontroller::GameControllerPacket& oldPacket,
                      const gamecontroller::GameControllerPacket& newPacket);
         void sendReplyMessage(const gamecontroller::ReplyMessage& message);
-        const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
-        const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
-        message::input::GameState::Data::PenaltyReason getPenaltyReason(
-            const gamecontroller::PenaltyState& penaltyState) const;
+        [[nodiscard]] const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& state) const;
+        [[nodiscard]] const gamecontroller::Team& getOpponentTeam(
+            const gamecontroller::GameControllerPacket& state) const;
+        [[nodiscard]] static message::input::GameState::Data::PenaltyReason getPenaltyReason(
+            const gamecontroller::PenaltyState& penaltyState);
 
-        std::string ipAddressIntToString(const uint32_t ipAddr);
+        [[nodiscard]] static std::string ipAddressIntToString(const uint32_t& ipAddr);
 
     public:
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);

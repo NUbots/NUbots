@@ -4,13 +4,14 @@ nuclear_role(
   extension::FileWatcher
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
   network::NUClearNet
-  platform::darwin::HardwareIO
+  network::NetworkForwarder
+  platform::cm740::HardwareIO
   behaviour::Controller
   motion::ScriptEngine
   behaviour::tools::ScriptRunner
   input::SensorFilter
-  support::NUsight
+  output::Overview
 )

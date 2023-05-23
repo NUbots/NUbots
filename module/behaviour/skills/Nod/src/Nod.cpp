@@ -43,39 +43,38 @@ namespace module::behaviour::skills {
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
 
-    Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , value(false)
-        , EXECUTION_PRIORITY(0.0f) {
+    Nod::Nod(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // do a little configurating
         on<Configuration>("Nod.yaml").then([this](const Configuration& config) {
-            EXECUTION_PRIORITY = config["execution_priority"].as<float>();
+            log_level        = config["log_level"].as<NUClear::LogLevel>();
+            cfg.nod_priority = config["nod_priority"].as<float>();
         });
 
         on<Trigger<message::behaviour::Nod>>().then([this](const message::behaviour::Nod& nod) {
-            value = nod.value;
-            updatePriority(EXECUTION_PRIORITY);
+            nod_yes = nod.value;
+            updatePriority(cfg.nod_priority);
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-            id,
+            subsumption_id,
             "Nod",
             {std::pair<float, std::set<LimbID>>(0, {LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {
-                if (value) {
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodYes.yaml"})));
+            [this](const std::set<LimbID>& /*unused*/) {
+                if (nod_yes) {
+                    emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
+                                                               std::vector<std::string>({"NodYes.yaml"})));
                 }
                 else {
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodNo.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
+                                                               std::vector<std::string>({"NodNo.yaml"})));
                 }
             },
-            [this](const std::set<LimbID>&) { updatePriority(0); },
-            [this](const std::set<ServoID>&) { updatePriority(0); }}));
+            [this](const std::set<LimbID>& /*unused*/) { updatePriority(0); },
+            [this](const std::set<ServoID>& /*unused*/) { updatePriority(0); }}));
     }
 
     void Nod::updatePriority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 }  // namespace module::behaviour::skills
