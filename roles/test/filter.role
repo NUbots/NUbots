@@ -1,0 +1,13 @@
+nuclear_role(
+  extension::FileWatcher
+  input::SensorFilter
+  support::logging::ConsoleLogHandler
+  actuation::KinematicsConfiguration
+  support::configuration::GlobalConfig
+  network::NetworkForwarder
+  network::PlotJuggler
+  network::NUClearNet
+  input::SensorFilter
+  output::Overview
+  tools::FilterTester
+)

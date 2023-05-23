@@ -5,16 +5,16 @@
 
 namespace module::tools {
 
-class FilterTester : public NUClear::Reactor {
-private:
-    /// The configuration variables for this reactor
-    struct {
-    } config;
+    class FilterTester : public NUClear::Reactor {
+    private:
+        /// The configuration variables for this reactor
+        struct {
+        } cfg;
 
-public:
-    /// @brief Called by the powerplant to build and setup the FilterTester reactor.
-    explicit FilterTester(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the FilterTester reactor.
+        explicit FilterTester(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::tools
 

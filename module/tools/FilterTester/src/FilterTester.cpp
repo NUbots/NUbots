@@ -17,12 +17,11 @@ namespace module::tools {
     using message::platform::RawSensors;
     using NUClear::message::CommandLineArguments;
 
-    FilterTester::FilterTester(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), config{} {
+    FilterTester::FilterTester(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("FilterTester.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("FilterTester.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FilterTester.yaml
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
         // This is the information that will come back from the sensor filter
@@ -33,9 +32,9 @@ namespace module::tools {
         on<Trigger<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
             std::vector<std::filesystem::path> paths(std::next(args.begin()), args.end());
 
-            std::cout << "Opening NBS files" << std::endl;
+            log<NUClear::INFO>("Opening NBS files: ");
             for (const auto& a : paths) {
-                std::cout << a << std::endl;
+                log<NUClear::INFO>(a.string());
             }
 
             utility::support::ProgressBar index_progress("B");
