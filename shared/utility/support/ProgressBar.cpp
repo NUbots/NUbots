@@ -65,9 +65,7 @@ namespace utility::support {
         : unit(std::move(unit))
         , start_time(std::chrono::steady_clock::now())
         , last_update(std::chrono::seconds(0))
-        , bars({" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}) {
-        printf("Progress\nbar!");
-    }
+        , bars({" ", "▏", "▎", "▍", "▌", "▋", "▊", "▉", "█"}) {}
 
     void ProgressBar::update(const double& current, const double& total, const std::string& status) {
         using namespace std::chrono;  // NOLINT(google-build-using-namespace) fine in function scope
