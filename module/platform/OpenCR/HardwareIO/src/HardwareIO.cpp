@@ -91,7 +91,7 @@ namespace module::platform::OpenCR {
             bool packet_dropped = false;
             // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
             // any packets, otherwise is the nonzero ID of the timed out device
-            while (uint8_t dropout_id = queue_item_waiting()) {
+            for(uint8_t dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;)
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
                 log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
