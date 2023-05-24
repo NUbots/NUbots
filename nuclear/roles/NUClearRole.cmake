@@ -9,9 +9,6 @@ function(NUCLEAR_ROLE)
   # Store our role_modules in a sane variable
   set(role_modules ${ARGN})
 
-  # Replace any instances of <subcontroller> placeholder with the subcontroller cmake variable
-  string(REPLACE "<subcontroller>" "${SUBCONTROLLER}" role_modules "${role_modules}")
-
   # Custom command that specifies how to generate ${role}.cpp
   add_custom_command(
     OUTPUT "${role}.cpp"

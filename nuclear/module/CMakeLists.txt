@@ -15,11 +15,8 @@ unset(NUCLEAR_MODULE_DATA_FILES CACHE)
 # Build each of our modules and their corresponding tests
 foreach(module ${NUCLEAR_MODULES})
 
-  # Replace any instances of <subcontroller> placeholder with the subcontroller cmake variable
-  string(REPLACE "<subcontroller>" "${SUBCONTROLLER}" module_path "${module}")
-
   # Add the subdirectories
-  string(REPLACE "::" "/" module_path "${module_path}")
+  string(REPLACE "::" "/" module_path "${module}")
   add_subdirectory(
     "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}"
     "${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}"

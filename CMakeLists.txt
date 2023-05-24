@@ -44,6 +44,18 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+# Allow selection of subcontroller for conditional build
+
+if(NOT SUBCONTROLLER)
+  message(STATUS "Setting subcontroller to 'OpenCR' as none was specified.")
+  set(SUBCONTROLLER
+      OpenCR
+      CACHE STRING "Choose the subcontroller to build for." FORCE
+  )
+  # Set the possible values of subcontroller for cmake-gui
+  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR" "cm740")
+endif()
+
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY OR CI_BUILD)
@@ -102,14 +114,6 @@ if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang)
   add_compile_options(-fcolor-diagnostics)
 endif()
-
-# Allow selection of subcontroller for conditional build
-set(SUBCONTROLLER
-    "OpenCR"
-    CACHE STRING "Select what subcontroller to build for"
-)
-# Set the possible values of subcontroller for cmake-gui
-set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR" "cm740" "NUSense")
 
 # Our banner file for placing at the top of the roles
 set(NUCLEAR_ROLE_BANNER_FILE

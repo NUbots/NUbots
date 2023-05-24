@@ -8,7 +8,7 @@ nuclear_role(
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
   # Sensors
-  platform::<subcontroller>::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::Camera
   input::GameController

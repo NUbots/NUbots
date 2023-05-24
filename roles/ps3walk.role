@@ -14,7 +14,7 @@ nuclear_role(
   output::Overview
   # Hardware Interface
   input::Camera
-  platform::<subcontroller>::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # Motion
   motion::QuinticWalk
