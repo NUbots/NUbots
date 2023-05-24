@@ -455,6 +455,13 @@ namespace utility::math::filter {
         [[nodiscard]] const ParticleWeights& get_particle_weights() const {
             return weights;
         }
+
+        /**
+         * @brief Returns the weight of the particle at the given index.
+         */
+        [[nodiscard]] const Scalar get_particle_weight(int idx) const {
+            return weights[idx];
+        }
     };
 }  // namespace utility::math::filter
 

@@ -59,8 +59,9 @@ message Goal {
     Side                 side           = 1;
     Post                 post           = 3;
     repeated Measurement measurements   = 4;
-    fvec2                screen_angular = 5;
-    fvec2                angular_size   = 6;
+    repeated fvec3 points = 5;
+    fvec2                screen_angular = 6;
+    fvec2                angular_size   = 7;
 }
 
 message Goals {

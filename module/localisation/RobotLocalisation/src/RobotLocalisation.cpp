@@ -7,6 +7,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
 
 namespace module::localisation {
 
@@ -23,6 +24,8 @@ namespace module::localisation {
     using message::motion::WalkCommand;
     using message::support::FieldDescription;
     using message::vision::FieldLines;
+    using VisionGoal  = message::vision::Goal;
+    using VisionGoals = message::vision::Goals;
 
     using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
@@ -216,6 +219,16 @@ namespace module::localisation {
 
             // Set the time update time to now
             last_time_update_time = NUClear::clock::now();
+
+            // Add the known goal post positions to a vector
+            cfg.goal_posts.emplace_back(
+                Eigen::Vector2d(fd.dimensions.field_length / 2.0, fd.dimensions.goal_width / 2.0));
+            cfg.goal_posts.emplace_back(
+                Eigen::Vector2d(fd.dimensions.field_length / 2.0, -fd.dimensions.goal_width / 2.0));
+            cfg.goal_posts.emplace_back(
+                Eigen::Vector2d(-fd.dimensions.field_length / 2.0, fd.dimensions.goal_width / 2.0));
+            cfg.goal_posts.emplace_back(
+                Eigen::Vector2d(-fd.dimensions.field_length / 2.0, -fd.dimensions.goal_width / 2.0));
         });
 
         on<Trigger<FieldLines>, With<Stability>>().then(
@@ -296,6 +309,88 @@ namespace module::localisation {
                     field->Hfw        = Hfw.matrix();
                     field->covariance = filter.get_covariance();
                     emit(field);
+                }
+            });
+
+        on<Trigger<VisionGoals>, With<FieldDescription>, With<Stability>>().then(
+            "Particle Filter",
+            [this](const VisionGoals& goals, const Stability& stability) {
+                log<NUClear::DEBUG>("Received vision goals");
+                if (stability != Stability::FALLEN) {
+                    std::vector<Eigen::Vector2d> goal_post_observations;
+                    for (const auto& goal_post : goals.goals) {
+                        Eigen::Isometry3d Hcw   = Eigen::Isometry3d(goals.Hcw.cast<double>());
+                        double closest_distance = std::numeric_limits<double>::max();
+                        Eigen::Vector2d closest_point;
+                        for (const auto& point : goal_post.points) {
+                            auto uPCw = point.cast<double>();
+                            auto rPCw = ray_to_field_plane(uPCw, Hcw);
+                            auto cell = position_in_map(filter.get_state(), rPCw);
+                            emit(graph("All goal post points on map [x,y]:", cell.x(), cell.y()));
+                            if (rPCw.norm() < closest_distance) {
+                                closest_distance = rPCw.norm();
+                                closest_point    = rPCw;
+                            }
+                        }
+                        goal_post_observations.push_back(closest_point);
+                    }
+
+                    // Compute the time since the last time update
+                    using namespace std::chrono;
+                    const auto curr_time  = NUClear::clock::now();
+                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                    last_time_update_time = curr_time;
+
+                    // Perform the time update
+                    filter.time(seconds);
+
+
+                    // Calculate the weight of each particle based on the goal post observations
+                    for (auto& rPCw : goal_post_observations) {
+
+                        // Reset all the particle weights to 1
+                        for (int i = 0; i < cfg.n_particles; i++) {
+                            filter.set_particle_weight(1.0, i);
+                        }
+                        // Weight the particles with all the goal post observations
+                        for (int i = 0; i < cfg.n_particles; i++) {
+                            auto particle = filter.get_particle(i);
+                            Eigen::Isometry2d Hfw;
+                            Hfw.translation()    = Eigen::Vector2d(particle(0), particle(1));
+                            Hfw.linear()         = Eigen::Rotation2Dd(particle(2)).toRotationMatrix();
+                            Eigen::Vector2d rPFf = Hfw * rPCw;
+                            if (log_level <= NUClear::DEBUG) {
+                                auto cell = position_in_map(filter.get_state(), rPCw);
+                                emit(graph("Goal post points on map [x,y]:", cell.x(), cell.y()));
+                            }
+
+
+                            // Data association, find the goal post closest to this oberservation
+                            Eigen::Vector2d closest_goal_post = cfg.goal_posts[0];
+                            double closest_distance           = (rPFf - closest_goal_post).norm();
+                            for (int j = 1; j < cfg.goal_posts.size(); j++) {
+                                double distance = (rPFf - cfg.goal_posts[j]).norm();
+                                if (distance < closest_distance) {
+                                    closest_distance  = distance;
+                                    closest_goal_post = cfg.goal_posts[j];
+                                }
+                            }
+
+                            emit(graph("rPFf: ", rPFf.x(), rPFf.y()));
+                            emit(graph("closest_goal_post: ", closest_goal_post.x(), closest_goal_post.y()));
+                            emit(graph("closest_distance: ", closest_distance));
+
+                            // Calculate the weight of the particle based on the distance to the closest goal post
+                            double sigma  = 0.01;
+                            double weight = std::exp(-0.5 * std::pow(closest_distance / cfg.measurement_noise, 2))
+                                            / (std::sqrt(2 * M_PI) * cfg.measurement_noise);
+                            log<NUClear::DEBUG>("Particle weight: ", weight);
+
+                            filter.set_particle_weight(weight, i);
+                        }
+                        // Resample the particles
+                        filter.resample();
+                    }
                 }
             });
     }

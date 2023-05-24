@@ -50,6 +50,9 @@ namespace module::localisation {
 
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
+
+            /// @brief Vector of known goal post positions
+            std::vector<Eigen::Vector2d> goal_posts{};
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;

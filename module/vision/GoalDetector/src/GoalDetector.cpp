@@ -164,6 +164,10 @@ namespace module::vision {
 
                     for (auto& cluster : clusters) {
                         Goal g;
+                        for (const auto& idx : cluster) {
+                            g.points.push_back(rays.col(idx));
+                        }
+
                         // Split cluster into left-side and right-side
                         // Return true if the left neighbour is NOT a goal point
                         auto right = utility::vision::visualmesh::partition_points(
