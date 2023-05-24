@@ -1,3 +1,5 @@
+import * as THREE from "three";
+
 export class Quaternion {
   constructor(readonly x: number, readonly y: number, readonly z: number, readonly w: number) {}
 
@@ -10,5 +12,13 @@ export class Quaternion {
       return Quaternion.of();
     }
     return new Quaternion(q.x || 0, q.y || 0, q.z || 0, q.w || 0);
+  }
+
+  static fromThree(q: THREE.Quaternion) {
+    return new Quaternion(q.x, q.y, q.z, q.w);
+  }
+
+  toThree() {
+    return new THREE.Quaternion(this.x, this.y, this.z, this.w);
   }
 }
