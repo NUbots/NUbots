@@ -21,5 +21,4 @@ foreach(module ${NUCLEAR_MODULES})
     "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}"
     "${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}"
   )
-
 endforeach()

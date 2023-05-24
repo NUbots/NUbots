@@ -45,7 +45,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # Allow selection of subcontroller for conditional build
-
 if(NOT SUBCONTROLLER)
   message(STATUS "Setting subcontroller to 'OpenCR' as none was specified.")
   set(SUBCONTROLLER
