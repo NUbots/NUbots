@@ -20,6 +20,11 @@ namespace module::platform::OpenCR {
         const uint8_t ID;
     };
 
+    struct XH540_W270 : public DynamixelServo {
+        XH540_W270(uint8_t ID) : ID(ID) {}
+        const uint8_t ID;
+    };
+
     class NUgus {
     public:
         NUgus();
@@ -71,8 +76,8 @@ namespace module::platform::OpenCR {
         MX106 L_HIP_ROLL;
         MX106 R_HIP_PITCH;
         MX106 L_HIP_PITCH;
-        MX106 R_KNEE;
-        MX106 L_KNEE;
+        XH540_W270 R_KNEE;
+        XH540_W270 L_KNEE;
         MX106 R_ANKLE_PITCH;
         MX106 L_ANKLE_PITCH;
         MX106 R_ANKLE_ROLL;
