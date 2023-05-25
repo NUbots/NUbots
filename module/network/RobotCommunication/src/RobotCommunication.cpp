@@ -1,5 +1,4 @@
 #include "RobotCommunication.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState"
