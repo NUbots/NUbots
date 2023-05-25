@@ -102,7 +102,7 @@ message RawSensors {
         FSR right = 2;
     }
 
-    // Full set on information to use for servos using Dynamixel v2 firmware
+    // Full set of information to use for servos using Dynamixel v2 firmware
     message Servo {
         uint32 error_flags           = 1;
         bool   torque_enabled        = 2;
