@@ -90,7 +90,7 @@ namespace module::platform::OpenCR {
             bool packet_dropped = false;
             // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
             // any packets, otherwise is the nonzero ID of the timed out device
-            for(uint8_t dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;)
+            for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
                 log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
@@ -117,17 +117,18 @@ namespace module::platform::OpenCR {
         });
 
         on<Trigger<StatusReturn>, Sync<HardwareIO>>().then([this](const StatusReturn& packet) {
+            const NUgus::ID packet_id = NUgus::ID(packet.id);
             /* Error handling */
 
             // Check we can process this packet
-            if (packet_queue.find(packet.id) == packet_queue.end()) {
+            if (packet_queue.find(packet_id) == packet_queue.end()) {
                 log<NUClear::WARN>(fmt::format("Recieved packet for unexpected ID {}.", packet.id));
                 return;
             }
 
             // Check we're expecting the packet
-            if (packet_queue[packet.id].size() == 0) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet.id));
+            if (packet_queue[packet_id].size() == 0) {
+                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet_id));
                 return;
             }
 
@@ -137,16 +138,16 @@ namespace module::platform::OpenCR {
             emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
 
             // Pop the front of the packet queue
-            auto& info = packet_queue[packet.id].front();
-            packet_queue[packet.id].erase(packet_queue[packet.id].begin());
+            auto& info = packet_queue[packet_id].front();
+            packet_queue[packet_id].erase(packet_queue[packet_id].begin());
 
             // Check for packet errors
             /// @todo Do we want to handle packets differently if they have errors?
             if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet.id));
+                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet_id));
             }
             if (packet.alert) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", packet.id));
+                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", packet_id));
             }
 
             /// @brief handle incoming packets, and send next request if all packets were handled
