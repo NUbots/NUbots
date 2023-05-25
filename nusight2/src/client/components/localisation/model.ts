@@ -1,12 +1,13 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
+import { Matrix4 } from "../../../shared/math/matrix4";
 
+import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
-import { Vector3 } from "../../math/vector3";
 import { AppModel } from "../app/model";
 
-import { LocalisationRobotModel } from "./darwin_robot/model";
 import { FieldModel } from "./field/model";
+import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxModel } from "./skybox/model";
 
 export class TimeModel {
@@ -42,7 +43,7 @@ class CameraModel {
   @observable pitch: number;
   @observable distance: number;
 
-  constructor({ position, yaw, pitch, distance }: CameraModel) {
+  constructor({ position, yaw, pitch, distance }: { position: Vector3; yaw: number; pitch: number; distance: number }) {
     this.position = position;
     this.yaw = yaw;
     this.pitch = pitch;

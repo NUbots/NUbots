@@ -1,11 +1,13 @@
 import { computed } from "mobx";
 import * as THREE from "three";
-import { Vector3 } from "../../../math/vector3";
+
+import { Vector3 } from "../../../../shared/math/vector3";
 import { group } from "../../three/builders";
 import { scene } from "../../three/builders";
 import { perspectiveCamera } from "../../three/builders";
 import { stage } from "../../three/builders";
 import { Canvas } from "../../three/three";
+
 import { OdometryVisualizerModel } from "./model";
 
 export class OdometryVisualizerViewModel {

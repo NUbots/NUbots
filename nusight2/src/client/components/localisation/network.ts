@@ -1,21 +1,23 @@
 import { action } from "mobx";
 import * as THREE from "three";
+import { Matrix3 } from "../../../shared/math/matrix3";
+import { Matrix4 } from "../../../shared/math/matrix4";
 
+import { Quaternion } from "../../../shared/math/quaternion";
+import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
-import { Quaternion } from "../../math/quaternion";
-import { Vector3 } from "../../math/vector3";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
-import { LocalisationRobotModel } from "./darwin_robot/model";
 import { LocalisationModel } from "./model";
-import Sensors = message.input.Sensors;
+import { LocalisationRobotModel } from "./robot_model";
 
 export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
-    this.network.on(Sensors, this.onSensors);
+    this.network.on(message.input.Sensors, this.onSensors);
+    this.network.on(message.localisation.Field, this.onField);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -28,13 +30,23 @@ export class LocalisationNetwork {
   }
 
   @action
-  private onSensors = (robotModel: RobotModel, sensors: Sensors) => {
+  private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.Hfw = Matrix4.from(field.Hfw);
+  };
+
+  @action
+  private onSensors = (robotModel: RobotModel, sensors: message.input.Sensors) => {
+    // Ignore empty Sensors packets which may be emitted by the nbs scrubber
+    // when there's no Sensors data at a requested timestamp).
+    if (!sensors.Htw) {
+      return;
+    }
+
     const robot = LocalisationRobotModel.of(robotModel);
 
-    const { translation: rWTt, rotation: Rwt } = decompose(
-      new THREE.Matrix4().getInverse(fromProtoMat44(sensors.Htw!)),
-    );
-    robot.rWTt = new Vector3(rWTt.x, rWTt.y, rWTt.z);
+    const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
+    robot.Htw = Matrix4.from(sensors.Htw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;

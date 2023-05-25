@@ -1,8 +1,8 @@
-import classNames from "classnames";
 import React from "react";
 import { ReactNode } from "react";
+import classNames from "classnames";
 
-import styles from "./style.module.css";
+import style from "./style.module.css";
 
 export type ButtonProps = {
   type?: "normal" | "primary";
@@ -12,6 +12,7 @@ export type ButtonProps = {
   iconBefore?: ReactNode;
   iconAfter?: ReactNode;
   iconAfterAlignedRight?: boolean;
+  className?: string;
   children?: any;
   onClick?(): void;
 };
@@ -26,6 +27,7 @@ export class Button extends React.PureComponent<ButtonProps> {
       iconBefore,
       iconAfter,
       iconAfterAlignedRight,
+      className,
       children,
       onClick,
     } = this.props;
@@ -33,21 +35,25 @@ export class Button extends React.PureComponent<ButtonProps> {
       <button
         onClick={onClick}
         disabled={disabled}
-        className={classNames(styles.button, {
-          [styles.buttonPrimary]: type === "primary",
-          [styles.buttonNormal]: type === "normal",
-          [styles.fullwidth]: fullwidth,
-          [styles.iconAfterAlignedRight]: iconAfterAlignedRight,
-          [styles.alignLeft]: textAlign === "left",
-          [styles.alignRight]: textAlign === "right",
-        })}
+        className={classNames(
+          style.button,
+          {
+            [style.buttonPrimary]: type === "primary",
+            [style.buttonNormal]: type === "normal",
+            [style.fullwidth]: fullwidth,
+            [style.iconAfterAlignedRight]: iconAfterAlignedRight,
+            [style.alignLeft]: textAlign === "left",
+            [style.alignRight]: textAlign === "right",
+          },
+          className,
+        )}
       >
-        {iconBefore && <span className={styles.iconBefore}>{iconBefore}</span>}
+        {iconBefore && <span className={style.iconBefore}>{iconBefore}</span>}
         {children}
         {iconAfter && (
           <span
-            className={classNames(styles.iconAfter, {
-              [styles.iconAfterAlignedRight]: iconAfterAlignedRight,
+            className={classNames(style.iconAfter, {
+              [style.iconAfterAlignedRight]: iconAfterAlignedRight,
             })}
           >
             {iconAfter}

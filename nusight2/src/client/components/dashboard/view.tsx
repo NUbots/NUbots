@@ -1,8 +1,8 @@
-import { observer } from "mobx-react";
 import { PropsWithChildren } from "react";
 import React from "react";
 import { Component } from "react";
 import { ComponentType } from "react";
+import { observer } from "mobx-react";
 
 import { DashboardController } from "./controller";
 import { DashboardModel } from "./model";

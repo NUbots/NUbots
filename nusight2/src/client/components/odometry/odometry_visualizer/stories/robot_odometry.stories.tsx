@@ -1,18 +1,31 @@
-import { storiesOf } from "@storybook/react";
+import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 import { reaction } from "mobx";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
-import React from "react";
 import * as THREE from "three";
-import { Matrix4 } from "../../../../math/matrix4";
-import { Vector3 } from "../../../../math/vector3";
-import { fullscreen } from "../../../storybook/fullscreen";
+
+import { Matrix4 } from "../../../../../shared/math/matrix4";
+import { Vector3 } from "../../../../../shared/math/vector3";
 import { OdometryVisualizerModel } from "../model";
 import { OdometryVisualizer } from "../view";
 
-fullscreen(storiesOf("components.odometry.odometry_visualizer", module))
-  .add("Renders statically", () => <OdometryVisualizerHarness />)
-  .add("Renders animated", () => <OdometryVisualizerHarness animate />);
+interface StoryProps {}
+
+const meta: Meta<StoryProps> = {
+  title: "components/odometry/odometry_visualizer",
+  parameters: { layout: "fullscreen" },
+};
+
+export default meta;
+
+export const Static: StoryObj<StoryProps> = {
+  render: () => <OdometryVisualizerHarness />,
+};
+
+export const Animated: StoryObj<StoryProps> = {
+  render: () => <OdometryVisualizerHarness animate />,
+};
 
 class OdometryVisualizerHarness extends React.Component<{ animate?: boolean }> {
   private model = OdometryVisualizerModel.of({

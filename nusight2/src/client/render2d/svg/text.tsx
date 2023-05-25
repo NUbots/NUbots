@@ -1,15 +1,18 @@
+import React, { useContext } from "react";
 import { observer } from "mobx-react";
-import React from "react";
 
-import { Transform } from "../../math/transform";
+import { Transform } from "../../../shared/math/transform";
 import { TextGeometry } from "../geometry/text_geometry";
 import { Shape } from "../object/shape";
+import { rendererTransformsContext } from "../svg_renderer";
 
-import { toSvgProps, toSvgTransform } from "./rendering";
+import { toSvgAppearance, toSvgEventHandlers, toSvgTransform } from "./rendering";
 
-type Props = { model: Shape<TextGeometry>; world: Transform };
-export const Text = observer(({ model: { geometry, appearance }, world }: Props) => {
+type Props = { model: Shape<TextGeometry> };
+export const Text = observer(({ model: { geometry, appearance, eventHandlers } }: Props) => {
   const { x, y, fontFamily, fontSize, text, textAlign, textBaseline, worldAlignment, worldScale } = geometry;
+  const transforms = useContext(rendererTransformsContext);
+  const world = transforms.world;
 
   const t = Transform.of({
     translate: { x, y },
@@ -24,11 +27,13 @@ export const Text = observer(({ model: { geometry, appearance }, world }: Props)
   return (
     <g transform={toSvgTransform(t)}>
       <text
+        className="select-none"
         fontFamily={fontFamily}
         fontSize={fontSize}
         textAnchor={textAlign}
         dominantBaseline={textBaseline}
-        {...toSvgProps(appearance)}
+        {...toSvgAppearance(appearance)}
+        {...toSvgEventHandlers(eventHandlers, transforms)}
       >
         {text}
       </text>

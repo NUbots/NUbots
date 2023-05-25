@@ -14,7 +14,9 @@ import {
   Vector2,
   WebGLRenderer,
 } from "three";
+
 import { ImageDecoder } from "../../../image_decoder/image_decoder";
+
 import { CameraModel, VisualMesh } from "./model";
 import meshFragmentShader from "./shaders/mesh.frag";
 import meshVertexShader from "./shaders/mesh.vert";
@@ -97,7 +99,6 @@ export class CameraViewModel {
       vertexShader: meshVertexShader,
       fragmentShader: meshFragmentShader,
       uniforms: {
-        image: { type: "t" },
         dimensions: { value: new Vector2() },
       },
     });

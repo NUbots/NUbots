@@ -8,9 +8,9 @@ import { Mesh } from "three";
 import { Object3D } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-import { LocalisationRobotModel } from "../darwin_robot/model";
+import { LocalisationRobotModel } from "../robot_model";
 
-import url from "./config/nugus.glb";
+import url from "./config/nugus.glb?url";
 
 export class NUgusViewModel {
   constructor(private readonly model: LocalisationRobotModel) {}
@@ -30,12 +30,8 @@ export class NUgusViewModel {
     // TODO (Annable): Baking the offsets into the model geometries would be ideal.
     const PI = Math.PI;
     const PI_2 = PI / 2;
-    robot.position.x = this.model.rWTt.x;
-    robot.position.y = this.model.rWTt.y;
-    robot.position.z = this.model.rWTt.z;
-    const rotation = new Quaternion(this.model.Rwt.x, this.model.Rwt.y, this.model.Rwt.z, this.model.Rwt.w);
-    rotation.multiply(new Quaternion().setFromEuler(new Euler(PI_2, 0, 0)));
-    robot.setRotationFromQuaternion(rotation);
+    robot.matrix = this.model.Hft.toThree().multiply(new Matrix4().makeRotationX(PI_2));
+    robot.matrixAutoUpdate = false;
     findMesh(robot, "R_Shoulder").rotation.set(0, 0, PI_2 - motors.rightShoulderPitch.angle);
     findMesh(robot, "L_Shoulder").rotation.set(0, 0, -PI_2 - motors.leftShoulderPitch.angle);
     findMesh(robot, "R_Arm_Upper").rotation.set(0, PI_2, motors.rightShoulderRoll.angle);
@@ -70,7 +66,7 @@ export class NUgusViewModel {
   private static robotObjectBase = lazyObservable<Object3D | undefined>((sink) => {
     new GLTFLoader().load(url, (gltf) => {
       // TODO (Annable): Baking this rotation into the model geometry would be ideal.
-      findMesh(gltf.scene, "Head").geometry.applyMatrix(new Matrix4().makeRotationY(-Math.PI / 2));
+      findMesh(gltf.scene, "Head").geometry.applyMatrix4(new Matrix4().makeRotationY(-Math.PI / 2));
       sink(findMesh(gltf.scene, "Torso"));
     });
   });

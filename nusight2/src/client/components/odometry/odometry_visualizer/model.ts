@@ -1,6 +1,7 @@
 import { observable } from "mobx";
-import { Matrix4 } from "../../../math/matrix4";
-import { Vector3 } from "../../../math/vector3";
+
+import { Matrix4 } from "../../../../shared/math/matrix4";
+import { Vector3 } from "../../../../shared/math/vector3";
 
 export class OdometryVisualizerModel {
   @observable.ref Hwt: Matrix4;

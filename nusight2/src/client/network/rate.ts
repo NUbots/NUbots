@@ -25,7 +25,10 @@ export class Rate {
   }
 
   update(newCount: number) {
-    const now = this.clock.now();
+    // We floor here to be able to compare `now` and `this.lastUpdateTime`
+    // as ints below. Otherwise they're almost always different due to the
+    // decimal places and issues with floating point equality.
+    const now = Math.floor(this.clock.now());
 
     if (this.lastUpdateTime === undefined) {
       this.currentUpdateCount = newCount;

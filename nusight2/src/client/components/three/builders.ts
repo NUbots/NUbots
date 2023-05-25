@@ -1,3 +1,6 @@
+import { CircleBufferGeometry } from "three";
+import { InstancedBufferGeometry } from "three";
+import { InstancedBufferAttribute } from "three";
 import { InterleavedBufferAttribute } from "three";
 import { BufferAttribute } from "three";
 import { LinearMipMapLinearFilter } from "three";
@@ -22,22 +25,23 @@ import { OrthographicCamera } from "three";
 import { PixelFormat } from "three";
 import { PerspectiveCamera } from "three";
 import { Scene } from "three";
-import { Geometry } from "three";
 import { TextureFilter } from "three";
 import { Wrapping } from "three";
 import { Mapping } from "three";
 import { TextureDataType } from "three";
-import * as THREE from "three";
 import { DataTexture } from "three";
 import { MeshPhongMaterial } from "three";
 import { MeshBasicMaterial } from "three";
 import { Color } from "three";
 import { Object3D } from "three";
 import { Mesh } from "three";
+import { Points } from "three";
 import { Material } from "three";
 import { ShaderMaterial } from "three";
+import * as THREE from "three";
+import { InstancedMesh } from "three";
 
-import { Vector3 } from "../../math/vector3";
+import { Vector3 } from "../../../shared/math/vector3";
 
 import { createUpdatableComputed } from "./create_updatable_computed";
 
@@ -75,7 +79,7 @@ export const scene = createUpdatableComputed(
     children && children.length && scene.add(...children);
     updateObject3D(scene, opts);
   },
-  (scene) => scene.dispose(),
+  // Disposing Scene objects is no longer necessary. See https://github.com/mrdoob/three.js/pull/19972.
 );
 
 export const group = createUpdatableComputed(
@@ -137,15 +141,38 @@ export const orthographicCamera = createUpdatableComputed(
 );
 
 type MeshOpts = Object3DOpts & {
-  geometry: Geometry | BufferGeometry;
+  geometry: BufferGeometry;
   material: Material | Material[];
 };
+
+type PointsOpts = MeshOpts;
 
 export const mesh = createUpdatableComputed(
   (opts: MeshOpts) => new Mesh(opts.geometry, opts.material),
   (mesh, opts) => {
     mesh.geometry = opts.geometry;
     mesh.material = opts.material;
+    updateObject3D(mesh, opts);
+  },
+);
+
+export const points = createUpdatableComputed(
+  (opts: PointsOpts) => new Points(opts.geometry, opts.material),
+  (mesh, opts) => {
+    mesh.geometry = opts.geometry;
+    mesh.material = opts.material;
+    updateObject3D(mesh, opts);
+  },
+);
+
+type InstancedMeshOpts = MeshOpts & { count: number };
+
+export const instancedMesh = createUpdatableComputed(
+  (opts: InstancedMeshOpts) => new InstancedMesh(opts.geometry, opts.material, opts.count),
+  (mesh, opts) => {
+    mesh.geometry = opts.geometry;
+    mesh.material = opts.material;
+    mesh.count = opts.count;
     updateObject3D(mesh, opts);
   },
 );
@@ -234,6 +261,7 @@ export const shaderMaterial = createUpdatableComputed(
     updateMaterial(material, opts);
     material.needsUpdate = true;
   },
+  (material) => material.dispose(),
 );
 
 function updateMaterial(object: Material, opts: MaterialOpts) {
@@ -344,6 +372,15 @@ function updateTexture(texture: Texture, opts: TextureOpts) {
   texture.minFilter = opts.minFilter || LinearFilter;
 }
 
+type Attribute = { name: string; buffer: BufferAttribute | InterleavedBufferAttribute | InstancedBufferAttribute };
+
+export const withAttributes = (geometry: BufferGeometry, attributes: Attribute[]) => {
+  for (const { name, buffer } of attributes) {
+    geometry.setAttribute(name, buffer);
+  }
+  return geometry;
+};
+
 type BoxGeometryOpts = { width: number; height: number; depth: number };
 
 export const boxGeometry = createUpdatableComputed(
@@ -380,6 +417,24 @@ export const planeGeometry = createUpdatableComputed(
   (plane) => plane.dispose(),
 );
 
+type CircleBufferGeometryOpts = {
+  radius: number;
+  segments: number;
+};
+
+export const circleBufferGeometry = createUpdatableComputed(
+  (opts: CircleBufferGeometryOpts) => {
+    return new CircleBufferGeometry(opts.radius, opts.segments, 0, 2 * Math.PI);
+  },
+  (geometry, opts) => {
+    const { radius, segments } = geometry.parameters;
+    if (opts.radius !== radius || opts.segments !== segments) {
+      geometry.copy(new CircleBufferGeometry(opts.radius, opts.segments, 0, 2 * Math.PI));
+    }
+  },
+  (geometry) => geometry.dispose(),
+);
+
 type InterleavedBufferOpts = {
   buffer: TypedArray;
   stride: number;
@@ -391,7 +446,7 @@ export const interleavedBuffer = createUpdatableComputed(
 );
 
 type BufferGeometryOpts = {
-  index: BufferAttribute | number[];
+  index?: BufferAttribute | number[];
   attributes: { name: string; buffer: BufferAttribute | InterleavedBufferAttribute }[];
 };
 
@@ -399,12 +454,40 @@ export const bufferGeometry = createUpdatableComputed(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (opts: BufferGeometryOpts) => new BufferGeometry(),
   (geometry, opts) => {
-    geometry.setIndex(opts.index);
+    if (opts.index) {
+      geometry.setIndex(opts.index);
+    }
     for (const [name] of Object.entries(geometry.attributes)) {
-      geometry.removeAttribute(name);
+      geometry.deleteAttribute(name);
     }
     for (const { name, buffer } of opts.attributes) {
-      geometry.addAttribute(name, buffer);
+      geometry.setAttribute(name, buffer);
+    }
+  },
+  (geometry) => geometry.dispose(),
+);
+
+type InstancedBufferGeometryOpts = {
+  index?: BufferAttribute | number[];
+  instanceCount?: number;
+  attributes: { name: string; buffer: BufferAttribute | InterleavedBufferAttribute | InstancedBufferAttribute }[];
+};
+
+export const instancedBufferGeometry = createUpdatableComputed(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (opts: InstancedBufferGeometryOpts) => new InstancedBufferGeometry(),
+  (geometry, opts) => {
+    if (opts.index) {
+      geometry.setIndex(opts.index);
+    }
+    if (opts.instanceCount) {
+      geometry.instanceCount = opts.instanceCount;
+    }
+    for (const [name] of Object.entries(geometry.attributes)) {
+      geometry.deleteAttribute(name);
+    }
+    for (const { name, buffer } of opts.attributes) {
+      geometry.setAttribute(name, buffer);
     }
   },
   (geometry) => geometry.dispose(),
@@ -419,6 +502,7 @@ export const ambientLight = createUpdatableComputed(
     light.intensity = opts.intensity != null ? opts.intensity : 1;
     updateObject3D(light, opts);
   },
+  (light) => light.dispose(),
 );
 
 export const pointLight = createUpdatableComputed(
@@ -428,6 +512,7 @@ export const pointLight = createUpdatableComputed(
     light.intensity = opts.intensity != null ? opts.intensity : 1;
     updateObject3D(light, opts);
   },
+  (light) => light.dispose(),
 );
 
 function updateObject3D(object: Object3D, opts: Object3DOpts) {

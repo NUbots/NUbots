@@ -11,7 +11,11 @@ import { WebSocketClient } from "./web_socket_client";
  * There should never be enough logic in here that it needs any testing.
  */
 export class DirectWebSocketClient implements WebSocketClient {
-  constructor(private socket: Socket) {}
+  private socket: Socket;
+
+  constructor(socket: Socket) {
+    this.socket = socket;
+  }
 
   static of(uri: string, opts: SocketOptions) {
     const socket = io(uri, { ...opts, parser: NUClearNetProxyParser } as any);
@@ -27,7 +31,23 @@ export class DirectWebSocketClient implements WebSocketClient {
   }
 
   on(event: string, fn: (...args: any[]) => void) {
-    this.socket.on(event, fn);
+    this.socket.on(event, (...args: any[]) => {
+      const now = Date.now();
+
+      // Go through the args and replace the ack function with a wrapper that adds the time we
+      // received the message here. This is used for performance measurements on the server.
+      const argsWithAckWrapped = args.map((arg) => {
+        // We assume that any function in args is an ack function, since the only function
+        // we will ever get from a Socket.io connection is the ack function.
+        return typeof arg === "function"
+          ? (...ackArgs: any[]) => {
+              arg(...ackArgs, now);
+            }
+          : arg;
+      });
+
+      fn(...argsWithAckWrapped);
+    });
   }
 
   off(event: string, fn?: Function) {

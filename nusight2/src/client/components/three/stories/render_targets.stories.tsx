@@ -1,11 +1,11 @@
-import { storiesOf } from "@storybook/react";
+import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
 import { action } from "mobx";
 import { reaction } from "mobx";
 import { computed } from "mobx";
 import { observable } from "mobx";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
-import React from "react";
 import { WebGLRenderTarget } from "three";
 import { TextureLoader } from "three";
 import { LinearFilter } from "three";
@@ -13,9 +13,8 @@ import { ClampToEdgeWrapping } from "three";
 import { Texture } from "three";
 import { Color } from "three";
 
+import { Vector3 } from "../../../../shared/math/vector3";
 import { disposableComputed } from "../../../base/disposable_computed";
-import { Vector3 } from "../../../math/vector3";
-import { fullscreen } from "../../storybook/fullscreen";
 import { planeGeometry } from "../builders";
 import { pointLight } from "../builders";
 import { ambientLight } from "../builders";
@@ -31,15 +30,32 @@ import { orthographicCamera } from "../builders";
 import { Canvas } from "../three";
 import { Three } from "../three";
 
-import robotSvgUrl from "./robot.file.svg";
+import robotSvgUrl from "./robot.svg?url";
 
-fullscreen(storiesOf("component.three", module))
-  .add("renders static scene with render targets", () => {
+type StoryComponent = React.FunctionComponent<{}>;
+
+const meta: Meta<StoryComponent> = {
+  title: "components/Three",
+  parameters: {
+    layout: "fullscreen",
+  },
+};
+
+export default meta;
+
+export const StaticSceneWithRenderTargets: StoryObj<StoryComponent> = {
+  name: "static scene with render targets",
+  render: () => {
     return <RenderTargetHarness />;
-  })
-  .add("renders animated scene with render targets", () => {
+  },
+};
+
+export const AnimatedSceneWithRenderTargets: StoryObj<StoryComponent> = {
+  name: "animated scene with render targets",
+  render: () => {
     return <RenderTargetHarness animate />;
-  });
+  },
+};
 
 type Model = { time: number };
 
@@ -238,7 +254,7 @@ class RobotViewModel {
   }));
 
   private readonly texture = disposableComputed<Texture>(() => {
-    const texture = new TextureLoader().load(String(robotSvgUrl));
+    const texture = new TextureLoader().load(robotSvgUrl);
     texture.generateMipmaps = false;
     texture.wrapS = texture.wrapT = ClampToEdgeWrapping;
     texture.minFilter = LinearFilter;

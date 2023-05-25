@@ -1,18 +1,24 @@
 import { action, runInAction } from "mobx";
+
 import { UnreachableError } from "../../../shared/base/unreachable_error";
 import { fourcc, fourccToString } from "../../../shared/image_decoder/fourcc";
+import { Matrix4 } from "../../../shared/math/matrix4";
+import { Projection } from "../../../shared/math/projection";
+import { Vector2 } from "../../../shared/math/vector2";
+import { Vector3 } from "../../../shared/math/vector3";
+import { Vector4 } from "../../../shared/math/vector4";
 import { message } from "../../../shared/messages";
 import { toSeconds } from "../../../shared/time/timestamp";
-import { Matrix4 } from "../../math/matrix4";
-import { Vector2 } from "../../math/vector2";
-import { Vector3 } from "../../math/vector3";
-import { Vector4 } from "../../math/vector4";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
+import { CameraParams } from "../camera/camera_params";
+import { ImageFormat } from "../camera/image";
+import { Lens } from "../camera/lens";
 import { RobotModel } from "../robot/model";
-import { CameraModel, CameraParams, GreenHorizon, Lens, Projection } from "./camera/model";
-import { ImageFormat } from "./image";
+
 import { VisionRobotModel } from "./model";
+import { GreenHorizonModel } from "./vision_camera/green_horizon";
+import { VisionCameraModel } from "./vision_camera/model";
 
 export class VisionNetwork {
   constructor(private network: Network) {
@@ -34,6 +40,12 @@ export class VisionNetwork {
   };
 
   private onImage = async (robotModel: RobotModel, image: message.input.Image | message.output.CompressedImage) => {
+    // Image data or lens will be null for empty NBS packets (which are emitted by the nbs scrubber when there's no
+    // image packet at a requested timestamp). Ignoring for now, but we'd want to draw a blank image in the future.
+    if (!image.data || !image.lens) {
+      return;
+    }
+
     const robot = VisionRobotModel.of(robotModel);
     const { id, name, dimensions, format, data, Hcw } = image;
     const { projection, focalLength, centre, k } = image.lens!;
@@ -42,13 +54,13 @@ export class VisionNetwork {
 
     runInAction(() => {
       const camera = robot.cameras.get(id);
-      const model = CameraModel.of({
+      const model = VisionCameraModel.of({
         ...camera,
         id: id,
         name,
         image: {
-          type: "element-or-bitmap",
-          image: bitmap,
+          type: "bitmap",
+          bitmap,
           width: dimensions?.x!,
           height: dimensions?.y!,
           format: getImageFormat(format),
@@ -75,7 +87,7 @@ export class VisionNetwork {
     if (!camera) {
       return;
     }
-    camera.visualmesh = {
+    camera.visualMesh = {
       neighbours: neighbourhood?.v!,
       rays: rays?.v!,
       classifications: { dim: classifications?.rows!, values: classifications?.v! },
@@ -135,11 +147,11 @@ export class VisionNetwork {
     if (!camera) {
       return;
     }
-    const greenhorizon = new GreenHorizon({
+    const greenHorizon = new GreenHorizonModel({
       horizon: horizon?.map((v) => Vector3.from(v)),
       Hcw: Matrix4.from(Hcw),
     });
-    camera.greenhorizon = camera.greenhorizon?.copy(greenhorizon) || greenhorizon;
+    camera.greenHorizon = camera.greenHorizon?.copy(greenHorizon) || greenHorizon;
   }
 }
 

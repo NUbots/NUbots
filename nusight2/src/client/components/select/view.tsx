@@ -1,20 +1,21 @@
+import React from "react";
+import { ReactNode } from "react";
 import { action } from "mobx";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
-import React from "react";
-import { ReactNode } from "react";
-import OutsideClickHandler from "react-outside-click-handler";
+import OutsideClickHandler from "react-outside-click-handler/esm/OutsideClickHandler";
 
 import { Button } from "../button/view";
 import { Dropdown } from "../dropdown/view";
+import { Icon } from "../icon/view";
 
-import DropdownIcon from "./dropdown.svg";
 import { SelectOption } from "./option";
 import style from "./style.module.css";
 
 export interface Option {
   id: string | number;
   label: string;
+  icon?: ReactNode;
 }
 
 export type SelectProps = {
@@ -51,8 +52,17 @@ export class Select extends React.Component<SelectProps> {
   render(): JSX.Element {
     const { className, icon, placeholder, dropDirection, empty, options, selectedOption } = this.props;
 
+    // If one of the options has an icon, show padding for all the options to align their text
+    const showOptionIconPadding = options.some((option) => option.icon);
+
     const button = (
-      <Button iconBefore={icon} iconAfter={<DropdownIcon />} textAlign="left" iconAfterAlignedRight fullwidth>
+      <Button
+        iconBefore={icon}
+        iconAfter={<Icon className="-mr-0.5">arrow_drop_down</Icon>}
+        textAlign="left"
+        iconAfterAlignedRight
+        fullwidth
+      >
         {selectedOption ? selectedOption.label : placeholder}
       </Button>
     );
@@ -74,7 +84,14 @@ export class Select extends React.Component<SelectProps> {
                 {options.map((option) => {
                   const isSelected = Boolean(selectedOption && selectedOption.id === option.id);
                   return (
-                    <SelectOption key={option.id} option={option} isSelected={isSelected} onSelect={this.onSelect} />
+                    <SelectOption
+                      key={option.id}
+                      option={option}
+                      icon={option.icon}
+                      showIconPadding={showOptionIconPadding}
+                      isSelected={isSelected}
+                      onSelect={this.onSelect}
+                    />
                   );
                 })}
               </div>

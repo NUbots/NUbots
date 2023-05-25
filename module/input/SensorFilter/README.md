@@ -28,6 +28,6 @@ The resulting filtered data will then be outputted as `message::input::Sensors` 
 - `message::platform::ButtonLeftUp` when button released.
 - `message::platform::ButtonMiddleDown` when button pressed.
 - `message::platform::ButtonMiddleUp` when button released.
-- `message::support::nusight::DataPoint` if log_level >= DEBUG, indicating if feet are down.
+- `message::eye::DataPoint` if log_level >= DEBUG, indicating if feet are down.
 
 ## Dependencies

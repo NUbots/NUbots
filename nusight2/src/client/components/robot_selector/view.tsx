@@ -1,11 +1,11 @@
-import { observer } from "mobx-react";
 import React from "react";
+import { observer } from "mobx-react";
 
 import { dropdownContainer } from "../dropdown_container/view";
 import { RobotModel } from "../robot/model";
 
-import PlugIcon from "./plug.svg";
-import RobotIcon from "./robot.svg";
+import IconPlug from "./icon_plug";
+import IconRobot from "./icon_robot";
 import { RobotLabel } from "./robot_label/view";
 import style from "./style.module.css";
 
@@ -19,7 +19,7 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props;
   const dropdownToggle = (
     <button className={style.button}>
-      <RobotIcon />
+      <IconRobot />
       Select robots
     </button>
   );
@@ -30,7 +30,7 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
           {robots.length === 0 && (
             <div className={style.empty}>
               <div className={style.emptyIcon}>
-                <PlugIcon />
+                <IconPlug />
               </div>
               <div className={style.emptyTitle}>No connected robots</div>
               <span className={style.emptyDescription}>Run yarn start:sim to simulate robots</span>
