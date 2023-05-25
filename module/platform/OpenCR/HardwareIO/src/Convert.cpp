@@ -111,16 +111,7 @@ namespace module::platform::OpenCR {
             // Ensure we're working within our expected range
             data = utility::math::clamp(uint32_t(0), data, uint32_t(4095));
 
-            /**
-             * Servos are given position commands in terms of a 0-360deg rotation
-             * but the angles are normalised to (-pi, pi] so we need to apply a
-             * correction before we convert I think.
-             *
-             * (This is based on what is done in the cm740 hwIO branch.)
-             *
-             * We also do an additional check to ensure we don't cause integer underflow
-             * although this should never happen in practice.
-             */
+            // Data is sent as an unsigned int, need to offset the value since the angle can be negative
             int32_t scaled_value = int32_t(data) - 2048;
 
             // Do the actual converstion to angle

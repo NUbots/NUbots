@@ -144,7 +144,6 @@ namespace module::platform::OpenCR {
             packet_queue[packet_id].erase(packet_queue[packet_id].begin());
 
             // Check for packet errors
-            /// @todo Do we want to handle packets differently if they have errors?
             if (packet.error != StatusReturn::CommandError::NO_ERROR) {
                 log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet_id));
             }
