@@ -44,8 +44,10 @@ namespace module::platform::OpenCR {
             // Initialise packet_queue map
             // OpenCR
             packet_queue[NUgus::ID::OPENCR] = std::vector<PacketTypes>();
-            // Servos - NOT zero indexed. First servo is ID 1.
-            // Required because response packets have Dynamixel ID
+
+            // Within this codebase, we consider servos to be 0 indexed
+            // However, when we receive a packet, they are 1 indexed
+            // The packet queue and servo_ids function handles this
             for (const auto& id : nugus.servo_ids()) {
                 packet_queue[NUgus::ID(id)] = std::vector<PacketTypes>();
             }
