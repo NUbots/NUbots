@@ -7,24 +7,24 @@ namespace module::platform::OpenCR {
      * for queue.push() and queue.pop() to clean everything up.
      */
 
-    uint8_t HardwareIO::servo_waiting() {
+    NUgus::ID HardwareIO::servo_waiting() {
         // Loop through all servos in order
-        for (auto& id : nugus.servo_ids()) {
+        for (const auto& id : nugus.servo_ids()) {
             // If the length is non-zero then return
-            if (packet_queue[id].size()) {
-                return id;
+            if (packet_queue[NUgus::ID(id)].size() > 0) {
+                return NUgus::ID(id);
             }
         }
         // no servos waiting
-        return uint8_t(NUgus::ID::NO_ID);
+        return NUgus::ID::NO_ID;
     }
 
-    uint8_t HardwareIO::opencr_waiting() {
+    int HardwareIO::opencr_waiting() {
         // just a basic wrapper for consistency
-        return packet_queue[uint8_t(NUgus::ID::OPENCR)].size();
+        return packet_queue[NUgus::ID::OPENCR].size();
     }
 
-    uint8_t HardwareIO::queue_item_waiting() {
+    NUgus::ID HardwareIO::queue_item_waiting() {
         // Loop through all devices in the queue
         for (const auto& keypair : packet_queue) {
             // If any are waiting, then return their ID
@@ -33,7 +33,7 @@ namespace module::platform::OpenCR {
             }
         }
         // no devices waiting
-        return uint8_t(NUgus::ID::NO_ID);
+        return NUgus::ID::NO_ID;
     }
 
     int HardwareIO::queue_clear_all() {

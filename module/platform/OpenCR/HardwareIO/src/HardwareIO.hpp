@@ -43,7 +43,7 @@ namespace module::platform::OpenCR {
         enum class PacketTypes : uint8_t { MODEL_INFORMATION, OPENCR_DATA, SERVO_DATA, FSR_DATA };
 
         /// @brief The packets we are currently waiting to receive
-        std::map<uint8_t, std::vector<PacketTypes>> packet_queue;
+        std::map<NUgus::ID, std::vector<PacketTypes>> packet_queue;
 
         /// @see opencr_state
         struct OpenCRState {
@@ -198,15 +198,15 @@ namespace module::platform::OpenCR {
 
         /// @brief Check if we're currently waiting on any servo packets
         /// @returns ID of FIRST servo we're waiting on, or 0 if none
-        uint8_t servo_waiting();
+        NUgus::ID servo_waiting();
 
         /// @brief Check if we're currently waiting on any OpenCR packets
         /// @returns number of OpenCR packets waiting
-        uint8_t opencr_waiting();
+        int opencr_waiting();
 
         /// @brief Check if we're currently waiting on any packets
         /// @returns ID of FIRST device we're waiting on, or 0 if none
-        uint8_t queue_item_waiting();
+        NUgus::ID queue_item_waiting();
 
         /// @brief clear all packet queues
         /// @returns the number of packets cleared

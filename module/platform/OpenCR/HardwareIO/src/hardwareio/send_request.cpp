@@ -62,7 +62,7 @@ namespace module::platform::OpenCR {
 
         // Get updated servo data
         // SYNC_READ (read the same memory addresses on all devices)
-        for (auto& id : nugus.servo_ids()) {
+        for (const auto& id : nugus.servo_ids()) {
             packet_queue[id].push_back(PacketTypes::SERVO_DATA);
         }
         opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(AddressBook::SERVO_READ),
@@ -98,7 +98,7 @@ namespace module::platform::OpenCR {
 
         // Get OpenCR data
         // READ (only reading from a single device here)
-        packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::OPENCR_DATA);
+        packet_queue[NUgus::ID::OPENCR].push_back(PacketTypes::OPENCR_DATA);
         opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
                                                 uint16_t(OpenCR::Address::LED),
                                                 sizeof(OpenCRReadData)));

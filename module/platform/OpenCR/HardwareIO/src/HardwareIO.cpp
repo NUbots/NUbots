@@ -43,11 +43,11 @@ namespace module::platform::OpenCR {
 
             // Initialise packet_queue map
             // OpenCR
-            packet_queue[uint8_t(NUgus::ID::OPENCR)] = std::vector<PacketTypes>();
+            packet_queue[NUgus::ID::OPENCR] = std::vector<PacketTypes>();
             // Servos - NOT zero indexed. First servo is ID 1.
             // Required because response packets have Dynamixel ID
-            for (auto& id : nugus.servo_ids()) {
-                packet_queue[id] = std::vector<PacketTypes>();
+            for (const auto& id : nugus.servo_ids()) {
+                packet_queue[NUgus::ID(id)] = std::vector<PacketTypes>();
             }
 
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
@@ -77,8 +77,7 @@ namespace module::platform::OpenCR {
         on<Watchdog<HardwareIO, 2, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
             // First, check if this is the model info packet, because if it is, the system
             // startup failed, and we need to re-trigger it.
-            if (opencr_waiting()
-                && packet_queue[uint8_t(NUgus::ID::OPENCR)].front() == PacketTypes::MODEL_INFORMATION) {
+            if ((opencr_waiting() > 0) && packet_queue[NUgus::ID::OPENCR].front() == PacketTypes::MODEL_INFORMATION) {
                 log<NUClear::WARN>(fmt::format("OpenCR model information not recieved, restarting system"));
                 // Clear all packet queues just in case
                 queue_clear_all();
@@ -164,7 +163,7 @@ namespace module::platform::OpenCR {
                     process_model_information(packet);
 
                     // check if we recieved the final packet we are expecting
-                    if (!queue_item_waiting()) {
+                    if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
                         send_servo_request();
                     }
@@ -177,7 +176,7 @@ namespace module::platform::OpenCR {
                     process_opencr_data(packet);
 
                     // check if we recieved the final packet we are expecting
-                    if (!queue_item_waiting()) {
+                    if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
                     }
@@ -190,7 +189,7 @@ namespace module::platform::OpenCR {
                     process_servo_data(packet);
 
                     // check if we recieved the final packet we are expecting
-                    if (!queue_item_waiting()) {
+                    if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("All servos received, requesting OpenCR data");
                         send_opencr_request();
                     }

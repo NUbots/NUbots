@@ -129,7 +129,7 @@ namespace module::platform::OpenCR {
 
         // Find OpenCR firmware and model versions
         // This has to be called last, as we need to wait for the response packet before starting
-        packet_queue[uint8_t(NUgus::ID::OPENCR)].push_back(PacketTypes::MODEL_INFORMATION);
+        packet_queue[NUgus::ID::OPENCR].push_back(PacketTypes::MODEL_INFORMATION);
         opencr.write(dynamixel::v2::ReadCommand(uint8_t(NUgus::ID::OPENCR),
                                                 uint16_t(OpenCR::Address::MODEL_NUMBER_L),
                                                 uint8_t(3)));
