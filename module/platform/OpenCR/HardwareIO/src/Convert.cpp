@@ -13,12 +13,6 @@ namespace module::platform::OpenCR {
 
     namespace convert {
 
-        /**
-         * @todo properly name and comment these functions. Copied accross from
-         * old code but it's horribly documented. The overloading of param/return
-         * types is what implies whether its a forward or backward conversion.
-         */
-
         float gyro(int16_t raw) {
             // Range: -32768 - +32767 = -2000dps - +2000dps
             //
@@ -194,8 +188,6 @@ namespace module::platform::OpenCR {
             // Default servo limits for current
             return int16_t(utility::math::clamp(-1941, int(current / 0.00336f), 1941));
         }
-
-        /// @todo clamp gain values to [0,16383]
 
         /**
          * Controller gain = Ram table gain / 128
