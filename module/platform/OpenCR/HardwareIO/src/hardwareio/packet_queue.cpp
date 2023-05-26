@@ -11,7 +11,7 @@ namespace module::platform::OpenCR {
         // Loop through all servos in order
         for (const auto& id : nugus.servo_ids()) {
             // If the length is non-zero then return
-            if (packet_queue[NUgus::ID(id)].size() > 0) {
+            if (!packet_queue[NUgus::ID(id)].empty()) {
                 return NUgus::ID(id);
             }
         }
