@@ -79,7 +79,7 @@ namespace module::platform::OpenCR {
         on<Watchdog<HardwareIO, 2, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
             // First, check if this is the model info packet, because if it is, the system
             // startup failed, and we need to re-trigger it.
-            if ((opencr_waiting() > 0) && packet_queue[NUgus::ID::OPENCR].front() == PacketTypes::MODEL_INFORMATION) {
+            if (opencr_waiting() && packet_queue[NUgus::ID::OPENCR].front() == PacketTypes::MODEL_INFORMATION) {
                 log<NUClear::WARN>(fmt::format("OpenCR model information not recieved, restarting system"));
                 // Clear all packet queues just in case
                 queue_clear_all();
@@ -129,7 +129,7 @@ namespace module::platform::OpenCR {
             }
 
             // Check we're expecting the packet
-            if (packet_queue[packet_id].size() == 0) {
+            if (packet_queue[packet_id].empty()) {
                 log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet_id));
                 return;
             }
