@@ -19,9 +19,9 @@ namespace module::platform::OpenCR {
         return NUgus::ID::NO_ID;
     }
 
-    int HardwareIO::opencr_waiting() {
+    bool HardwareIO::opencr_waiting() {
         // just a basic wrapper for consistency
-        return packet_queue[NUgus::ID::OPENCR].size();
+        return !packet_queue[NUgus::ID::OPENCR].empty();
     }
 
     NUgus::ID HardwareIO::queue_item_waiting() {

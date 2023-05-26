@@ -201,8 +201,8 @@ namespace module::platform::OpenCR {
         NUgus::ID servo_waiting();
 
         /// @brief Check if we're currently waiting on any OpenCR packets
-        /// @returns number of OpenCR packets waiting
-        int opencr_waiting();
+        /// @returns True if waiting on packets, false if not
+        bool opencr_waiting();
 
         /// @brief Check if we're currently waiting on any packets
         /// @returns ID of FIRST device we're waiting on, or 0 if none
