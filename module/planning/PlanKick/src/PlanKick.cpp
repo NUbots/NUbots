@@ -24,6 +24,7 @@ namespace module::planning {
     using message::skill::Walk;
     using utility::input::LimbID;
     using utility::support::Expression;
+
     PlanKick::PlanKick(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("PlanKick.yaml").then([this](const Configuration& config) {
@@ -87,7 +88,7 @@ namespace module::planning {
                     return;
                 }
 
-                // If the kick leg is forced left, kick left If the kick leg is auto,
+                // If the kick leg is forced left, kick left. If the kick leg is auto,
                 // kick with left leg if ball is more to the left
                 if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && ball.rBRr.y() > 0.0)) {
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
