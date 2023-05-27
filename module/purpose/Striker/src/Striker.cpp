@@ -6,7 +6,9 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
+#include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -24,7 +26,9 @@ namespace module::purpose {
     using message::planning::KickTo;
     using message::purpose::NormalStriker;
     using message::purpose::PenaltyShootoutStriker;
+    using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
+    using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
@@ -63,10 +67,12 @@ namespace module::purpose {
 
         // Normal READY state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
+            // Create walk to field position message
+            auto walk_to_ready(std::make_unique<WalkToFieldPosition>());
+            walk_to_ready->rPFf    = Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0);
+            walk_to_ready->heading = cfg.ready_position.z();
             // If we are stable, walk to the ready field position
-            emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
+            emit<Task>(walk_to_ready);
         });
 
         // Normal PLAYING state
@@ -96,7 +102,8 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 4);  // kick the ball if possible
+        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);  // try to walk to the ball
+        emit<Task>(std::make_unique<KickToGoal>(), 5);       // kick the ball if possible
     }
 
 }  // namespace module::purpose
