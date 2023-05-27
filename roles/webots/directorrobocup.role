@@ -21,7 +21,6 @@ nuclear_role(
   # Localisation
   localisation::RobotLocalisation
   localisation::BallFilter
-
   # Director
   extension::Director
   # Servos
