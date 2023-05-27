@@ -31,16 +31,17 @@ namespace module::strategy {
            With<Sensors>,
            With<FieldDescription>,
            Every<30, Per<std::chrono::seconds>>>()
-            .then([this](const Field& field, const Sensors& sensors) {
+            .then([this](const Field& field, const Sensors& sensors, const FieldDescription& field_description) {
                 // Get the robot's position (pose) on the field
-                Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors.Htw) * Eigen::Isometry3d(field.Hfw.inverse());
+                Eigen::Isometry3d Hrf = Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse());
 
                 // Get the goal position relative to the torso to kick to
-                Eigen::Vector3d rGFf =
-                    Eigen::Vector3d(-field_description.field_length / 2.0, 0.0, 0.0);  // convert to torso space
-                Eigen::Vector3d rGTt = Htf * rGFf;
+                Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.dimensions.field_length / 2.0,
+                                                       0.0,
+                                                       0.0);  // convert to torso space
+                Eigen::Vector3d rGRr = Hrf * rGFf;
 
-                emit<Task>(std::make_unique<KickTo>(rGTt));  // kick the ball if possible
+                emit<Task>(std::make_unique<KickTo>(rGRr));  // kick the ball if possible
             });
     }
 

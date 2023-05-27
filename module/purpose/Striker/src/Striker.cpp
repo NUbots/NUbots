@@ -97,6 +97,7 @@ namespace module::purpose {
     }
 
     void Striker::play() {
+        log<NUClear::INFO>("Playing as striker.");
         // Walk to the ball and kick!
         // Second argument is priority - higher number means higher priority
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball

@@ -47,7 +47,7 @@ namespace module::strategy {
                     Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors.Htw) * Eigen::Isometry3d(field.Hfw.inverse());
 
                     // Goal position relative to torso
-                    Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.field_length / 2.0, 0.0, 0.0);
+                    Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.dimensions.field_length / 2.0, 0.0, 0.0);
                     Eigen::Vector3d rGTt = Htf * rGFf;
 
                     // Find the angle to the goal - should be as close as possible to 0 to be aligned
