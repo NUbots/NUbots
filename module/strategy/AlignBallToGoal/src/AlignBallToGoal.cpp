@@ -44,14 +44,14 @@ namespace module::strategy {
                 float distance_to_ball = ball.rBRr.head(2).norm();
                 if (distance_to_ball < cfg.ball_distance_threshold) {
                     // Get the robot's position (pose) on the field
-                    Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors.Htw) * Eigen::Isometry3d(field.Hfw.inverse());
+                    Eigen::Isometry3d Hrf = Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse());
 
-                    // Goal position relative to torso
+                    // Goal position relative to robot
                     Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.dimensions.field_length / 2.0, 0.0, 0.0);
-                    Eigen::Vector3d rGTt = Htf * rGFf;
+                    Eigen::Vector3d rGRr = Hrf * rGFf;
 
                     // Find the angle to the goal - should be as close as possible to 0 to be aligned
-                    float kick_angle = std::atan2(rGTt.y(), rGTt.x());
+                    float kick_angle = std::atan2(rGRr.y(), rGRr.x());
 
                     // Only align if we are not within a threshold of the goal
                     if (std::fabs(kick_angle) > cfg.angle_threshold) {

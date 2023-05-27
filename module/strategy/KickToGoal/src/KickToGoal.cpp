@@ -35,7 +35,7 @@ namespace module::strategy {
                 // Get the robot's position (pose) on the field
                 Eigen::Isometry3d Hrf = Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse());
 
-                // Get the goal position relative to the torso to kick to
+                // Get the goal position relative to the robot to kick to
                 Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.dimensions.field_length / 2.0,
                                                        0.0,
                                                        0.0);  // convert to torso space

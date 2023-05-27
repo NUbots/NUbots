@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
-ball_distance_threshold: 1.0
+ball_distance_threshold: 0.6
 angle_threshold: 0.4
