@@ -11,6 +11,10 @@ class Defender : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+
+            /// @brief Ready position to walk to (x, y, theta)
+            Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
+
         } cfg;
 
         enum field_position {left_wing, right_wing, goal_box, centre_cirlce};
