@@ -199,13 +199,13 @@ namespace module::support::optimisation {
 
     /// @brief Handle the WAITING_FOR_REQUEST state
     void NSGA2Evaluator::waiting_for_request() {
-        log<NUClear::DEBUG>("waiting_for_request");
+        log<NUClear::DEBUG>("Waiting For Request");
         emit(std::make_unique<NSGA2EvaluatorReady>());  // Let the optimiser know we're ready
     }
 
     /// @brief Handle the SETTING_UP_TRIAL state
     void NSGA2Evaluator::setting_up_trial() {
-        log<NUClear::DEBUG>("setting_up_trial");
+        log<NUClear::DEBUG>("Setting Up Trial");
 
         generation = last_eval_request_msg.generation;
         individual = last_eval_request_msg.id;
@@ -233,7 +233,7 @@ namespace module::support::optimisation {
 
     /// @brief Handle the RESETTING_SIMULATION state
     void NSGA2Evaluator::resetting_simulation() {
-        log<NUClear::DEBUG>("resetting_simulation");
+        log<NUClear::DEBUG>("Resetting Simulation");
 
         task->reset_simulation();
 
@@ -245,7 +245,7 @@ namespace module::support::optimisation {
 
     /// @brief Handle the EVALUATING state
     void NSGA2Evaluator::evaluating(NSGA2Evaluator::Event event) {
-        log<NUClear::DEBUG>("evaluating");
+        log<NUClear::DEBUG>("Evaluating");
 
         if (event == Event::RESET_DONE) {
             if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
@@ -273,7 +273,7 @@ namespace module::support::optimisation {
 
     /// @brief Handle the TERMINATING_EARLY state
     void NSGA2Evaluator::terminating_early() {
-        log<NUClear::DEBUG>("terminating_early");
+        log<NUClear::DEBUG>("Terminating Early");
 
         // Send a zero walk command to stop walking
         emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
@@ -286,7 +286,7 @@ namespace module::support::optimisation {
 
     /// @brief Handle the TERMINATING_GRACEFULLY state
     void NSGA2Evaluator::terminating_gracefully() {
-        log<NUClear::DEBUG>("terminating_gracefully");
+        log<NUClear::DEBUG>("Terminating Gracefully");
 
         // Send a zero walk command to stop walking
         emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
@@ -298,6 +298,6 @@ namespace module::support::optimisation {
     }
 
     void NSGA2Evaluator::finished() {
-        log<NUClear::INFO>("finished");
+        log<NUClear::INFO>("Finished");
     }
 }  // namespace module::support::optimisation
