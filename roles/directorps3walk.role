@@ -1,0 +1,34 @@
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
+  # and without it many roles do not run
+  extension::FileWatcher
+  support::SignalCatcher
+  support::logging::ConsoleLogHandler
+  # Config
+  actuation::KinematicsConfiguration
+  # Network
+  network::PlotJuggler
+  # Sensors
+  input::Camera
+  input::SensorFilter
+  platform::cm740::HardwareIO  
+  output::Overview
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  # Skills
+  skill::QuinticWalk
+  skill::ScriptKick
+  skill::GetUp
+  skill::Look
+  # Planners
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+  # Purpose
+  purpose::PS3Walk
+)
