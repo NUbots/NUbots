@@ -10,6 +10,8 @@
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/support/FieldDescription.hpp"
 
+#include "utility/support/yaml_expression.hpp"
+
 namespace module::strategy {
 
     using extension::Configuration;
@@ -19,6 +21,7 @@ namespace module::strategy {
     using message::planning::TurnAroundBall;
     using message::support::FieldDescription;
     using AlignBallToGoalTask = message::strategy::AlignBallToGoal;
+    using utility::support::Expression;
 
     AlignBallToGoal::AlignBallToGoal(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -27,7 +30,7 @@ namespace module::strategy {
             // Use configuration here from file AlignBallToGoal.yaml
             this->log_level             = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_distance_threshold = config["ball_distance_threshold"].as<float>();
-            cfg.angle_threshold         = config["angle_threshold"].as<float>();
+            cfg.angle_threshold         = config["angle_threshold"].as<Expression>();
         });
 
         on<Provide<AlignBallToGoalTask>,
