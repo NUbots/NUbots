@@ -29,4 +29,4 @@ To implement the evaluator for a new optimisation scenario, extend from the Eval
 
 ## Dependencies
 
-- `module::support::optimisation::NSGA2Optimiser`
+- `module::support::optimisation::NSGA2Optimiser` Optimises parameters based on the performance of individuals that are evaluated.
