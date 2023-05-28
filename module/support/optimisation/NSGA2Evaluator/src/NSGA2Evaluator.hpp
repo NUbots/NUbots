@@ -54,6 +54,7 @@ namespace module::support::optimisation {
         double sim_time = 0.0;
 
     private:
+        /// @brief Pointer to an instance of the task being evaluated
         std::unique_ptr<EvaluatorTask> task;
 
         /// @brief Subsumption priority ID for this module
