@@ -129,7 +129,6 @@ namespace module::platform::OpenCR {
         }
     };
 
-#pragma pack(push, 1)  // Here we disable the OS putting in padding bytes so we can raw memcpy into this data
     /// @brief The first part of the servo data to write to the dynamixel
     struct DynamixelServoWriteDataPart1 {
         uint8_t torque_enable;
@@ -138,7 +137,7 @@ namespace module::platform::OpenCR {
         uint16_t position_d_gain;
         uint16_t position_i_gain;
         uint16_t position_p_gain;
-    };
+    } __attribute__((packed));
 
     /// @brief The second part of the servo data to write to the dynamixel
     struct DynamixelServoWriteDataPart2 {
@@ -150,7 +149,7 @@ namespace module::platform::OpenCR {
         uint32_t profile_acceleration;
         uint32_t profile_velocity;
         uint32_t goal_position;
-    };
+    } __attribute__((packed));
 
     /// @brief The servo data to read from the dynamixel
     struct DynamixelServoReadData {
@@ -162,14 +161,14 @@ namespace module::platform::OpenCR {
         uint32_t present_position;
         uint16_t present_voltage;
         uint8_t present_temperature;
-    };
+    } __attribute__((packed));
 
     /// @brief The data to write to the OpenCR device
     struct OpenCRWriteData {
         uint8_t led;
         uint16_t rgb_led;
         uint8_t buzzer;
-    };
+    } __attribute__((packed));
 
     /// @brief The data to read from the OpenCR device
     struct OpenCRReadData {
@@ -180,9 +179,7 @@ namespace module::platform::OpenCR {
         uint8_t voltage;
         int16_t gyro[3];
         int16_t acc[3];
-    };
-
-#pragma pack(pop)  // Stop bitpacking our results
+    } __attribute__((packed));
 
     /// @brief Document addresses used for read/writing to dynamixel devices, especially
     /// where indirect addressing is used.
