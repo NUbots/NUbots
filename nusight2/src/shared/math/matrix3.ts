@@ -30,6 +30,14 @@ export class Matrix3 {
     return this.x.x + this.y.y + this.z.z;
   }
 
+  multiply(m: Matrix3): Matrix3 {
+    return Matrix3.fromThree(this.toThree().multiply(m.toThree()));
+  }
+
+  invert(): Matrix3 {
+    return Matrix3.fromThree(this.toThree().invert());
+  }
+
   static fromThree(mat4: THREE.Matrix3) {
     return new Matrix3(
       new Vector3(mat4.elements[0], mat4.elements[1], mat4.elements[2]),

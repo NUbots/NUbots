@@ -30,12 +30,8 @@ export class NUgusViewModel {
     // TODO (Annable): Baking the offsets into the model geometries would be ideal.
     const PI = Math.PI;
     const PI_2 = PI / 2;
-    robot.position.x = this.model.rWTt.x;
-    robot.position.y = this.model.rWTt.y;
-    robot.position.z = this.model.rWTt.z;
-    const rotation = new Quaternion(this.model.Rwt.x, this.model.Rwt.y, this.model.Rwt.z, this.model.Rwt.w);
-    rotation.multiply(new Quaternion().setFromEuler(new Euler(PI_2, 0, 0)));
-    robot.setRotationFromQuaternion(rotation);
+    robot.matrix = this.model.Hft.toThree().multiply(new Matrix4().makeRotationX(PI_2));
+    robot.matrixAutoUpdate = false;
     findMesh(robot, "R_Shoulder").rotation.set(0, 0, PI_2 - motors.rightShoulderPitch.angle);
     findMesh(robot, "L_Shoulder").rotation.set(0, 0, -PI_2 - motors.leftShoulderPitch.angle);
     findMesh(robot, "R_Arm_Upper").rotation.set(0, PI_2, motors.rightShoulderRoll.angle);

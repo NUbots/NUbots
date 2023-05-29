@@ -1,5 +1,7 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
+import { Matrix4 } from "../../../shared/math/matrix4";
+import * as THREE from "three";
 
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
@@ -114,7 +116,8 @@ export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
   @observable color?: string;
-  @observable rWTt: Vector3; // Torso to world translation in torso space.
+  @observable Htw: Matrix4; // World to torso
+  @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
 
@@ -122,21 +125,24 @@ export class LocalisationRobotModel {
     model,
     name,
     color,
-    rWTt,
+    Htw,
+    Hfw,
     Rwt,
     motors,
   }: {
     model: RobotModel;
     name: string;
     color?: string;
-    rWTt: Vector3;
+    Htw: Matrix4;
+    Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
   }) {
     this.model = model;
     this.name = name;
     this.color = color;
-    this.rWTt = rWTt;
+    this.Htw = Htw;
+    this.Hfw = Hfw;
     this.Rwt = Rwt;
     this.motors = motors;
   }
@@ -145,7 +151,8 @@ export class LocalisationRobotModel {
     return new LocalisationRobotModel({
       model,
       name: model.name,
-      rWTt: Vector3.of(),
+      Htw: Matrix4.of(),
+      Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
     });
@@ -153,5 +160,11 @@ export class LocalisationRobotModel {
 
   @computed get visible() {
     return this.model.enabled;
+  }
+
+  /** Torso to field transformation */
+  @computed
+  get Hft(): Matrix4 {
+    return this.Hfw.multiply(this.Htw.invert());
   }
 }
