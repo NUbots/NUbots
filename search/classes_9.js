@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['joystick_1235',['Joystick',['../classJoystick.html',1,'']]],
-  ['joystickevent_1236',['JoystickEvent',['../classJoystickEvent.html',1,'']]]
+  ['joystick_1239',['Joystick',['../classJoystick.html',1,'']]],
+  ['joystickevent_1240',['JoystickEvent',['../classJoystickEvent.html',1,'']]]
 ];
