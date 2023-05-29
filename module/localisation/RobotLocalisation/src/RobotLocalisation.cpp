@@ -42,7 +42,7 @@ namespace module::localisation {
             cfg.process_noise.diagonal()      = Eigen::Vector3f(config["process_noise"].as<Expression>());
             cfg.measurement_noise             = config["measurement_noise"].as<float>();
             cfg.max_range                     = config["max_range"].as<float>();
-            cfg.min_observations              = config["min_observations"].as<int>();
+            cfg.min_observations              = config["min_observations"].as<size_t>();
             // Create vector of search positions
             for (const auto& initial_state : config["initial_state"].config) {
                 cfg.initial_state.push_back(initial_state.as<Expression>());
@@ -291,6 +291,8 @@ namespace module::localisation {
                 Eigen::Vector3f rPWw  = Hwc * rPCc;
                 auto robot_theta_cell = position_in_map(state, rPWw.head(2));
                 emit(graph("Robot (theta)", robot_theta_cell.x(), robot_theta_cell.y()));
+
+                emit(graph("Localisation Confidence", covariance.trace()));
             }
             // Build and emit the field message
             auto field(std::make_unique<Field>());
@@ -299,6 +301,7 @@ namespace module::localisation {
             Hfw.linear()      = Eigen::AngleAxisf(state.z(), Eigen::Vector3f::UnitZ()).toRotationMatrix();
             field->Hfw        = Hfw.matrix();
             field->covariance = covariance;
+            field->confidence = covariance.trace();
             emit(field);
         });
     }

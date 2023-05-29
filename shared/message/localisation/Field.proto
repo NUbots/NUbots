@@ -24,9 +24,11 @@ import "Matrix.proto";
 
 message Field {
     /// Isometry2d position transform of world from field
-    mat4 Hfw = 1;
+    fmat4 Hfw = 1;
     /// Covariance of (x, y, theta)
-    mat3 covariance = 2;
+    fmat3 covariance = 2;
+    /// Trace of the covariance matrix to quantify the filters confidence for all states as a single value
+    float confidence = 3;
 }
 
 message ResetRobotLocalisation {}

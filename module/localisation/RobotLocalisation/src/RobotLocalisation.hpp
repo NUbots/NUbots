@@ -46,7 +46,7 @@ namespace module::localisation {
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
             /// @brief Minimum number of field line points for a measurement update
-            int min_observations = 0;
+            size_t min_observations = 0;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
