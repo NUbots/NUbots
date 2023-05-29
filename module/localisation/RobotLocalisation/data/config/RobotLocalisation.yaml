@@ -26,3 +26,6 @@ max_range: 11
 
 # Bool to save a csv file of the generated occupancy grid map
 save_map: false
+
+# Minimum number of field line points for a measurement update
+min_observations: 100

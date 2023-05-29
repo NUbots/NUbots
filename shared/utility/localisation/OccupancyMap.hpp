@@ -10,7 +10,7 @@ namespace module::localisation {
 
     public:
         /// @brief Getter for the map data
-        Eigen::MatrixXd get_map();
+        Eigen::MatrixXf get_map();
 
         /// @brief Get the width (number of columns) of the map
         int get_width();
@@ -23,7 +23,7 @@ namespace module::localisation {
         /// @param x The x-coordinate of the map
         /// @param y The y-coordinate of the map
         /// @return The value of the map at the specified coordinates
-        double get_occupancy_value(int x, int y);
+        float get_occupancy_value(int x, int y);
 
         /**
          * @brief Resize the map to specified width and length, and set all values to zero
@@ -98,11 +98,11 @@ namespace module::localisation {
          * @param map The pre-filled Map with occupancy values of 0 or 1
          * @param grid_size The size of the grid cells
          */
-        void create_distance_map(double grid_size);
+        void create_distance_map(float grid_size);
 
     private:
         /// @brief Eigen matrix which stores the map data
-        Eigen::MatrixXd map;
+        Eigen::MatrixXf map;
     };
 
 }  // namespace module::localisation

@@ -20,9 +20,9 @@ namespace module::localisation {
 
     // Particle struct
     struct Particle {
-        Eigen::Matrix<double, 3, 1> state =
-            Eigen::Matrix<double, 3, 1>::Zero();  // (x, y, theta) of world space in field space
-        double weight = 1.0;
+        Eigen::Matrix<float, 3, 1> state =
+            Eigen::Matrix<float, 3, 1>::Zero();  // (x, y, theta) of world space in field space
+        float weight = 1.0;
     };
 
     class RobotLocalisation : public NUClear::Reactor {
@@ -30,21 +30,23 @@ namespace module::localisation {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Size of the grid cells in the occupancy grid [m]
-            double grid_size = 0.0;
+            float grid_size = 0.0;
             /// @brief Number of particles to use in the particle filter
             int n_particles = 0;
             /// @brief Uncertainty in the process model
-            Eigen::Matrix<double, 3, 3> process_noise = Eigen::Matrix<double, 3, 3>::Zero();
+            Eigen::Matrix<float, 3, 3> process_noise = Eigen::Matrix<float, 3, 3>::Zero();
             /// @brief Uncertainty in the measurement model
-            double measurement_noise = 0;
+            float measurement_noise = 0;
             /// @brief Maximum distance a field line can be from a particle to be considered an observation [m]
-            double max_range = 0;
+            float max_range = 0;
             /// @brief Initial state (x,y,theta) of the robot, saved for resetting
-            std::vector<Eigen::Matrix<double, 3, 1>> initial_state{};
+            std::vector<Eigen::Matrix<float, 3, 1>> initial_state{};
             /// @brief Initial covariance matrix of the robot's state, saved for resetting
-            Eigen::Matrix<double, 3, 3> initial_covariance = Eigen::Matrix<double, 3, 3>::Identity();
+            Eigen::Matrix<float, 3, 3> initial_covariance = Eigen::Matrix<float, 3, 3>::Identity();
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
+            /// @brief Minimum number of field line points for a measurement update
+            int min_observations = 0;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
@@ -53,10 +55,10 @@ namespace module::localisation {
         OccupancyMap fieldline_map;
 
         /// @brief State (x,y,theta) of the robot
-        Eigen::Matrix<double, 3, 1> state = Eigen::Matrix<double, 3, 1>::Zero();
+        Eigen::Matrix<float, 3, 1> state = Eigen::Matrix<float, 3, 1>::Zero();
 
         /// @brief Covariance matrix of the robot's state
-        Eigen::Matrix<double, 3, 3> covariance = Eigen::Matrix<double, 3, 3>::Identity();
+        Eigen::Matrix<float, 3, 3> covariance = Eigen::Matrix<float, 3, 3>::Identity();
 
         /// @brief Status of if the robot is falling
         bool falling = false;
@@ -74,28 +76,28 @@ namespace module::localisation {
         /// @param uPCw unit vector of point from the camera in world space
         /// @param Hcw the world from camera transform
         /// @return the field point measurement (x,y) relative to the robot
-        Eigen::Vector2d ray_to_field_plane(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw);
+        Eigen::Vector2f ray_to_field_plane(Eigen::Vector3f uPCw, Eigen::Isometry3f Hcw);
 
         /// @brief Transform a point in the robot's coordinate frame into an index in the map
         /// @param particle The state of the particle (x,y,theta)
         /// @param rPRw The field point (x, y) in world space {w} [m]
         /// @return The observation location (x, y) in the map
-        Eigen::Vector2i position_in_map(const Eigen::Matrix<double, 3, 1> particle, const Eigen::Vector2d rPRw);
+        Eigen::Vector2i position_in_map(const Eigen::Matrix<float, 3, 1> particle, const Eigen::Vector2f rPRw);
 
         /// @brief Get the weight of a particle given a set of observations
         /// @param particle The state of the particle (x,y,theta)
         /// @param observations The observations (x, y) in the robot's coordinate frame [m]
         /// @return The weight of the particle
-        double calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
-                                const std::vector<Eigen::Vector2d>& observations);
+        float calculate_weight(const Eigen::Matrix<float, 3, 1> particle,
+                               const std::vector<Eigen::Vector2f>& observations);
 
         /// @brief Get the current mean (state) of the robot
         // @return The current mean (state) of the robot
-        Eigen::Matrix<double, 3, 1> compute_mean();
+        Eigen::Matrix<float, 3, 1> compute_mean();
 
         /// @brief Get the current covariance matrix of the robot's state
         // @return The current covariance matrix of the robot's state
-        Eigen::Matrix<double, 3, 3> compute_covariance();
+        Eigen::Matrix<float, 3, 3> compute_covariance();
 
         /// @brief Perform a time update on the particles
         /// @param walk_command The walk command (dx, dy, dtheta)
