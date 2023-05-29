@@ -19,8 +19,8 @@ namespace module::platform::OpenCR {
 
         if (servos_dirty) {
             // Write data is split into two components
-            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1>, 20> data1;
-            std::array<dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2>, 20> data2;
+            dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart1> data1[20];
+            dynamixel::v2::SyncWriteData<DynamixelServoWriteDataPart2> data2[20];
 
             for (uint i = 0; i < servo_states.size(); ++i) {
                 // Servo ID is sequential, but not 0-indexed
