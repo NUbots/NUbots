@@ -50,4 +50,5 @@ nuclear_role(
   # Purposes
   purpose::Striker
   purpose::Soccer
+  purpose::Goalie
 )

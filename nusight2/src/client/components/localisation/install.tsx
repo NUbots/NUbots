@@ -1,11 +1,11 @@
-import { ComponentType } from 'react'
-import React from 'react'
+import { ComponentType } from "react";
+import React from "react";
 
-import { NavigationConfiguration } from '../../navigation'
-import { NUsightNetwork } from '../../network/nusight_network'
-import { AppModel } from '../app/model'
+import { NavigationConfiguration } from "../../navigation";
+import { NUsightNetwork } from "../../network/nusight_network";
+import { AppModel } from "../app/model";
 
-import Icon from './icon.svg'
+import Icon from "./icon";
 
 export function installLocalisation({
   nav,
@@ -13,20 +13,20 @@ export function installLocalisation({
   nusightNetwork,
   Menu,
 }: {
-  nav: NavigationConfiguration
-  appModel: AppModel
-  nusightNetwork: NUsightNetwork
-  Menu: ComponentType
+  nav: NavigationConfiguration;
+  appModel: AppModel;
+  nusightNetwork: NUsightNetwork;
+  Menu: ComponentType;
 }) {
   nav.addRoute({
-    path: '/localisation',
+    path: "/localisation",
     Icon,
-    label: 'Localisation',
+    label: "Localisation",
     Content: React.lazy(async () => {
-      const { createLocalisationView } = await import('./create')
+      const { createLocalisationView } = await import("./create");
       return {
         default: createLocalisationView({ appModel, nusightNetwork, Menu }),
-      }
+      };
     }),
-  })
+  });
 }

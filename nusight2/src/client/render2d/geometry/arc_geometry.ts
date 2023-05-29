@@ -1,20 +1,20 @@
-import { observable } from 'mobx'
+import { observable } from "mobx";
 
-import { Vector2 } from '../../math/vector2'
+import { Vector2 } from "../../../shared/math/vector2";
 
 export class ArcGeometry {
-  @observable origin: Vector2
-  @observable radius: number
-  @observable startAngle: number
-  @observable endAngle: number
-  @observable anticlockwise: boolean
+  @observable origin: Vector2;
+  @observable radius: number;
+  @observable startAngle: number;
+  @observable endAngle: number;
+  @observable anticlockwise: boolean;
 
   constructor(opts: ArcGeometry) {
-    this.origin = opts.origin
-    this.radius = opts.radius
-    this.startAngle = opts.startAngle
-    this.endAngle = opts.endAngle
-    this.anticlockwise = opts.anticlockwise
+    this.origin = opts.origin;
+    this.radius = opts.radius;
+    this.startAngle = opts.startAngle;
+    this.endAngle = opts.endAngle;
+    this.anticlockwise = opts.anticlockwise;
   }
 
   static of({
@@ -30,6 +30,6 @@ export class ArcGeometry {
       startAngle,
       endAngle,
       anticlockwise,
-    })
+    });
   }
 }
