@@ -339,13 +339,13 @@ namespace module::localisation {
             double occupancy_value = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
             // Check if the observation is within the max range and within the field
             if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
-                double distance_error_norm = std::pow(occupancy_value, 2);
-                weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
+                weight += std::exp(-0.5 * std::pow(occupancy_value / cfg.measurement_noise, 2))
                           / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
             // If the observation is outside the max range, penalise it
             else {
-                weight *= (1 - 1 / observations.size());
+                weight += std::exp(-0.5 * std::pow(cfg.max_range / cfg.measurement_noise, 2))
+                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
             }
         }
 
