@@ -8,6 +8,7 @@
 #include "message/eye/DataPoint.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/FilteredBall.hpp"
+#include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -21,6 +22,7 @@ namespace module::localisation {
     using FilteredBall = message::localisation::FilteredBall;
     using VisionBalls  = message::vision::Balls;
     using VisionBall   = message::vision::Ball;
+    using message::support::FieldDescription;
 
     using message::eye::DataPoint;
     using message::input::Sensors;
