@@ -65,7 +65,7 @@ namespace module::input {
         static const size_t n_measurements = 4;
 
         /// @brief Kalman filter for pose estimation
-        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf;
+        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
 
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
@@ -225,13 +225,13 @@ namespace module::input {
             Eigen::Vector3d deadreckoning_scale = Eigen::Vector3d::Zero();
 
             //  **************************************** Kalman Filter Config ****************************************
-            /// @brief Kalman Continuos time process model
+            /// @brief Kalman Continuous time process model
             Eigen::Matrix<double, n_states, n_states> Ac;
 
-            /// @brief Kalman Continuos time input model
-            Eigen::Matrix<double, n_inputs, n_inputs> Bc;
+            /// @brief Kalman Continuous time input model
+            Eigen::Matrix<double, n_states, n_inputs> Bc;
 
-            /// @brief Kalman Continuos time measurement model
+            /// @brief Kalman Continuous time measurement model
             Eigen::Matrix<double, n_measurements, n_states> C;
 
             /// @brief Kalman Process noise
