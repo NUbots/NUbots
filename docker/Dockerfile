@@ -187,11 +187,7 @@ COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
 # Eigen3
-COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
-COPY usr/local/package/eigen3/cxx17-overalign.patch /usr/local/package/cxx17-overalign.patch
-RUN install-from-source-with-patches https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2 \
-    /usr/local/package/deprecated-copy.patch \
-    /usr/local/package/cxx17-overalign.patch --
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
 # tcmalloc
 RUN install-from-source \
@@ -230,7 +226,7 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz \
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.1.tar.gz \
+RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.2.tar.gz \
     -DCATCH_CONFIG_CONSOLE_WIDTH=120 \
     -DCATCH_CONFIG_CPP11_TO_STRING=ON \
     -DCATCH_CONFIG_CPP17_UNCAUGHT_EXCEPTIONS=ON \

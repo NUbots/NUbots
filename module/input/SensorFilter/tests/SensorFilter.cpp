@@ -19,7 +19,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <catch/catch_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -39,6 +40,7 @@
 #include "utility/math/quaternion.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+using Catch::Matchers::WithinAbs;
 using module::input::MotionModel;
 using utility::math::filter::UKF;
 using utility::support::Expression;
@@ -247,9 +249,9 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
     INFO("Mean Angular Error: " << mean_angular_error);
-    REQUIRE(mean_error.w() == Approx(1.0).margin(0.01));
-    REQUIRE(mean_error.x() == Approx(0.0).margin(0.01));
-    REQUIRE(mean_error.y() == Approx(0.0).margin(0.01));
-    REQUIRE(mean_error.z() == Approx(0.0).margin(0.01));
-    REQUIRE(mean_angular_error == Approx(0.0).margin(0.02));
+    REQUIRE_THAT(mean_error.w(), WithinAbs(1.0, 0.01));
+    REQUIRE_THAT(mean_error.x(), WithinAbs(0.0, 0.01));
+    REQUIRE_THAT(mean_error.y(), WithinAbs(0.0, 0.01));
+    REQUIRE_THAT(mean_error.z(), WithinAbs(0.0, 0.01));
+    REQUIRE_THAT(mean_angular_error, WithinAbs(0.0, 0.02));
 }
