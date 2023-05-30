@@ -11,7 +11,7 @@ nuclear_role(
   # Sensors
   input::Camera
   input::SensorFilter
-  platform::cm740::HardwareIO  
+  platform::cm740::HardwareIO
   output::Overview
   # Director
   extension::Director
@@ -25,8 +25,7 @@ nuclear_role(
   skill::Look
   # Planners
   planning::GetUpPlanner
-  planning::FallingRelaxPlanner
-  # Strategies
+  # planning::FallingRelaxPlanner Strategies
   strategy::FallRecovery
   strategy::StandStill
   # Purpose
