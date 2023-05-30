@@ -217,7 +217,7 @@ TEST_CASE("Test the KalmanFilter", "[utility][math][filter][KalmanFilter]") {
     Eigen::Matrix3d A = config["kalman"]["A"].as<Expression>();
 
     // Define the input model
-    Eigen::MatrixXd B;
+    Eigen::MatrixXd B = Eigen::Matrix<double, n_states, n_inputs>::Zero();
 
     // Define the measurement model
     Eigen::MatrixXd C = config["kalman"]["C"].as<Expression>();
