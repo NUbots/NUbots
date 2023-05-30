@@ -31,7 +31,11 @@ if __name__ == "__main__":
                     includes.append(include)
 
                 # Load our protobuf module
-                loader.find_module(module_name).load_module(module_name)
+                fqdn = os.path.normpath(
+                    os.path.join(os.path.relpath(dir_name, python_message_root), module_name)
+                ).replace(os.sep, ".")
+                if fqdn not in sys.modules:
+                    loader.find_module(fqdn).load_module(fqdn)
 
     # Now that we've imported them all get all the subclasses of protobuf message
     messages = set()
@@ -48,9 +52,18 @@ if __name__ == "__main__":
 
     includes = "\n".join('#include "{}"'.format(i) for i in includes)
 
-    cases = "\n".join(
+    cases_reflect = "\n".join(
         [
             "case 0x{}: return std::make_unique<Reflector<{}>>();".format(
+                xxhash.xxh64(m, seed=0x4E55436C).hexdigest(), "::".join(m.split("."))
+            )
+            for m in messages
+        ]
+    )
+
+    cases_trait = "\n".join(
+        [
+            "case 0x{}: return TypeTrait<{}>::value;".format(
                 xxhash.xxh64(m, seed=0x4E55436C).hexdigest(), "::".join(m.split("."))
             )
             for m in messages
@@ -67,15 +80,27 @@ if __name__ == "__main__":
         #include <string>
         #include <vector>
 
+        #include "utility/reflection/reflection_exceptions.hpp"
+        #include "utility/type_traits/has_id.hpp"
+
         {includes}
 
         namespace message::reflection {{
+            using utility::reflection::unknown_message;
 
             template <template <typename> class Reflector>
             std::unique_ptr<Reflector<void>> from_hash(const uint64_t& hash) {{
                 switch (hash) {{
         {cases}
-                    default: throw std::runtime_error("Unknown message type with hash " + std::to_string(hash));
+                    default: throw unknown_message(hash);
+                }}
+            }}
+
+            template <template <typename> class TypeTrait>
+            bool trait_from_hash(const uint64_t& hash) {{
+                switch(hash){{
+        {cases_id}
+                default: throw unknown_message(hash);
                 }}
             }}
 
@@ -83,7 +108,7 @@ if __name__ == "__main__":
 
         #endif  // MESSAGE_REFLECTION_HPP
         """
-    ).format(includes=includes, cases=indent(cases, 12))
+    ).format(includes=includes, cases=indent(cases_reflect, 12), cases_id=indent(cases_trait, 12))
 
     with open(reflection_output_header, "w") as f:
         f.write(output)

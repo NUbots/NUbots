@@ -58,13 +58,17 @@ class WrapPty:
         signal.signal(signal.SIGINT, self.old_int)
         signal.signal(signal.SIGTERM, self.old_term)
 
-    def spawn(self, args, env=os.environ):
-        pid, self.fd = pty.fork()
-
+    def spawn(self, args, env=os.environ, cwd=None):
         if len(args) == 0:
             args = ["/bin/bash"]
 
+        pid, self.fd = pty.fork()
+
         if pid == pty.CHILD:
+
+            if cwd is not None:
+                os.chdir(cwd)
+
             # If no arguments run bash
             os.execlpe(args[0], *args, env)
 

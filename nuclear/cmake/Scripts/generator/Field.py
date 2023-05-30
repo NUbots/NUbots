@@ -95,6 +95,8 @@ class Field:
 
         vector_regex = re.compile(r"^\.([fiuc]?)vec(\d*)$")
         matrix_regex = re.compile(r"^\.([fiuc]?)mat(\d*)$")
+        quaternion_regex = re.compile(r"^\.(f?)quat$")
+        isometry_regex = re.compile(r"^\.(f?)iso([23])$")
 
         # Nothing is trivially copyable unless it is
         self.trivially_copyable = False
@@ -110,6 +112,12 @@ class Field:
         elif matrix_regex.match(t):
             r = matrix_regex.match(t)
             t = "::message::conversion::math::{}mat{}".format(r.group(1), r.group(2))
+        elif quaternion_regex.match(t):
+            r = quaternion_regex.match(t)
+            t = "::message::conversion::math::{}quat".format(r.group(1))
+        elif isometry_regex.match(t):
+            r = isometry_regex.match(t)
+            t = "::message::conversion::math::{}iso{}".format(r.group(1), r.group(2))
 
         # Timestamps and durations map to real time/duration classes
         elif t == ".google.protobuf.Timestamp":
@@ -163,14 +171,15 @@ class Field:
 
         # If it's a repeated field, and not a map, it's a vector
         if self.repeated and not self.map_type:
-            self.trivially_copyable = False
             # If we have a fixed size use std::array instead
             if self.array_size > 0:
                 t = "::std::array<{}, {}>".format(t, self.array_size)
+                self.trivially_copyable = False
             else:
                 t = "::std::vector<{}>".format(t)
+                self.trivially_copyable = False
 
         return t, special
 
     def generate_cpp_header(self):
-        return "{} {};".format(self.cpp_type, self.name)
+        return "{} {}{{{}}};".format(self.cpp_type, self.name, self.default_value if self.type != "string" else "")

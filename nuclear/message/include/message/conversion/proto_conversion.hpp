@@ -289,6 +289,66 @@ namespace message::conversion {
     };
 
     /**
+     * @brief Specialisation for converting to/from Eigen::Isometry types
+     *
+     * @tparam Neutron Expected to be Eigen::Isometry<....>
+     * @tparam Proto Expected to be one of ::iso2/3 of ::fiso2/3
+     */
+    template <typename Neutron, typename Proto>
+    struct Convert<Isometry, Neutron, Proto> {
+        static Neutron call(const Proto& proto) {
+            Neutron isometry{};
+
+            set_matrix_from_protobuf::x(isometry.matrix(), proto);
+            set_matrix_from_protobuf::y(isometry.matrix(), proto);
+            set_matrix_from_protobuf::z(isometry.matrix(), proto);
+            set_matrix_from_protobuf::t(isometry.matrix(), proto);
+
+            return isometry;
+        }
+        static Proto call(const Neutron& neutron) {
+            Proto proto{};
+
+            set_protobuf_from_matrix::x(proto, neutron.matrix());
+            set_protobuf_from_matrix::y(proto, neutron.matrix());
+            set_protobuf_from_matrix::z(proto, neutron.matrix());
+            set_protobuf_from_matrix::t(proto, neutron.matrix());
+
+            return proto;
+        }
+    };
+
+    /**
+     * @brief Specialisation for converting to/from Eigen::Quaternion types
+     *
+     * @tparam Neutron Expected to be Eigen::Quaternion<....>
+     * @tparam Proto Expected to be one of ::quat of ::fquat
+     */
+    template <typename Neutron, typename Proto>
+    struct Convert<Quaternion, Neutron, Proto> {
+        static Neutron call(const Proto& proto) {
+            Neutron quaternion{};
+
+            quaternion.x() = proto.x();
+            quaternion.y() = proto.y();
+            quaternion.z() = proto.z();
+            quaternion.w() = proto.w();
+
+            return quaternion;
+        }
+        static Proto call(const Neutron& neutron) {
+            Proto proto{};
+
+            proto.set_x(neutron.x());
+            proto.set_y(neutron.y());
+            proto.set_z(neutron.z());
+            proto.set_w(neutron.w());
+
+            return proto;
+        }
+    };
+
+    /**
      * @brief Specialisation for converting to/from chrono types
      *
      * @tparam Neutron Expected to be one of NUClear::clock::time_point or NUClear::clock::duration

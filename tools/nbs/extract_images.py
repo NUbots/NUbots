@@ -15,7 +15,7 @@ from .images import decode_image, fourcc
 
 
 def register(command):
-    command.help = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
+    command.description = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
 
     # Command arguments
     command.add_argument(
@@ -101,7 +101,6 @@ def process_metadata(packet, output):
 
 
 def run(files, output, **kwargs):
-
     os.makedirs(output, exist_ok=True)
 
     for packet in tqdm(

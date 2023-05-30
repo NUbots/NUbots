@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 
-import struct
-
 import numpy as np
 
 from .load_nbs import load_nbs
-from .nbs_packet import NBSPacket
+from .nbs_packet import MappedNBSPacket
 from .protobuf_types import MessageTypes
 
 
@@ -19,13 +17,22 @@ class LinearDecoder:
     def __len__(self):
         return self._total_messages
 
+    def __getitem__(self, key):
+        (type_hash, subtype, index_timestamp, fileno, offset, size) = self.index[key]
+
+        return MappedNBSPacket(self._maps, fileno, offset, size, type_hash, subtype, index_timestamp)
+
     def total_bytes(self):
         return self._total_bytes
 
     def __iter__(self):
-        for type_hash, _, index_timestamp, fileno, offset, size in self.index:
-            type = MessageTypes[type_hash].name
-            raw = self._maps[fileno]["map"][offset : offset + size]
-            (emit_timestamp,) = struct.unpack("<Q", self._maps[fileno]["map"][int(offset - 16) : int(offset - 8)])
-
-            yield NBSPacket(type, index_timestamp, emit_timestamp, MessageTypes[type_hash].type.FromString(raw), raw)
+        for (
+            type_hash,
+            subtype,
+            index_timestamp,
+            fileno,
+            offset,
+            size,
+        ) in self.index:
+            if offset + size <= len(self._maps[fileno]["map"]):
+                yield MappedNBSPacket(self._maps, fileno, offset, size, type_hash, subtype, index_timestamp)

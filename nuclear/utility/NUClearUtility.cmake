@@ -28,7 +28,7 @@ endif()
 
 # Generate in the lib folder so it gets installed
 if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
-  set_target_properties(nuclear_utility PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+  set_property(TARGET nuclear_utility PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 endif()
 
 # Alias to the namespaced version

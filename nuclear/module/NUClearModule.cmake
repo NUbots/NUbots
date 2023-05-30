@@ -174,13 +174,14 @@ function(NUCLEAR_MODULE)
 
   if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
     add_library(${module_target_name} SHARED ${sources})
-    set_target_properties(${module_target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
+    set_property(TARGET ${module_target_name} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
   else()
     add_library(${module_target_name} ${NUCLEAR_LINK_TYPE} ${sources})
   endif()
 
-  # Our source dir is our include path
+  # Our source dir and binary dir are our include paths
   target_include_directories(${module_target_name} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+  target_include_directories(${module_target_name} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/src")
 
   # Link to the target libraries
   target_link_libraries(${module_target_name} PUBLIC Threads::Threads)
@@ -188,8 +189,8 @@ function(NUCLEAR_MODULE)
   target_link_libraries(${module_target_name} PUBLIC nuclear::utility nuclear::message nuclear::extension)
   target_link_libraries(${module_target_name} PUBLIC ${MODULE_LIBRARIES})
 
-  # Put it in an IDE group for the module's directory
-  set_target_properties(${module_target_name} PROPERTIES FOLDER ${module_path})
+  # Put it in an IDE group for shared
+  set_property(TARGET ${module_target_name} PROPERTY FOLDER ${module_path})
 
   # ####################################################################################################################
   # Testing #
@@ -197,6 +198,8 @@ function(NUCLEAR_MODULE)
 
   # If we are doing tests then build the tests for this
   if(BUILD_TESTS)
+    find_package(Catch2 REQUIRED)
+
     # Set a different name for our test module
     set(test_module_target_name "Test${module_target_name}")
 
@@ -236,9 +239,17 @@ function(NUCLEAR_MODULE)
       endforeach(test_data_file)
 
       add_executable(${test_module_target_name} ${test_src} ${test_data})
-      target_link_libraries(${test_module_target_name} ${module_target_name})
 
-      set_target_properties(${test_module_target_name} PROPERTIES FOLDER "modules/tests")
+      # Our source dir and binary dir are our include paths
+      target_include_directories(${test_module_target_name} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src")
+      target_include_directories(${test_module_target_name} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/src")
+      target_include_directories(${test_module_target_name} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+      target_include_directories(${test_module_target_name} PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/tests")
+
+      target_link_libraries(${test_module_target_name} ${module_target_name})
+      target_link_libraries(${test_module_target_name} Catch2::Catch2WithMain)
+
+      set_property(TARGET ${test_module_target_name} PROPERTY FOLDER "modules/tests")
 
       # Add the test
       add_test(
@@ -246,6 +257,7 @@ function(NUCLEAR_MODULE)
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
         COMMAND ${CMAKE_CURRENT_BINARY_DIR}/${test_module_target_name}
       )
+
     endif()
   endif()
 

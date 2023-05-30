@@ -69,18 +69,18 @@ def generate(project_source_dir, project_binary_dir, use_asan, roles):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate launch configurations for debugging roles")
     parser.add_argument(
-        "--source-directory", "-s", default=os.path.join("", "home", "fourtel", "Horus"), help="Location of source code"
+        "--source-directory", "-s", default=os.path.join("", "home", "NUbots", "NUbots"), help="Location of source code"
     )
     parser.add_argument(
         "--binary-directory",
         "-b",
-        default=os.path.join("", "home", "fourtel", "build"),
+        default=os.path.join("", "home", "NUbots", "build"),
         help="Location of build directory",
     )
     parser.add_argument(
         "--launch-file",
         "-l",
-        default=os.path.join("", "home", "fourtel", "Horus", ".vscode", "launch.json"),
+        default=os.path.join("", "home", "NUbots", "NUbots", ".vscode", "launch.json"),
         help="Location of build directory",
     )
     parser.add_argument(

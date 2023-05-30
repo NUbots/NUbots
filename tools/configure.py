@@ -10,7 +10,7 @@ from utility.shell import WrapPty
 @run_on_docker
 def register(command):
     # Install help
-    command.help = "Configure the project in a docker container"
+    command.description = "Configure the project in a docker container"
 
     command.add_argument(
         "-i",
@@ -27,17 +27,20 @@ def register(command):
 def run(interactive, args, **kwargs):
     pty = WrapPty()
 
-    # If interactive then run ccmake else just run cmake
-    os.chdir(os.path.join(b.project_dir, "..", "build"))
+    default_args = [
+        "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake",
+        "-DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache",
+        "-DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache",
+    ]
 
     # To pass arguments to the cmake command you put them after "--"
     # but "--"  isn't a valid argument for cmake, so we remove it here
     if "--" in args:
         args.remove("--")
 
+    # If interactive then run ccmake else just run cmake
+    os.chdir(os.path.join(b.project_dir, "..", "build"))
     if interactive:
-        exit(
-            pty.spawn(["ccmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir])
-        )
+        exit(pty.spawn(["ccmake", "-GNinja", *default_args, *args, b.project_dir]))
     else:
-        exit(pty.spawn(["cmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir]))
+        exit(pty.spawn(["cmake", "-GNinja", *default_args, *args, b.project_dir]))

@@ -7,6 +7,7 @@
 #include <nuclear_bits/clock.hpp>
 
 #include "Matrix.pb.h"
+#include "Transform.pb.h"
 #include "Vector.pb.h"
 #include "math_types.hpp"
 
@@ -149,6 +150,12 @@ namespace message::conversion {
     template <> struct NeutronToProtobufMap<::message::conversion::math::fmat>   { using type = ::fmat; };
     template <> struct NeutronToProtobufMap<::message::conversion::math::imat>   { using type = ::imat; };
     template <> struct NeutronToProtobufMap<::message::conversion::math::umat>   { using type = ::umat; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::iso2>   { using type = ::iso2; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::fiso2>  { using type = ::fiso2; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::iso3>   { using type = ::iso3; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::fiso3>  { using type = ::fiso3; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::quat>   { using type = ::quat; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::fquat>  { using type = ::fquat; };
     template <> struct NeutronToProtobufMap<NUClear::clock::time_point>  { using type = ::google::protobuf::Timestamp; };
     template <> struct NeutronToProtobufMap<NUClear::clock::duration>  { using type = ::google::protobuf::Duration; };
     // clang-format on

@@ -40,8 +40,7 @@ function(GenerateNeutron)
   set(nt_out "${CMAKE_CURRENT_BINARY_DIR}/neutron")
   set(py_out "${CMAKE_CURRENT_BINARY_DIR}/python")
 
-  # * Extract the components of the filename that we need
-  # * NAME_WE: File name with neither the directory nor the longest extension
+  # Extract the components of the filename that we need
   get_filename_component(file_we ${NEUTRON_PROTO} NAME_WE)
   file(RELATIVE_PATH output_path ${NEUTRON_PARENT_DIR} ${NEUTRON_PROTO})
   get_filename_component(output_path ${output_path} DIRECTORY)
@@ -88,7 +87,6 @@ function(GenerateNeutron)
     # * Add a dependency to the target that generates the neutron for this dependency
     # * We specifically exclude adding dependencies for system protobufs (these have "/google/protobuf/" in their path)
     # * and NUClearRoles builtin protobufs (these have "/nuclear/message/proto/" in their path)
-    # * NAME_WE: File name with neither the directory nor the longest extension
     get_filename_component(depend_we ${depend_rel} NAME_WE)
     get_filename_component(output_path ${depend_rel} DIRECTORY)
     string(REPLACE "/" "_" target_depend "${output_path}_${depend_we}_neutron")
@@ -130,7 +128,7 @@ function(GenerateNeutron)
 
   # Run the protocol buffer compiler on these new protobufs
   add_custom_command(
-    OUTPUT "${py}_pb2.py" "${pb}.pb.cc" "${pb}.pb.h"
+    OUTPUT "${pb}.pb.cc" "${pb}.pb.h" "${py}_pb2.py"
     COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${pb_out} --python_out=${py_out} -I${pb_out}
             -I${NEUTRON_BUILTIN_DIR} "${pb}.proto"
     DEPENDS ${binary_depends} "${pb}.proto" ${target_depends}

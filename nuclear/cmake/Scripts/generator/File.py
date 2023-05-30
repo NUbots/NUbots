@@ -60,6 +60,7 @@ class File:
             if d in [
                 "Vector.proto",
                 "Matrix.proto",
+                "Transform.proto",
                 "google/protobuf/timestamp.proto",
                 "google/protobuf/duration.proto",
             ]:

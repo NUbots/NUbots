@@ -4,7 +4,20 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+template <typename Scalar, int Dim, int Mode>
+inline bool operator==(const Eigen::Transform<Scalar, Dim, Mode>& lhs, const Eigen::Transform<Scalar, Dim, Mode>& rhs) {
+    return lhs.matrix() == rhs.matrix();
+}
+
 namespace message::conversion::math {
+
+    using iso3  = Eigen::Transform<double, 3, Eigen::Isometry>;
+    using fiso3 = Eigen::Transform<float, 3, Eigen::Isometry>;
+    using iso2  = Eigen::Transform<double, 2, Eigen::Isometry>;
+    using fiso2 = Eigen::Transform<float, 2, Eigen::Isometry>;
+
+    using quat  = Eigen::Quaternion<double>;
+    using fquat = Eigen::Quaternion<float>;
 
     using vec    = Eigen::Matrix<double, Eigen::Dynamic, 1>;
     using fvec   = Eigen::Matrix<float, Eigen::Dynamic, 1>;
