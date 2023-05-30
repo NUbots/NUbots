@@ -19,7 +19,7 @@
 
 #include <Eigen/Core>
 #include <array>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <cfloat>
 #include <cmath>
 #include <fmt/format.h>
