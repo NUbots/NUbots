@@ -162,35 +162,9 @@ export class LocalisationRobotModel {
     return this.model.enabled;
   }
 
-  /** Field to torso translation in field space. */
-  @computed get rTFf(): Vector3 {
-    return this.position.rTFf;
-  }
-
-  /* Field to torso rotation in field space. */
-  @computed get Rtf(): Quaternion {
-    return this.position.Rtf;
-  }
-
+  /** Torso to field transformation */
   @computed
-  private get position() {
-    const Hwf = this.Hfw.toThree().invert();
-    const Htf = this.Htw.toThree().multiply(Hwf);
-    const { rotation: Rtf } = decompose(Htf);
-    const Hft = Htf.invert();
-    const { translation: rTFf } = decompose(Hft);
-    return { Htf, rTFf, Rtf };
+  get Hft(): Matrix4 {
+    return this.Hfw.multiply(this.Htw.invert());
   }
-}
-
-function decompose(m: THREE.Matrix4): { translation: Vector3; rotation: Quaternion; scale: Vector3 } {
-  const translation = new THREE.Vector3();
-  const rotation = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
-  m.decompose(translation, rotation, scale);
-  return {
-    translation: Vector3.from(translation),
-    rotation: Quaternion.from(rotation),
-    scale: Vector3.from(scale),
-  };
 }
