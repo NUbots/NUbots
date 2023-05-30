@@ -4,12 +4,11 @@ import os
 import shutil
 import subprocess
 
+from configure import run as configure
 from termcolor import cprint
 
 import b
 from utility.dockerise import run_on_docker
-
-from .configure import run as configure
 
 
 @run_on_docker
