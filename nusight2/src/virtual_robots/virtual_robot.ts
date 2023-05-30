@@ -1,6 +1,6 @@
-import { NUClearNetClient } from '../shared/nuclearnet/nuclearnet_client'
+import { NUClearNetClient } from "../shared/nuclearnet/nuclearnet_client";
 
-import { Simulator } from './simulator'
+import { Simulator } from "./simulator";
 
 export class VirtualRobot {
   constructor(
@@ -9,7 +9,7 @@ export class VirtualRobot {
     private readonly nuclearnetAddress: string,
     private readonly simulators: Simulator[],
   ) {
-    this.nuclearnetClient.connect({ name: this.name, address: nuclearnetAddress })
+    this.nuclearnetClient.connect({ name: this.name, address: nuclearnetAddress });
   }
 
   static of({
@@ -18,16 +18,16 @@ export class VirtualRobot {
     nuclearnetClient,
     nuclearnetAddress,
   }: {
-    name: string
-    simulators: Simulator[]
-    nuclearnetClient: NUClearNetClient
-    nuclearnetAddress: string
+    name: string;
+    simulators: Simulator[];
+    nuclearnetClient: NUClearNetClient;
+    nuclearnetAddress: string;
   }) {
-    return new VirtualRobot(name, nuclearnetClient, nuclearnetAddress, simulators)
+    return new VirtualRobot(name, nuclearnetClient, nuclearnetAddress, simulators);
   }
 
   start(): () => void {
-    const stops = this.simulators.map(simulator => simulator.start())
-    return () => stops.forEach(stop => stop())
+    const stops = this.simulators.map((simulator) => simulator.start());
+    return () => stops.forEach((stop) => stop());
   }
 }

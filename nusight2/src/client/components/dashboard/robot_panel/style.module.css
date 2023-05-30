@@ -55,11 +55,11 @@
 .icon {
   border: 0.1em transparent solid;
   border-radius: 0.15em;
-  height: 1.54em;
-  margin-left: 0.1em;
-  padding: 0.25em;
+  height: 1.5rem;
+  margin: 0;
+  padding: 0;
   overflow: hidden;
-  width: 1.54em;
+  width: 1.5rem;
 }
 
 .icon > svg {

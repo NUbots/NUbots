@@ -47,7 +47,10 @@ nuclear_role(
   strategy::FindObject
   strategy::Ready
   strategy::DiveToBall
+  strategy::KickToGoal
+  strategy::AlignBallToGoal
   # Purposes
   purpose::Striker
   purpose::Soccer
+  purpose::Goalie
 )

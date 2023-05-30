@@ -24,5 +24,5 @@ import "Vector.proto";
 
 message KickTo {
     /// Point {P} to kick to from the robot {R} in robot space {r}
-    fvec3 rPRr = 1;
+    vec3 rPRr = 1;
 }
