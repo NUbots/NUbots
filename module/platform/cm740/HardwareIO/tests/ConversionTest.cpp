@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include "Convert.hpp"
 
