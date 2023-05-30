@@ -74,7 +74,7 @@ namespace module::localisation {
         /* To run whenever a ball has been detected */
         on<Trigger<VisionBalls>, With<Sensors>, With<FieldDescription>>().then(
             [this](const VisionBalls& balls, const Sensors& sensors, const FieldDescription& fd) {
-                if (balls.balls.size() > 0) {
+                if (!balls.balls.empty()) {
                     Eigen::Isometry3f Hcw = Eigen::Isometry3f(balls.Hcw.cast<float>());
                     Eigen::Isometry3f Hwc = Hcw.inverse();
                     auto state            = BallModel<float>::StateVec(ukf.get_state());
@@ -82,13 +82,13 @@ namespace module::localisation {
                     // Get the first ball measurement and treat it as the closest measurement to our current estimate
                     Eigen::Vector3f rBWw =
                         Hwc * reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
-                    float lowest_distance = (rBWw.head<2>() - state.rBWw).norm();
+                    float lowest_distance = (rBWw.head<2>() - state.rBWw).squaredNorm();
 
                     // Loop through all our ball measurements and find the closest measurement to our current estimate
                     for (const auto& ball : balls.balls) {
                         Eigen::Vector3f temp_rBWw =
                             Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
-                        float temp_distance = (temp_rBWw.head<2>() - state.rBWw).norm();
+                        float temp_distance = (temp_rBWw.head<2>() - state.rBWw).squaredNorm();
                         if (temp_distance < lowest_distance) {
                             lowest_distance = temp_distance;
                             rBWw            = temp_rBWw;
