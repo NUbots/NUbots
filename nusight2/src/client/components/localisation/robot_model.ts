@@ -164,21 +164,7 @@ export class LocalisationRobotModel {
 
   /** Torso to field transformation */
   @computed
-  get Hft() {
-    const Hwf = this.Hfw.toThree().invert();
-    const Htf = this.Htw.toThree().multiply(Hwf);
-    return Matrix4.fromThree(Htf.invert());
+  get Hft(): Matrix4 {
+    return this.Hfw.multiply(this.Htw.invert());
   }
-}
-
-function decompose(m: THREE.Matrix4): { translation: Vector3; rotation: Quaternion; scale: Vector3 } {
-  const translation = new THREE.Vector3();
-  const rotation = new THREE.Quaternion();
-  const scale = new THREE.Vector3();
-  m.decompose(translation, rotation, scale);
-  return {
-    translation: Vector3.from(translation),
-    rotation: Quaternion.from(rotation),
-    scale: Vector3.from(scale),
-  };
 }
