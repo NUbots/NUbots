@@ -7,6 +7,7 @@
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
 #include "message/strategy/FindFeature.hpp"
+#include "message/strategy/Localise.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -25,6 +26,7 @@ namespace module::purpose {
     using message::purpose::NormalStriker;
     using message::purpose::PenaltyShootoutStriker;
     using message::strategy::FindBall;
+    using message::strategy::Localise;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
@@ -63,10 +65,12 @@ namespace module::purpose {
 
         // Normal READY state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
-            // If we are stable, walk to the ready field position
+            // If we are stable and localised, walk to the ready field position
             emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
+                           Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                           cfg.ready_position.z()),
+                       1);
+            emit<Task>(std::make_unique<Localise>(), 2);  // localise if necessary
         });
 
         // Normal PLAYING state
@@ -97,6 +101,7 @@ namespace module::purpose {
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
         emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 4);  // kick the ball if possible
+        emit<Task>(std::make_unique<Localise>(), 5);                       // localise if necessary
     }
 
 }  // namespace module::purpose
