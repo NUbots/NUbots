@@ -162,6 +162,9 @@ var annotated_dup =
         [ "VirtualLoadSensor", "classmodule_1_1input_1_1VirtualLoadSensor.html", "classmodule_1_1input_1_1VirtualLoadSensor" ]
       ] ],
       [ "localisation", null, [
+        [ "MeasurementType", null, [
+          [ "BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ]
+        ] ],
         [ "BallFilter", "classmodule_1_1localisation_1_1BallFilter.html", "classmodule_1_1localisation_1_1BallFilter" ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],

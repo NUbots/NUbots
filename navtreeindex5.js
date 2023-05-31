@@ -1,5 +1,14 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1motion_1_1KickBalancer.html#aa9ccd4de0078b61fe92147036ca9c4d6":[1,0,2,5,6,0],
+"classmodule_1_1motion_1_1Kicker.html":[1,0,2,5,7],
+"classmodule_1_1motion_1_1Kicker.html#a292f8deb7641ea709b90ad0da158e534":[1,0,2,5,7,1],
+"classmodule_1_1motion_1_1Kicker.html#a2f6d52c6f497cae8c890355cdee14fe3":[1,0,2,5,7,5],
+"classmodule_1_1motion_1_1Kicker.html#a5f891f5491c61f912e60d2ea81b44a2d":[1,0,2,5,7,6],
+"classmodule_1_1motion_1_1Kicker.html#a626ac20e49e10425302b2b0a4cefa1c1":[1,0,2,5,7,3],
+"classmodule_1_1motion_1_1Kicker.html#a8c3152148b924125c7c2188a1ccd419f":[1,0,2,5,7,0],
+"classmodule_1_1motion_1_1Kicker.html#a962487b4b69285bdd212f6fb71ea365b":[1,0,2,5,7,11],
+"classmodule_1_1motion_1_1Kicker.html#aa629b5396aae4747f7958205be2f9046":[1,0,2,5,7,7],
 "classmodule_1_1motion_1_1Kicker.html#aaa2fbb7903febb05b27478f6ee3ca94b":[1,0,2,5,7,13],
 "classmodule_1_1motion_1_1Kicker.html#aab24e457de3bbfdc3b760b163cf0f07f":[1,0,2,5,7,4],
 "classmodule_1_1motion_1_1Kicker.html#aad9c98d70c3bdc81cc4bd386f56e64ff":[1,0,2,5,7,10],
@@ -240,14 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a87bbd04ba1339edbe4382e94bbeaa345":[1,0,2,10,1,0],
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a9b826382d8823c8512341d28f7eed460":[1,0,2,10,1,8],
 "classmodule_1_1purpose_1_1KeyboardWalk.html#a9d382ae1beaf0a6b5920623cb21fd93e":[1,0,2,10,1,28],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#aa24b63e670d072063ca831c2c8e5cb04":[1,0,2,10,1,9],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#ab38ef90c692e2898b1c6d666cc000330":[1,0,2,10,1,2],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#ac298d2e96a75b6985b037240ced23f41":[1,0,2,10,1,5],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#ac6ca8b7308870251bfff33d9ce1ed8c6":[1,0,2,10,1,4],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#acb7f58f760d723e227547af2e71b477f":[1,0,2,10,1,6],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#acd420e3f3dc12b167cd82ef5bf077803":[1,0,2,10,1,29],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#acf135b9cf37686cc6ab3d3ed05377220":[1,0,2,10,1,7],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#ad4777b1d3d82f26e2d1c835dc4022e68":[1,0,2,10,1,19],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#ad7596a523b4d2e4f904922c1918bc1b1":[1,0,2,10,1,24],
-"classmodule_1_1purpose_1_1KeyboardWalk.html#ad9970c386b529f62d6f9f0bff4632a1b":[1,0,2,10,1,13]
+"classmodule_1_1purpose_1_1KeyboardWalk.html#aa24b63e670d072063ca831c2c8e5cb04":[1,0,2,10,1,9]
 };

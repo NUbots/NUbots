@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classCM740_1_1FSR.html#a6c0b551fca4d4cd8b74e5f328a289707abf65d60abf04adc94843fc9f20b9f7bb":[1,0,0,6,0,2],
 "classCM740_1_1FSR.html#a6c0b551fca4d4cd8b74e5f328a289707ae23a6d20bd807f23e511ebb283e300d1":[1,0,0,6,0,21],
 "classCM740_1_1FSR.html#a6c0b551fca4d4cd8b74e5f328a289707aeb67a9894ba7693089b6e1e62fad3656":[1,0,0,6,0,10],
 "classCM740_1_1FSR.html#a6c0b551fca4d4cd8b74e5f328a289707aee7c07a100a75c791fd27ffc18c6ddcd":[1,0,0,6,0,8],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a25cc8ce8bac0f8ae148a3d8e2be55fb0":[1,0,2,1,2,0,19],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a30e39d2105c927e8a032caea3de92332":[1,0,2,1,2,0,5],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a476042238deed1317b3cb80f67d3f435":[1,0,2,1,2,0,7],
-"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a4a4e85a90ef7e1211974340b045289dd":[1,0,2,1,2,0,26],
-"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a59ae03d790e2c282cd8886568cc99379":[1,0,2,1,2,0,24]
+"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a4a4e85a90ef7e1211974340b045289dd":[1,0,2,1,2,0,26]
 };

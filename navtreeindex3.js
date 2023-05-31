@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a59ae03d790e2c282cd8886568cc99379":[1,0,2,1,2,0,24],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a59e44117a09a494b373216633f3cba4e":[1,0,2,1,2,0,21],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a5e812f153154d730148aa14371f76668":[1,0,2,1,2,0,8],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#a77ca8ad171d149936236d7e3e9f29fea":[1,0,2,1,2,0,27],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1input_1_1MotionModel.html#a57d477eafcb1032d2fa81497aad9de14":[1,0,2,3,8,11],
 "classmodule_1_1input_1_1MotionModel.html#a7d57e4ddd6f7b5ebbdabef5c2119e1da":[1,0,2,3,8,10],
 "classmodule_1_1input_1_1MotionModel.html#abde0ea5275c6f79439f833887226676e":[1,0,2,3,8,2],
-"classmodule_1_1input_1_1MotionModel.html#ac0440fd085fb30a833462f03dc95fab2":[1,0,2,3,8,9],
-"classmodule_1_1input_1_1MotionModel.html#ac897ebe8cd265ccdd2e1d59c7e31f229":[1,0,2,3,8,8]
+"classmodule_1_1input_1_1MotionModel.html#ac0440fd085fb30a833462f03dc95fab2":[1,0,2,3,8,9]
 };
