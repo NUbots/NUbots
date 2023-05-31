@@ -13,7 +13,16 @@ namespace module::strategy {
         struct Config {
             /// @brief The confidence value field localisation needs to be below to not request standing still.
             float confidence_threshold = 0;
+
+            /// @brief The amount of time the robot can be lost before localisation is reset.
+            float max_lost_time = 0;
         } cfg;
+
+        /// @brief The time point at which the robot became lost.
+        NUClear::clock::time_point time_point_lost;
+
+        /// @brief Flag to indicate if the robot has just now become lost.
+        bool just_lost = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the Localise reactor.

@@ -22,6 +22,7 @@
 #include "message/actuation/BodySide.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkingState.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 
@@ -40,6 +41,7 @@ namespace module::input {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkingState;
+    using message::localisation::ResetRobotLocalisation;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
@@ -142,6 +144,13 @@ namespace module::input {
         on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
+
+        on<Trigger<ResetRobotLocalisation>>().then([this] {
+            // Reset the translation and yaw of odometry
+            Hwt.translation().x() = 0;
+            Hwt.translation().y() = 0;
+            yaw                   = 0;
+        });
 
         update_loop = on<Trigger<RawSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>()
                           .then("Main Sensors Loop",

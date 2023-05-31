@@ -13,6 +13,7 @@ namespace module::localisation {
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
+    using message::localisation::AddNoiseToParticles;
     using message::localisation::Field;
     using message::localisation::ResetRobotLocalisation;
     using message::motion::DisableWalkEngineCommand;
@@ -80,6 +81,8 @@ namespace module::localisation {
                 }
             }
         });
+
+        on<Trigger<AddNoiseToParticles>>().then([this] { add_noise(); });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
             // Resize map to the field dimensions
@@ -240,9 +243,9 @@ namespace module::localisation {
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             Eigen::Isometry3f Hcw = Eigen::Isometry3f(field_lines.Hcw.cast<float>());
+            // Add noise to the particles
+            add_noise();
             if (!falling && field_lines.points.size() > cfg.min_observations) {
-                // Add noise to the particles
-                add_noise();
 
                 // Project the field line observations (uPCr) onto the field plane
                 std::vector<Eigen::Vector2f> field_point_observations;

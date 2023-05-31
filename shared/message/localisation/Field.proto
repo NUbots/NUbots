@@ -32,3 +32,5 @@ message Field {
 }
 
 message ResetRobotLocalisation {}
+
+message AddNoiseToParticles {}
