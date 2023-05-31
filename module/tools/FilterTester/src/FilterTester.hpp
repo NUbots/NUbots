@@ -14,6 +14,8 @@ namespace module::tools {
     public:
         /// @brief Called by the powerplant to build and setup the FilterTester reactor.
         explicit FilterTester(std::unique_ptr<NUClear::Environment> environment);
+
+        double total_error = 0;
     };
 
 }  // namespace module::tools

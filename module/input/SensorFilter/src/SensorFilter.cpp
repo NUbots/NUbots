@@ -175,6 +175,10 @@ namespace module::input {
                                         debug_sensor_filter(sensors, raw_sensors);
                                     }
 
+                                    // Ground truth odometry
+                                    if (raw_sensors.odometry_ground_truth.exists) {
+                                        sensors->Htw_ground_truth = raw_sensors.odometry_ground_truth.Htw;
+                                    }
                                     emit(std::move(sensors));
                                 })
                           .disable();

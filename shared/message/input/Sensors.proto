@@ -138,12 +138,15 @@ message Sensors {
     /// A set of transforms; one for each servo
     repeated mat4 Htx = 12 [(array_size) = 20];
 
-    /// Homogeneous transform: torso {t} from ground {g}
+    /// Homogeneous transformation from torso {t} space to ground {g} space
     mat4 Hgt = 13;
 
-    /// Homogeneous transform: world {w} from robot {r}
+    /// Homogeneous transformation from world {w} space to robot {r} space
     mat4 Hrw = 14;
 
-    /// Homogeneous transform: world {w} from torso {t}
+    /// Homogeneous transformation from world {w} space to torso {t} space
     mat4 Htw = 15;
+
+    /// Ground truth from simulator of Htw
+    mat4 Htw_ground_truth = 16;
 }

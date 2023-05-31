@@ -7,7 +7,10 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/math/euler.hpp"
+#include "utility/math/matrix/transform.hpp"
 #include "utility/nbs/Decoder.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/ProgressBar.hpp"
 
 namespace module::tools {
@@ -16,6 +19,9 @@ namespace module::tools {
     using message::input::Sensors;
     using message::platform::RawSensors;
     using NUClear::message::CommandLineArguments;
+    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::transform::error;
+    using utility::nusight::graph;
 
     FilterTester::FilterTester(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -26,7 +32,10 @@ namespace module::tools {
 
         // This is the information that will come back from the sensor filter
         on<Trigger<Sensors>, Sync<FilterTester>>().then([this](const Sensors& sensors) {
-            // TODO do something with the sensors coming out of the module
+            Eigen::Isometry3d Hwt              = Eigen::Isometry3d(sensors.Htw).inverse();
+            Eigen::Isometry3d Hwt_ground_truth = Eigen::Isometry3d(sensors.Htw_ground_truth).inverse();
+            total_error += error<double>(Hwt, Hwt_ground_truth).squaredNorm();
+            log<NUClear::INFO>("Total Error: {}", total_error);
         });
 
         on<Trigger<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
