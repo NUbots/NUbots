@@ -287,7 +287,8 @@ RUN install-package tinyxml2
 RUN install-package catch2
 
 # tinyrobotics
-RUN git clone https://github.com/Tom0Brien/tinyrobotics && cd tinyrobotics && mkdir build && cd build && cmake .. -G Ninja && ninja install && cd ../.. && rm -rf tinyrobotics
+RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.0.tar.gz \
+    -DBUILD_TESTS=OFF
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
