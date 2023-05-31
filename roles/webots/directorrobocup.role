@@ -52,6 +52,8 @@ nuclear_role(
   strategy::Ready
   strategy::DiveToBall
   strategy::Localise
+  strategy::KickToGoal
+  strategy::AlignBallToGoal
   # Purposes
   purpose::Striker
   purpose::Soccer
