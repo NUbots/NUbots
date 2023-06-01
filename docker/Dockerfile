@@ -93,6 +93,9 @@ ARG platform=generic
 COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_toolchain.py
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
+# zlib
+RUN install-from-source https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz
+
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
@@ -190,6 +193,7 @@ RUN install-from-source \
 # Protobuf
 RUN install-package protobuf
 RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-cpp-3.17.3.tar.gz \
+    --with-zlib=/usr/local \
     --with-protoc=/usr/sbin/protoc
 
 # Libjpeg
@@ -222,7 +226,7 @@ RUN install-header-from-source https://github.com/catchorg/Catch2/releases/downl
 # libusb - a dependency of aravis
 RUN install-from-source https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
 # Aravis
-RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --without-python
+RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.63.3/glib-2.63.3.tar.bz2 \
     -Ddefault_library=both \
@@ -304,8 +308,7 @@ RUN install-package \
     vim \
     nano \
     clinfo \
-    doxygen \
-    zlib
+    doxygen
 
 # Install packages for nusight
 RUN install-package \
