@@ -40,8 +40,22 @@ namespace module::purpose {
             this->log_level          = config["log_level"].as<NUClear::LogLevel>();
             cfg.left_ready_position  = config["left_ready_position"].as<Expression>();
             cfg.right_ready_position = config["right_ready_position"].as<Expression>();
-            cfg.left_defender_bounding_box =
-                config["left_defender_bounding_box"].as<Expression>();  //<std::vector<Eigen::Vector3f>>();
+
+            YAML::Node config = YAML::LoadFile("Defender.yaml");
+
+            // Assuming the YAML file has a key called "left_defender_bounding_box"
+            YAML::Node boundingBoxNode = config["left_defender_bounding_box"];
+
+            // Iterate over the bounding box values
+            for (std::size_t i = 0; i < boundingBoxNode.size(); ++i) {
+                YAML::Node point_node = boundingBoxNode[i];
+
+                cfg.left_defender_bounding_box.push_back(point_node);
+            }
+
+            // std::cout << "Point " << i << ": x=" << x << ", y=" << y << ", z=" << z << std::endl;
+            //  cfg.left_defender_bounding_box =
+            //  config["left_defender_bounding_box"].as<std::vector<Eigen::Vector3f>>();
         });
 
         on<Provide<DefenderTask>, Optional<Trigger<GameState>>>().then(
@@ -78,7 +92,8 @@ namespace module::purpose {
     void Defender::play() {
         // Walk to the ball and kick!
         // Second argument is priority - higher number means higher priority
-        emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<FindBall>(),
+                   1);                                  // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         // emit<Task>(std::make_unique<WalkToDefencePosition>(), 3);  // try to walk to the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);                     // try to walk to the ball

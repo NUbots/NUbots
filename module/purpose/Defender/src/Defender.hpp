@@ -17,15 +17,12 @@ namespace module::purpose {
             Eigen::Vector3f left_ready_position  = Eigen::Vector3f::Zero();
             Eigen::Vector3f right_ready_position = Eigen::Vector3f::Zero();
 
-            std::vector<Eigen::Vector3f> left_defender_bounding_box = {Eigen::Vector3f::Zero(),
-                                                                       Eigen::Vector3f::Zero(),
-                                                                       Eigen::Vector3f::Zero(),
-                                                                       Eigen::Vector3f::Zero()};
+            std::vector<Eigen::Vector3f> left_defender_bounding_box = {};
 
-            std::vector<Eigen::Vector3f> right_defender_bounding_box = {Eigen::Vector3f::Zero(),
-                                                                        Eigen::Vector3f::Zero(),
-                                                                        Eigen::Vector3f::Zero(),
-                                                                        Eigen::Vector3f::Zero()};
+            // std::vector<Eigen::Vector3f> right_defender_bounding_box = {Eigen::Vector3f::Zero(),
+            //                                                             Eigen::Vector3f::Zero(),
+            //                                                             Eigen::Vector3f::Zero(),
+            //                                                             Eigen::Vector3f::Zero()};
 
         } cfg;
 
