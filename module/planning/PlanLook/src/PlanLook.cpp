@@ -54,6 +54,9 @@ namespace module::planning {
                 // Increase the index and wrap around if we have reached the end of the list
                 search_idx = (search_idx + 1) % cfg.search_positions.size();
             }
+            else {
+                emit<Task>(std::make_unique<Idle>());
+            }
         });
 
         // Start from the first search position
