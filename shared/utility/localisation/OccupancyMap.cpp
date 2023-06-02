@@ -16,7 +16,7 @@ namespace module::localisation {
         return map.rows();
     }
 
-    double OccupancyMap::get_occupancy_value(int x, int y) {
+    float OccupancyMap::get_occupancy_value(int x, int y) {
         // Check if the observation is within the map
         if (x < 0 || x >= get_length() || y < 0 || y >= get_width()) {
             return -1;
@@ -99,7 +99,7 @@ namespace module::localisation {
             for (int x = 0; x < cols; x++) {
                 if (map(y, x) == 1) {
                     for (int i = 1; i <= range; i++) {
-                        double value = (1.0 * (range - i) / range) * 0.5;
+                        float value = (1.0 * (range - i) / range) * 0.5;
                         for (int j = -i; j <= i; j++) {
                             if (x - i >= 0 && y + j >= 0 && y + j < rows) {
                                 if (map(y + j, x - i) < value) {
@@ -128,10 +128,10 @@ namespace module::localisation {
         }
     }
 
-    void OccupancyMap::create_distance_map(double grid_size) {
+    void OccupancyMap::create_distance_map(float grid_size) {
         // Initialize the distance map with infinite distances
         Eigen::MatrixXd dist_map =
-            Eigen::MatrixXd::Constant(map.rows(), map.cols(), std::numeric_limits<double>::infinity());
+            Eigen::MatrixXd::Constant(map.rows(), map.cols(), std::numeric_limits<float>::infinity());
 
         // Create a queue to hold the cells to be visited
         std::queue<std::pair<int, int>> q;
@@ -166,7 +166,7 @@ namespace module::localisation {
 
                     // Check if the neighbor is within the map boundaries
                     if (new_y >= 0 && new_y < map.rows() && new_x >= 0 && new_x < map.cols()) {
-                        double weight = std::sqrt(std::pow(i, 2) + std::pow(j, 2));
+                        float weight = std::sqrt(std::pow(i, 2) + std::pow(j, 2));
 
                         // Check if the neighbor is unoccupied and has a shorter distance through the current cell
                         if (map(new_y, new_x) == 0 && dist_map(new_y, new_x) > dist_map(y, x) + weight) {
