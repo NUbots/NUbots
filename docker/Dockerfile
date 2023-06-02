@@ -89,6 +89,9 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr
 ### ADD NEW SYTEM PROGRAMS/LIBRARIES HERE ###
 #############################################
 
+# Install packages for nusight using generic
+RUN install-autotools-from-source https://github.com/nodejs/node/archive/refs/tags/v18.16.0.tar.gz
+
 ################################################
 #  _____           _      _           _        #
 # |_   _|__   ___ | | ___| |__   __ _(_)_ __   #
@@ -313,12 +316,6 @@ RUN install-package \
     arm-none-eabi-newlib \
     doxygen
 
-# Install packages for nusight
-RUN install-package \
-    nodejs \
-    npm \
-    yarn
-
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
@@ -326,6 +323,7 @@ RUN pip install --upgrade \
     black==22.3.0
 
 RUN npm install -g \
+    yarn@1.22.19 \
     prettier@2.7.1 \
     eslint@8.27.0
 
