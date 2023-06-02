@@ -48,16 +48,16 @@ namespace module::input {
 
         // Set our measurement noises
         cfg.ukf.noise.measurement.accelerometer =
-            Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
+            Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
         cfg.ukf.noise.measurement.accelerometer_magnitude =
-            Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
+            Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
                 .asDiagonal();
         cfg.ukf.noise.measurement.gyroscope =
-            Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
+            Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
         cfg.ukf.noise.measurement.flat_foot_odometry =
-            Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>()).asDiagonal();
+            Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>()).asDiagonal();
         cfg.ukf.noise.measurement.flat_foot_orientation =
-            Eigen::Vector4f(config["ukf"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>())
+            Eigen::Vector4d(config["ukf"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>())
                 .asDiagonal();
 
         // Set our process noises
@@ -68,7 +68,7 @@ namespace module::input {
             config["ukf"]["noise"]["process"]["rotational_velocity"].as<Expression>();
 
         // Set our motion model's process noise
-        MotionModel<float>::StateVec process_noise;
+        MotionModel<double>::StateVec process_noise;
         process_noise.rTWw      = cfg.ukf.noise.process.position;
         process_noise.vTw       = cfg.ukf.noise.process.velocity;
         process_noise.Rwt       = cfg.ukf.noise.process.rotation;
@@ -111,10 +111,11 @@ namespace module::input {
 
         // **************** UKF Measurement Update ****************
         // Gyroscope measurement update
-        ukf.measure(sensors->gyroscope, cfg.ukf.noise.measurement.gyroscope, MeasurementType::GYROSCOPE());
+        Eigen::Vector3d gyro = sensors->gyroscope.cast<double>();
+        ukf.measure(gyro, cfg.ukf.noise.measurement.gyroscope, MeasurementType::GYROSCOPE());
 
         // Calculate accelerometer noise factor
-        Eigen::Matrix3f acc_noise =
+        Eigen::Matrix3d acc_noise =
             cfg.ukf.noise.measurement.accelerometer
             // Add noise which is proportional to the square of how much we are moving, minus gravity
             // This means that the more we're accelerating, the noisier we think the measurements are
@@ -122,7 +123,8 @@ namespace module::input {
                   * cfg.ukf.noise.measurement.accelerometer_magnitude;
 
         // Accelerometer measurement update
-        ukf.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
+        Eigen::Vector3d acc = sensors->accelerometer.cast<double>();
+        ukf.measure(acc, acc_noise, MeasurementType::ACCELEROMETER());
 
         // This loop calculates the Hwf transform for feet if they have just hit the ground. If they
         // have not just hit the ground, it uses the previous Hwf value. This assumes that once the foot
@@ -135,10 +137,10 @@ namespace module::input {
             // If this side's foot is down, and it was not down at the previous time step, then we
             // calculate our new footlanding_Hwf value, because our foot has just landed
             if (foot_down && !prev_foot_down) {
-                const MotionModel<float>::StateVec filterState = MotionModel<float>::StateVec(ukf.get_state());
+                const MotionModel<double>::StateVec filterState = MotionModel<double>::StateVec(ukf.get_state());
                 Eigen::Isometry3f Hwt;
-                Hwt.linear()      = filterState.Rwt.toRotationMatrix();
-                Hwt.translation() = filterState.rTWw;
+                Hwt.linear()      = filterState.Rwt.toRotationMatrix().cast<float>();
+                Hwt.translation() = filterState.rTWw.cast<float>();
 
                 // Htg is intended to be such that the "foot down" position is where the foot would be
                 // if it were flat, even if it's not flat when first touches the ground. As the foot
@@ -159,12 +161,13 @@ namespace module::input {
                 Eigen::Isometry3f footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
 
                 // do a foot based position update
-                ukf.measure(Eigen::Vector3f(footlanding_Hwt.translation()),
+                Eigen::Vector3d footlanding_rTWw = footlanding_Hwt.translation().cast<double>();
+                ukf.measure(footlanding_rTWw,
                             cfg.ukf.noise.measurement.flat_foot_odometry,
                             MeasurementType::FLAT_FOOT_ODOMETRY());
 
                 // do a foot based orientation update
-                Eigen::Quaternionf Rwt(footlanding_Hwt.linear());
+                Eigen::Quaterniond Rwt(footlanding_Hwt.linear().cast<double>());
                 ukf.measure(Rwt.coeffs(),
                             cfg.ukf.noise.measurement.flat_foot_orientation,
                             MeasurementType::FLAT_FOOT_ORIENTATION());
@@ -234,12 +237,12 @@ namespace module::input {
         else {
             // **************** Construct Odometry Output (Htw) ****************
             // Gives us the quaternion representation
-            const auto o = MotionModel<float>::StateVec(ukf.get_state());
+            const auto o = MotionModel<double>::StateVec(ukf.get_state());
             // Map from world to torso coordinates (Rtw)
             Eigen::Isometry3f Hwt;
-            Hwt.linear()      = o.Rwt.toRotationMatrix();
-            Hwt.translation() = o.rTWw;
-            sensors->Htw      = Hwt.inverse().matrix();
+            Hwt.linear()      = o.Rwt.toRotationMatrix().cast<float>();
+            Hwt.translation() = o.rTWw.cast<float>();
+            sensors->Htw      = Hwt.inverse().matrix().cast<float>();
 
             // **************** Kinematics Horizon (Hgt) ****************
             Eigen::Isometry3f Rwt(sensors->Htw.inverse());
