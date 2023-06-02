@@ -90,7 +90,7 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr
 #############################################
 
 # Install packages for nusight using generic
-RUN install-autotools-from-source https://github.com/nodejs/node/archive/refs/tags/v18.16.0.tar.gz
+RUN PREFIX=/usr install-autotools-from-source https://github.com/nodejs/node/archive/refs/tags/v18.16.0.tar.gz
 
 ################################################
 #  _____           _      _           _        #
