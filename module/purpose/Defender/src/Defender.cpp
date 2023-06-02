@@ -41,7 +41,7 @@ namespace module::purpose {
             cfg.left_ready_position  = config["left_ready_position"].as<Expression>();
             cfg.right_ready_position = config["right_ready_position"].as<Expression>();
 
-            YAML::Node config = YAML::LoadFile("Defender.yaml");
+            // YAML::Node config = YAML::LoadFile("Defender.yaml");
 
             // Assuming the YAML file has a key called "left_defender_bounding_box"
             YAML::Node boundingBoxNode = config["left_defender_bounding_box"];
@@ -50,7 +50,7 @@ namespace module::purpose {
             for (std::size_t i = 0; i < boundingBoxNode.size(); ++i) {
                 YAML::Node point_node = boundingBoxNode[i];
 
-                cfg.left_defender_bounding_box.push_back(point_node);
+                // cfg.left_defender_bounding_box = .push_back(point_node);
             }
 
             // std::cout << "Point " << i << ": x=" << x << ", y=" << y << ", z=" << z << std::endl;
