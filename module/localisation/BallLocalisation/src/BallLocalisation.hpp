@@ -1,6 +1,6 @@
 
-#ifndef MODULE_LOCALISATION_BALLFILTER_HPP
-#define MODULE_LOCALISATION_BALLFILTER_HPP
+#ifndef MODULE_LOCALISATION_BALLLOCALISATION_HPP
+#define MODULE_LOCALISATION_BALLLOCALISATION_HPP
 
 #include <nuclear>
 
@@ -13,7 +13,7 @@
 
 namespace module::localisation {
 
-    class BallFilter : public NUClear::Reactor {
+    class BallLocalisation : public NUClear::Reactor {
     private:
         struct Config {
             Config() = default;
@@ -57,9 +57,9 @@ namespace module::localisation {
         utility::math::filter::UKF<float, BallModel> ukf{};
 
     public:
-        /// @brief Called by the powerplant to build and setup the BallFilter reactor.
-        explicit BallFilter(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.
+        explicit BallLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::localisation
 
-#endif  // MODULE_LOCALISATION_BALLFILTER_HPP
+#endif  // MODULE_LOCALISATION_BALLLOCALISATION_HPP

@@ -1,4 +1,4 @@
-#include "BallFilter.hpp"
+#include "BallLocalisation.hpp"
 
 #include <Eigen/Geometry>
 #include <chrono>
@@ -7,7 +7,7 @@
 
 #include "message/eye/DataPoint.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/localisation/FilteredBall.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
@@ -19,9 +19,9 @@
 namespace module::localisation {
 
     using extension::Configuration;
-    using FilteredBall = message::localisation::FilteredBall;
-    using VisionBalls  = message::vision::Balls;
-    using VisionBall   = message::vision::Ball;
+    using Ball        = message::localisation::Ball;
+    using VisionBalls = message::vision::Balls;
+    using VisionBall  = message::vision::Ball;
     using message::support::FieldDescription;
 
     using message::eye::DataPoint;
@@ -31,12 +31,13 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    BallFilter::BallFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
 
-        using message::localisation::FilteredBall;
+        using message::localisation::Ball;
         using utility::math::coordinates::reciprocalSphericalToCartesian;
 
-        on<Configuration>("BallFilter.yaml").then([this](const Configuration& config) {
+        on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
             // Set our measurement noise
             cfg.ukf.noise.measurement.position =
@@ -114,7 +115,7 @@ namespace module::localisation {
                     rBWw << state.rBWw.x(), state.rBWw.y(), fd.ball_radius;
 
                     // Generate and emit message
-                    auto ball = std::make_unique<FilteredBall>();
+                    auto ball = std::make_unique<Ball>();
                     Eigen::Isometry3f Htw(sensors.Htw.cast<float>());
                     Eigen::Isometry3f Hrw(sensors.Hrw.cast<float>());
                     Eigen::Isometry3f Htc     = Eigen::Isometry3f(sensors.Htw.cast<float>()) * Hwc;

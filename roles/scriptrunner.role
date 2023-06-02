@@ -9,9 +9,9 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   platform::cm740::HardwareIO
-  behaviour::Controller
+  # behaviour::Controller
   motion::ScriptEngine
-  behaviour::tools::ScriptRunner
+  # behaviour::tools::ScriptRunner
   input::SensorFilter
   output::Overview
 )

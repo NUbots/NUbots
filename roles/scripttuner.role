@@ -6,8 +6,7 @@ nuclear_role(
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
   platform::cm740::HardwareIO
-  behaviour::tools::ScriptTuner
-  behaviour::Controller
+  # behaviour::tools::ScriptTuner behaviour::Controller
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
