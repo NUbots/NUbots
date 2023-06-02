@@ -114,7 +114,7 @@ namespace module::input {
                                                         0,  // fourcc is set later
                                                         num_cameras++,
                                                         Image::Lens(),        // Lens is constructed in settings
-                                                        Eigen::Isometry3d(),  // Hpc is set in settings
+                                                        Eigen::Isometry3f(),  // Hpc is set in settings
                                                         camera,
                                                         stream,
                                                         CameraContext::TimeCorrection(),
@@ -152,7 +152,7 @@ namespace module::input {
             context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
 
             // Load Hpc from configuration
-            context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
+            context.Hpc = Eigen::Matrix4f(config["lens"]["Hpc"].as<Expression>());
 
             // Apply image offsets to lens_centre, optical axis:
             int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
@@ -296,9 +296,9 @@ namespace module::input {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
-            Eigen::Isometry3d Htw(sensors.Htw);
-            Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
+            Eigen::Isometry3f Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3f Htw(sensors.Htw);
+            Eigen::Isometry3f Hwp = Htw.inverse() * Htp;
 
             Hwps.emplace_back(sensors.timestamp, Hwp);
         });
@@ -401,21 +401,21 @@ namespace module::input {
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
 
-                Eigen::Isometry3d Hcw;
+                Eigen::Isometry3f Hcw;
 
                 /* Mutex Scope */ {
                     std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
 
-                    Eigen::Isometry3d Hpc = context->Hpc;
-                    Eigen::Isometry3d Hwp;
+                    Eigen::Isometry3f Hpc = context->Hpc;
+                    Eigen::Isometry3f Hwp;
                     if (reactor.Hwps.empty()) {
-                        Hwp = Eigen::Isometry3d::Identity();
+                        Hwp = Eigen::Isometry3f::Identity();
                     }
                     else {
                         // Find the first time that is not less than the target time
                         auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
                                                        reactor.Hwps.end(),
-                                                       std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
+                                                       std::make_pair(msg->timestamp, Eigen::Isometry3f::Identity()),
                                                        [](const auto& a, const auto& b) { return a.first > b.first; });
 
                         if (Hwp_it == reactor.Hwps.end()) {
@@ -435,7 +435,7 @@ namespace module::input {
                         }
                     }
 
-                    Hcw = Eigen::Isometry3d(Hwp * Hpc).inverse();
+                    Hcw = Eigen::Isometry3f(Hwp * Hpc).inverse();
                 }
 
                 msg->lens = context->lens;
