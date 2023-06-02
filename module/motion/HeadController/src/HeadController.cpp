@@ -103,7 +103,7 @@ namespace module::motion {
                 Eigen::Vector3f head_unit_vector =
                     goal_robot_space
                         ? goal_head_unit_vector_world
-                        : Eigen::Isometry3d(sensors.Htw).rotation().cast<float>() * goal_head_unit_vector_world;
+                        : Eigen::Isometry3f(sensors.Htw).rotation().cast<float>() * goal_head_unit_vector_world;
 
                 // Compute inverse kinematics for head
                 // TODO(MotionTeam): MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
