@@ -95,15 +95,15 @@ namespace module::behaviour::strategy {
 
             using namespace std::chrono;
 
-            cfg.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
-                duration<double>(config["ball_last_seen_max_time"].as<double>()));
-            cfg.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
-                duration<double>(config["goal_last_seen_max_time"].as<double>()));
+            cfg.ball_last_seen_max_time =
+                duration_cast<NUClear::clock::duration>(duration<float>(config["ball_last_seen_max_time"].as<float>()));
+            cfg.goal_last_seen_max_time =
+                duration_cast<NUClear::clock::duration>(duration<float>(config["goal_last_seen_max_time"].as<float>()));
 
             cfg.localisation_interval = std::chrono::duration_cast<NUClear::clock::duration>(
-                duration<double>(config["localisation_interval"].as<double>()));
+                duration<float>(config["localisation_interval"].as<float>()));
             cfg.localisation_duration = std::chrono::duration_cast<NUClear::clock::duration>(
-                duration<double>(config["localisation_duration"].as<double>()));
+                duration<float>(config["localisation_duration"].as<float>()));
 
             cfg.start_position_offensive = config["start_position_offensive"].as<Expression>();
             cfg.start_position_defensive = config["start_position_defensive"].as<Expression>();
