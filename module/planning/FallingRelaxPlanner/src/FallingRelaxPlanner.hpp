@@ -14,13 +14,13 @@ namespace module::planning {
 
             struct Levels {
                 /// @brief The mean value of this sensor to subtract
-                double mean;
+                float mean;
                 /// @brief The threshold for this sensor to be considered unstable
-                double unstable;
+                float unstable;
                 /// @brief The threshold for this sensor to be considered falling
-                double falling;
+                float falling;
                 /// @brief The smoothing factor for this sensor
-                double smoothing;
+                float smoothing;
             };
 
             /// @brief The configuration for the gyroscope magnitude check
@@ -39,11 +39,11 @@ namespace module::planning {
 
     private:
         /// @brief the current smoothed value of the gyroscope magnitude
-        double gyro_mag = 0.0;
+        float gyro_mag = 0.0;
         /// @brief the current smoothed value of the accelerometer magnitude
-        double acc_mag = 0.0;
+        float acc_mag = 0.0;
         /// @brief the current smoothed value of the accelerometer angle from upright
-        double acc_angle = 0.0;
+        float acc_angle = 0.0;
     };
 
 }  // namespace module::planning

@@ -70,7 +70,7 @@ namespace module::planning {
                                  std::abs(a.norm() - cfg.acc_mag.mean),
                                  cfg.acc_mag.smoothing);
                 acc_angle = smooth(acc_angle,
-                                   std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
+                                   std::acos(std::min(1.0f, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
                                    cfg.acc_angle.smoothing);
 
                 // Check if we are stable according to each sensor
