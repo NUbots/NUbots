@@ -21,7 +21,7 @@ namespace module::strategy {
             // Use configuration here from file WalkToBall.yaml
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
-                std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
+                std::chrono::duration<float>(config["ball_search_timeout"].as<float>()));
             cfg.ball_y_offset = config["ball_y_offset"].as<float>();
         });
 

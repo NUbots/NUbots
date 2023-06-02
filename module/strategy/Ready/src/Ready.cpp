@@ -22,7 +22,7 @@ namespace module::strategy {
             // Use configuration here from file Ready.yaml
             this->log_level        = config["log_level"].as<NUClear::LogLevel>();
             cfg.walk_to_ready_time = std::chrono::duration_cast<NUClear::clock::duration>(
-                std::chrono::duration<double>(config["walk_to_ready_time"].as<double>()));
+                std::chrono::duration<float>(config["walk_to_ready_time"].as<float>()));
             cfg.walk_to_ready_speed_x  = config["walk_to_ready_speed_x"].as<float>();
             cfg.walk_to_ready_speed_y  = config["walk_to_ready_speed_y"].as<float>();
             cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<float>();
