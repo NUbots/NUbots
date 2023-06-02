@@ -336,8 +336,8 @@ namespace module::skill {
         auto right_leg  = std::make_unique<RightLegIK>();
         left_leg->time  = time;
         right_leg->time = time;
-        left_leg->Htl   = Htl.cast<double>().matrix();
-        right_leg->Htr  = Htr.cast<double>().matrix();
+        left_leg->Htl   = Htl.matrix();
+        right_leg->Htr  = Htr.matrix();
         // Arms
         auto left_arm  = std::make_unique<LeftArm>();
         auto right_arm = std::make_unique<RightArm>();

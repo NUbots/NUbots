@@ -338,10 +338,10 @@ namespace module::purpose {
         }
 
         // Create a unit vector in the direction the head should be pointing
-        Eigen::Vector3d uPCt = (Eigen::AngleAxisd(head_yaw, Eigen::Vector3d::UnitZ())
-                                * Eigen::AngleAxisd(-head_pitch, Eigen::Vector3d::UnitY()))
+        Eigen::Vector3f uPCt = (Eigen::AngleAxisf(head_yaw, Eigen::Vector3f::UnitZ())
+                                * Eigen::AngleAxisf(-head_pitch, Eigen::Vector3f::UnitY()))
                                    .toRotationMatrix()
-                               * Eigen::Vector3d::UnitX();
+                               * Eigen::Vector3f::UnitX();
         emit<Task>(std::make_unique<Look>(uPCt, false));
     }
 

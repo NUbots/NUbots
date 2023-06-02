@@ -49,7 +49,7 @@ namespace module::actuation {
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<LeftLeg>();
                 auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htl), LimbID::LEFT_LEG);
+                    calculateLegJoints<float>(kinematics_model, Eigen::Isometry3f(leg_ik.Htl), LimbID::LEFT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -71,7 +71,7 @@ namespace module::actuation {
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<RightLeg>();
                 auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htr), LimbID::RIGHT_LEG);
+                    calculateLegJoints<float>(kinematics_model, Eigen::Isometry3f(leg_ik.Htr), LimbID::RIGHT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -92,13 +92,13 @@ namespace module::actuation {
 
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<Head>();
-                auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
+                auto joints = calculateHeadJoints<float>(Eigen::Vector3f(head_ik.uPCt));
 
                 // Get head kinematics limits
-                double max_yaw   = kinematics_model.head.MAX_YAW;
-                double min_yaw   = kinematics_model.head.MIN_YAW;
-                double max_pitch = kinematics_model.head.MAX_PITCH;
-                double min_pitch = kinematics_model.head.MIN_PITCH;
+                float max_yaw   = kinematics_model.head.MAX_YAW;
+                float min_yaw   = kinematics_model.head.MIN_YAW;
+                float max_pitch = kinematics_model.head.MAX_PITCH;
+                float min_pitch = kinematics_model.head.MIN_PITCH;
 
                 // Clamp head angles with max/min limits
                 for (auto& joint : joints) {

@@ -85,7 +85,7 @@ namespace module::behaviour::planning {
                            "Simple Walk Path Planner",
                            {
                                // Limb sets required by the walk engine:
-                               std::pair<double, std::set<LimbID>>(
+                               std::pair<float, std::set<LimbID>>(
                                    0,
                                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
                            },
@@ -146,7 +146,7 @@ namespace module::behaviour::planning {
     void SimpleWalkPathPlanner::vision_walk_path(const std::shared_ptr<const FilteredBall>& ball) {
         // If ball exists...
         if (ball) {
-            Eigen::Vector3f rBTt = ball->rBTt.cast<float>();
+            Eigen::Vector3f rBTt = ball->rBTt;
             // Add a offset to the ball position to avoid walking at the ball directly such that the robot can kick
             rBTt.y() = rBTt.y() + cfg.ball_y_offset;
             // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
@@ -159,8 +159,7 @@ namespace module::behaviour::planning {
                                                     std::atan2(walk_command.y(), walk_command.x()),
                                                     cfg.max_turn_speed);
 
-            std::unique_ptr<WalkCommand> command =
-                std::make_unique<WalkCommand>(subsumption_id, walk_command.cast<double>());
+            std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumption_id, walk_command);
 
             emit(std::move(command));
             update_priority(cfg.walk_path_planner_priority);
@@ -173,7 +172,7 @@ namespace module::behaviour::planning {
 
         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
             subsumption_id,
-            Eigen::Vector3d(cfg.rotate_speed_x, cfg.rotate_speed_y, sign * cfg.rotate_speed));
+            Eigen::Vector3f(cfg.rotate_speed_x, cfg.rotate_speed_y, sign * cfg.rotate_speed));
 
         emit(std::move(command));
         update_priority(cfg.walk_path_planner_priority);
@@ -183,7 +182,7 @@ namespace module::behaviour::planning {
 
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumption_id,
-                                          Eigen::Vector3d(cfg.rotate_around_ball_speed_x,
+                                          Eigen::Vector3f(cfg.rotate_around_ball_speed_x,
                                                           cfg.rotate_around_ball_speed_y,
                                                           cfg.rotate_around_ball_speed));
 
@@ -195,7 +194,7 @@ namespace module::behaviour::planning {
 
         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
             subsumption_id,
-            Eigen::Vector3d(cfg.walk_to_ready_speed_x, cfg.walk_to_ready_speed_y, cfg.walk_to_ready_rotation));
+            Eigen::Vector3f(cfg.walk_to_ready_speed_x, cfg.walk_to_ready_speed_y, cfg.walk_to_ready_rotation));
 
         emit(std::move(command));
         update_priority(cfg.walk_path_planner_priority);

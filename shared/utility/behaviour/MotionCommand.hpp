@@ -34,12 +34,12 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand WalkToState(const Eigen::Isometry2d& goalState_) {
+    inline MotionCommand WalkToState(const Eigen::Isometry2f& goalState_) {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::WALK_TO_STATE;
-        cmd.goal_state = Eigen::Vector3d(goalState_.translation().x(),
+        cmd.goal_state = Eigen::Vector3f(goalState_.translation().x(),
                                          goalState_.translation().y(),
-                                         Eigen::Rotation2Dd(goalState_.linear()).angle());
+                                         Eigen::Rotation2Df(goalState_.linear()).angle());
         return cmd;
     }
 
@@ -49,12 +49,12 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand DirectCommand(const Eigen::Isometry2d& walkCommand_) {
+    inline MotionCommand DirectCommand(const Eigen::Isometry2f& walkCommand_) {
         MotionCommand cmd;
         cmd.type         = MotionCommand::Type::Value::DIRECT_COMMAND;
-        cmd.walk_command = Eigen::Vector3d(walkCommand_.translation().x(),
+        cmd.walk_command = Eigen::Vector3f(walkCommand_.translation().x(),
                                            walkCommand_.translation().y(),
-                                           Eigen::Rotation2Dd(walkCommand_.linear()).angle());
+                                           Eigen::Rotation2Df(walkCommand_.linear()).angle());
         return cmd;
     }
 
