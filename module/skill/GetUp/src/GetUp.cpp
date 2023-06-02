@@ -42,12 +42,12 @@ namespace module::skill {
                         emit(std::make_unique<Stability>(Stability::FALLEN));
 
                         // Transform to torso {t} from world {w} space
-                        Eigen::Isometry3d Hwt = Eigen::Isometry3d(sensors.Htw).inverse();
+                        Eigen::Isometry3f Hwt = Eigen::Isometry3f(sensors.Htw).inverse();
 
                         // Decompose our basis axes of the torso {t} into world {w} space
-                        Eigen::Vector3d uXTw = Hwt.rotation().col(0);
-                        Eigen::Vector3d uYTw = Hwt.rotation().col(1);
-                        Eigen::Vector3d uZTw = Hwt.rotation().col(2);
+                        Eigen::Vector3f uXTw = Hwt.rotation().col(0);
+                        Eigen::Vector3f uYTw = Hwt.rotation().col(1);
+                        Eigen::Vector3f uZTw = Hwt.rotation().col(2);
 
                         // Split into six cases (think faces of a cube) to work out which getup script we should run
 

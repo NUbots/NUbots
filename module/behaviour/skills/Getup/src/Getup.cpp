@@ -71,14 +71,14 @@ namespace module::behaviour::skills {
 
         on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
             // Transform to torso {t} from world {w} space
-            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            Eigen::Matrix4f Hwt = sensors.Htw.inverse();
             // Basis Z vector of torso {t} in world {w} space
-            Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+            Eigen::Vector3f uZTw = Hwt.block(0, 2, 3, 1);
             // Basis X vector of torso {t} in world {w} space
-            Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
+            Eigen::Vector3f uXTw = Hwt.block(0, 0, 3, 1);
 
             // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-            if (!getting_up && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
+            if (!getting_up && std::acos(Eigen::Vector3f::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
                 // If the z component of the torso's x basis in world space is negative, the robot is fallen on
                 // its front
                 is_front = (uXTw.z() <= 0);
