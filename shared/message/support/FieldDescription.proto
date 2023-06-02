@@ -37,52 +37,52 @@ message FieldDescription {
     /// Measurements of the field which are loaded from config file. In metres
     message FieldDimensions {
         /// The rules say that the lines must be the same width
-        double line_width = 1;
+        float line_width = 1;
         /// The 'touch line' length - AKA the sideline
-        double field_length = 2;
+        float field_length = 2;
         /// The 'goal line' length - AKA the baseline
-        double field_width = 3;
+        float field_width = 3;
         /// Cross-sectional shape of goal-posts
         GoalpostType goalpost_type = 4;
         /// Distance behind the keeper to the net
-        double goal_depth = 5;
+        float goal_depth = 5;
         /// Distance between inner edges of goal posts
-        double goal_width = 6;
+        float goal_width = 6;
         /// 'Goal area' is equivalent to 6-yard box in soccer. Length is front to back, if you standing in the middle
         /// of the field facing goals
-        double goal_area_length = 7;
+        float goal_area_length = 7;
         /// 'Goal area' is equivalent to 6-yard box in soccer. Width is left to right, if you're standing in the middle
         /// of the field facing goals
-        double goal_area_width = 8;
+        float goal_area_width = 8;
         /// Height to the bottom of the crossbar
-        double goal_crossbar_height = 9;
+        float goal_crossbar_height = 9;
 
-        double goalpost_width = 10;
+        float goalpost_width = 10;
 
-        double goalpost_depth = 11;
+        float goalpost_depth = 11;
 
-        double goal_crossbar_width = 12;
+        float goal_crossbar_width = 12;
 
-        double goal_crossbar_depth = 13;
+        float goal_crossbar_depth = 13;
 
-        double goal_net_height = 14;
+        float goal_net_height = 14;
         /// Measured from the goal line to the middle of the penalty mark
-        double penalty_mark_distance = 15;
+        float penalty_mark_distance = 15;
         /// Diameter of the circle in the center of the field
-        double center_circle_diameter = 16;
+        float center_circle_diameter = 16;
         /// Minimum width of the border strip around the field
-        double border_strip_min_width = 17;
+        float border_strip_min_width = 17;
         /// 'Penalty area' is equivalent to 18-yard box in soccer. Length is from the goal line to the horizontal line
         /// if you're facing the centre of the field from the goal line
-        double penalty_area_length = 18;
+        float penalty_area_length = 18;
         /// 'Penalty area' is equivalent to 18-yard box in soccer. Width is the distance between the sides of the
         ///  penalty box facing the centre of the field/goal
-        double penalty_area_width = 19;
+        float penalty_area_width = 19;
     }
     /// @see Law 2
-    double ball_radius = 1;
+    float ball_radius = 1;
     /// Calculated as goal_crossbar_height + goal_crossbar_width
-    double goalpost_top_height = 2;
+    float goalpost_top_height = 2;
 
     // Coordinates of goalpost centers calculated from the FieldDimensions, in field space
 
