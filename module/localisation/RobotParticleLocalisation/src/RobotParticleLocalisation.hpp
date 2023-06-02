@@ -16,18 +16,18 @@ namespace module::localisation {
 
     class RobotParticleLocalisation : public NUClear::Reactor {
     private:
-        utility::math::filter::ParticleFilter<double, RobotModel> filter;
+        utility::math::filter::ParticleFilter<float, RobotModel> filter;
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
 
         static constexpr int TIME_UPDATE_FREQUENCY = 10;
 
         struct {
-            std::vector<Eigen::Vector3d> start_state{};
-            Eigen::Vector3d start_variance{};
+            std::vector<Eigen::Vector3f> start_state{};
+            Eigen::Vector3f start_variance{};
         } config{};
 
-        [[nodiscard]] static Eigen::Vector3d getFieldPosition(const message::vision::Goal::Side& side,
+        [[nodiscard]] static Eigen::Vector3f getFieldPosition(const message::vision::Goal::Side& side,
                                                               const message::support::FieldDescription& fd,
                                                               const bool& isOwn);
 

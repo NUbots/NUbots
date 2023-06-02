@@ -27,8 +27,8 @@ message ResetBallHypotheses {
 
     message Ball {
         /// Estimate of the balls position in world space
-        vec2 rBWw       = 1;
-        mat2 covariance = 2;
+        fvec2 rBWw       = 1;
+        fmat2 covariance = 2;
     }
 
     repeated Ball hypotheses = 1;

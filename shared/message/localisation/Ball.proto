@@ -25,6 +25,6 @@ import "Matrix.proto";
 
 message Ball {
     /// The ball's position measured in world space (rBWw)
-    vec2 position   = 1;
-    mat2 covariance = 2;
+    fvec2 position   = 1;
+    fmat2 covariance = 2;
 }

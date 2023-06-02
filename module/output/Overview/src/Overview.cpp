@@ -86,16 +86,16 @@ namespace module::output {
 
                 if (sensors) {
                     // Get our world transform
-                    Eigen::Isometry3d Htw(sensors->Htw);
+                    Eigen::Isometry3f Htw(sensors->Htw);
 
                     // If we have field information
                     if (field) {
                         // Transform the field state into Hfw
-                        Eigen::Isometry3d Hfw(field->Hfw);
+                        Eigen::Isometry3f Hfw(field->Hfw);
 
                         // Get our torso in field space
-                        Eigen::Isometry3d Hft = Hfw * Htw.inverse();
-                        Eigen::Vector3d rTFf  = Hft.translation();
+                        Eigen::Isometry3f Hft = Hfw * Htw.inverse();
+                        Eigen::Vector3f rTFf  = Hft.translation();
 
                         // Store our position from field to torso
                         msg->robot_position =
@@ -104,8 +104,8 @@ namespace module::output {
 
                         if (loc_ball) {
                             // Get our ball in field space
-                            Eigen::Vector4d rBWw(loc_ball->position.x(), loc_ball->position.y(), 0.0, 1.0);
-                            Eigen::Vector4d rBFf = Hfw * rBWw;
+                            Eigen::Vector4f rBWw(loc_ball->position.x(), loc_ball->position.y(), 0.0, 1.0);
+                            Eigen::Vector4f rBFf = Hfw * rBWw;
 
                             // Store our position from field to ball
                             msg->ball_position            = Eigen::Vector2f(rBFf.x(), rBFf.y());

@@ -75,7 +75,7 @@ namespace module::localisation {
             : resetRange(Eigen::Matrix<Scalar, 3, 1>::Zero())
             , processNoiseDiagonal(Eigen::Matrix<Scalar, 3, 1>::Ones()) {}
 
-        StateVec time(const StateVec& state, double /*deltaT*/) {
+        StateVec time(const StateVec& state, float /*deltaT*/) {
             return state;
         }
 

@@ -12,14 +12,14 @@ namespace module::localisation {
 
     class BallLocalisation : public NUClear::Reactor {
     private:
-        utility::math::filter::ParticleFilter<double, BallModel> filter;
+        utility::math::filter::ParticleFilter<float, BallModel> filter;
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
         bool ball_pos_log;
 
         struct {
-            std::vector<Eigen::Vector2d> start_state{};
-            Eigen::Vector2d start_variance = Eigen::Vector2d::Zero();
+            std::vector<Eigen::Vector2f> start_state{};
+            Eigen::Vector2f start_variance = Eigen::Vector2f::Zero();
         } config{};
 
     public:

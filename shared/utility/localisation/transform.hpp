@@ -25,43 +25,43 @@
 namespace utility::localisation {
 
     // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
-    inline Eigen::Isometry3d fieldStateToTransform3D(const Eigen::Vector3d& state) {
-        Eigen::Isometry3d Hfw;
-        Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0.0);
-        Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+    inline Eigen::Isometry3f fieldStateToTransform3D(const Eigen::Vector3f& state) {
+        Eigen::Isometry3f Hfw;
+        Hfw.translation() = Eigen::Vector3f(state.x(), state.y(), 0.0);
+        Hfw.linear()      = Eigen::AngleAxisf(state.z(), Eigen::Vector3f::UnitZ()).toRotationMatrix();
         return Hfw;
     }
 
-    inline Eigen::Isometry2d projectTo2D(const Eigen::Isometry3d& m,
-                                         const Eigen::Vector3d& yawAxis,
-                                         const Eigen::Vector3d& forwardAxis) {
-        Eigen::Isometry2d result;
+    inline Eigen::Isometry2f projectTo2D(const Eigen::Isometry3f& m,
+                                         const Eigen::Vector3f& yawAxis,
+                                         const Eigen::Vector3f& forwardAxis) {
+        Eigen::Isometry2f result;
 
         // Translation
-        const Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
-        const Eigen::Vector3d r                = m.translation();
-        Eigen::Isometry3d newSpaceToWorld(Eigen::Isometry3d::Identity());
+        const Eigen::Vector3f orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
+        const Eigen::Vector3f r                = m.translation();
+        Eigen::Isometry3f newSpaceToWorld(Eigen::Isometry3f::Identity());
         newSpaceToWorld.linear().leftCols<1>()    = orthoForwardAxis;
         newSpaceToWorld.linear().middleCols<1>(1) = yawAxis.cross(orthoForwardAxis);
         newSpaceToWorld.linear().rightCols<1>()   = yawAxis;
-        const Eigen::Isometry3d worldToNewSpace(newSpaceToWorld.inverse());
-        Eigen::Vector3d rNewSpace = worldToNewSpace * r;
+        const Eigen::Isometry3f worldToNewSpace(newSpaceToWorld.inverse());
+        Eigen::Vector3f rNewSpace = worldToNewSpace * r;
         result.translation()      = rNewSpace.head<2>();
 
         // Rotation
-        Eigen::Isometry3d rot(m);
-        rot.translation() = Eigen::Vector3d::Zero();
-        const Eigen::Vector3d x(rot.linear().leftCols<1>());
-        const Eigen::Vector3d xNew(worldToNewSpace * x);
+        Eigen::Isometry3f rot(m);
+        rot.translation() = Eigen::Vector3f::Zero();
+        const Eigen::Vector3f x(rot.linear().leftCols<1>());
+        const Eigen::Vector3f xNew(worldToNewSpace * x);
         const float theta_x_from_f = std::atan2(xNew.y(), xNew.x());  // sin/cos
-        result.linear()            = Eigen::Rotation2Dd(theta_x_from_f).toRotationMatrix();
+        result.linear()            = Eigen::Rotation2Df(theta_x_from_f).toRotationMatrix();
 
         return result;
     }
 
     // Transforms the transform
-    inline Eigen::Isometry2d transform3DToFieldState(const Eigen::Isometry3d& m) {
-        return projectTo2D(m, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
+    inline Eigen::Isometry2f transform3DToFieldState(const Eigen::Isometry3f& m) {
+        return projectTo2D(m, Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitX());
     }
 
 }  // namespace utility::localisation

@@ -45,28 +45,28 @@ namespace module::localisation {
                 /* Perform time update */
                 using namespace std::chrono;
                 const auto curr_time  = NUClear::clock::now();
-                const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                const float seconds   = duration_cast<duration<float>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
 
                 filter.time(seconds);
 
                 // Get filter state and transform
-                Eigen::Vector3d state(filter.get_state());
+                Eigen::Vector3f state(filter.get_state());
                 emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
                 auto field(std::make_unique<Field>());
-                Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
-                Hfw.translation() = Eigen::Vector3d(state[RobotModel<double>::kX], state[RobotModel<double>::kY], 0);
+                Eigen::Isometry3f Hfw(Eigen::Isometry3f::Identity());
+                Hfw.translation() = Eigen::Vector3f(state[RobotModel<float>::kX], state[RobotModel<float>::kY], 0);
                 Hfw.linear() =
-                    Eigen::AngleAxisd(state[RobotModel<double>::kAngle], Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                    Eigen::AngleAxisf(state[RobotModel<float>::kAngle], Eigen::Vector3f::UnitZ()).toRotationMatrix();
                 field->Hfw        = Hfw.matrix();
                 field->covariance = filter.get_covariance();
 
                 log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
-                                                state[RobotModel<double>::kX],
-                                                state[RobotModel<double>::kY],
-                                                state[RobotModel<double>::kAngle]));
+                                                state[RobotModel<float>::kX],
+                                                state[RobotModel<float>::kY],
+                                                state[RobotModel<float>::kAngle]));
 
                 emit(field);
             });
@@ -78,7 +78,7 @@ namespace module::localisation {
                     // Perform time update
                     using namespace std::chrono;
                     const auto curr_time  = NUClear::clock::now();
-                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                    const float seconds   = duration_cast<duration<float>>(curr_time - last_time_update_time).count();
                     last_time_update_time = curr_time;
 
                     filter.time(seconds);
@@ -103,8 +103,8 @@ namespace module::localisation {
                                     // this is a real measurement
                                     auto own_filter = filter;
                                     const auto own_logits =
-                                        own_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
-                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                        own_filter.measure(Eigen::Vector3f(m.srGCc.cast<float>()),
+                                                           Eigen::Matrix3f(m.covariance.cast<float>()),
                                                            getFieldPosition(goal_post.side, fd, true),
                                                            goals.Hcw);
 
@@ -112,22 +112,22 @@ namespace module::localisation {
                                     // thinks this is a real measurement
                                     auto opp_filter = filter;
                                     const auto opp_logits =
-                                        opp_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
-                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                        opp_filter.measure(Eigen::Vector3f(m.srGCc.cast<float>()),
+                                                           Eigen::Matrix3f(m.covariance.cast<float>()),
                                                            getFieldPosition(goal_post.side, fd, false),
                                                            goals.Hcw);
 
                                     if (log_level <= NUClear::DEBUG) {
-                                        const Eigen::Vector3d state(filter.get_state());
-                                        Eigen::Isometry3d Hfw;
-                                        Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
+                                        const Eigen::Vector3f state(filter.get_state());
+                                        Eigen::Isometry3f Hfw;
+                                        Hfw.translation() = Eigen::Vector3f(state.x(), state.y(), 0);
                                         Hfw.linear() =
-                                            Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                                            Eigen::AngleAxisf(state.z(), Eigen::Vector3f::UnitZ()).toRotationMatrix();
 
-                                        const Eigen::Isometry3d Hcf(goals.Hcw * Hfw.inverse().matrix());
-                                        const Eigen::Vector3d rGCc_own(Hcf
+                                        const Eigen::Isometry3f Hcf(goals.Hcw * Hfw.inverse().matrix());
+                                        const Eigen::Vector3f rGCc_own(Hcf
                                                                        * getFieldPosition(goal_post.side, fd, true));
-                                        const Eigen::Vector3d rGCc_opp(Hcf
+                                        const Eigen::Vector3f rGCc_opp(Hcf
                                                                        * getFieldPosition(goal_post.side, fd, false));
 
                                         log<NUClear::DEBUG>(
@@ -147,8 +147,8 @@ namespace module::localisation {
                                 }
                                 else {
                                     // Keep track of our best option
-                                    double best_logits = std::numeric_limits<double>::lowest();
-                                    auto best_filter   = filter;
+                                    float best_logits = std::numeric_limits<float>::lowest();
+                                    auto best_filter  = filter;
 
                                     // Check the measurement against each possible goal post and find the best match
                                     for (const auto& post : std::initializer_list<std::pair<VisionGoal::Side, bool>>{
@@ -158,9 +158,9 @@ namespace module::localisation {
                                              {VisionGoal::Side::RIGHT, false}}) {
                                         auto current_filter = filter;
 
-                                        const double current_logits =
-                                            current_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
-                                                                   Eigen::Matrix3d(m.covariance.cast<double>()),
+                                        const float current_logits =
+                                            current_filter.measure(Eigen::Vector3f(m.srGCc.cast<float>()),
+                                                                   Eigen::Matrix3f(m.covariance.cast<float>()),
                                                                    getFieldPosition(post.first, fd, post.second),
                                                                    goals.Hcw);
 
@@ -184,7 +184,7 @@ namespace module::localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
-                std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> hypotheses;
+                std::vector<std::pair<Eigen::Vector3f, Eigen::Matrix3f>> hypotheses;
                 if (locReset.hypotheses.empty()) {
                     for (const auto& state : config.start_state) {
                         hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
@@ -193,31 +193,31 @@ namespace module::localisation {
                     return;
                 }
 
-                const Eigen::Isometry3d Htw(sensors.Htw);
+                const Eigen::Isometry3f Htw(sensors.Htw);
                 for (const auto& s : locReset.hypotheses) {
 
                     // Calculate the reset state
-                    Eigen::Isometry3d Hft;
-                    Hft.translation() = Eigen::Vector3d(s.rTFf.x(), s.rTFf.y(), 0);
+                    Eigen::Isometry3f Hft;
+                    Hft.translation() = Eigen::Vector3f(s.rTFf.x(), s.rTFf.y(), 0);
                     // Linear part of transform is `s.heading` radians rotation about Z axis
-                    Hft.linear() = Eigen::AngleAxisd(s.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-                    const Eigen::Isometry3d Hfw(Hft * Htw);
+                    Hft.linear() = Eigen::AngleAxisf(s.heading, Eigen::Vector3f::UnitZ()).toRotationMatrix();
+                    const Eigen::Isometry3f Hfw(Hft * Htw);
 
-                    const Eigen::Isometry2d hfw_2d_projection(
-                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX()));
+                    const Eigen::Isometry2f hfw_2d_projection(
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitX()));
 
-                    const Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),
+                    const Eigen::Vector3f hfw_state_vec(hfw_2d_projection.translation().x(),
                                                         hfw_2d_projection.translation().y(),
-                                                        Eigen::Rotation2Dd(hfw_2d_projection.rotation()).angle());
+                                                        Eigen::Rotation2Df(hfw_2d_projection.rotation()).angle());
 
                     // Calculate the reset covariance
-                    const Eigen::Rotation2Dd Hfw_xy(
-                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX())
+                    const Eigen::Rotation2Df Hfw_xy(
+                        utility::localisation::projectTo2D(Hfw, Eigen::Vector3f::UnitZ(), Eigen::Vector3f::UnitX())
                             .rotation());
 
-                    const Eigen::Rotation2Dd pos_cov(Hfw_xy * s.covariance * Hfw_xy.matrix().transpose());
+                    const Eigen::Rotation2Df pos_cov(Hfw_xy * s.covariance * Hfw_xy.matrix().transpose());
 
-                    Eigen::Matrix3d state_cov(Eigen::Matrix3d::Identity());
+                    Eigen::Matrix3f state_cov(Eigen::Matrix3f::Identity());
                     state_cov.topLeftCorner(2, 2) = pos_cov.matrix();
                     state_cov(2, 2)               = s.heading_var;
                     hypotheses.emplace_back(std::make_pair(hfw_state_vec, state_cov));
@@ -266,7 +266,7 @@ namespace module::localisation {
             //                                 0.0,
             //                                 -M_PI);
 
-            std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> hypotheses;
+            std::vector<std::pair<Eigen::Vector3f, Eigen::Matrix3f>> hypotheses;
             for (const auto& state : config.start_state) {
                 hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
             }
@@ -275,7 +275,7 @@ namespace module::localisation {
     }
 
     // True goal position
-    [[nodiscard]] Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(
+    [[nodiscard]] Eigen::Vector3f RobotParticleLocalisation::getFieldPosition(
         const VisionGoal::Side& side,
         const message::support::FieldDescription& fd,
         const bool& isOwn) {
@@ -283,18 +283,18 @@ namespace module::localisation {
         const bool right = (side == VisionGoal::Side::RIGHT);
 
         if (isOwn && left) {
-            return Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
         }
         if (isOwn && right) {
-            return Eigen::Vector3d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
         }
         if (!isOwn && left) {
-            return Eigen::Vector3d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
         }
         if (!isOwn && right) {
-            return Eigen::Vector3d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
         }
 
-        return Eigen::Vector3d::Zero();
+        return Eigen::Vector3f::Zero();
     }
 }  // namespace module::localisation

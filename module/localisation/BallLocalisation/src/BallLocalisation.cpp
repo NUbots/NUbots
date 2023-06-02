@@ -67,7 +67,7 @@ namespace module::localisation {
             // Infront of our feet (Penalty shootout)
             config.start_state.emplace_back(0.2, 0);
 
-            std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
+            std::vector<std::pair<Eigen::Vector2f, Eigen::Matrix2f>> hypotheses;
             for (const auto& state : config.start_state) {
                 hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
             }
@@ -79,7 +79,7 @@ namespace module::localisation {
             /* Perform time update */
             using namespace std::chrono;
             const auto curr_time  = NUClear::clock::now();
-            const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+            const float seconds   = duration_cast<duration<float>>(curr_time - last_time_update_time).count();
             last_time_update_time = curr_time;
             filter.time(seconds);
 
@@ -102,7 +102,7 @@ namespace module::localisation {
                 // Call Time Update first
                 using namespace std::chrono;
                 const auto curr_time  = NUClear::clock::now();
-                const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                const float seconds   = duration_cast<duration<float>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
                 filter.time(seconds);
                 for (const auto& ball : balls.balls) {
@@ -111,8 +111,8 @@ namespace module::localisation {
                         // Now call Measurement Update. Supports multiple measurement methods and will treat them as
                         // separate measurements
                         for (const auto& measurement : ball.measurements) {
-                            filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
-                                           Eigen::Matrix3d(measurement.covariance.cast<double>()),
+                            filter.measure(Eigen::Vector3f(measurement.srBCc.cast<float>()),
+                                           Eigen::Matrix3f(measurement.covariance.cast<float>()),
                                            field,
                                            balls.Hcw);
                         }
@@ -127,7 +127,7 @@ namespace module::localisation {
                 // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
                 // starting position
                 if (locReset.self_reset) {
-                    std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
+                    std::vector<std::pair<Eigen::Vector2f, Eigen::Matrix2f>> hypotheses;
                     for (const auto& state : config.start_state) {
                         hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
                     }
@@ -136,7 +136,7 @@ namespace module::localisation {
                 // Otherwise reset balls to the [0, 0] field position
                 else {
                     // Set the filter state to the field origin relative to us
-                    Eigen::Isometry3d Hfw = Eigen::Isometry3d(field.Hfw);
+                    Eigen::Isometry3f Hfw = Eigen::Isometry3f(field.Hfw);
                     filter.set_state(Hfw.translation().head(2), config.start_variance.asDiagonal());
                 }
             });
