@@ -40,7 +40,7 @@ namespace module::skill {
 
         on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
             // Normalise the look vector
-            Eigen::Vector3d req_uPCt = look.rPCt.normalized();
+            Eigen::Vector3f req_uPCt = look.rPCt.normalized();
 
             // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
             // locking on to the target

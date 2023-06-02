@@ -39,14 +39,14 @@ namespace module::planning {
             // of cfg.search_positions
             if (time_since_last_search_moved > cfg.search_fixation_time) {
                 // Send command for look position
-                double yaw   = cfg.search_positions[search_idx][0];
-                double pitch = cfg.search_positions[search_idx][1];
+                float yaw   = cfg.search_positions[search_idx][0];
+                float pitch = cfg.search_positions[search_idx][1];
 
                 // Make a vector pointing straight forwards and rotate it by the pitch and yaw
-                Eigen::Vector3d uPCt = (Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ())
-                                        * Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()))
+                Eigen::Vector3f uPCt = (Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ())
+                                        * Eigen::AngleAxisf(pitch, Eigen::Vector3f::UnitY()))
                                            .toRotationMatrix()
-                                       * Eigen::Vector3d::UnitX();
+                                       * Eigen::Vector3f::UnitX();
                 emit<Task>(std::make_unique<Look>(uPCt, false));
 
                 // Move to next search position in list

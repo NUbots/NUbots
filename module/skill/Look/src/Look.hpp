@@ -22,7 +22,7 @@ namespace module::skill {
         bool smooth = false;
 
         /// @brief Last goal vector, used for smoothing
-        Eigen::Vector3d uPCt = Eigen::Vector3d::Zero();
+        Eigen::Vector3f uPCt = Eigen::Vector3f::Zero();
 
     public:
         /// @brief Called by the powerplant to build and setup the Look reactor.
