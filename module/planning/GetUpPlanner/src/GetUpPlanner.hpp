@@ -14,13 +14,13 @@ namespace module::planning {
             /// @brief The number of frames we need to be at recovery levels before we trigger
             int count = 30;
             /// @brief The cosine of the angle we need to be at to trigger
-            double cos_angle = 0.0;
+            float cos_angle = 0.0;
             /// @brief The maximum rate the gyro can be moving at to trigger
-            double gyro = 0.0;
+            float gyro = 0.0;
             /// @brief The acceleration due to gravity to remove from the accelerometer readings
-            double g = 9.8;
+            float g = 9.8;
             /// @brief The maximum acceleration we can have to trigger
-            double acc = 0.0;
+            float acc = 0.0;
         } cfg;
 
     public:

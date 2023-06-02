@@ -36,9 +36,9 @@ namespace module::planning {
                 if (info.run_reason == RunInfo::OTHER_TRIGGER) {
                     // Calculate our recovery values
                     // Htw(2, 2) contains the dot product of the z axis of the torso with the world z axis (cos_angle)
-                    double cos_angle = sensors.Htw(2, 2);
-                    double acc       = sensors.accelerometer.norm() - cfg.g;
-                    double gyro      = sensors.gyroscope.x() + sensors.gyroscope.y() + sensors.gyroscope.z();
+                    float cos_angle = sensors.Htw(2, 2);
+                    float acc       = sensors.accelerometer.norm() - cfg.g;
+                    float gyro      = sensors.gyroscope.x() + sensors.gyroscope.y() + sensors.gyroscope.z();
 
                     // Check if we are at recovery levels
                     bool recovery = cos_angle < cfg.cos_angle && acc < cfg.acc && gyro < cfg.gyro;

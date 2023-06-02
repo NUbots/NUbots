@@ -21,7 +21,7 @@ namespace module::planning {
     using utility::skill::load_script;
     using utility::support::Expression;
 
-    double smooth(double value, double new_value, double alpha) {
+    float smooth(float value, float new_value, float alpha) {
         return alpha * value + (1.0 - alpha) * new_value;
     }
 
