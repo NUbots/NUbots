@@ -1,7 +1,0 @@
-log_level: INFO
-
-# Priority in subsumption system when a kick is requested
-kick_priority: 4
-
-# Time between kick command message and kicking before kick is discarded (milliseconds)
-message_timeout: 3000
