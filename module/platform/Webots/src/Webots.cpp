@@ -260,7 +260,7 @@ namespace module::platform {
             CameraContext context;
             context.name = name;
             context.id   = num_cameras++;
-            context.Hpc  = Eigen::Matrix4f(config["lens"]["Hpc"].as<Expression>());  // Load Hpc from configuration
+            context.Hpc  = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());  // Load Hpc from configuration
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
@@ -306,9 +306,9 @@ namespace module::platform {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Isometry3f Htp(sensors.Htx[ServoID::HEAD_PITCH]);
-            Eigen::Isometry3f Htw(sensors.Htw);
-            Eigen::Isometry3f Hwp = Htw.inverse() * Htp;
+            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htw(sensors.Htw);
+            Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
             Hwps.emplace_back(sensors.timestamp, Hwp);
         });
@@ -807,18 +807,18 @@ namespace module::platform {
             image->id        = camera_context[camera.name].id;
             image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
 
-            Eigen::Isometry3f Hcw;
+            Eigen::Isometry3d Hcw;
 
             /* Mutex Scope */ {
                 std::lock_guard<std::mutex> lock(sensors_mutex);
 
-                const Eigen::Isometry3f& Hpc = camera_context[camera.name].Hpc;
-                Eigen::Isometry3f Hwp        = Eigen::Isometry3f::Identity();
+                const Eigen::Isometry3d& Hpc = camera_context[camera.name].Hpc;
+                Eigen::Isometry3d Hwp        = Eigen::Isometry3d::Identity();
                 if (!Hwps.empty()) {
                     // Find the first time that is not less than the target time
                     auto Hwp_it = std::lower_bound(Hwps.begin(),
                                                    Hwps.end(),
-                                                   std::make_pair(image->timestamp, Eigen::Isometry3f::Identity()),
+                                                   std::make_pair(image->timestamp, Eigen::Isometry3d::Identity()),
                                                    [](const auto& a, const auto& b) { return a.first > b.first; });
 
                     if (Hwp_it == Hwps.end()) {
@@ -838,7 +838,7 @@ namespace module::platform {
                     }
                 }
 
-                Hcw = Eigen::Isometry3f(Hwp * Hpc).inverse();
+                Hcw = Eigen::Isometry3d(Hwp * Hpc).inverse();
             }
 
             image->lens = camera_context[camera.name].lens;
