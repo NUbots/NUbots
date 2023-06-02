@@ -79,9 +79,9 @@ namespace module::platform {
         uint64_t current_real_time = 0;
         /// @brief Interpolation factor to smooth clock. 0.0 is no smoothing (raw updates from Webots), 1.0 takes no
         /// updates from Webots
-        double clock_smoothing = 0.0;
+        float clock_smoothing = 0.0;
         /// @brief Real time factor of the simulation clock
-        double rtf = 1.0;
+        float rtf = 1.0;
 
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
@@ -90,8 +90,8 @@ namespace module::platform {
         /// @brief The minimum allowed time between two sensor measurements, not including the camera
         int min_sensor_time_step;
         /// @brief The maximum velocity allowed by the NUgus motors in webots
-        double max_velocity_mx64;
-        double max_velocity_mx106;
+        float max_velocity_mx64;
+        float max_velocity_mx106;
 
         /// @brief Current state of a servo
         struct ServoState {
@@ -104,18 +104,18 @@ namespace module::platform {
             /// @brief Name of the servo
             std::string name;
 
-            double p_gain = 32.0 / 255.0;
+            float p_gain = 32.0 / 255.0;
             // `i` and `d` gains are always 0
-            static constexpr double i_gain = 0.0;
-            static constexpr double d_gain = 0.0;
+            static constexpr float i_gain = 0.0;
+            static constexpr float d_gain = 0.0;
 
-            double moving_speed  = 0.0;
-            double goal_position = 0.0;
-            double torque        = 0.0;  // 0.0 to 1.0
+            float moving_speed  = 0.0;
+            float goal_position = 0.0;
+            float torque        = 0.0;  // 0.0 to 1.0
 
             /// Values that are read from the simulator
-            double present_position = 0.0;
-            double present_speed    = 0.0;
+            float present_position = 0.0;
+            float present_speed    = 0.0;
         };
 
         /// @brief Our current servo states
@@ -129,7 +129,7 @@ namespace module::platform {
         bool connection_active = false;
 
         std::mutex sensors_mutex;
-        std::vector<std::pair<NUClear::clock::time_point, Eigen::Isometry3d>> Hwps;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Isometry3f>> Hwps;
 
         struct CameraContext {
             std::string name;
@@ -137,7 +137,7 @@ namespace module::platform {
             message::input::Image::Lens lens;
             // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is
             // attached to
-            Eigen::Isometry3d Hpc;
+            Eigen::Isometry3f Hpc;
         };
         std::map<std::string, CameraContext> camera_context;
         uint32_t num_cameras = 0;
