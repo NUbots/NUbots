@@ -157,10 +157,10 @@ namespace module::platform::cm740 {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
             [this](const std::shared_ptr<const Sensors>& previousSensors) {
                 if (previousSensors) {
-                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
-                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
-                    Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
-                    Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
+                    Eigen::Isometry3f Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
+                    Eigen::Isometry3f Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
+                    Eigen::Vector3f torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
+                    Eigen::Vector3f torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
                     if (torsoFromRightFoot.z() > torsoFromLeftFoot.z()) {
                         setLeftFootDown(false);
@@ -186,12 +186,12 @@ namespace module::platform::cm740 {
                         servo.present_position = servo.goal_position;
                     }
                     else {
-                        Eigen::Vector3d present(std::cos(servo.present_position),
+                        Eigen::Vector3f present(std::cos(servo.present_position),
                                                 std::sin(servo.present_position),
                                                 0.0);
-                        Eigen::Vector3d goal(std::cos(servo.goal_position), std::sin(servo.goal_position), 0.0);
+                        Eigen::Vector3f goal(std::cos(servo.goal_position), std::sin(servo.goal_position), 0.0);
 
-                        Eigen::Vector3d cross = present.cross(goal);
+                        Eigen::Vector3f cross = present.cross(goal);
                         if (cross.z() > 0) {
                             servo.present_position =
                                 utility::math::angle::normalizeAngle(servo.present_position + movingSpeed);
