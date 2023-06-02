@@ -53,7 +53,7 @@ namespace module::input {
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Unscented kalman filter for pose estimation
-        utility::math::filter::UKF<double, MotionModel> ukf{};
+        utility::math::filter::UKF<float, MotionModel> ukf{};
 
         /// @brief Number of states in the Kalman filter. x = [roll, pitch, roll rate, pitch rate]'
         static const size_t n_states = 4;
@@ -65,7 +65,7 @@ namespace module::input {
         static const size_t n_measurements = 4;
 
         /// @brief Kalman filter for pose estimation
-        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
+        utility::math::filter::KalmanFilter<float, n_states, n_inputs, n_measurements> kf{};
 
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
@@ -177,78 +177,78 @@ namespace module::input {
             //  **************************************** UKF Config ****************************************
             /// @brief Config for the UKF
             struct UKF {
-                Eigen::Vector3d velocity_decay = Eigen::Vector3d::Zero();
+                Eigen::Vector3f velocity_decay = Eigen::Vector3f::Zero();
 
                 struct Noise {
                     Noise() = default;
                     struct Measurement {
-                        Eigen::Matrix3d accelerometer           = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d accelerometer_magnitude = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d gyroscope               = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d flat_foot_odometry      = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix4d flat_foot_orientation   = Eigen::Matrix4d::Zero();
+                        Eigen::Matrix3f accelerometer           = Eigen::Matrix3f::Zero();
+                        Eigen::Matrix3f accelerometer_magnitude = Eigen::Matrix3f::Zero();
+                        Eigen::Matrix3f gyroscope               = Eigen::Matrix3f::Zero();
+                        Eigen::Matrix3f flat_foot_odometry      = Eigen::Matrix3f::Zero();
+                        Eigen::Matrix4f flat_foot_orientation   = Eigen::Matrix4f::Zero();
                     } measurement{};
                     struct Process {
-                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
+                        Eigen::Vector3f position            = Eigen::Vector3f::Zero();
+                        Eigen::Vector3f velocity            = Eigen::Vector3f::Zero();
+                        Eigen::Vector4f rotation            = Eigen::Vector4f::Zero();
+                        Eigen::Vector3f rotational_velocity = Eigen::Vector3f::Zero();
+                        Eigen::Vector3f gyroscope_bias      = Eigen::Vector3f::Zero();
                     } process{};
                 } noise{};
                 struct Initial {
                     Initial() = default;
                     struct Mean {
-                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
+                        Eigen::Vector3f position            = Eigen::Vector3f::Zero();
+                        Eigen::Vector3f velocity            = Eigen::Vector3f::Zero();
+                        Eigen::Vector4f rotation            = Eigen::Vector4f::Zero();
+                        Eigen::Vector3f rotational_velocity = Eigen::Vector3f::Zero();
+                        Eigen::Vector3f gyroscope_bias      = Eigen::Vector3f::Zero();
                     } mean{};
                     struct Covariance {
-                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
+                        Eigen::Vector3f position            = Eigen::Vector3f::Zero();
+                        Eigen::Vector3f velocity            = Eigen::Vector3f::Zero();
+                        Eigen::Vector4f rotation            = Eigen::Vector4f::Zero();
+                        Eigen::Vector3f rotational_velocity = Eigen::Vector3f::Zero();
+                        Eigen::Vector3f gyroscope_bias      = Eigen::Vector3f::Zero();
                     } covariance{};
                 } initial{};
             } ukf{};
 
             /// @brief Initial state of the for the UKF filter
-            MotionModel<double>::StateVec initial_mean;
+            MotionModel<float>::StateVec initial_mean;
 
             /// @brief Initial covariance of the for the UKF filter
-            MotionModel<double>::StateVec initial_covariance;
+            MotionModel<float>::StateVec initial_covariance;
 
             /// @brief Parameter for scaling the walk command to better match actual achieved velocity
-            Eigen::Vector3d deadreckoning_scale = Eigen::Vector3d::Zero();
+            Eigen::Vector3f deadreckoning_scale = Eigen::Vector3f::Zero();
 
             //  **************************************** Kalman Filter Config ****************************************
             /// @brief Kalman Continuous time process model
-            Eigen::Matrix<double, n_states, n_states> Ac;
+            Eigen::Matrix<float, n_states, n_states> Ac;
 
             /// @brief Kalman Continuous time input model
-            Eigen::Matrix<double, n_states, n_inputs> Bc;
+            Eigen::Matrix<float, n_states, n_inputs> Bc;
 
             /// @brief Kalman Continuous time measurement model
-            Eigen::Matrix<double, n_measurements, n_states> C;
+            Eigen::Matrix<float, n_measurements, n_states> C;
 
             /// @brief Kalman Process noise
-            Eigen::Matrix<double, n_states, n_states> Q;
+            Eigen::Matrix<float, n_states, n_states> Q;
 
             /// @brief Kalman Measurement noise
-            Eigen::Matrix<double, n_measurements, n_measurements> R;
+            Eigen::Matrix<float, n_measurements, n_measurements> R;
 
             //  **************************************** Mahony Filter Config ****************************************
             /// @brief Mahony filter bias
-            Eigen::Vector3d bias = Eigen::Vector3d::Zero();
+            Eigen::Vector3f bias = Eigen::Vector3f::Zero();
 
             /// @brief Mahony filter proportional gain
-            double Ki = 0.0;
+            float Ki = 0.0;
 
             /// @brief Mahony filter integral gain
-            double Kp = 0.0;
+            float Kp = 0.0;
         } cfg;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
@@ -276,7 +276,7 @@ namespace module::input {
         /// @param previous_sensors The previous sensors message
         /// @param raw_sensors The raw sensor data
         /// @param dt The time since the last update
-        void integrate_walkcommand(const double dt);
+        void integrate_walkcommand(const float dt);
 
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
@@ -322,13 +322,13 @@ namespace module::input {
 
     private:
         /// @brief Dead reckoning yaw orientation of the robot in world space
-        double yaw = 0;
+        float yaw = 0;
 
         /// @brief Transform of torso from world space
-        Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+        Eigen::Isometry3f Hwt = Eigen::Isometry3f::Identity();
 
         /// @brief Current walk command
-        Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
+        Eigen::Vector3f walk_command = Eigen::Vector3f::Zero();
 
         /// @brief Bool to indicate if the robot is falling
         bool falling = false;
@@ -350,7 +350,7 @@ namespace module::input {
         std::array<bool, 2> previous_foot_down = {false, false};
 
         // Foot to world in foot-flat (both feet down) rotation at the timestep with the most recent foot landing
-        std::array<Eigen::Isometry3d, 2> footlanding_Hwf{};
+        std::array<Eigen::Isometry3f, 2> footlanding_Hwf{};
 
         // Handle for the sensor filter update loop, allows disabling new sensor updates when a reset event occurs
         ReactionHandle update_loop{};

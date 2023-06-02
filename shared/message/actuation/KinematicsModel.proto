@@ -86,15 +86,15 @@ message KinematicsModel {
     /// {CoM_x, CoM_y, CoM_z, mass} in SI units
     /// A Particles CoM is in particle space
     message MassModel {
-        vec4 head        = 1;
-        vec4 arm_upper   = 2;
-        vec4 arm_lower   = 3;
-        vec4 torso       = 4;
-        vec4 hip_block   = 5;
-        vec4 leg_upper   = 6;
-        vec4 leg_lower   = 7;
-        vec4 ankle_block = 8;
-        vec4 foot        = 9;
+        fvec4 head        = 1;
+        fvec4 arm_upper   = 2;
+        fvec4 arm_lower   = 3;
+        fvec4 torso       = 4;
+        fvec4 hip_block   = 5;
+        fvec4 leg_upper   = 6;
+        fvec4 leg_lower   = 7;
+        fvec4 ankle_block = 8;
+        fvec4 foot        = 9;
     }
 
     /// Particle inertial tensors (in particle space) with respect to the CoM of
@@ -104,15 +104,15 @@ message KinematicsModel {
     ///  [xz, yz, zz]]
     /// SI Units
     message TensorModel {
-        mat3 head        = 1;
-        mat3 arm_upper   = 2;
-        mat3 arm_lower   = 3;
-        mat3 torso       = 4;
-        mat3 hip_block   = 5;
-        mat3 leg_upper   = 6;
-        mat3 leg_lower   = 7;
-        mat3 ankle_block = 8;
-        mat3 foot        = 9;
+        fmat3 head        = 1;
+        fmat3 arm_upper   = 2;
+        fmat3 arm_lower   = 3;
+        fmat3 torso       = 4;
+        fmat3 hip_block   = 5;
+        fmat3 leg_upper   = 6;
+        fmat3 leg_lower   = 7;
+        fmat3 ankle_block = 8;
+        fmat3 foot        = 9;
     }
 
     Leg         leg          = 1;

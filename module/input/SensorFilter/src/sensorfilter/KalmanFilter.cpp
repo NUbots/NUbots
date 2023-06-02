@@ -42,14 +42,14 @@ namespace module::input {
 
     void SensorFilter::configure_kf(const Configuration& config) {
         // Kalman Filter Config
-        cfg.Ac           = Eigen::Matrix<double, n_states, n_states>(config["kalman"]["Ac"].as<Expression>());
-        cfg.C            = Eigen::Matrix<double, n_measurements, n_states>(config["kalman"]["C"].as<Expression>());
-        cfg.Q.diagonal() = Eigen::VectorXd(config["kalman"]["Q"].as<Expression>());
-        cfg.R.diagonal() = Eigen::VectorXd(config["kalman"]["R"].as<Expression>());
+        cfg.Ac           = Eigen::Matrix<float, n_states, n_states>(config["kalman"]["Ac"].as<Expression>());
+        cfg.C            = Eigen::Matrix<float, n_measurements, n_states>(config["kalman"]["C"].as<Expression>());
+        cfg.Q.diagonal() = Eigen::VectorXf(config["kalman"]["Q"].as<Expression>());
+        cfg.R.diagonal() = Eigen::VectorXf(config["kalman"]["R"].as<Expression>());
         // Initialise the Kalman filter
         kf.update(cfg.Ac, cfg.Bc, cfg.C, cfg.Q, cfg.R);
-        kf.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
-        Hwt.translation() = Eigen::VectorXd(config["kalman"]["initial_rTWw"].as<Expression>());
+        kf.reset(Eigen::VectorXf::Zero(n_states), Eigen::MatrixXf::Identity(n_states, n_states));
+        Hwt.translation() = Eigen::VectorXf(config["kalman"]["initial_rTWw"].as<Expression>());
         update_loop.enable();
     }
 
@@ -58,49 +58,49 @@ namespace module::input {
                                           const RawSensors& raw_sensors) {
         // **************** Time Update ****************
         // Calculate our time offset from the last read then update the filter's time
-        const double dt = std::max(
-            std::chrono::duration_cast<std::chrono::duration<double>>(
+        const float dt = std::max(
+            std::chrono::duration_cast<std::chrono::duration<float>>(
                 raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
                 .count(),
-            0.0);
+            0.0f);
 
         // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
         integrate_walkcommand(dt);
 
         // Integrate the rotational velocity to predict the change in orientation (roll, pitch)
-        Eigen::Matrix<double, n_inputs, 1> u;
+        Eigen::Matrix<float, n_inputs, 1> u;
         kf.time(u, dt);
 
         // **************** Roll/Pitch Orientation Measurement Update ****************
         // Calculate the roll and pitch estimates from the accelerometer
-        double est_roll  = std::atan2(sensors->accelerometer.y(), sensors->accelerometer.z());
-        double est_pitch = std::atan2(-sensors->accelerometer.x(),
-                                      std::sqrt(sensors->accelerometer.y() * sensors->accelerometer.y()
-                                                + sensors->accelerometer.z() * sensors->accelerometer.z()));
+        float est_roll  = std::atan2(sensors->accelerometer.y(), sensors->accelerometer.z());
+        float est_pitch = std::atan2(-sensors->accelerometer.x(),
+                                     std::sqrt(sensors->accelerometer.y() * sensors->accelerometer.y()
+                                               + sensors->accelerometer.z() * sensors->accelerometer.z()));
 
         // Perform a gyroscope and accelerometer measurement based correction of the predicted roll and pitch
-        Eigen::Matrix<double, n_measurements, 1> y;
+        Eigen::Matrix<float, n_measurements, 1> y;
         y << est_roll, est_pitch, sensors->gyroscope.x(), sensors->gyroscope.y();
         kf.measure(y);
 
         // Update the height of the torso using the kinematics from a foot which is on the ground
         if (sensors->feet[BodySide::LEFT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+            Hwt.translation().z() = Eigen::Isometry3f(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
         }
         else if (sensors->feet[BodySide::RIGHT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+            Hwt.translation().z() = Eigen::Isometry3f(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
         }
 
         // **************** Construct Odometry Output ****************
         // Use the roll and pitch from the Kalman filter and the yaw from the dead reckoning of walk command
-        const double roll  = kf.get_state()(0);
-        const double pitch = kf.get_state()(1);
-        Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
-        sensors->Htw       = Hwt.inverse().matrix();
+        const float roll  = kf.get_state()(0);
+        const float pitch = kf.get_state()(1);
+        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3f(roll, pitch, yaw));
+        sensors->Htw      = Hwt.inverse().matrix();
 
-        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+        Eigen::Isometry3f Hwr = Eigen::Isometry3f::Identity();
+        Hwr.linear()          = Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ()).toRotationMatrix();
+        Hwr.translation()     = Eigen::Vector3f(Hwt.translation().x(), Hwt.translation().y(), 0.0);
         sensors->Hrw          = Hwr.inverse().matrix();
     }
 }  // namespace module::input

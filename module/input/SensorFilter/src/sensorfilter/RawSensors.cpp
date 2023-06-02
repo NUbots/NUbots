@@ -97,7 +97,7 @@ namespace module::input {
                 sensors->accelerometer = previous_sensors->accelerometer;
             }
             else {
-                sensors->accelerometer = raw_sensors.accelerometer.cast<double>();
+                sensors->accelerometer = raw_sensors.accelerometer.cast<float>();
             }
 
             // If we have a previous Sensors message, our platform has errors, and the gyro is spinning too fast then
@@ -110,7 +110,7 @@ namespace module::input {
                 sensors->gyroscope = previous_sensors->gyroscope;
             }
             else {
-                sensors->gyroscope = raw_sensors.gyroscope.cast<double>();
+                sensors->gyroscope = raw_sensors.gyroscope.cast<float>();
             }
         }
 

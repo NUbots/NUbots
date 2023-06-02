@@ -92,7 +92,7 @@ message OdometryGroundTruth {
     bool exists = 1;
     /// Isometry3d transform from odometry (world) space to the robot (torso) space.
     /// It measures the world in robot space
-    mat4 Htw = 2;
+    fmat4 Htw = 2;
 }
 
 message VisionGroundTruth {

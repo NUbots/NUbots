@@ -31,7 +31,7 @@ message WalkCommand {
     uint64 subsumption_id = 1;
     /// {x, y, omega} - x and y are the target to walk to and omega is the
     /// required rotational velocity about the z axis. In torso space
-    vec3 command = 2;
+    fvec3 command = 2;
 }
 
 message StopCommand {
@@ -40,7 +40,7 @@ message StopCommand {
 }
 
 message NewWalkCommand {
-    vec3 velocity_target = 1;
+    fvec3 velocity_target = 1;
 }
 
 message EnableWalkEngineCommand {

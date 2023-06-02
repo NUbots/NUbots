@@ -40,22 +40,22 @@ namespace module::input {
 
         // **************** Kinematics ****************
         // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
-        auto Htx = calculateAllPositions(kinematics_model, *sensors);
+        auto Htx = calculateAllPositions<float>(kinematics_model, *sensors);
         for (const auto& entry : Htx) {
             sensors->Htx[entry.first] = entry.second.matrix();
         }
 
         // **************** Centre of Mass and Inertia Tensor ****************
-        sensors->rMTt           = calculateCentreOfMass(kinematics_model, sensors->Htx);
-        sensors->inertia_tensor = calculateInertialTensor(kinematics_model, sensors->Htx);
+        sensors->rMTt           = calculateCentreOfMass<float>(kinematics_model, sensors->Htx);
+        sensors->inertia_tensor = calculateInertialTensor<float>(kinematics_model, sensors->Htx);
 
         // **************** Foot Down Information ****************
         sensors->feet[BodySide::RIGHT].down = true;
         sensors->feet[BodySide::LEFT].down  = true;
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
-        const Eigen::Vector3d rRLl  = Hlr.translation();
+        const Eigen::Isometry3f Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+        const Eigen::Isometry3f Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+        const Eigen::Isometry3f Hlr = Htl.inverse() * Htr;
+        const Eigen::Vector3f rRLl  = Hlr.translation();
         switch (cfg.footDown.method()) {
             case FootDownMethod::Z_HEIGHT:
                 if (rRLl.z() < -cfg.footDown.threshold()) {

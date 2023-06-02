@@ -96,7 +96,7 @@ message Sensors {
     /// Foot information
     message Foot {
         bool down = 1;
-        mat4 Hwf  = 2;
+        fmat4 Hwf  = 2;
     }
 
     /// When the data were taken/captured
@@ -104,12 +104,12 @@ message Sensors {
 
     /// The values are between 0 and 1023, representing a value between -4g and 4g
     /// => 512 = 0g. Is {x, y, z} acceleration
-    vec3 accelerometer = 2;
+    fvec3 accelerometer = 2;
 
     /// The values are between 0 and 1023, represent a value between -500 degrees
     /// per second and 500 degrees per second.
     /// => 512 = 0 degrees per second. Is {x, y, z} angular velocity
-    vec3 gyroscope = 3;
+    fvec3 gyroscope = 3;
 
     /// Set of force sensitive resistors. Used to sense if a foot is on the ground
     repeated Foot feet = 4 [(array_size) = 2];
@@ -130,20 +130,20 @@ message Sensors {
     float battery = 9;
 
     /// Cartesian position of the CoM {M} of the robot from the torso {T} in the torso space {t}
-    vec4 rMTt = 10;
+    fvec4 rMTt = 10;
 
     /// Inertia tensor measured in particle space and relative to the CoM of the particle
-    mat3 inertia_tensor = 11;
+    fmat3 inertia_tensor = 11;
 
     /// A set of transforms; one for each servo
-    repeated mat4 Htx = 12 [(array_size) = 20];
+    repeated fmat4 Htx = 12 [(array_size) = 20];
 
     /// Homogeneous transform: torso {t} from ground {g}
-    mat4 Hgt = 13;
+    fmat4 Hgt = 13;
 
     /// Homogeneous transform: world {w} from robot {r}
-    mat4 Hrw = 14;
+    fmat4 Hrw = 14;
 
     /// Homogeneous transform: world {w} from torso {t}
-    mat4 Htw = 15;
+    fmat4 Htw = 15;
 }

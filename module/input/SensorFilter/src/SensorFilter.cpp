@@ -72,7 +72,7 @@ namespace module::input {
             configure_mahony(config);
 
             // Deadreckoning
-            cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
+            cfg.deadreckoning_scale = Eigen::Vector3f(config["deadreckoning_scale"].as<Expression>());
         });
 
         on<Last<20, Trigger<RawSensors>>, Single>().then(
@@ -107,7 +107,7 @@ namespace module::input {
             });
 
         on<Trigger<WalkingState>>().then([this](const WalkingState& walking_state) {
-            walk_command        = walking_state.walk_command.cast<double>();
+            walk_command        = walking_state.walk_command.cast<float>();
             walk_engine_enabled = walking_state.is_walking;
         });
 
@@ -130,12 +130,12 @@ namespace module::input {
         on<Trigger<EnableWalkEngineCommand>>().then([this]() { walk_engine_enabled = true; });
 
         on<Trigger<DisableWalkEngineCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
+            walk_command        = Eigen::Vector3f::Zero();
             walk_engine_enabled = false;
         });
 
         on<Trigger<StopCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
+            walk_command        = Eigen::Vector3f::Zero();
             walk_engine_enabled = false;
         });
 
@@ -193,35 +193,35 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Kinematics information
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-        Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
-        Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
-        Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();
-        Eigen::Matrix<double, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
+        const Eigen::Isometry3f Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+        const Eigen::Isometry3f Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+        Eigen::Matrix<float, 3, 3> Rtl     = Htl.linear();
+        Eigen::Matrix<float, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
+        Eigen::Matrix<float, 3, 3> Rtr     = Htr.linear();
+        Eigen::Matrix<float, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
         emit(graph("Left Foot Actual Position", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
         emit(graph("Left Foot Actual Orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
         emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
         emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
 
         // Odometry information
-        Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
-        Eigen::Vector3d est_rTWw = Hwt.translation();
-        Eigen::Vector3d est_Rwt  = MatrixToEulerIntrinsic(Hwt.rotation());
+        Eigen::Isometry3f Hwt    = Eigen::Isometry3f(sensors->Htw).inverse();
+        Eigen::Vector3f est_rTWw = Hwt.translation();
+        Eigen::Vector3f est_Rwt  = MatrixToEulerIntrinsic(Hwt.rotation());
         emit(graph("Htw est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
         emit(graph("Rtw est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (raw_sensors.odometry_ground_truth.exists) {
-            Eigen::Isometry3d true_Hwt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
+            Eigen::Isometry3f true_Hwt = Eigen::Isometry3f(raw_sensors.odometry_ground_truth.Htw).inverse();
 
             // Determine translational distance error
-            Eigen::Vector3d true_rTWw  = true_Hwt.translation();
-            Eigen::Vector3d error_rTWw = (true_rTWw - est_rTWw).cwiseAbs();
+            Eigen::Vector3f true_rTWw  = true_Hwt.translation();
+            Eigen::Vector3f error_rTWw = (true_rTWw - est_rTWw).cwiseAbs();
             // Determine yaw, pitch and roll error
-            Eigen::Vector3d true_Rwt  = MatrixToEulerIntrinsic(true_Hwt.rotation());
-            Eigen::Vector3d error_Rwt = (true_Rwt - est_Rwt).cwiseAbs();
-            double quat_rot_error     = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
+            Eigen::Vector3f true_Rwt  = MatrixToEulerIntrinsic(true_Hwt.rotation());
+            Eigen::Vector3f error_Rwt = (true_Rwt - est_Rwt).cwiseAbs();
+            float quat_rot_error      = Eigen::Quaternionf(true_Hwt.linear() * Hwt.inverse().linear()).w();
 
             // Graph translation and its error
             emit(graph("Htw true translation (rTWw)", true_rTWw.x(), true_rTWw.y(), true_rTWw.z()));

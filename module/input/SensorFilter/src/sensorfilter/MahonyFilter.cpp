@@ -41,12 +41,12 @@ namespace module::input {
     using utility::math::filter::MahonyUpdate;
     using utility::support::Expression;
 
-    void SensorFilter::integrate_walkcommand(const double dt) {
+    void SensorFilter::integrate_walkcommand(const float dt) {
         // Check if we are not currently falling and walking
         if (!falling && walk_engine_enabled) {
             // Integrate the walk command to estimate the change in position and yaw orientation
-            double dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
-            double dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
+            float dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
+            float dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
             yaw += walk_command.z() * dt * cfg.deadreckoning_scale.z();
             // Rotate the change in position into world coordinates before adding it to the current position
             Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
@@ -58,8 +58,8 @@ namespace module::input {
         // Mahony Filter Config
         cfg.Ki            = config["mahony"]["Ki"].as<Expression>();
         cfg.Kp            = config["mahony"]["Kp"].as<Expression>();
-        cfg.bias          = Eigen::Vector3d(config["mahony"]["bias"].as<Expression>());
-        Hwt.translation() = Eigen::VectorXd(config["mahony"]["initial_rTWw"].as<Expression>());
+        cfg.bias          = Eigen::Vector3f(config["mahony"]["bias"].as<Expression>());
+        Hwt.translation() = Eigen::VectorXf(config["mahony"]["initial_rTWw"].as<Expression>());
     }
 
     void SensorFilter::update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
@@ -67,11 +67,11 @@ namespace module::input {
                                               const RawSensors& raw_sensors) {
         // **************** Time Update ****************
         // Calculate our time offset from the last read then update the filter's time
-        const double dt = std::max(
-            std::chrono::duration_cast<std::chrono::duration<double>>(
+        const float dt = std::max(
+            std::chrono::duration_cast<std::chrono::duration<float>>(
                 raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
                 .count(),
-            0.0);
+            0.0f);
 
         // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
         integrate_walkcommand(dt);
@@ -85,26 +85,26 @@ namespace module::input {
                                             cfg.Kp,
                                             cfg.bias);
         // Extract the roll and pitch from the orientation quaternion
-        Eigen::Vector3d rpy = MatrixToEulerIntrinsic(Hwt.rotation());
+        Eigen::Vector3f rpy = MatrixToEulerIntrinsic(Hwt.rotation());
 
         // Compute the height of the torso using the kinematics from a foot which is on the ground
         if (sensors->feet[BodySide::LEFT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+            Hwt.translation().z() = Eigen::Isometry3f(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
         }
         else if (sensors->feet[BodySide::RIGHT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+            Hwt.translation().z() = Eigen::Isometry3f(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
         }
 
         // **************** Construct Odometry Output ****************
         // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning of walk command
-        const double roll  = rpy(0);
-        const double pitch = rpy(1);
-        Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
-        sensors->Htw       = Hwt.inverse().matrix();
+        const float roll  = rpy(0);
+        const float pitch = rpy(1);
+        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3f(roll, pitch, yaw));
+        sensors->Htw      = Hwt.inverse().matrix();
 
-        Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+        Eigen::Isometry3f Hwr = Eigen::Isometry3f::Identity();
+        Hwr.linear()          = Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ()).toRotationMatrix();
+        Hwr.translation()     = Eigen::Vector3f(Hwt.translation().x(), Hwt.translation().y(), 0.0);
         sensors->Hrw          = Hwr.inverse().matrix();
         update_loop.enable();
     }

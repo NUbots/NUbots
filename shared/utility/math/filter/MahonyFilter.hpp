@@ -50,51 +50,53 @@ namespace utility {
              * @param Hwb:     Homogeneous transformation matrix from world to body frame of IMU
              * @param bias:    gyroscope bias
              */
-            void MahonyUpdate(const Eigen::Vector3d& acc,
-                              const Eigen::Vector3d& gyro,
-                              Eigen::Isometry3d& Hwb,
-                              const double ts,
-                              const double Ki,
-                              const double Kp,
-                              Eigen::Vector3d& bias) {
+            template <typename Scalar>
+            void MahonyUpdate(const Eigen::Matrix<Scalar, 3, 1>& acc,
+                              const Eigen::Matrix<Scalar, 3, 1>& gyro,
+                              Eigen::Transform<Scalar, 3, Eigen::Isometry>& Hwb,
+                              const Scalar ts,
+                              const Scalar Ki,
+                              const Scalar Kp,
+                              Eigen::Matrix<Scalar, 3, 1>& bias) {
                 // Normalize the accelerometer reading
-                Eigen::Vector3d rGTt = acc.normalized();
+                Eigen::Matrix<Scalar, 3, 1> rGTt = acc.normalized();
 
                 // Invert the rotation matrix to get the body-to-world transformation
-                Eigen::Matrix3d Rbw = Hwb.linear().transpose();
+                Eigen::Matrix<Scalar, 3, 3> Rbw = Hwb.linear().transpose();
 
                 // Rotate the world gravity vector in the world frame into the body frame
-                Eigen::Vector3d rGBb(0, 0, 1);
-                Eigen::Vector3d est_rGTt = Rbw * rGBb;
+                Eigen::Matrix<Scalar, 3, 1> rGBb(0, 0, 1);
+                Eigen::Matrix<Scalar, 3, 1> est_rGTt = Rbw * rGBb;
 
                 // Calculate the error between the measured and estimated acceleration vectors
-                Eigen::Matrix3d a_corr    = rGTt * est_rGTt.transpose() - est_rGTt * rGTt.transpose();
-                Eigen::Vector3d omega_mes = -1 * Eigen::Vector3d(a_corr(2, 1), a_corr(0, 2), a_corr(1, 0));
+                Eigen::Matrix<Scalar, 3, 3> a_corr = rGTt * est_rGTt.transpose() - est_rGTt * rGTt.transpose();
+                Eigen::Matrix<Scalar, 3, 1> omega_mes =
+                    -1 * Eigen::Matrix<Scalar, 3, 1>(a_corr(2, 1), a_corr(0, 2), a_corr(1, 0));
 
 
                 // Integrate the error vector to estimate the gyro bias
                 bias += Ki * omega_mes * ts;
 
                 // Depolarizing the gyroscope bias
-                Eigen::Vector3d l_omega = gyro + Kp * omega_mes + bias;
+                Eigen::Matrix<Scalar, 3, 1> l_omega = gyro + Kp * omega_mes + bias;
 
                 // Find the quaternions rate of change
-                Eigen::Matrix3d omega_x = skew(l_omega);
-                Eigen::Matrix4d ome     = Eigen::Matrix4d::Zero();
-                ome.block<3, 3>(0, 0)   = -omega_x;
-                ome.block<1, 3>(3, 0)   = -l_omega.transpose();
-                ome.block<3, 1>(0, 3)   = l_omega;
-                ome(3, 3)               = 0;
+                Eigen::Matrix<Scalar, 3, 3> omega_x = skew(l_omega);
+                Eigen::Matrix<Scalar, 4, 4> ome     = Eigen::Matrix<Scalar, 4, 4>::Zero();
+                ome.block(0, 0, 3, 3)               = -omega_x;
+                ome.block(3, 0, 1, 3)               = -l_omega.transpose();
+                ome.block(0, 3, 3, 1)               = l_omega;
+                ome(3, 3)                           = 0;
 
-                Eigen::Quaterniond quat(Hwb.linear());
-                Eigen::Vector4d quat_vec(quat.x(), quat.y(), quat.z(), quat.w());
-                Eigen::Vector4d q_d(0.5 * ome * quat_vec);
+                Eigen::Quaternion<Scalar> quat(Hwb.linear());
+                Eigen::Matrix<Scalar, 4, 1> quat_vec(quat.x(), quat.y(), quat.z(), quat.w());
+                Eigen::Matrix<Scalar, 4, 1> q_d(0.5 * ome * quat_vec);
 
                 // Calculate integral to find the attitude quaternion
                 quat_vec += ts * q_d;
 
                 // Set quat (Rwt) and normalise
-                quat = Eigen::Quaterniond(quat_vec(3), quat_vec(0), quat_vec(1), quat_vec(2));
+                quat = Eigen::Quaternion<Scalar>(quat_vec(3), quat_vec(0), quat_vec(1), quat_vec(2));
                 quat.normalize();
 
                 // Set the rotation matrix
