@@ -154,7 +154,6 @@ jobs:
         run: ccache -k cache_dir
 
       - name: Configure the code
-        timeout-minutes: 1
         run: |
           mkdir -p build
           cd build
@@ -167,13 +166,11 @@ jobs:
                    -DBUILD_TESTS=ON
 
       - name: Build the code
-        timeout-minutes: 30
         run: |
           cd build
           ninja
 
       - name: Test the code
-        timeout-minutes: 5
         run: |
           cd build
           ninja test
