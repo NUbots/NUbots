@@ -2,6 +2,7 @@
 file(GLOB_RECURSE test_src "*/**.cpp" "*/**.hpp")
 
 if(test_src)
+
   # Check for module test data
   file(GLOB_RECURSE test_data_files "${CMAKE_CURRENT_SOURCE_DIR}/data/**")
   foreach(test_data_file ${test_data_files})
@@ -25,15 +26,15 @@ if(test_src)
     )
   endforeach(test_data_file)
 
-  add_executable(TestShared "${CMAKE_SOURCE_DIR}/${NUCLEAR_SHARED_DIR}/tests/test.cpp" ${test_src} ${test_data})
-  target_link_libraries(TestShared PRIVATE nuclear::message nuclear::utility)
+  add_executable(testshared "${CMAKE_SOURCE_DIR}/${NUCLEAR_SHARED_DIR}/tests/test.cpp" ${test_src} ${test_data})
+  target_link_libraries(testshared PRIVATE nuclear::message nuclear::utility)
 
-  set_target_properties(TestShared PROPERTIES FOLDER "shared/tests")
+  set_target_properties(testshared PROPERTIES FOLDER "shared/tests")
 
   # Add the test
   add_test(
-    NAME TestShared
+    NAME testshared
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/TestShared
+    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/testshared
   )
 endif()
