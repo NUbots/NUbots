@@ -41,7 +41,7 @@ formatters["black"] = {
 formatters["eslint"] = {
     "format": [["eslint", "--color", "--fix", "{path}"]],
     "include": ["*.js", "*.jsx", "*.ts", "*.tsx"],
-    "exclude": ["*.min.*"],
+    "exclude": ["*.min.*", "doc/**"],
 }
 formatters["prettier"] = {
     "format": [["prettier", "--write", "{path}"]],
