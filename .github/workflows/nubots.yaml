@@ -76,6 +76,9 @@ jobs:
           elif [[ "${{ github.event_name }}" == "pull_request" ]]
           then
             echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
+          elif [[ "${{ github.event_name }}" == "merge_group" ]]
+          then
+            echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
           fi
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
