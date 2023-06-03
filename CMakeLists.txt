@@ -67,8 +67,8 @@ endif()
 if(CI_BUILD)
   add_compile_options(-Werror)
   # Turn these back on once we have fixed all the clang-tidy warnings
-  # set(CMAKE_CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY} -warnings-as-errors=*)
-  # set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
+  # * set(CMAKE_CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY} -warnings-as-errors=*)
+  # * set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
 endif()
 
 # Enable address sanitizer
