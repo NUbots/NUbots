@@ -6,4 +6,4 @@ force_playing: false
 
 # The position of the robot
 # GOALIE, STRIKER, DEFENDER
-position: STRIKER
+position: DEFENDER

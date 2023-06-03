@@ -1,6 +1,7 @@
 #ifndef MODULE_PURPOSE_DEFENDER_HPP
 #define MODULE_PURPOSE_DEFENDER_HPP
 
+
 #include <Eigen/Core>
 #include <nuclear>
 
@@ -10,29 +11,18 @@ namespace module::purpose {
 
     class Defender : public ::extension::behaviour::BehaviourReactor {
     private:
-        /// @brief Stores configuration values
-        struct Config {
-
-            /// @brief Ready position to walk to (x, y, theta)
-            Eigen::Vector3f left_ready_position  = Eigen::Vector3f::Zero();
-            Eigen::Vector3f right_ready_position = Eigen::Vector3f::Zero();
-
-            std::vector<Eigen::Vector3f> left_defender_bounding_box = {};
-
-            // std::vector<Eigen::Vector3f> right_defender_bounding_box = {Eigen::Vector3f::Zero(),
-            //                                                             Eigen::Vector3f::Zero(),
-            //                                                             Eigen::Vector3f::Zero(),
-            //                                                             Eigen::Vector3f::Zero()};
-
-        } cfg;
-
-        bool is_left_defender;
-
         /// @brief Calls Tasks to play soccer normally for a defender
         void play();
 
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Ready position to walk to (x, y, theta)
+            Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
+        } cfg;
+
+
     public:
-        /// @brief Called by the powerplant to build and setup the Defender reactor.
+        /// @brief Called by the powerplant to build and setup the defender reactor.
         explicit Defender(std::unique_ptr<NUClear::Environment> environment);
     };
 

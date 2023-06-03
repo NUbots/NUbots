@@ -1,0 +1,8 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# Position on field to walk to (x,y,theta)
+defender_position: [2, -1.5, -3.14]
+
+# Bounding box of the side of the field that is defended (x min, x max, y min, y max)
+defending_region: [-4, -1, -3, 3]

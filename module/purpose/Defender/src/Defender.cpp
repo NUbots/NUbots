@@ -7,12 +7,14 @@
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
+#include "message/strategy/Defend.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToBall.hpp"
+#include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -23,13 +25,18 @@ namespace module::purpose {
     using GameMode = message::input::GameState::Data::Mode;
     using message::input::GameState;
     using message::planning::KickTo;
+    using message::purpose::NormalDefender;
+    using message::purpose::PenaltyShootoutDefender;
     using message::strategy::AlignBallToGoal;
+    using message::strategy::Defend;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
+    using message::strategy::WalkToFieldPosition;
+
     using DefenderTask = message::purpose::Defender;
     using utility::support::Expression;
 
@@ -37,31 +44,15 @@ namespace module::purpose {
 
         on<Configuration>("Defender.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defender.yaml
-            this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.left_ready_position  = config["left_ready_position"].as<Expression>();
-            cfg.right_ready_position = config["right_ready_position"].as<Expression>();
-
-            // YAML::Node config = YAML::LoadFile("Defender.yaml");
-
-            // Assuming the YAML file has a key called "left_defender_bounding_box"
-            YAML::Node boundingBoxNode = config["left_defender_bounding_box"];
-
-            // Iterate over the bounding box values
-            for (std::size_t i = 0; i < boundingBoxNode.size(); ++i) {
-                YAML::Node point_node = boundingBoxNode[i];
-
-                // cfg.left_defender_bounding_box = .push_back(point_node);
-            }
-
-            // std::cout << "Point " << i << ": x=" << x << ", y=" << y << ", z=" << z << std::endl;
-            //  cfg.left_defender_bounding_box =
-            //  config["left_defender_bounding_box"].as<std::vector<Eigen::Vector3f>>();
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            cfg.ready_position = config["ready_position"].as<Expression>();
         });
 
         on<Provide<DefenderTask>, Optional<Trigger<GameState>>>().then(
-            [this](const DefenderTask& defender_task, const std::shared_ptr<const GameState>& game_state) {
+            [this](const DefenderTask& Defender_task, const std::shared_ptr<const GameState>& game_state) {
+                log<NUClear::DEBUG>("DEFENDER");
                 // Do not use GameController information if force playing or force penalty shootout
-                if (defender_task.force_playing) {
+                if (Defender_task.force_playing) {
                     play();
                     return;
                 }
@@ -69,37 +60,56 @@ namespace module::purpose {
                 // Check if there is GameState information, and if so act based on the current mode
                 if (game_state) {
                     switch (game_state->data.mode.value) {
+                        case GameMode::PENALTY_SHOOTOUT: emit<Task>(std::make_unique<PenaltyShootoutDefender>()); break;
                         case GameMode::NORMAL:
-                        case GameMode::OVERTIME: emit<Task>(std::make_unique<DefenderTask>()); break;
+                        case GameMode::OVERTIME: emit<Task>(std::make_unique<NormalDefender>()); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
                 }
-
-                // Put this in the above SWITCH
-                // Normal READY state
-                on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::READY>>().then(
-                    [this] { emit<Task>(std::make_unique<Ready>()); });
-
-                // Normal PLAYING state
-                on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
-
-                // Normal UNKNOWN state
-                on<Provide<DefenderTask>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
-                    [this] { log<NUClear::WARN>("Unknown normal game phase."); });
             });
+
+        // Normal READY state
+        on<Provide<NormalDefender>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
+            // If we are stable, walk to the ready field position
+            log<NUClear::DEBUG>("READY");
+            emit<Task>(std::make_unique<WalkToFieldPosition>(
+                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                cfg.ready_position.z()));
+        });
+
+        // Normal PLAYING state
+        on<Provide<NormalDefender>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+
+        // Normal UNKNOWN state
+        on<Provide<NormalDefender>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
+            [this] { log<NUClear::WARN>("Unknown normal game phase."); });
+
+        // Default for INITIAL, SET, FINISHED, TIMEOUT
+        on<Provide<NormalDefender>>().then([this] {
+            log<NUClear::DEBUG>("INITIAL");
+            emit<Task>(std::make_unique<StandStill>());
+        });
+
+        // Penalty shootout PLAYING state
+        on<Provide<PenaltyShootoutDefender>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
+
+        // Penalty shootout UNKNOWN state
+        on<Provide<PenaltyShootoutDefender>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
+            [this] { log<NUClear::WARN>("Unknown penalty shootout game phase."); });
+
+        // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
+        on<Provide<PenaltyShootoutDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
     void Defender::play() {
         // Walk to the ball and kick!
         // Second argument is priority - higher number means higher priority
-        emit<Task>(std::make_unique<FindBall>(),
-                   1);                                  // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
-        // emit<Task>(std::make_unique<WalkToDefencePosition>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<WalkToBall>(), 3);                     // try to walk to the ball
-        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);                // try to walk to the ball
-        emit<Task>(std::make_unique<KickToGoal>(), 5);                     // kick the ball if possible
-        emit<Task>(std::make_unique<KickTo>(Eigen::Vector3d::Zero()), 6);  // kick the ball if possible
+        emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
+        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);  // try to walk to the ball
+        emit<Task>(std::make_unique<KickToGoal>(), 5);       // kick the ball if possible
+        // emit<Task>(std::make_unique<Defend>(), 6);
     }
 
 }  // namespace module::purpose
