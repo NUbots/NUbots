@@ -23,9 +23,10 @@ namespace module::strategy {
 
         on<Configuration>("WalkToFieldPosition.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToFieldPosition.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.align_radius   = config["align_radius"].as<float>();
-            cfg.stop_tolerance = config["stop_tolerance"].as<float>();
+            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
+            cfg.align_radius     = config["align_radius"].as<float>();
+            cfg.stop_tolerance   = config["stop_tolerance"].as<float>();
+            cfg.resume_tolerance = config["resume_tolerance"].as<float>();
         });
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
@@ -50,12 +51,23 @@ namespace module::strategy {
                 const float heading_error  = std::acos(std::max(-1.0f, std::min(1.0f, uXRf.dot(uHFf.head(2)))));
                 log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
 
-                // If the error in the desired field position and heading is low enough, stand still
-                if (position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
+                // If we are stopped but our position error is too high, then we need to start walking again
+                if (stopped && position_error < cfg.resume_tolerance && heading_error < cfg.resume_tolerance) {
                     emit<Task>(std::make_unique<StandStill>());
+                    stopped = true;
+                    return;
                 }
+
+                // If the error in the desired field position and heading is low enough, stand still
+                if (!stopped && position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
+                    emit<Task>(std::make_unique<StandStill>());
+                    stopped = true;
+                    return;
+                }
+
+
                 // If we are getting close to the field position begin to align with the desired heading in field space
-                else if (position_error < cfg.align_radius) {
+                if (position_error < cfg.align_radius) {
                     // Rotate the desired heading in field {f} space to robot space
                     const Eigen::Vector3f uHRr(Hrf.linear() * uHFf);
                     const float desired_heading = std::atan2(uHRr.y(), uHRr.x());

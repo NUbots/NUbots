@@ -15,7 +15,12 @@ namespace module::strategy {
             float align_radius = 0.0f;
             /// @brief Tolerance for stopping at the field position
             float stop_tolerance = 0.0f;
+            /// @brief Tolerance for resuming walking to the field position if stopped
+            float resume_tolerance = 0.0f;
         } cfg;
+
+        /// @brief Whether or not we are stopped
+        bool stopped = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the WalkToFieldPosition reactor.
