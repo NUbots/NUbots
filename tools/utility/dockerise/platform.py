@@ -125,6 +125,7 @@ def build(image, platform, username, uid, reset):
             f"user_uid={uid}",
             "--output=type=docker",
             f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform}",
+            f"--cache-to=type=inline",
             dockerdir,
         ]
     )
