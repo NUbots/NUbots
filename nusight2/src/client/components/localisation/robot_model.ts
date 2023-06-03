@@ -1,10 +1,8 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
-import { Matrix4 } from "../../../shared/math/matrix4";
-import * as THREE from "three";
 
+import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
-import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 

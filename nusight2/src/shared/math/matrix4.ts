@@ -1,7 +1,7 @@
 import * as THREE from "three";
+
 import { Quaternion } from "./quaternion";
 import { Vector3 } from "./vector3";
-
 import { Vector4 } from "./vector4";
 
 export class Matrix4 {
