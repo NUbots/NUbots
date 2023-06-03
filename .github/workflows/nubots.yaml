@@ -65,6 +65,12 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Dump GitHub context
+        id: github_context_step
+        run: echo $JSON
+        env:
+          JSON: ${{ toJSON(github) }}
+
       # Figure out the tag to use for the Docker image
       - name: Set Docker tag
         run: |
