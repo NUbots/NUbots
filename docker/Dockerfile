@@ -41,6 +41,9 @@ RUN install-package \
     cmake \
     meson \
     git \
+    sox \
+    subversion \
+    unzip \
     ncurses
 
 # Get python to look in /usr/local for packages
@@ -176,6 +179,31 @@ RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.14.tar.g
 RUN install-package gcc-fortran
 COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
+
+#Speech Rec
+RUN install-from-source \
+    https://github.com/alphacep/openfst/archive/7dfd808194105162f20084bb4d8e4ee4b65266d5.tar.gz \
+    --enable-static \
+    --enable-shared \
+    --enable-far \
+    --enable-ngram-fsts \
+    --enable-lookahead-fsts \
+    --disable-bin \
+    --with-pic
+COPY usr/local/package/clapack.sh /usr/local/package/clapack.sh
+RUN /usr/local/package/clapack.sh \
+    https://github.com/alphacep/clapack/archive/0b815a85da01c384404c74a9cff0e32385cb925f.tar.gz
+COPY usr/local/package/kaldi.sh /usr/local/package/kaldi.sh
+RUN /usr/local/package/kaldi.sh \
+    https://github.com/alphacep/kaldi/archive/6417ac1dece94783e80dfbac0148604685d27579.tar.gz \
+    -DMATHLIB=OpenBLAS \
+    -DKALDI_BUILD_EXE=OFF \
+    -DKALDI_BUILD_TEST=OFF \
+    -DKALDI_USE_PATCH_NUMBER=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DKALDI_VERSION="5.5"
+RUN install-from-source \
+    https://github.com/alphacep/vosk-api/archive/refs/tags/v0.3.43.tar.gz
 
 # Eigen3
 COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch

@@ -1,0 +1,4 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+wav_path: /home/nubots/NUbots/module/input/WavReader/data/audio/test.wav
