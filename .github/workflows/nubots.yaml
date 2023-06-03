@@ -68,6 +68,7 @@ jobs:
       # Figure out the tag to use for the Docker image
       - name: Set Docker tag
         run: |
+          echo "${{ toJson(github) }}"
           if [[ "${{ github.event_name }}" == "push" ]]
           then
             branch="${{ github.ref_name }}"
@@ -76,22 +77,9 @@ jobs:
           elif [[ "${{ github.event_name }}" == "pull_request" ]]
           then
             echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
-          elif [[ "${{ github.event_name }}" == "merge_group" ]]
-          then
-            echo "Head SHA:         ${{ github.event.head_sha }}"
-            echo "Head ref:         ${{ github.event.head_ref }}"
-            echo "Base SHA:         ${{ github.event.base_sha }}"
-            echo "Base ref:         ${{ github.event.base_ref }}"
-            echo "Head Commit ID:   ${{ github.event.head_commit.id }}"
-            echo "Tree ID:          ${{ github.event.head_commit.tree_id }}"
-            echo "message:          ${{ github.event.head_commit.message }}"
-            echo "Timestamp:        ${{ github.event.head_commit.timestamp }}"
-            echo "Author Name:      ${{ github.event.head_commit.author.name }}"
-            echo "Author Email:     ${{ github.event.head_commit.author.email }}"
-            echo "Committer Name:   ${{ github.event.head_commit.committer.name }}"
-            echo "Committer Email:  ${{ github.event.head_commit.committer.email }}"
-
-            # echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
+          # elif [[ "${{ github.event_name }}" == "merge_group" ]]
+          # then
+          #   # echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
           fi
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
