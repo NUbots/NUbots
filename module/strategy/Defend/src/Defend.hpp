@@ -13,9 +13,6 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
 
-            /// @brief Ready position to walk to (x, y, theta)
-            Eigen::Vector3f defender_position = Eigen::Vector3f::Zero();
-
             /// @brief Region to defend the ball
             Eigen::Vector4f defending_region = Eigen::Vector4f::Zero();
 

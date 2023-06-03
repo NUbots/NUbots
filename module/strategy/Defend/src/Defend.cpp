@@ -28,11 +28,9 @@ namespace module::strategy {
 
         on<Configuration>("Defend.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defend.yaml
-            this->log_level       = config["log_level"].as<NUClear::LogLevel>();
-            cfg.defender_position = Eigen::Vector3f(config["defender_position"].as<Expression>());
-            cfg.defending_region  = Eigen::Vector4f(config["defending_region"].as<Expression>());
+            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
+            cfg.defending_region = Eigen::Vector4f(config["defending_region"].as<Expression>());
 
-            log<NUClear::DEBUG>("cfg.defender_position ", cfg.defender_position.transpose());
             log<NUClear::DEBUG>("cfg.defending_region ", cfg.defending_region.transpose());
         });
 
@@ -50,7 +48,11 @@ namespace module::strategy {
                     // Do nothing, play normally
                 }
                 else {
-                    emit<Task>(std::make_unique<StandStill>());
+                    // Calculate the defender position
+                    Eigen::Vector3f rDFf = Eigen::Vector3f::Zero();
+                    rDFf.x()             = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
+                    rDFf.y()             = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x(), rDFf.y(), 0), -M_PI));
                     log<NUClear::DEBUG>("Ball is outside of defending region");
                 }
             });
