@@ -68,7 +68,7 @@ jobs:
       # Figure out the tag to use for the Docker image
       - name: Set Docker tag
         run: |
-          echo "${{ toJson(github) }}"
+          echo "${{ toJson(github) }}";
           if [[ "${{ github.event_name }}" == "push" ]]
           then
             branch="${{ github.ref_name }}"
@@ -77,9 +77,6 @@ jobs:
           elif [[ "${{ github.event_name }}" == "pull_request" ]]
           then
             echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
-          # elif [[ "${{ github.event_name }}" == "merge_group" ]]
-          # then
-          #   # echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
           fi
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
