@@ -42,7 +42,6 @@ jobs:
           driver-opts: |
             env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
             env.BUILDKIT_STEP_LOG_MAX_SPEED=-1
-          config: docker/buildkitd.toml
 
       # Login to the docker repository
       - name: Login to the docker repository
