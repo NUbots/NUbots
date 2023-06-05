@@ -139,24 +139,6 @@ namespace module::behaviour::strategy {
                     const message::input::GameState::Data::Phase& phase,
                     const std::shared_ptr<const FilteredBall>& ball);
 
-        /// @brief Direct Freekick mode state machine, used to decide what phase behaviour to use.
-        void direct_freekick(const message::input::GameState& game_state);
-
-        /// @brief Indirect Freekick mode state machine, used to decide what phase behaviour to use.
-        void indirect_freekick(const message::input::GameState& game_state);
-
-        /// @brief Pentalty kick mode state machine, used to decide what phase behaviour to use.
-        void penalty_kick(const message::input::GameState& game_state);
-
-        /// @brief Corner kick mode state machine, used to decide what phase behaviour to use.
-        void corner_kick(const message::input::GameState& game_state);
-
-        /// @brief Goal kick mode state machine, used to decide what phase behaviour to use.
-        void goal_kick(const message::input::GameState& game_state);
-
-        /// @brief Throw in mode state machine, used to decide what phase behaviour to use.
-        void throw_in(const message::input::GameState& game_state);
-
         /// @brief Penalty mode, initial phase behaviour/strategy
         void penalty_shootout_initial();
 
@@ -192,16 +174,6 @@ namespace module::behaviour::strategy {
 
         /// @brief Normal mode, time phase behaviour/strategy
         void normal_timeout();
-
-        /// @brief Direct Freekick mode, wait phase behaviour/strategy
-        void direct_freekick_wait();
-
-        /// @brief Direct Freekick mode, placing phase behaviour/strategy
-        void direct_freekick_placing();
-
-        /// @brief Direct Freekick mode, excute kick phase behaviour/strategy
-        void direct_freekick_end_placing();
-
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
