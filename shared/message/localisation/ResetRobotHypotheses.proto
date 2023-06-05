@@ -27,11 +27,11 @@ message ResetRobotHypotheses {
 
     message Self {
         /// Estimate of the robot's {x, y} position in field space
-        fvec2   rTFf         = 1;
-        fmat2   covariance   = 2;
+        fvec2 rTFf         = 1;
+        fmat2 covariance   = 2;
         float heading      = 3;
         float heading_var  = 4;
-        bool   absolute_yaw = 5;
+        bool  absolute_yaw = 5;
     }
 
     repeated Self hypotheses = 1;

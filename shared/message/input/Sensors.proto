@@ -95,7 +95,7 @@ message Sensors {
 
     /// Foot information
     message Foot {
-        bool down = 1;
+        bool  down = 1;
         fmat4 Hwf  = 2;
     }
 

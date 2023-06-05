@@ -55,7 +55,7 @@ message Image {
     google.protobuf.Timestamp timestamp  = 6;
     /// World to camera Isometry3d transform
     fmat4 Hcw  = 7;
-    Lens lens = 8;
+    Lens  lens = 8;
     /// Ground truth data from webots
     platform.webots.VisionGroundTruth vision_ground_truth = 9;
 }
