@@ -14,15 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2022 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
+
 syntax = "proto3";
 
-package message.planning;
+package message.strategy;
 
-import "Vector.proto";
-
-message KickTo {
-    /// Point {P} to kick to from the robot {R} in robot space {r}
-    vec3 rPRr = 1;
-}
+/// A task that will tell behaviour to kick the ball towards the goal when applicable
+message KickToGoal {}
