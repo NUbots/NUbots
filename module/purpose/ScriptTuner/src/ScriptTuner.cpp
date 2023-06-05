@@ -58,26 +58,18 @@ namespace module::purpose {
     using extension::behaviour::Task;
 
     using utility::skill::Frame;
-    using utility::skill::load_script;
     using utility::skill::Script;
-
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
     struct LockServo {};
 
     ScriptTuner::ScriptTuner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , scriptPath("Initializing...")
-        , frame(0)
-        , selection(0)
-        , angleOrGain(true)
-        , running(true) {
+        : Reactor(std::move(environment)), script_path("Initializing..."), frame(0), selection(0), angle_or_gain(true) {
 
         // Add a blank frame to start with
         script.frames.emplace_back();
-        script.frames.back().duration = std::chrono::milliseconds(defaultDuration);
+        script.frames.back().duration = std::chrono::milliseconds(default_duration);
 
         on<Configuration>("ScriptTuner.yaml").then([this](const Configuration& config) {
             // Use configuration here from file KeyboardWalk.yaml
@@ -96,19 +88,19 @@ namespace module::purpose {
             // Hide the cursor
             curs_set(0);
 
-            refreshView();
+            refresh_view();
         });
 
         on<Trigger<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
             if (args.size() == 2) {
-                scriptPath = args[1];
+                script_path = args[1];
 
                 // Check if the script exists and load it if it does.
-                if (utility::file::exists(scriptPath)) {
-                    NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
-                    loadScript(scriptPath);
+                if (utility::file::exists(script_path)) {
+                    NUClear::log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
+                    load_script(script_path);
                     // Build our initial gui with context from loaded script
-                    refreshView();
+                    refresh_view();
                 }
             }
 
@@ -122,10 +114,9 @@ namespace module::purpose {
             auto id = selection < 2 ? 18 + selection : selection - 2;
 
             Frame::Target target;
-
             target.id       = id;
             target.position = utility::platform::getRawServo(target.id, sensors).present_position;
-            target.gain     = defaultGain;
+            target.gain     = default_gain;
             target.torque   = 100;
 
             script.frames[frame].targets.push_back(target);
@@ -154,48 +145,48 @@ namespace module::purpose {
                 case 9:          // Swap between angle and gain
                 case KEY_LEFT:   // Swap between angle and gain
                 case KEY_RIGHT:  // Swap between angle and gain
-                    angleOrGain = !angleOrGain;
+                    angle_or_gain = !angle_or_gain;
                     break;
                 case ',':  // Move left a frame
-                    activateFrame(frame == 0 ? frame : frame - 1);
+                    activate_frame(frame == 0 ? frame : frame - 1);
                     break;
                 case '.':  // Move right a frame
-                    activateFrame(frame == script.frames.size() - 1 ? frame : frame + 1);
+                    activate_frame(frame == script.frames.size() - 1 ? frame : frame + 1);
                     break;
                 case '\n':       // Edit selected field
                 case KEY_ENTER:  // Edit selected field
-                    editSelection();
+                    edit_selection();
                     break;
                 case ' ':  // Toggle lock mode
-                    toggleLockMotor();
+                    toggle_lock_motor();
                     break;
                 case 'S':  // Save the current script
-                    saveScript();
+                    save_script();
                     break;
                 case 'A':  // save script as
-                    saveScriptAs();
+                    save_script_as();
                     break;
                 case 'T':  // Edit this frames duration
-                    editDuration();
+                    edit_duration();
                     break;
                 case 'N':  // New frame
-                    newFrame();
+                    new_frame();
                     break;
                 case 'I':  // Delete frame
-                    deleteFrame();
+                    delete_frame();
                     break;
                 case 'P':  // plays script through with correct durations
-                    playScript();
+                    play_script();
                     break;
                 case 'J':  // changes frame without robot moving
-                    jumpToFrame();
+                    jump_to_frame();
                     break;
                 case 'R':  // updates visual changes
-                    refreshView();
+                    refresh_view();
                     break;
-                case 'M': mirrorScript(); break;
+                case 'M': mirror_script(); break;
                 case 'G':  // allows multiple gains to be edited at once
-                    editGain();
+                    edit_gain();
                     break;
                 case ':':  // lists commands
                     help();
@@ -206,14 +197,14 @@ namespace module::purpose {
             }
 
             // Update whatever visual changes we made
-            refreshView();
+            refresh_view();
         });
 
         // When we shutdown end ncurses
         on<Shutdown>().then(endwin);
     }
 
-    void ScriptTuner::activateFrame(int frame) {
+    void ScriptTuner::activate_frame(int frame) {
         this->frame = frame;
 
         auto waypoints = std::make_unique<ServoTargets>();
@@ -228,7 +219,7 @@ namespace module::purpose {
         emit(std::move(waypoints));
     }
 
-    void ScriptTuner::refreshView() {
+    void ScriptTuner::refresh_view() {
         // Clear our window
         erase();
 
@@ -241,8 +232,8 @@ namespace module::purpose {
         attroff(A_BOLD);
 
         // Top sections
-        mvprintw(2, 2, "Script: %s", scriptPath.c_str());  // Output our scripts name
-        mvprintw(3, 2, "Frames:");                         // The frames section is filled out after this
+        mvprintw(2, 2, "Script: %s", script_path.c_str());  // Output our scripts name
+        mvprintw(3, 2, "Frames:");                          // The frames section is filled out after this
         mvprintw(4,
                  2,
                  "Duration: %d",  // Output the selected frames duration
@@ -270,7 +261,6 @@ namespace module::purpose {
         mvprintw(LINES - 6, 2, "Commands");
         attroff(A_BOLD);
         mvprintw(LINES - 2, 2, "Type :help for a full list of commands");
-
 
         // Each Command
         const char* COMMANDS[] = {",", ".", "N", "I", " ", "T", "J", "G", "P", "S"};
@@ -355,13 +345,13 @@ namespace module::purpose {
         }
 
         // Highlight our selected point
-        mvchgat(selection + 9, angleOrGain ? 26 : 40, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
+        mvchgat(selection + 9, angle_or_gain ? 26 : 40, angle_or_gain ? 13 : 11, A_STANDOUT, 0, nullptr);
 
         // We finished building
         refresh();
     }
 
-    void ScriptTuner::toggleLockMotor() {
+    void ScriptTuner::toggle_lock_motor() {
         // This finds if we have this particular motor stored in the frame
         auto targetFinder = [=, this](const Frame::Target& target) {
             return (static_cast<uint32_t>(target.id) + 2) % 20 == selection;
@@ -392,14 +382,14 @@ namespace module::purpose {
         }
     }
 
-    void ScriptTuner::newFrame() {
+    void ScriptTuner::new_frame() {
         // Make a new frame before our current with our current set of motor angles and unlocked/locked status
-        auto newFrame = script.frames[frame];
-        script.frames.insert(script.frames.begin() + frame, newFrame);
-        script.frames[frame].duration = std::chrono::milliseconds(defaultDuration);
+        auto new_frame = script.frames[frame];
+        script.frames.insert(script.frames.begin() + frame, new_frame);
+        script.frames[frame].duration = std::chrono::milliseconds(default_duration);
     }
 
-    void ScriptTuner::deleteFrame() {
+    void ScriptTuner::delete_frame() {
         // Delete our current frame and go to the one before this one, if this is the last frame then ignore
         if (script.frames.size() > 1) {
             script.frames.erase(std::begin(script.frames) + frame);
@@ -412,7 +402,7 @@ namespace module::purpose {
         }
     }
 
-    std::string ScriptTuner::userInput() {
+    std::string ScriptTuner::user_input() {
         // Read characters until we see either esc or enter
         std::stringstream chars;
 
@@ -431,7 +421,7 @@ namespace module::purpose {
         }
     }
 
-    void ScriptTuner::loadScript(const std::string& path) {
+    void ScriptTuner::load_script(const std::string& path) {
         // Load the YAML file
         YAML::Node node = YAML::LoadFile(path);
 
@@ -444,12 +434,12 @@ namespace module::purpose {
         NUClear::log<NUClear::DEBUG>("Successfully loaded script from:", path);
     }
 
-    void ScriptTuner::saveScript() {
+    void ScriptTuner::save_script() {
         YAML::Node n(script);
-        utility::file::writeToFile(scriptPath, n);
+        utility::file::writeToFile(script_path, n);
     }
 
-    void ScriptTuner::editDuration() {
+    void ScriptTuner::edit_duration() {
         // Move to the correct position and erase the old duration
         move(4, 12);
         for (int i = 0; i < 10; ++i) {
@@ -458,7 +448,7 @@ namespace module::purpose {
         move(4, 12);
 
         // Get the users input
-        std::string result = userInput();
+        std::string result = user_input();
 
         // If we have a result
         if (!result.empty()) {
@@ -473,15 +463,15 @@ namespace module::purpose {
         }
     }
 
-    void ScriptTuner::editSelection() {
+    void ScriptTuner::edit_selection() {
         // Erase our old text
-        mvprintw(selection + 9, angleOrGain ? 33 : 46, " ");
+        mvprintw(selection + 9, angle_or_gain ? 33 : 46, " ");
 
         // Move to our point
-        move(selection + 9, angleOrGain ? 33 : 46);
+        move(selection + 9, angle_or_gain ? 33 : 46);
 
         // Get the users input
-        std::string result = userInput();
+        std::string result = user_input();
 
         // If we have a result
         if (!result.empty()) {
@@ -504,11 +494,11 @@ namespace module::purpose {
                     auto id      = selection < 2 ? 18 + selection : selection - 2;
                     it->id       = id;
                     it->position = 0;
-                    it->gain     = defaultGain;
+                    it->gain     = default_gain;
                 }
 
                 // If we are entering an angle
-                if (angleOrGain) {
+                if (angle_or_gain) {
 
                     // Normalize our angle to be between -pi and pi
                     num = utility::math::angle::normalizeAngle(num);
@@ -538,7 +528,7 @@ namespace module::purpose {
     void ScriptTuner::help() {
         move(LINES - 6, 12);
         curs_set(1);
-        std::string tempcommand = userInput();
+        std::string tempcommand = user_input();
 
         if (tempcommand == "help") {
             curs_set(0);
@@ -559,7 +549,7 @@ namespace module::purpose {
                                           "Saves Script As)",
                                           "Manual Refresh View",
                                           "Mirrors the script",
-                                          "Exit (this works to exit help and editGain)",
+                                          "Exit (this works to exit help and edit_gain)",
                                           "Quit Scripttuner"};
 
             size_t longestCommand = 0;
@@ -591,150 +581,154 @@ namespace module::purpose {
                     mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                 }
             }
-            refreshView();
+            refresh_view();
         }
         else {
-            refreshView();
+            refresh_view();
         }
         curs_set(0);
     }
 
-    // emits a message so motion can pick up the script
-    void ScriptTuner::playScript() {
-        emit<Task>(load_script<LimbsSequence>(script), 3);
-        // emit<Task>(load_script<LimbsSequence>("Stand.yaml"), 3);
+    void ScriptTuner::play_script() {
+        emit<Task>(utility::skill::load_script<LimbsSequence>(script));
     }
 
-    // allows user to jump to a specific frame without engaging the motors
-    void ScriptTuner::jumpToFrame() {
+    void ScriptTuner::jump_to_frame() {
         mvprintw(5, 2, "Jump To Frame:");
         move(5, 17);
         curs_set(1);
-        userInputToFrame();
+        user_input_to_frame();
         curs_set(0);
     }
 
-    // switches angle and gains between corresponding left and right motors, flips script around z axis
-    void ScriptTuner::mirrorScript() {
+    void ScriptTuner::mirror_script() {
         for (auto& f : script.frames) {
 
-            Frame newFrame;
-            newFrame.duration = f.duration;
+            Frame new_frame;
+            new_frame.duration = f.duration;
 
             for (auto& target : f.targets) {
 
                 switch (target.id.value) {
                     case ServoID::HEAD_YAW:
-                        newFrame.targets.emplace_back(ServoID::HEAD_YAW, target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::HEAD_YAW, target.position, target.gain, target.torque);
                         break;
                     case ServoID::HEAD_PITCH:
-                        newFrame.targets.emplace_back(ServoID::HEAD_PITCH, target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::HEAD_PITCH,
+                                                       target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::R_SHOULDER_PITCH:
-                        newFrame.targets.emplace_back(ServoID::L_SHOULDER_PITCH,
-                                                      target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_SHOULDER_PITCH,
+                                                       target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::L_SHOULDER_PITCH:
-                        newFrame.targets.emplace_back(ServoID::R_SHOULDER_PITCH,
-                                                      target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_SHOULDER_PITCH,
+                                                       target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::R_ELBOW:
-                        newFrame.targets.emplace_back(ServoID::L_ELBOW, target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_ELBOW, target.position, target.gain, target.torque);
                         break;
                     case ServoID::L_ELBOW:
-                        newFrame.targets.emplace_back(ServoID::R_ELBOW, target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_ELBOW, target.position, target.gain, target.torque);
                         break;
                     case ServoID::R_HIP_PITCH:
-                        newFrame.targets.emplace_back(ServoID::L_HIP_PITCH,
-                                                      target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_HIP_PITCH,
+                                                       target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::L_HIP_PITCH:
-                        newFrame.targets.emplace_back(ServoID::R_HIP_PITCH,
-                                                      target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_HIP_PITCH,
+                                                       target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::R_KNEE:
-                        newFrame.targets.emplace_back(ServoID::L_KNEE, target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_KNEE, target.position, target.gain, target.torque);
                         break;
                     case ServoID::L_KNEE:
-                        newFrame.targets.emplace_back(ServoID::R_KNEE, target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_KNEE, target.position, target.gain, target.torque);
                         break;
                     case ServoID::R_ANKLE_PITCH:
-                        newFrame.targets.emplace_back(ServoID::L_ANKLE_PITCH,
-                                                      target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_ANKLE_PITCH,
+                                                       target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::L_ANKLE_PITCH:
-                        newFrame.targets.emplace_back(ServoID::R_ANKLE_PITCH,
-                                                      target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_ANKLE_PITCH,
+                                                       target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::R_SHOULDER_ROLL:
-                        newFrame.targets.emplace_back(ServoID::L_SHOULDER_ROLL,
-                                                      -target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_SHOULDER_ROLL,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::L_SHOULDER_ROLL:
-                        newFrame.targets.emplace_back(ServoID::R_SHOULDER_ROLL,
-                                                      -target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_SHOULDER_ROLL,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::R_HIP_ROLL:
-                        newFrame.targets.emplace_back(ServoID::L_HIP_ROLL,
-                                                      -target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_HIP_ROLL,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::L_HIP_ROLL:
-                        newFrame.targets.emplace_back(ServoID::R_HIP_ROLL,
-                                                      -target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_HIP_ROLL,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::R_ANKLE_ROLL:
-                        newFrame.targets.emplace_back(ServoID::L_ANKLE_ROLL,
-                                                      -target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_ANKLE_ROLL,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::L_ANKLE_ROLL:
-                        newFrame.targets.emplace_back(ServoID::R_ANKLE_ROLL,
-                                                      -target.position,
-                                                      target.gain,
-                                                      target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_ANKLE_ROLL,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::R_HIP_YAW:
-                        newFrame.targets.emplace_back(ServoID::L_HIP_YAW, -target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::L_HIP_YAW,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::L_HIP_YAW:
-                        newFrame.targets.emplace_back(ServoID::R_HIP_YAW, -target.position, target.gain, target.torque);
+                        new_frame.targets.emplace_back(ServoID::R_HIP_YAW,
+                                                       -target.position,
+                                                       target.gain,
+                                                       target.torque);
                         break;
                     case ServoID::NUMBER_OF_SERVOS:
                     default: break;
                 }  // end switch(target.id)
             }
-            f = newFrame;
-            refreshView();
+            f = new_frame;
+            refresh_view();
         }
-    }  // end mirrorScript()
+    }
 
-    // change scriptPath and then call saveScript to Save As
-    void ScriptTuner::saveScriptAs() {
+    void ScriptTuner::save_script_as() {
         move(5, 2);
         curs_set(1);
-        std::string saveScriptAs = userInput();
-        if (utility::file::exists(saveScriptAs)) {
+        std::string save_script_as = user_input();
+        if (utility::file::exists(save_script_as)) {
             bool print = true;
             while (print) {
                 mvprintw(6, 2, "This file already exists.");
@@ -744,31 +738,30 @@ namespace module::purpose {
                     case KEY_ENTER:
                         move(5, 2);
                         curs_set(0);
-                        print      = false;
-                        scriptPath = saveScriptAs;
-                        saveScript();
-                        refreshView();
+                        print       = false;
+                        script_path = save_script_as;
+                        save_script();
+                        refresh_view();
                         break;
                     case 'X':
                         move(5, 2);
                         curs_set(0);
                         print = false;
-                        refreshView();
+                        refresh_view();
                         break;
                 }
             }
         }
         else {
-            scriptPath = saveScriptAs;
-            saveScript();
+            script_path = save_script_as;
+            save_script();
             move(5, 2);
             curs_set(0);
-            refreshView();
+            refresh_view();
         }
     }
 
-    // allows user to edit the gain for the entire script or specified frame
-    void ScriptTuner::editGain() {
+    void ScriptTuner::edit_gain() {
         erase();
         box(stdscr, 0, 0);
         attron(A_BOLD);
@@ -794,13 +787,13 @@ namespace module::purpose {
         bool editFrame         = false;
         bool changedUpper      = false;
         bool changedLower      = false;
-        bool editGainRun       = true;
+        bool edit_gainRun      = true;
         mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
 
-        while (editGainRun) {
+        while (edit_gainRun) {
 
             switch (getch()) {
-                case 'X': editGainRun = false; break;
+                case 'X': edit_gainRun = false; break;
                 case KEY_UP:
                     if (YPOSITION[i][j] == 0 && XPOSITION[i][j] == 0) {
                         mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, 0, 0, nullptr);
@@ -893,13 +886,13 @@ namespace module::purpose {
                     if (YPOSITION[i][j] == 7 && XPOSITION[i][j] == 12) {
                         mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
                         move(YPOSITION[i][j], XPOSITION[i][j]);
-                        userInputToFrame();
+                        user_input_to_frame();
                         mvprintw(YPOSITION[i][j], XPOSITION[i][j], "%d", frame + 1);
                     }
                     else {
                         mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
                         move(YPOSITION[i][j], XPOSITION[i][j]);
-                        newGain = userInputToGain();
+                        newGain = user_input_to_gain();
                         if (std::isnan(newGain)) {
                             mvprintw(YPOSITION[i][j], XPOSITION[i][j], "---.-");
                             upperGainS = -1;
@@ -995,7 +988,6 @@ namespace module::purpose {
 
         }  // while
 
-
         // loop through all frames in script and edit gains
         if (editScript) {
             std::cout << "Hello!" << std::endl;
@@ -1074,13 +1066,11 @@ namespace module::purpose {
                 }
             }
         }
-        refreshView();
-    }  // editGain()
+        refresh_view();
+    }
 
-
-    // checks user input is a number and converts it a number that becomes the new frame number
-    void ScriptTuner::userInputToFrame() {
-        std::string tempframe = userInput();
+    void ScriptTuner::user_input_to_frame() {
+        std::string tempframe = user_input();
         if (!tempframe.empty() && tempframe.size() <= 4) {
             try {
                 int tempframe2 = stoi(tempframe);
@@ -1107,9 +1097,9 @@ namespace module::purpose {
             }
         }
     }
-    // converts valid user input to gain
-    float ScriptTuner::userInputToGain() {
-        std::string tempGain = userInput();
+
+    float ScriptTuner::user_input_to_gain() {
+        std::string tempGain = user_input();
         try {
             if (!tempGain.empty()) {
                 float tempGain2 = stof(tempGain);

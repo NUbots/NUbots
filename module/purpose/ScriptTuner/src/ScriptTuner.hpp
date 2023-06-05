@@ -38,42 +38,83 @@ namespace module::purpose {
      */
     class ScriptTuner : public NUClear::Reactor {
     private:
-        const size_t id;
-        /// The path to the script we are editing
-        std::string scriptPath;
-        /// The script object we are editing
+        /// @brief The path to the script we are editing
+        std::string script_path;
+
+        /// @brief The script object we are editing
         Script<LimbsSequence> script;
-        /// The index of the frame we are currently editing
+
+        /// @brief The index of the frame we are currently editing
         size_t frame;
-        /// The index of the item we are selecting
+
+        /// @brief The index of the item we are selecting
         size_t selection;
-        /// If we are selecting the angle or gain for this item
-        bool angleOrGain;
-        const size_t defaultGain     = 10;
-        const size_t defaultDuration = 1000;
 
-        static std::string userInput();
+        /// @brief If we are selecting the angle or gain for this item
+        bool angle_or_gain;
 
-        void refreshView();
-        void loadScript(const std::string& path);
-        void saveScript();
-        void editDuration();
-        void editSelection();
-        void activateFrame(int frame);
-        void toggleLockMotor();
-        void newFrame();
-        void deleteFrame();
-        void playScript();
-        void jumpToFrame();
+        /// @brief Default gain for new frames
+        const size_t default_gain = 10;
+
+        /// @brief Default duration for new frames
+        const size_t default_duration = 1000;
+
+        /// @brief Listens for user input
+        static std::string user_input();
+
+        /// @brief Refreshes the ncurses view
+        void refresh_view();
+
+        /// @brief Loads in the script from the specified path
+        void load_script(const std::string& path);
+
+        /// @brief Saves the current script
+        void save_script();
+
+        /// @brief Edits the duration of the current frame
+        void edit_duration();
+
+        /// @brief Edits the angle of the current selection
+        void edit_selection();
+
+        /// @brief Emits targets of the current frame
+        void activate_frame(int frame);
+
+        /// @brief
+        void toggle_lock_motor();
+
+        /// @brief Adds a new frame to the script
+        void new_frame();
+
+        /// @brief Deletes the current frame from the script
+        void delete_frame();
+
+        /// @brief Plays the script
+        void play_script();
+
+        /// @brief Jumps to the specified frame without moving the robot
+        void jump_to_frame();
+
+        /// @brief Prints a list of commands to the screen
         void help();
-        void editGainInput();
-        void mirrorScript();
-        void saveScriptAs();
-        void editGain();
-        void userInputToFrame();
-        static float userInputToGain();
 
-        volatile bool running;
+        /// @brief
+        void edit_gain_input();
+
+        /// @brief Switches angle and gains between corresponding left and right motors, flips script around z axis
+        void mirror_script();
+
+        /// @brief Change script_path and then call save_script to Save As
+        void save_script_as();
+
+        /// @brief Allows user to edit the gain for the entire script or specified frame
+        void edit_gain();
+
+        /// @brief Checks user input is a number and converts it a number that becomes the new frame number
+        void user_input_to_frame();
+
+        /// @brief Converts valid user input to gain
+        static float user_input_to_gain();
 
     public:
         explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
