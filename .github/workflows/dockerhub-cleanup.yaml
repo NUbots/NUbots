@@ -6,7 +6,6 @@ on:
   # Triggers the workflow on closed events for the main branch
   pull_request:
     # 'closed' covers merges too
-    branches: [craft/fix-dockerhub-clean]
     types: [closed]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
@@ -31,7 +30,7 @@ jobs:
       # Run our script which calls the dockerhub API to delete the PR's tag
       - name: Delete DockerHub image tag
         run: |
-          DOCKERHUB_USERNAME=crafty15 \
-          DOCKERHUB_PASSWORD=${{ secrets.LIAMS_DOCKER_PASSWORD }} \
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+          DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
           TAG=pull-request-${{ github.event.number }} \
           .github/workflows/scripts/remove_dockerhub_tag.sh

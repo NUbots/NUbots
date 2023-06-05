@@ -5,7 +5,7 @@ name: NUbots CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [robocup2022]
+    branches: [main]
   # Triggers on PRs to any branch
   pull_request:
   # Trigger for merge queue
@@ -77,15 +77,15 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: crafty15
-          password: ${{ secrets.LIAMS_DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
       # Build the docker image
       - name: 🐳 Build the docker image 🐳
         uses: docker/build-push-action@v3.1.0
         with:
           pull: true
-          tags: "crafty15/nubots:pull-request-${{ github.event.number }}"
+          tags: "nubots/nubots:pull-request-${{ github.event.number }}"
           file: docker/Dockerfile
           context: docker
           build-args: |
@@ -93,13 +93,13 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
           push: true
           cache-from: |
-            type=registry,ref=crafty15/nubots:pull-request-${{ github.event.number }}
-            type=registry,ref=crafty15/nubots:generic
+            type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
+            type=registry,ref=nubots/nubots:generic
             type=inline
 
       - id: image_output
         name: Output the created image
-        run: echo "::set-output name=image::crafty15/nubots:pull-request-${{ github.event.number }}"
+        run: echo "::set-output name=image::nubots/nubots:pull-request-${{ github.event.number }}"
 
   # Build the codebase
   build_nubots:

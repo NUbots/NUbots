@@ -53,7 +53,7 @@ def run(target, build, pull, **kwargs):
 
         if pull:
             # Pull the image from dockerhub
-            platform.pull(defaults.repository, defaults.image, target)
+            platform.pull(defaults.image, target)
 
         # If user wants or needs to build it locally, do that unless the build context is the same as origin/main
         if build:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from . import platform
 
-repository = "crafty15"
+repository = "nubots"
 image = "nubots"
 user = "nubots"
 directory = "NUbots"

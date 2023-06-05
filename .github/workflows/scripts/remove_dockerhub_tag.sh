@@ -1,5 +1,5 @@
 #!/bin/bash
-# TEST DIFF
+
 # Script for deleting tags with the DockerHub REST API
 # Method adapted from here
 # https://devopsheaven.com/docker/dockerhub/2018/04/09/delete-docker-image-tag-dockerhub.html
@@ -19,8 +19,8 @@ elif [[ ! -v TAG ]]; then
     exit 1
 fi
 
-# These are always the same (except when they're not - L.Craft, Robocup 2022 image stuff)
-ORGANIZATION="crafty15"
+# These are always the same
+ORGANIZATION="nubots"
 IMAGE="nubots"
 
 login_json() {
