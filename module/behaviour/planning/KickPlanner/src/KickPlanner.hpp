@@ -20,6 +20,10 @@
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <nuclear>
+
 namespace module::behaviour::planning {
 
     class KickPlanner : public NUClear::Reactor {
@@ -31,7 +35,7 @@ namespace module::behaviour::planning {
         /// @brief Determines if the robot should kick based on the ball position.
         /// @param ball_pos The position of the ball in torso space.
         /// @return True if the robot should kick, false otherwise.
-        [[nodiscard]] bool kick_valid(const Eigen::Vector3d& ball_pos) const;
+        [[nodiscard]] bool kick_valid(const Eigen::Vector3f& ball_pos) const;
 
         /// @brief Stores configuration values
         struct Config {

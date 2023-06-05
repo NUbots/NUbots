@@ -41,13 +41,13 @@ namespace module::motion {
     }
 
     void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        Eigen::Isometry3d torsoToFoot = getTorsoPose(sensors);
-        Eigen::Isometry3d startPose   = torsoToFoot.inverse();
+        Eigen::Isometry3f torsoToFoot = getTorsoPose(sensors);
+        Eigen::Isometry3f startPose   = torsoToFoot.inverse();
 
         int negativeIfRight          = (supportFoot == LimbID::RIGHT_LEG) ? -1 : 1;
-        Eigen::Isometry3d finishPose = torsoToFoot;
+        Eigen::Isometry3f finishPose = torsoToFoot;
         finishPose.translation() =
-            Eigen::Vector3d(forward_lean,
+            Eigen::Vector3f(forward_lean,
                             negativeIfRight * (adjustment + kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE),
                             stand_height);
         finishPose = finishPose.inverse();
@@ -82,36 +82,36 @@ namespace module::motion {
     }
 
     void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
-        Eigen::Isometry3d startPose = Eigen::Isometry3d::Identity();
+        Eigen::Isometry3f startPose = Eigen::Isometry3f::Identity();
 
         // Convert torso to support foot
-        Eigen::Isometry3d currentTorso = getTorsoPose(sensors);
+        Eigen::Isometry3f currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
-        Eigen::Isometry3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                                ? Eigen::Isometry3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
-                                                : Eigen::Isometry3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+        Eigen::Isometry3f currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
+                                                ? Eigen::Isometry3f(sensors.Htx[ServoID::L_ANKLE_ROLL])
+                                                : Eigen::Isometry3f(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to
         // torso
-        Eigen::Isometry3d supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
+        Eigen::Isometry3f supportToKickFoot = currentKickFoot.inverse() * currentTorso.inverse();
         // Convert ball position from support foot coordinates to kick foot coordinates
-        Eigen::Vector3d ballFromKickFoot = supportToKickFoot * ballPosition;
-        Eigen::Vector3d goalFromKickFoot = supportToKickFoot * goalPosition;
+        Eigen::Vector3f ballFromKickFoot = supportToKickFoot * ballPosition;
+        Eigen::Vector3f goalFromKickFoot = supportToKickFoot * goalPosition;
 
         // Compute follow through:
-        Eigen::Vector3d ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalized();
-        Eigen::Vector3d followThrough  = follow_through * ballToGoalUnit;
-        Eigen::Vector3d windUp         = -wind_up * ballToGoalUnit;
+        Eigen::Vector3f ballToGoalUnit = (goalFromKickFoot - ballFromKickFoot).normalized();
+        Eigen::Vector3f followThrough  = follow_through * ballToGoalUnit;
+        Eigen::Vector3f windUp         = -wind_up * ballToGoalUnit;
 
         // Get kick and lift goals
-        Eigen::Vector3d kickGoal = followThrough;
-        Eigen::Vector3d liftGoal = windUp;
+        Eigen::Vector3f kickGoal = followThrough;
+        Eigen::Vector3f liftGoal = windUp;
 
         kickGoal.z() = kick_height;
         liftGoal.z() = kick_height;
 
         // constrain to prevent leg collision
-        Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
+        Eigen::Vector3f supportFootPos = supportToKickFoot.translation();
         int signSupportFootPosY        = supportFootPos.y() < 0 ? -1 : 1;
         float clippingPlaneY =
             supportFootPos.y()
@@ -139,7 +139,7 @@ namespace module::motion {
         // Robocup code / hacks
         auto startFrame                     = SixDOFFrame{startPose, 0};
         auto liftBeforeWindUp               = startFrame;
-        liftBeforeWindUp.pose.translation() = Eigen::Vector3d(0, 0, lift_foot.pose.translation().z());
+        liftBeforeWindUp.pose.translation() = Eigen::Vector3f(0, 0, lift_foot.pose.translation().z());
         liftBeforeWindUp.duration           = lift_before_windup_duration;
         auto returnBeforePlace              = liftBeforeWindUp;
         returnBeforePlace.duration          = return_before_place_duration;

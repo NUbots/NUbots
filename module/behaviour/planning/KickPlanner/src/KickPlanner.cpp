@@ -19,15 +19,15 @@
 
 #include "KickPlanner.hpp"
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
-
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/input/GameState.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
@@ -95,20 +95,14 @@ namespace module::behaviour::planning {
                     std::chrono::duration_cast<std::chrono::microseconds>(now - ball_last_seen).count() * 1e-6;
 
                 // Compute target in robot coords
-                Eigen::Isometry2d position(field.Hfw);
-                Eigen::Isometry3d Hfw;
-                Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0.0);
-                Hfw.linear() =
-                    Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(), Eigen::Vector3d::UnitZ())
-                        .toRotationMatrix();
-
-                Eigen::Isometry3d Htw(sensors.Htw);
-                Eigen::Vector3d ball_position =
-                    Htw * Eigen::Vector3d(ball.position.x(), ball.position.y(), fd.ball_radius);
+                Eigen::Isometry3f Hfw(field.Hfw);
+                Eigen::Isometry3f Htw(sensors.Htw);
+                Eigen::Vector3f ball_position =
+                    Htw * Eigen::Vector3f(ball.position.x(), ball.position.y(), fd.ball_radius);
 
                 // Transform target from field to torso space
-                Eigen::Isometry3d Htf       = Htw * Hfw.inverse();
-                Eigen::Vector3d kick_target = Htf * Eigen::Vector3d(kick_plan.target.x(), kick_plan.target.y(), 0.0);
+                Eigen::Isometry3f Htf       = Htw * Hfw.inverse();
+                Eigen::Vector3f kick_target = Htf * Eigen::Vector3f(kick_plan.target.x(), kick_plan.target.y(), 0.0);
                 float kick_angle            = std::fabs(std::atan2(kick_target.y(), kick_target.x()));
 
                 bool correct_state = true;
@@ -131,14 +125,14 @@ namespace module::behaviour::planning {
                     switch (kick_plan.kick_type.value) {
                         case KickType::IK_KICK:
                             if (ball_position.y() > 0.0) {
-                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3d(0.1, 0.04, 0.0),
-                                                                               Eigen::Vector3d::UnitX(),
+                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3f(0.1, 0.04, 0.0),
+                                                                               Eigen::Vector3f::UnitX(),
                                                                                KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                             }
                             else {
-                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3d(0.1, -0.04, 0.0),
-                                                                               Eigen::Vector3d::UnitX(),
+                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3f(0.1, -0.04, 0.0),
+                                                                               Eigen::Vector3f::UnitX(),
                                                                                KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                             }
@@ -168,7 +162,7 @@ namespace module::behaviour::planning {
     }
 
 
-    [[nodiscard]] bool KickPlanner::kick_valid(const Eigen::Vector3d& ball_pos) const {
+    [[nodiscard]] bool KickPlanner::kick_valid(const Eigen::Vector3f& ball_pos) const {
         return (ball_pos.x() > 0.0) && (ball_pos.x() < cfg.max_ball_distance)
                && (std::fabs(ball_pos.y()) < cfg.kick_corridor_width * 0.5);
     }

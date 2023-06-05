@@ -49,18 +49,18 @@ namespace module::motion {
         // };
         // InterpolationType interpolation = LINEAR;
     public:
-        Eigen::Isometry3d pose;
+        Eigen::Isometry3f pose;
         float duration;
         SixDOFFrame() : pose(), duration(0.0f) {}
-        SixDOFFrame(Eigen::Isometry3d pose_, float duration_) : pose(pose_), duration(duration_) {}
+        SixDOFFrame(Eigen::Isometry3f pose_, float duration_) : pose(pose_), duration(duration_) {}
         SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
             duration                    = config["duration"].as<float>();
-            Eigen::Vector3d pos         = config["pos"].as<Expression>();
-            Eigen::Vector3d orientation = config["orientation"].as<Expression>();
-            pose                        = Eigen::Isometry3d::Identity();
-            pose.rotate(Eigen::AngleAxisd(orientation.x(), Eigen::Vector3d::UnitX()));
-            pose.rotate(Eigen::AngleAxisd(orientation.y(), Eigen::Vector3d::UnitY()));
-            pose.rotate(Eigen::AngleAxisd(orientation.z(), Eigen::Vector3d::UnitZ()));
+            Eigen::Vector3f pos         = config["pos"].as<Expression>();
+            Eigen::Vector3f orientation = config["orientation"].as<Expression>();
+            pose                        = Eigen::Isometry3f::Identity();
+            pose.rotate(Eigen::AngleAxisf(orientation.x(), Eigen::Vector3f::UnitX()));
+            pose.rotate(Eigen::AngleAxisf(orientation.y(), Eigen::Vector3f::UnitY()));
+            pose.rotate(Eigen::AngleAxisf(orientation.z(), Eigen::Vector3f::UnitZ()));
             pose.translation() = pos;
         };
         // TODO:
@@ -72,7 +72,7 @@ namespace module::motion {
         std::vector<SixDOFFrame> frames;
         int i = 0;
         Animator() : frames() {
-            frames.push_back(SixDOFFrame{Eigen::Isometry3d::Identity(), 0});
+            frames.push_back(SixDOFFrame{Eigen::Isometry3f::Identity(), 0});
         }
         Animator(const std::vector<SixDOFFrame>& frames_) : frames(frames_) {}
         int clampPrev(int k) const {
@@ -114,8 +114,8 @@ namespace module::motion {
         Animator anim;
         float servo_angle_threshold = 0.1;
 
-        Eigen::Vector3d ballPosition;
-        Eigen::Vector3d goalPosition;
+        Eigen::Vector3f ballPosition;
+        Eigen::Vector3f goalPosition;
 
         NUClear::clock::time_point motionStartTime;
 
@@ -125,8 +125,8 @@ namespace module::motion {
             , forward_duration(0.0f)
             , return_duration(0.0f)
             , anim()
-            , ballPosition(Eigen::Vector3d::Zero())
-            , goalPosition(Eigen::Vector3d::Zero())
+            , ballPosition(Eigen::Vector3f::Zero())
+            , goalPosition(Eigen::Vector3f::Zero())
             , motionStartTime() {}
         virtual ~SixDOFFootController() = default;
 
@@ -171,31 +171,31 @@ namespace module::motion {
 
 
         void setKickParameters(utility::input::LimbID supportFoot_,
-                               Eigen::Vector3d ballPosition_,
-                               Eigen::Vector3d goalPosition_) {
+                               Eigen::Vector3f ballPosition_,
+                               Eigen::Vector3f goalPosition_) {
             supportFoot  = supportFoot_;
             ballPosition = ballPosition_;
             goalPosition = goalPosition_;
             reset();
         }
 
-        Eigen::Isometry3d getTorsoPose(const message::input::Sensors& sensors) {
+        Eigen::Isometry3f getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? Eigen::Isometry3d(sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL])
-                        : Eigen::Isometry3d(sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]));
+                        ? Eigen::Isometry3f(sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL])
+                        : Eigen::Isometry3f(sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]));
         }
 
-        Eigen::Isometry3d getFootPose(const message::input::Sensors& sensors) {
-            auto result = Eigen::Isometry3d::Identity();
+        Eigen::Isometry3f getFootPose(const message::input::Sensors& sensors) {
+            auto result = Eigen::Isometry3f::Identity();
             if (stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
 
-                double elapsedTime =
+                float elapsedTime =
                     std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count()
                     * 1e-6;
-                double alpha = (anim.currentFrame().duration != 0)
-                                   ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
-                                   : 1;
+                float alpha = (anim.currentFrame().duration != 0)
+                                  ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
+                                  : 1;
 
                 result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
 

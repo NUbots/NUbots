@@ -39,9 +39,9 @@ namespace module::motion {
         // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick
         // foot which is rightFootFront KickPlanner has to add the radius of the all to get the location of the
         // centre of the ball point position of ball
-        Eigen::Vector3d ballPosition;
+        Eigen::Vector3f ballPosition;
         // direction we want to kick the ball
-        Eigen::Vector3d goalPosition;
+        Eigen::Vector3f goalPosition;
 
         /// Subsumption ID key to access motors
         const size_t subsumptionId;

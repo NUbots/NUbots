@@ -75,9 +75,9 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
         // Do our forward kinematics
         Eigen::Isometry3d Htc =
-            utility::actuation::kinematics::calculatePosition(kinematics_model,
-                                                              sensors,
-                                                              ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+            utility::actuation::kinematics::calculatePosition<double>(kinematics_model,
+                                                                      sensors,
+                                                                      ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
         REQUIRE(double(Htc(0, 0) - camera_vector[0]) == Approx(0.0).margin(ERROR_THRESHOLD));
@@ -104,7 +104,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         sensors.servo = std::vector<Sensors::Servo>(20);
 
         std::vector<std::pair<ServoID, double>> left_leg_joints =
-            utility::actuation::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::LEFT_LEG);
+            utility::actuation::kinematics::calculateLegJoints<double>(kinematics_model, ik_request, LimbID::LEFT_LEG);
         for (const auto& leg_joint : left_leg_joints) {
             ServoID servoID;
             double position;
@@ -115,7 +115,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         }
 
         std::vector<std::pair<ServoID, double>> right_leg_joints =
-            utility::actuation::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
+            utility::actuation::kinematics::calculateLegJoints<double>(kinematics_model, ik_request, LimbID::RIGHT_LEG);
         for (const auto& leg_joint : right_leg_joints) {
             ServoID servoID;
             double position;
@@ -127,13 +127,13 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
 
         INFO("Calculating forward kinematics");
         Eigen::Isometry3d left_foot_position =
-            utility::actuation::kinematics::calculatePosition(kinematics_model,
-                                                              sensors,
-                                                              ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+            utility::actuation::kinematics::calculatePosition<double>(kinematics_model,
+                                                                      sensors,
+                                                                      ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
         Eigen::Isometry3d right_foot_position =
-            utility::actuation::kinematics::calculatePosition(kinematics_model,
-                                                              sensors,
-                                                              ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+            utility::actuation::kinematics::calculatePosition<double>(kinematics_model,
+                                                                      sensors,
+                                                                      ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
         INFO("Forward Kinematics predicts left foot: \n" << left_foot_position.matrix());
         INFO("Forward Kinematics predicts right foot: \n" << right_foot_position.matrix());
         INFO("Compared to request: \n" << ik_request.matrix());

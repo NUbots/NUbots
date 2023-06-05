@@ -46,25 +46,25 @@ using utility::support::Expression;
 
 TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionModel][orientation]") {
     // Create our motion model
-    UKF<float, MotionModel> filter{};
+    UKF<double, MotionModel> filter{};
 
     // Read in test data and ground truths
-    std::vector<Eigen::Vector3f> gyro_readings{};
-    std::vector<Eigen::Vector3f> acc_readings{};
-    std::vector<Eigen::Quaternionf> quaternions{};
+    std::vector<Eigen::Vector3d> gyro_readings{};
+    std::vector<Eigen::Vector3d> acc_readings{};
+    std::vector<Eigen::Quaterniond> quaternions{};
 
     char comma;
     std::ifstream ifs("tests/webots.csv");
     while (ifs.good()) {
-        Eigen::Vector3f gyro;
-        Eigen::Vector3f acc;
-        Eigen::Quaternionf quat;
+        Eigen::Vector3d gyro;
+        Eigen::Vector3d acc;
+        Eigen::Quaterniond quat;
         ifs >> gyro.x() >> comma >> gyro.y() >> comma >> gyro.z() >> comma >> acc.x() >> comma >> acc.y() >> comma
             >> acc.z();
         if (ifs.good()) {
             gyro_readings.emplace_back(gyro);
             acc_readings.emplace_back(acc);
-            quaternions.emplace_back(Eigen::Quaternionf(Eigen::Vector4d(0.0, 0.0, 0.0, 1.0)));
+            quaternions.emplace_back(Eigen::Quaterniond(Eigen::Vector4d(0.0, 0.0, 0.0, 1.0)));
         }
     }
     ifs.close();
@@ -80,7 +80,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     filter.model.timeUpdateVelocityDecay = config["ukf"]["update"]["velocity_decay"].as<Expression>();
 
     // Set our process noise in our filter
-    MotionModel<float>::StateVec process_noise{};
+    MotionModel<double>::StateVec process_noise{};
     const auto& process        = config["ukf"]["noise"]["process"];
     process_noise.rTWw         = process["position"].as<Expression>();
     process_noise.vTw          = process["velocity"].as<Expression>();
@@ -89,8 +89,8 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     filter.model.process_noise = process_noise;
 
     // Set our initial mean and covariance
-    MotionModel<float>::StateVec mean{};
-    MotionModel<float>::StateVec covariance{};
+    MotionModel<double>::StateVec mean{};
+    MotionModel<double>::StateVec covariance{};
     const auto& initial = config["ukf"]["initial"];
     mean.rTWw           = initial["mean"]["position"].as<Expression>();
     mean.vTw            = initial["mean"]["velocity"].as<Expression>();
@@ -127,9 +127,9 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
     if (failed) {
         // Failed to initialise UKF
-        const float covariance_sigma_weight = 0.1 * 0.1 * MotionModel<float>::size;
-        const MotionModel<float>::StateMat state(
-            covariance_sigma_weight * filter.get_covariance().unaryExpr([](const float& c) { return std::abs(c); }));
+        const double covariance_sigma_weight = 0.1 * 0.1 * MotionModel<double>::size;
+        const MotionModel<double>::StateMat state(
+            covariance_sigma_weight * filter.get_covariance().unaryExpr([](const double& c) { return std::abs(c); }));
         INFO(state.diagonal());
 
         INFO(error_msg);
@@ -137,17 +137,17 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     }
 
     // Noise to be applied to gyroscope measurements
-    Eigen::Matrix3f gyroscope_noise =
-        Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
+    Eigen::Matrix3d gyroscope_noise =
+        Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
 
     // Noise to be applied to accelerometer measurements
-    Eigen::Matrix3f accelerometer_noise =
-        Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
-    Eigen::Matrix3f accelerometer_magnitude_noise =
-        Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>()).asDiagonal();
+    Eigen::Matrix3d accelerometer_noise =
+        Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
+    Eigen::Matrix3d accelerometer_magnitude_noise =
+        Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>()).asDiagonal();
 
     // Elapsed time between each sensor read
-    static constexpr float deltaT = 1.0 / 90.0;
+    static constexpr double deltaT = 1.0 / 90.0;
 
     // Set up for adding gaussian noise to the measurements
     // Gyroscope datasheet says the MEMS device has a 0.03 dps/sqrt(Hz) noise density with a bandwidth of 50Hz
@@ -158,8 +158,8 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     std::normal_distribution<> acc_sensor_noise{0.0, 22e-6 * std::sqrt(400) * module::input::G};
 
     // Vector of quaternion errors from each timestep
-    std::vector<Eigen::Quaternionf> errors{};
-    std::vector<float> angular_errors{};
+    std::vector<Eigen::Quaterniond> errors{};
+    std::vector<double> angular_errors{};
 
     // Step through test data and get orientation predictions
     for (int i = 0; i < int(quaternions.size()); ++i) {
@@ -167,7 +167,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         filter.measure(gyro_readings[i], gyroscope_noise, module::input::MeasurementType::GYROSCOPE());
 
         // Calculate accelerometer noise factor
-        Eigen::Matrix3f acc_noise = accelerometer_noise
+        Eigen::Matrix3d acc_noise = accelerometer_noise
                                     + ((acc_readings[i].norm() - std::abs(module::input::G))
                                        * (acc_readings[i].norm() - std::abs(module::input::G)))
                                           * accelerometer_magnitude_noise;
@@ -206,7 +206,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
         if (!failed) {
             // Calculate difference between expected and predicted orientations
-            Eigen::Quaternionf Rwt = MotionModel<float>::StateVec(filter.get_state()).Rwt;
+            Eigen::Quaterniond Rwt = MotionModel<double>::StateVec(filter.get_state()).Rwt;
             INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
 
             angular_errors.emplace_back(Rwt.angularDistance(quaternions[i]));
@@ -214,27 +214,27 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         }
         else {
             // UKF state unrecoverable. Print current average error and bail
-            Eigen::Quaternionf Rwt            = MotionModel<float>::StateVec(filter.get_state()).Rwt;
-            const float current_angular_error = Rwt.angularDistance(quaternions[i]);
+            Eigen::Quaterniond Rwt             = MotionModel<double>::StateVec(filter.get_state()).Rwt;
+            const double current_angular_error = Rwt.angularDistance(quaternions[i]);
 
             angular_errors.emplace_back(current_angular_error);
             errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
 
-            const Eigen::Quaternionf mean_error =
+            const Eigen::Quaterniond mean_error =
                 utility::math::quaternion::meanRotation(errors.begin(), errors.end()).normalized();
 
-            const float mean_angular_error =
-                std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / float(angular_errors.size());
+            const double mean_angular_error =
+                std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
 
             INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
             INFO("Current Angular Error....: " << current_angular_error);
             INFO("Mean Error........: " << mean_error.coeffs().transpose());
             INFO("Mean Angular Error: " << mean_angular_error);
 
-            const float covariance_sigma_weight = 0.1 * 0.1 * MotionModel<float>::size;
-            const MotionModel<float>::StateMat state(
+            const double covariance_sigma_weight = 0.1 * 0.1 * MotionModel<double>::size;
+            const MotionModel<double>::StateMat state(
                 covariance_sigma_weight
-                * filter.get_covariance().unaryExpr([](const float& c) { return std::abs(c); }));
+                * filter.get_covariance().unaryExpr([](const double& c) { return std::abs(c); }));
             INFO(state.diagonal());
 
             INFO(error_msg);
@@ -242,10 +242,10 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         }
     }
 
-    const Eigen::Quaternionf mean_error = utility::math::quaternion::meanRotation(errors.begin(), errors.end());
+    const Eigen::Quaterniond mean_error = utility::math::quaternion::meanRotation(errors.begin(), errors.end());
 
-    const float mean_angular_error =
-        std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / float(angular_errors.size());
+    const double mean_angular_error =
+        std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
     INFO("Mean Angular Error: " << mean_angular_error);
     REQUIRE(mean_error.w() == Approx(1.0).margin(0.01));
