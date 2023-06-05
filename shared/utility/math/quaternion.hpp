@@ -100,7 +100,7 @@ namespace utility::math::quaternion {
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
         if (eigensolver.info() != Eigen::Success) {
             // Failed to get the mean using Merkley's method, try just averaging naively
-            Eigen::Vector4d mean = Eigen::Vector4d::Zero();
+            Eigen::Matrix<Scalar, 4, 1> mean = Eigen::Matrix<Scalar, 4, 1>::Zero();
             for (Iterator it = begin; it != end; ++it) {
                 mean += it->coeffs();
             }
