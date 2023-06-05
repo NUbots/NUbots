@@ -150,7 +150,7 @@ namespace module::input {
                 Eigen::Isometry3f Htg(calculateGroundSpace(Htf, Hwt));
 
                 footlanding_Hwf[side]                   = Hwt * Htg;
-                footlanding_Hwf[side].translation().z() = 0.0;
+                footlanding_Hwf[side].translation().z() = 0.0f;
 
                 // Store the current foot down state for next time
                 previous_foot_down[side] = true;

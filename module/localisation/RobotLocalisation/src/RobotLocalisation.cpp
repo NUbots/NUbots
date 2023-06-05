@@ -260,7 +260,7 @@ namespace module::localisation {
                 for (int i = 0; i < cfg.n_particles; i++) {
                     particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
                     if (log_level <= NUClear::DEBUG) {
-                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector2f(0.0, 0.0));
+                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector2f(0.0f, 0.0f));
                         emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
                     }
                 }
@@ -274,11 +274,11 @@ namespace module::localisation {
 
                 if (log_level <= NUClear::DEBUG) {
                     // Graph where the world frame is positioned in the map
-                    auto state_cell = position_in_map(state, Eigen::Vector2f(0.0, 0.0));
+                    auto state_cell = position_in_map(state, Eigen::Vector2f(0.0f, 0.0f));
                     emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
 
                     // Graph the cell 0.5m in front of the world frame to visualise the direction of world frame x
-                    auto direction_cell = position_in_map(state, Eigen::Vector2f(0.5, 0.0));
+                    auto direction_cell = position_in_map(state, Eigen::Vector2f(0.5f, 0.0f));
                     emit(graph("World (theta)", direction_cell.x(), direction_cell.y()));
 
                     // Graph where the robot is positioned in the map
@@ -288,7 +288,7 @@ namespace module::localisation {
                     emit(graph("Robot (x,y)", robot_cell.x(), robot_cell.y()));
 
                     // Graph the cell 0.5m in front of the robot to visualise the direction it's facing
-                    Eigen::Vector3f rPCc  = Eigen::Vector3f(0.5, 0.0, 0.0);
+                    Eigen::Vector3f rPCc  = Eigen::Vector3f(0.5f, 0.0f, 0.0f);
                     Eigen::Vector3f rPWw  = Hwc * rPCc;
                     auto robot_theta_cell = position_in_map(state, rPWw.head(2));
                     emit(graph("Robot (theta)", robot_theta_cell.x(), robot_theta_cell.y()));
@@ -297,7 +297,7 @@ namespace module::localisation {
                 // Build and emit the field message
                 auto field(std::make_unique<Field>());
                 Eigen::Isometry3f Hfw(Eigen::Isometry3f::Identity());
-                Hfw.translation() = Eigen::Vector3f(state.x(), state.y(), 0);
+                Hfw.translation() = Eigen::Vector3f(state.x(), state.y(), 0.0f);
                 Hfw.linear()      = Eigen::AngleAxisf(state.z(), Eigen::Vector3f::UnitZ()).toRotationMatrix();
                 field->Hfw        = Hfw.matrix();
                 field->covariance = covariance;
@@ -310,7 +310,7 @@ namespace module::localisation {
     Eigen::Vector2f RobotLocalisation::ray_to_field_plane(Eigen::Vector3f uPCr, Eigen::Isometry3f Hcw) {
         // Project the field line points onto the field plane
         auto Hwc             = Hcw.inverse();
-        Eigen::Vector3f rCWw = Eigen::Vector3f(Hwc.translation().x(), Hwc.translation().y(), 0.0);
+        Eigen::Vector3f rCWw = Eigen::Vector3f(Hwc.translation().x(), Hwc.translation().y(), 0.0f);
         Eigen::Vector3f rPCw = uPCr * std::abs(Hwc.translation().z() / uPCr.z()) + rCWw;
         return rPCw.head(2);
     }
@@ -357,7 +357,7 @@ namespace module::localisation {
         for (size_t i = 0; i < particles.size(); i++) {
             weights[i] = particles[i].weight;
         }
-        float weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
+        float weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0f);
         if (weight_sum == 0) {
             log<NUClear::DEBUG>("All weights are zero, cannot resample");
             // Add some more noise to the particles
@@ -399,7 +399,7 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::add_noise() {
-        MultivariateNormal<float, 3> multivariate(Eigen::Vector3f(0.0, 0.0, 0.0), cfg.process_noise);
+        MultivariateNormal<float, 3> multivariate(Eigen::Vector3f(0.0f, 0.0f, 0.0f), cfg.process_noise);
 
         for (auto& particle : particles) {
             particle.state += multivariate.sample();

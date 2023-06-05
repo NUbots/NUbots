@@ -230,10 +230,10 @@ namespace module::motion {
     class KickBalancer : public SixDOFFootController {
     private:
         // Config
-        float stand_height    = 0.18;
-        float foot_separation = 0.074;
-        float forward_lean    = 0.01;
-        float adjustment      = 0.011;
+        float stand_height    = 0.18f;
+        float foot_separation = 0.074f;
+        float forward_lean    = 0.01f;
+        float adjustment      = 0.011f;
 
     public:
         virtual void configure(const ::extension::Configuration& config);

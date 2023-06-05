@@ -30,7 +30,7 @@ namespace module::localisation {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Size of the grid cells in the occupancy grid [m]
-            float grid_size = 0.0;
+            float grid_size = 0.0f;
             /// @brief Number of particles to use in the particle filter
             int n_particles = 0;
             /// @brief Uncertainty in the process model

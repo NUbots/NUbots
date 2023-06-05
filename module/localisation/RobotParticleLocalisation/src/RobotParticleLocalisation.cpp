@@ -239,13 +239,13 @@ namespace module::localisation {
 
         on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
             // Left side penalty mark
-            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance,
-                                            (-fd.dimensions.field_width / 2.0),
+            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0f) + fd.dimensions.penalty_mark_distance,
+                                            (-fd.dimensions.field_width / 2.0f),
                                             -M_PI_2);
 
             // Right side penalty mark
-            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance,
-                                            (fd.dimensions.field_width / 2.0),
+            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0f) + fd.dimensions.penalty_mark_distance,
+                                            (fd.dimensions.field_width / 2.0f),
                                             M_PI_2);
 
             // // Left side goal line
@@ -283,16 +283,16 @@ namespace module::localisation {
         const bool right = (side == VisionGoal::Side::RIGHT);
 
         if (isOwn && left) {
-            return Eigen::Vector3f(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0.0f);
         }
         if (isOwn && right) {
-            return Eigen::Vector3f(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0.0f);
         }
         if (!isOwn && left) {
-            return Eigen::Vector3f(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0.0f);
         }
         if (!isOwn && right) {
-            return Eigen::Vector3f(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
+            return Eigen::Vector3f(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0.0f);
         }
 
         return Eigen::Vector3f::Zero();

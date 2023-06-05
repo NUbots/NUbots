@@ -90,7 +90,7 @@ namespace module::planning {
 
                 // If the kick leg is forced left, kick left. If the kick leg is auto,
                 // kick with left leg if ball is more to the left
-                if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && ball.rBRr.y() > 0.0)) {
+                if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && ball.rBRr.y() > 0.0f)) {
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
                 }
                 else {  // kick leg is forced right or ball is more to the right and kick leg is auto

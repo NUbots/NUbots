@@ -102,7 +102,7 @@ namespace module::behaviour::planning {
 
                 // Transform target from field to torso space
                 Eigen::Isometry3f Htf       = Htw * Hfw.inverse();
-                Eigen::Vector3f kick_target = Htf * Eigen::Vector3f(kick_plan.target.x(), kick_plan.target.y(), 0.0);
+                Eigen::Vector3f kick_target = Htf * Eigen::Vector3f(kick_plan.target.x(), kick_plan.target.y(), 0.0f);
                 float kick_angle            = std::fabs(std::atan2(kick_target.y(), kick_target.x()));
 
                 bool correct_state = true;
@@ -124,21 +124,21 @@ namespace module::behaviour::planning {
 
                     switch (kick_plan.kick_type.value) {
                         case KickType::IK_KICK:
-                            if (ball_position.y() > 0.0) {
-                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3f(0.1, 0.04, 0.0),
+                            if (ball_position.y() > 0.0f) {
+                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3f(0.1f, 0.04f, 0.0f),
                                                                                Eigen::Vector3f::UnitX(),
                                                                                KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                             }
                             else {
-                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3f(0.1, -0.04, 0.0),
+                                emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3f(0.1f, -0.04f, 0.0f),
                                                                                Eigen::Vector3f::UnitX(),
                                                                                KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                             }
                             break;
                         case KickType::SCRIPTED:
-                            if (ball_position.y() > 0.0) {
+                            if (ball_position.y() > 0.0f) {
                                 emit(std::make_unique<KickScriptCommand>(
                                     KickScriptCommand(LimbID::LEFT_LEG, KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));

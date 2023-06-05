@@ -50,7 +50,8 @@ namespace module::strategy {
                     Eigen::Isometry3f Hrf = Eigen::Isometry3f(sensors.Hrw) * Eigen::Isometry3f(field.Hfw.inverse());
 
                     // Goal position relative to robot
-                    Eigen::Vector3f rGFf = Eigen::Vector3f(-field_description.dimensions.field_length / 2.0, 0.0, 0.0);
+                    Eigen::Vector3f rGFf =
+                        Eigen::Vector3f(-field_description.dimensions.field_length / 2.0f, 0.0f, 0.0f);
                     Eigen::Vector3f rGRr = Hrf * rGFf;
 
                     // Find the angle to the goal - should be as close as possible to 0 to be aligned
@@ -58,7 +59,7 @@ namespace module::strategy {
 
                     // Only align if we are not within a threshold of the goal
                     if (std::fabs(kick_angle) > cfg.angle_threshold) {
-                        if (kick_angle < 0.0) {
+                        if (kick_angle < 0.0f) {
                             emit<Task>(std::make_unique<TurnAroundBall>(true));
                         }
                         else {

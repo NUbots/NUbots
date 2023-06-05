@@ -245,10 +245,10 @@ namespace module::input {
             Eigen::Vector3f bias = Eigen::Vector3f::Zero();
 
             /// @brief Mahony filter proportional gain
-            float Ki = 0.0;
+            float Ki = 0.0f;
 
             /// @brief Mahony filter integral gain
-            float Kp = 0.0;
+            float Kp = 0.0f;
         } cfg;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery

@@ -100,7 +100,7 @@ namespace module::input {
 
         Eigen::Isometry3f Hwr = Eigen::Isometry3f::Identity();
         Hwr.linear()          = Eigen::AngleAxisf(yaw, Eigen::Vector3f::UnitZ()).toRotationMatrix();
-        Hwr.translation()     = Eigen::Vector3f(Hwt.translation().x(), Hwt.translation().y(), 0.0);
+        Hwr.translation()     = Eigen::Vector3f(Hwt.translation().x(), Hwt.translation().y(), 0.0f);
         sensors->Hrw          = Hwr.inverse().matrix();
     }
 }  // namespace module::input

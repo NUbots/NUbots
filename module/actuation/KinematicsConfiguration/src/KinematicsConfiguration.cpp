@@ -70,7 +70,7 @@ namespace module::actuation {
         model.leg.FOOT_LENGTH = objFoot["length"].as<float>();
         model.leg.TOE_LENGTH  = objFoot["toe_length"].as<float>();
 
-        model.leg.LENGTH_BETWEEN_LEGS = 2.0 * model.leg.HIP_OFFSET_Y;
+        model.leg.LENGTH_BETWEEN_LEGS = 2.0f * model.leg.HIP_OFFSET_Y;
 
         const auto& objLeftRight            = objLeg["left_to_right"];
         model.leg.LEFT_TO_RIGHT_HIP_YAW     = objLeftRight["hip_yaw"].as<int>();

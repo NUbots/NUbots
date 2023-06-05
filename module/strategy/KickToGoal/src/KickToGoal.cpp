@@ -36,7 +36,7 @@ namespace module::strategy {
                 Eigen::Isometry3f Hrf = Eigen::Isometry3f(sensors.Hrw) * Eigen::Isometry3f(field.Hfw.inverse());
 
                 // Get the goal position relative to the robot to kick to
-                Eigen::Vector3f rGFf = Eigen::Vector3f(-field_description.dimensions.field_length / 2.0, 0.0, 0.0);
+                Eigen::Vector3f rGFf = Eigen::Vector3f(-field_description.dimensions.field_length / 2.0f, 0.0f, 0.0f);
                 Eigen::Vector3f rGRr = Hrf * rGFf;
 
                 emit<Task>(std::make_unique<KickTo>(rGRr));  // kick the ball if possible

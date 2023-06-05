@@ -64,7 +64,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         if (ifs.good()) {
             gyro_readings.emplace_back(gyro);
             acc_readings.emplace_back(acc);
-            quaternions.emplace_back(Eigen::Quaternionf(Eigen::Vector4f(0.0, 0.0, 0.0, 1.0)));
+            quaternions.emplace_back(Eigen::Quaternionf(Eigen::Vector4f(0.0f, 0.0f, 0.0f, 1.0f)));
         }
     }
     ifs.close();
@@ -127,7 +127,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
     if (failed) {
         // Failed to initialise UKF
-        const float covariance_sigma_weight = 0.1 * 0.1 * MotionModel<float>::size;
+        const float covariance_sigma_weight = 0.1f * 0.1f * MotionModel<float>::size;
         const MotionModel<float>::StateMat state(
             covariance_sigma_weight * filter.get_covariance().unaryExpr([](const float& c) { return std::abs(c); }));
         INFO(state.diagonal());
@@ -147,15 +147,15 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         Eigen::Vector3f(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>()).asDiagonal();
 
     // Elapsed time between each sensor read
-    static constexpr float deltaT = 1.0 / 90.0;
+    static constexpr float deltaT = 1.0f / 90.0f;
 
     // Set up for adding gaussian noise to the measurements
     // Gyroscope datasheet says the MEMS device has a 0.03 dps/sqrt(Hz) noise density with a bandwidth of 50Hz
     // Accelerometer datasheet says the MEMS device has a 220 micro-g/sqrt(Hz) noise density with a bandwidth 400Hz
     std::random_device rd{};
     std::mt19937 gen{rd()};
-    std::normal_distribution<> gyro_sensor_noise{0.0, 0.03 * std::sqrt(50.0) * M_PI / 180.0};
-    std::normal_distribution<> acc_sensor_noise{0.0, 22e-6 * std::sqrt(400) * module::input::G};
+    std::normal_distribution<> gyro_sensor_noise{0.0f, 0.03f * std::sqrt(50.0f) * M_PI / 180.0f};
+    std::normal_distribution<> acc_sensor_noise{0.0f, 22e-6f * std::sqrt(400.0f) * module::input::G};
 
     // Vector of quaternion errors from each timestep
     std::vector<Eigen::Quaternionf> errors{};
