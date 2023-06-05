@@ -80,47 +80,70 @@ message Sensors {
         float temperature = 13;
     }
 
+    /// Button information
     message Button {
         uint32 id = 1;
         /// True is pressed, false is unpressed
         bool value = 2;
     }
 
+    /// LED information
     message LED {
         uint32 id     = 1;
         uint32 colour = 2;
     }
 
+    /// Foot information
     message Foot {
         bool down = 1;
         mat4 Hwf  = 2;
     }
+
     /// When the data were taken/captured
     google.protobuf.Timestamp timestamp = 1;
+
     /// The values are between 0 and 1023, representing a value between -4g and 4g
     /// => 512 = 0g. Is {x, y, z} acceleration
     vec3 accelerometer = 2;
+
     /// The values are between 0 and 1023, represent a value between -500 degrees
     /// per second and 500 degrees per second.
     /// => 512 = 0 degrees per second. Is {x, y, z} angular velocity
     vec3 gyroscope = 3;
-    /// Affine3d transform from odometry (world) space to the robot (torso) space.
-    /// It measures the world in robot space
-    mat4 Htw = 4;
+
     /// Set of force sensitive resistors. Used to sense if a foot is on the ground
-    repeated Foot   feet   = 5;
-    repeated Servo  servo  = 6;
-    repeated Button button = 7;
-    repeated LED    led    = 8;
+    repeated Foot feet = 4 [(array_size) = 2];
+
+    /// Set of servos on the robot
+    repeated Servo servo = 5;
+
+    /// Set of buttons on the robot
+    repeated Button button = 6;
+
+    /// Set of LEDs on the robot
+    repeated LED led = 7;
+
     /// Voltage for the whole robot, from the main battery
-    float voltage = 9;
-    float battery = 10;
+    float voltage = 8;
+
+    /// Battery
+    float battery = 9;
+
+    /// Cartesian position of the CoM {M} of the robot from the torso {T} in the torso space {t}
+    vec4 rMTt = 10;
+
+    /// Inertia tensor measured in particle space and relative to the CoM of the particle
+    mat3 inertia_tensor = 11;
+
     /// A set of transforms; one for each servo
-    repeated mat4 Htx = 15 [(array_size) = 20];
-    /// Torso to Centre of Mass (CoM) in torso space
-    vec4 rMTt = 17;
-    mat4 Hgt  = 18;
-    /// Inertia tensor measured in particle space and relative to the CoM of the
-    /// particle
-    mat3 inertia_tensor = 20;
+    repeated mat4 Htx = 12 [(array_size) = 20];
+
+    /// Homogeneous transform: torso {t} from ground {g}
+    mat4 Hgt = 13;
+
+    /// Homogeneous transform: world {w} from robot {r}
+    mat4 Hrw = 14;
+
+    /// Homogeneous transform: world {w} from torso {t}
+    mat4 Htw = 15;
 }

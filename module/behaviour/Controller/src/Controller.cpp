@@ -19,13 +19,13 @@
 
 #include "Controller.hpp"
 
-#include "message/motion/ServoTarget.hpp"
+#include "message/actuation/ServoTarget.hpp"
 
 namespace module::behaviour {
 
+    using message::actuation::ServoTargets;
     using message::behaviour::ServoCommand;
     using message::behaviour::ServoCommands;
-    using message::motion::ServoTargets;
 
     using utility::behaviour::ActionKill;
     using utility::behaviour::ActionPriorities;

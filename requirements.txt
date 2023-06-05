@@ -7,3 +7,4 @@ si-prefix
 numpy
 argcomplete
 honcho
+opencv-python

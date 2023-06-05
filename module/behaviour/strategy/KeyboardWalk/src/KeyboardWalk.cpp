@@ -332,7 +332,7 @@ namespace module::behaviour::strategy {
 
     void KeyboardWalk::update_command() {
         if (moving) {
-            Eigen::Affine2d affineParameter;
+            Eigen::Isometry2d affineParameter;
             affineParameter.linear()      = Eigen::Rotation2Dd(rotation).toRotationMatrix();
             affineParameter.translation() = Eigen::Vector2d(velocity.x(), velocity.y());
             emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));

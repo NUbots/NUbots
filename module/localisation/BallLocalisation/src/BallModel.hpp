@@ -73,7 +73,7 @@ namespace module::localisation {
                                                           const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
 
             const Eigen::Matrix<Scalar, 3, 1> rBWw(state[PX], state[PY], field.ball_radius);
-            const Eigen::Matrix<Scalar, 3, 1> rBCc(Eigen::Affine3d(Hcw) * rBWw);
+            const Eigen::Matrix<Scalar, 3, 1> rBCc(Eigen::Isometry3d(Hcw) * rBWw);
 
             return cartesianToReciprocalSpherical(rBCc);
         }

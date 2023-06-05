@@ -4,21 +4,23 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/Behaviour.hpp"
+#include "message/eye/DataPoint.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/SaveConfiguration.hpp"
 
+#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::motion {
 
     using extension::Configuration;
 
+    using message::actuation::KinematicsModel;
     using message::behaviour::Behaviour;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
@@ -26,13 +28,15 @@ namespace module::motion {
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::motion::KinematicsModel;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
-    using utility::support::Expression;
 
+    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
-    using utility::motion::kinematics::calculateLegJoints;
+    using utility::math::euler::EulerIntrinsicToMatrix;
+    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::nusight::graph;
+    using utility::support::Expression;
 
     /**
      * @brief loads the configuration from cfg into config
@@ -106,8 +110,8 @@ namespace module::motion {
             // compute the pitch offset to the currently wanted pitch of the engine
             float wanted_pitch =
                 current_config.params.trunk_pitch
-                + current_config.params.trunk_pitch_p_coef_forward * walk_engine.getFootstep().getNext().x()
-                + current_config.params.trunk_pitch_p_coef_turn * std::abs(walk_engine.getFootstep().getNext().z());
+                + current_config.params.trunk_pitch_p_coef_forward * walk_engine.get_footstep().get_next().x()
+                + current_config.params.trunk_pitch_p_coef_turn * std::abs(walk_engine.get_footstep().get_next().z());
             RPY.y() += wanted_pitch;
 
             // threshold pitch and roll
@@ -115,17 +119,17 @@ namespace module::motion {
                 log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
                                                std::abs(RPY.x()),
                                                current_config.imu_roll_threshold));
-                walk_engine.requestPause();
+                walk_engine.request_pause();
             }
             else if (std::abs(RPY.y()) > current_config.imu_pitch_threshold) {
                 log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
                                                std::abs(RPY.y()),
                                                current_config.imu_pitch_threshold));
-                walk_engine.requestPause();
+                walk_engine.request_pause();
             }
         });
 
-        on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("quinticwalk.yaml").then([this](const Configuration& cfg) {
             log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             load_quintic_walk(cfg, normal_config);
@@ -133,7 +137,7 @@ namespace module::motion {
             // Make sure the walk engine has the parameters at least once
             if (first_config) {
                 // Send these parameters to the walk engine
-                walk_engine.setParameters(current_config.params);
+                walk_engine.set_parameters(current_config.params);
 
                 imu_reaction.enable(current_config.imu_active);
 
@@ -141,7 +145,7 @@ namespace module::motion {
             }
         });
 
-        on<Configuration>("goalie/QuinticWalk.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("goalie/quinticwalk.yaml").then([this](const Configuration& cfg) {
             load_quintic_walk(cfg, goalie_config);
         });
 
@@ -156,7 +160,7 @@ namespace module::motion {
             }
 
             // Send these parameters to the walk engine
-            walk_engine.setParameters(current_config.params);
+            walk_engine.set_parameters(current_config.params);
 
             imu_reaction.enable(current_config.imu_active);
         });
@@ -176,12 +180,12 @@ namespace module::motion {
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
         on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
-            subsumptionId = walkCommand.subsumption_id;
+            subsumption_id = walkCommand.subsumption_id;
             current_orders.setZero();
         });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            subsumptionId = walkCommand.subsumption_id;
+            subsumption_id = walkCommand.subsumption_id;
 
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
@@ -217,18 +221,18 @@ namespace module::motion {
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
-            subsumptionId = command.subsumption_id;
+            subsumption_id = command.subsumption_id;
             walk_engine.reset();
             update_handle.enable();
         });
 
         on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
-            subsumptionId = command.subsumption_id;
+            subsumption_id = command.subsumption_id;
             update_handle.disable();
         });
 
         update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
-            const float dt = getTimeDelta();
+            const float dt = get_time_delta();
 
             if (falling) {
                 // We are falling, reset walk engine
@@ -237,14 +241,14 @@ namespace module::motion {
             else {
 
                 // see if the walk engine has new goals for us
-                if (walk_engine.updateState(dt, current_orders)) {
-                    calculateJointGoals();
+                if (walk_engine.update_state(dt, current_orders)) {
+                    calculate_joint_goals();
                 }
             }
         });
     }
 
-    float QuinticWalk::getTimeDelta() {
+    float QuinticWalk::get_time_delta() {
         // compute time delta depended if we are currently in simulation or reality
         const auto current_time = NUClear::clock::now();
         float dt =
@@ -265,50 +269,64 @@ namespace module::motion {
         return dt;
     }
 
-    void QuinticWalk::calculateJointGoals() {
-        /*
-        This method computes the next motor goals and publishes them.
-        */
-        auto setRPY = [&](const float& roll, const float& pitch, const float& yaw) {
-            const float halfYaw   = yaw * 0.5f;
-            const float halfPitch = pitch * 0.5f;
-            const float halfRoll  = roll * 0.5f;
-            const float cosYaw    = std::cos(halfYaw);
-            const float sinYaw    = std::sin(halfYaw);
-            const float cosPitch  = std::cos(halfPitch);
-            const float sinPitch  = std::sin(halfPitch);
-            const float cosRoll   = std::cos(halfRoll);
-            const float sinRoll   = std::sin(halfRoll);
-            return Eigen::Quaternionf(Eigen::Vector4f(sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,   // x
-                                                      cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,   // y
-                                                      cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,   // z
-                                                      cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw))  // w
-                .normalized()  // Rotation quaternions should have unit norm
-                .toRotationMatrix();
-        };
+    /*
+    This method computes the next motor goals and publishes them.
+    */
+    void QuinticWalk::calculate_joint_goals() {
+
+        // Position of trunk {t} relative to support foot {s}
+        Eigen::Vector3f rTSs = Eigen::Vector3f::Zero();
+        // Euler angles [Roll, Pitch, Yaw] of trunk {t} relative to support foot {s}
+        Eigen::Vector3f thetaST = Eigen::Vector3f::Zero();
+        // Position of flying foot {f} relative to support foot {s}
+        Eigen::Vector3f rFSs = Eigen::Vector3f::Zero();
+        // Euler angles [Roll, Pitch, Yaw] of flying foot {f} relative to support foot {s}
+        Eigen::Vector3f thetaSF = Eigen::Vector3f::Zero();
+
         // Read the cartesian positions and orientations for trunk and fly foot
-        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
+        std::tie(rTSs, thetaST, rFSs, thetaSF, is_left_support) = walk_engine.compute_cartesian_position();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
-        Eigen::Affine3f Hst;  // trunk_to_support_foot_goal
-        Hst.linear()      = setRPY(trunk_axis.x(), trunk_axis.y(), trunk_axis.z()).transpose();
-        Hst.translation() = -Hst.rotation() * trunk_pos;
+        // Trunk {t} from support foot {s}
+        Eigen::Isometry3f Hst;
+        Hst.linear()      = EulerIntrinsicToMatrix(thetaST);
+        Hst.translation() = rTSs;
 
-        Eigen::Affine3f Hfs;  // support_to_flying_foot
-        Hfs.linear()      = setRPY(foot_axis.x(), foot_axis.y(), foot_axis.z());
-        Hfs.translation() = foot_pos;
+        // Flying foot {f} from support foot {s}
+        Eigen::Isometry3f Hsf;
+        Hsf.linear()      = EulerIntrinsicToMatrix(thetaSF);
+        Hsf.translation() = rFSs;
 
-        const Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
+        // Support foot {s} from trunk {t}
+        const Eigen::Isometry3f Hts = Hst.inverse();
 
-        // Calculate leg joints
-        const Eigen::Matrix4f left_foot  = walk_engine.getFootstep().isLeftSupport() ? Hst.matrix() : Hft.matrix();
-        const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Hft.matrix() : Hst.matrix();
+        // Flying foot {f} from trunk {t}
+        const Eigen::Isometry3f Htf = Hts * Hsf;
 
-        const auto joints =
-            calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
+        // Get desired transform for left foot {l}
+        const Eigen::Isometry3f Htl = walk_engine.get_footstep().is_left_support() ? Hts : Htf;
 
-        auto waypoints = motion(joints);
+        // Get desired transform for right foot {r}
+        const Eigen::Isometry3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
+
+        // Compute inverse kinematics for left and right foot
+        const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
+        auto waypoints    = motion(joints);
         emit(std::move(waypoints));
+
+        // Plot graphs of desired trajectories
+        if (log_level <= NUClear::DEBUG) {
+            Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
+            emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+            emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
+
+            Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
+            emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+            emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
+
+            emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
+            emit(graph("Trunk desired orientation (r,p,y)", thetaST.x(), thetaST.y(), thetaST.z()));
+        }
     }
 
     std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
@@ -318,7 +336,7 @@ namespace module::motion {
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
         for (const auto& joint : joints) {
-            waypoints->commands.emplace_back(subsumptionId,
+            waypoints->commands.emplace_back(subsumption_id,
                                              time,
                                              joint.first,
                                              joint.second,
@@ -327,7 +345,7 @@ namespace module::motion {
         }
 
         for (const auto& joint : current_config.arm_positions) {
-            waypoints->commands.emplace_back(subsumptionId,
+            waypoints->commands.emplace_back(subsumption_id,
                                              time,
                                              joint.first,
                                              joint.second,

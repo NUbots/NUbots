@@ -19,7 +19,7 @@ jobs:
     # Run once for each of the platforms
     strategy:
       matrix:
-        platform: ["generic", "nuc7i7bnh"]
+        platform: ["generic", "nuc8i7beh", "nuc7i7bnh", "nuc12wshi7"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -39,7 +39,7 @@ jobs:
 
       # Build the docker image
       - name: 🐳 Build the docker image 🐳
-        uses: docker/build-push-action@v3.0.0
+        uses: docker/build-push-action@v3.1.0
         with:
           pull: true
           tags: "crafty15/nubots:${{ matrix.platform }}"

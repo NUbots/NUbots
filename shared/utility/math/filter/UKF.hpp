@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2019 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_FILTER_UKF_HPP
@@ -291,11 +291,11 @@ namespace utility::math::filter {
                 });
         }
 
-        [[nodiscard]] const StateVec& get() const {
+        [[nodiscard]] const StateVec& get_state() const {
             return mean;
         }
 
-        [[nodiscard]] const StateMat& getCovariance() const {
+        [[nodiscard]] const StateMat& get_covariance() const {
             return covariance;
         }
     };

@@ -28,6 +28,66 @@ namespace utility::platform {
     using message::platform::RawSensors;
     using utility::input::ServoID;
 
+    std::string make_error_string(const std::string& src, const uint error_code) {
+        std::stringstream s;
+
+        s << "Error on ";
+        s << src;
+        s << ":";
+
+        if ((error_code & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
+            s << " Input Voltage ";
+        }
+        if ((error_code & RawSensors::Error::ANGLE_LIMIT) != 0u) {
+            s << " Angle Limit ";
+        }
+        if ((error_code & RawSensors::Error::OVERHEATING) != 0u) {
+            s << " Overheating ";
+        }
+        if ((error_code & RawSensors::Error::OVERLOAD) != 0u) {
+            s << " Overloaded ";
+        }
+        if ((error_code & RawSensors::Error::INSTRUCTION) != 0u) {
+            s << " Bad Instruction ";
+        }
+        if ((error_code & RawSensors::Error::CORRUPT_DATA) != 0u) {
+            s << " Corrupt Data ";
+        }
+        if ((error_code & RawSensors::Error::TIMEOUT) != 0u) {
+            s << " Timeout ";
+        }
+
+        return s.str();
+    }
+
+    std::string make_servo_error_string(const RawSensors::Servo& servo, const uint32_t servo_id) {
+        std::stringstream s;
+        s << "Error on Servo " << (servo_id + 1) << " (" << static_cast<ServoID>(servo_id) << "):";
+
+        if (RawSensors::Error::INPUT_VOLTAGE != 0u) {
+            s << " Input Voltage - " << servo.voltage;
+        }
+        if (RawSensors::Error::ANGLE_LIMIT != 0u) {
+            s << " Angle Limit - " << servo.present_position;
+        }
+        if (RawSensors::Error::OVERHEATING != 0u) {
+            s << " Overheating - " << servo.temperature;
+        }
+        if (RawSensors::Error::OVERLOAD != 0u) {
+            s << " Overloaded - " << servo.load;
+        }
+        if (RawSensors::Error::INSTRUCTION != 0u) {
+            s << " Bad Instruction ";
+        }
+        if (RawSensors::Error::CORRUPT_DATA != 0u) {
+            s << " Corrupt Data ";
+        }
+        if (RawSensors::Error::TIMEOUT != 0u) {
+            s << " Timeout ";
+        }
+        return s.str();
+    }
+
     inline const RawSensors::Servo& getRawServo(ServoID servoId, const RawSensors& sensors) {
 
         switch (servoId.value) {

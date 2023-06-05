@@ -13,11 +13,43 @@ function(ToolchainLibraryFinder)
       "VERSION_FILE"
       "VERSION_BINARY_ARGUMENTS"
       "VERSION_REGEX"
+      "LINK_TYPE"
   )
   cmake_parse_arguments(PACKAGE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # Clear our required_vars variable
   unset(required_vars)
+
+  if(PACKAGE_LIBRARY OR PACKAGE_LIBRARIES)
+    if(PACKAGE_LINK_TYPE)
+      set(${PACKAGE_NAME}_LINK_TYPE
+          ${PACKAGE_LINK_TYPE}
+          CACHE STRING "Choose method to link the library"
+      )
+    else()
+      set(${PACKAGE_NAME}_LINK_TYPE
+          UNKNOWN
+          CACHE STRING "Choose method to link the library"
+      )
+    endif()
+    set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN")
+    mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
+
+    # Search only for specified libraries
+    if(${PACKAGE_NAME}_LINK_TYPE STREQUAL "STATIC")
+      set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
+      # Uncache the incorrect value
+      if(${PACKAGE_NAME}_LIBRARY MATCHES ".*\.so$")
+        unset(${PACKAGE_NAME}_LIBRARY CACHE)
+      endif()
+    elseif(${PACKAGE_NAME}_LINK_TYPE STREQUAL "SHARED")
+      set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
+      # Uncache the incorrect value
+      if(${PACKAGE_NAME}_LIBRARY MATCHES ".*\.a$")
+        unset(${PACKAGE_NAME}_LIBRARY CACHE)
+      endif()
+    endif()
+  endif()
 
   # Find our library from the named library files
   if(PACKAGE_LIBRARY)
@@ -29,7 +61,7 @@ function(ToolchainLibraryFinder)
     )
 
     # Setup an imported target for this library
-    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} UNKNOWN IMPORTED)
+    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} ${${PACKAGE_NAME}_LINK_TYPE} IMPORTED)
     set_target_properties(${PACKAGE_NAME}::${PACKAGE_NAME} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_LIBRARY})
 
     # Setup and export our variables
@@ -50,7 +82,7 @@ function(ToolchainLibraryFinder)
       )
 
       # Setup an imported target for this library
-      add_library(${PACKAGE_NAME}::${lib} UNKNOWN IMPORTED)
+      add_library(${PACKAGE_NAME}::${lib} ${${PACKAGE_NAME}_LINK_TYPE} IMPORTED)
       set_target_properties(${PACKAGE_NAME}::${lib} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_${lib}_LIBRARY})
 
       # Setup and export our variables

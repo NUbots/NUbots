@@ -15,3 +15,5 @@ This codebase is the current state of our development efforts to compete in the 
 
 [NUbook](https://nubook.nubots.net/) is the handbook and high-level documentation for the NUbots team.
 It contains guides for [getting started with development](https://nubook.nubots.net/guides/main/getting-started) and [information about the team](https://nubook.nubots.net/team/introduction).
+
+We also have generated documentation from the code available at [codedocs](https://codedocs.nubots.net/).

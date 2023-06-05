@@ -20,17 +20,18 @@
 #include "SoccerStrategy.hpp"
 
 #include <Eigen/Geometry>
+#include <cmath>
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/BodySide.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
-#include "message/behaviour/SoccerObjectPriority.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/FilteredBall.hpp"
 #include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
-#include "message/motion/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KickCommand.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -50,13 +51,8 @@ namespace module::behaviour::strategy {
     using extension::Configuration;
 
     using message::behaviour::Behaviour;
-    using message::behaviour::FieldTarget;
-    using message::behaviour::KickPlan;
-    using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::MotionCommand;
     using message::behaviour::Nod;
-    using message::behaviour::SoccerObjectPriority;
-    using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
     using message::input::GameEvents;
     using message::input::GameState;
     using Phase          = message::input::GameState::Data::Phase;
@@ -64,12 +60,12 @@ namespace module::behaviour::strategy {
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using GameMode       = message::input::GameState::Data::Mode;
+    using message::actuation::BodySide;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::localisation::ResetBallHypotheses;
     using message::localisation::ResetRobotHypotheses;
-    using message::motion::BodySide;
     using message::motion::ExecuteGetup;
     using message::motion::KickCommandType;
     using message::motion::KickScriptCommand;
@@ -77,10 +73,14 @@ namespace module::behaviour::strategy {
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
     using message::support::FieldDescription;
-    using VisionBalls = message::vision::Balls;
+
+    using FilteredBall = message::localisation::FilteredBall;
+
     using VisionGoals = message::vision::Goals;
+    using LimbID      = utility::input::LimbID;
 
     using utility::input::LimbID;
+    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::support::Expression;
 
@@ -89,24 +89,27 @@ namespace module::behaviour::strategy {
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+
         on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             using namespace std::chrono;
+
             cfg.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
                 duration<double>(config["ball_last_seen_max_time"].as<double>()));
             cfg.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
                 duration<double>(config["goal_last_seen_max_time"].as<double>()));
 
-            cfg.localisation_interval =
-                duration_cast<NUClear::clock::duration>(duration<double>(config["localisation_interval"].as<double>()));
-            cfg.localisation_duration =
-                duration_cast<NUClear::clock::duration>(duration<double>(config["localisation_duration"].as<double>()));
+            cfg.localisation_interval = std::chrono::duration_cast<NUClear::clock::duration>(
+                duration<double>(config["localisation_interval"].as<double>()));
+            cfg.localisation_duration = std::chrono::duration_cast<NUClear::clock::duration>(
+                duration<double>(config["localisation_duration"].as<double>()));
 
             cfg.start_position_offensive = config["start_position_offensive"].as<Expression>();
             cfg.start_position_defensive = config["start_position_defensive"].as<Expression>();
 
-            cfg.is_goalie = config["is_goalie"].as<bool>();
+            cfg.is_goalie                = config["is_goalie"].as<bool>();
+            cfg.goalie_max_ball_distance = config["goalie_max_ball_distance"].as<float>();
 
             // Use configuration here from file SoccerStrategy.yaml
             cfg.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
@@ -120,19 +123,10 @@ namespace module::behaviour::strategy {
             cfg.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();
 
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
-        });
 
-        on<Trigger<Field>, With<FieldDescription>>().then(
-            [this](const Field& field, const FieldDescription& field_description) {
-                Eigen::Vector2d kick_target = get_kick_plan(field, field_description);
-                emit(std::make_unique<KickPlan>(KickPlan(kick_target, kick_type)));
-            });
+            cfg.kicking_distance_threshold = config["kicking_distance_threshold"].as<float>();
 
-        // For checking last seen times
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (!balls.balls.empty()) {
-                ball_last_measured = NUClear::clock::now();
-            }
+            cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<float>();
         });
 
         on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
@@ -185,30 +179,28 @@ namespace module::behaviour::strategy {
            With<Phase>,
            With<FieldDescription>,
            With<Field>,
-           With<Ball>,
+           Optional<With<FilteredBall>>,
            Single>()
             .then([this](const Sensors& sensors,
                          const GameState& game_state,
                          const Phase& phase,
-                         const FieldDescription& field_description,
-                         const Field& field,
-                         const Ball& ball) {
+                         const std::shared_ptr<const FilteredBall>& ball) {
                 try {
                     // If we're picked up, stand still
                     if (picked_up(sensors)) {
                         // TODO(BehaviourTeam): stand, no moving
                         stand_still();
-                        currentState = Behaviour::State::PICKED_UP;
+                        current_state = Behaviour::State::PICKED_UP;
                     }
                     else {
                         // Overide SoccerStrategy and force normal mode in playing phase
                         if (cfg.force_playing) {
-                            normal_playing();
+                            normal_playing(ball);
                         }
                         // Overide SoccerStrategy and force penalty mode in playing phase
                         else if (cfg.force_penalty_shootout) {
                             team_kicking_off = GameEvents::Context::TEAM;
-                            penalty_shootout_playing(field, ball);
+                            penalty_shootout_playing(ball);
                         }
                         else {
                             // Switch gamemode statemachine based on GameController mode
@@ -231,9 +223,9 @@ namespace module::behaviour::strategy {
                     }
 
                     // Update current behaviour state if it has changed
-                    if (currentState != previousState) {
-                        previousState = currentState;
-                        emit(std::make_unique<Behaviour::State>(currentState));
+                    if (current_state != previous_state) {
+                        previous_state = current_state;
+                        emit(std::make_unique<Behaviour::State>(current_state));
                     }
                 }
                 catch (std::runtime_error& err) {
@@ -244,23 +236,22 @@ namespace module::behaviour::strategy {
     }
 
     // ********************PENALTY GAMEMODE STATE MACHINE********************************
-    void SoccerStrategy::penalty_shootout(const Phase& phase,
-                                          const FieldDescription& field_description,
-                                          const Field& field,
-                                          const Ball& ball) {
+    void SoccerStrategy::penalty_shootout(const Phase& phase, const std::shared_ptr<const FilteredBall>& ball) {
         switch (phase.value) {
-            case Phase::INITIAL: penalty_shootout_initial(); break;           // Happens at beginning.
-            case Phase::READY: penalty_shootout_ready(); break;               // Should not happen.
-            case Phase::SET: penalty_shootout_set(field_description); break;  // Happens on beginning of each kick try.
-            case Phase::PLAYING: penalty_shootout_playing(field, ball); break;  // Either kicking or goalie.
-            case Phase::TIMEOUT: penalty_shootout_timeout(); break;    // A pause in playing. Not in simulation.
+            case Phase::INITIAL: penalty_shootout_initial(); break;      // Happens at beginning.
+            case Phase::READY: penalty_shootout_ready(); break;          // Should not happen.
+            case Phase::SET: penalty_shootout_set(); break;              // Happens on beginning of each kick try.
+            case Phase::PLAYING: penalty_shootout_playing(ball); break;  // Either kicking or goalie.
+            case Phase::TIMEOUT: penalty_shootout_timeout(); break;      // A pause in playing. Not in simulation.
             case Phase::FINISHED: penalty_shootout_finished(); break;  // Happens when penalty shootout completely ends.
             default: log<NUClear::WARN>("Unknown penalty shootout gamemode phase.");
         }
     }
 
     // ********************NORMAL GAMEMODE STATE MACHINE********************************
-    void SoccerStrategy::normal(const message::input::GameState& game_state, const Phase& phase) {
+    void SoccerStrategy::normal(const message::input::GameState& game_state,
+                                const Phase& phase,
+                                const std::shared_ptr<const FilteredBall>& ball) {
         switch (phase.value) {
             // Beginning of game and half time
             case Phase::INITIAL: normal_initial(); break;
@@ -269,7 +260,7 @@ namespace module::behaviour::strategy {
             // Happens after ready. Robot should stop moving.
             case Phase::SET: normal_set(); break;
             // After set, main game where we should walk to ball and kick.
-            case Phase::PLAYING: normal_playing(); break;
+            case Phase::PLAYING: normal_playing(ball); break;
             case Phase::FINISHED: normal_finished(); break;  // Game has finished.
             case Phase::TIMEOUT: normal_timeout(); break;    // A pause in playing. Not in simulation.
             default: log<NUClear::WARN>("Unknown normal gamemode phase.");
@@ -324,51 +315,46 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::penalty_shootout_initial() {
         // There's no point in doing anything since we'll be teleported over to a penalty shootout position
         stand_still();
-        currentState = Behaviour::State::INITIAL;
+        current_state = Behaviour::State::INITIAL;
     }
 
     void SoccerStrategy::penalty_shootout_ready() {
-        // Should not happen
-        currentState = Behaviour::State::READY;
+        // Should be unreachable
+        log<NUClear::ERROR>("penalty_shootout_ready should be unreachable!");
+        current_state = Behaviour::State::READY;
     }
 
-    void SoccerStrategy::penalty_shootout_set(const FieldDescription& field_description) {
-        emit(std::make_unique<ResetWebotsServos>());             // we were teleported, so reset
-        has_kicked = false;                                      // reset the has_kicked flag between kicks
-        penalty_shootout_localisation_reset(field_description);  // Reset localisation
+    void SoccerStrategy::penalty_shootout_set() {
         stand_still();
-        currentState = Behaviour::State::SET;
+        current_state = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::penalty_shootout_playing(const Field& field, const Ball& ball) {
-        // Execute penalty kick script once if we haven't yet, and if we are not goalie
-        if (!has_kicked && team_kicking_off == GameEvents::Context::TEAM) {
-            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::PENALTY));
-            has_kicked   = true;  // Set this so we do not kick again, otherwise the script will keep trying to execute
-            currentState = Behaviour::State::SHOOTOUT;
+    void SoccerStrategy::penalty_shootout_playing(const std::shared_ptr<const FilteredBall>& ball) {
+        // Execute penalty kick script once if we haven't yet, and if we are not goalie (team_kicking_off will not be us
+        // if we are the goalie)
+        log<NUClear::DEBUG>("Entering penalty shootout playing...");
+        if (team_kicking_off == GameEvents::Context::TEAM) {
+            // Go kick the ball directly into the goals... i.e. regular playing
+            play(ball);
+            current_state = Behaviour::State::SHOOTOUT;
         }
-        // If we are not kicking off then be a goalie
-        else if (team_kicking_off == GameEvents::Context::OPPONENT) {
-            goalie_walk(field, ball);
-            currentState = Behaviour::State::GOALIE_WALK;
-        }
-        // Else we are not a goalie but we've already kicked. Current behaviour is to do nothing.
         else {
+            // TODO(BehaviourTeam): Can add a dive or walk in-front of the ball here to attempt to block in future
             stand_still();
-            currentState = Behaviour::State::SHOOTOUT;
+            current_state = Behaviour::State::GOALIE_WALK;
         }
     }
 
     void SoccerStrategy::penalty_shootout_timeout() {
         // Don't need to do anything
         stand_still();
-        currentState = Behaviour::State::TIMEOUT;
+        current_state = Behaviour::State::TIMEOUT;
     }
 
     void SoccerStrategy::penalty_shootout_finished() {
         // Don't need to do anything
         stand_still();
-        currentState = Behaviour::State::FINISHED;
+        current_state = Behaviour::State::FINISHED;
     }
 
     // ********************NORMAL GAMEMODE STATES********************************
@@ -380,13 +366,13 @@ namespace module::behaviour::strategy {
             reset_in_initial = false;
         }
 
-        currentState = Behaviour::State::INITIAL;
+        current_state = Behaviour::State::INITIAL;
     }
 
     void SoccerStrategy::normal_ready(const GameState& game_state) {
         if (penalised()) {  // penalised
             stand_still();
-            currentState = Behaviour::State::PENALISED;
+            current_state = Behaviour::State::PENALISED;
         }
         else {
             if (!game_state.data.first_half & !is_reset_half) {
@@ -405,44 +391,54 @@ namespace module::behaviour::strategy {
             else {
                 stand_still();
             }
-            currentState = Behaviour::State::READY;
+            current_state = Behaviour::State::READY;
         }
     }
 
     void SoccerStrategy::normal_set() {
         stand_still();
         reset_in_initial = true;
-        currentState     = Behaviour::State::SET;
+        current_state    = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::normal_playing() {
+    void SoccerStrategy::normal_playing(const std::shared_ptr<const FilteredBall>& ball) {
         if (penalised() && !cfg.force_playing) {
             // We are penalised, stand still
             stand_still();
-            currentState = Behaviour::State::PENALISED;
+            current_state = Behaviour::State::PENALISED;
         }
         else {
-            if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
-                // Ball has been seen recently, request walk planner to walk to the ball
-                play();
-                currentState = Behaviour::State::WALK_TO_BALL;
+            if (ball && cfg.is_goalie && ball->rBTt.norm() > cfg.goalie_max_ball_distance) {
+                // We are goalie and the ball is too far away, stand still
+                stand_still();
+                current_state = Behaviour::State::SEARCH_FOR_BALL;
+                // current_state = Behaviour::State::GOALIE_WALK;
+            }
+            else if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
+                // We are not goalie or the ball is close enough, request walk planner to walk to the ball if
+                // ball has been seen recently
+
+                play(ball);
+                current_state = Behaviour::State::WALK_TO_BALL;
             }
             else {
                 // Ball has not been seen recently, request walk planner to rotate on the spot
-                find();
-                currentState = Behaviour::State::SEARCH_FOR_BALL;
+                if (!cfg.is_goalie) {
+                    find(ball);
+                }
+                current_state = Behaviour::State::SEARCH_FOR_BALL;
             }
         }
     }
 
     void SoccerStrategy::normal_finished() {
         stand_still();
-        currentState = Behaviour::State::FINISHED;
+        current_state = Behaviour::State::FINISHED;
     }
 
     void SoccerStrategy::normal_timeout() {
         stand_still();
-        currentState = Behaviour::State::TIMEOUT;
+        current_state = Behaviour::State::TIMEOUT;
     }
 
     void SoccerStrategy::initial_localisation_reset() {
@@ -476,32 +472,7 @@ namespace module::behaviour::strategy {
 
 
     // **************************** LOCALISATION RESETS ****************************
-    void SoccerStrategy::penalty_shootout_localisation_reset(const FieldDescription& field_description) {
-        auto robot_reset = std::make_unique<ResetRobotHypotheses>();
-
-        ResetRobotHypotheses::Self self_side_base_line;
-        self_side_base_line.rTFf = Eigen::Vector2d(
-            (-field_description.dimensions.field_length / 2.0) + field_description.dimensions.penalty_mark_distance,
-            0.0);
-        self_side_base_line.covariance  = Eigen::Vector2d::Constant(0.01).asDiagonal();
-        self_side_base_line.heading     = -M_PI;
-        self_side_base_line.heading_var = 0.005;
-
-        robot_reset->hypotheses.push_back(self_side_base_line);
-
-        emit(robot_reset);
-
-        auto ball_reset = std::make_unique<ResetBallHypotheses>();
-
-        ResetBallHypotheses::Ball at_feet;
-        at_feet.rBWw       = Eigen::Vector2d(0.2, 0);
-        at_feet.covariance = Eigen::Vector2d::Constant(0.01).asDiagonal();
-
-        ball_reset->hypotheses.push_back(at_feet);
-        ball_reset->self_reset = true;
-
-        emit(ball_reset);
-    }
+    void SoccerStrategy::penalty_shootout_localisation_reset() {}
 
     void SoccerStrategy::unpenalised_localisation_reset() {
         emit(std::make_unique<ResetRobotHypotheses>());
@@ -526,78 +497,31 @@ namespace module::behaviour::strategy {
         return self_penalised;
     }
 
-    void SoccerStrategy::find() {
-        emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
-    }
-
-    void SoccerStrategy::play() {
-        emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
-    }
-
-    Eigen::Vector2d SoccerStrategy::get_kick_plan(const Field& field, const FieldDescription& field_description) {
-        // Defines the box within in which the kick target is changed from the centre
-        // of the oppposition goal to the perpendicular distance from the robot to the goal
-
-        const float max_kick_range =
-            0.6;  // TODO(BehaviourTeam): make configurable, only want to change at the last kick to avoid smart goalies
-        const float x_take_over_box = max_kick_range;
-        const float error           = 0.05;
-        const float buffer          = error + 2.0f * field_description.ball_radius;          // 15cm
-        const float y_take_over_box = field_description.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-        Eigen::Affine2d position(field.position);
-        const float x_robot = position.translation().x();
-        const float y_robot = position.translation().y();
-        Eigen::Vector2d new_target{};
-
-        if ((field_description.dimensions.field_length * 0.5) - x_take_over_box < x_robot && -y_take_over_box < y_robot
-            && y_robot < y_take_over_box) {
-            // Aims for behind the point that gives the shortest distance
-            new_target.x() =
-                field_description.dimensions.field_length * 0.5 + field_description.dimensions.goal_depth * 0.5;
-            new_target.y() = y_robot;
+    void SoccerStrategy::find(const std::shared_ptr<const FilteredBall>& ball) {
+        if (ball && ball->rBTt.y() < 0.0) {
+            emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(true)));
         }
         else {
-            // Aims for the centre of the goal
-            new_target.x() = field_description.dimensions.field_length * 0.5;
-            new_target.y() = 0;
+            emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(false)));
         }
-        return new_target;
     }
 
-    void SoccerStrategy::goalie_walk(const Field& field, const Ball& ball) {
-        auto motion_command = std::make_unique<MotionCommand>();
-
-        float time_since_ball_seen =
-            std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ball_last_measured)
-                .count();
-
-        if (time_since_ball_seen < cfg.goalie_command_timeout) {
-
-            Eigen::Affine2d position(field.position);
-            const float field_bearing = Eigen::Rotation2Dd(position.rotation()).angle();
-            const int sign_bearing    = field_bearing > 0 ? 1 : -1;
-            const float rotation_speed =
-                -sign_bearing
-                * std::fmin(std::fabs(cfg.goalie_rotation_speed_factor * field_bearing), cfg.goalie_max_rotation_speed);
-
-            const int sign_translation = ball.position.y() > 0 ? 1 : -1;
-            const float translation_speed =
-                sign_translation
-                * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball.position[1]),
-                            cfg.goalie_max_translation_speed);
-
-            Eigen::Affine2d cmd{};
-            cmd.linear()      = Eigen::Rotation2Dd(rotation_speed).matrix();
-            cmd.translation() = Eigen::Vector2d::Zero();
-            motion_command    = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
-            if (std::fabs(field_bearing) < cfg.goalie_side_walk_angle_threshold) {
-                motion_command->walk_command.y() = translation_speed;
-            }
+    void SoccerStrategy::play(const std::shared_ptr<const FilteredBall>& ball) {
+        float absolute_yaw_angle = std::abs(std::atan2(ball->rBTt.y(), ball->rBTt.x()));
+        float distance_to_ball   = ball->rBTt.head(2).norm();
+        if (ball && distance_to_ball < cfg.kicking_distance_threshold
+            && absolute_yaw_angle < cfg.kicking_angle_threshold) {
+            // We are in range, lets kick
+            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
         }
         else {
-            motion_command =
-                std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Affine2d::Identity()));
+            // Request walk planner to walk to the ball
+            emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
         }
-        emit(std::move(motion_command));
+
+        if (log_level <= NUClear::DEBUG) {
+            log<NUClear::DEBUG>("Distance to ball: ", distance_to_ball);
+        }
     }
+
 }  // namespace module::behaviour::strategy

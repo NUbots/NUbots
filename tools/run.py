@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from glob import glob
 
 from termcolor import cprint
 
@@ -24,11 +25,18 @@ def register(command):
         default=False,
         help="Run the specified program using valgrind",
     )
-    command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
+
+    # Find all role files
+    fnames = glob(os.path.join(b.project_dir, "roles", "**", "*.role"), recursive=True)
+    # Strip everything from file paths except role name and subdirectory in roles/
+    roles = [os.path.splitext(f.replace(os.path.join(b.project_dir, "roles", ""), ""))[0] for f in fnames]
+
+    command.add_argument("role", help="The role to run", choices=roles)
+    command.add_argument("args", nargs="*", help="Any arguments that should be used for the execution")
 
 
 @run_on_docker
-def run(args, use_gdb, use_valgrind, **kwargs):
+def run(role, args, use_gdb, use_valgrind, **kwargs):
 
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
@@ -42,8 +50,8 @@ def run(args, use_gdb, use_valgrind, **kwargs):
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
-    # Add 'bin/` to the command (first argument)
-    args[0] = os.path.join("bin", args[0])
+    # Path to the binary being run starting at bin/
+    binary = os.path.join("bin", role)
 
     # Get current environment
     env = os.environ
@@ -94,6 +102,8 @@ def run(args, use_gdb, use_valgrind, **kwargs):
         ]
     else:
         cmd = []
+
+    cmd.append(binary)
 
     # Run the command
     pty = WrapPty()

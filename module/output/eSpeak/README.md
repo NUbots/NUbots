@@ -1,5 +1,4 @@
-eSpeak
-======
+# eSpeak
 
 ## Description
 
@@ -16,9 +15,8 @@ The robot uses eSpeak's default voice.
 
 ## Consumes
 
-* `message::Say` containing words for the robot to say
+- `message::Say` containing words for the robot to say
 
 ## Dependencies
 
-* libespeak is used for speech synthesis
-
+- libespeak is used for speech synthesis

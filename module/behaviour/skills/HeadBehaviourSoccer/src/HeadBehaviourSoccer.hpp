@@ -31,29 +31,31 @@ namespace module::behaviour::skills {
      * @author Thomas O'Brien
      */
     class HeadBehaviourSoccer : public NUClear::Reactor {
-    public:
     private:
-        // Time before starting to search for ball after its lost
-        float search_timeout_ms = 0.0f;
-        // Time lingering at each position in lost ballsearch
-        float fixation_time_ms = 0.0f;
-        // Index in the list of search positions
-        long unsigned int searchIdx = 0;
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Walk path planner priority in the subsumption system
+            // Time before starting to search for ball after its lost
+            NUClear::clock::duration search_timeout{};
+            /// @brief Time lingering at each position in lost ballsearch
+            float fixation_time = 0.0f;
+            float pitch_offset  = 0.0f;
+            /// @brief List of positions for search
+            std::vector<Eigen::Vector2d> search_positions;
+        } cfg;
 
-        // Flag for if the robot is currently getting up
-        bool isGettingUp = false;
+        /// @brief Index in the list of search positions
+        long unsigned int search_idx = 0;
 
-        // Time between last search position transition
-        NUClear::clock::time_point searchLastMoved = NUClear::clock::now();
+        /// @brief Flag for if the robot is currently getting up
+        bool is_getting_up = false;
 
-        // List of positions for search
-        std::vector<Eigen::Vector2d> search_positions;
+        /// @brief  Time since last search position transition
+        NUClear::clock::time_point search_last_moved = NUClear::clock::now();
 
-        // Time since last ball seen
-        NUClear::clock::time_point ballLastMeasured = NUClear::clock::now();
-
-        // Position of last seen ball
-        Eigen::Vector3d rBCc = Eigen::Vector3d::Zero();
+        /// @brief Time since last ball seen
+        NUClear::clock::time_point ball_last_measured = NUClear::clock::now();
 
     public:
         explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);

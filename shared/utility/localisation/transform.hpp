@@ -25,31 +25,31 @@
 namespace utility::localisation {
 
     // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
-    inline Eigen::Affine3d fieldStateToTransform3D(const Eigen::Vector3d& state) {
-        Eigen::Affine3d Hfw;
+    inline Eigen::Isometry3d fieldStateToTransform3D(const Eigen::Vector3d& state) {
+        Eigen::Isometry3d Hfw;
         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0.0);
         Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
         return Hfw;
     }
 
-    inline Eigen::Affine2d projectTo2D(const Eigen::Affine3d& m,
-                                       const Eigen::Vector3d& yawAxis,
-                                       const Eigen::Vector3d& forwardAxis) {
-        Eigen::Affine2d result;
+    inline Eigen::Isometry2d projectTo2D(const Eigen::Isometry3d& m,
+                                         const Eigen::Vector3d& yawAxis,
+                                         const Eigen::Vector3d& forwardAxis) {
+        Eigen::Isometry2d result;
 
         // Translation
         const Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
         const Eigen::Vector3d r                = m.translation();
-        Eigen::Affine3d newSpaceToWorld(Eigen::Affine3d::Identity());
+        Eigen::Isometry3d newSpaceToWorld(Eigen::Isometry3d::Identity());
         newSpaceToWorld.linear().leftCols<1>()    = orthoForwardAxis;
         newSpaceToWorld.linear().middleCols<1>(1) = yawAxis.cross(orthoForwardAxis);
         newSpaceToWorld.linear().rightCols<1>()   = yawAxis;
-        const Eigen::Affine3d worldToNewSpace(newSpaceToWorld.inverse());
+        const Eigen::Isometry3d worldToNewSpace(newSpaceToWorld.inverse());
         Eigen::Vector3d rNewSpace = worldToNewSpace * r;
         result.translation()      = rNewSpace.head<2>();
 
         // Rotation
-        Eigen::Affine3d rot(m);
+        Eigen::Isometry3d rot(m);
         rot.translation() = Eigen::Vector3d::Zero();
         const Eigen::Vector3d x(rot.linear().leftCols<1>());
         const Eigen::Vector3d xNew(worldToNewSpace * x);
@@ -60,7 +60,7 @@ namespace utility::localisation {
     }
 
     // Transforms the transform
-    inline Eigen::Affine2d transform3DToFieldState(const Eigen::Affine3d& m) {
+    inline Eigen::Isometry2d transform3DToFieldState(const Eigen::Isometry3d& m) {
         return projectTo2D(m, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
     }
 

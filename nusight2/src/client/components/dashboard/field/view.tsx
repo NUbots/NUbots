@@ -1,22 +1,22 @@
-import { observer } from 'mobx-react'
-import React from 'react'
-import { Component } from 'react'
+import React from "react";
+import { Component } from "react";
+import { observer } from "mobx-react";
 
-import { Renderer } from '../../../render2d/renderer'
+import { Renderer } from "../../../render2d/renderer";
 
-import { FieldModel } from './model'
-import style from './style.css'
-import { FieldViewModel } from './view_model'
+import { FieldModel } from "./model";
+import style from "./style.module.css";
+import { FieldViewModel } from "./view_model";
 
 export type FieldProps = {
-  model: FieldModel
-}
+  model: FieldModel;
+};
 
 @observer
 export class Field extends Component<FieldProps> {
   render() {
-    const model = this.props.model
-    const viewModel = FieldViewModel.of(model)
+    const model = this.props.model;
+    const viewModel = FieldViewModel.of(model);
     return (
       <div className={style.container}>
         <Renderer
@@ -27,6 +27,6 @@ export class Field extends Component<FieldProps> {
           aspectRatio={viewModel.aspectRatio}
         />
       </div>
-    )
+    );
   }
 }

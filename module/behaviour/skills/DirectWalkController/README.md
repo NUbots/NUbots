@@ -1,14 +1,9 @@
-DirectWalkController
-====================
+# DirectWalkController
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

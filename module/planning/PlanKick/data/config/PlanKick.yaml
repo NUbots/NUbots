@@ -1,0 +1,17 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# How long since the last ball measurement before ignoring it and assuming the ball is lost, in milliseconds
+ball_timeout_threshold: 1000
+
+# Maximum distance of the ball required to kick the ball (in metres)
+ball_distance_threshold: 0.25
+# Maximum angle of the ball from the torso's x-axis required to kick the ball (in radians), both clockwise and anticlockwise
+ball_angle_threshold: 0.4
+
+# Maximum angle of the target from the torso's x-axis required to kick the ball (in radians), both clockwise and anticlockwise
+target_angle_threshold: 23 * pi / 180
+
+# Is a LimbID - UNKNOWN, LEFT_LEG, RIGHT_LEG are valid options
+# Left will only kick with the left leg, right only with the right, and unknown will determine the leg from the ball position
+kick_leg: UNKNOWN

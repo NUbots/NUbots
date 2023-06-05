@@ -1,13 +1,9 @@
-GlobalConfig
-============
+# GlobalConfig
 
 ## Description
 
-
 ## Usage
 
-
 ## Emits
-
 
 ## Dependencies

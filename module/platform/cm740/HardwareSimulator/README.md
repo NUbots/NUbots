@@ -19,15 +19,15 @@ To change the colour of the NUgus' head or eye LEDs, emit a
 `message::platform::RawSensors::EyeLED` or `message::platform::RawSensors::HeadLED`
 containing the colour you wish to set them to.
 
-To control the NUgus' servos, use `message::motion::ServoTarget`. You may
-emit these commands individually or emit several at once in a `message::motion::ServoTargets`.
+To control the NUgus' servos, use `message::actuation::ServoTarget`. You may
+emit these commands individually or emit several at once in a `message::actuation::ServoTargets`.
 
 ## Consumes
 
 - `message::platform::RawSensors::EyeLED` requesting a change to eye LED colour
 - `message::platform::RawSensors::HeadLED` requesting a change to head LED colour
-- `message::motion::ServoTarget` requesting a single servo command be performed
-- `message::motion::ServoTargets` requesting a batch of servo commands be performed
+- `message::actuation::ServoTarget` requesting a single servo command be performed
+- `message::actuation::ServoTargets` requesting a batch of servo commands be performed
 
 ## Emits
 

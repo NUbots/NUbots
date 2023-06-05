@@ -51,16 +51,17 @@ namespace module::localisation {
                 filter.time(seconds);
 
                 // Get filter state and transform
-                Eigen::Vector3d state(filter.getMean());
+                Eigen::Vector3d state(filter.get_state());
                 emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
                 auto field(std::make_unique<Field>());
-                Eigen::Affine2d position(Eigen::Affine2d::Identity());
-                position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
-                position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
-                field->position        = position.matrix();
-                field->covariance      = filter.getCovariance();
+                Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+                Hfw.translation() = Eigen::Vector3d(state[RobotModel<double>::kX], state[RobotModel<double>::kY], 0);
+                Hfw.linear() =
+                    Eigen::AngleAxisd(state[RobotModel<double>::kAngle], Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                field->Hfw        = Hfw.matrix();
+                field->covariance = filter.get_covariance();
 
                 log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
                                                 state[RobotModel<double>::kX],
@@ -117,13 +118,13 @@ namespace module::localisation {
                                                            goals.Hcw);
 
                                     if (log_level <= NUClear::DEBUG) {
-                                        const Eigen::Vector3d state(filter.getMean());
-                                        Eigen::Affine3d Hfw;
+                                        const Eigen::Vector3d state(filter.get_state());
+                                        Eigen::Isometry3d Hfw;
                                         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
                                         Hfw.linear() =
                                             Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
 
-                                        const Eigen::Affine3d Hcf(goals.Hcw * Hfw.inverse().matrix());
+                                        const Eigen::Isometry3d Hcf(goals.Hcw * Hfw.inverse().matrix());
                                         const Eigen::Vector3d rGCc_own(Hcf
                                                                        * getFieldPosition(goal_post.side, fd, true));
                                         const Eigen::Vector3d rGCc_opp(Hcf
@@ -192,17 +193,17 @@ namespace module::localisation {
                     return;
                 }
 
-                const Eigen::Affine3d Htw(sensors.Htw);
+                const Eigen::Isometry3d Htw(sensors.Htw);
                 for (const auto& s : locReset.hypotheses) {
 
                     // Calculate the reset state
-                    Eigen::Affine3d Hft;
+                    Eigen::Isometry3d Hft;
                     Hft.translation() = Eigen::Vector3d(s.rTFf.x(), s.rTFf.y(), 0);
                     // Linear part of transform is `s.heading` radians rotation about Z axis
                     Hft.linear() = Eigen::AngleAxisd(s.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
-                    const Eigen::Affine3d Hfw(Hft * Htw);
+                    const Eigen::Isometry3d Hfw(Hft * Htw);
 
-                    const Eigen::Affine2d hfw_2d_projection(
+                    const Eigen::Isometry2d hfw_2d_projection(
                         utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX()));
 
                     const Eigen::Vector3d hfw_state_vec(hfw_2d_projection.translation().x(),

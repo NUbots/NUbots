@@ -1,5 +1,4 @@
-Simple Walk Path Planner
-=============
+# Simple Walk Path Planner
 
 ## Description
 
@@ -11,12 +10,12 @@ Include this module to allow the robot to plan a walk command for a walk strateg
 
 ## Consumes
 
-* `message::behaviour::MotionCommand` containing the walk type
-* `message::localisation::*` containing navigation data
+- `message::behaviour::MotionCommand` containing the walk type
+- `message::localisation::*` containing navigation data
 
 ## Emits
 
-* `message::notyetimplemented` instructs the walk reflex to do a walk
+- `message::notyetimplemented` instructs the walk reflex to do a walk
 
 ## Dependencies
 

@@ -2,7 +2,7 @@
 export function compose(fns: (() => void)[]): () => void {
   return () => {
     for (const fn of fns) {
-      fn()
+      fn();
     }
-  }
+  };
 }

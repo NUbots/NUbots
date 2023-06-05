@@ -84,7 +84,7 @@ namespace utility::motion::splines {
         is_left_support_foot = !is_left_support_foot;
     }
 
-    void Footstep::stepFromOrders(const Eigen::Vector3f& diff) {
+    void Footstep::step_from_orders(const Eigen::Vector3f& diff) {
         // Compute step diff in next support foot frame
         Eigen::Vector3f tmpDiff = Eigen::Vector3f::Zero();
         // No change in forward step

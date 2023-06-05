@@ -23,8 +23,10 @@ package message.localisation;
 import "Matrix.proto";
 
 message Field {
-    /// Affine2d position transform
-    mat3 position = 1;
+    /// Isometry2d position transform of world from field
+    mat4 Hfw = 1;
     /// Covariance of (x, y, theta)
     mat3 covariance = 2;
 }
+
+message ResetRobotLocalisation {}

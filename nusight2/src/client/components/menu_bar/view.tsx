@@ -1,38 +1,57 @@
-import React from 'react'
-import { ComponentType } from 'react'
-import { ReactNode } from 'react'
+import React from "react";
+import { ComponentType } from "react";
+import { ReactNode } from "react";
 
-import { RobotModel } from '../robot/model'
-import { RobotSelector } from '../robot_selector/view'
+import { NUsightNetwork } from "../../network/nusight_network";
+import { RobotModel } from "../robot/model";
+import { RobotSelector } from "../robot_selector/view";
 
-import style from './style.css'
+import { withNbsScrubbers } from "./nbs_scrubbers/view";
 
 export function withRobotSelectorMenuBar(
   robots: RobotModel[],
   toggleRobotEnabled: (robot: RobotModel) => void,
+  nusightNetwork: NUsightNetwork,
 ) {
   const robotSelector = () => (
-    <RobotSelector
-      dropdownMenuPosition={'right'}
-      robots={robots}
-      selectRobot={toggleRobotEnabled}
-    />
-  )
-  return ({ children }: MenuBarProps) => <MenuBar RobotSelector={robotSelector}>{children}</MenuBar>
+    <RobotSelector dropdownMenuPosition={"right"} robots={robots} selectRobot={toggleRobotEnabled} />
+  );
+
+  const { NbsScrubbers, NbsScrubbersToggle } = withNbsScrubbers(nusightNetwork);
+
+  return ({ children }: MenuBarProps) => (
+    <MenuBar RobotSelector={robotSelector} NbsScrubbers={NbsScrubbers} NbsScrubbersToggle={NbsScrubbersToggle}>
+      {children}
+    </MenuBar>
+  );
 }
 
 export type MenuBarProps = {
-  children?: ReactNode
-}
+  children?: ReactNode;
+};
 
 export const MenuBar = ({
   RobotSelector,
+  NbsScrubbers,
+  NbsScrubbersToggle,
   children,
-}: MenuBarProps & { RobotSelector: ComponentType }) => (
-  <div className={style.menuBar}>
-    <div className={style.menu}>{children}</div>
-    <div className={style.robotSelector}>
-      <RobotSelector />
+}: MenuBarProps & {
+  RobotSelector: ComponentType;
+  NbsScrubbers: ComponentType;
+  NbsScrubbersToggle: ComponentType;
+}) => {
+  return (
+    <div className="flex flex-col">
+      <div className="flex h-[60px]">
+        <div className="flex-1">{children}</div>
+        <div>
+          <RobotSelector />
+        </div>
+        <div>
+          <NbsScrubbersToggle />
+        </div>
+      </div>
+      <NbsScrubbers />
     </div>
-  </div>
-)
+  );
+};

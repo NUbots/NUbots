@@ -7,12 +7,7 @@
  * @return the fourcc integer code for this format
  */
 export function fourcc(code: string): number {
-  return (
-    (code.charCodeAt(3) << 24) |
-    (code.charCodeAt(2) << 16) |
-    (code.charCodeAt(1) << 8) |
-    code.charCodeAt(0)
-  )
+  return (code.charCodeAt(3) << 24) | (code.charCodeAt(2) << 16) | (code.charCodeAt(1) << 8) | code.charCodeAt(0);
 }
 
 export function fourccToString(code: number): string {
@@ -21,5 +16,5 @@ export function fourccToString(code: number): string {
     String.fromCharCode((code >> 8) & 0xff) +
     String.fromCharCode((code >> 16) & 0xff) +
     String.fromCharCode((code >> 24) & 0xff)
-  )
+  );
 }

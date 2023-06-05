@@ -1,53 +1,53 @@
-import { observable } from 'mobx'
+import { observable } from "mobx";
 
 interface FieldModelValues {
-  lineWidth: number
-  markWidth: number
-  fieldLength: number
-  fieldWidth: number
-  goalDepth: number
-  goalWidth: number
-  goalAreaLength: number
-  goalAreaWidth: number
-  goalCrossbarHeight: number
-  goalPostDiameter: number
-  goalNetHeight: number
-  penaltyMarkDistance: number
-  centerCircleDiameter: number
-  borderStripMinWidth: number
+  lineWidth: number;
+  markWidth: number;
+  fieldLength: number;
+  fieldWidth: number;
+  goalDepth: number;
+  goalWidth: number;
+  goalAreaLength: number;
+  goalAreaWidth: number;
+  goalCrossbarHeight: number;
+  goalPostDiameter: number;
+  goalNetHeight: number;
+  penaltyMarkDistance: number;
+  centerCircleDiameter: number;
+  borderStripMinWidth: number;
 }
 
 export class FieldDimensions {
-  @observable lineWidth: number
-  @observable markWidth: number
-  @observable fieldLength: number
-  @observable fieldWidth: number
-  @observable goalDepth: number
-  @observable goalWidth: number
-  @observable goalAreaLength: number
-  @observable goalAreaWidth: number
-  @observable goalCrossbarHeight: number
-  @observable goalPostDiameter: number
-  @observable goalNetHeight: number
-  @observable penaltyMarkDistance: number
-  @observable centerCircleDiameter: number
-  @observable borderStripMinWidth: number
+  @observable lineWidth: number;
+  @observable markWidth: number;
+  @observable fieldLength: number;
+  @observable fieldWidth: number;
+  @observable goalDepth: number;
+  @observable goalWidth: number;
+  @observable goalAreaLength: number;
+  @observable goalAreaWidth: number;
+  @observable goalCrossbarHeight: number;
+  @observable goalPostDiameter: number;
+  @observable goalNetHeight: number;
+  @observable penaltyMarkDistance: number;
+  @observable centerCircleDiameter: number;
+  @observable borderStripMinWidth: number;
 
   constructor(values: FieldModelValues) {
-    this.lineWidth = values.lineWidth
-    this.markWidth = values.markWidth
-    this.fieldLength = values.fieldLength
-    this.fieldWidth = values.fieldWidth
-    this.goalDepth = values.goalDepth
-    this.goalWidth = values.goalWidth
-    this.goalAreaLength = values.goalAreaLength
-    this.goalAreaWidth = values.goalAreaWidth
-    this.goalCrossbarHeight = values.goalCrossbarHeight
-    this.goalPostDiameter = values.goalPostDiameter
-    this.goalNetHeight = values.goalNetHeight
-    this.penaltyMarkDistance = values.penaltyMarkDistance
-    this.centerCircleDiameter = values.centerCircleDiameter
-    this.borderStripMinWidth = values.borderStripMinWidth
+    this.lineWidth = values.lineWidth;
+    this.markWidth = values.markWidth;
+    this.fieldLength = values.fieldLength;
+    this.fieldWidth = values.fieldWidth;
+    this.goalDepth = values.goalDepth;
+    this.goalWidth = values.goalWidth;
+    this.goalAreaLength = values.goalAreaLength;
+    this.goalAreaWidth = values.goalAreaWidth;
+    this.goalCrossbarHeight = values.goalCrossbarHeight;
+    this.goalPostDiameter = values.goalPostDiameter;
+    this.goalNetHeight = values.goalNetHeight;
+    this.penaltyMarkDistance = values.penaltyMarkDistance;
+    this.centerCircleDiameter = values.centerCircleDiameter;
+    this.borderStripMinWidth = values.borderStripMinWidth;
   }
 
   static preYear2014() {
@@ -66,7 +66,7 @@ export class FieldDimensions {
       penaltyMarkDistance: 1.8,
       centerCircleDiameter: 1.2,
       borderStripMinWidth: 0.7,
-    })
+    });
   }
 
   static postYear2017() {
@@ -85,6 +85,6 @@ export class FieldDimensions {
       penaltyMarkDistance: 2.05,
       centerCircleDiameter: 1.56,
       borderStripMinWidth: 0.7,
-    })
+    });
   }
 }

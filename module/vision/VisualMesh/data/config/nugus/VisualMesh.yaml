@@ -9,8 +9,8 @@
 
 cameras:
   Left:
-    concurrent: 2
-    network: config/networks/RobocupNetwork.yaml
+    concurrent: 1
+    network: config/networks/LabNetwork.yaml
     engine: opencl
     cache_directory: "./vision_cache/"
     classifier:
@@ -18,8 +18,8 @@ cameras:
       max_distance: 15
       intersection_tolerance: 0.25
   Right:
-    concurrent: 2
-    network: config/networks/RobocupNetwork.yaml
+    concurrent: 1
+    network: config/networks/LabNetwork.yaml
     engine: opencl
     cache_directory: "./vision_cache/"
     classifier:

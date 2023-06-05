@@ -1,5 +1,4 @@
-Script Tuner
-============
+# Script Tuner
 
 ## Description
 
@@ -39,8 +38,8 @@ The keyboard controls are as follows:
 
 ## Emits
 
-- `message::motion::ServoTarget` to control currently selected servo when locked or unlocked
-- `message::motion::ServoTargets` to control all servos when transitioning between frames
+- `message::actuation::ServoTarget` to control currently selected servo when locked or unlocked
+- `message::actuation::ServoTargets` to control all servos when transitioning between frames
 - `extension::ExecuteScript` to play the script
 - `utility::behaviour::RegisterAction` to register actions during module initialisation
 - `module::behaviour::tools::LockServo` (internal to this class only) to trigger servo lock event

@@ -113,8 +113,8 @@ namespace module::input {
                                                         name,
                                                         0,  // fourcc is set later
                                                         num_cameras++,
-                                                        Image::Lens(),      // Lens is constructed in settings
-                                                        Eigen::Affine3d(),  // Hpc is set in settings
+                                                        Image::Lens(),        // Lens is constructed in settings
+                                                        Eigen::Isometry3d(),  // Hpc is set in settings
                                                         camera,
                                                         stream,
                                                         CameraContext::TimeCorrection(),
@@ -296,9 +296,9 @@ namespace module::input {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
-            Eigen::Affine3d Htw(sensors.Htw);
-            Eigen::Affine3d Hwp = Htw.inverse() * Htp;
+            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htw(sensors.Htw);
+            Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
             Hwps.emplace_back(sensors.timestamp, Hwp);
         });
@@ -401,22 +401,22 @@ namespace module::input {
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
 
-                Eigen::Affine3d Hcw;
+                Eigen::Isometry3d Hcw;
 
                 /* Mutex Scope */ {
                     std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
 
-                    Eigen::Affine3d Hpc = context->Hpc;
-                    Eigen::Affine3d Hwp;
+                    Eigen::Isometry3d Hpc = context->Hpc;
+                    Eigen::Isometry3d Hwp;
                     if (reactor.Hwps.empty()) {
-                        Hwp = Eigen::Affine3d::Identity();
+                        Hwp = Eigen::Isometry3d::Identity();
                     }
                     else {
                         // Find the first time that is not less than the target time
                         auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
                                                        reactor.Hwps.end(),
-                                                       std::make_pair(msg->timestamp, Eigen::Affine3d::Identity()),
-                                                       [](const auto& a, const auto& b) { return a.first < b.first; });
+                                                       std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
+                                                       [](const auto& a, const auto& b) { return a.first > b.first; });
 
                         if (Hwp_it == reactor.Hwps.end()) {
                             // Image is newer than most recent sensors
@@ -435,7 +435,7 @@ namespace module::input {
                         }
                     }
 
-                    Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
+                    Hcw = Eigen::Isometry3d(Hwp * Hpc).inverse();
                 }
 
                 msg->lens = context->lens;

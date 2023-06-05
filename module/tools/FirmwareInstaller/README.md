@@ -1,14 +1,9 @@
-FirmwareInstaller
-=================
+# FirmwareInstaller
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

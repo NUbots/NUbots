@@ -1,14 +1,9 @@
-Nod
-===
+# Nod
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

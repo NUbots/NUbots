@@ -1,14 +1,9 @@
-GreenHorizonDetector
-====================
+# GreenHorizonDetector
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

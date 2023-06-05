@@ -140,7 +140,7 @@ namespace module::behaviour::strategy {
             if (moving) {
                 const auto strafeNorm          = strafe / std::numeric_limits<short>::max();
                 const auto rotationalSpeedNorm = rotationalSpeed / std::numeric_limits<short>::max();
-                Eigen::Affine2d affineParameter;
+                Eigen::Isometry2d affineParameter;
                 affineParameter.linear()      = Eigen::Rotation2Dd(rotationalSpeedNorm).toRotationMatrix();
                 affineParameter.translation() = Eigen::Vector2d(strafeNorm.x(), strafeNorm.y());
                 emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));

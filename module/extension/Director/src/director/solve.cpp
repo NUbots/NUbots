@@ -14,36 +14,34 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include "Director.hpp"
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::DirectorTask;
-    using ::module::extension::provider::Provider;
-    using ::module::extension::provider::ProviderGroup;
-
+    using component::DirectorTask;
+    using component::Provider;
+    using component::ProviderGroup;
 
     Director::Solution::Option Director::solve_provider(const std::shared_ptr<Provider>& provider,
-                                                        const std::shared_ptr<const DirectorTask>& authority,
-                                                        std::set<std::shared_ptr<const Provider>> visited) {
-
+                                                        const std::shared_ptr<DirectorTask>& authority,
+                                                        std::set<std::type_index> visited) {
 
         Solution::Option option;
         option.provider = provider;
         option.state    = Solution::Option::OK;
 
         // This prevents us going in a loop, if we have already looked at this provider in our tree in the past stop
-        if (!visited.insert(provider).second) {
+        if (!visited.insert(provider->type).second) {
             option.state = Solution::Option::BLOCKED_LOOP;
             return option;
         }
 
         // We need to have priority over the currently running task
-        auto group = groups.at(provider->type);
-        if (challenge_priority(group.active_task, authority)) {
+        auto group = provider->group;
+        if (!challenge_priority(group.active_task, authority)) {
             option.state = Solution::Option::BLOCKED_PRIORITY;
             return option;
         }
@@ -65,25 +63,29 @@ namespace module::extension {
 
 
     Director::Solution Director::solve_when(const Provider::WhenCondition& when,
-                                            const std::shared_ptr<const DirectorTask>& authority,
-                                            const std::set<std::shared_ptr<const Provider>>& visited) {
+                                            const std::shared_ptr<DirectorTask>& authority,
+                                            const std::set<std::type_index>& visited) {
         Solution s;
         s.pushed = true;
 
         // Check all the candidates that provide a solution to this when condition
         // in the event that there are none, this solution will have no options and therefore be blocked
-        for (auto& group : groups) {
-            auto& g = group.second;
+        for (auto& group_item : groups) {
+            auto& group = group_item.second;
 
             // A provider already needs to be running to push it
-            if (g.active_task != nullptr) {
-                for (const auto& p : g.providers) {
-                    if (p->causing.count(when.type) != 0 && when.validator(p->causing[when.type])) {
-                        if (challenge_priority(g.pushing_task, authority)) {
-                            s.options.push_back(solve_provider(p, authority, visited));
-                        }
-                        else {
-                            // TODO Don't have the priority to push, but we could queue to push?
+            if (group.active_task != nullptr) {
+
+                // Add an option for everyone who could provide this when condition
+                for (const auto& p : group.providers) {
+                    if (p->classification == Provider::Classification::PROVIDE && p->causing.contains(when.type)
+                        && when.validator(p->causing[when.type])) {
+                        // We now swap to using the running providers authority
+                        s.options.push_back(solve_provider(p, group.active_task, visited));
+
+                        // If we can't beat the pushing tasks priority we are also blocked
+                        if (!challenge_priority(group.pushing_task, authority)) {
+                            s.options.back().state = Solution::Option::BLOCKED_PRIORITY;
                         }
                     }
                 }
@@ -94,25 +96,35 @@ namespace module::extension {
     }
 
     Director::Solution Director::solve_group(const std::type_index& type,
-                                             const std::shared_ptr<const DirectorTask>& authority,
-                                             const std::set<std::shared_ptr<const Provider>>& visited) {
+                                             const std::shared_ptr<DirectorTask>& authority,
+                                             const std::set<std::type_index>& visited) {
         Solution s;
         s.pushed = false;
 
         // Continue building the tree recursively for all the providers that meet our needs
-        if (groups.count(type) != 0) {
-            for (const auto& p : groups.at(type).providers) {
-                s.options.push_back(solve_provider(p, authority, visited));
+        if (groups.contains(type)) {
+            auto& group = groups.at(type);
+
+            // If the group is being pushed and we can't beat the priority it limits us to the provider it pushed for
+            if (group.pushing_task != nullptr && !challenge_priority(group.pushing_task, authority)) {
+                s.options.push_back(solve_provider(group.pushed_provider, authority, visited));
+            }
+            // Otherwise we can use any provider that meets our needs
+            else {
+                for (const auto& p : group.providers) {
+                    if (p->classification == Provider::Classification::PROVIDE && p->reaction->enabled) {
+                        s.options.push_back(solve_provider(p, authority, visited));
+                    }
+                }
             }
         }
 
         return s;
     }
 
-    Director::Solution Director::solve_task(const std::shared_ptr<const DirectorTask>& task,
-                                            const std::shared_ptr<const DirectorTask>& authority) {
-        std::set<std::shared_ptr<const Provider>> visited;
-        return solve_group(task->type, authority, visited);
+    Director::Solution Director::solve_task(const std::shared_ptr<DirectorTask>& task) {
+        std::set<std::type_index> visited;
+        return solve_group(task->type, task, visited);
     }
 
 }  // namespace module::extension

@@ -27,7 +27,7 @@ extern "C" {
 #include <cstdio>
 #include <sstream>
 
-#include "message/motion/ServoTarget.hpp"
+#include "message/actuation/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
@@ -44,8 +44,8 @@ namespace module::behaviour::tools {
     using extension::ExecuteScript;
     using extension::Script;
 
-    using message::motion::ServoTarget;
-    using message::motion::ServoTargets;
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::platform::RawSensors;
 
     using utility::behaviour::RegisterAction;

@@ -1,5 +1,4 @@
-Falling Relax
-=============
+# Falling Relax
 
 ## Description
 
@@ -11,13 +10,13 @@ Include this module to allow the robot to relax its motors to prevent damage whe
 
 ## Consumes
 
-* `message::Sensors` containing the orientation matrix and accelerometer readings
+- `message::Sensors` containing the orientation matrix and accelerometer readings
 
 ## Emits
 
-* `message::ExecuteScript` instructs the script engine to run a script
+- `message::ExecuteScript` instructs the script engine to run a script
 
 ## Dependencies
 
-* The Script Engine module is required to execute the scripts
-* The Filtered Sensors module is required to retrieve the current orientation
+- The Script Engine module is required to execute the scripts
+- The Filtered Sensors module is required to retrieve the current orientation

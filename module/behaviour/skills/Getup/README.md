@@ -1,5 +1,4 @@
-Getup
-=============
+# Getup
 
 ## Description
 

@@ -81,6 +81,15 @@ namespace utility::math::coordinates {
         return cartesianCoordinates;
     }
 
+    /// @brief Converts the given vector from a cartesian direction vector to a 2d screen angular coordinates
+    /// @tparam T scalar template for the vectors
+    /// @param v The cartesian direction vector
+    /// @return The screen angular coordinates
+    template <typename T>
+    [[nodiscard]] inline Eigen::Matrix<T, 2, 1> screen_angular_from_object_direction(const Eigen::Matrix<T, 3, 1>& v) {
+        return {std::atan2(v.y(), v.x()), std::atan2(v.z(), v.x())};
+    }
+
 }  // namespace utility::math::coordinates
 
 

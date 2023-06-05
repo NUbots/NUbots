@@ -1,0 +1,6 @@
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First.
+  support::logging::ConsoleLogHandler
+  extension::FileWatcher
+  tools::SystemConfiguration
+)

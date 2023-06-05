@@ -84,11 +84,11 @@ namespace module::localisation {
                                                          const Eigen::Matrix<Scalar, 4, 4>& Hcw) {
 
             // Create a transform from the field state
-            Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
+            Eigen::Transform<Scalar, 3, Eigen::Isometry> Hfw;
             Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
             Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
 
-            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
+            const Eigen::Transform<Scalar, 3, Eigen::Isometry> Hcf(Hcw * Hfw.inverse().matrix());
 
             const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * rGFf);
             return cartesianToReciprocalSpherical(rGCc);

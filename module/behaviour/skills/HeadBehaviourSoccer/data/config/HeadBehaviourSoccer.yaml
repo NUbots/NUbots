@@ -1,22 +1,16 @@
-log_level: WARN
+log_level: INFO
 
 # Search path positions
 min_yaw: &min_yaw -0.7
 max_yaw: &max_yaw 0.7
-min_pitch: &min_pitch -0.1
-max_pitch: &max_pitch 0.1
-positions:
-  [
-    [*min_yaw, *max_pitch],
-    [*min_yaw, *min_pitch],
-    [0, *min_pitch],
-    [*max_yaw, *min_pitch],
-    [*max_yaw, *max_pitch],
-    [0, *max_pitch],
-  ]
+min_pitch: &min_pitch -0.4
+positions: [[*min_yaw, *min_pitch], [0, *min_pitch], [*max_yaw, *min_pitch], [0, *min_pitch]]
 
-#Minimum time before search starts
-search_timeout_ms: 3000
+# Minimum time before search starts (seconds)
+search_timeout: 4.5
 
-#Time between switching search positions
-fixation_time_ms: 750
+# Time between switching search positions (seconds)
+fixation_time: 2
+
+# Added pitch offset to ball tracking
+pitch_offset: -0.5

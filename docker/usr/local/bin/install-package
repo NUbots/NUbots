@@ -5,22 +5,8 @@ set -e
 if ! [ $(id -u) = 0 ]; then
     sudo "$0" "$@"
 else
-    # Grab valid public keys from the latest version of Arch Linux.
-    # Equivalently, but much slower:
-    #
-    #   $ pacman-key --refresh-keys
-    #
-    echo 'Updating public keys.'
-    pacman-key --init
-    pacman -Sy --noconfirm --config /etc/pacman.conf archlinux-keyring
-
-    echo 'Resetting the system to the old package database.'
-    # The package database is now out of date *and* at a later version than what we use.
-    # Force down grade the package database, and perform any upgrades if needed.
-    pacman -Syyu --noconfirm --needed
-
-    # Install the packages if needed.
+    # Update pacman, install the packages and cleanup the cache to make the layer smaller
+    pacman -Syu --noconfirm --needed
     pacman -S --noconfirm --needed "$@"
-    # Clean up the cache to make the layer smaller.
     rm -rf /var/cache
 fi

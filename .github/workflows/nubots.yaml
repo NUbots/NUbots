@@ -8,6 +8,9 @@ on:
     branches: [robocup2022]
   # Triggers on PRs to any branch
   pull_request:
+  # Trigger for merge queue
+  merge_group:
+    types: [checks_requested]
 
 # Ensure that only one instance of the workflow is run at a time for each branch/tag.
 # Jobs currently running on the branch/tag will be cancelled when new commits are pushed.
@@ -29,9 +32,6 @@ jobs:
       has_workflow_changes: ${{ steps.filter.outputs.workflow_changes }}
       has_docker_changes: ${{ steps.filter.outputs.docker_changes }}
       has_code_changes: ${{ steps.filter.outputs.code_changes }}
-      has_clang_changes: ${{ steps.filter.outputs.clang_changes }}
-      has_cmake_changes: ${{ steps.filter.outputs.cmake_changes }}
-      has_python_changes: ${{ steps.filter.outputs.python_changes }}
 
     steps:
       - name: Checkout Code
@@ -49,19 +49,7 @@ jobs:
               - 'docker/**'
             code_changes:
               - '{module,shared,nuclear}/**'
-            clang_changes:
-              - '.github/workflows/format/validate_clang_format.sh'
-              - '**/.clang-format'
-              - '**/*.{c,cc,cpp,cxx,hpp,ipp,proto,glsl,vert,frag}'
-            cmake_changes:
-              - '.github/workflows/format/validate_cmake_format.sh'
-              - '**/.cmake-format.py'
-              - '**/CMakeLists.txt'
-              - '**/*.{cmake,role}'
-            python_changes:
-              - '.github/workflows/format/validate_python_format.sh'
-              - '**/pyproject.toml'
-              - '**/*.py'
+              - 'CMakeLists.txt'
 
   # Build the docker image. This job is not conditional since we don't want it skipped
   # because other jobs depend on it. The actual building of the image is cached, so it
@@ -94,7 +82,7 @@ jobs:
 
       # Build the docker image
       - name: 🐳 Build the docker image 🐳
-        uses: docker/build-push-action@v3.0.0
+        uses: docker/build-push-action@v3.1.0
         with:
           pull: true
           tags: "crafty15/nubots:pull-request-${{ github.event.number }}"
@@ -142,7 +130,7 @@ jobs:
         run: mkdir -p ../build
 
       - name: Configure the code
-        run: ./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=ON
+        run: ./b configure -- -DBUILD_TESTS=ON # -DCI_BUILD=ON
 
       - name: Build the code
         run: ./b build
@@ -150,16 +138,10 @@ jobs:
       - name: Test the code
         run: ./b tests run
 
-  # Check the code is formatted according to clang-format
-  clang-format:
-    name: "C++/Protobuf Formatting"
+  # Check that the code is formatted correctly
+  check-format:
+    name: "Check Code Formatting"
     needs: [check_for_changes, build_docker]
-
-    # Run only if the workflow or `clang-format` related files have changed
-    if: >
-      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
-      needs.check_for_changes.outputs.has_docker_changes == 'true' ||
-      needs.check_for_changes.outputs.has_clang_changes == 'true'
 
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
@@ -175,61 +157,5 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Check clang-format
-        run: .github/workflows/format/validate_clang_format.sh
-
-  # Validate the formatting is correct according to cmake-format
-  cmake-format:
-    name: "CMake Formatting"
-    needs: [check_for_changes, build_docker]
-
-    # Run only if the workflow or `cmake-format` related files have changed
-    if: >
-      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
-      needs.check_for_changes.outputs.has_docker_changes == 'true' ||
-      needs.check_for_changes.outputs.has_cmake_changes == 'true'
-
-    # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
-
-    # Run on the container we just built
-    container:
-      image: "${{ needs.build_docker.outputs.image }}"
-      options: --user 0:0
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Check cmake-format
-        run: .github/workflows/format/validate_cmake_format.sh
-
-  # Validate the formatting is correct according to isort and black
-  python-format:
-    name: "Python Formatting"
-    needs: [check_for_changes, build_docker]
-
-    # Run only if the workflow or Python files have changed
-    if: >
-      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
-      needs.check_for_changes.outputs.has_docker_changes == 'true' ||
-      needs.check_for_changes.outputs.has_python_changes == 'true'
-
-    # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
-
-    # Run on the container we just built
-    container:
-      image: "${{ needs.build_docker.outputs.image }}"
-      options: --user 0:0
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Check isort and black
-        run: .github/workflows/format/validate_python_format.sh
+      - name: Check formatting
+        run: ./b format --check --all --verbose

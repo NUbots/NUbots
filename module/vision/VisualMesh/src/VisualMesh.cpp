@@ -59,7 +59,7 @@ namespace module::vision {
                     if (!runner.active->exchange(true)) {
 
                         // Extract the camera position now that we need it
-                        Eigen::Affine3d Hcw(image.Hcw);
+                        Eigen::Isometry3d Hcw(image.Hcw);
 
                         std::exception_ptr eptr;
                         try {
@@ -83,6 +83,10 @@ namespace module::vision {
                                 msg->indices         = std::move(result.indices);
                                 msg->classifications = std::move(result.classifications);
                                 msg->class_map       = runner.class_map;
+
+                                if (image.vision_ground_truth.exists) {
+                                    msg->vision_ground_truth = image.vision_ground_truth;
+                                }
 
                                 // Emit the inference
                                 emit(msg);

@@ -2,53 +2,18 @@
 set(role_source_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_ROLES_DIR}")
 set(role_binary_dir "${PROJECT_BINARY_DIR}/${NUCLEAR_ROLES_DIR}")
 
-# This gets all of our source files
-file(GLOB rolefiles "${role_source_dir}/*.role")
+# This gets all of our role files
+file(GLOB_RECURSE role_files "${role_source_dir}/*.role")
 
-# Backup the state of all the role variables before we re read them This is needed so we can delete roles that no longer
-# exist
+# Backup the state of all the role variables before we re read them. This is needed so we can delete roles that no
+# longer exist
 get_cmake_property(vars CACHE_VARIABLES)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9_-]+")
     set("BACKUP_${var}" ${${var}})
     unset(${var} CACHE)
   endif()
 endforeach(var)
-
-# Find all of our role files
-foreach(rolefile ${rolefiles})
-  get_filename_component(roleext ${rolefile} EXT)
-
-  # Check it is a .role file
-  if(roleext STREQUAL .role)
-
-    # Get role name and add it to our list of roles
-    get_filename_component(role_name ${rolefile} NAME_WE)
-
-    # If we had a backup as to if this role is enabled use it. Otherwise default to true.
-    if(DEFINED "BACKUP_ROLE_${role_name}")
-      option("ROLE_${role_name}" "Build the role ${role_name}" ${BACKUP_ROLE_${role_name}})
-    else()
-      option("ROLE_${role_name}" "Build the role ${role_name}" ON)
-    endif()
-  endif()
-endforeach(rolefile)
-
-# Set our NUClear roles based on the ROLES cache variables that are set to true This makes it so that only the roles
-# that are enabled will be built
-get_cmake_property(vars CACHE_VARIABLES)
-unset(NUCLEAR_ROLES CACHE)
-foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9_]+")
-    if(${var})
-      string(SUBSTRING ${var} 5 -1 role_name)
-      set(NUCLEAR_ROLES
-          ${NUCLEAR_ROLES} ${role_name}
-          CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
-      )
-    endif()
-  endif()
-endforeach()
 
 # We need the NUClear role function here so it can be used in the role files
 include(NUClearRole.cmake)
@@ -56,10 +21,44 @@ include(NUClearRole.cmake)
 # Clear our NUClear modules variable so we can repopulate it
 unset(NUCLEAR_MODULES CACHE)
 
-# Note that the loop value of this for loop sets the local role variable that is used in the included role file
-foreach(role ${NUCLEAR_ROLES})
-  include("${role_source_dir}/${role}.role")
-endforeach(role)
+# Clear our NUClear roles variable so we can repopulate it
+unset(NUCLEAR_ROLES CACHE)
+
+# Find all of our role files and set our NUClear roles based on the ROLES cache variables that are set to true. This
+# makes it so that only the roles that are enabled will be built
+foreach(role_file ${role_files})
+  # Get path to role and the role name and add it to our list of roles
+  file(RELATIVE_PATH role_path ${role_source_dir} ${role_file})
+  get_filename_component(role_name ${role_path} NAME_WE)
+
+  # Convert path to underscore separated folders
+  get_filename_component(role_path ${role_path} DIRECTORY)
+
+  # Join the role name with the role path again
+  if(role_path)
+    string(CONCAT role_var "ROLE_" ${role_path} "-" ${role_name})
+  else()
+    string(CONCAT role_var "ROLE_" ${role_name})
+  endif()
+
+  # If we had a backup as to if this role is enabled use it. Otherwise default to true.
+  if(DEFINED "BACKUP_${role_var}")
+    option("${role_var}" "Build the ${role_var}" ${BACKUP_${role_var}})
+  else()
+    option("${role_var}" "Build the ${role_var}" ON)
+  endif()
+
+  if(${role_var})
+    string(SUBSTRING ${role_var} 5 -1 role)
+    set(NUCLEAR_ROLES
+        ${NUCLEAR_ROLES} ${role}
+        CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
+    )
+
+    # Note that the local variables in this file are available in the NUClear role function
+    include("${role_source_dir}/${role_path}/${role_name}.role")
+  endif()
+endforeach()
 
 # If we want to build all the modules, we will list them all in the required format then create the role manually
 if(BUILD_ALL_MODULES)

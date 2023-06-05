@@ -1,0 +1,5 @@
+[Match]
+Name=wlp58s0
+
+[Network]
+Bond=bond0

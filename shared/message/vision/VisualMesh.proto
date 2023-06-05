@@ -23,6 +23,7 @@ package message.vision;
 
 import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
+import "message/platform/webots/messages.proto";
 
 message VisualMesh {
     /// Time this message was created
@@ -46,4 +47,6 @@ message VisualMesh {
     fmat rays = 9;
     /// A mapping from class names to column indices (for accessing the corresponding classification column)
     map<string, uint32> class_map = 10;
+    /// Ground truth data from webots
+    platform.webots.VisionGroundTruth vision_ground_truth = 11;
 }

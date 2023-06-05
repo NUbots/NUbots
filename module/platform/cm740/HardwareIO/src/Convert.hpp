@@ -33,7 +33,7 @@ namespace module::platform::cm740 {
         /// This means 512 = 0
         static constexpr double ACCELEROMETER_CONVERSION_FACTOR = (4 * 9.80665) / 512.0;
 
-        /// The Gyrosocope value from the CM740 is between 0 and 1023, representing a value between -500 and
+        /// The Gyroscope value from the CM740 is between 0 and 1023, representing a value between -500 and
         /// 500 degrees per second. This means 512 = 0
         /// 1880.0 is an empirically measured value for this factor, which was calculated by spinning the robot on an
         /// office chair and comparing how far the robot thought it spun to how much it actually spun.

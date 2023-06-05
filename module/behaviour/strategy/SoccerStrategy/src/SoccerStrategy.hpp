@@ -24,16 +24,18 @@
 #include <nuclear>
 
 #include "message/behaviour/Behaviour.hpp"
-#include "message/behaviour/FieldTarget.hpp"
 #include "message/behaviour/KickPlan.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/FilteredBall.hpp"
 #include "message/support/FieldDescription.hpp"
 
 namespace module::behaviour::strategy {
+
+    using FilteredBall = message::localisation::FilteredBall;
 
     class SoccerStrategy : public NUClear::Reactor {
     private:
@@ -47,6 +49,7 @@ namespace module::behaviour::strategy {
             Eigen::Vector2d start_position_offensive{Eigen::Vector2d::Zero()};
             Eigen::Vector2d start_position_defensive{Eigen::Vector2d::Zero()};
             bool is_goalie                         = false;
+            float goalie_max_ball_distance         = 0.0f;
             float goalie_command_timeout           = 0.0f;
             float goalie_rotation_speed_factor     = 0.0f;
             float goalie_max_rotation_speed        = 0.0f;
@@ -55,16 +58,18 @@ namespace module::behaviour::strategy {
             float goalie_side_walk_angle_threshold = 0.0f;
             NUClear::clock::duration localisation_interval{};
             NUClear::clock::duration localisation_duration{};
-            bool force_playing          = false;
-            bool force_penalty_shootout = false;
-            int walk_to_ready_time      = 0;
+            bool force_playing               = false;
+            bool force_penalty_shootout      = false;
+            int walk_to_ready_time           = 0;
+            float kicking_distance_threshold = 0.0f;
+            float kicking_angle_threshold    = 0.0f;
         } cfg;
+
+        /// @brief Flag to determine whether the ball is on the left or right side of the robot
+        float ball_lost_clockwise = true;
 
         /// @brief Bool to indicate  if the robot is currently getting up
         bool is_getting_up = false;
-
-        /// @brief Bool to indicate if the robot has finished kicking in penalty shootout
-        bool has_kicked = false;
 
         /// @brief Bool to indicate if we are currently penalised
         bool self_penalised = false;
@@ -78,10 +83,10 @@ namespace module::behaviour::strategy {
         message::behaviour::KickPlan::KickType kick_type{};
 
         /// @brief Stores which behaviour state the robot is in
-        message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State current_state = message::behaviour::Behaviour::State::INIT;
 
         /// @brief Stores which behaviour state the robot was previosuly in
-        message::behaviour::Behaviour::State previousState = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State previous_state = message::behaviour::Behaviour::State::INIT;
 
         /// @brief Stores the time stamp of when the robot starts walking to the ready position
         NUClear::clock::time_point started_walking_to_ready_at;
@@ -104,7 +109,8 @@ namespace module::behaviour::strategy {
         void initial_localisation_reset();
 
         /// @brief Resets robot and ball localisation for use in initial phase of penalty mode
-        void penalty_shootout_localisation_reset(const message::support::FieldDescription& field_description);
+        // TODO(BehaviourTeam): This method needs a rewrite
+        void penalty_shootout_localisation_reset();
 
         /// @brief Resets ball localisation for use after we are unpenalised
         void unpenalised_localisation_reset();
@@ -113,10 +119,10 @@ namespace module::behaviour::strategy {
         void stand_still();
 
         /// @brief Playing behaviour when ball is visible, currently just walks to the ball
-        void play();
+        void play(const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Playing behaviour when ball is lost, currently just rotate on spot
-        void find();
+        void find(const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Determines if robot is currently picked up based on foot down sensors
         bool picked_up(const message::input::Sensors& sensors) const;
@@ -124,21 +130,14 @@ namespace module::behaviour::strategy {
         /// @brief Determines if robot is currently penalised
         bool penalised() const;
 
-        /// @brief Goalie playing behaviour
-        void goalie_walk(const message::localisation::Field& field, const message::localisation::Ball& ball);
-
-        /// @brief Generated a kick plan on localisation updates
-        static Eigen::Vector2d get_kick_plan(const message::localisation::Field& field,
-                                             const message::support::FieldDescription& field_description);
-
         /// @brief Penalty mode state machine, used to decide what phase behaviour to use.
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
-                              const message::support::FieldDescription& field_description,
-                              const message::localisation::Field& field,
-                              const message::localisation::Ball& ball);
+                              const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Normal mode state machine, used to decide what phase behaviour to use.
-        void normal(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
+        void normal(const message::input::GameState& game_state,
+                    const message::input::GameState::Data::Phase& phase,
+                    const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Direct Freekick mode state machine, used to decide what phase behaviour to use.
         void direct_freekick(const message::input::GameState& game_state);
@@ -165,11 +164,10 @@ namespace module::behaviour::strategy {
         void penalty_shootout_ready();
 
         /// @brief Penalty mode, set phase behaviour/strategy
-        void penalty_shootout_set(const message::support::FieldDescription& field_description);
+        void penalty_shootout_set();
 
         /// @brief Penalty mode, playing phase behaviour/strategy
-        void penalty_shootout_playing(const message::localisation::Field& field,
-                                      const message::localisation::Ball& ball);
+        void penalty_shootout_playing(const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Penalty mode, timeout phase behaviour/strategy
         void penalty_shootout_timeout();
@@ -187,7 +185,7 @@ namespace module::behaviour::strategy {
         void normal_set();
 
         /// @brief Normal mode, playing phase behaviour/strategy
-        void normal_playing();
+        void normal_playing(const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Normal mode, finished phase behaviour/strategy
         void normal_finished();

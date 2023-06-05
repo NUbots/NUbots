@@ -21,6 +21,7 @@ syntax = "proto3";
 
 package message.input;
 
+import "message/platform/webots/messages.proto";
 import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Vector.proto";
@@ -52,7 +53,9 @@ message Image {
     uint32                    id         = 4;
     string                    name       = 5;
     google.protobuf.Timestamp timestamp  = 6;
-    /// World to camera Affine3D transform
+    /// World to camera Isometry3d transform
     mat4 Hcw  = 7;
     Lens lens = 8;
+    /// Ground truth data from webots
+    platform.webots.VisionGroundTruth vision_ground_truth = 9;
 }

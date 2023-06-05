@@ -1,5 +1,4 @@
-NUsight
-========
+# NUsight
 
 ## Description
 
@@ -14,4 +13,4 @@ Also ensure that sending data points are enabled in `config/NUsight.yaml`
 
 ## Emits
 
-* `message::support::nusight::DataPoint`
+- `message::eye::DataPoint`

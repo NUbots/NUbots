@@ -22,6 +22,9 @@ package message.behaviour;
 
 import "google/protobuf/timestamp.proto";
 
+/// These messages are for use with Controller. See message.motion.ServoCommand for the ServoCommand message to be used
+/// with Director.
+
 message ServoCommand {
     /// The subsumption ID which created the command
     uint64 source = 1;

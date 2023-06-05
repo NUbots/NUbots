@@ -1,25 +1,24 @@
-import { ComponentType } from 'react'
+import { ComponentType } from "react";
 
 export type Route = {
-  exact?: boolean
-  path: string
-  Icon: any
-  label: string
-  Content: ComponentType
-}
+  path: string;
+  Icon: any;
+  label: string;
+  Content: ComponentType;
+};
 
 export class NavigationConfiguration {
-  private routes: Route[] = []
+  private routes: Route[] = [];
 
   static of() {
-    return new NavigationConfiguration()
+    return new NavigationConfiguration();
   }
 
   addRoute(route: Route) {
-    this.routes.push(route)
+    this.routes.push(route);
   }
 
   getRoutes() {
-    return this.routes
+    return this.routes;
   }
 }

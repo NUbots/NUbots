@@ -158,6 +158,10 @@ namespace module::vision {
                 msg->timestamp = mesh.timestamp;
                 msg->class_map = mesh.class_map;
 
+                if (mesh.vision_ground_truth.exists) {
+                    msg->vision_ground_truth = mesh.vision_ground_truth;
+                }
+
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
                 for (const auto& idx : hull_indices) {

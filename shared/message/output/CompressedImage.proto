@@ -53,7 +53,7 @@ message CompressedImage {
     string name = 5;
     /// Time when the image was taken
     google.protobuf.Timestamp timestamp = 6;
-    /// World to camera Affine3D transform
+    /// World to camera Isometry3d transform
     mat4 Hcw = 7;
     /// Lens information of the camera that took the image
     Lens lens = 8;

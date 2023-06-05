@@ -1,23 +1,26 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-  "name": "NUbots",
+  "name": "${localWorkspaceFolderBasename}",
   "image": "nubots:generic",
+  "initializeCommand": "docker buildx use default",
   "workspaceMount": "type=bind,consistency=delegated,src=${localWorkspaceFolder},dst=/home/nubots/NUbots",
   "workspaceFolder": "/home/nubots/NUbots",
-  "mounts": [
-    "type=volume,src=nubots_generic_build,dst=/home/nubots/build,consistency=delegated"
-  ],
+  "mounts": ["type=volume,src=nubots_generic_build,dst=/home/nubots/build,consistency=delegated"],
   "extensions": [
-    "ms-vscode.cpptools",
-    "twxs.cmake",
-    "ms-vscode.cmake-tools",
     "cheshirekow.cmake-format",
+    "coolbear.systemd-unit-file",
+    "cschlosser.doxdocgen",
+    "esbenp.prettier-vscode",
+    "github.vscode-pull-request-github",
     "ms-azuretools.vscode-docker",
-    "galarius.vscode-opencl",
+    "ms-python.isort",
     "ms-python.python",
-    "zxh404.vscode-proto3",
-    "redhat.vscode-yaml",
-    "streetsidesoftware.code-spell-checker"
+    "ms-python.vscode-pylance",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode.cpptools-extension-pack",
+    "slevesque.shader",
+    "streetsidesoftware.code-spell-checker",
+    "zxh404.vscode-proto3"
   ],
   "settings": {
     "C_Cpp.clang_format_path": "/usr/local/bin/clang-format",
