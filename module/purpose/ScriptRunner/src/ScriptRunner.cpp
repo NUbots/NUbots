@@ -23,7 +23,7 @@ namespace module::purpose {
         : BehaviourReactor(std::move(environment)) {
 
         // Get the scripts to run from the command line
-        on<Configuration, With<CommandLineArguments>>("ScriptRunner.yaml")
+        on<Configuration, With<CommandLineArguments>>("scriptrunner.yaml")
             .then([this](const Configuration& config, const CommandLineArguments& args) {
                 scripts = config["scripts"].as<std::vector<std::string>>();
 
