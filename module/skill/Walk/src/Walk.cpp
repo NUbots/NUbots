@@ -8,6 +8,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
+#include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
@@ -30,6 +31,8 @@ namespace module::skill {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
+    using message::skill::ControlLeftFoot;
+    using message::skill::ControlRightFoot;
     using WalkTask = message::skill::Walk;
 
     using utility::actuation::kinematics::calculateLegJoints;
@@ -143,19 +146,8 @@ namespace module::skill {
         Eigen::Transform<float, 3, Eigen::Isometry> Htl = walk_engine.get_foot_pose(LimbID::LEFT_LEG);
         Eigen::Transform<float, 3, Eigen::Isometry> Htr = walk_engine.get_foot_pose(LimbID::RIGHT_LEG);
 
-        // Construct Leg IK tasks
-        auto left_leg   = std::make_unique<LeftLegIK>();
-        left_leg->time  = time;
-        left_leg->Htl   = Htl.cast<double>().matrix();
-        auto right_leg  = std::make_unique<RightLegIK>();
-        right_leg->time = time;
-        right_leg->Htr  = Htr.cast<double>().matrix();
-        for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {
-            right_leg->servos[id] = cfg.servo_states[ServoID(id)];
-        }
-        for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
-            left_leg->servos[id] = cfg.servo_states[ServoID(id)];
-        }
+        emit<Task>(std::make_unique<ControlLeftFoot>(Htl.matrix(), time));
+        emit<Task>(std::make_unique<ControlRightFoot>(Htr.matrix(), time));
 
         // Construct Arm IK tasks
         auto left_arm  = std::make_unique<LeftArm>();
@@ -169,9 +161,6 @@ namespace module::skill {
                 ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
         }
 
-        // Emit IK tasks to achieve the desired poses
-        emit<Task>(left_leg, 0, false, "Walk left leg");
-        emit<Task>(right_leg, 0, false, "Walk right leg");
         emit<Task>(left_arm, 0, true, "Walk left arm");
         emit<Task>(right_arm, 0, true, "Walk right arm");
 
