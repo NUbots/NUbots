@@ -27,7 +27,7 @@ namespace utility::localisation {
     // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
     inline Eigen::Isometry3f fieldStateToTransform3D(const Eigen::Vector3f& state) {
         Eigen::Isometry3f Hfw;
-        Hfw.translation() = Eigen::Vector3f(state.x(), state.y(), 0.0);
+        Hfw.translation() = Eigen::Vector3f(state.x(), state.y(), 0.0f);
         Hfw.linear()      = Eigen::AngleAxisf(state.z(), Eigen::Vector3f::UnitZ()).toRotationMatrix();
         return Hfw;
     }

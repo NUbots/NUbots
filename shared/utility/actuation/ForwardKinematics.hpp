@@ -60,12 +60,12 @@ namespace utility::actuation::kinematics {
         runningTransform = runningTransform.translate(NECK_POS);
         // Rotate to face out of base of neck
         runningTransform =
-            runningTransform.rotate(Eigen::AngleAxis<Scalar>(-M_PI_2, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
+            runningTransform.rotate(Eigen::AngleAxis<Scalar>(Scalar(-M_PI_2), Eigen::Matrix<Scalar, 3, 1>::UnitY()));
         // Rotate head in yaw axis
         runningTransform =
             runningTransform.rotate(Eigen::AngleAxis<Scalar>(HEAD_YAW, Eigen::Matrix<Scalar, 3, 1>::UnitX()));
         // Translate to top of neck (i.e. next motor axle)
-        runningTransform = runningTransform.translate(Eigen::Matrix<Scalar, 3, 1>(NECK_LENGTH, 0.0, 0.0));
+        runningTransform = runningTransform.translate(Eigen::Matrix<Scalar, 3, 1>(NECK_LENGTH, Scalar(0), Scalar(0)));
         // YAW
         // Return the basis pointing out of the top of the torso with z pointing out the back of the neck. Pos
         // is top of neck (at hip pitch motor)
@@ -76,7 +76,7 @@ namespace utility::actuation::kinematics {
 
         // Rotate to face forward direction of neck
         runningTransform =
-            runningTransform.rotate(Eigen::AngleAxis<Scalar>(M_PI_2, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
+            runningTransform.rotate(Eigen::AngleAxis<Scalar>(Scalar(M_PI_2), Eigen::Matrix<Scalar, 3, 1>::UnitY()));
         // Rotate pitch
         runningTransform =
             runningTransform.rotate(Eigen::AngleAxis<Scalar>(HEAD_PITCH, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
@@ -205,9 +205,9 @@ namespace utility::actuation::kinematics {
             Eigen::AngleAxis<Scalar>(sensors.servo[ANKLE_ROLL].present_position, Eigen::Matrix<Scalar, 3, 1>::UnitZ()));
         // Rotate so x faces toward toes
         runningTransform =
-            runningTransform.rotate(Eigen::AngleAxis<Scalar>(-M_PI_2, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
+            runningTransform.rotate(Eigen::AngleAxis<Scalar>(Scalar(-M_PI_2), Eigen::Matrix<Scalar, 3, 1>::UnitY()));
         // Translate to ground
-        runningTransform = runningTransform.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, -model.leg.FOOT_HEIGHT));
+        runningTransform = runningTransform.translate(Eigen::Matrix<Scalar, 3, 1>(Scalar(0), Scalar(0), -model.leg.FOOT_HEIGHT));
         // Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre
         // projected to ground
         positions[ANKLE_ROLL] = runningTransform;
@@ -259,7 +259,7 @@ namespace utility::actuation::kinematics {
                                         model.arm.SHOULDER_Z_OFFSET));
         // Rotate about shoulder pitch with zero position Zombie arms
         runningTransform = runningTransform.rotate(
-            Eigen::AngleAxis<Scalar>(shoulder_pitch - M_PI_2, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
+            Eigen::AngleAxis<Scalar>(shoulder_pitch - Scalar(M_PI_2), Eigen::Matrix<Scalar, 3, 1>::UnitY()));
         // Translate to end of shoulder part
         runningTransform =
             runningTransform.translate(Eigen::Matrix<Scalar, 3, 1>(model.arm.SHOULDER_LENGTH,
@@ -282,7 +282,7 @@ namespace utility::actuation::kinematics {
                                                                    -model.arm.UPPER_ARM_LENGTH));
         // Rotate to face down arm
         runningTransform =
-            runningTransform.rotate(Eigen::AngleAxis<Scalar>(M_PI_2, Eigen::Matrix<Scalar, 3, 1>::UnitY()));
+            runningTransform.rotate(Eigen::AngleAxis<Scalar>(Scalar(M_PI_2), Eigen::Matrix<Scalar, 3, 1>::UnitY()));
 
         positions[SHOULDER_ROLL] = runningTransform;
         if (servoID == SHOULDER_ROLL) {
@@ -369,7 +369,7 @@ namespace utility::actuation::kinematics {
         // particle - CoM coordinates in particle space
         auto com = [](const Eigen::Matrix<Scalar, 4, 4>& Htx, const Eigen::Matrix<Scalar, 4, 1>& particle) {
             // Split out CoM and mass
-            Eigen::Matrix<Scalar, 4, 1> com(particle.x(), particle.y(), particle.z(), 1.0);
+            Eigen::Matrix<Scalar, 4, 1> com(particle.x(), particle.y(), particle.z(), Scalar(1));
             const Scalar mass = particle.w();
 
             // Calculate CoM in torso space
@@ -404,7 +404,7 @@ namespace utility::actuation::kinematics {
         };
 
         // Calculate the CoM for the entire robot
-        std::pair<Eigen::Matrix<Scalar, 3, 1>, Scalar> robot_com = {Eigen::Matrix<Scalar, 3, 1>::Zero(), 0.0};
+        std::pair<Eigen::Matrix<Scalar, 3, 1>, Scalar> robot_com = {Eigen::Matrix<Scalar, 3, 1>::Zero(), Scalar(0)};
         for (const auto& particle : particles) {
             robot_com.first = (robot_com.first * robot_com.second + particle.first * particle.second)
                               / (robot_com.second + particle.second);

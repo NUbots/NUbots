@@ -99,7 +99,7 @@ namespace module::localisation {
             for (int x = 0; x < cols; x++) {
                 if (map(y, x) == 1) {
                     for (int i = 1; i <= range; i++) {
-                        float value = (1.0 * (range - i) / range) * 0.5;
+                        float value = 0.5f * float(range - i) / float(range);
                         for (int j = -i; j <= i; j++) {
                             if (x - i >= 0 && y + j >= 0 && y + j < rows) {
                                 if (map(y + j, x - i) < value) {
@@ -166,7 +166,7 @@ namespace module::localisation {
 
                     // Check if the neighbor is within the map boundaries
                     if (new_y >= 0 && new_y < map.rows() && new_x >= 0 && new_x < map.cols()) {
-                        float weight = std::sqrt(std::pow(i, 2) + std::pow(j, 2));
+                        float weight = std::sqrt(std::pow(float(i), 2.0f) + std::pow(float(j), 2.0f));
 
                         // Check if the neighbor is unoccupied and has a shorter distance through the current cell
                         if (map(new_y, new_x) == 0 && dist_map(new_y, new_x) > dist_map(y, x) + weight) {
