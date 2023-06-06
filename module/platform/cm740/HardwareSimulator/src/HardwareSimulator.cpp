@@ -87,28 +87,28 @@ namespace module::platform::cm740 {
         sensors.fsr.right.error_flags = 0;
 
         // Sensors
-        sensors.fsr.right.fsr1 = 1;
-        sensors.fsr.right.fsr2 = 1;
-        sensors.fsr.right.fsr3 = 1;
-        sensors.fsr.right.fsr4 = 1;
+        sensors.fsr.right.fsr1 = 1.0f;
+        sensors.fsr.right.fsr2 = 1.0f;
+        sensors.fsr.right.fsr3 = 1.0f;
+        sensors.fsr.right.fsr4 = 1.0f;
 
         // Centre
-        sensors.fsr.right.centre_x = 0;
-        sensors.fsr.right.centre_y = 0;
+        sensors.fsr.right.centre_x = 0.0f;
+        sensors.fsr.right.centre_y = 0.0f;
 
         // Left Sensor
         // Error
         sensors.fsr.left.error_flags = 0;
 
         // Sensors
-        sensors.fsr.left.fsr1 = 1;
-        sensors.fsr.left.fsr2 = 1;
-        sensors.fsr.left.fsr3 = 1;
-        sensors.fsr.left.fsr4 = 1;
+        sensors.fsr.left.fsr1 = 1.0f;
+        sensors.fsr.left.fsr2 = 1.0f;
+        sensors.fsr.left.fsr3 = 1.0f;
+        sensors.fsr.left.fsr4 = 1.0f;
 
         // Centre
-        sensors.fsr.left.centre_x = 0;
-        sensors.fsr.left.centre_y = 0;
+        sensors.fsr.left.centre_x = 0.0f;
+        sensors.fsr.left.centre_y = 0.0f;
 
         /*
          Servos
@@ -125,25 +125,25 @@ namespace module::platform::cm740 {
             servo.torque_enabled = true;
 
             // Gain
-            servo.d_gain = 0;
-            servo.i_gain = 0;
-            servo.p_gain = 0;
+            servo.d_gain = 0.0f;
+            servo.i_gain = 0.0f;
+            servo.p_gain = 0.0f;
 
             // Torque
-            servo.torque = 0;
+            servo.torque = 0.0f;
 
             // Targets
-            servo.goal_position = 0;
+            servo.goal_position = 0.0f;
             servo.moving_speed  = M_PI_4;
 
             // Present Data
-            servo.present_position = 0;
-            servo.present_speed    = 0;
-            servo.load             = 0;
+            servo.present_position = 0.0f;
+            servo.present_speed    = 0.0f;
+            servo.load             = 0.0f;
 
             // Diagnostic Information
-            servo.voltage     = 0;
-            servo.temperature = 0;
+            servo.voltage     = 0.0f;
+            servo.temperature = 0.0f;
         }
 
         on<Configuration>("HardwareSimulator.yaml")
@@ -188,8 +188,8 @@ namespace module::platform::cm740 {
                     else {
                         Eigen::Vector3f present(std::cos(servo.present_position),
                                                 std::sin(servo.present_position),
-                                                0.0);
-                        Eigen::Vector3f goal(std::cos(servo.goal_position), std::sin(servo.goal_position), 0.0);
+                                                0.0f);
+                        Eigen::Vector3f goal(std::cos(servo.goal_position), std::sin(servo.goal_position), 0.0f);
 
                         Eigen::Vector3f cross = present.cross(goal);
                         if (cross.z() > 0.0f) {
@@ -204,7 +204,7 @@ namespace module::platform::cm740 {
                 }
 
                 sensors.gyroscope     = Eigen::Vector3f(0.0f, 0.0f, imu_drift_rate);
-                sensors.accelerometer = Eigen::Vector3f(-9.8 * std::sin(bodyTilt), 0.0, 9.8 * std::cos(bodyTilt));
+                sensors.accelerometer = Eigen::Vector3f(-9.8f * std::sin(bodyTilt), 0.0f, 9.8f * std::cos(bodyTilt));
                 sensors.timestamp     = NUClear::clock::now();
 
                 // Add some noise so that sensor fusion doesnt converge to a singularity
@@ -226,8 +226,8 @@ namespace module::platform::cm740 {
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed = 0.0f;
-                if (duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                if (duration.count() > 0.0f) {
+                    speed = diff / (duration.count() / NUClear::clock::period::den);
                 }
 
                 // Set our variables

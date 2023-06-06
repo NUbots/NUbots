@@ -43,10 +43,10 @@ namespace module::platform::cm740 {
         void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors) const;
         struct NoiseConfig {
             NoiseConfig() = default;
-            Eigen::Vector3f accelerometer{0.001, 0.001, 0.001};
-            Eigen::Vector3f gyroscope{0.001, 0.001, 0.001};
+            Eigen::Vector3f accelerometer{0.001f, 0.001f, 0.001f};
+            Eigen::Vector3f gyroscope{0.001f, 0.001f, 0.001f};
         } noise;
-        double bodyTilt                      = 0;
+        float bodyTilt                       = 0.0f;
         Eigen::Vector3d integrated_gyroscope = Eigen::Vector3d::Zero();
         void setRightFootDown(bool down);
         void setLeftFootDown(bool down);
