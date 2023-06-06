@@ -96,7 +96,7 @@ namespace module::input {
                     return;
                 }
             }
-            // We failed to compress this image
+            // We failed to decompress this image
             ++dropped;
         });
 
