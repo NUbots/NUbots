@@ -163,7 +163,7 @@ namespace module::behaviour::planning {
 
 
     [[nodiscard]] bool KickPlanner::kick_valid(const Eigen::Vector3f& ball_pos) const {
-        return (ball_pos.x() > 0.0) && (ball_pos.x() < cfg.max_ball_distance)
-               && (std::fabs(ball_pos.y()) < cfg.kick_corridor_width * 0.5);
+        return (ball_pos.x() > 0.0f) && (ball_pos.x() < cfg.max_ball_distance)
+               && (std::fabs(ball_pos.y()) < cfg.kick_corridor_width * 0.5f);
     }
 }  // namespace module::behaviour::planning
