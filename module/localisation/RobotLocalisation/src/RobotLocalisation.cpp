@@ -260,7 +260,7 @@ namespace module::localisation {
                 for (int i = 0; i < cfg.n_particles; i++) {
                     particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
                     if (log_level <= NUClear::DEBUG) {
-                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector2f(0.0f, 0.0f));
+                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector2f::Zero());
                         emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
                     }
                 }
@@ -274,7 +274,7 @@ namespace module::localisation {
 
                 if (log_level <= NUClear::DEBUG) {
                     // Graph where the world frame is positioned in the map
-                    auto state_cell = position_in_map(state, Eigen::Vector2f(0.0f, 0.0f));
+                    auto state_cell = position_in_map(state, Eigen::Vector2f::Zero());
                     emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
 
                     // Graph the cell 0.5m in front of the world frame to visualise the direction of world frame x
@@ -331,7 +331,7 @@ namespace module::localisation {
 
     float RobotLocalisation::calculate_weight(const Eigen::Matrix<float, 3, 1> particle,
                                               const std::vector<Eigen::Vector2f>& observations) {
-        float weight = 0;
+        float weight = 0.0f;
         for (auto rORr : observations) {
             // Get the position of the observation in the map for this particle [x, y]
             Eigen::Vector2i map_position = position_in_map(particle, rORr);
@@ -339,9 +339,9 @@ namespace module::localisation {
             float occupancy_value = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
             // Check if the observation is within the max range and within the field
             if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
-                float distance_error_norm = std::pow(occupancy_value, 2);
-                weight += std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
-                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
+                float distance_error_norm = std::pow(occupancy_value, 2.0f);
+                weight += float(std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
+                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2.0)));
             }
             // If the observation is outside the max range, penalise it
             else {
