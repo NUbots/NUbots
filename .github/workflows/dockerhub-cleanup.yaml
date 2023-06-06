@@ -32,5 +32,5 @@ jobs:
         run: |
           DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
           DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
-          TAG=pull-request-${{ github.event.number }} \
+          TAG=PR-${{ github.event.number }} \
           .github/workflows/scripts/remove_dockerhub_tag.sh
