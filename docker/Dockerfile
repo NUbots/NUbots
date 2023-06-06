@@ -199,10 +199,14 @@ RUN install-from-source \
     --enable-minimal
 
 # Protobuf
-RUN install-package protobuf
-RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-cpp-3.17.3.tar.gz \
-    --with-zlib=/usr/local \
-    --with-protoc=/usr/sbin/protoc
+RUN install-package protobuf && \
+    install-from-source-with-patches https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+    https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
+    -- \
+    -DWITH_PROTOC="/usr/sbin/protoc" \
+    -Dprotobuf_BUILD_TESTS=OFF \
+    -Dprotobuf_BUILD_LIBPROTOC=ON \
+    -DBUILD_SHARED_LIBS=OFF
 
 # Libjpeg
 RUN install-package yasm
@@ -307,7 +311,7 @@ RUN pip install \
     termcolor \
     stringcase \
     Pillow \
-    protobuf==3.17.3 \
+    protobuf==4.21.2 \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
