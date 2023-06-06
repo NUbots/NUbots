@@ -64,7 +64,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         if (ifs.good()) {
             gyro_readings.emplace_back(gyro);
             acc_readings.emplace_back(acc);
-            quaternions.emplace_back(Eigen::Quaternionf::UnitW());
+            quaternions.emplace_back(Eigen::Quaternionf(Eigen::Vector4f::UnitW()));
         }
     }
     ifs.close();
