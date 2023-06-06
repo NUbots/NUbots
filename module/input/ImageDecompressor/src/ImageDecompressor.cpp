@@ -91,7 +91,7 @@ namespace module::input {
                     // Emit the compressed image
                     emit(msg);
 
-                    // Successful compression!
+                    // Successful decompression!
                     ++decompressed;
                     return;
                 }
