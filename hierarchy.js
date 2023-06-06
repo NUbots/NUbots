@@ -368,6 +368,9 @@ var hierarchy =
       [ "module::output::compressor::vaapi::cl::opencl_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html", null ],
       [ "module::output::compressor::vaapi::vaapi_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html", null ]
     ] ],
+    [ "std::runtime_error", null, [
+      [ "utility::reflection::unknown_message", "structutility_1_1reflection_1_1unknown__message.html", null ]
+    ] ],
     [ "std::shared_ptr", null, [
       [ "module::output::compressor::vaapi::cl::opencl_wrapper< T >", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html", null ]
     ] ],
