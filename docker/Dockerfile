@@ -41,7 +41,8 @@ RUN install-package \
     cmake \
     meson \
     git \
-    ncurses
+    ncurses \
+    zlib
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -304,8 +305,7 @@ RUN install-package \
     vim \
     nano \
     clinfo \
-    doxygen \
-    zlib
+    doxygen
 
 # Install packages for nusight
 RUN install-package \
