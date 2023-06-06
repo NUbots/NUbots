@@ -53,9 +53,8 @@ namespace module::input {
 
                     for (auto& f : config.factories) {
                         for (int i = 0; i < f.second; ++i) {
-                            auto a = std::make_unique<std::atomic<bool>>();
                             it->second->decompressors.emplace_back(DecompressorContext::Decompressor{
-                                std::move(a),
+                                std::make_unique<std::mutex>(),
                                 f.first->make_decompressor(image.dimensions[0], image.dimensions[1], image.format),
                             });
                         }
@@ -66,51 +65,38 @@ namespace module::input {
 
             // Look through our compressors and try to find the first free one
             for (auto& ctx : ctx->decompressors) {
-                // We swap in true to the atomic and if we got false back then it wasn't active previously
-                if (!ctx.active->exchange(true)) {
-                    std::exception_ptr eptr;
-                    try {
-                        auto msg = std::make_unique<Image>();
+                // Attempt to acquire a lock on the mutex, if this succeeds then the context wasn't being used
+                std::unique_lock lock(*ctx.mutex, std::try_to_lock);
+                if (lock) {
 
-                        // Compress the data
-                        auto result = ctx.decompressor->decompress(image.data);
-                        msg->data   = result.first;
-                        msg->format = result.second;
+                    auto msg = std::make_unique<Image>();
 
-                        // Copy across the other attributes
-                        msg->dimensions        = image.dimensions;
-                        msg->id                = image.id;
-                        msg->name              = image.name;
-                        msg->timestamp         = image.timestamp;
-                        msg->Hcw               = image.Hcw;
-                        msg->lens.projection   = int(image.lens.projection);
-                        msg->lens.focal_length = image.lens.focal_length;
-                        msg->lens.fov          = image.lens.fov;
-                        msg->lens.centre       = image.lens.centre;
-                        msg->lens.k            = image.lens.k;
+                    // Compress the data
+                    auto result = ctx.decompressor->decompress(image.data);
+                    msg->data   = result.first;
+                    msg->format = result.second;
 
-                        // Emit the compressed image
-                        emit(msg);
-                    }
-                    catch (...) {
-                        eptr = std::current_exception();
-                    }
+                    // Copy across the other attributes
+                    msg->dimensions        = image.dimensions;
+                    msg->id                = image.id;
+                    msg->name              = image.name;
+                    msg->timestamp         = image.timestamp;
+                    msg->Hcw               = image.Hcw;
+                    msg->lens.projection   = int(image.lens.projection);
+                    msg->lens.focal_length = image.lens.focal_length;
+                    msg->lens.fov          = image.lens.fov;
+                    msg->lens.centre       = image.lens.centre;
+                    msg->lens.k            = image.lens.k;
 
-                    // This sets the atomic integer back to false so another thread can use this compressor
-                    ctx.active->store(false);
+                    // Emit the compressed image
+                    emit(msg);
 
-                    if (eptr) {
-                        // Exception :(
-                        std::rethrow_exception(eptr);
-                    }
-                    else {
-                        // Successful compression!
-                        ++decompressed;
-                        return;
-                    }
+                    // Successful compression!
+                    ++decompressed;
+                    return;
                 }
             }
-            // We failed to decompress this image
+            // We failed to compress this image
             ++dropped;
         });
 
