@@ -5,4 +5,4 @@ log_level: DEBUG
 defender_position: [2, -1.5, -3.14]
 
 # Bounding box of the side of the field that is defended (x min, x max, y min, y max)
-defending_region: [0.4, 4.5, -3, 0]
+defending_region: [-0.1, 4.3, -3, -0.05]
