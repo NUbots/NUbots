@@ -207,7 +207,8 @@ namespace utility::actuation::kinematics {
         runningTransform =
             runningTransform.rotate(Eigen::AngleAxis<Scalar>(Scalar(-M_PI_2), Eigen::Matrix<Scalar, 3, 1>::UnitY()));
         // Translate to ground
-        runningTransform = runningTransform.translate(Eigen::Matrix<Scalar, 3, 1>(Scalar(0), Scalar(0), -model.leg.FOOT_HEIGHT));
+        runningTransform =
+            runningTransform.translate(Eigen::Matrix<Scalar, 3, 1>(Scalar(0), Scalar(0), -model.leg.FOOT_HEIGHT));
         // Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre
         // projected to ground
         positions[ANKLE_ROLL] = runningTransform;

@@ -65,7 +65,7 @@ namespace utility {
                 Eigen::Matrix<Scalar, 3, 3> Rbw = Hwb.linear().transpose();
 
                 // Rotate the world gravity vector in the world frame into the body frame
-                Eigen::Matrix<Scalar, 3, 1> rGBb = Eigen::Matrix<Scalar, 3, 1>::UnitZ();
+                Eigen::Matrix<Scalar, 3, 1> rGBb     = Eigen::Matrix<Scalar, 3, 1>::UnitZ();
                 Eigen::Matrix<Scalar, 3, 1> est_rGTt = Rbw * rGBb;
 
                 // Calculate the error between the measured and estimated acceleration vectors
