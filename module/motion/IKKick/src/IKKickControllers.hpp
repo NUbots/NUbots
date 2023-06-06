@@ -72,7 +72,7 @@ namespace module::motion {
         std::vector<SixDOFFrame> frames;
         int i = 0;
         Animator() : frames() {
-            frames.push_back(SixDOFFrame{Eigen::Isometry3f::Identity(), 0});
+            frames.push_back(SixDOFFrame{Eigen::Isometry3f::Identity(), 0.0f});
         }
         Animator(const std::vector<SixDOFFrame>& frames_) : frames(frames_) {}
         int clampPrev(int k) const {
@@ -112,7 +112,7 @@ namespace module::motion {
         float forward_duration;
         float return_duration;
         Animator anim;
-        float servo_angle_threshold = 0.1;
+        float servo_angle_threshold = 0.1f;
 
         Eigen::Vector3f ballPosition;
         Eigen::Vector3f goalPosition;
@@ -192,10 +192,10 @@ namespace module::motion {
 
                 float elapsedTime =
                     std::chrono::duration_cast<std::chrono::microseconds>(sensors.timestamp - motionStartTime).count()
-                    * 1e-6;
+                    * 1e-6f;
                 float alpha = (anim.currentFrame().duration != 0)
-                                  ? std::fmax(0, std::fmin(elapsedTime / anim.currentFrame().duration, 1))
-                                  : 1;
+                                  ? std::fmax(0.0f, std::fmin(elapsedTime / anim.currentFrame().duration, 1.0f))
+                                  : 1.0f;
 
                 result = interpolate(anim.previousFrame().pose, anim.currentFrame().pose, alpha);
 

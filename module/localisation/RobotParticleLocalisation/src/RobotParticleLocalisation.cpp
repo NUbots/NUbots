@@ -57,7 +57,7 @@ namespace module::localisation {
                 // Emit state
                 auto field(std::make_unique<Field>());
                 Eigen::Isometry3f Hfw(Eigen::Isometry3f::Identity());
-                Hfw.translation() = Eigen::Vector3f(state[RobotModel<float>::kX], state[RobotModel<float>::kY], 0);
+                Hfw.translation() = Eigen::Vector3f(state[RobotModel<float>::kX], state[RobotModel<float>::kY], 0.0f);
                 Hfw.linear() =
                     Eigen::AngleAxisf(state[RobotModel<float>::kAngle], Eigen::Vector3f::UnitZ()).toRotationMatrix();
                 field->Hfw        = Hfw.matrix();
@@ -198,7 +198,7 @@ namespace module::localisation {
 
                     // Calculate the reset state
                     Eigen::Isometry3f Hft;
-                    Hft.translation() = Eigen::Vector3f(s.rTFf.x(), s.rTFf.y(), 0);
+                    Hft.translation() = Eigen::Vector3f(s.rTFf.x(), s.rTFf.y(), 0.0f);
                     // Linear part of transform is `s.heading` radians rotation about Z axis
                     Hft.linear() = Eigen::AngleAxisf(s.heading, Eigen::Vector3f::UnitZ()).toRotationMatrix();
                     const Eigen::Isometry3f Hfw(Hft * Htw);
@@ -239,13 +239,13 @@ namespace module::localisation {
 
         on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
             // Left side penalty mark
-            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0f) + fd.dimensions.penalty_mark_distance,
-                                            (-fd.dimensions.field_width / 2.0f),
+            config.start_state.emplace_back((-fd.dimensions.field_length * 0.5f) + fd.dimensions.penalty_mark_distance,
+                                            (-fd.dimensions.field_width * 0.5f),
                                             -M_PI_2);
 
             // Right side penalty mark
-            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0f) + fd.dimensions.penalty_mark_distance,
-                                            (fd.dimensions.field_width / 2.0f),
+            config.start_state.emplace_back((-fd.dimensions.field_length * 0.5f) + fd.dimensions.penalty_mark_distance,
+                                            (fd.dimensions.field_width * 0.5f),
                                             M_PI_2);
 
             // // Left side goal line

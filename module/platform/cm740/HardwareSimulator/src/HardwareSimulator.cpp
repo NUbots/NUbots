@@ -192,7 +192,7 @@ namespace module::platform::cm740 {
                         Eigen::Vector3f goal(std::cos(servo.goal_position), std::sin(servo.goal_position), 0.0);
 
                         Eigen::Vector3f cross = present.cross(goal);
-                        if (cross.z() > 0) {
+                        if (cross.z() > 0.0f) {
                             servo.present_position =
                                 utility::math::angle::normalizeAngle(servo.present_position + movingSpeed);
                         }

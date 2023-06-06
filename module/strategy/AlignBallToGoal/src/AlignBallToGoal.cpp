@@ -51,7 +51,7 @@ namespace module::strategy {
 
                     // Goal position relative to robot
                     Eigen::Vector3f rGFf =
-                        Eigen::Vector3f(-field_description.dimensions.field_length / 2.0f, 0.0f, 0.0f);
+                        Eigen::Vector3f(-field_description.dimensions.field_length * 0.5f, 0.0f, 0.0f);
                     Eigen::Vector3f rGRr = Hrf * rGFf;
 
                     // Find the angle to the goal - should be as close as possible to 0 to be aligned

@@ -18,11 +18,11 @@
 
 namespace module::localisation {
 
-    // Particle struct
     struct Particle {
-        Eigen::Matrix<float, 3, 1> state =
-            Eigen::Matrix<float, 3, 1>::Zero();  // (x, y, theta) of world space in field space
-        float weight = 1.0;
+        /// @brief State of the particle (x,y,theta)
+        Eigen::Matrix<float, 3, 1> state = Eigen::Matrix<float, 3, 1>::Zero();
+        /// @brief Weight of the particle
+        float weight = 1.0f;
     };
 
     class RobotLocalisation : public NUClear::Reactor {
@@ -36,9 +36,9 @@ namespace module::localisation {
             /// @brief Uncertainty in the process model
             Eigen::Matrix<float, 3, 3> process_noise = Eigen::Matrix<float, 3, 3>::Zero();
             /// @brief Uncertainty in the measurement model
-            float measurement_noise = 0;
+            float measurement_noise = 0.0f;
             /// @brief Maximum distance a field line can be from a particle to be considered an observation [m]
-            float max_range = 0;
+            float max_range = 0.0f;
             /// @brief Initial state (x,y,theta) of the robot, saved for resetting
             std::vector<Eigen::Matrix<float, 3, 1>> initial_state{};
             /// @brief Initial covariance matrix of the robot's state, saved for resetting

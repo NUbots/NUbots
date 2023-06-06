@@ -104,7 +104,7 @@ namespace module::output {
 
                         if (loc_ball) {
                             // Get our ball in field space
-                            Eigen::Vector4f rBWw(loc_ball->position.x(), loc_ball->position.y(), 0.0, 1.0);
+                            Eigen::Vector4f rBWw(loc_ball->position.x(), loc_ball->position.y(), 0.0f, 1.0f);
                             Eigen::Vector4f rBFf = Hfw * rBWw;
 
                             // Store our position from field to ball

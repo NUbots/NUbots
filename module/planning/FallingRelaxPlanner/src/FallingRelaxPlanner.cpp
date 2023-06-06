@@ -21,10 +21,6 @@ namespace module::planning {
     using utility::skill::load_script;
     using utility::support::Expression;
 
-    float smooth(float value, float new_value, float alpha) {
-        return alpha * value + (1.0 - alpha) * new_value;
-    }
-
     /// @brief A state to categorise each of the properties we are monitoring
     enum class State {
         /// @brief This sensor believes the robot is stable

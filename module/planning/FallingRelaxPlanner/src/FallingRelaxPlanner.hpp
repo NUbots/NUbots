@@ -7,6 +7,11 @@
 
 namespace module::planning {
 
+    template <typename Scalar>
+    Scalar smooth(Scalar value, Scalar new_value, Scalar alpha) {
+        return alpha * value + (1.0 - alpha) * new_value;
+    }
+
     class FallingRelaxPlanner : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
@@ -14,13 +19,13 @@ namespace module::planning {
 
             struct Levels {
                 /// @brief The mean value of this sensor to subtract
-                float mean;
+                float mean = 0.0f;
                 /// @brief The threshold for this sensor to be considered unstable
-                float unstable;
+                float unstable = 0.0f;
                 /// @brief The threshold for this sensor to be considered falling
-                float falling;
+                float falling = 0.0f;
                 /// @brief The smoothing factor for this sensor
-                float smoothing;
+                float smoothing = 0.0f;
             };
 
             /// @brief The configuration for the gyroscope magnitude check
@@ -39,11 +44,11 @@ namespace module::planning {
 
     private:
         /// @brief the current smoothed value of the gyroscope magnitude
-        float gyro_mag = 0.0;
+        float gyro_mag = 0.0f;
         /// @brief the current smoothed value of the accelerometer magnitude
-        float acc_mag = 0.0;
+        float acc_mag = 0.0f;
         /// @brief the current smoothed value of the accelerometer angle from upright
-        float acc_angle = 0.0;
+        float acc_angle = 0.0f;
     };
 
 }  // namespace module::planning

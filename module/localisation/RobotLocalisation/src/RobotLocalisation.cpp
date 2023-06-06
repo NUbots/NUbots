@@ -341,7 +341,7 @@ namespace module::localisation {
             if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
                 float distance_error_norm = std::pow(occupancy_value, 2.0f);
                 weight += float(std::exp(-0.5 * std::pow(distance_error_norm / cfg.measurement_noise, 2))
-                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2.0)));
+                                / (2 * M_PI * std::pow(cfg.measurement_noise, 2.0)));
             }
             // If the observation is outside the max range, penalise it
             else {
@@ -354,11 +354,12 @@ namespace module::localisation {
 
     void RobotLocalisation::resample() {
         std::vector<float> weights(particles.size());
+        float weight_sum = 0.0f;
         for (size_t i = 0; i < particles.size(); i++) {
             weights[i] = particles[i].weight;
+            weight_sum += particles[i].weight;
         }
-        float weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0f);
-        if (weight_sum == 0) {
+        if (weight_sum < std::numeric_limits<float>::epsilon()) {
             log<NUClear::DEBUG>("All weights are zero, cannot resample");
             // Add some more noise to the particles
             add_noise();
@@ -399,7 +400,7 @@ namespace module::localisation {
     }
 
     void RobotLocalisation::add_noise() {
-        MultivariateNormal<float, 3> multivariate(Eigen::Vector3f(0.0f, 0.0f, 0.0f), cfg.process_noise);
+        MultivariateNormal<float, 3> multivariate(Eigen::Vector3f::Zero(), cfg.process_noise);
 
         for (auto& particle : particles) {
             particle.state += multivariate.sample();
