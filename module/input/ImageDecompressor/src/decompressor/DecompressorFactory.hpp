@@ -10,11 +10,11 @@ namespace module::input::decompressor {
 
     class DecompressorFactory {
     public:
-        DecompressorFactory()                                          = default;
-        virtual ~DecompressorFactory()                                 = default;
-        DecompressorFactory(const DecompressorFactory&)                = default;
-        DecompressorFactory(DecompressorFactory&&) noexcept            = default;
-        DecompressorFactory& operator=(const DecompressorFactory&)     = default;
+        DecompressorFactory()                               = default;
+        virtual ~DecompressorFactory()                      = default;
+        DecompressorFactory(const DecompressorFactory&)     = default;
+        DecompressorFactory(DecompressorFactory&&) noexcept = default;
+        DecompressorFactory& operator=(const DecompressorFactory&) = default;
         DecompressorFactory& operator=(DecompressorFactory&&) noexcept = default;
 
         virtual std::shared_ptr<Decompressor> make_decompressor(const uint32_t& width,

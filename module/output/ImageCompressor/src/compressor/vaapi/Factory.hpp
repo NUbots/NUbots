@@ -10,9 +10,9 @@ namespace module::output::compressor::vaapi {
     class Factory : public CompressorFactory {
     public:
         Factory(const std::string& device, const std::string& driver, const int& quality);
-        Factory(const Factory&)                = default;
-        Factory(Factory&&) noexcept            = default;
-        Factory& operator=(const Factory&)     = default;
+        Factory(const Factory&)     = default;
+        Factory(Factory&&) noexcept = default;
+        Factory& operator=(const Factory&) = default;
         Factory& operator=(Factory&&) noexcept = default;
         ~Factory() override;
 
