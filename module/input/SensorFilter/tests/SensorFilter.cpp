@@ -245,7 +245,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     const Eigen::Quaternionf mean_error = utility::math::quaternion::meanRotation(errors.begin(), errors.end());
 
     const float mean_angular_error =
-        std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / float(angular_errors.size());
+        std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0f) / float(angular_errors.size());
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
     INFO("Mean Angular Error: " << mean_angular_error);
     REQUIRE(mean_error.w() == Approx(1.0).margin(0.01));

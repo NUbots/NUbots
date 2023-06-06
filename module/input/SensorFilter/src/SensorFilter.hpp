@@ -322,7 +322,7 @@ namespace module::input {
 
     private:
         /// @brief Dead reckoning yaw orientation of the robot in world space
-        float yaw = 0;
+        float yaw = 0.0f;
 
         /// @brief Transform of torso from world space
         Eigen::Isometry3f Hwt = Eigen::Isometry3f::Identity();
