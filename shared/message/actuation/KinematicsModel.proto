@@ -30,57 +30,57 @@ import "Matrix.proto";
  */
 message KinematicsModel {
     message Leg {
-        float HIP_OFFSET_X                = 1;
-        float HIP_OFFSET_Y                = 2;
-        float HIP_OFFSET_Z                = 3;
-        float UPPER_LEG_LENGTH            = 4;
-        float LOWER_LEG_LENGTH            = 5;
-        float FOOT_HEIGHT                 = 6;
-        float FOOT_LENGTH                 = 7;
-        float TOE_LENGTH                  = 8;
-        float HEEL_LENGTH                 = 9;
-        float FOOT_WIDTH                  = 10;
-        float FOOT_CENTRE_TO_ANKLE_CENTRE = 11;
-        float LENGTH_BETWEEN_LEGS         = 12;
-        int32 LEFT_TO_RIGHT_HIP_YAW       = 13;
-        int32 LEFT_TO_RIGHT_HIP_ROLL      = 14;
-        int32 LEFT_TO_RIGHT_HIP_PITCH     = 15;
-        int32 LEFT_TO_RIGHT_KNEE          = 16;
-        int32 LEFT_TO_RIGHT_ANKLE_PITCH   = 17;
-        int32 LEFT_TO_RIGHT_ANKLE_ROLL    = 18;
+        double HIP_OFFSET_X                = 1;
+        double HIP_OFFSET_Y                = 2;
+        double HIP_OFFSET_Z                = 3;
+        double UPPER_LEG_LENGTH            = 4;
+        double LOWER_LEG_LENGTH            = 5;
+        double FOOT_HEIGHT                 = 6;
+        double FOOT_LENGTH                 = 7;
+        double TOE_LENGTH                  = 8;
+        double HEEL_LENGTH                 = 9;
+        double FOOT_WIDTH                  = 10;
+        double FOOT_CENTRE_TO_ANKLE_CENTRE = 11;
+        double LENGTH_BETWEEN_LEGS         = 12;
+        int32  LEFT_TO_RIGHT_HIP_YAW       = 13;
+        int32  LEFT_TO_RIGHT_HIP_ROLL      = 14;
+        int32  LEFT_TO_RIGHT_HIP_PITCH     = 15;
+        int32  LEFT_TO_RIGHT_KNEE          = 16;
+        int32  LEFT_TO_RIGHT_ANKLE_PITCH   = 17;
+        int32  LEFT_TO_RIGHT_ANKLE_ROLL    = 18;
     }
 
     message Head {
-        float NECK_BASE_POS_FROM_ORIGIN_X     = 1;
-        float NECK_BASE_POS_FROM_ORIGIN_Y     = 2;
-        float NECK_BASE_POS_FROM_ORIGIN_Z     = 3;
-        float NECK_LENGTH                     = 4;
-        float NECK_TO_CAMERA_X                = 5;
-        float NECK_TO_CAMERA_Y                = 6;
-        float NECK_TO_CAMERA_Z                = 7;
-        float CAMERA_DECLINATION_ANGLE_OFFSET = 8;
-        float INTERPUPILLARY_DISTANCE         = 13;
+        double NECK_BASE_POS_FROM_ORIGIN_X     = 1;
+        double NECK_BASE_POS_FROM_ORIGIN_Y     = 2;
+        double NECK_BASE_POS_FROM_ORIGIN_Z     = 3;
+        double NECK_LENGTH                     = 4;
+        double NECK_TO_CAMERA_X                = 5;
+        double NECK_TO_CAMERA_Y                = 6;
+        double NECK_TO_CAMERA_Z                = 7;
+        double CAMERA_DECLINATION_ANGLE_OFFSET = 8;
+        double INTERPUPILLARY_DISTANCE         = 13;
 
         // Head movement limits, in radians
-        float MAX_YAW   = 9;
-        float MIN_YAW   = 10;
-        float MAX_PITCH = 11;
-        float MIN_PITCH = 12;
+        double MAX_YAW   = 9;
+        double MIN_YAW   = 10;
+        double MAX_PITCH = 11;
+        double MIN_PITCH = 12;
     }
 
     message Arm {
-        float DISTANCE_BETWEEN_SHOULDERS = 1;
-        float SHOULDER_Z_OFFSET          = 2;
-        float SHOULDER_X_OFFSET          = 3;
-        float SHOULDER_LENGTH            = 4;
-        float SHOULDER_WIDTH             = 5;
-        float SHOULDER_HEIGHT            = 6;
-        float UPPER_ARM_LENGTH           = 7;
-        float UPPER_ARM_Y_OFFSET         = 8;
-        float UPPER_ARM_X_OFFSET         = 9;
-        float LOWER_ARM_LENGTH           = 10;
-        float LOWER_ARM_Y_OFFSET         = 11;
-        float LOWER_ARM_Z_OFFSET         = 12;
+        double DISTANCE_BETWEEN_SHOULDERS = 1;
+        double SHOULDER_Z_OFFSET          = 2;
+        double SHOULDER_X_OFFSET          = 3;
+        double SHOULDER_LENGTH            = 4;
+        double SHOULDER_WIDTH             = 5;
+        double SHOULDER_HEIGHT            = 6;
+        double UPPER_ARM_LENGTH           = 7;
+        double UPPER_ARM_Y_OFFSET         = 8;
+        double UPPER_ARM_X_OFFSET         = 9;
+        double LOWER_ARM_LENGTH           = 10;
+        double LOWER_ARM_Y_OFFSET         = 11;
+        double LOWER_ARM_Z_OFFSET         = 12;
     }
 
     /// {CoM_x, CoM_y, CoM_z, mass} in SI units
