@@ -54,33 +54,33 @@ namespace module::behaviour::planning {
         struct Config {
             Config() = default;
             /// @brief Walk path planner priority in the subsumption system
-            float walk_path_planner_priority = 0;
+            double walk_path_planner_priority = 0;
             /// @brief Walk command velocity for walking to ball
-            float forward_speed = 0;
+            double forward_speed = 0;
             /// @brief Maximum angular velocity command for walking to ball
-            float max_turn_speed = 0;
+            double max_turn_speed = 0;
             /// @brief Minimum angular velocity command for walking to ball
-            float min_turn_speed = 0;
+            double min_turn_speed = 0;
             /// @brief Rotate on spot walk command angular velocity
-            float rotate_speed = 0;
+            double rotate_speed = 0;
             /// @brief Rotate on spot walk command forward velocity
-            float rotate_speed_x = 0;
+            double rotate_speed_x = 0;
             /// @brief Rotate on spot walk command side velocity
-            float rotate_speed_y = 0;
+            double rotate_speed_y = 0;
             /// @brief Walk to ready walk command forward velocity
-            float walk_to_ready_speed_x = 0;
+            double walk_to_ready_speed_x = 0;
             /// @brief Walk to ready walk command side velocity
-            float walk_to_ready_speed_y = 0;
+            double walk_to_ready_speed_y = 0;
             /// @brief Walk to ready walk command angular velocity
-            float walk_to_ready_rotation = 0;
+            double walk_to_ready_rotation = 0;
             /// @brief rotate_around_ball command angular velocity
-            float rotate_around_ball_speed = 0;
+            double rotate_around_ball_speed = 0;
             /// @brief rotate_around_ball forward velocity
-            float rotate_around_ball_speed_x = 0;
+            double rotate_around_ball_speed_x = 0;
             /// @brief rotate_around_ball side velocity
-            float rotate_around_ball_speed_y = 0;
+            double rotate_around_ball_speed_y = 0;
             /// @brief ball y offset
-            float ball_y_offset = 0;
+            double ball_y_offset = 0;
         } cfg;
 
         /// @brief Stores the latest MotionCommand
@@ -110,7 +110,7 @@ namespace module::behaviour::planning {
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
-        void update_priority(const float& priority);
+        void update_priority(const double& priority);
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

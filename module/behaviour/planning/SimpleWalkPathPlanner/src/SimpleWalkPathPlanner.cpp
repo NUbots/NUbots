@@ -67,17 +67,17 @@ namespace module::behaviour::planning {
 
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& config) {
             log_level                      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.max_turn_speed             = config["max_turn_speed"].as<float>();
-            cfg.min_turn_speed             = config["min_turn_speed"].as<float>();
-            cfg.forward_speed              = config["forward_speed"].as<float>();
-            cfg.rotate_speed_x             = config["rotate_speed_x"].as<float>();
-            cfg.rotate_speed_y             = config["rotate_speed_y"].as<float>();
-            cfg.rotate_speed               = config["rotate_speed"].as<float>();
-            cfg.walk_to_ready_speed_x      = config["walk_to_ready_speed_x"].as<float>();
-            cfg.walk_to_ready_speed_y      = config["walk_to_ready_speed_y"].as<float>();
-            cfg.walk_to_ready_rotation     = config["walk_to_ready_rotation"].as<float>();
-            cfg.walk_path_planner_priority = config["walk_path_planner_priority"].as<float>();
-            cfg.ball_y_offset              = config["ball_y_offset"].as<float>();
+            cfg.max_turn_speed             = config["max_turn_speed"].as<double>();
+            cfg.min_turn_speed             = config["min_turn_speed"].as<double>();
+            cfg.forward_speed              = config["forward_speed"].as<double>();
+            cfg.rotate_speed_x             = config["rotate_speed_x"].as<double>();
+            cfg.rotate_speed_y             = config["rotate_speed_y"].as<double>();
+            cfg.rotate_speed               = config["rotate_speed"].as<double>();
+            cfg.walk_to_ready_speed_x      = config["walk_to_ready_speed_x"].as<double>();
+            cfg.walk_to_ready_speed_y      = config["walk_to_ready_speed_y"].as<double>();
+            cfg.walk_to_ready_rotation     = config["walk_to_ready_rotation"].as<double>();
+            cfg.walk_path_planner_priority = config["walk_path_planner_priority"].as<double>();
+            cfg.ball_y_offset              = config["ball_y_offset"].as<double>();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
@@ -146,12 +146,12 @@ namespace module::behaviour::planning {
     void SimpleWalkPathPlanner::vision_walk_path(const std::shared_ptr<const FilteredBall>& ball) {
         // If ball exists...
         if (ball) {
-            Eigen::Vector3f rBTt = ball->rBTt.cast<float>();
+            Eigen::Vector3d rBTt = ball->rBTt.cast<double>();
             // Add a offset to the ball position to avoid walking at the ball directly such that the robot can kick
             rBTt.y() = rBTt.y() + cfg.ball_y_offset;
             // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
-            Eigen::Vector3f uBTt         = rBTt.normalized();
-            Eigen::Vector3f walk_command = cfg.forward_speed * (uBTt);
+            Eigen::Vector3d uBTt         = rBTt.normalized();
+            Eigen::Vector3d walk_command = cfg.forward_speed * (uBTt);
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed
@@ -201,7 +201,7 @@ namespace module::behaviour::planning {
         update_priority(cfg.walk_path_planner_priority);
     }
 
-    void SimpleWalkPathPlanner::update_priority(const float& priority) {
+    void SimpleWalkPathPlanner::update_priority(const double& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
