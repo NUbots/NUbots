@@ -76,7 +76,7 @@ namespace module::platform::cm740 {
         sensors.voltage = 0;
 
         // Gyroscope (in radians/second)
-        sensors.gyroscope = Eigen::Vector3f::Zero();
+        sensors.gyroscope = Eigen::Vector3d::Zero();
 
         /*
          Force Sensitive Resistor Data
@@ -148,7 +148,7 @@ namespace module::platform::cm740 {
 
         on<Configuration>("HardwareSimulator.yaml")
             .then("Hardware Simulator Config", [this](const Configuration& config) {
-                imu_drift_rate      = config["imu_drift_rate"].as<float>();
+                imu_drift_rate      = config["imu_drift_rate"].as<double>();
                 noise.accelerometer = config["noise"]["accelerometer"].as<Expression>();
                 noise.gyroscope     = config["noise"]["gyroscope"].as<Expression>();
                 bodyTilt            = config["body_tilt"].as<Expression>();
@@ -177,9 +177,9 @@ namespace module::platform::cm740 {
                 }
 
                 for (int i = 0; i < 20; ++i) {
-                    auto& servo       = utility::platform::getRawServo(i, sensors);
-                    float movingSpeed = servo.moving_speed == 0 ? 0.1 : servo.moving_speed / UPDATE_FREQUENCY;
-                    movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
+                    auto& servo        = utility::platform::getRawServo(i, sensors);
+                    double movingSpeed = servo.moving_speed == 0 ? 0.1 : servo.moving_speed / UPDATE_FREQUENCY;
+                    movingSpeed        = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
 
                     if (std::abs(servo.present_position - servo.goal_position) < movingSpeed) {
@@ -203,8 +203,8 @@ namespace module::platform::cm740 {
                     }
                 }
 
-                sensors.gyroscope     = Eigen::Vector3f(0.0f, 0.0f, imu_drift_rate);
-                sensors.accelerometer = Eigen::Vector3f(-9.8 * std::sin(bodyTilt), 0.0, 9.8 * std::cos(bodyTilt));
+                sensors.gyroscope     = Eigen::Vector3d(0.0f, 0.0f, imu_drift_rate);
+                sensors.accelerometer = Eigen::Vector3d(-9.8 * std::sin(bodyTilt), 0.0, 9.8 * std::cos(bodyTilt));
                 sensors.timestamp     = NUClear::clock::now();
 
                 // Add some noise so that sensor fusion doesnt converge to a singularity
@@ -220,12 +220,12 @@ namespace module::platform::cm740 {
             for (const auto& command : commands.targets) {
 
                 // Calculate our moving speed
-                float diff = utility::math::angle::difference(
+                double diff = utility::math::angle::difference(
                     command.position,
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed = 0.0f;
+                double speed = 0.0f;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
@@ -246,8 +246,8 @@ namespace module::platform::cm740 {
         });
     }
 
-    float centered_noise() {
-        return rand() / float(RAND_MAX) - 0.5f;
+    double centered_noise() {
+        return rand() / double(RAND_MAX) - 0.5f;
     }
 
     void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) const {

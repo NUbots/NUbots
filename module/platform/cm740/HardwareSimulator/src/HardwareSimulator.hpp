@@ -38,13 +38,13 @@ namespace module::platform::cm740 {
     private:
         message::platform::RawSensors sensors;
 
-        float imu_drift_rate                     = 0.0f;
+        double imu_drift_rate                    = 0.0f;
         static constexpr size_t UPDATE_FREQUENCY = 90;
         void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors) const;
         struct NoiseConfig {
             NoiseConfig() = default;
-            Eigen::Vector3f accelerometer{0.001, 0.001, 0.001};
-            Eigen::Vector3f gyroscope{0.001, 0.001, 0.001};
+            Eigen::Vector3d accelerometer{0.001, 0.001, 0.001};
+            Eigen::Vector3d gyroscope{0.001, 0.001, 0.001};
         } noise;
         double bodyTilt                      = 0;
         Eigen::Vector3d integrated_gyroscope = Eigen::Vector3d::Zero();
