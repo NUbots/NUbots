@@ -39,9 +39,9 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief Value that priority is set to when getup is requested
-            float getup_priority = 0.0f;
+            double getup_priority = 0.0f;
             /// @brief Threshold angle for executing getup, between torso z axis and world z axis
-            float fallen_angle = 0.0f;
+            double fallen_angle = 0.0f;
             /// @brief Script sequence to run when getting from lying on the front to standing
             std::vector<std::string> getup_front;
             /// @brief Script sequence to run when getting from lying on the back to standing
@@ -56,7 +56,7 @@ namespace module::behaviour::skills {
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
-        void update_priority(const float& priority);
+        void update_priority(const double& priority);
 
     public:
         explicit Getup(std::unique_ptr<NUClear::Environment> environment);

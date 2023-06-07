@@ -52,8 +52,8 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
             log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.fallen_angle   = config["fallen_angle"].as<float>();
-            cfg.getup_priority = config["getup_priority"].as<float>();
+            cfg.fallen_angle   = config["fallen_angle"].as<double>();
+            cfg.getup_priority = config["getup_priority"].as<double>();
 
             cfg.getup_front = config["getup_front"].as<std::vector<std::string>>();
             cfg.getup_back  = config["getup_back"].as<std::vector<std::string>>();
@@ -62,7 +62,7 @@ namespace module::behaviour::skills {
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
             subsumption_id,
             "Get Up",
-            {std::pair<float, std::set<LimbID>>(
+            {std::pair<double, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<ExecuteGetup>()); },
@@ -104,7 +104,7 @@ namespace module::behaviour::skills {
         });
     }
 
-    void Getup::update_priority(const float& priority) {
+    void Getup::update_priority(const double& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
