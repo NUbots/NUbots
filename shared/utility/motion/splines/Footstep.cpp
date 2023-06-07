@@ -16,10 +16,10 @@ namespace utility::motion::splines {
      * Add to given pose the given diff expressed in pose frame and return the integrated added pose.
      * Note that this is a free function which does not depend on the state of the Footstep class
      */
-    Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) {
-        const float cos_z = std::cos(pose.z());
-        const float sin_z = std::sin(pose.z());
-        return Eigen::Vector3f(pose.x() + diff.x() * cos_z - diff.y() * sin_z,
+    Eigen::Vector3d poseAdd(const Eigen::Vector3d& pose, const Eigen::Vector3d& diff) {
+        const double cos_z = std::cos(pose.z());
+        const double sin_z = std::sin(pose.z());
+        return Eigen::Vector3d(pose.x() + diff.x() * cos_z - diff.y() * sin_z,
                                pose.y() + diff.x() * sin_z + diff.y() * cos_z,
                                utility::math::angle::normalizeAngle(pose.z() + diff.z()));
     }
@@ -28,13 +28,13 @@ namespace utility::motion::splines {
      * Compute and return the delta from (zero + diff) to (zero) in (zero + diff) frame.
      * Note that this is a free function which does not depend on the state of the Footstep class
      */
-    Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) {
-        const float cos_z = std::cos(-diff.z());
-        const float sin_z = std::sin(-diff.z());
-        return Eigen::Vector3f(-diff.x() * cos_z + diff.y() * sin_z, -diff.x() * sin_z - diff.y() * cos_z, -diff.z());
+    Eigen::Vector3d diffInv(const Eigen::Vector3d& diff) {
+        const double cos_z = std::cos(-diff.z());
+        const double sin_z = std::sin(-diff.z());
+        return Eigen::Vector3d(-diff.x() * cos_z + diff.y() * sin_z, -diff.x() * sin_z - diff.y() * cos_z, -diff.z());
     }
 
-    Footstep::Footstep(const float& foot_distance_, const bool& is_left_support_foot_) {
+    Footstep::Footstep(const double& foot_distance_, const bool& is_left_support_foot_) {
         if (foot_distance_ <= 0.0f) {
             throw std::logic_error("Footstep invalid distance");
         }
@@ -69,7 +69,7 @@ namespace utility::motion::splines {
         }
     }
 
-    void Footstep::stepFromSupport(const Eigen::Vector3f& diff) {
+    void Footstep::stepFromSupport(const Eigen::Vector3d& diff) {
         // Update relative diff from support foot
         support_to_last = diffInv(support_to_next);
         support_to_next = diff;
@@ -84,9 +84,9 @@ namespace utility::motion::splines {
         is_left_support_foot = !is_left_support_foot;
     }
 
-    void Footstep::step_from_orders(const Eigen::Vector3f& diff) {
+    void Footstep::step_from_orders(const Eigen::Vector3d& diff) {
         // Compute step diff in next support foot frame
-        Eigen::Vector3f tmpDiff = Eigen::Vector3f::Zero();
+        Eigen::Vector3d tmpDiff = Eigen::Vector3d::Zero();
         // No change in forward step
         tmpDiff.x() = diff.x();
         // Add lateral foot offset

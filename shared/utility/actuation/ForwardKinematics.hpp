@@ -43,8 +43,8 @@ namespace utility::actuation::kinematics {
 
 
     [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateHeadJointPosition(const KinematicsModel& model,
-                                                                                         const float& HEAD_PITCH,
-                                                                                         const float& HEAD_YAW,
+                                                                                         const double& HEAD_PITCH,
+                                                                                         const double& HEAD_YAW,
                                                                                          const ServoID& servoID) {
         std::map<ServoID, Eigen::Isometry3d> positions{};
 
@@ -52,7 +52,7 @@ namespace utility::actuation::kinematics {
         const Eigen::Vector3d NECK_POS(model.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                        model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                        model.head.NECK_BASE_POS_FROM_ORIGIN_Z);
-        const float NECK_LENGTH = model.head.NECK_LENGTH;
+        const double NECK_LENGTH = model.head.NECK_LENGTH;
 
         // Translate to base of neck from origin
         runningTransform = runningTransform.translate(NECK_POS);
@@ -230,9 +230,9 @@ namespace utility::actuation::kinematics {
             negativeIfRight = -1;
         }
 
-        const float& shoulder_pitch = sensors.servo[SHOULDER_PITCH].present_position;
-        const float& shoulder_roll  = sensors.servo[SHOULDER_ROLL].present_position;
-        const float& elbow          = sensors.servo[ELBOW].present_position;
+        const double& shoulder_pitch = sensors.servo[SHOULDER_PITCH].present_position;
+        const double& shoulder_roll  = sensors.servo[SHOULDER_ROLL].present_position;
+        const double& elbow          = sensors.servo[ELBOW].present_position;
 
         // Translate to shoulder
         runningTransform =

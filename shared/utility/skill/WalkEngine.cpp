@@ -19,7 +19,7 @@ namespace utility::skill {
         trajectories_init(trajs);
     }
 
-    bool QuinticWalkEngine::update_state(const float& dt, const Eigen::Vector3f& orders) {
+    bool QuinticWalkEngine::update_state(const double& dt, const Eigen::Vector3d& orders) {
         const bool orders_zero = orders.isZero();
         // First check if we are currently in pause state or idle, since we don't want to update the phase in this
         // case
@@ -162,8 +162,8 @@ namespace utility::skill {
         return true;
     }
 
-    void QuinticWalkEngine::update_phase(const float& dt) {
-        float local_dt = dt;
+    void QuinticWalkEngine::update_phase(const double& dt) {
+        double local_dt = dt;
         // Check for negative time step
         if (local_dt <= 0.0f) {
             if (local_dt == 0.0f) {  // sometimes happens due to rounding
@@ -206,26 +206,26 @@ namespace utility::skill {
 
         // Compute current point in time to save state by multiplying the half period time with the advancement of
         // period time
-        float factor = last_phase;
+        double factor = last_phase;
         if (factor < 0.5f) {
             factor = factor * 2.0f;
         }
 
-        float period_time = half_period * factor;
+        double period_time = half_period * factor;
 
-        Eigen::Vector2f trunk_pos(trajs.get(TrajectoryTypes::TRUNK_POS_X).pos(period_time),
+        Eigen::Vector2d trunk_pos(trajs.get(TrajectoryTypes::TRUNK_POS_X).pos(period_time),
                                   trajs.get(TrajectoryTypes::TRUNK_POS_Y).pos(period_time));
-        Eigen::Vector2f trunk_vel(trajs.get(TrajectoryTypes::TRUNK_POS_X).vel(period_time),
+        Eigen::Vector2d trunk_vel(trajs.get(TrajectoryTypes::TRUNK_POS_X).vel(period_time),
                                   trajs.get(TrajectoryTypes::TRUNK_POS_Y).vel(period_time));
-        Eigen::Vector2f trunk_acc(trajs.get(TrajectoryTypes::TRUNK_POS_X).acc(period_time),
+        Eigen::Vector2d trunk_acc(trajs.get(TrajectoryTypes::TRUNK_POS_X).acc(period_time),
                                   trajs.get(TrajectoryTypes::TRUNK_POS_Y).acc(period_time));
 
         // Convert in next support foot frame
         trunk_pos.x() -= foot_step.get_next().x();
         trunk_pos.y() -= foot_step.get_next().y();
-        trunk_pos = Eigen::Rotation2Df(-foot_step.get_next().z()).toRotationMatrix() * trunk_pos;
-        trunk_vel = Eigen::Rotation2Df(-foot_step.get_next().z()).toRotationMatrix() * trunk_vel;
-        trunk_acc = Eigen::Rotation2Df(-foot_step.get_next().z()).toRotationMatrix() * trunk_acc;
+        trunk_pos = Eigen::Rotation2Dd(-foot_step.get_next().z()).toRotationMatrix() * trunk_pos;
+        trunk_vel = Eigen::Rotation2Dd(-foot_step.get_next().z()).toRotationMatrix() * trunk_vel;
+        trunk_acc = Eigen::Rotation2Dd(-foot_step.get_next().z()).toRotationMatrix() * trunk_acc;
 
         // Save state
         trunk_pos_at_last.x() = trunk_pos.x();
@@ -241,7 +241,7 @@ namespace utility::skill {
         trunk_acc_at_last.z() = trajs.get(TrajectoryTypes::TRUNK_POS_Z).acc(period_time);
 
         // Evaluate and save trunk orientation in next support foot frame
-        Eigen::Vector3f trunk_axis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
+        Eigen::Vector3d trunk_axis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
                                    trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
                                    trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(period_time));
 
@@ -259,20 +259,20 @@ namespace utility::skill {
         trunk_axis_acc_at_last.z() = trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).acc(period_time);
     }
 
-    void QuinticWalkEngine::build_trajectories(const Eigen::Vector3f& orders,
+    void QuinticWalkEngine::build_trajectories(const Eigen::Vector3d& orders,
                                                const bool& start_movement,
                                                const bool& start_step,
                                                const bool& kick_step) {
 
 
         // Time length of double and single support phase during the half cycle
-        float double_support_length = params.double_support_ratio * half_period;
-        float single_support_length = half_period - double_support_length;
+        double double_support_length = params.double_support_ratio * half_period;
+        double single_support_length = half_period - double_support_length;
 
         // Save the current trunk state to use it later and compute next step position
         if (start_movement) {
             trunk_pos_at_last.y() -= foot_step.get_next().y();
-            foot_step.step_from_orders(Eigen::Vector3f::Zero());
+            foot_step.step_from_orders(Eigen::Vector3d::Zero());
             // Only move the trunk on the first half cycle after a walk enable
             double_support_length = half_period;
             single_support_length = 0.0f;
@@ -293,8 +293,8 @@ namespace utility::skill {
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, 0.0f);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.is_left_support()));
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.is_left_support()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<double>(foot_step.is_left_support()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<double>(foot_step.is_left_support()));
 
         //  ******************************** Flying foot position ******************************** //
 
@@ -339,36 +339,36 @@ namespace utility::skill {
 
         //  ******************************** Trunk position ******************************** //
 
-        const float period      = 2.0f * half_period;
-        const float pauseLength = 0.5f * params.trunk_pause * half_period;
-        const float timeShift   = (double_support_length - half_period) * 0.5f + params.trunk_phase * half_period;
+        const double period      = 2.0f * half_period;
+        const double pauseLength = 0.5f * params.trunk_pause * half_period;
+        const double timeShift   = (double_support_length - half_period) * 0.5f + params.trunk_phase * half_period;
 
-        const Eigen::Vector2f trunk_point_support(
+        const Eigen::Vector2d trunk_point_support(
             params.trunk_x_offset + params.trunk_x_offset_p_coef_forward * foot_step.get_next().x()
                 + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.get_next().z()),
             params.trunk_y_offset);
 
-        const Eigen::Vector2f trunk_point_next(
+        const Eigen::Vector2d trunk_point_next(
             foot_step.get_next().x() + params.trunk_x_offset
                 + params.trunk_x_offset_p_coef_forward * foot_step.get_next().x()
                 + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.get_next().z()),
             foot_step.get_next().y() + params.trunk_y_offset);
 
         // Trunk middle neutral (no swing) position
-        const Eigen::Vector2f trunk_point_middle = 0.5f * (trunk_point_support + trunk_point_next);
+        const Eigen::Vector2d trunk_point_middle = 0.5f * (trunk_point_support + trunk_point_next);
 
         // Trunk vector from middle to support apex
-        Eigen::Vector2f trunk_vect = trunk_point_support - trunk_point_middle;
+        Eigen::Vector2d trunk_vect = trunk_point_support - trunk_point_middle;
 
         // Apply swing amplitude ratio
         trunk_vect.y() *= params.trunk_swing;
 
         // Trunk support and next apex position
-        const Eigen::Vector2f trunkApexSupport = trunk_point_middle + trunk_vect;
-        const Eigen::Vector2f trunkApexNext    = trunk_point_middle - trunk_vect;
+        const Eigen::Vector2d trunkApexSupport = trunk_point_middle + trunk_vect;
+        const Eigen::Vector2d trunkApexNext    = trunk_point_middle - trunk_vect;
 
-        const float trunk_velSupport = (foot_step.get_next().x() - foot_step.get_last().x()) / period;
-        const float trunk_velNext    = foot_step.get_next().x() / half_period;
+        const double trunk_velSupport = (foot_step.get_next().x() - foot_step.get_last().x()) / period;
+        const double trunk_velNext    = foot_step.get_next().x() / half_period;
 
         // Trunk x position
         if (start_step) {
@@ -434,7 +434,7 @@ namespace utility::skill {
         point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch, 0.0f);
 
         // Trunk yaw
-        float trunk_yaw_vel =
+        double trunk_yaw_vel =
             utility::math::angle::angleDistance(foot_step.get_last().z(), foot_step.get_next().z()) / half_period;
 
         point(TrajectoryTypes::TRUNK_AXIS_Z,
@@ -449,7 +449,7 @@ namespace utility::skill {
         point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, foot_step.get_next().z(), trunk_yaw_vel);
     }
 
-    void QuinticWalkEngine::build_walk_disable_trajectories(const Eigen::Vector3f& orders,
+    void QuinticWalkEngine::build_walk_disable_trajectories(const Eigen::Vector3d& orders,
                                                             const bool& foot_in_idle_position) {
         // Save the current trunk state to use it later
         save_current_trunk_state();
@@ -459,21 +459,21 @@ namespace utility::skill {
         // Reset the trajectories
         trajectories_init(trajs);
 
-        // Time length of float and single support phase during the half cycle
-        const float double_support_length = params.double_support_ratio * half_period;
-        const float single_support_length = half_period - double_support_length;
+        // Time length of double and single support phase during the half cycle
+        const double double_support_length = params.double_support_ratio * half_period;
+        const double single_support_length = half_period - double_support_length;
 
         // Sign of support foot with respect to lateral
-        const float support_sign = foot_step.is_left_support() ? 1.0f : -1.0f;
+        const double support_sign = foot_step.is_left_support() ? 1.0f : -1.0f;
 
-        // Set float support phase
-        const float is_double_support = foot_in_idle_position ? 1.0f : 0.0f;
+        // Set double support phase
+        const double is_double_support = foot_in_idle_position ? 1.0f : 0.0f;
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, is_double_support);
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, is_double_support);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.is_left_support()));
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.is_left_support()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<double>(foot_step.is_left_support()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<double>(foot_step.is_left_support()));
 
         //  ******************************** Flying foot position ******************************** //
 
@@ -603,12 +603,12 @@ namespace utility::skill {
 
     QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::compute_cartesian_position() const {
         // Compute trajectories time
-        const float time = get_trajs_time();
+        const double time = get_trajs_time();
         return compute_cartesian_position_at_time(time);
     }
 
     QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::compute_cartesian_position_at_time(
-        const float& time) const {
+        const double& time) const {
         // Evaluate target cartesian state from trajectories
         const auto [trunk_pos, trunk_axis, footPos, footAxis] = trajectories_trunk_foot_pos(time, trajs);
         // Discard is_double_support because we don't use it

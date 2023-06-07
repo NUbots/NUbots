@@ -97,7 +97,7 @@ namespace utility::vision::visualmesh {
                                       Iterator last,
                                       HorizonIt horizon_first,
                                       HorizonIt horizon_last,
-                                      const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
+                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
                                       const bool& up   = true,
                                       const bool& down = true) {
 

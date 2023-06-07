@@ -27,7 +27,7 @@ namespace utility::skill {
     /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script
     struct ScriptRequest {
         std::string name;
-        float duration_modifier{1.0};
+        double duration_modifier{1.0};
     };
 
     // One frame of a script
@@ -37,11 +37,11 @@ namespace utility::skill {
             /// @brief The servo ID that this target is for; see ServoID.hpp
             ServoID id;
             /// @brief Target position for this servo in this frame
-            float position{0.0f};
+            double position{0.0f};
             /// @brief Gain for this servo in this frame
-            float gain{0.0f};
+            double gain{0.0f};
             /// @brief Torque for this servo in this frame
-            float torque{0.0f};
+            double torque{0.0f};
         };
 
         /// @brief The time it should take for the servos to move to their targets
@@ -213,9 +213,9 @@ namespace YAML {
             // Try to read and save the target information
             try {
                 rhs = {node["id"].as<std::string>(),
-                       node["position"].as<float>(),
-                       node["gain"].as<float>(),
-                       node["torque"] != nullptr ? node["torque"].as<float>() : 100};
+                       node["position"].as<double>(),
+                       node["gain"].as<double>(),
+                       node["torque"] != nullptr ? node["torque"].as<double>() : 100};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",

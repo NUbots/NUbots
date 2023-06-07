@@ -35,7 +35,7 @@ namespace utility::behaviour {
         size_t id;
         std::string name;
 
-        std::vector<std::pair<float, std::set<LimbID>>> limbSet;
+        std::vector<std::pair<double, std::set<LimbID>>> limbSet;
 
         std::function<void(std::set<LimbID>)> start;
         std::function<void(std::set<LimbID>)> kill;
@@ -45,7 +45,7 @@ namespace utility::behaviour {
     struct ActionPriorities {
         size_t id;
 
-        std::vector<float> priorities;
+        std::vector<double> priorities;
     };
 
     struct ActionStart {

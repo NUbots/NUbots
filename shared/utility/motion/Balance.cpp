@@ -28,88 +28,88 @@ namespace utility::motion {
     using message::input::Sensors;
 
     void Balancer::configure(const YAML::Node& config) {
-        rotationPGain = config["angle_gain"]["p"].as<float>();
-        rotationIGain = config["angle_gain"]["i"].as<float>();
-        rotationDGain = config["angle_gain"]["d"].as<float>();
+        rotationPGain = config["angle_gain"]["p"].as<double>();
+        rotationIGain = config["angle_gain"]["i"].as<double>();
+        rotationDGain = config["angle_gain"]["d"].as<double>();
 
-        hipRotationScale   = config["hip_rotation_scale"].as<float>();
-        ankleRotationScale = config["ankle_rotation_scale"].as<float>();
+        hipRotationScale   = config["hip_rotation_scale"].as<double>();
+        ankleRotationScale = config["ankle_rotation_scale"].as<double>();
 
-        translationPGainX = config["translation_gain"]["X"]["p"].as<float>();
-        translationDGainX = config["translation_gain"]["X"]["d"].as<float>();
+        translationPGainX = config["translation_gain"]["X"]["p"].as<double>();
+        translationDGainX = config["translation_gain"]["X"]["d"].as<double>();
 
-        translationPGainY = config["translation_gain"]["Y"]["p"].as<float>();
-        translationDGainY = config["translation_gain"]["Y"]["d"].as<float>();
+        translationPGainY = config["translation_gain"]["Y"]["p"].as<double>();
+        translationDGainY = config["translation_gain"]["Y"]["d"].as<double>();
 
-        translationPGainZ = config["translation_gain"]["Z"]["p"].as<float>();
-        translationDGainZ = config["translation_gain"]["Z"]["d"].as<float>();
+        translationPGainZ = config["translation_gain"]["Z"]["p"].as<double>();
+        translationDGainZ = config["translation_gain"]["Z"]["d"].as<double>();
 
         lastBalanceTime = NUClear::clock::now();
     }
 
 
     void Balancer::balance(const KinematicsModel& model,
-                           Eigen::Isometry3f& footToTorso,
+                           Eigen::Isometry3d& footToTorso,
                            const LimbID& leg,
                            const Sensors& sensors) {
 
         // Goal is based on the support foot rotation.
-        Eigen::AngleAxisf goalTorsoOrientation = Eigen::AngleAxisf(footToTorso.rotation().inverse());
+        Eigen::AngleAxisd goalTorsoOrientation = Eigen::AngleAxisd(footToTorso.rotation().inverse());
 
         //------------------------------------
         // Rotation
         //------------------------------------
 
         // Robot coords in world (:Robot -> World)
-        Eigen::Isometry3f Htw         = Eigen::Isometry3d(sensors.Htw).cast<float>();
-        Eigen::AngleAxisf orientation = Eigen::AngleAxisf(Htw.rotation().inverse());
+        Eigen::Isometry3d Htw         = Eigen::Isometry3d(sensors.Htw).cast<double>();
+        Eigen::AngleAxisd orientation = Eigen::AngleAxisd(Htw.rotation().inverse());
 
         // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}
-        float orientationYaw = orientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
+        double orientationYaw = orientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
         // The nested AngleAxis creates a -orientationYaw radians rotation about the Z axis
         // The outside AngleAxis constructs an AngleAxis from the returned Quaternion type of the multiplication
-        Eigen::AngleAxisf yawlessOrientation =
-            Eigen::AngleAxisf(Eigen::AngleAxisf(-orientationYaw, Eigen::Vector3f::UnitZ()) * orientation);
+        Eigen::AngleAxisd yawlessOrientation =
+            Eigen::AngleAxisd(Eigen::AngleAxisd(-orientationYaw, Eigen::Vector3d::UnitZ()) * orientation);
 
         // Removes any yaw component
-        float goalTorsoOrientationYaw = goalTorsoOrientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
+        double goalTorsoOrientationYaw = goalTorsoOrientation.toRotationMatrix().eulerAngles(0, 1, 2)[2];
 
         // Again the nested AngleAxis is a rotation -goalTorsoOrientation radians about the Z axis and the outer one
         // converts from Quaternion type to AngleAxis
-        Eigen::AngleAxisf yawlessGoalOrientation = Eigen::AngleAxisf(
-            Eigen::AngleAxisf(-goalTorsoOrientationYaw, Eigen::Vector3f::UnitZ()) * goalTorsoOrientation);
+        Eigen::AngleAxisd yawlessGoalOrientation = Eigen::AngleAxisd(
+            Eigen::AngleAxisd(-goalTorsoOrientationYaw, Eigen::Vector3d::UnitZ()) * goalTorsoOrientation);
 
         // Error orientation maps: Goal -> Current
-        Eigen::AngleAxisf errorOrientation = Eigen::AngleAxisf(yawlessOrientation * yawlessGoalOrientation.inverse());
+        Eigen::AngleAxisd errorOrientation = Eigen::AngleAxisd(yawlessOrientation * yawlessGoalOrientation.inverse());
 
         // Our goal position as a quaternions
-        Eigen::Quaternion<float> errorQuaternion(errorOrientation);
+        Eigen::Quaternion<double> errorQuaternion(errorOrientation);
 
         // Calculate our D error and I error
-        Eigen::Quaternion<float> differential = lastErrorQuaternion.inverse() * errorQuaternion;
+        Eigen::Quaternion<double> differential = lastErrorQuaternion.inverse() * errorQuaternion;
 
         // TODO(MotionTeam): LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
         // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
 
         // Apply the PID gains
-        Eigen::AngleAxisf ankleRotation =
-            Eigen::AngleAxisf(Eigen::Quaternion<float>::Identity().slerp(rotationPGain, errorQuaternion)
+        Eigen::AngleAxisd ankleRotation =
+            Eigen::AngleAxisd(Eigen::Quaternion<double>::Identity().slerp(rotationPGain, errorQuaternion)
                               // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
-                              * Eigen::Quaternion<float>::Identity().slerp(rotationDGain, differential));
+                              * Eigen::Quaternion<double>::Identity().slerp(rotationDGain, differential));
 
         // Apply our rotation by scaling the thetas by the rotationScale parameters
         auto hipRotation = ankleRotation;
-        ankleRotation    = Eigen::AngleAxisf(ankleRotationScale * ankleRotation.angle(), ankleRotation.axis());
-        hipRotation      = Eigen::AngleAxisf(hipRotationScale * hipRotation.angle(), hipRotation.axis());
+        ankleRotation    = Eigen::AngleAxisd(ankleRotationScale * ankleRotation.angle(), ankleRotation.axis());
+        hipRotation      = Eigen::AngleAxisd(hipRotationScale * hipRotation.angle(), hipRotation.axis());
 
 
         // Apply this rotation goal to our position
         footToTorso.linear() = ankleRotation.toRotationMatrix() * footToTorso.rotation();
 
         // Get the position of our hip to rotate around
-        Eigen::Isometry3f hip = Eigen::Isometry3f::Identity();
-        hip.translation()     = Eigen::Vector3f(model.leg.HIP_OFFSET_X,
+        Eigen::Isometry3d hip = Eigen::Isometry3d::Identity();
+        hip.translation()     = Eigen::Vector3d(model.leg.HIP_OFFSET_X,
                                             model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
                                             -model.leg.HIP_OFFSET_Z);
 
@@ -127,7 +127,7 @@ namespace utility::motion {
         // if(leg == LimbID::RIGHT_LEG){
         //     balanceServo = ServoID::R_ANKLE_PITCH;
         // }
-        // // float anklePitchTorque = sensors.servos[int(balanceServo)].load;
+        // // double anklePitchTorque = sensors.servos[int(balanceServo)].load;
 
         // Get error signal
         //.eulerAngles(0, 1, 2) == {roll, pitch, yaw}
@@ -160,12 +160,12 @@ namespace utility::motion {
         // sensors.bodyCentreHeight * dPitch));
 
         // Compute torso position adjustment
-        Eigen::Vector3f torsoAdjustment_world =
-            Eigen::Vector3f(
+        Eigen::Vector3d torsoAdjustment_world =
+            Eigen::Vector3d(
                 -translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
                 translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
                 -translationPGainZ * total - translationDGainY * dTotal)
-                .cast<float>();
+                .cast<double>();
 
         // Apply opposite translation to the foot position
         footToTorso = footToTorso.translate(-torsoAdjustment_world);

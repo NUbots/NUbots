@@ -36,35 +36,35 @@ namespace utility::motion {
     class Balancer {
     private:
         // Config
-        float rotationPGain = 0;
-        float rotationIGain = 0;
-        float rotationDGain = 0;
+        double rotationPGain = 0;
+        double rotationIGain = 0;
+        double rotationDGain = 0;
 
-        float translationPGainX = 0;
-        float translationPGainY = 0;
-        float translationPGainZ = 0;
+        double translationPGainX = 0;
+        double translationPGainY = 0;
+        double translationPGainZ = 0;
 
-        float translationDGainX = 0;
-        float translationDGainY = 0;
-        float translationDGainZ = 0;
+        double translationDGainX = 0;
+        double translationDGainY = 0;
+        double translationDGainZ = 0;
 
-        float ankleRotationScale = 0;
-        float hipRotationScale   = 0;
+        double ankleRotationScale = 0;
+        double hipRotationScale   = 0;
 
         // State
-        float dPitch    = 0;
-        float dRoll     = 0;
-        float lastPitch = 0;
-        float lastRoll  = 0;
+        double dPitch    = 0;
+        double dRoll     = 0;
+        double lastPitch = 0;
+        double lastRoll  = 0;
 
-        Eigen::Quaternion<float> lastErrorQuaternion;
+        Eigen::Quaternion<double> lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
 
     public:
         Balancer() = default;
         void configure(const YAML::Node& config);
         void balance(const message::actuation::KinematicsModel& model,
-                     Eigen::Isometry3f& footToTorso,
+                     Eigen::Isometry3d& footToTorso,
                      const utility::input::LimbID& leg,
                      const message::input::Sensors& sensors);
     };

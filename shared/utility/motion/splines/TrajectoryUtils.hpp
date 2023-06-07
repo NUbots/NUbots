@@ -159,12 +159,12 @@ namespace utility::motion::splines {
     /**
      * @brief Tuple of 4 vectors, useful for the TrajectoriesTrunkFoot* functions
      */
-    using Vector3fQuadruple = std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f>;
+    using Vector3dQuadruple = std::tuple<Eigen::Vector3d, Eigen::Vector3d, Eigen::Vector3d, Eigen::Vector3d>;
 
     /**
      * Simple typedef for trajectories container
      */
-    using Trajectories = SplineContainer<SmoothSpline<float>, TrajectoryTypes, float>;
+    using Trajectories = SplineContainer<SmoothSpline<double>, TrajectoryTypes, double>;
 
     /**
      * Return initialized trajectories for trunk/foot ik cartesian with empty splines
@@ -195,52 +195,52 @@ namespace utility::motion::splines {
      * Compute from given spline container trajectory Cartesian trunk and foot position/velocity/acceleration
      * and assign it to given vector
      */
-    [[nodiscard]] inline Vector3fQuadruple trajectories_trunk_foot_pos(const float& t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3dQuadruple trajectories_trunk_foot_pos(const double& t, const Trajectories& traj) {
         // Compute Cartesian positions
-        const auto trunk_pos = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
+        const auto trunk_pos = Eigen::Vector3d(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
                                                traj.get(TrajectoryTypes::TRUNK_POS_Y).pos(t),
                                                traj.get(TrajectoryTypes::TRUNK_POS_Z).pos(t));
-        const auto trunkAxis = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_AXIS_X).pos(t),
+        const auto trunkAxis = Eigen::Vector3d(traj.get(TrajectoryTypes::TRUNK_AXIS_X).pos(t),
                                                traj.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(t),
                                                traj.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(t));
-        const auto footPos   = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_POS_X).pos(t),
+        const auto footPos   = Eigen::Vector3d(traj.get(TrajectoryTypes::FOOT_POS_X).pos(t),
                                              traj.get(TrajectoryTypes::FOOT_POS_Y).pos(t),
                                              traj.get(TrajectoryTypes::FOOT_POS_Z).pos(t));
-        const auto footAxis  = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_AXIS_X).pos(t),
+        const auto footAxis  = Eigen::Vector3d(traj.get(TrajectoryTypes::FOOT_AXIS_X).pos(t),
                                               traj.get(TrajectoryTypes::FOOT_AXIS_Y).pos(t),
                                               traj.get(TrajectoryTypes::FOOT_AXIS_Z).pos(t));
         return {trunk_pos, trunkAxis, footPos, footAxis};
     }
 
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootVel(const float& t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3dQuadruple trajectoriesTrunkFootVel(const double& t, const Trajectories& traj) {
         // Compute Cartesian velocities
-        const auto trunk_posVel = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).vel(t),
+        const auto trunk_posVel = Eigen::Vector3d(traj.get(TrajectoryTypes::TRUNK_POS_X).vel(t),
                                                   traj.get(TrajectoryTypes::TRUNK_POS_Y).vel(t),
                                                   traj.get(TrajectoryTypes::TRUNK_POS_Z).vel(t));
-        const auto trunkAxisVel = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_AXIS_X).vel(t),
+        const auto trunkAxisVel = Eigen::Vector3d(traj.get(TrajectoryTypes::TRUNK_AXIS_X).vel(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Y).vel(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Z).vel(t));
-        const auto footPosVel   = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_POS_X).vel(t),
+        const auto footPosVel   = Eigen::Vector3d(traj.get(TrajectoryTypes::FOOT_POS_X).vel(t),
                                                 traj.get(TrajectoryTypes::FOOT_POS_Y).vel(t),
                                                 traj.get(TrajectoryTypes::FOOT_POS_Z).vel(t));
-        const auto footAxisVel  = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_AXIS_X).vel(t),
+        const auto footAxisVel  = Eigen::Vector3d(traj.get(TrajectoryTypes::FOOT_AXIS_X).vel(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Y).vel(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Z).vel(t));
         return {trunk_posVel, trunkAxisVel, footPosVel, footAxisVel};
     }
 
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootAcc(const float& t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3dQuadruple trajectoriesTrunkFootAcc(const double& t, const Trajectories& traj) {
         // Compute Cartesian accelerations
-        const auto trunk_posAcc = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).acc(t),
+        const auto trunk_posAcc = Eigen::Vector3d(traj.get(TrajectoryTypes::TRUNK_POS_X).acc(t),
                                                   traj.get(TrajectoryTypes::TRUNK_POS_Y).acc(t),
                                                   traj.get(TrajectoryTypes::TRUNK_POS_Z).acc(t));
-        const auto trunkAxisAcc = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_AXIS_X).acc(t),
+        const auto trunkAxisAcc = Eigen::Vector3d(traj.get(TrajectoryTypes::TRUNK_AXIS_X).acc(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Y).acc(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Z).acc(t));
-        const auto footPosAcc   = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_POS_X).acc(t),
+        const auto footPosAcc   = Eigen::Vector3d(traj.get(TrajectoryTypes::FOOT_POS_X).acc(t),
                                                 traj.get(TrajectoryTypes::FOOT_POS_Y).acc(t),
                                                 traj.get(TrajectoryTypes::FOOT_POS_Z).acc(t));
-        const auto footAxisAcc  = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_AXIS_X).acc(t),
+        const auto footAxisAcc  = Eigen::Vector3d(traj.get(TrajectoryTypes::FOOT_AXIS_X).acc(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Y).acc(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Z).acc(t));
         return {trunk_posAcc, trunkAxisAcc, footPosAcc, footAxisAcc};
@@ -253,7 +253,7 @@ namespace utility::motion::splines {
      * @param traj The set of trajectories which are being evaluated
      * @return std::pair<bool, bool> {is_double_supportFoot, is_left_supportFoot}, as evaluated at time t
      */
-    [[nodiscard]] constexpr inline std::pair<bool, bool> trajectories_support_foot_state(const float& t,
+    [[nodiscard]] constexpr inline std::pair<bool, bool> trajectories_support_foot_state(const double& t,
                                                                                          const Trajectories& traj) {
         // Compute support foot state
         return {traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f,

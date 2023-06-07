@@ -22,76 +22,76 @@ namespace utility::skill {
     struct WalkingParameter {
         // Full walk cycle frequency
         //(in Hz, > 0)
-        float freq = 0.0f;
+        double freq = 0.0f;
         // Length of double support phase in half cycle
         //(ratio, [0:1])
-        float double_support_ratio = 0.0f;
+        double double_support_ratio = 0.0f;
         // Lateral distance between the feet center
         //(in m, >= 0)
-        float foot_distance = 0.0f;
+        double foot_distance = 0.0f;
         // Maximum flying foot height
         //(in m, >= 0)
-        float foot_rise = 0.0f;
+        double foot_rise = 0.0f;
         // Pause of Z movement on highest point
         //(single support cycle ratio, [0,1])
-        float foot_z_pause = 0.0f;
+        double foot_z_pause = 0.0f;
         // Let the foot's downward trajectory end above the ground
         // this is helpful if the support leg bends
         //(in m, >= 0)
-        float foot_put_down_z_offset = 0.0f;
+        double foot_put_down_z_offset = 0.0f;
         // Phase time for moving the foot from Z offset to ground,
         // also used for X and Y since they should not move after contact to the ground
         //(phase between apex and single support end [0:1])
-        float foot_put_down_phase = 0.0f;
+        double foot_put_down_phase = 0.0f;
         // Phase of flying foot apex
         //(single support cycle phase, [0:1])
-        float foot_apex_phase = 0.0f;
+        double foot_apex_phase = 0.0f;
         // Foot X/Y overshoot in ratio of step length
         //(ratio, >= 0)
-        float foot_overshoot_ratio = 0.0f;
+        double foot_overshoot_ratio = 0.0f;
         // Foot X/Y overshoot phase
         //(single support cycle phase, [footApexPhase:1]
-        float foot_overshoot_phase = 0.0f;
+        double foot_overshoot_phase = 0.0f;
         // Height of the trunk from ground
         //(in m, > 0)
-        float trunk_height = 0.0f;
+        double trunk_height = 0.0f;
         // Trunk pitch orientation
         //(in rad)
-        float trunk_pitch = 0.0f;
+        double trunk_pitch = 0.0f;
         // Phase offset of trunk oscillation
         //(half cycle phase, [0:1])
-        float trunk_phase = 0.0f;
+        double trunk_phase = 0.0f;
         // Trunk forward offset
         //(in m)
-        float trunk_x_offset = 0.0f;
+        double trunk_x_offset = 0.0f;
         // Trunk lateral offset
         //(in m)
-        float trunk_y_offset = 0.0f;
+        double trunk_y_offset = 0.0f;
         // Trunk lateral oscillation amplitude ratio
         //(ratio, >= 0)
-        float trunk_swing = 0.0f;
+        double trunk_swing = 0.0f;
         // Trunk swing pause length in phase at apex
         //(half cycle ratio, [0:1])
-        float trunk_pause = 0.0f;
+        double trunk_pause = 0.0f;
         // Trunk forward offset proportional to forward step
         //(in 1)
-        float trunk_x_offset_p_coef_forward = 0.0f;
+        double trunk_x_offset_p_coef_forward = 0.0f;
         // Trunk forward offset proportional to rotation step
         //(in m/rad)
-        float trunk_x_offset_p_coef_turn = 0.0f;
+        double trunk_x_offset_p_coef_turn = 0.0f;
         // Trunk pitch orientation proportional to forward step
         //(in rad/m)
-        float trunk_pitch_p_coef_forward = 0.0f;
+        double trunk_pitch_p_coef_forward = 0.0f;
         // Trunk pitch orientation proportional to rotation step
         //(in 1)
-        float trunk_pitch_p_coef_turn        = 0.0f;
-        float trunk_y_only_in_double_support = 0.0f;
-        float kick_length                    = 0.0f;
-        float kick_phase                     = 0.0f;
-        float foot_put_down_roll_offset      = 0.0f;
-        float kick_vel                       = 0.0f;
-        float pause_duration                 = 0.0f;
-        float first_step_swing_factor        = 0.0f;
+        double trunk_pitch_p_coef_turn        = 0.0f;
+        double trunk_y_only_in_double_support = 0.0f;
+        double kick_length                    = 0.0f;
+        double kick_phase                     = 0.0f;
+        double foot_put_down_roll_offset      = 0.0f;
+        double kick_vel                       = 0.0f;
+        double pause_duration                 = 0.0f;
+        double first_step_swing_factor        = 0.0f;
     };
 
     enum class WalkEngineState { IDLE, PAUSED, START_MOVEMENT, START_STEP, WALKING, STOP_STEP, STOP_MOVEMENT, KICK };
@@ -113,7 +113,7 @@ namespace utility::skill {
          * Return current walk phase
          * between 0 and 1
          */
-        [[nodiscard]] float get_phase() const {
+        [[nodiscard]] double get_phase() const {
             return phase;
         }
 
@@ -122,7 +122,7 @@ namespace utility::skill {
          * 0 and half period for
          * trajectories evaluation
          */
-        [[nodiscard]] float get_trajs_time() const {
+        [[nodiscard]] double get_trajs_time() const {
             return phase < 0.5f ? phase / params.freq : (phase - 0.5f) / params.freq;
         }
 
@@ -144,7 +144,7 @@ namespace utility::skill {
          * Return true if both feet are currently on the ground
          */
         [[nodiscard]] bool is_double_support() const {
-            // returns true if the value of the "is_float_support" spline is currently higher than 0.5
+            // returns true if the value of the "is_double_support" spline is currently higher than 0.5
             // the spline should only have values of 0 or 1
             return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(get_trajs_time()) >= 0.5f;
         }
@@ -164,11 +164,11 @@ namespace utility::skill {
          * (phase, trajectories) from given
          * elapsed time since last update() call
          */
-        bool update_state(const float& dt, const Eigen::Vector3f& orders);
+        bool update_state(const double& dt, const Eigen::Vector3d& orders);
 
         // Return type for the following two functions
         using PositionSupportTuple =
-            std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, bool>;
+            std::tuple<Eigen::Vector3d, Eigen::Vector3d, Eigen::Vector3d, Eigen::Vector3d, bool>;
         /**
          * @brief Compute current cartesian target from trajectories
          * @return PositionSupportTuple The computed vectors with the bool indicating the support foot:
@@ -176,7 +176,7 @@ namespace utility::skill {
          */
         [[nodiscard]] PositionSupportTuple compute_cartesian_position()
             const;  // Gets current time and calls below func
-        [[nodiscard]] PositionSupportTuple compute_cartesian_position_at_time(const float& time) const;
+        [[nodiscard]] PositionSupportTuple compute_cartesian_position_at_time(const double& time) const;
 
         constexpr void request_kick(const bool& left) {
             if (left) {
@@ -222,16 +222,16 @@ namespace utility::skill {
         /**
          * Movement phase between 0 and 1
          */
-        float phase      = 0.0f;
-        float last_phase = 0.0f;
+        double phase      = 0.0f;
+        double last_phase = 0.0f;
 
-        float time_paused = 0.0f;
+        double time_paused = 0.0f;
 
         /**
          * Currently used parameters
          */
         WalkingParameter params{};
-        float half_period = 0.0f;
+        double half_period = 0.0f;
 
         bool left_kick_requested  = false;
         bool right_kick_requested = false;
@@ -242,12 +242,12 @@ namespace utility::skill {
          * position, velocity and acceleration
          * at half cycle start
          */
-        Eigen::Vector3f trunk_pos_at_last      = Eigen::Vector3f::Zero();
-        Eigen::Vector3f trunk_vel_at_last      = Eigen::Vector3f::Zero();
-        Eigen::Vector3f trunk_acc_at_last      = Eigen::Vector3f::Zero();
-        Eigen::Vector3f trunk_axis_pos_at_last = Eigen::Vector3f::Zero();
-        Eigen::Vector3f trunk_axis_vel_at_last = Eigen::Vector3f::Zero();
-        Eigen::Vector3f trunk_axis_acc_at_last = Eigen::Vector3f::Zero();
+        Eigen::Vector3d trunk_pos_at_last      = Eigen::Vector3d::Zero();
+        Eigen::Vector3d trunk_vel_at_last      = Eigen::Vector3d::Zero();
+        Eigen::Vector3d trunk_acc_at_last      = Eigen::Vector3d::Zero();
+        Eigen::Vector3d trunk_axis_pos_at_last = Eigen::Vector3d::Zero();
+        Eigen::Vector3d trunk_axis_vel_at_last = Eigen::Vector3d::Zero();
+        Eigen::Vector3d trunk_axis_acc_at_last = Eigen::Vector3d::Zero();
 
         /**
          * Generated half walk
@@ -255,49 +255,49 @@ namespace utility::skill {
          */
         Trajectories trajs{};
 
-        void update_phase(const float& dt);
+        void update_phase(const double& dt);
 
-        void build_trajectories(const Eigen::Vector3f& orders,
+        void build_trajectories(const Eigen::Vector3d& orders,
                                 const bool& start_movement,
                                 const bool& start_step,
                                 const bool& kick_step);
 
-        void build_start_movement_trajectories(const Eigen::Vector3f& orders) {
+        void build_start_movement_trajectories(const Eigen::Vector3d& orders) {
             build_trajectories(orders, true, false, false);
         }
 
-        void build_start_step_trajectories(const Eigen::Vector3f& orders) {
+        void build_start_step_trajectories(const Eigen::Vector3d& orders) {
             build_trajectories(orders, false, true, false);
         }
 
-        void build_kick_trajectories(const Eigen::Vector3f& orders) {
+        void build_kick_trajectories(const Eigen::Vector3d& orders) {
             build_trajectories(orders, false, false, true);
         }
 
-        void build_normal_trajectories(const Eigen::Vector3f& orders) {
+        void build_normal_trajectories(const Eigen::Vector3d& orders) {
             build_trajectories(orders, false, false, false);
         }
 
-        void build_stop_step_trajectories(const Eigen::Vector3f& orders) {
+        void build_stop_step_trajectories(const Eigen::Vector3d& orders) {
             build_walk_disable_trajectories(orders, false);
         }
 
-        void build_stop_movement_trajectories(const Eigen::Vector3f& orders) {
+        void build_stop_movement_trajectories(const Eigen::Vector3d& orders) {
             build_walk_disable_trajectories(orders, true);
         }
 
 
-        void build_walk_disable_trajectories(const Eigen::Vector3f& orders, const bool& foot_in_idle_position);
+        void build_walk_disable_trajectories(const Eigen::Vector3d& orders, const bool& foot_in_idle_position);
 
         void save_current_trunk_state();
 
         void use_current_trunk_state();
 
         void point(const TrajectoryTypes& spline,
-                   const float& t,
-                   const float& pos,
-                   const float& vel = 0,
-                   const float& acc = 0) {
+                   const double& t,
+                   const double& pos,
+                   const double& vel = 0,
+                   const double& acc = 0) {
             trajs.get(spline).addPoint(t, pos, vel, acc);
         }
 

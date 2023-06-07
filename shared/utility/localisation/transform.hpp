@@ -53,7 +53,7 @@ namespace utility::localisation {
         rot.translation() = Eigen::Vector3d::Zero();
         const Eigen::Vector3d x(rot.linear().leftCols<1>());
         const Eigen::Vector3d xNew(worldToNewSpace * x);
-        const float theta_x_from_f = std::atan2(xNew.y(), xNew.x());  // sin/cos
+        const double theta_x_from_f = std::atan2(xNew.y(), xNew.x());  // sin/cos
         result.linear()            = Eigen::Rotation2Dd(theta_x_from_f).toRotationMatrix();
 
         return result;

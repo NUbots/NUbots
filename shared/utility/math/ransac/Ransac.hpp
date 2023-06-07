@@ -97,7 +97,7 @@ namespace utility::math::ransac {
                 }
 
                 for (auto it = first; it != last; ++it) {
-                    float this_error = model.calculateError(*it);
+                    double this_error = model.calculateError(*it);
                     if (this_error < consensusErrorThreshold) {
                         ++consensusSize;
                         error += this_error;

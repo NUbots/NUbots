@@ -28,22 +28,22 @@ namespace utility::math::geometry {
     // Convert a vec3 to a vec2
     // vec2.x = vec3.x / vec3.z
     // vec2.y = vec3.y / vec3.y
-    inline Eigen::Vector2f project_vector(const Eigen::Vector3f& v) {
-        return Eigen::Vector2f(v.x() / v.z(), v.y() / v.z());
+    inline Eigen::Vector2d project_vector(const Eigen::Vector3d& v) {
+        return Eigen::Vector2d(v.x() / v.z(), v.y() / v.z());
     }
 
     // Sort a list of indices by increasing theta order
     template <typename Iterator>
     void sort_by_theta(Iterator first,
                        Iterator last,
-                       const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
-                       const float& world_offset) {
+                       const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
+                       const double& world_offset) {
         std::sort(first, last, [&](const int& a, const int& b) {
-            const Eigen::Vector3f& p0(rays.col(a));
-            const Eigen::Vector3f& p1(rays.col(b));
+            const Eigen::Vector3d& p0(rays.col(a));
+            const Eigen::Vector3d& p1(rays.col(b));
 
-            float theta0 = std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
-            float theta1 = std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
+            double theta0 = std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<double>(2.0 * M_PI));
+            double theta1 = std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, static_cast<double>(2.0 * M_PI));
             return theta0 < theta1;
         });
     }
@@ -53,11 +53,11 @@ namespace utility::math::geometry {
     // Returns  0 indicating a colinear set of points (no turn)
     // Returns  1 indicating a clockwise turn
     template <int N>
-    int8_t turn_direction(const Eigen::Matrix<float, N, 1>& p0,
-                          const Eigen::Matrix<float, N, 1>& p1,
-                          const Eigen::Matrix<float, N, 1>& p2) {
+    int8_t turn_direction(const Eigen::Matrix<double, N, 1>& p0,
+                          const Eigen::Matrix<double, N, 1>& p1,
+                          const Eigen::Matrix<double, N, 1>& p2) {
         // Compute z-coordinate of the cross product of P0->P1 and P0->P2
-        float cross_z = (p1.y() - p0.y()) * (p2.x() - p1.x()) - (p1.x() - p0.x()) * (p2.y() - p1.y());
+        double cross_z = (p1.y() - p0.y()) * (p2.x() - p1.x()) - (p1.x() - p0.x()) * (p2.y() - p1.y());
 
         // Clockwise turn
         if (cross_z < 0.0f) {
@@ -74,14 +74,14 @@ namespace utility::math::geometry {
     // A point is in the convex hull if, for every pair of points in the hull, an anti-clockwise turn is made
     // with the given point If the point is allowed to be on the boundary the, for every pair of points in the
     // convex hull, the given point is allowed to be colinear
-    inline bool point_in_convex_hull(const Eigen::Vector2f& point,
+    inline bool point_in_convex_hull(const Eigen::Vector2d& point,
                                      const std::vector<int>& hull_indices,
-                                     const Eigen::Matrix<float, Eigen::Dynamic, 2>& coords,
+                                     const Eigen::Matrix<double, Eigen::Dynamic, 2>& coords,
                                      const bool& allow_boundary = false) {
         const int8_t threshold = (allow_boundary) ? -1 : 0;
         for (auto it = std::next(hull_indices.begin()); it != hull_indices.end(); it = std::next(it)) {
-            Eigen::Vector2f p0(coords.col(*std::prev(it)));
-            Eigen::Vector2f p1(coords.col(*it));
+            Eigen::Vector2d p0(coords.col(*std::prev(it)));
+            Eigen::Vector2d p1(coords.col(*it));
             if (turn_direction(p0, p1, point) > threshold) {
                 return false;
             }
@@ -91,15 +91,15 @@ namespace utility::math::geometry {
     }
 
     template <typename Iterator>
-    inline bool point_under_hull(const Eigen::Vector3f& point,
+    inline bool point_under_hull(const Eigen::Vector3d& point,
                                  const Iterator rays_begin,
                                  const Iterator rays_end,
                                  const bool& allow_boundary = false) {
-        const float theta = std::atan2(point.y(), point.x());
-        auto lower_it = std::lower_bound(rays_begin, rays_end, theta, [&](const Eigen::Vector3f& p0, const float& b) {
+        const double theta = std::atan2(point.y(), point.x());
+        auto lower_it = std::lower_bound(rays_begin, rays_end, theta, [&](const Eigen::Vector3d& p0, const double& b) {
             return std::atan2(p0.y(), p0.x()) < b;
         });
-        auto upper_it = std::upper_bound(rays_begin, rays_end, theta, [&](const float& b, const Eigen::Vector3f& p0) {
+        auto upper_it = std::upper_bound(rays_begin, rays_end, theta, [&](const double& b, const Eigen::Vector3d& p0) {
             return b < std::atan2(p0.y(), p0.x());
         });
 
@@ -109,9 +109,9 @@ namespace utility::math::geometry {
         // lower_bound returns the first ray that has a theta value that is >= our point_theta value
         // taking the ray immediately before the lower_bound should give us a ray with theta < point_theta
         // upper_bound returns the first ray that has a theta value that is > our point_theta value
-        const Eigen::Vector2f p0 = project_vector(lower_it == rays_begin ? *lower_it : *std::prev(lower_it));
-        const Eigen::Vector2f p1 = project_vector(point);
-        const Eigen::Vector2f p2 = project_vector(*upper_it);
+        const Eigen::Vector2d p0 = project_vector(lower_it == rays_begin ? *lower_it : *std::prev(lower_it));
+        const Eigen::Vector2d p1 = project_vector(point);
+        const Eigen::Vector2d p2 = project_vector(*upper_it);
 
         // Point should make a clockwise turn if it is under the convex hull.
         // It should be colinear if it is on the convex hull
@@ -120,7 +120,7 @@ namespace utility::math::geometry {
     }
 
     inline std::vector<int> upper_convex_hull(const std::vector<int>& indices,
-                                              const Eigen::Matrix<float, Eigen::Dynamic, 2>& coords,
+                                              const Eigen::Matrix<double, Eigen::Dynamic, 2>& coords,
                                               const bool& cycle = false) {
         // We need a minimum of 3 non-colinear points to calculate the convex hull
         if (indices.size() < 3) {
@@ -135,17 +135,17 @@ namespace utility::math::geometry {
 
         // Sort by increasing x, then by decreasing y
         std::sort(local_indices.begin(), local_indices.end(), [&coords](const int& a, const int& b) {
-            const Eigen::Vector2f p0(coords.col(a));
-            const Eigen::Vector2f p1(coords.col(b));
+            const Eigen::Vector2d p0(coords.col(a));
+            const Eigen::Vector2d p1(coords.col(b));
 
             return ((p0.x() < p1.x()) || ((p0.x() == p1.x()) && (p0.y() > p1.y())));
         });
 
         // Remove all colinear points
         for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-            const Eigen::Vector2f p0(coords.col(*std::prev(it, 2)));
-            const Eigen::Vector2f p1(coords.col(*std::prev(it, 1)));
-            Eigen::Vector2f p2(coords.col(*it));
+            const Eigen::Vector2d p0(coords.col(*std::prev(it, 2)));
+            const Eigen::Vector2d p1(coords.col(*std::prev(it, 1)));
+            Eigen::Vector2d p2(coords.col(*it));
 
             while (turn_direction(p0, p1, p2) == 0) {
                 it = local_indices.erase(it);
@@ -172,9 +172,9 @@ namespace utility::math::geometry {
         // clockwise turn
         for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
             // Triple does not make an clockwise turn, replace the last element in the list
-            Eigen::Vector2f p0(coords.col(*std::prev(hull_indices.end(), 2)));
-            Eigen::Vector2f p1(coords.col(*std::prev(hull_indices.end(), 1)));
-            const Eigen::Vector2f p2(coords.col(*it));
+            Eigen::Vector2d p0(coords.col(*std::prev(hull_indices.end(), 2)));
+            Eigen::Vector2d p1(coords.col(*std::prev(hull_indices.end(), 1)));
+            const Eigen::Vector2d p2(coords.col(*it));
             while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
                 // Remove the offending point from the convex hull
                 hull_indices.pop_back();
@@ -190,8 +190,8 @@ namespace utility::math::geometry {
     }
 
     inline std::vector<int> upper_convex_hull(const std::vector<int>& indices,
-                                              const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
-                                              const float world_offset,
+                                              const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
+                                              const double world_offset,
                                               const bool& cycle = false) {
         // We need a minimum of 3 non-colinear points to calculate the convex hull
         if (rays.cols() < 3) {
@@ -208,9 +208,9 @@ namespace utility::math::geometry {
 
         // Remove all colinear points
         for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-            const Eigen::Vector2f p0 = project_vector(rays.col(*std::prev(local_indices.end(), 2)));
-            const Eigen::Vector2f p1 = project_vector(rays.col(*std::prev(local_indices.end(), 1)));
-            Eigen::Vector2f p2       = project_vector(rays.col(*it));
+            const Eigen::Vector2d p0 = project_vector(rays.col(*std::prev(local_indices.end(), 2)));
+            const Eigen::Vector2d p1 = project_vector(rays.col(*std::prev(local_indices.end(), 1)));
+            Eigen::Vector2d p2       = project_vector(rays.col(*it));
 
             while ((it != local_indices.end()) && turn_direction(p0, p1, p2) == 0) {
                 it = local_indices.erase(it);
@@ -238,9 +238,9 @@ namespace utility::math::geometry {
         // Now go through the rest of the points and add them to the convex hull if each triple makes an
         // clockwise turn
         for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
-            Eigen::Vector2f p0       = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
-            Eigen::Vector2f p1       = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
-            const Eigen::Vector2f p2 = project_vector(rays.col(*it));
+            Eigen::Vector2d p0       = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
+            Eigen::Vector2d p1       = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
+            const Eigen::Vector2d p2 = project_vector(rays.col(*it));
             // Triple does not make an clockwise turn, replace the last element in the list
             while ((hull_indices.size() > 2) && (turn_direction(p0, p1, p2) <= 0)) {
                 // Remove the offending point from the convex hull
@@ -259,7 +259,7 @@ namespace utility::math::geometry {
     // Finds the convex hull of a set of points using the Graham Scan algorithm
     // https://en.wikipedia.org/wiki/Graham_scan
     inline std::vector<int> graham_scan(const std::vector<int>& indices,
-                                        const Eigen::Matrix<float, 2, Eigen::Dynamic>& coords,
+                                        const Eigen::Matrix<double, 2, Eigen::Dynamic>& coords,
                                         const bool& cycle = false) {
 
         // We need a minimum of 3 non-colinear points to calculate the convex hull
@@ -276,8 +276,8 @@ namespace utility::math::geometry {
         // Find the bottom left point
         size_t bottom_left = 0;
         for (size_t idx = 1; idx < indices.size(); ++idx) {
-            const Eigen::Vector2f min_p(coords.col(local_indices[bottom_left]));
-            const Eigen::Vector2f p(coords.col(local_indices[idx]));
+            const Eigen::Vector2d min_p(coords.col(local_indices[bottom_left]));
+            const Eigen::Vector2d p(coords.col(local_indices[idx]));
 
             if ((p.y() > min_p.y()) || ((p.y() == min_p.y()) && (p.x() < min_p.x()))) {
                 bottom_left = idx;
@@ -295,9 +295,9 @@ namespace utility::math::geometry {
         std::sort(std::next(local_indices.begin()),
                   local_indices.end(),
                   [&bottom_left, &coords](const int& a, const int& b) {
-                      const Eigen::Vector2f p0(coords.col(bottom_left));
-                      const Eigen::Vector2f p1(coords.col(a));
-                      const Eigen::Vector2f p2(coords.col(b));
+                      const Eigen::Vector2d p0(coords.col(bottom_left));
+                      const Eigen::Vector2d p1(coords.col(a));
+                      const Eigen::Vector2d p2(coords.col(b));
 
                       int direction = turn_direction(p0, p1, p2);
 
@@ -311,13 +311,13 @@ namespace utility::math::geometry {
 
         // Remove all colinear points
         for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
-            const Eigen::Vector2f p0(coords.col(*std::prev(it, 2)));
-            const Eigen::Vector2f p1(coords.col(*std::prev(it, 1)));
-            Eigen::Vector2f p2(coords.col(*it));
+            const Eigen::Vector2d p0(coords.col(*std::prev(it, 2)));
+            const Eigen::Vector2d p1(coords.col(*std::prev(it, 1)));
+            Eigen::Vector2d p2(coords.col(*it));
 
             while (turn_direction(p0, p1, p2) == 0) {
                 it = local_indices.erase(it);
-                Eigen::Vector2f p2(coords.col(*it));
+                Eigen::Vector2d p2(coords.col(*it));
             }
             it = std::next(it);
         }
@@ -341,9 +341,9 @@ namespace utility::math::geometry {
         // anti-clockwise turn
         for (auto it = std::next(local_indices.begin(), 3); it != local_indices.end(); it = std::next(it)) {
             // Triple does not make an anti-clockwise turn, replace the last element in the list
-            Eigen::Vector2f p0(coords.col(*std::prev(hull_indices.end(), 2)));
-            Eigen::Vector2f p1(coords.col(*std::prev(hull_indices.end(), 1)));
-            const Eigen::Vector2f p2(coords.col(*it));
+            Eigen::Vector2d p0(coords.col(*std::prev(hull_indices.end(), 2)));
+            Eigen::Vector2d p1(coords.col(*std::prev(hull_indices.end(), 1)));
+            const Eigen::Vector2d p2(coords.col(*it));
             while (turn_direction(p0, p1, p2) >= 0) {
                 // Remove the offending point from the convex hull
                 hull_indices.pop_back();
