@@ -147,24 +147,24 @@ namespace module::input {
             /// @brief Config for the foot down detector
             struct FootDown {
                 FootDown() = default;
-                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
+                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, double>& thresholds) {
                     set_method(method, thresholds);
                 }
-                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
+                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, double>& thresholds) {
                     if (thresholds.count(method) == 0) {
                         throw std::runtime_error(fmt::format("Invalid foot down method '{}'", std::string(method)));
                     }
                     current_method       = method;
                     certainty_thresholds = thresholds;
                 }
-                [[nodiscard]] float threshold() const {
+                [[nodiscard]] double threshold() const {
                     return certainty_thresholds.at(current_method);
                 }
                 [[nodiscard]] FootDownMethod method() const {
                     return current_method;
                 }
-                FootDownMethod current_method                        = FootDownMethod::Z_HEIGHT;
-                std::map<FootDownMethod, float> certainty_thresholds = {
+                FootDownMethod current_method                         = FootDownMethod::Z_HEIGHT;
+                std::map<FootDownMethod, double> certainty_thresholds = {
                     {FootDownMethod::Z_HEIGHT, 0.01f},
                     {FootDownMethod::LOAD, 0.05f},
                     {FootDownMethod::FSR, 60.0f},
@@ -343,7 +343,7 @@ namespace module::input {
         bool middle_down = false;
 
         /// @brief Our sensor for foot down
-        VirtualLoadSensor<float> load_sensor{};
+        VirtualLoadSensor<double> load_sensor{};
 
         // This keeps track of whether each sides foot was down in the previous time step
         // e.g. if right foot down at time t, then at time t+1, previous_foot_down[RightSide] = true
