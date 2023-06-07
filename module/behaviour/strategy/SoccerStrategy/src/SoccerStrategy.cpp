@@ -109,24 +109,24 @@ namespace module::behaviour::strategy {
             cfg.start_position_defensive = config["start_position_defensive"].as<Expression>();
 
             cfg.is_goalie                = config["is_goalie"].as<bool>();
-            cfg.goalie_max_ball_distance = config["goalie_max_ball_distance"].as<float>();
+            cfg.goalie_max_ball_distance = config["goalie_max_ball_distance"].as<double>();
 
             // Use configuration here from file SoccerStrategy.yaml
-            cfg.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
-            cfg.goalie_rotation_speed_factor     = config["goalie_rotation_speed_factor"].as<float>();
-            cfg.goalie_max_rotation_speed        = config["goalie_max_rotation_speed"].as<float>();
-            cfg.goalie_translation_speed_factor  = config["goalie_translation_speed_factor"].as<float>();
-            cfg.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<float>();
-            cfg.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
+            cfg.goalie_command_timeout           = config["goalie_command_timeout"].as<double>();
+            cfg.goalie_rotation_speed_factor     = config["goalie_rotation_speed_factor"].as<double>();
+            cfg.goalie_max_rotation_speed        = config["goalie_max_rotation_speed"].as<double>();
+            cfg.goalie_translation_speed_factor  = config["goalie_translation_speed_factor"].as<double>();
+            cfg.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<double>();
+            cfg.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<double>();
 
             cfg.force_playing          = config["force_playing"].as<bool>();
             cfg.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();
 
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
 
-            cfg.kicking_distance_threshold = config["kicking_distance_threshold"].as<float>();
+            cfg.kicking_distance_threshold = config["kicking_distance_threshold"].as<double>();
 
-            cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<float>();
+            cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<double>();
         });
 
         on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
@@ -432,8 +432,8 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play(const std::shared_ptr<const FilteredBall>& ball) {
-        float absolute_yaw_angle = std::abs(std::atan2(ball->rBTt.y(), ball->rBTt.x()));
-        float distance_to_ball   = ball->rBTt.head(2).norm();
+        double absolute_yaw_angle = std::abs(std::atan2(ball->rBTt.y(), ball->rBTt.x()));
+        double distance_to_ball   = ball->rBTt.head(2).norm();
         if (ball && distance_to_ball < cfg.kicking_distance_threshold
             && absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // We are in range, lets kick
