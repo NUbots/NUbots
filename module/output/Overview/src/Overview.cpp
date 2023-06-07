@@ -99,8 +99,8 @@ namespace module::output {
 
                         // Store our position from field to torso
                         msg->robot_position =
-                            Eigen::Vector3f(rTFf.x(), rTFf.y(), Hft.rotation().matrix().eulerAngles(0, 1, 2).z());
-                        msg->robot_position_covariance = field->covariance.cast<float>();
+                            Eigen::Vector3d(rTFf.x(), rTFf.y(), Hft.rotation().matrix().eulerAngles(0, 1, 2).z());
+                        msg->robot_position_covariance = field->covariance;
 
                         if (loc_ball) {
                             // Get our ball in field space
@@ -108,14 +108,14 @@ namespace module::output {
                             Eigen::Vector4d rBFf = Hfw * rBWw;
 
                             // Store our position from field to ball
-                            msg->ball_position            = Eigen::Vector2f(rBFf.x(), rBFf.y());
-                            msg->ball_position_covariance = loc_ball->covariance.cast<float>();
+                            msg->ball_position            = Eigen::Vector2d(rBFf.x(), rBFf.y());
+                            msg->ball_position_covariance = loc_ball->covariance;
                         }
                     }
                 }
 
                 if (kick_plan) {
-                    msg->kick_target = kick_plan->target.cast<float>();
+                    msg->kick_target = kick_plan->target;
                 }
 
                 // Set our game mode properties
@@ -131,10 +131,10 @@ namespace module::output {
 
                 // Set our walk command
                 if (walk_command) {
-                    msg->walk_command = walk_command->command.cast<float>();
+                    msg->walk_command = walk_command->command;
                 }
                 else {
-                    msg->walk_command = Eigen::Vector3f::Zero();
+                    msg->walk_command = Eigen::Vector3d::Zero();
                 }
 
                 emit(msg);
