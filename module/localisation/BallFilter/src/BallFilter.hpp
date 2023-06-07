@@ -22,31 +22,31 @@ namespace module::localisation {
                 struct Noise {
                     Noise() = default;
                     struct Measurement {
-                        Eigen::Matrix2f position = Eigen::Matrix2f::Zero();
+                        Eigen::Matrix2d position = Eigen::Matrix2d::Zero();
                     } measurement{};
                     struct Process {
-                        Eigen::Vector2f position = Eigen::Vector2f::Zero();
-                        Eigen::Vector2f velocity = Eigen::Vector2f::Zero();
+                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
+                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
                     } process{};
                 } noise{};
                 struct Initial {
                     Initial() = default;
                     struct Mean {
-                        Eigen::Vector2f position = Eigen::Vector2f::Zero();
-                        Eigen::Vector2f velocity = Eigen::Vector2f::Zero();
+                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
+                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
                     } mean{};
                     struct Covariance {
-                        Eigen::Vector2f position = Eigen::Vector2f::Zero();
-                        Eigen::Vector2f velocity = Eigen::Vector2f::Zero();
+                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
+                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
                     } covariance{};
                 } initial{};
             } ukf{};
 
             /// @brief Initial state of the for the UKF filter
-            BallModel<float>::StateVec initial_mean;
+            BallModel<double>::StateVec initial_mean;
 
             /// @brief Initial covariance of the for the UKF filter
-            BallModel<float>::StateVec initial_covariance;
+            BallModel<double>::StateVec initial_covariance;
 
         } cfg;
 
@@ -54,7 +54,7 @@ namespace module::localisation {
         NUClear::clock::time_point last_time_update;
 
         /// @brief Unscented Kalman Filter for ball filtering
-        utility::math::filter::UKF<float, BallModel> ukf{};
+        utility::math::filter::UKF<double, BallModel> ukf{};
 
     public:
         /// @brief Called by the powerplant to build and setup the BallFilter reactor.

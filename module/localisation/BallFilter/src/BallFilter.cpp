@@ -40,14 +40,14 @@ namespace module::localisation {
             log_level = config["log_level"].as<NUClear::LogLevel>();
             // Set our measurement noise
             cfg.ukf.noise.measurement.position =
-                Eigen::Vector2f(config["ukf"]["noise"]["measurement"]["ball_position"].as<Expression>()).asDiagonal();
+                Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["ball_position"].as<Expression>()).asDiagonal();
 
             // Set our process noises
             cfg.ukf.noise.process.position = config["ukf"]["noise"]["process"]["position"].as<Expression>();
             cfg.ukf.noise.process.velocity = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
 
             // Set our motion model's process noise
-            BallModel<float>::StateVec process_noise;
+            BallModel<double>::StateVec process_noise;
             process_noise.rBWw      = cfg.ukf.noise.process.position;
             process_noise.vBw       = cfg.ukf.noise.process.velocity;
             ukf.model.process_noise = process_noise;
@@ -75,20 +75,20 @@ namespace module::localisation {
         on<Trigger<VisionBalls>, With<Sensors>, With<FieldDescription>>().then(
             [this](const VisionBalls& balls, const Sensors& sensors, const FieldDescription& fd) {
                 if (!balls.balls.empty()) {
-                    Eigen::Isometry3f Hcw = Eigen::Isometry3f(balls.Hcw.cast<float>());
-                    Eigen::Isometry3f Hwc = Hcw.inverse();
-                    auto state            = BallModel<float>::StateVec(ukf.get_state());
+                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(balls.Hcw.cast<double>());
+                    Eigen::Isometry3d Hwc = Hcw.inverse();
+                    auto state            = BallModel<double>::StateVec(ukf.get_state());
 
                     // Get the first ball measurement and treat it as the closest measurement to our current estimate
-                    Eigen::Vector3f rBWw =
-                        Hwc * reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
-                    float lowest_distance = (rBWw.head<2>() - state.rBWw).squaredNorm();
+                    Eigen::Vector3d rBWw =
+                        Hwc * reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>());
+                    double lowest_distance = (rBWw.head<2>() - state.rBWw).squaredNorm();
 
                     // Loop through all our ball measurements and find the closest measurement to our current estimate
                     for (const auto& ball : balls.balls) {
-                        Eigen::Vector3f temp_rBWw =
-                            Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
-                        float temp_distance = (temp_rBWw.head<2>() - state.rBWw).squaredNorm();
+                        Eigen::Vector3d temp_rBWw =
+                            Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<double>());
+                        double temp_distance = (temp_rBWw.head<2>() - state.rBWw).squaredNorm();
                         if (temp_distance < lowest_distance) {
                             lowest_distance = temp_distance;
                             rBWw            = temp_rBWw;
@@ -96,8 +96,8 @@ namespace module::localisation {
                     }
 
                     // Compute the time since the last update (in seconds)
-                    const auto dt = std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now()
-                                                                                             - last_time_update)
+                    const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now()
+                                                                                              - last_time_update)
                                         .count();
                     last_time_update = NUClear::clock::now();
 
@@ -105,19 +105,19 @@ namespace module::localisation {
                     ukf.time(dt);
 
                     // Measurement update
-                    ukf.measure(Eigen::Vector2f(rBWw.head<2>()),
+                    ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
                                 cfg.ukf.noise.measurement.position,
                                 MeasurementType::BALL_POSITION());
 
                     // Get the new state, here we are assuming ball is on the ground
-                    state = BallModel<float>::StateVec(ukf.get_state());
+                    state = BallModel<double>::StateVec(ukf.get_state());
                     rBWw << state.rBWw.x(), state.rBWw.y(), fd.ball_radius;
 
                     // Generate and emit message
                     auto ball = std::make_unique<FilteredBall>();
-                    Eigen::Isometry3f Htw(sensors.Htw.cast<float>());
-                    Eigen::Isometry3f Hrw(sensors.Hrw.cast<float>());
-                    Eigen::Isometry3f Htc     = Eigen::Isometry3f(sensors.Htw.cast<float>()) * Hwc;
+                    Eigen::Isometry3d Htw(sensors.Htw.cast<double>());
+                    Eigen::Isometry3d Hrw(sensors.Hrw.cast<double>());
+                    Eigen::Isometry3d Htc     = Eigen::Isometry3d(sensors.Htw.cast<double>()) * Hwc;
                     ball->rBWw                = rBWw;
                     ball->rBTt                = Htw * rBWw;
                     ball->rBRr                = Hrw * rBWw;
