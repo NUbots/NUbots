@@ -62,8 +62,8 @@ namespace module::behaviour::skills {
                 log_level          = config["log_level"].as<NUClear::LogLevel>();
                 cfg.search_timeout = duration_cast<NUClear::clock::duration>(
                     std::chrono::duration<double>(config["search_timeout"].as<double>()));
-                cfg.fixation_time = config["fixation_time"].as<float>();
-                cfg.pitch_offset  = config["pitch_offset"].as<float>();
+                cfg.fixation_time = config["fixation_time"].as<double>();
+                cfg.pitch_offset  = config["pitch_offset"].as<double>();
                 // Create vector of search positions
                 for (const auto& position : config["positions"].config) {
                     cfg.search_positions.push_back(position.as<Expression>());
@@ -94,9 +94,9 @@ namespace module::behaviour::skills {
                     }
                     else {
                         // Ball hasn't been seen in a while. Look around using search positions
-                        float time_since_last_search_moved = std::chrono::duration_cast<std::chrono::duration<float>>(
-                                                                 NUClear::clock::now() - search_last_moved)
-                                                                 .count();
+                        double time_since_last_search_moved = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                                                  NUClear::clock::now() - search_last_moved)
+                                                                  .count();
 
                         // Robot will move through the search positions, and linger for fixation_time. Once
                         // fixation_time time has passed, send a new head command for the next position in the list

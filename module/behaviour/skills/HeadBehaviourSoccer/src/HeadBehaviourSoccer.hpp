@@ -39,8 +39,8 @@ namespace module::behaviour::skills {
             // Time before starting to search for ball after its lost
             NUClear::clock::duration search_timeout{};
             /// @brief Time lingering at each position in lost ballsearch
-            float fixation_time = 0.0f;
-            float pitch_offset  = 0.0f;
+            double fixation_time = 0.0f;
+            double pitch_offset  = 0.0f;
             /// @brief List of positions for search
             std::vector<Eigen::Vector2d> search_positions;
         } cfg;
