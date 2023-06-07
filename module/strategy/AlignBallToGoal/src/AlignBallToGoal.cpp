@@ -29,7 +29,7 @@ namespace module::strategy {
         on<Configuration>("AlignBallToGoal.yaml").then([this](const Configuration& config) {
             // Use configuration here from file AlignBallToGoal.yaml
             this->log_level             = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_distance_threshold = config["ball_distance_threshold"].as<float>();
+            cfg.ball_distance_threshold = config["ball_distance_threshold"].as<double>();
             cfg.angle_threshold         = config["angle_threshold"].as<Expression>();
         });
 
@@ -44,7 +44,7 @@ namespace module::strategy {
                          const Sensors& sensors,
                          const FieldDescription& field_description) {
                 // If the ball is close, align towards the goal
-                float distance_to_ball = ball.rBRr.head(2).norm();
+                double distance_to_ball = ball.rBRr.head(2).norm();
                 if (distance_to_ball < cfg.ball_distance_threshold) {
                     // Get the robot's position (pose) on the field
                     Eigen::Isometry3d Hrf = Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse());
@@ -54,7 +54,7 @@ namespace module::strategy {
                     Eigen::Vector3d rGRr = Hrf * rGFf;
 
                     // Find the angle to the goal - should be as close as possible to 0 to be aligned
-                    float kick_angle = std::atan2(rGRr.y(), rGRr.x());
+                    double kick_angle = std::atan2(rGRr.y(), rGRr.x());
 
                     // Only align if we are not within a threshold of the goal
                     if (std::fabs(kick_angle) > cfg.angle_threshold) {
