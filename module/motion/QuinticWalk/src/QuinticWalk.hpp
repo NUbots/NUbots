@@ -39,11 +39,11 @@ namespace module::motion {
 
         struct Config {
             Eigen::Vector3d max_step = Eigen::Vector3d::Zero();
-            double max_step_xy       = 0.0f;
+            double max_step_xy       = 0.0;
 
             bool imu_active            = true;
-            double imu_pitch_threshold = 0.0f;
-            double imu_roll_threshold  = 0.0f;
+            double imu_pitch_threshold = 0.0;
+            double imu_roll_threshold  = 0.0;
 
             utility::skill::WalkingParameter params{};
 

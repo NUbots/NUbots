@@ -256,8 +256,8 @@ namespace utility::motion::splines {
     [[nodiscard]] constexpr inline std::pair<bool, bool> trajectories_support_foot_state(const double& t,
                                                                                          const Trajectories& traj) {
         // Compute support foot state
-        return {traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f,
-                traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5f};
+        return {traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5,
+                traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5};
     }
 
 }  // namespace utility::motion::splines

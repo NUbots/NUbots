@@ -274,16 +274,16 @@ namespace module::skill {
         // compute time delta depended if we are currently in simulation or reality
         const auto current_time = NUClear::clock::now();
         double dt =
-            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
+            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0;
 
-        if (dt == 0.0f) {
-            dt = 0.001f;
+        if (dt == 0.0) {
+            dt = 0.001;
         }
 
         // time is wrong when we run it for the first time
         if (first_run) {
             first_run = false;
-            dt        = 0.0001f;
+            dt        = 0.0001;
         }
 
         last_update_time = current_time;

@@ -22,76 +22,76 @@ namespace utility::skill {
     struct WalkingParameter {
         // Full walk cycle frequency
         //(in Hz, > 0)
-        double freq = 0.0f;
+        double freq = 0.0;
         // Length of double support phase in half cycle
         //(ratio, [0:1])
-        double double_support_ratio = 0.0f;
+        double double_support_ratio = 0.0;
         // Lateral distance between the feet center
         //(in m, >= 0)
-        double foot_distance = 0.0f;
+        double foot_distance = 0.0;
         // Maximum flying foot height
         //(in m, >= 0)
-        double foot_rise = 0.0f;
+        double foot_rise = 0.0;
         // Pause of Z movement on highest point
         //(single support cycle ratio, [0,1])
-        double foot_z_pause = 0.0f;
+        double foot_z_pause = 0.0;
         // Let the foot's downward trajectory end above the ground
         // this is helpful if the support leg bends
         //(in m, >= 0)
-        double foot_put_down_z_offset = 0.0f;
+        double foot_put_down_z_offset = 0.0;
         // Phase time for moving the foot from Z offset to ground,
         // also used for X and Y since they should not move after contact to the ground
         //(phase between apex and single support end [0:1])
-        double foot_put_down_phase = 0.0f;
+        double foot_put_down_phase = 0.0;
         // Phase of flying foot apex
         //(single support cycle phase, [0:1])
-        double foot_apex_phase = 0.0f;
+        double foot_apex_phase = 0.0;
         // Foot X/Y overshoot in ratio of step length
         //(ratio, >= 0)
-        double foot_overshoot_ratio = 0.0f;
+        double foot_overshoot_ratio = 0.0;
         // Foot X/Y overshoot phase
         //(single support cycle phase, [footApexPhase:1]
-        double foot_overshoot_phase = 0.0f;
+        double foot_overshoot_phase = 0.0;
         // Height of the trunk from ground
         //(in m, > 0)
-        double trunk_height = 0.0f;
+        double trunk_height = 0.0;
         // Trunk pitch orientation
         //(in rad)
-        double trunk_pitch = 0.0f;
+        double trunk_pitch = 0.0;
         // Phase offset of trunk oscillation
         //(half cycle phase, [0:1])
-        double trunk_phase = 0.0f;
+        double trunk_phase = 0.0;
         // Trunk forward offset
         //(in m)
-        double trunk_x_offset = 0.0f;
+        double trunk_x_offset = 0.0;
         // Trunk lateral offset
         //(in m)
-        double trunk_y_offset = 0.0f;
+        double trunk_y_offset = 0.0;
         // Trunk lateral oscillation amplitude ratio
         //(ratio, >= 0)
-        double trunk_swing = 0.0f;
+        double trunk_swing = 0.0;
         // Trunk swing pause length in phase at apex
         //(half cycle ratio, [0:1])
-        double trunk_pause = 0.0f;
+        double trunk_pause = 0.0;
         // Trunk forward offset proportional to forward step
         //(in 1)
-        double trunk_x_offset_p_coef_forward = 0.0f;
+        double trunk_x_offset_p_coef_forward = 0.0;
         // Trunk forward offset proportional to rotation step
         //(in m/rad)
-        double trunk_x_offset_p_coef_turn = 0.0f;
+        double trunk_x_offset_p_coef_turn = 0.0;
         // Trunk pitch orientation proportional to forward step
         //(in rad/m)
-        double trunk_pitch_p_coef_forward = 0.0f;
+        double trunk_pitch_p_coef_forward = 0.0;
         // Trunk pitch orientation proportional to rotation step
         //(in 1)
-        double trunk_pitch_p_coef_turn        = 0.0f;
-        double trunk_y_only_in_double_support = 0.0f;
-        double kick_length                    = 0.0f;
-        double kick_phase                     = 0.0f;
-        double foot_put_down_roll_offset      = 0.0f;
-        double kick_vel                       = 0.0f;
-        double pause_duration                 = 0.0f;
-        double first_step_swing_factor        = 0.0f;
+        double trunk_pitch_p_coef_turn        = 0.0;
+        double trunk_y_only_in_double_support = 0.0;
+        double kick_length                    = 0.0;
+        double kick_phase                     = 0.0;
+        double foot_put_down_roll_offset      = 0.0;
+        double kick_vel                       = 0.0;
+        double pause_duration                 = 0.0;
+        double first_step_swing_factor        = 0.0;
     };
 
     enum class WalkEngineState { IDLE, PAUSED, START_MOVEMENT, START_STEP, WALKING, STOP_STEP, STOP_MOVEMENT, KICK };
@@ -123,7 +123,7 @@ namespace utility::skill {
          * trajectories evaluation
          */
         [[nodiscard]] double get_trajs_time() const {
-            return phase < 0.5f ? phase / params.freq : (phase - 0.5f) / params.freq;
+            return phase < 0.5 ? phase / params.freq : (phase - 0.5) / params.freq;
         }
 
         /**
@@ -146,7 +146,7 @@ namespace utility::skill {
         [[nodiscard]] bool is_double_support() const {
             // returns true if the value of the "is_double_support" spline is currently higher than 0.5
             // the spline should only have values of 0 or 1
-            return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(get_trajs_time()) >= 0.5f;
+            return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(get_trajs_time()) >= 0.5;
         }
 
 
@@ -198,7 +198,7 @@ namespace utility::skill {
          */
         constexpr void end_step() {
             // ends the step earlier, e.g. when foot has already contact to ground
-            phase = phase < 0.5f ? 0.5f : 0.0f;
+            phase = phase < 0.5 ? 0.5 : 0.0;
         }
 
         /**
@@ -217,21 +217,21 @@ namespace utility::skill {
          * Current footstep support
          * and flying last and next pose
          */
-        Footstep foot_step = Footstep(0.14f, true);
+        Footstep foot_step = Footstep(0.14, true);
 
         /**
          * Movement phase between 0 and 1
          */
-        double phase      = 0.0f;
-        double last_phase = 0.0f;
+        double phase      = 0.0;
+        double last_phase = 0.0;
 
-        double time_paused = 0.0f;
+        double time_paused = 0.0;
 
         /**
          * Currently used parameters
          */
         WalkingParameter params{};
-        double half_period = 0.0f;
+        double half_period = 0.0;
 
         bool left_kick_requested  = false;
         bool right_kick_requested = false;

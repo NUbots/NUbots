@@ -35,7 +35,7 @@ namespace utility::motion::splines {
     }
 
     Footstep::Footstep(const double& foot_distance_, const bool& is_left_support_foot_) {
-        if (foot_distance_ <= 0.0f) {
+        if (foot_distance_ <= 0.0) {
             throw std::logic_error("Footstep invalid distance");
         }
 
@@ -49,14 +49,14 @@ namespace utility::motion::splines {
 
     void Footstep::reset(const bool& is_left_support_foot_) {
         is_left_support_foot = is_left_support_foot_;
-        support_to_last.x()  = 0.0f;
+        support_to_last.x()  = 0.0;
         if (is_left_support_foot) {
             support_to_last.y() = -foot_distance;
         }
         else {
             support_to_last.y() = foot_distance;
         }
-        support_to_last.z() = 0.0f;
+        support_to_last.z() = 0.0;
         support_to_next     = support_to_last;
     }
 
@@ -97,7 +97,7 @@ namespace utility::motion::splines {
             tmpDiff.y() -= foot_distance;
         }
         // Allow lateral step only on external foot (internal foot will return to zero pose)
-        if ((is_left_support_foot && diff.y() > 0.0f) || (!is_left_support_foot && diff.y() < 0.0f)) {
+        if ((is_left_support_foot && diff.y() > 0.0) || (!is_left_support_foot && diff.y() < 0.0)) {
             tmpDiff.y() += diff.y();
         }
         // No change in turn (in order to rotate around trunk center)
