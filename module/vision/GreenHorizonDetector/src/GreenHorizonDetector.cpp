@@ -26,17 +26,17 @@ namespace module::vision {
             // Use configuration here from file GreenHorizonDetector.yaml
             log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
-            config.confidence_threshold = cfg["confidence_threshold"].as<float>();
+            config.confidence_threshold = cfg["confidence_threshold"].as<double>();
             config.cluster_points       = cfg["cluster_points"].as<uint>();
-            config.distance_offset      = cfg["distance_offset"].as<float>();
+            config.distance_offset      = cfg["distance_offset"].as<double>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
             // Convenience variables
             const auto& cls                                     = mesh.classifications;
             const auto& neighbours                              = mesh.neighbourhood;
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
-            const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays = mesh.rays;
+            const double world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
             const uint32_t LINE_INDEX                           = mesh.class_map.at("line");
             const uint32_t FIELD_INDEX                          = mesh.class_map.at("field");
 
@@ -91,8 +91,8 @@ namespace module::vision {
                         return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
                     });
 
-                    const float min_a = std::atan2(rays(1, *range_a.first), rays(0, *range_a.first));
-                    const float max_a = std::atan2(rays(1, *range_a.second), rays(0, *range_a.second));
+                    const double min_a = std::atan2(rays(1, *range_a.first), rays(0, *range_a.first));
+                    const double max_a = std::atan2(rays(1, *range_a.second), rays(0, *range_a.second));
 
                     for (auto it2 = std::next(it); it2 != clusters.end();) {
                         // Get the largest and smallest theta values
@@ -101,8 +101,8 @@ namespace module::vision {
                                 return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
                             });
 
-                        const float min_b = std::atan2(rays(1, *range_b.first), rays(0, *range_b.first));
-                        const float max_b = std::atan2(rays(1, *range_b.second), rays(0, *range_b.second));
+                        const double min_b = std::atan2(rays(1, *range_b.first), rays(0, *range_b.first));
+                        const double max_b = std::atan2(rays(1, *range_b.second), rays(0, *range_b.second));
 
                         // Ranges do not overlap
                         // Merge the clusters
@@ -165,10 +165,10 @@ namespace module::vision {
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
                 for (const auto& idx : hull_indices) {
-                    const Eigen::Vector3f ray      = rays.col(idx);
-                    const float d                  = mesh.Hcw(2, 3) / ray.z();
-                    Eigen::Vector3f ray_projection = ray * d;
-                    const float norm               = ray_projection.head<2>().norm();
+                    const Eigen::Vector3d ray      = rays.col(idx);
+                    const double d                  = mesh.Hcw(2, 3) / ray.z();
+                    Eigen::Vector3d ray_projection = ray * d;
+                    const double norm               = ray_projection.head<2>().norm();
                     ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
                     msg->horizon.emplace_back(ray_projection.normalized());
                 }
