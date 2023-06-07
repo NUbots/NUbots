@@ -77,11 +77,11 @@ namespace module::vision {
                                 msg->id              = image.id;
                                 msg->name            = image.name;
                                 msg->Hcw             = image.Hcw;
-                                msg->rays            = result.rays;
-                                msg->coordinates     = result.coordinates;
+                                msg->rays            = result.rays.cast<double>();
+                                msg->coordinates     = result.coordinates.cast<double>();
                                 msg->neighbourhood   = std::move(result.neighbourhood);
                                 msg->indices         = std::move(result.indices);
-                                msg->classifications = std::move(result.classifications);
+                                msg->classifications = std::move(result.classifications.cast<double>());
                                 msg->class_map       = runner.class_map;
 
                                 if (image.vision_ground_truth.exists) {
