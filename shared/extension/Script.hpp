@@ -44,7 +44,7 @@ namespace extension {
         struct Frame {
             struct Target {
                 Target() = default;
-                Target(const ServoID& servo, float pos, float gain, float torque)
+                Target(const ServoID& servo, double pos, double gain, double torque)
                     : id(servo), position(pos), gain(gain), torque(torque) {}
                 Target(const Target& other) = default;
                 Target(Target&& other) noexcept
@@ -59,9 +59,9 @@ namespace extension {
                 }
 
                 ServoID id;
-                float position{0.0f};
-                float gain{0.0f};
-                float torque{0.0f};
+                double position{0.0f};
+                double gain{0.0f};
+                double torque{0.0f};
             };
 
             Frame() : duration() {}
@@ -373,9 +373,9 @@ namespace YAML {
         static inline bool decode(const Node& node, ::extension::Script::Frame::Target& rhs) {
             try {
                 rhs = {node["id"].as<std::string>(),
-                       node["position"].as<float>(),
-                       node["gain"].as<float>(),
-                       node["torque"] != nullptr ? node["torque"].as<float>() : 100};
+                       node["position"].as<double>(),
+                       node["gain"].as<double>(),
+                       node["torque"] != nullptr ? node["torque"].as<double>() : 100};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
