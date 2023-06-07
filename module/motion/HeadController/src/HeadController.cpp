@@ -61,17 +61,18 @@ namespace module::motion {
                 cfg.head_controller_priority = config["head_controller_priority"].as<double>();
                 cfg.head_motor_gain          = config["head_motors"]["gain"].as<double>();
                 cfg.head_motor_torque        = config["head_motors"]["torque"].as<double>();
-                cfg.smoothing_factor         = config["smoothing_factor"].as<float>();
+                cfg.smoothing_factor         = config["smoothing_factor"].as<double>();
 
                 //  Move the head to its config specified initial conditions
-                emit(std::make_unique<HeadCommand>(
-                    HeadCommand{config["initial"]["yaw"].as<float>(), config["initial"]["pitch"].as<float>(), false}));
+                emit(std::make_unique<HeadCommand>(HeadCommand{config["initial"]["yaw"].as<double>(),
+                                                               config["initial"]["pitch"].as<double>(),
+                                                               false}));
             });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
             RegisterAction{subsumption_id,
                            "HeadController",
-                           {std::pair<float, std::set<LimbID>>(cfg.head_controller_priority, {LimbID::HEAD})},
+                           {std::pair<double, std::set<LimbID>>(cfg.head_controller_priority, {LimbID::HEAD})},
                            [this](const std::set<LimbID>& /* limbs */) { /* Head control gained */ },
                            [this](const std::set<LimbID>& /* limbs */) { /* Head control lost */ },
                            [](const std::set<ServoID>& /* servos */) { /* Servos reached target */ }}));
@@ -97,27 +98,27 @@ namespace module::motion {
                            : goal_angles;
 
                 // Get goal vector from angles
-                Eigen::Vector3f goal_head_unit_vector_world =
-                    sphericalToCartesian(Eigen::Vector3f(1, current_angles.x(), current_angles.y()));
+                Eigen::Vector3d goal_head_unit_vector_world =
+                    sphericalToCartesian(Eigen::Vector3d(1, current_angles.x(), current_angles.y()));
                 // Convert to robot space if requested angle is in world space
-                Eigen::Vector3f head_unit_vector =
+                Eigen::Vector3d head_unit_vector =
                     goal_robot_space
                         ? goal_head_unit_vector_world
-                        : Eigen::Isometry3d(sensors.Htw).rotation().cast<float>() * goal_head_unit_vector_world;
+                        : Eigen::Isometry3d(sensors.Htw).rotation().cast<double>() * goal_head_unit_vector_world;
 
                 // Compute inverse kinematics for head
                 // TODO(MotionTeam): MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
-                std::vector<std::pair<ServoID, float>> goal_angles_list = calculateHeadJoints(head_unit_vector);
+                std::vector<std::pair<ServoID, double>> goal_angles_list = calculateHeadJoints(head_unit_vector);
 
                 // Store angles for logging
-                float pitch = 0;
-                float yaw   = 0;
+                double pitch = 0;
+                double yaw   = 0;
 
                 // Clamp requested head angles with max/min limits
-                float max_yaw   = kinematicsModel.head.MAX_YAW;
-                float min_yaw   = kinematicsModel.head.MIN_YAW;
-                float max_pitch = kinematicsModel.head.MAX_PITCH;
-                float min_pitch = kinematicsModel.head.MIN_PITCH;
+                double max_yaw   = kinematicsModel.head.MAX_YAW;
+                double min_yaw   = kinematicsModel.head.MIN_YAW;
+                double max_pitch = kinematicsModel.head.MAX_PITCH;
+                double min_pitch = kinematicsModel.head.MIN_PITCH;
                 for (auto& angle : goal_angles_list) {
                     if (angle.first == ServoID::HEAD_PITCH) {
                         angle.second = utility::math::clamp(min_pitch, angle.second, max_pitch);
@@ -140,8 +141,8 @@ namespace module::motion {
                                                      t,
                                                      angle.first,
                                                      angle.second,
-                                                     float(cfg.head_motor_gain),
-                                                     float(cfg.head_motor_torque));
+                                                     double(cfg.head_motor_gain),
+                                                     double(cfg.head_motor_torque));
                 }
                 // Send commands
                 emit(waypoints);

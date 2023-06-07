@@ -39,26 +39,26 @@ namespace module::motion {
         struct Config {
             Config() = default;
             /// @brief Head controller priority in the subsumption system
-            float head_controller_priority = 0;
+            double head_controller_priority = 0;
             /// @brief Motor gain for head commands
-            float head_motor_gain = 0;
+            double head_motor_gain = 0;
             /// @brief Motor torque for head commands
-            float head_motor_torque = 0;
+            double head_motor_torque = 0;
             /// @brief Smoothing factor for smoothing goal_angles with exponential filter
-            float smoothing_factor = 0;
+            double smoothing_factor = 0;
         } cfg;
 
         /// @brief Updates the priority of the module in the subsumption system
-        void update_priority(const float& priority);
+        void update_priority(const double& priority);
 
     public:
         explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Stores the latest goal angle from HeadCommand message
-        Eigen::Vector2f goal_angles = Eigen::Vector2f::Zero();
+        Eigen::Vector2d goal_angles = Eigen::Vector2d::Zero();
 
         /// @brief Stores angles to be sent to head servos
-        Eigen::Vector2f current_angles = Eigen::Vector2f::Zero();
+        Eigen::Vector2d current_angles = Eigen::Vector2d::Zero();
 
         /// @brief Bool to inidicate if the goal_angles are in robot space or world space (true if world space)
         bool goal_robot_space = true;
