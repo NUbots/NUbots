@@ -52,16 +52,16 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
             // Store falling angle as a cosine so we can compare it directly to the z axis value
-            const auto fallingAngle = config["FALLING_ANGLE"].as<float>();
+            const auto fallingAngle = config["FALLING_ANGLE"].as<double>();
             FALLING_ANGLE           = std::cos(fallingAngle);
 
             // When falling the acceleration should drop below this value
-            FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<float>();
+            FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<double>();
 
             // Once the acceleration has stabalized, we are no longer falling
-            RECOVERY_ACCELERATION = config["RECOVERY_ACCELERATION"].as<std::vector<float>>();
+            RECOVERY_ACCELERATION = config["RECOVERY_ACCELERATION"].as<std::vector<double>>();
 
-            PRIORITY = config["PRIORITY"].as<float>();
+            PRIORITY = config["PRIORITY"].as<double>();
         });
 
         on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
@@ -109,7 +109,7 @@ namespace module::behaviour::skills {
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
             id,
             "Falling Relax",
-            {std::pair<float, std::set<LimbID>>(
+            {std::pair<double, std::set<LimbID>>(
                 0.0f,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<Falling>()); },
@@ -119,7 +119,7 @@ namespace module::behaviour::skills {
             }}));
     }
 
-    void FallingRelax::updatePriority(const float& priority) {
+    void FallingRelax::updatePriority(const double& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
     }
 

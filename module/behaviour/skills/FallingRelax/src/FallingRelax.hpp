@@ -36,12 +36,12 @@ namespace module::behaviour::skills {
         bool falling = false;
 
         /// config settings
-        float FALLING_ANGLE        = 0.0f;
-        float FALLING_ACCELERATION = 0.0f;
-        float PRIORITY             = 0.0f;
-        std::vector<float> RECOVERY_ACCELERATION{};
+        double FALLING_ANGLE        = 0.0f;
+        double FALLING_ACCELERATION = 0.0f;
+        double PRIORITY             = 0.0f;
+        std::vector<double> RECOVERY_ACCELERATION{};
 
-        void updatePriority(const float& priority);
+        void updatePriority(const double& priority);
 
     public:
         explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
