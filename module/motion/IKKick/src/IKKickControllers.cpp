@@ -31,13 +31,13 @@ namespace module::motion {
     using message::actuation::KinematicsModel;
 
     void KickBalancer::configure(const Configuration& config) {
-        servo_angle_threshold = config["balancer"]["servo_angle_threshold"].as<float>();
-        stand_height          = config["balancer"]["stand_height"].as<float>();
-        forward_lean          = config["balancer"]["forward_lean"].as<float>();
-        foot_separation       = config["balancer"]["foot_separation"].as<float>();
-        adjustment            = config["balancer"]["adjustment"].as<float>();
-        forward_duration      = config["balancer"]["forward_duration"].as<float>();
-        return_duration       = config["balancer"]["return_duration"].as<float>();
+        servo_angle_threshold = config["balancer"]["servo_angle_threshold"].as<double>();
+        stand_height          = config["balancer"]["stand_height"].as<double>();
+        forward_lean          = config["balancer"]["forward_lean"].as<double>();
+        foot_separation       = config["balancer"]["foot_separation"].as<double>();
+        adjustment            = config["balancer"]["adjustment"].as<double>();
+        forward_duration      = config["balancer"]["forward_duration"].as<double>();
+        return_duration       = config["balancer"]["return_duration"].as<double>();
     }
 
     void KickBalancer::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
@@ -66,19 +66,19 @@ namespace module::motion {
     }
 
     void Kicker::configure(const Configuration& config) {
-        servo_angle_threshold = config["kick_frames"]["servo_angle_threshold"].as<float>();
+        servo_angle_threshold = config["kick_frames"]["servo_angle_threshold"].as<double>();
         lift_foot             = SixDOFFrame(config["kick_frames"]["lift_foot"].config);
         kick                  = SixDOFFrame(config["kick_frames"]["kick"].config);
         place_foot            = SixDOFFrame(config["kick_frames"]["place_foot"].config);
 
-        kick_velocity          = config["kick"]["kick_velocity"].as<float>();
-        follow_through         = config["kick"]["follow_through"].as<float>();
-        kick_height            = config["kick"]["kick_height"].as<float>();
-        wind_up                = config["kick"]["wind_up"].as<float>();
-        foot_separation_margin = config["kick"]["foot_separation_margin"].as<float>();
+        kick_velocity          = config["kick"]["kick_velocity"].as<double>();
+        follow_through         = config["kick"]["follow_through"].as<double>();
+        kick_height            = config["kick"]["kick_height"].as<double>();
+        wind_up                = config["kick"]["wind_up"].as<double>();
+        foot_separation_margin = config["kick"]["foot_separation_margin"].as<double>();
 
-        lift_before_windup_duration  = config["kick"]["lift_before_windup_duration"].as<float>();
-        return_before_place_duration = config["kick"]["return_before_place_duration"].as<float>();
+        lift_before_windup_duration  = config["kick"]["lift_before_windup_duration"].as<double>();
+        return_before_place_duration = config["kick"]["return_before_place_duration"].as<double>();
     }
 
     void Kicker::computeStartMotion(const KinematicsModel& kinematicsModel, const Sensors& sensors) {
@@ -113,19 +113,19 @@ namespace module::motion {
         // constrain to prevent leg collision
         Eigen::Vector3d supportFootPos = supportToKickFoot.translation();
         int signSupportFootPosY        = supportFootPos.y() < 0 ? -1 : 1;
-        float clippingPlaneY =
+        double clippingPlaneY =
             supportFootPos.y()
             - signSupportFootPosY
                   * (foot_separation_margin
                      + (kinematicsModel.leg.FOOT_WIDTH / 2.0 - kinematicsModel.leg.FOOT_CENTRE_TO_ANKLE_CENTRE));
 
-        float liftClipDistance = (liftGoal.y() - clippingPlaneY);
+        double liftClipDistance = (liftGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * liftClipDistance > 0) {
             // Clip
             liftGoal.topRows<2>() = liftGoal.topRows<2>() * clippingPlaneY / liftGoal.y();
         }
 
-        float kickClipDistance = (kickGoal.y() - clippingPlaneY);
+        double kickClipDistance = (kickGoal.y() - clippingPlaneY);
         if (signSupportFootPosY * kickClipDistance > 0) {
             // Clip
             kickGoal.topRows<2>() = kickGoal.topRows<2>() * clippingPlaneY / kickGoal.y();

@@ -48,13 +48,13 @@ namespace module::motion {
 
         bool leftFootIsSupport;
 
-        float foot_separation;
+        double foot_separation;
 
-        float KICK_PRIORITY;
-        float EXECUTION_PRIORITY;
+        double KICK_PRIORITY;
+        double EXECUTION_PRIORITY;
 
-        float gain_legs = 50;
-        float torque    = 100;
+        double gain_legs = 50;
+        double torque    = 100;
 
         bool feedback_active;
         utility::motion::Balancer feedbackBalancer;
@@ -62,7 +62,7 @@ namespace module::motion {
         KickBalancer balancer;
         Kicker kicker;
 
-        void updatePriority(const float& priority);
+        void updatePriority(const double& priority);
 
         static constexpr size_t UPDATE_FREQUENCY = 90;
 

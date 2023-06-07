@@ -80,20 +80,20 @@ namespace module::motion {
             balancer.configure(config);
             kicker.configure(config);
 
-            KICK_PRIORITY      = config["kick_priority"].as<float>();
-            EXECUTION_PRIORITY = config["execution_priority"].as<float>();
+            KICK_PRIORITY      = config["kick_priority"].as<double>();
+            EXECUTION_PRIORITY = config["execution_priority"].as<double>();
 
-            foot_separation = config["balancer"]["foot_separation"].as<float>();
+            foot_separation = config["balancer"]["foot_separation"].as<double>();
 
-            gain_legs = config["servo"]["gain"].as<float>();
-            torque    = config["servo"]["torque"].as<float>();
+            gain_legs = config["servo"]["gain"].as<double>();
+            torque    = config["servo"]["torque"].as<double>();
 
             auto& balanceConfig = config["active_balance"];
             feedback_active     = balanceConfig["enabled"].as<bool>();
             feedbackBalancer.configure(balanceConfig);
 
             // Emit useful info to KickPlanner
-            emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
+            emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<double>())));
         });
 
         on<Startup>().then("IKKick Startup", [this] {
@@ -204,14 +204,12 @@ namespace module::motion {
                 }
 
                 // Balance based on the IMU
-                Eigen::Isometry3f supportFootGoalFloat(supportFootGoal.cast<float>());
                 if (feedback_active) {
-                    feedbackBalancer.balance(kinematicsModel, supportFootGoalFloat, supportFoot, sensors);
+                    feedbackBalancer.balance(kinematicsModel, supportFootGoal, supportFoot, sensors);
                 }
-                supportFootGoal = supportFootGoalFloat.cast<double>();  // yuk
 
                 // Calculate IK and send waypoints
-                std::vector<std::pair<ServoID, float>> joints;
+                std::vector<std::pair<ServoID, double>> joints;
 
                 // IK
                 auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
@@ -248,7 +246,7 @@ namespace module::motion {
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
             RegisterAction{subsumptionId,
                            "IK Kick",
-                           {std::pair<float, std::set<LimbID>>(
+                           {std::pair<double, std::set<LimbID>>(
                                0,
                                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
                            [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
@@ -256,7 +254,7 @@ namespace module::motion {
                            [this](const std::set<ServoID>&) {}}));
     }
 
-    void IKKick::updatePriority(const float& priority) {
+    void IKKick::updatePriority(const double& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {priority}}));
     }
 }  // namespace module::motion

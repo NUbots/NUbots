@@ -50,11 +50,11 @@ namespace module::motion {
         // InterpolationType interpolation = LINEAR;
     public:
         Eigen::Isometry3d pose;
-        float duration;
+        double duration;
         SixDOFFrame() : pose(), duration(0.0f) {}
-        SixDOFFrame(Eigen::Isometry3d pose_, float duration_) : pose(pose_), duration(duration_) {}
+        SixDOFFrame(Eigen::Isometry3d pose_, double duration_) : pose(pose_), duration(duration_) {}
         SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
-            duration                    = config["duration"].as<float>();
+            duration                    = config["duration"].as<double>();
             Eigen::Vector3d pos         = config["pos"].as<Expression>();
             Eigen::Vector3d orientation = config["orientation"].as<Expression>();
             pose                        = Eigen::Isometry3d::Identity();
@@ -64,7 +64,7 @@ namespace module::motion {
             pose.translation() = pos;
         };
         // TODO:
-        // std::map<message::input::ServoID, float> jointGains;
+        // std::map<message::input::ServoID, double> jointGains;
     };
 
     class Animator {
@@ -109,10 +109,10 @@ namespace module::motion {
         // State variables
         utility::input::LimbID supportFoot;
 
-        float forward_duration;
-        float return_duration;
+        double forward_duration;
+        double return_duration;
         Animator anim;
-        float servo_angle_threshold = 0.1;
+        double servo_angle_threshold = 0.1;
 
         Eigen::Vector3d ballPosition;
         Eigen::Vector3d goalPosition;
@@ -230,10 +230,10 @@ namespace module::motion {
     class KickBalancer : public SixDOFFootController {
     private:
         // Config
-        float stand_height    = 0.18;
-        float foot_separation = 0.074;
-        float forward_lean    = 0.01;
-        float adjustment      = 0.011;
+        double stand_height    = 0.18;
+        double foot_separation = 0.074;
+        double forward_lean    = 0.01;
+        double adjustment      = 0.011;
 
     public:
         virtual void configure(const ::extension::Configuration& config);
@@ -248,14 +248,14 @@ namespace module::motion {
         SixDOFFrame kick;
         SixDOFFrame place_foot;
 
-        float kick_velocity;
-        float follow_through;
-        float kick_height;
-        float wind_up;
-        float foot_separation_margin;
+        double kick_velocity;
+        double follow_through;
+        double kick_height;
+        double wind_up;
+        double foot_separation_margin;
 
-        float return_before_place_duration;
-        float lift_before_windup_duration;
+        double return_before_place_duration;
+        double lift_before_windup_duration;
 
     public:
         Kicker()
