@@ -26,26 +26,26 @@ namespace module::planning {
             // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.max_forward_speed = config["max_forward_speed"].as<float>();
-            cfg.min_forward_speed = config["min_forward_speed"].as<float>();
-            cfg.acceleration      = config["acceleration"].as<float>();
-            cfg.approach_radius   = config["approach_radius"].as<float>();
+            cfg.max_forward_speed = config["max_forward_speed"].as<double>();
+            cfg.min_forward_speed = config["min_forward_speed"].as<double>();
+            cfg.acceleration      = config["acceleration"].as<double>();
+            cfg.approach_radius   = config["approach_radius"].as<double>();
 
-            cfg.max_turn_speed = config["max_turn_speed"].as<float>();
-            cfg.min_turn_speed = config["min_turn_speed"].as<float>();
+            cfg.max_turn_speed = config["max_turn_speed"].as<double>();
+            cfg.min_turn_speed = config["min_turn_speed"].as<double>();
 
-            cfg.rotate_speed   = config["rotate_speed"].as<float>();
-            cfg.rotate_speed_x = config["rotate_speed_x"].as<float>();
-            cfg.rotate_speed_y = config["rotate_speed_y"].as<float>();
+            cfg.rotate_speed   = config["rotate_speed"].as<double>();
+            cfg.rotate_speed_x = config["rotate_speed_x"].as<double>();
+            cfg.rotate_speed_y = config["rotate_speed_y"].as<double>();
 
-            cfg.pivot_ball_speed   = config["pivot_ball_speed"].as<float>();
-            cfg.pivot_ball_speed_x = config["pivot_ball_speed_x"].as<float>();
-            cfg.pivot_ball_speed_y = config["pivot_ball_speed_y"].as<float>();
+            cfg.pivot_ball_speed   = config["pivot_ball_speed"].as<double>();
+            cfg.pivot_ball_speed_x = config["pivot_ball_speed_x"].as<double>();
+            cfg.pivot_ball_speed_y = config["pivot_ball_speed_y"].as<double>();
         });
 
         // Path to walk to a particular point
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            Eigen::Vector3f rPRr = walk_to.rPRr;
+            Eigen::Vector3d rPRr = walk_to.rPRr;
 
             // If robot getting close to the point, begin to decelerate to minimum speed
             if (rPRr.head(2).norm() < cfg.approach_radius) {
@@ -59,7 +59,7 @@ namespace module::planning {
             }
 
             // Obtain the unit vector to desired target in robot space and scale by cfg.forward_speed
-            Eigen::Vector3f walk_command = rPRr.normalized() * speed;
+            Eigen::Vector3d walk_command = rPRr.normalized() * speed;
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed
@@ -74,7 +74,7 @@ namespace module::planning {
 
             // Turn on the spot
             emit<Task>(std::make_unique<Walk>(
-                Eigen::Vector3f(cfg.rotate_speed_x, cfg.rotate_speed_y, sign * cfg.rotate_speed)));
+                Eigen::Vector3d(cfg.rotate_speed_x, cfg.rotate_speed_y, sign * cfg.rotate_speed)));
         });
 
         on<Provide<TurnAroundBall>>().then([this](const TurnAroundBall& turn_around_ball) {
@@ -82,7 +82,7 @@ namespace module::planning {
             int sign = turn_around_ball.clockwise ? -1 : 1;
             // Turn around the ball
             emit<Task>(std::make_unique<Walk>(
-                Eigen::Vector3f(cfg.pivot_ball_speed_x, cfg.pivot_ball_speed_y, sign * cfg.pivot_ball_speed)));
+                Eigen::Vector3d(cfg.pivot_ball_speed_x, cfg.pivot_ball_speed_y, sign * cfg.pivot_ball_speed)));
         });
     }
 }  // namespace module::planning
