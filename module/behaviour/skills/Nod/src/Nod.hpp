@@ -32,13 +32,13 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief Nod priority in the subsumption system
-            float nod_priority = 0.0f;
+            double nod_priority = 0.0f;
         } cfg;
 
         /// @brief Bool to indicate if the robot should nod yes, else it nods no
         bool nod_yes = false;
 
-        void updatePriority(const float& priority);
+        void updatePriority(const double& priority);
 
     public:
         /// @brief Called by the powerplant to build and setup the KickScript reactor.
