@@ -29,7 +29,7 @@ namespace module::vision {
             // Use configuration here from file FieldLineDetector.yaml
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
-            this->config.confidence_threshold = cfg["confidence_threshold"].as<float>();
+            this->config.confidence_threshold = cfg["confidence_threshold"].as<double>();
             this->config.cluster_points       = cfg["cluster_points"].as<int>();
         });
 
@@ -38,8 +38,8 @@ namespace module::vision {
             const auto& cls        = horizon.mesh->classifications;
             const auto& neighbours = horizon.mesh->neighbourhood;
             // Unit vectors from camera to a point in the mesh, in world space
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays;
-            const int LINE_INDEX                                = horizon.class_map.at("line");
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays;
+            const int LINE_INDEX                                 = horizon.class_map.at("line");
             // PARTITION INDICES AND CLUSTER
             // Get some indices to partition
             std::vector<int> indices(horizon.mesh->indices.size());
