@@ -33,9 +33,9 @@ namespace module::skill {
         on<Configuration>("Look.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Look.yaml
             this->log_level      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.smoothing_factor = config["smoothing_factor"].as<float>();
-            cfg.head_gain        = config["head_gain"].as<float>();
-            cfg.head_torque      = config["head_torque"].as<float>();
+            cfg.smoothing_factor = config["smoothing_factor"].as<double>();
+            cfg.head_gain        = config["head_gain"].as<double>();
+            cfg.head_torque      = config["head_torque"].as<double>();
         });
 
         on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {

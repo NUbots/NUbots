@@ -12,9 +12,9 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
-            float smoothing_factor = 0.0;
-            float head_gain        = 0.0;
-            float head_torque      = 0.0;
+            double smoothing_factor = 0.0;
+            double head_gain        = 0.0;
+            double head_torque      = 0.0;
         } cfg;
 
         /// @brief Store whether we are smoothing the head movements from the previous run, to help with transitioning
