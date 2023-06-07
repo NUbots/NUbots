@@ -111,7 +111,7 @@ namespace module::behaviour::tools {
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
             id,
             "Script Tuner",
-            {std::pair<float, std::set<LimbID>>(
+            {std::pair<double, std::set<LimbID>>(
                 1,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [](const std::set<LimbID>& /* limbs */) {},
@@ -376,7 +376,7 @@ namespace module::behaviour::tools {
             waypoint->time     = NUClear::clock::now();
             waypoint->id       = selection < 2 ? 18 + selection : selection - 2;
             waypoint->gain     = 0;
-            waypoint->position = std::numeric_limits<float>::quiet_NaN();
+            waypoint->position = std::numeric_limits<double>::quiet_NaN();
             waypoint->torque   = 0;
             emit(std::move(waypoint));
         }
@@ -770,10 +770,10 @@ namespace module::behaviour::tools {
         size_t XPOSITION[3][3] = {{7, 20, 33}, {12, 0, 0}, {7, 20, 33}};
         size_t i               = 0;
         size_t j               = 0;
-        float upperGainS       = -1;
-        float lowerGainS       = -1;
-        float upperGainF       = -1;
-        float lowerGainF       = -1;
+        double upperGainS      = -1;
+        double lowerGainS      = -1;
+        double upperGainF      = -1;
+        double lowerGainF      = -1;
         bool editScript        = false;
         bool editFrame         = false;
         bool changedUpper      = false;
@@ -863,7 +863,7 @@ namespace module::behaviour::tools {
                     break;
                 case '\n':
                 case KEY_ENTER:
-                    float newGain = 0;
+                    double newGain = 0;
                     // tracks editing
 
                     if (YPOSITION[i][j] == 6) {
@@ -1092,11 +1092,11 @@ namespace module::behaviour::tools {
         }
     }
     // converts valid user input to gain
-    float ScriptTuner::userInputToGain() {
+    double ScriptTuner::userInputToGain() {
         std::string tempGain = userInput();
         try {
             if (!tempGain.empty()) {
-                float tempGain2 = stof(tempGain);
+                double tempGain2 = stof(tempGain);
                 if (tempGain2 >= 0 && tempGain2 <= 100) {
                     return tempGain2;
                 }
@@ -1107,6 +1107,6 @@ namespace module::behaviour::tools {
             beep();
         }
 
-        return std::numeric_limits<float>::quiet_NaN();
+        return std::numeric_limits<double>::quiet_NaN();
     }
 }  // namespace module::behaviour::tools
