@@ -22,7 +22,7 @@ namespace module::strategy {
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_search_timeout = duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["ball_search_timeout"].as<double>()));
-            cfg.ball_y_offset = config["ball_y_offset"].as<float>();
+            cfg.ball_y_offset = config["ball_y_offset"].as<double>();
         });
 
         // If the Provider updates on Every and the last FilteredBall was too long ago, it won't emit any Task
@@ -32,8 +32,8 @@ namespace module::strategy {
                 // If we have a ball, walk to it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
                     // Add an offset to account for walking with the foot in front of the ball
-                    const Eigen::Vector3f rBRr(ball.rBRr.x(), ball.rBRr.y() + cfg.ball_y_offset, ball.rBRr.z());
-                    const float heading = std::atan2(ball.rBRr.y(), ball.rBRr.x());
+                    const Eigen::Vector3d rBRr(ball.rBRr.x(), ball.rBRr.y() + cfg.ball_y_offset, ball.rBRr.z());
+                    const double heading = std::atan2(ball.rBRr.y(), ball.rBRr.x());
                     emit<Task>(std::make_unique<WalkTo>(rBRr, heading));
                 }
             });
