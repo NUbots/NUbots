@@ -62,10 +62,10 @@ namespace module::behaviour::planning {
         on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.max_ball_distance        = config["max_ball_distance"].as<float>();
-            cfg.kick_corridor_width      = config["kick_corridor_width"].as<float>();
-            cfg.seconds_not_seen_limit   = config["seconds_not_seen_limit"].as<float>();
-            cfg.kick_forward_angle_limit = config["kick_forward_angle_limit"].as<float>();
+            cfg.max_ball_distance        = config["max_ball_distance"].as<double>();
+            cfg.kick_corridor_width      = config["kick_corridor_width"].as<double>();
+            cfg.seconds_not_seen_limit   = config["seconds_not_seen_limit"].as<double>();
+            cfg.kick_forward_angle_limit = config["kick_forward_angle_limit"].as<double>();
             emit(std::make_unique<WantsToKick>(false));
         });
 
@@ -109,7 +109,7 @@ namespace module::behaviour::planning {
                 // Transform target from field to torso space
                 Eigen::Isometry3d Htf       = Htw * Hfw.inverse();
                 Eigen::Vector3d kick_target = Htf * Eigen::Vector3d(kick_plan.target.x(), kick_plan.target.y(), 0.0);
-                float kick_angle            = std::fabs(std::atan2(kick_target.y(), kick_target.x()));
+                double kick_angle           = std::fabs(std::atan2(kick_target.y(), kick_target.x()));
 
                 bool correct_state = true;
                 if (game_state) {
@@ -123,7 +123,7 @@ namespace module::behaviour::planning {
                 if (kick_is_valid) {
                     last_time_valid = now;
                 }
-                float time_since_valid = (now - last_time_valid).count() * (1 / double(NUClear::clock::period::den));
+                double time_since_valid = (now - last_time_valid).count() * (1 / double(NUClear::clock::period::den));
 
                 if (seconds_since_last_seen < cfg.seconds_not_seen_limit && kick_is_valid
                     && (correct_state || force_playing) && kick_angle < cfg.kick_forward_angle_limit) {

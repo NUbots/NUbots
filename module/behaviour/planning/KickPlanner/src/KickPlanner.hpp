@@ -35,10 +35,10 @@ namespace module::behaviour::planning {
 
         /// @brief Stores configuration values
         struct Config {
-            float max_ball_distance        = 0.0;
-            float kick_corridor_width      = 0.0;
-            float seconds_not_seen_limit   = 0.0;
-            float kick_forward_angle_limit = 0.0;
+            double max_ball_distance        = 0.0;
+            double kick_corridor_width      = 0.0;
+            double seconds_not_seen_limit   = 0.0;
+            double kick_forward_angle_limit = 0.0;
         } cfg;
 
         /// @brief Whether the robot is in a play state regardless of the GameController state
