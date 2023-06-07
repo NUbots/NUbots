@@ -16,7 +16,7 @@ namespace module::purpose {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Ready position to walk to (x, y, theta)
-            Eigen::Vector3f ready_position = Eigen::Vector3f::Zero();
+            Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
         } cfg;
 
     public:
