@@ -46,7 +46,7 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("Stand.yaml").then([this](const Configuration& config) {
             log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.stand_priority = config["stand_priority"].as<float>();
+            cfg.stand_priority = config["stand_priority"].as<double>();
         });
 
         on<Trigger<ExecuteStand>>().then(
@@ -55,7 +55,7 @@ namespace module::behaviour::skills {
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
             RegisterAction{subsumption_id,
                            "Stand",
-                           {std::pair<float, std::set<LimbID>>(
+                           {std::pair<double, std::set<LimbID>>(
                                cfg.stand_priority,
                                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
                            [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<ExecuteStand>()); },
