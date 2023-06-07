@@ -37,7 +37,7 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief Value that priority is set to when kick is requested
-            float kick_priority = 0.0f;
+            double kick_priority = 0.0f;
             /// @brief Time between kick command message and kicking before kick is discarded (milliseconds)
             int message_timeout = 0;
         } cfg;
@@ -50,7 +50,7 @@ namespace module::behaviour::skills {
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
-        void update_priority(const float& priority);
+        void update_priority(const double& priority);
 
     public:
         /// @brief Called by the powerplant to build and setup the KickScript reactor.

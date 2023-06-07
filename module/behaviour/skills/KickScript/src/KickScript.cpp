@@ -57,14 +57,14 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
             log_level           = config["log_level"].as<NUClear::LogLevel>();
-            cfg.kick_priority   = config["kick_priority"].as<float>();
+            cfg.kick_priority   = config["kick_priority"].as<double>();
             cfg.message_timeout = config["message_timeout"].as<Expression>();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
             subsumption_id,
             "Kick Script",
-            {std::pair<float, std::set<LimbID>>(
+            {std::pair<double, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
             [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<ExecuteKick>()); },
@@ -122,7 +122,7 @@ namespace module::behaviour::skills {
         });
     }
 
-    void KickScript::update_priority(const float& priority) {
+    void KickScript::update_priority(const double& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
