@@ -49,14 +49,14 @@ namespace module::behaviour::strategy {
                         case AXIS_LEFT_JOYSTICK_HORIZONTAL:
                             // y is left relative to robot
                             // strafe[1] = -event.value;
-                            rotationalSpeed = static_cast<float>(-event.value);
+                            rotationalSpeed = static_cast<double>(-event.value);
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
                             // x is forward relative to robot
                             strafe[0] = -event.value;
                             break;
-                        case AXIS_RIGHT_JOYSTICK_VERTICAL: headPitch = static_cast<float>(-event.value); break;
-                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: headYaw = static_cast<float>(-event.value); break;
+                        case AXIS_RIGHT_JOYSTICK_VERTICAL: headPitch = static_cast<double>(-event.value); break;
+                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: headYaw = static_cast<double>(-event.value); break;
                     }
                 }
                 else if (event.isButton()) {
