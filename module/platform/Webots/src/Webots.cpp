@@ -231,7 +231,7 @@ namespace module::platform {
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
             max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
-            max_fsr_value        = config["max_fsr_value"].as<float>();
+            max_fsr_value        = config["max_fsr_value"].as<double>();
 
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -266,14 +266,14 @@ namespace module::platform {
             int height = config["settings"]["Height"].as<Expression>();
 
             // Renormalise the focal length
-            float focal_length = config["lens"]["focal_length"].as<Expression>();
-            float fov          = config["lens"]["fov"].as<Expression>();
+            double focal_length = config["lens"]["focal_length"].as<Expression>();
+            double fov          = config["lens"]["fov"].as<Expression>();
 
             // Recentre/renormalise the centre
-            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>());
+            Eigen::Vector2d centre = Eigen::Vector2d(config["lens"]["centre"].as<Expression>());
 
             // Adjust the distortion parameters for the new width units
-            Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
+            Eigen::Vector2d k = config["lens"]["k"].as<Expression>();
 
             // Set the lens parameters from configuration
             context.lens = Image::Lens{
@@ -288,10 +288,10 @@ namespace module::platform {
             if (!std::isfinite(context.lens.fov)) {
                 double a = height / width;
                 std::array<double, 4> options{
-                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
+                    utility::vision::unproject(Eigen::Vector2d(0, 0), context.lens, Eigen::Vector2d(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2d(1, 0), context.lens, Eigen::Vector2d(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2d(0, a), context.lens, Eigen::Vector2d(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2d(1, a), context.lens, Eigen::Vector2d(1, a)).x()};
                 context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
             }
 
@@ -739,9 +739,9 @@ namespace module::platform {
                 // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output
                 // over 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept
                 // consistent with that
-                sensor_data->accelerometer.x() = static_cast<float>(accelerometer.value.X) - 100.0f;
-                sensor_data->accelerometer.y() = static_cast<float>(accelerometer.value.Y) - 100.0f;
-                sensor_data->accelerometer.z() = static_cast<float>(accelerometer.value.Z) - 100.0f;
+                sensor_data->accelerometer.x() = accelerometer.value.X - 100.0f;
+                sensor_data->accelerometer.y() = accelerometer.value.Y - 100.0f;
+                sensor_data->accelerometer.z() = accelerometer.value.Z - 100.0f;
             }
 
             if (!sensor_measurements.gyros.empty()) {
@@ -750,9 +750,9 @@ namespace module::platform {
                 // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
                 // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
                 // that
-                sensor_data->gyroscope.x() = static_cast<float>(gyro.value.X) - 100.0f;
-                sensor_data->gyroscope.y() = static_cast<float>(gyro.value.Y) - 100.0f;
-                sensor_data->gyroscope.z() = static_cast<float>(gyro.value.Z) - 100.0f;
+                sensor_data->gyroscope.x() = gyro.value.X - 100.0f;
+                sensor_data->gyroscope.y() = gyro.value.Y - 100.0f;
+                sensor_data->gyroscope.z() = gyro.value.Z - 100.0f;
             }
 
             for (const auto& bumper : sensor_measurements.bumpers) {
