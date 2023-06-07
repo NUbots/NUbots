@@ -64,7 +64,7 @@ namespace module::behaviour {
         bool active = false;
 
         /// The maximum priority for any of the items
-        float maxPriority = std::numeric_limits<float>::min();
+        double maxPriority = std::numeric_limits<double>::min();
 
         /// The index of the main item
         size_t mainElement = 0;
@@ -80,7 +80,7 @@ namespace module::behaviour {
 
     struct RequestItem {
 
-        RequestItem(Request& group_, size_t index_, float priority_, std::set<utility::input::LimbID> limbSet_)
+        RequestItem(Request& group_, size_t index_, double priority_, std::set<utility::input::LimbID> limbSet_)
             : group(group_), index(index_), priority(priority_), limbSet(std::move(limbSet_)) {}
 
         Request& group;
@@ -89,7 +89,7 @@ namespace module::behaviour {
 
         bool active = false;
 
-        float priority = 0.0f;
+        double priority = 0.0f;
         std::set<utility::input::LimbID> limbSet{};
     };
 
