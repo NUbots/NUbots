@@ -3,5 +3,4 @@
 # docker image.
 nuclear_module(
   DATA_FILES "/etc/pacman.d/mirrorlist:system/default/etc/pacman.d"
-             "/home/nubots/.ssh/id_rsa.pub:system/default/home/nubots/.ssh"
 )
