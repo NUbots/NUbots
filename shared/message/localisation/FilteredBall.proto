@@ -26,16 +26,16 @@ import "google/protobuf/timestamp.proto";
 message FilteredBall {
 
     /// Ball's filtered cartesian position measured in world space {w} from the world {W}
-    fvec3 rBWw = 1;
+    vec3 rBWw = 1;
 
     /// Ball's filtered cartesian position measured in torso space {t} from the torso {T}
-    fvec3 rBTt = 2;
+    vec3 rBTt = 2;
 
     /// Ball's filtered cartesian position measured in robot space {r} from the robot {R}
-    fvec3 rBRr = 3;
+    vec3 rBRr = 3;
 
     /// Ball's filtered cartesian position measured in torso space {t} from the camera {C}
-    fvec3 rBCt = 4;
+    vec3 rBCt = 4;
 
     /// Time the ball measurement was taken
     google.protobuf.Timestamp time_of_measurement = 5;

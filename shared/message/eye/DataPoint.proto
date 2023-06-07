@@ -7,6 +7,6 @@ import "google/protobuf/timestamp.proto";
 message DataPoint {
     uint32                    id        = 5;
     string                    label     = 1;
-    repeated float            value     = 2 [packed = true];
+    repeated double            value     = 2 [packed = true];
     google.protobuf.Timestamp timestamp = 4;
 }

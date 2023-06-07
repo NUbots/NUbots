@@ -35,16 +35,16 @@ message VisualMesh {
     /// World to camera transform that this mesh was constructed with
     mat4 Hcw = 4;
     /// Pixel coordinates projected from the rays
-    fmat coordinates = 5;
+    mat coordinates = 5;
     /// Neighbours of each node in the mesh. Each row corresponds to a node and the columns are the neighbours
     imat neighbourhood = 6;
     /// The corresponding global indices for each on-screen node
     repeated int32 indices = 7 [packed = true];
     /// The classification for each pixel/ray. Each row corresponds to a pixel. Each column corresponds to a
     /// class. The mapping from columns to classes is dependant on how the classes were presented during training
-    fmat classifications = 8;
+    mat classifications = 8;
     /// Unit vectors pointing from the camera to each node in the mesh
-    fmat rays = 9;
+    mat rays = 9;
     /// A mapping from class names to column indices (for accessing the corresponding classification column)
     map<string, uint32> class_map = 10;
     /// Ground truth data from webots

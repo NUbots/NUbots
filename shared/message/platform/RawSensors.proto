@@ -152,10 +152,10 @@ message RawSensors {
     float voltage = 7;
     /// In m/s^2. Each axis is bounded between -4g and 4g, according to the datasheet
     /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#acc_x-acc_y-acc_z
-    fvec3 accelerometer = 8;
+    vec3 accelerometer = 8;
     /// In radians per second. Each axis bounded between -500 and 500 degrees per second, according to the datasheet
     /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#gyro_x-gyro_y-gyro_z
-    fvec3  gyroscope = 9;
+    vec3   gyroscope = 9;
     FSRs   fsr       = 10;
     Servos servo     = 11;
     /// Ground truth from a simulator

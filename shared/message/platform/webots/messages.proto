@@ -99,7 +99,7 @@ message VisionGroundTruth {
     /// Indicates if this message exists
     bool exists = 1;
     /// Vector from the world to the ball in world space.
-    fvec3 rBWw = 2;
+    vec3 rBWw = 2;
 }
 
 message SensorMeasurements {

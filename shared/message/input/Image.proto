@@ -37,12 +37,12 @@ message Image {
         }
         Projection projection = 1;
         /// Normalised focal length: focal length in pixels / image width
-        float focal_length = 2;
+        double focal_length = 2;
         /// The angular diameter that the lens covers (the area that light hits on the sensor). In radians
-        float fov = 3;
+        double fov = 3;
         /// Normalised image centre offset: pixels from centre to optical axis / image width
-        fvec2 centre = 4;
-        fvec2 k      = 5;
+        vec2 centre = 4;
+        vec2 k      = 5;
     }
     /// Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
     /// see module::output::compressor::turbojpeg::Compressor::compress for currently supported formats

@@ -29,9 +29,9 @@ package message.motion;
  */
 message HeadCommand {
     /// Target head yaw in radians
-    float yaw = 1;
+    double yaw = 1;
     /// Target head pitch in radians
-    float pitch = 2;
+    double pitch = 2;
     /// If true, the yaw and pitch are interpreted in robot space, instead of IMU space
     bool robot_space = 3;
     /// If true, smooth the goal angle using expoential smoothing

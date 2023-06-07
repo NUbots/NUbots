@@ -53,5 +53,5 @@ message KickScriptCommand {
 message KickFinished {}
 
 message IKKickParams {
-    float stand_height = 1;
+    double stand_height = 1;
 }

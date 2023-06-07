@@ -37,25 +37,25 @@ message Overview {
 
     /// The current battery voltage as a percentage.
     /// @see message::input::Sensors::battery
-    float battery = 4;
+    double battery = 4;
 
     /// The current voltage of the battery.
     /// @see message::input::Sensors::voltage
-    float voltage = 5;
+    double voltage = 5;
 
     /// The current behaviour state. List of possible states in message::behaviour::Behaviour
     behaviour.Behaviour.State behaviour_state = 6;
 
     /// Localisation measured in field space
-    fvec3 robot_position            = 7;
-    fmat3 robot_position_covariance = 8;
+    vec3 robot_position            = 7;
+    mat3 robot_position_covariance = 8;
 
     /// The ball position measured in field space
-    fvec2 ball_position            = 9;
-    fmat2 ball_position_covariance = 10;
+    vec2 ball_position            = 9;
+    mat2 ball_position_covariance = 10;
 
     /// The {x, y} location we are kicking to
-    fvec2 kick_target = 11;
+    vec2 kick_target = 11;
     /// The type of game being played. From Game Controller
     input.GameState.Data.Mode game_mode = 12;
     /// The current stage of gameplay. For Game Controller
@@ -69,5 +69,5 @@ message Overview {
     google.protobuf.Timestamp last_seen_goal = 17;
     /// {x, y, omega} - x and y are the target to walk to and omega is the
     /// required rotational velocity about the z axis. In torso space
-    fvec3 walk_command = 18;
+    vec3 walk_command = 18;
 }

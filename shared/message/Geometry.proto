@@ -28,8 +28,8 @@ import "Matrix.proto";
  * Hesse normal form representation of a line. See https://en.wikipedia.org/wiki/Hesse_normal_form
  */
 message Line {
-    fvec3 normal   = 1;
-    float distance = 2;
+    vec3 normal   = 1;
+    double distance = 2;
 }
 
 message Circle {
@@ -71,7 +71,7 @@ message Frustum {
 
 message Cone {
     /// 3D axis of the centre of the cone
-    fvec3 axis = 1;
+    vec3 axis = 1;
     /// Cos(theta) of the cone angle
-    float radius = 3;
+    double radius = 3;
 }
