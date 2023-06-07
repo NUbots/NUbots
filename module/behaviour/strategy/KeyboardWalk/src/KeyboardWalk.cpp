@@ -45,7 +45,7 @@ namespace module::behaviour::strategy {
     }
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
+        : Reactor(std::move(environment)), velocity(Eigen::Vector2d::Zero()) {
 
         // Ensure UTF-8 is enabled
         std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -321,7 +321,7 @@ namespace module::behaviour::strategy {
     }
 
     void KeyboardWalk::reset() {
-        velocity   = Eigen::Vector2f::Zero();
+        velocity   = Eigen::Vector2d::Zero();
         rotation   = 0.0f;
         head_yaw   = 0.0f;
         head_pitch = 0.0f;
@@ -358,8 +358,8 @@ namespace module::behaviour::strategy {
                         velocity.y(),
                         rotation,
                         moving,
-                        head_yaw * 180.0f / float(M_PI),
-                        head_pitch * 180.0f / float(M_PI));
+                        head_yaw * 180.0f / double(M_PI),
+                        head_pitch * 180.0f / double(M_PI));
 
         // Update the command window
         update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);
