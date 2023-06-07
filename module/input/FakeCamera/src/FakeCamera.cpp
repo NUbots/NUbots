@@ -91,8 +91,8 @@ namespace module::input {
                     // Extract lens parameters from the lens file
                     YAML::Node lens        = YAML::LoadFile(images[image_index].second);
                     msg->lens.projection   = lens["projection"].as<std::string>();
-                    msg->lens.focal_length = lens["focal_length"].as<float>();
-                    msg->lens.fov          = lens["fov"].as<float>();
+                    msg->lens.focal_length = lens["focal_length"].as<double>();
+                    msg->lens.fov          = lens["fov"].as<double>();
                     msg->lens.centre       = lens["centre"].as<Expression>();
                     msg->lens.k            = lens["k"].as<Expression>();
 
