@@ -164,18 +164,18 @@ namespace module::input {
             int height   = config["settings"]["Height"].as<Expression>();
 
             // Renormalise the focal length
-            float focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
-            float fov          = config["lens"]["fov"].as<Expression>();
+            double focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
+            double fov          = config["lens"]["fov"].as<Expression>();
 
             // Recentre/renormalise the centre
-            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width;
-            centre += Eigen::Vector2f(offset_x - (full_width - width - offset_x),
+            Eigen::Vector2d centre = Eigen::Vector2d(config["lens"]["centre"].as<Expression>()) * full_width;
+            centre += Eigen::Vector2d(offset_x - (full_width - width - offset_x),
                                       offset_y - (full_height - height - offset_y))
                       * 0.5;
             centre /= width;
 
             // Adjust the distortion parameters for the new width units
-            Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
+            Eigen::Vector2d k = config["lens"]["k"].as<Expression>();
             k[0]              = k[0] * std::pow(width / full_height, 2);
             k[1]              = k[1] * std::pow(width / full_height, 4);
 
@@ -192,10 +192,10 @@ namespace module::input {
             if (!std::isfinite(context.lens.fov)) {
                 double a = height / width;
                 std::array<double, 4> options{
-                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
+                    utility::vision::unproject(Eigen::Vector2d(0, 0), context.lens, Eigen::Vector2d(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2d(1, 0), context.lens, Eigen::Vector2d(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2d(0, a), context.lens, Eigen::Vector2d(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2d(1, a), context.lens, Eigen::Vector2d(1, a)).x()};
                 context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
             }
 
