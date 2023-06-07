@@ -1,5 +1,5 @@
 [Match]
-Name=wlp58s0
+Name=enp86s0
 
 [Network]
 Address=10.1.1.3/16
