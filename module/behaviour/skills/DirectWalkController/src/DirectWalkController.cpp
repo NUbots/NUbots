@@ -49,7 +49,7 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("DirectWalkController.yaml").then([this](const Configuration& config) {
             log_level                = config["log_level"].as<NUClear::LogLevel>();
-            cfg.direct_walk_priority = config["direct_walk_priority"].as<float>();
+            cfg.direct_walk_priority = config["direct_walk_priority"].as<double>();
         });
 
         // Register this module with the subsumption system:
@@ -93,7 +93,7 @@ namespace module::behaviour::skills {
         });
     }
 
-    void DirectWalkController::update_priority(const float& priority) {
+    void DirectWalkController::update_priority(const double& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 }  // namespace module::behaviour::skills

@@ -33,12 +33,12 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief DirectWalkController priority in the subsumption system
-            float direct_walk_priority = 0.0f;
+            double direct_walk_priority = 0.0f;
         } cfg;
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
-        void update_priority(const float& priority);
+        void update_priority(const double& priority);
 
     public:
         /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
