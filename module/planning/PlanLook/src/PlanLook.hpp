@@ -13,7 +13,7 @@ namespace module::planning {
         /// @brief Stores configuration values
         struct Config {
             /// @brief How long to look at each search position
-            float search_fixation_time = 0.0f;
+            double search_fixation_time = 0.0f;
             /// @brief List of search positions for the search pattern
             std::vector<Eigen::Vector2d> search_positions{};
         } cfg;

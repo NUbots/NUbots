@@ -20,7 +20,7 @@ namespace module::planning {
         on<Configuration>("PlanLook.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PlanLook.yaml
             this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.search_fixation_time = config["search_fixation_time"].as<float>();
+            cfg.search_fixation_time = config["search_fixation_time"].as<double>();
 
             // Create vector of search positions
             for (const auto& search_position : config["search_positions"].config) {
@@ -30,8 +30,8 @@ namespace module::planning {
 
         on<Provide<LookAround>, Every<30, Per<std::chrono::seconds>>>().then([this] {
             // How long the look has lingered - will move to the next position if long enough
-            float time_since_last_search_moved =
-                std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - search_last_moved)
+            double time_since_last_search_moved =
+                std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - search_last_moved)
                     .count();
 
             // Robot will move through the search positions, and linger for search_fixation_time. Once
