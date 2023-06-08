@@ -1,20 +1,28 @@
-# Proper tag image creation and push to DockerHub
-name: Normal Target Pushes
+# Build the images for the main branch
+name: Images
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push events for the main branch
+  # Trigger when the main branch is updated
   push:
     branches: [main]
 
+# Ensure that only one instance of the workflow is run at a time for each branch/tag.
+# Jobs currently running on the branch/tag will be cancelled when new commits are pushed.
+# See https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#concurrency.
+concurrency:
+  # `github.workflow` is the workflow name, `github.ref` is the current branch/tag identifier
+  group: ${{ format('{0}:{1}', github.workflow, github.ref) }}
+  cancel-in-progress: true
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Build and push all images
+  # Build the docker images
   build_and_push:
-    name: "Build and Push Docker Images"
+    name: "Build and push image"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Run once for each of the platforms
     strategy:
@@ -30,25 +38,32 @@ jobs:
       # Setup docker buildx
       - name: 🐳 Set up docker buildx 🐳
         uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
+            env.BUILDKIT_STEP_LOG_MAX_SPEED=-1
 
-      - name: Login to DockerHub
+      # Login to the docker repository
+      - name: Login to the docker repository
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+      # Ensure write permissions for group and other are NOT set
+      # This is done to ensure consistency with the b script across all systems
+      - name: Enforce file permissions
+        run: chmod -Rv g-w,o-w docker/
+
       # Build the docker image
-      - name: 🐳 Build the docker image 🐳
-        uses: docker/build-push-action@v3.1.0
+      - name: 🐳 Build and push the docker image 🐳
+        uses: docker/build-push-action@v4
         with:
           pull: true
           tags: "nubots/nubots:${{ matrix.platform }}"
           file: docker/Dockerfile
           context: docker
-          build-args: |
-            platform=${{ matrix.platform }}
-            BUILDKIT_INLINE_CACHE=1
+          build-args: platform=${{ matrix.platform }}
+          cache-from: type=registry,ref=nubots/nubots:${{ matrix.platform }}
+          cache-to: type=inline
           push: true
-          cache-from: |
-            type=registry,ref=nubots/nubots:${{ matrix.platform }}
-            type=inline

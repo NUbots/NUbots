@@ -1,8 +1,6 @@
 import { computed } from "mobx";
 import { lazyObservable } from "mobx-utils";
 import { createTransformer } from "mobx-utils";
-import { Euler } from "three";
-import { Quaternion } from "three";
 import { Matrix4 } from "three";
 import { Mesh } from "three";
 import { Object3D } from "three";

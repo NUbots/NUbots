@@ -1,6 +1,5 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
-import { Matrix4 } from "../../../shared/math/matrix4";
 
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
