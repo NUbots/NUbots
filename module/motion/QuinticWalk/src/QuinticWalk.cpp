@@ -104,8 +104,7 @@ namespace module::motion {
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            Eigen::Vector3d RPY =
-                utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<double>());
+            Eigen::Vector3d RPY = utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>());
 
             // compute the pitch offset to the currently wanted pitch of the engine
             double wanted_pitch =
@@ -190,7 +189,7 @@ namespace module::motion {
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
             const double factor            = (1.0 / (current_config.params.freq)) * 0.5;
-            const Eigen::Vector3d& command = walkCommand.command.cast<double>() * factor;
+            const Eigen::Vector3d& command = walkCommand.command * factor;
 
             // Clamp velocity command
             Eigen::Vector3d orders =

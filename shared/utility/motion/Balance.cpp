@@ -61,7 +61,7 @@ namespace utility::motion {
         //------------------------------------
 
         // Robot coords in world (:Robot -> World)
-        Eigen::Isometry3d Htw         = Eigen::Isometry3d(sensors.Htw).cast<double>();
+        Eigen::Isometry3d Htw         = Eigen::Isometry3d(sensors.Htw);
         Eigen::AngleAxisd orientation = Eigen::AngleAxisd(Htw.rotation().inverse());
 
         // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}
@@ -160,12 +160,10 @@ namespace utility::motion {
         // sensors.bodyCentreHeight * dPitch));
 
         // Compute torso position adjustment
-        Eigen::Vector3d torsoAdjustment_world =
-            Eigen::Vector3d(
-                -translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
-                translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
-                -translationPGainZ * total - translationDGainY * dTotal)
-                .cast<double>();
+        Eigen::Vector3d torsoAdjustment_world = Eigen::Vector3d(
+            -translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
+            translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
+            -translationPGainZ * total - translationDGainY * dTotal);
 
         // Apply opposite translation to the foot position
         footToTorso = footToTorso.translate(-torsoAdjustment_world);

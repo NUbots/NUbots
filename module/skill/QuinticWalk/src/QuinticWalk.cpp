@@ -114,8 +114,7 @@ namespace module::skill {
         : BehaviourReactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            Eigen::Vector3d RPY =
-                utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<double>());
+            Eigen::Vector3d RPY = utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>());
 
             // compute the pitch offset to the currently wanted pitch of the engine
             double wanted_pitch =
@@ -207,7 +206,7 @@ namespace module::skill {
                 // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
                 // a double step factor 2 since the order distance is only for a single step, not double step
                 const double factor            = (1.0 / (current_cfg.params.freq)) * 0.5;
-                const Eigen::Vector3d& command = walk.velocity_target.cast<double>() * factor;
+                const Eigen::Vector3d& command = walk.velocity_target * factor;
 
                 // Clamp velocity command
                 current_orders =
@@ -336,8 +335,8 @@ namespace module::skill {
         auto right_leg  = std::make_unique<RightLegIK>();
         left_leg->time  = time;
         right_leg->time = time;
-        left_leg->Htl   = Htl.cast<double>().matrix();
-        right_leg->Htr  = Htr.cast<double>().matrix();
+        left_leg->Htl   = Htl.matrix();
+        right_leg->Htr  = Htr.matrix();
         // Arms
         auto left_arm  = std::make_unique<LeftArm>();
         auto right_arm = std::make_unique<RightArm>();

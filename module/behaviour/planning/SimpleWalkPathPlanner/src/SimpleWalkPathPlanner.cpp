@@ -146,7 +146,7 @@ namespace module::behaviour::planning {
     void SimpleWalkPathPlanner::vision_walk_path(const std::shared_ptr<const FilteredBall>& ball) {
         // If ball exists...
         if (ball) {
-            Eigen::Vector3d rBTt = ball->rBTt.cast<double>();
+            Eigen::Vector3d rBTt = ball->rBTt;
             // Add a offset to the ball position to avoid walking at the ball directly such that the robot can kick
             rBTt.y() = rBTt.y() + cfg.ball_y_offset;
             // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
@@ -159,8 +159,7 @@ namespace module::behaviour::planning {
                                                     std::atan2(walk_command.y(), walk_command.x()),
                                                     cfg.max_turn_speed);
 
-            std::unique_ptr<WalkCommand> command =
-                std::make_unique<WalkCommand>(subsumption_id, walk_command.cast<double>());
+            std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumption_id, walk_command);
 
             emit(std::move(command));
             update_priority(cfg.walk_path_planner_priority);

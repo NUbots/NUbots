@@ -142,7 +142,7 @@ namespace module::vision {
                 balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
 
                 // World to camera transform, to be used in for loop below
-                const Eigen::Isometry3d Hcw(horizon.Hcw.cast<double>());
+                const Eigen::Isometry3d Hcw(horizon.Hcw);
 
                 // CHECK EACH CLUSTER FOR VALID BALL
                 for (auto& cluster : clusters) {
@@ -328,7 +328,7 @@ namespace module::vision {
                     }
 
                     if (horizon.vision_ground_truth.exists) {
-                        Eigen::Isometry3d Hcw(horizon.Hcw.cast<double>());
+                        Eigen::Isometry3d Hcw(horizon.Hcw);
 
                         const Eigen::Vector3d rBCc = Hcw * horizon.vision_ground_truth.rBWw;
                         const Eigen::Vector3d rBWw = horizon.vision_ground_truth.rBWw;

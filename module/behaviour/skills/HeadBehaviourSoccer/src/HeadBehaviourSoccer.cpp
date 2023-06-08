@@ -83,7 +83,7 @@ namespace module::behaviour::skills {
                 if (!is_getting_up) {
                     if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.search_timeout) {
                         // We can see the ball, lets look at it
-                        Eigen::Vector3d rBCt                 = ball->rBCt.cast<double>();
+                        Eigen::Vector3d rBCt                 = ball->rBCt;
                         Eigen::Vector2d angles               = screenAngularFromObjectDirection(rBCt);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];

@@ -107,7 +107,7 @@ namespace module::input {
             });
 
         on<Trigger<WalkingState>>().then([this](const WalkingState& walking_state) {
-            walk_command        = walking_state.walk_command.cast<double>();
+            walk_command        = walking_state.walk_command;
             walk_engine_enabled = walking_state.is_walking;
         });
 

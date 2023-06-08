@@ -30,8 +30,8 @@ namespace module::strategy {
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
-                const Eigen::Isometry3d Hfw = Eigen::Isometry3d(field.Hfw.cast<double>());
-                const Eigen::Isometry3d Hrw = Eigen::Isometry3d(sensors.Hrw.cast<double>());
+                const Eigen::Isometry3d Hfw = Eigen::Isometry3d(field.Hfw);
+                const Eigen::Isometry3d Hrw = Eigen::Isometry3d(sensors.Hrw);
                 const Eigen::Isometry3d Hrf = Hrw * Hfw.inverse();
                 const Eigen::Isometry3d Hfr = Hrf.inverse();
                 const Eigen::Vector3d rPFf(walk_to_field_position.rPFf.x(), walk_to_field_position.rPFf.y(), 0.0);

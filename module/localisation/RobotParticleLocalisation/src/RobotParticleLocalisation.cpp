@@ -103,8 +103,8 @@ namespace module::localisation {
                                     // this is a real measurement
                                     auto own_filter = filter;
                                     const auto own_logits =
-                                        own_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
-                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                        own_filter.measure(Eigen::Vector3d(m.srGCc),
+                                                           Eigen::Matrix3d(m.covariance),
                                                            getFieldPosition(goal_post.side, fd, true),
                                                            goals.Hcw);
 
@@ -112,8 +112,8 @@ namespace module::localisation {
                                     // thinks this is a real measurement
                                     auto opp_filter = filter;
                                     const auto opp_logits =
-                                        opp_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
-                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                        opp_filter.measure(Eigen::Vector3d(m.srGCc),
+                                                           Eigen::Matrix3d(m.covariance),
                                                            getFieldPosition(goal_post.side, fd, false),
                                                            goals.Hcw);
 
@@ -159,8 +159,8 @@ namespace module::localisation {
                                         auto current_filter = filter;
 
                                         const double current_logits =
-                                            current_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
-                                                                   Eigen::Matrix3d(m.covariance.cast<double>()),
+                                            current_filter.measure(Eigen::Vector3d(m.srGCc),
+                                                                   Eigen::Matrix3d(m.covariance),
                                                                    getFieldPosition(post.first, fd, post.second),
                                                                    goals.Hcw);
 

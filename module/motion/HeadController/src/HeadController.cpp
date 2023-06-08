@@ -102,9 +102,8 @@ namespace module::motion {
                     sphericalToCartesian(Eigen::Vector3d(1, current_angles.x(), current_angles.y()));
                 // Convert to robot space if requested angle is in world space
                 Eigen::Vector3d head_unit_vector =
-                    goal_robot_space
-                        ? goal_head_unit_vector_world
-                        : Eigen::Isometry3d(sensors.Htw).rotation().cast<double>() * goal_head_unit_vector_world;
+                    goal_robot_space ? goal_head_unit_vector_world
+                                     : Eigen::Isometry3d(sensors.Htw).rotation() * goal_head_unit_vector_world;
 
                 // Compute inverse kinematics for head
                 // TODO(MotionTeam): MAKE THIS NOT FAIL FOR ANGLES OVER 90deg

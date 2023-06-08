@@ -75,20 +75,18 @@ namespace module::localisation {
         on<Trigger<VisionBalls>, With<Sensors>, With<FieldDescription>>().then(
             [this](const VisionBalls& balls, const Sensors& sensors, const FieldDescription& fd) {
                 if (!balls.balls.empty()) {
-                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(balls.Hcw.cast<double>());
+                    Eigen::Isometry3d Hcw = Eigen::Isometry3d(balls.Hcw);
                     Eigen::Isometry3d Hwc = Hcw.inverse();
                     auto state            = BallModel<double>::StateVec(ukf.get_state());
 
                     // Get the first ball measurement and treat it as the closest measurement to our current estimate
-                    Eigen::Vector3d rBWw =
-                        Hwc * reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>());
+                    Eigen::Vector3d rBWw   = Hwc * reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc);
                     double lowest_distance = (rBWw.head<2>() - state.rBWw).squaredNorm();
 
                     // Loop through all our ball measurements and find the closest measurement to our current estimate
                     for (const auto& ball : balls.balls) {
-                        Eigen::Vector3d temp_rBWw =
-                            Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<double>());
-                        double temp_distance = (temp_rBWw.head<2>() - state.rBWw).squaredNorm();
+                        Eigen::Vector3d temp_rBWw = Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc);
+                        double temp_distance      = (temp_rBWw.head<2>() - state.rBWw).squaredNorm();
                         if (temp_distance < lowest_distance) {
                             lowest_distance = temp_distance;
                             rBWw            = temp_rBWw;
@@ -115,9 +113,9 @@ namespace module::localisation {
 
                     // Generate and emit message
                     auto ball = std::make_unique<FilteredBall>();
-                    Eigen::Isometry3d Htw(sensors.Htw.cast<double>());
-                    Eigen::Isometry3d Hrw(sensors.Hrw.cast<double>());
-                    Eigen::Isometry3d Htc     = Eigen::Isometry3d(sensors.Htw.cast<double>()) * Hwc;
+                    Eigen::Isometry3d Htw(sensors.Htw);
+                    Eigen::Isometry3d Hrw(sensors.Hrw);
+                    Eigen::Isometry3d Htc     = Eigen::Isometry3d(sensors.Htw) * Hwc;
                     ball->rBWw                = rBWw;
                     ball->rBTt                = Htw * rBWw;
                     ball->rBRr                = Hrw * rBWw;

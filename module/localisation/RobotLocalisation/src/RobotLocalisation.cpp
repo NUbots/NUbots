@@ -245,9 +245,9 @@ namespace module::localisation {
 
                 // Project the field line observations (uPCr) onto the field plane
                 std::vector<Eigen::Vector2d> field_point_observations;
-                Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw.cast<double>());
+                Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
                 for (auto point : field_lines.points) {
-                    auto uPCw = point.cast<double>();
+                    auto uPCw = point;
                     auto rPCw = ray_to_field_plane(uPCw, Hcw);
                     field_point_observations.push_back(rPCw);
                     if (log_level <= NUClear::DEBUG) {

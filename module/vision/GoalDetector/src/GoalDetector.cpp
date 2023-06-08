@@ -249,9 +249,8 @@ namespace module::vision {
 
                             Eigen::Vector3d top_point(bottom_point * distance);
                             top_point.z() += field.dimensions.goal_crossbar_height;
-                            g.post.top = horizon.Hcw.topLeftCorner<3, 3>().cast<double>() * top_point.normalized();
-                            g.post.bottom =
-                                horizon.Hcw.topLeftCorner<3, 3>().cast<double>() * bottom_point.normalized();
+                            g.post.top      = horizon.Hcw.topLeftCorner<3, 3>() * top_point.normalized();
+                            g.post.bottom   = horizon.Hcw.topLeftCorner<3, 3>() * bottom_point.normalized();
                             g.post.distance = distance;
 
                             // Attach the measurement to the object (distance from camera to bottom center of post)
@@ -299,7 +298,7 @@ namespace module::vision {
                     // Returns true if rGCc0 is to the left of rGCc1, with respect to camera z
                     // The vectors are assumed to have unit norm
                     auto is_left_of = [&](const Eigen::Vector3d& rGCc0, const Eigen::Vector3d& rGCc1) {
-                        const Eigen::Vector3d cam_space_z = horizon.Hcw.block<3, 1>(0, 2).cast<double>();
+                        const Eigen::Vector3d cam_space_z = horizon.Hcw.block<3, 1>(0, 2);
 
                         // Direction (determined by RHR) needed to turn to get from one post to the other
                         // Anti-clockwise (negative) turn from rGCc0 to rGCc1 around cam_space_z
