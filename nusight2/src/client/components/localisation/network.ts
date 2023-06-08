@@ -1,10 +1,8 @@
 import { action } from "mobx";
 import * as THREE from "three";
-import { Matrix3 } from "../../../shared/math/matrix3";
-import { Matrix4 } from "../../../shared/math/matrix4";
 
+import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
-import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
 import { Network } from "../../network/network";

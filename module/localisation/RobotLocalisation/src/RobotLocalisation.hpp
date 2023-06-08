@@ -47,12 +47,14 @@ namespace module::localisation {
             bool save_map = false;
             /// @brief Minimum number of field line points for a measurement update
             size_t min_observations = 0;
+            /// @brief Penalty factor for observations being outside map
+            float outside_map_penalty_factor = 0.0;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
 
         /// @brief Occupancy grid map of the field lines
-        OccupancyMap fieldline_map;
+        OccupancyMap<float> fieldline_map;
 
         /// @brief State (x,y,theta) of the robot
         Eigen::Matrix<float, 3, 1> state = Eigen::Matrix<float, 3, 1>::Zero();
