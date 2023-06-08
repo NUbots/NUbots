@@ -1,6 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
-confidence_threshold: 0.5
+# Uncertainty value field localisation needs to be above to not localise.
+uncertainty_threshold: 0.5
 
-max_lost_time: 20
+# Amount of time the robot can be lost before requesting localisation to reset.
+max_lost_time: 30

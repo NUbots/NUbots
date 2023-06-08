@@ -27,23 +27,23 @@ namespace module::strategy {
 
         on<Configuration>("Localise.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Localise.yaml
-            this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.confidence_threshold = config["confidence_threshold"].as<float>();
-            cfg.max_lost_time        = config["max_lost_time"].as<float>();
+            this->log_level           = config["log_level"].as<NUClear::LogLevel>();
+            cfg.uncertainty_threshold = config["uncertainty_threshold"].as<float>();
+            cfg.max_lost_time         = config["max_lost_time"].as<float>();
         });
 
         on<Provide<LocaliseTask>, Trigger<Field>>().then([this](const Field& field) {
-            // If we are not confident (lower confidence value is better) in our position on the field, stand still.
-            if (field.confidence > cfg.confidence_threshold) {
-                log<NUClear::DEBUG>("Localisation confidence is not high enough, stand still.");
+            // If we are uncertain on our position on the field, stand still and look around.
+            if (field.uncertainty > cfg.uncertainty_threshold) {
+                log<NUClear::DEBUG>("Localisation uncertainty is not high enough, stand still.");
 
                 // Stop walking
                 emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(0, 0, 0)));
 
-                // Look around. TODO: Fix this, why doesn't the robot look around?
+                // Look around.
                 emit<Task>(std::make_unique<LookAround>());
 
-                // Add noise to the particles
+                // Add extra noise to the particles
                 emit(std::make_unique<AddNoiseToParticles>());
 
                 // Increment the time since we have

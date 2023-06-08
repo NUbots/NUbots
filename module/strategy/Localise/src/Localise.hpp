@@ -11,10 +11,10 @@ namespace module::strategy {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief The confidence value field localisation needs to be below to not request standing still.
-            float confidence_threshold = 0;
+            /// @brief Uncertainty value field localisation needs to be above to localise.
+            float uncertainty_threshold = 0;
 
-            /// @brief The amount of time the robot can be lost before localisation is reset.
+            /// @brief Amount of time the robot can be lost before requesting localisation to reset.
             float max_lost_time = 0;
         } cfg;
 
