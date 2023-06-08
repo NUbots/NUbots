@@ -12,10 +12,10 @@ finished at which point it terminates the program.
 
 ## Consumes
 
-- `CommandLineArguments` containing the list of scripts from the command line
+- `NUClear::message::CommandLineArguments` containing the list of scripts from the command line
 
 ## Emits
 
-- `message::actuation::LimbsSequence` through the Script extension, which populates the requested Script/s into LimbsSequences.
+- `message::actuation::LimbsSequence` through the Script utility, which populates the requested Script/s into LimbsSequences.
 
 ## Dependencies
