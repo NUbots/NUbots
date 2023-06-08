@@ -382,7 +382,7 @@ namespace module::platform::cm740 {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed = 0.0f;
+                float speed = 0.0;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }

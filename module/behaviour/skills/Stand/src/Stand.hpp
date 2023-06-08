@@ -38,7 +38,7 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief Stand priority in the subsumption system
-            double stand_priority = 0.0f;
+            double stand_priority = 0.0;
         } cfg;
 
     public:

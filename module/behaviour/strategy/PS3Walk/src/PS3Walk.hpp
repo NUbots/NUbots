@@ -65,11 +65,11 @@ namespace module::behaviour::strategy {
     private:
         Joystick joystick;
         Eigen::Vector2d strafe = Eigen::Vector2d::Zero();
-        double rotationalSpeed = 0.0f;
+        double rotationalSpeed = 0.0;
         bool moving            = false;
         bool headLocked        = false;
-        double headPitch       = 0.0f;
-        double headYaw         = 0.0f;
+        double headPitch       = 0.0;
+        double headYaw         = 0.0;
     };
 }  // namespace module::behaviour::strategy
 

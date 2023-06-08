@@ -32,7 +32,7 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief Nod priority in the subsumption system
-            double nod_priority = 0.0f;
+            double nod_priority = 0.0;
         } cfg;
 
         /// @brief Bool to indicate if the robot should nod yes, else it nods no

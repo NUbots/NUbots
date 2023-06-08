@@ -33,7 +33,7 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief DirectWalkController priority in the subsumption system
-            double direct_walk_priority = 0.0f;
+            double direct_walk_priority = 0.0;
         } cfg;
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message

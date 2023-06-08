@@ -47,17 +47,17 @@ namespace module::behaviour::strategy {
 
     class KeyboardWalk : public NUClear::Reactor {
     private:
-        static constexpr const double DIFF     = 0.01f;
-        static constexpr const double ROT_DIFF = 0.1f;
+        static constexpr const double DIFF     = 0.01;
+        static constexpr const double ROT_DIFF = 0.1;
 
-        static constexpr const double HEAD_DIFF = 1.0f * double(M_PI) / 180.0f;
+        static constexpr const double HEAD_DIFF = 1.0 * double(M_PI) / 180.0;
 
         bool moving = false;
         Eigen::Vector2d velocity;
-        double rotation = 0.0f;
+        double rotation = 0.0;
 
-        double head_yaw   = 0.0f;
-        double head_pitch = 0.0f;
+        double head_yaw   = 0.0;
+        double head_pitch = 0.0;
 
         std::shared_ptr<WINDOW> command_window;
         std::shared_ptr<WINDOW> log_window;

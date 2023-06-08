@@ -36,9 +36,9 @@ namespace module::behaviour::skills {
         bool falling = false;
 
         /// config settings
-        double FALLING_ANGLE        = 0.0f;
-        double FALLING_ACCELERATION = 0.0f;
-        double PRIORITY             = 0.0f;
+        double FALLING_ANGLE        = 0.0;
+        double FALLING_ACCELERATION = 0.0;
+        double PRIORITY             = 0.0;
         std::vector<double> RECOVERY_ACCELERATION{};
 
         void updatePriority(const double& priority);

@@ -225,7 +225,7 @@ namespace module::platform::cm740 {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                double speed = 0.0f;
+                double speed = 0.0;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
@@ -247,7 +247,7 @@ namespace module::platform::cm740 {
     }
 
     double centered_noise() {
-        return rand() / double(RAND_MAX) - 0.5f;
+        return rand() / double(RAND_MAX) - 0.5;
     }
 
     void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) const {

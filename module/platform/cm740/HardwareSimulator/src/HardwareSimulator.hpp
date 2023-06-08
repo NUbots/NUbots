@@ -38,7 +38,7 @@ namespace module::platform::cm740 {
     private:
         message::platform::RawSensors sensors;
 
-        double imu_drift_rate                    = 0.0f;
+        double imu_drift_rate                    = 0.0;
         static constexpr size_t UPDATE_FREQUENCY = 90;
         void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors) const;
         struct NoiseConfig {

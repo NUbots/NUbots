@@ -165,9 +165,9 @@ namespace module::input {
                 }
                 FootDownMethod current_method                         = FootDownMethod::Z_HEIGHT;
                 std::map<FootDownMethod, double> certainty_thresholds = {
-                    {FootDownMethod::Z_HEIGHT, 0.01f},
-                    {FootDownMethod::LOAD, 0.05f},
-                    {FootDownMethod::FSR, 60.0f},
+                    {FootDownMethod::Z_HEIGHT, 0.01},
+                    {FootDownMethod::LOAD, 0.05},
+                    {FootDownMethod::FSR, 60.0},
                 };
             } footDown;
 

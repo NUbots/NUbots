@@ -37,7 +37,7 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief Value that priority is set to when kick is requested
-            double kick_priority = 0.0f;
+            double kick_priority = 0.0;
             /// @brief Time between kick command message and kicking before kick is discarded (milliseconds)
             int message_timeout = 0;
         } cfg;

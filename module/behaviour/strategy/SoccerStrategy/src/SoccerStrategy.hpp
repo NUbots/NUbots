@@ -43,26 +43,26 @@ namespace module::behaviour::strategy {
             Config() = default;
             NUClear::clock::duration ball_last_seen_max_time{};
             NUClear::clock::duration goal_last_seen_max_time{};
-            double ball_search_walk_start_speed = 0.0f;
-            double ball_search_walk_stop_speed  = 0.0f;
-            double ball_search_walk_slow_time   = 0.0f;
+            double ball_search_walk_start_speed = 0.0;
+            double ball_search_walk_stop_speed  = 0.0;
+            double ball_search_walk_slow_time   = 0.0;
             Eigen::Vector2d start_position_offensive{Eigen::Vector2d::Zero()};
             Eigen::Vector2d start_position_defensive{Eigen::Vector2d::Zero()};
             bool is_goalie                          = false;
-            double goalie_max_ball_distance         = 0.0f;
-            double goalie_command_timeout           = 0.0f;
-            double goalie_rotation_speed_factor     = 0.0f;
-            double goalie_max_rotation_speed        = 0.0f;
-            double goalie_translation_speed_factor  = 0.0f;
-            double goalie_max_translation_speed     = 0.0f;
-            double goalie_side_walk_angle_threshold = 0.0f;
+            double goalie_max_ball_distance         = 0.0;
+            double goalie_command_timeout           = 0.0;
+            double goalie_rotation_speed_factor     = 0.0;
+            double goalie_max_rotation_speed        = 0.0;
+            double goalie_translation_speed_factor  = 0.0;
+            double goalie_max_translation_speed     = 0.0;
+            double goalie_side_walk_angle_threshold = 0.0;
             NUClear::clock::duration localisation_interval{};
             NUClear::clock::duration localisation_duration{};
             bool force_playing                = false;
             bool force_penalty_shootout       = false;
             int walk_to_ready_time            = 0;
-            double kicking_distance_threshold = 0.0f;
-            double kicking_angle_threshold    = 0.0f;
+            double kicking_distance_threshold = 0.0;
+            double kicking_angle_threshold    = 0.0;
         } cfg;
 
         /// @brief Flag to determine whether the ball is on the left or right side of the robot

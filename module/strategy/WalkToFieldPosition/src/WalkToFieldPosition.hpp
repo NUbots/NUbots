@@ -12,9 +12,9 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Radius to begin aligning with desired field heading
-            double align_radius = 0.0f;
+            double align_radius = 0.0;
             /// @brief Tolerance for stopping at the field position
-            double stop_tolerance = 0.0f;
+            double stop_tolerance = 0.0;
         } cfg;
 
     public:

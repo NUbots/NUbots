@@ -89,7 +89,7 @@ namespace module::behaviour {
 
         bool active = false;
 
-        double priority = 0.0f;
+        double priority = 0.0;
         std::set<utility::input::LimbID> limbSet{};
     };
 

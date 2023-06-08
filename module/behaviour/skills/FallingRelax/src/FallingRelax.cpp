@@ -110,7 +110,7 @@ namespace module::behaviour::skills {
             id,
             "Falling Relax",
             {std::pair<double, std::set<LimbID>>(
-                0.0f,
+                0.0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<Falling>()); },
             [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<KillFalling>()); },

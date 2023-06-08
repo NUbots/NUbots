@@ -39,9 +39,9 @@ namespace module::behaviour::skills {
         struct Config {
             Config() = default;
             /// @brief Value that priority is set to when getup is requested
-            double getup_priority = 0.0f;
+            double getup_priority = 0.0;
             /// @brief Threshold angle for executing getup, between torso z axis and world z axis
-            double fallen_angle = 0.0f;
+            double fallen_angle = 0.0;
             /// @brief Script sequence to run when getting from lying on the front to standing
             std::vector<std::string> getup_front;
             /// @brief Script sequence to run when getting from lying on the back to standing

@@ -238,14 +238,14 @@ namespace module::vision {
                             }
 
                             // Calculate bottom middle of goal post, z is calculated above
-                            bottom_point.x() = (left_side.x() + right_side.x()) * 0.5f;
-                            bottom_point.y() = (left_side.y() + right_side.y()) * 0.5f;
+                            bottom_point.x() = (left_side.x() + right_side.x()) * 0.5;
+                            bottom_point.y() = (left_side.y() + right_side.y()) * 0.5;
 
                             // https://en.wikipedia.org/wiki/Angular_diameter
-                            Eigen::Vector3d middle = ((left_side + right_side) * 0.5f).normalized();
+                            Eigen::Vector3d middle = ((left_side + right_side) * 0.5).normalized();
                             double radius          = middle.dot(left_side.normalized());
                             double distance =
-                                field.dimensions.goalpost_width * radius * 0.5f / std::sqrt(1.0f - radius * radius);
+                                field.dimensions.goalpost_width * radius * 0.5 / std::sqrt(1.0 - radius * radius);
 
                             Eigen::Vector3d top_point(bottom_point * distance);
                             top_point.z() += field.dimensions.goal_crossbar_height;
@@ -306,7 +306,7 @@ namespace module::vision {
                         // ==> rGCc1 is to the left of rGCc0
                         // Clockwise (positive) turn from rGCc0 to rGCc1 around cam_space_z
                         // ==> rGCc0 is to the left of rGCc1
-                        return rGCc0.cross(rGCc1).dot(cam_space_z) < 0.0f;
+                        return rGCc0.cross(rGCc1).dot(cam_space_z) < 0.0;
                     };
 
                     // Calculate the distance between 2 goal posts using the law of cosines

@@ -51,7 +51,7 @@ namespace module::motion {
     public:
         Eigen::Isometry3d pose;
         double duration;
-        SixDOFFrame() : pose(), duration(0.0f) {}
+        SixDOFFrame() : pose(), duration(0.0) {}
         SixDOFFrame(Eigen::Isometry3d pose_, double duration_) : pose(pose_), duration(duration_) {}
         SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
             duration                    = config["duration"].as<double>();
@@ -122,8 +122,8 @@ namespace module::motion {
     public:
         SixDOFFootController()
             : supportFoot()
-            , forward_duration(0.0f)
-            , return_duration(0.0f)
+            , forward_duration(0.0)
+            , return_duration(0.0)
             , anim()
             , ballPosition(Eigen::Vector3d::Zero())
             , goalPosition(Eigen::Vector3d::Zero())
@@ -262,13 +262,13 @@ namespace module::motion {
             : lift_foot()
             , kick()
             , place_foot()
-            , kick_velocity(0.0f)
-            , follow_through(0.0f)
-            , kick_height(0.0f)
-            , wind_up(0.0f)
-            , foot_separation_margin(0.0f)
-            , return_before_place_duration(0.0f)
-            , lift_before_windup_duration(0.0f) {}
+            , kick_velocity(0.0)
+            , follow_through(0.0)
+            , kick_height(0.0)
+            , wind_up(0.0)
+            , foot_separation_margin(0.0)
+            , return_before_place_duration(0.0)
+            , lift_before_windup_duration(0.0) {}
 
         virtual void configure(const ::extension::Configuration& config);
         virtual void computeStartMotion(const message::actuation::KinematicsModel& kinematicsModel,

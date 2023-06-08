@@ -318,8 +318,8 @@ namespace module::purpose {
 
     void KeyboardWalk::reset() {
         walk_command = Eigen::Vector3d::Zero();
-        head_yaw     = 0.0f;
-        head_pitch   = 0.0f;
+        head_yaw     = 0.0;
+        head_pitch   = 0.0;
         update_command();
         print_status();
         log<NUClear::INFO>("reset");
@@ -358,8 +358,8 @@ namespace module::purpose {
             walk_command.y(),
             walk_command.z(),
             walk_enabled,
-            head_yaw * 180.0f / M_PI,
-            head_pitch * 180.0f / M_PI);
+            head_yaw * 180.0 / M_PI,
+            head_pitch * 180.0 / M_PI);
 
         // Update the command window
         update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);

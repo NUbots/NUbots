@@ -322,9 +322,9 @@ namespace module::behaviour::strategy {
 
     void KeyboardWalk::reset() {
         velocity   = Eigen::Vector2d::Zero();
-        rotation   = 0.0f;
-        head_yaw   = 0.0f;
-        head_pitch = 0.0f;
+        rotation   = 0.0;
+        head_yaw   = 0.0;
+        head_pitch = 0.0;
         update_command();
         print_status();
         log<NUClear::INFO>("reset");
@@ -358,8 +358,8 @@ namespace module::behaviour::strategy {
                         velocity.y(),
                         rotation,
                         moving,
-                        head_yaw * 180.0f / double(M_PI),
-                        head_pitch * 180.0f / double(M_PI));
+                        head_yaw * 180.0 / double(M_PI),
+                        head_pitch * 180.0 / double(M_PI));
 
         // Update the command window
         update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);
