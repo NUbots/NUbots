@@ -1,5 +1,5 @@
-#ifndef MODULE_LOCALISATION_ROBOTLOCALISATION_HPP
-#define MODULE_LOCALISATION_ROBOTLOCALISATION_HPP
+#ifndef MODULE_LOCALISATION_FIELDLOCALISATION_HPP
+#define MODULE_LOCALISATION_FIELDLOCALISATION_HPP
 
 #include <nuclear>
 
@@ -25,7 +25,7 @@ namespace module::localisation {
         float weight = 1.0;
     };
 
-    class RobotLocalisation : public NUClear::Reactor {
+    class FieldLocalisation : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
         struct Config {
@@ -70,8 +70,8 @@ namespace module::localisation {
 
 
     public:
-        /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
-        explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
+        explicit FieldLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
         /// @brief Converts a unit vector of point from the camera in robot space to a (x,y) point relative to the robot
         /// on the field plane
@@ -118,4 +118,4 @@ namespace module::localisation {
     };
 }  // namespace module::localisation
 
-#endif  // MODULE_LOCALISATION_ROBOTLOCALISATION_HPP
+#endif  // MODULE_LOCALISATION_FIELDLOCALISATION_HPP

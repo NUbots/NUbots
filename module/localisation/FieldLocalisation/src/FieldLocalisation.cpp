@@ -1,4 +1,4 @@
-#include "RobotLocalisation.hpp"
+#include "FieldLocalisation.hpp"
 
 #include <Eigen/Dense>
 #include <fstream>
@@ -14,7 +14,7 @@ namespace module::localisation {
 
     using message::behaviour::state::Stability;
     using message::localisation::Field;
-    using message::localisation::ResetRobotLocalisation;
+    using message::localisation::ResetFieldLocalisation;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
@@ -28,10 +28,10 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    RobotLocalisation::RobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
+    FieldLocalisation::FieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Configuration>("RobotLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration>("FieldLocalisation.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.grid_size   = config["grid_size"].as<float>();
             cfg.n_particles = config["n_particles"].as<int>();
@@ -46,7 +46,7 @@ namespace module::localisation {
             cfg.outside_map_penalty_factor    = config["outside_map_penalty_factor"].as<float>();
         });
 
-        on<Trigger<ResetRobotLocalisation>>().then([this] {
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
             // Reset the particles to the initial state
             state      = cfg.initial_state[0];
             covariance = cfg.initial_covariance;
@@ -311,7 +311,7 @@ namespace module::localisation {
         });
     }
 
-    Eigen::Vector2f RobotLocalisation::ray_to_field_plane(Eigen::Vector3f uPCr, Eigen::Isometry3f Hcw) {
+    Eigen::Vector2f FieldLocalisation::ray_to_field_plane(Eigen::Vector3f uPCr, Eigen::Isometry3f Hcw) {
         // Project the field line points onto the field plane
         auto Hwc             = Hcw.inverse();
         Eigen::Vector3f rCWw = Eigen::Vector3f(Hwc.translation().x(), Hwc.translation().y(), 0.0);
@@ -319,7 +319,7 @@ namespace module::localisation {
         return rPCw.head(2);
     }
 
-    Eigen::Vector2i RobotLocalisation::position_in_map(const Eigen::Matrix<float, 3, 1> particle,
+    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Matrix<float, 3, 1> particle,
                                                        const Eigen::Vector2f rPRw) {
         // Transform observations from world {w} to field {f} space
         Eigen::Isometry2f Hfw;
@@ -333,7 +333,7 @@ namespace module::localisation {
         return Eigen::Vector2i(x_map, y_map);
     }
 
-    float RobotLocalisation::calculate_weight(const Eigen::Matrix<float, 3, 1> particle,
+    float FieldLocalisation::calculate_weight(const Eigen::Matrix<float, 3, 1> particle,
                                               const std::vector<Eigen::Vector2f>& observations) {
         float weight = 0;
         for (auto rORr : observations) {
@@ -355,13 +355,14 @@ namespace module::localisation {
         return std::max(weight, 0.0f);
     }
 
-    void RobotLocalisation::resample() {
+    void FieldLocalisation::resample() {
         std::vector<float> weights(particles.size());
+        float weight_sum = 0;
         for (size_t i = 0; i < particles.size(); i++) {
             weights[i] = particles[i].weight;
+            weight_sum += weights[i];
         }
-        float weight_sum = std::accumulate(weights.begin(), weights.end(), 0.0);
-        if (weight_sum == 0) {
+        if (weight_sum <= std::numeric_limits<float>::epsilon()) {
             log<NUClear::DEBUG>("All weights are zero, cannot resample");
             // Add some more noise to the particles
             add_noise();
@@ -383,7 +384,7 @@ namespace module::localisation {
         particles = resampled_particles;
     }
 
-    Eigen::Vector3f RobotLocalisation::compute_mean() {
+    Eigen::Vector3f FieldLocalisation::compute_mean() {
         Eigen::Vector3f mean = Eigen::Vector3f::Zero();
         for (const auto& particle : particles) {
             mean += particle.state;
@@ -391,7 +392,7 @@ namespace module::localisation {
         return mean / cfg.n_particles;
     }
 
-    Eigen::Matrix<float, 3, 3> RobotLocalisation::compute_covariance() {
+    Eigen::Matrix<float, 3, 3> FieldLocalisation::compute_covariance() {
         Eigen::Matrix<float, 3, 3> cov_matrix = Eigen::Matrix<float, 3, 3>::Zero();
         for (const auto& particle : particles) {
             const Eigen::Matrix<float, 3, 1> deviation = particle.state - state;
@@ -401,7 +402,7 @@ namespace module::localisation {
         return cov_matrix;
     }
 
-    void RobotLocalisation::add_noise() {
+    void FieldLocalisation::add_noise() {
         MultivariateNormal<float, 3> multivariate(Eigen::Vector3f(0.0, 0.0, 0.0), cfg.process_noise);
 
         for (auto& particle : particles) {

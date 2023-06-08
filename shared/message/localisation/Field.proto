@@ -23,7 +23,7 @@ package message.localisation;
 import "Matrix.proto";
 
 message Field {
-    /// Isometry2d position transform of world from field
+    /// Homogeneous transformation matrix from world to field space
     fmat4 Hfw = 1;
     /// Covariance of (x, y, theta)
     fmat3 covariance = 2;
@@ -31,4 +31,4 @@ message Field {
     float uncertainty = 3;
 }
 
-message ResetRobotLocalisation {}
+message ResetFieldLocalisation {}
