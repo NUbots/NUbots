@@ -33,12 +33,12 @@ namespace module::vision {
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
             // Convenience variables
-            const auto& cls                                     = mesh.classifications;
-            const auto& neighbours                              = mesh.neighbourhood;
+            const auto& cls                                      = mesh.classifications;
+            const auto& neighbours                               = mesh.neighbourhood;
             const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays = mesh.rays;
             const double world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
-            const uint32_t LINE_INDEX                           = mesh.class_map.at("line");
-            const uint32_t FIELD_INDEX                          = mesh.class_map.at("field");
+            const uint32_t LINE_INDEX                            = mesh.class_map.at("line");
+            const uint32_t FIELD_INDEX                           = mesh.class_map.at("field");
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
@@ -166,9 +166,9 @@ namespace module::vision {
                 msg->horizon.reserve(hull_indices.size());
                 for (const auto& idx : hull_indices) {
                     const Eigen::Vector3d ray      = rays.col(idx);
-                    const double d                  = mesh.Hcw(2, 3) / ray.z();
+                    const double d                 = mesh.Hcw(2, 3) / ray.z();
                     Eigen::Vector3d ray_projection = ray * d;
-                    const double norm               = ray_projection.head<2>().norm();
+                    const double norm              = ray_projection.head<2>().norm();
                     ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
                     msg->horizon.emplace_back(ray_projection.normalized());
                 }

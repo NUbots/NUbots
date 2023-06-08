@@ -28,7 +28,7 @@ import "Matrix.proto";
  * Hesse normal form representation of a line. See https://en.wikipedia.org/wiki/Hesse_normal_form
  */
 message Line {
-    vec3 normal   = 1;
+    vec3   normal   = 1;
     double distance = 2;
 }
 

@@ -97,10 +97,10 @@ namespace module::vision::visualmesh {
                 lens.focal_length = float(img.lens.focal_length * img.dimensions[0]);
                 lens.fov          = float(img.lens.fov);
                 lens.centre       = {float(img.lens.centre[0] * img.dimensions[0]),
-                                     float(img.lens.centre[1] * img.dimensions[0])};
+                               float(img.lens.centre[1] * img.dimensions[0])};
                 lens.k            = std::array<float, 2>{
-                               float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
-                               float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
+                    float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
+                    float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
                 };
                 switch (img.lens.projection.value) {
                     case Image::Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;

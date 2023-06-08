@@ -42,8 +42,10 @@ namespace utility::math::geometry {
             const Eigen::Vector3d& p0(rays.col(a));
             const Eigen::Vector3d& p1(rays.col(b));
 
-            double theta0 = std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<double>(2.0 * M_PI));
-            double theta1 = std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, static_cast<double>(2.0 * M_PI));
+            double theta0 =
+                std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<double>(2.0 * M_PI));
+            double theta1 =
+                std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, static_cast<double>(2.0 * M_PI));
             return theta0 < theta1;
         });
     }
