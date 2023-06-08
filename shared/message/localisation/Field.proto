@@ -24,9 +24,9 @@ import "Matrix.proto";
 
 message Field {
     /// Homogeneous transformation matrix from world to field space
-    fmat4 Hfw = 1;
+    mat4 Hfw = 1;
     /// Covariance of (x, y, theta)
-    fmat3 covariance = 2;
+    mat3 covariance = 2;
     /// Sum of the covariance matrix diagonals to quantify the filters uncertainty as a single value
     float uncertainty = 3;
 }
