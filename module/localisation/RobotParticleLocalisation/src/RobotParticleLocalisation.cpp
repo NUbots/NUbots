@@ -60,8 +60,8 @@ namespace module::localisation {
                 Hfw.translation() = Eigen::Vector3d(state[RobotModel<double>::kX], state[RobotModel<double>::kY], 0);
                 Hfw.linear() =
                     Eigen::AngleAxisd(state[RobotModel<double>::kAngle], Eigen::Vector3d::UnitZ()).toRotationMatrix();
-                field->Hfw        = Hfw.matrix().cast<float>();
-                field->covariance = filter.get_covariance().cast<float>();
+                field->Hfw        = Hfw.matrix();
+                field->covariance = filter.get_covariance();
 
                 log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
                                                 state[RobotModel<double>::kX],
