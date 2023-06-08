@@ -43,12 +43,11 @@ namespace extension {
         // Rules:
         // 1) Default config file should define a value for every node.
         // 2) Platform config overrides default config values.
-        // 3) Per-robot config overrides default and platform config values. This file need only override the values
-        // that need to be overriden.
-        // 4) Per-binary folder config overrides per-robot, platform and default config values. This
+        // 3) Per-binary folder config overrides platform and default config values. This
         // file need only override the values that need to be overriden.
-        // 5) Per-binary config overrides per-binary folder, per-robot, platform and default config values. This
-        // file need only override the values that need to be overriden.
+        // 4) Per-robot config overrides default, platform and binary folder config values. This file need only override
+        // the values that need to be overriden. 5) Per-binary config overrides per-binary folder, per-robot, platform
+        // and default config values. This file need only override the values that need to be overriden.
         //
         // Per-robot, per-platform, per-binary folder and per-binary files need not exist.
         // Per-robot, per-platform, per-binary folder and per-binary files can add new nodes to the file, but this is
@@ -105,6 +104,17 @@ namespace extension {
                 }
             }
 
+            // If the same file exists in this binary folder's per-binary folder config directory then load and merge.
+            if (fs::exists(fs::path("config") / folder / filename)) {
+                if (loaded) {
+                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / folder / filename));
+                }
+
+                else {
+                    config = YAML::LoadFile(fs::path("config") / folder / filename);
+                }
+            }
+
             // If the same file exists in this robots per-robot config directory then load and merge.
             if (fs::exists(fs::path("config") / hostname / filename)) {
                 if (loaded) {
@@ -117,16 +127,6 @@ namespace extension {
                 }
             }
 
-            // If the same file exists in this binary folder's per-binary folder config directory then load and merge.
-            if (fs::exists(fs::path("config") / folder / filename)) {
-                if (loaded) {
-                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / folder / filename));
-                }
-
-                else {
-                    config = YAML::LoadFile(fs::path("config") / folder / filename);
-                }
-            }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
             if (fs::exists(fs::path("config") / binary / filename)) {
@@ -303,7 +303,7 @@ namespace NUClear::dsl {
             /// @brief Sets up the NUClear Reaction for Configuration
             /// @details Sets up a FileWatch on the filename which is passed in
             ///          The config files are FileWatched in order from least specific to most specific:
-            ///          1. default, 2. per-robot, 3. binary folder 4. binary
+            ///          1. default, 2. platform, 3. binary folder, 4. per-robot, 5. binary
             ///          The later, more specific configs (if they exist) supersede the less specific ones
             ///          If the default config file doesn't exist, we make one
             ///          The flags used during binding tell FileWatch that the config files have been changed or
@@ -343,25 +343,18 @@ namespace NUClear::dsl {
                 // Bind our default config file path
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, default_config, flags);
 
-                // Bind our robot specific config file if it exists
-                const fs::path robot_config = fs::path("config") / hostname / filename;
-                if (fs::exists(robot_config)) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robot_config, flags);
-                }
-
-                // Bind our robot specific config file if it exists
+                // Bind our platform specific config file if it exists
                 const fs::path platform_config = fs::path("config") / platform / filename;
                 if (fs::exists(platform_config) && !platform.empty()) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platform_config, flags);
                 }
 
-                // If there were command line arguments, we can get the binary name, and check for a binary config
-                // If not, we don't bother checking for a binary config to bind
+                // If there were command line arguments, we can get the binary name, to check now for binary folder
+                // config and later for binary config
                 const auto binary_name = get_first_command_line_arg();
-
-                // Get the parent folder name
                 const auto folder_name = fs::path(binary_name).parent_path().filename();
 
+                // Get the parent folder name
                 // As long as the parent isn't bin (for docker) or empty (real robot), we can check for a folder config
                 // Bind folder config if it exists
                 if (!folder_name.empty() && folder_name != "bin") {
@@ -370,6 +363,12 @@ namespace NUClear::dsl {
                     if (fs::exists(binary_folder_config)) {
                         DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binary_folder_config, flags);
                     }
+                }
+
+                // Bind our robot specific config file if it exists
+                const fs::path robot_config = fs::path("config") / hostname / filename;
+                if (fs::exists(robot_config)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robot_config, flags);
                 }
 
                 if (!binary_name.empty()) {
