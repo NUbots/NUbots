@@ -27,8 +27,8 @@ message Field {
     fmat4 Hfw = 1;
     /// Covariance of (x, y, theta)
     fmat3 covariance = 2;
-    /// Trace of the covariance matrix to quantify the filters confidence for all states as a single value
-    float confidence = 3;
+    /// Sum of the covariance matrix diagonals to quantify the filters uncertainty as a single value
+    float uncertainty = 3;
 }
 
 message ResetRobotLocalisation {}
