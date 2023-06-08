@@ -8,7 +8,7 @@ from utility.shell import WrapPty
 @run_on_docker
 def register(command):
     # Install help
-    command.help = "Open an interactive shell in a docker container"
+    command.description = "Open an interactive shell in a docker container"
 
     command.add_argument(
         "args", nargs="...", help="the command to run on the docker image. If empty will default to /bin/bash"
