@@ -178,9 +178,6 @@ namespace module::localisation {
             int centre_circle_r = (fd.dimensions.center_circle_diameter / 2) / cfg.grid_size;
             fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
 
-            // Fill the surrounding cells close to the field lines with decreasing occupancy values
-            // fieldline_map.fill_surrounding_cells(0.25 / cfg.grid_size);
-
             // Precompute the distance map
             fieldline_map.create_distance_map(cfg.grid_size);
 

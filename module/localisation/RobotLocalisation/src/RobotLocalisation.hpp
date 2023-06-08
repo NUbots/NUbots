@@ -54,7 +54,7 @@ namespace module::localisation {
         NUClear::clock::time_point last_time_update_time;
 
         /// @brief Occupancy grid map of the field lines
-        OccupancyMap fieldline_map;
+        OccupancyMap<float> fieldline_map;
 
         /// @brief State (x,y,theta) of the robot
         Eigen::Matrix<float, 3, 1> state = Eigen::Matrix<float, 3, 1>::Zero();
