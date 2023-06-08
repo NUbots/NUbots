@@ -10,7 +10,7 @@ from utility.shell import WrapPty
 @run_on_docker
 def register(command):
     # Install help
-    command.help = "Run a built binary within the local docker container"
+    command.description = "Edit a file within the local docker container"
 
     command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
 

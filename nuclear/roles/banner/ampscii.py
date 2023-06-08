@@ -424,3 +424,7 @@ def ampscii(src, unicode=True):
         output += "\x1b[0m\n"
 
     return output
+
+
+if __name__ == "__main__":
+    print(ampscii(sys.argv[1]))

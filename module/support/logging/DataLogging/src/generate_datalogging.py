@@ -18,7 +18,6 @@ if __name__ == "__main__":
         modules = pkgutil.iter_modules(path=[dir_name])
         for loader, module_name, ispkg in modules:
             if module_name.endswith("pb2"):
-
                 # Work out what header file this came from
                 include = os.path.join(os.path.relpath(dir_name, shared_folder), "{}.hpp".format(module_name[:-4]))
 
@@ -27,12 +26,15 @@ if __name__ == "__main__":
                     includes.append(include)
 
                 # Load our protobuf module
-                loader.find_module(module_name).load_module(module_name)
+                fqdn = os.path.normpath(os.path.join(os.path.relpath(dir_name, shared_folder), module_name)).replace(
+                    os.sep, "."
+                )
+                if fqdn not in sys.modules:
+                    loader.find_module(fqdn).load_module(fqdn)
 
     # Now that we've imported them all get all the subclasses of protobuf message
     messages = set()
     for message in google.protobuf.message.Message.__subclasses__():
-
         # Work out our original protobuf type
         pb_type = ".".join(message.DESCRIPTOR.full_name.split(".")[1:])
 
