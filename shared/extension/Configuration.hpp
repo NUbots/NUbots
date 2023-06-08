@@ -358,7 +358,6 @@ namespace NUClear::dsl {
                 // If there were command line arguments, we can get the binary name, and check for a binary config
                 // If not, we don't bother checking for a binary config to bind
                 const auto binary_name = get_first_command_line_arg();
-                NUClear::log<NUClear::WARN>("Binary name: ", binary_name);
 
                 // Get the parent folder name
                 const auto folder_name = fs::path(binary_name).parent_path().filename();
@@ -367,7 +366,6 @@ namespace NUClear::dsl {
                 // Bind folder config if it exists
                 if (!folder_name.empty() && folder_name != "bin") {
                     fs::path binary_folder_config = fs::path("config") / folder_name / filename;
-                    NUClear::log<NUClear::WARN>("Binary folder name: ", folder_name.string());
                     // Bind our binary folder specific config file if it exists
                     if (fs::exists(binary_folder_config)) {
                         DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binary_folder_config, flags);
@@ -428,8 +426,8 @@ namespace NUClear::dsl {
                 // If it's the installation phase, and the path contains anything indicating it is not default config,
                 // then don't let the reaction run
                 if (watch.events == ::extension::FileWatch::Event::NO_OP
-                    && (str_exists(hostname) || str_exists(platform)
-                        || str_exists(binary_name || str_exists(folder_name)))) {
+                    && (str_exists(hostname) || str_exists(platform) || str_exists(binary_name)
+                        || str_exists(folder_name))) {
                     return false;
                 }
                 // Satisfied all the checks, the reaction can run
