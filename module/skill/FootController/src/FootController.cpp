@@ -46,6 +46,7 @@ namespace module::skill {
             // Use configuration here from file FootController.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.servo_gain  = config["servo_gain"].as<float>();
+            cfg.keep_level  = config["keep_level"].as<bool>();
         });
 
         on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
@@ -53,7 +54,7 @@ namespace module::skill {
                 // Construct Leg IK tasks
                 auto left_leg  = std::make_unique<LeftLegIK>();
                 left_leg->time = left_foot.time;
-                if (left_foot.keep_level) {
+                if (left_foot.keep_level && cfg.keep_level) {
                     // Calculate the desired foot orientation to keep the foot level with the ground
                     Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
                     Eigen::Isometry3d Htf = Eigen::Isometry3d(left_foot.Htf.cast<double>().matrix());
@@ -78,7 +79,7 @@ namespace module::skill {
                 right_leg->time = right_foot.time;
                 right_leg->Htr  = right_foot.Htf.cast<double>().matrix();
 
-                if (right_foot.keep_level) {
+                if (right_foot.keep_level && cfg.keep_level) {
                     // Calculate the desired foot orientation to keep the foot level with the ground
                     Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
                     Eigen::Isometry3d Htf = Eigen::Isometry3d(right_foot.Htf.cast<double>().matrix());

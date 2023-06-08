@@ -2,3 +2,5 @@
 log_level: DEBUG
 
 servo_gain: 50
+
+keep_level: true

@@ -11,7 +11,10 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Gains for the servos
             float servo_gain = 0.0f;
+            /// @brief Whether or not to level the foot with the ground
+            bool keep_level = false;
         } cfg;
 
     public:
