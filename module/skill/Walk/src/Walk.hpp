@@ -28,14 +28,14 @@ namespace module::skill {
             std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
 
             /// @brief Desired arm positions while walking
-            std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
+            std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
         } cfg;
 
         /// @brief Last time we updated the walk engine
         NUClear::clock::time_point last_update_time{};
 
         /// @brief Walk engine, generates swing foot and torso trajectories for walk velocity target
-        utility::skill::MotionGeneration<float> walk_engine{};
+        utility::skill::MotionGeneration<double> walk_engine{};
 
         /**
          * @brief Emits task to achieve desired joint positions to follow walking trajectories
@@ -46,7 +46,7 @@ namespace module::skill {
          * @brief Computes the time delta since the last time we updated the desired joint positions
          * @return Time since the last update
          */
-        [[nodiscard]] float compute_time_delta();
+        [[nodiscard]] double compute_time_delta();
     };
 }  // namespace module::skill
 

@@ -234,9 +234,9 @@ namespace utility::skill {
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(const LimbID& limb) const {
             // Assign the value based on the foot planted
-            Eigen::Transform<float, 3, Eigen::Isometry> Htl =
+            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htl =
                 left_foot_is_planted ? get_torso_pose().inverse() : get_torso_pose().inverse() * get_swing_foot_pose();
-            Eigen::Transform<float, 3, Eigen::Isometry> Htr =
+            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htr =
                 left_foot_is_planted ? get_torso_pose().inverse() * get_swing_foot_pose() : get_torso_pose().inverse();
 
             // Return the desired pose of the specified foot
@@ -245,6 +245,14 @@ namespace utility::skill {
             if (limb == LimbID::RIGHT_LEG)
                 return Htr;
             throw std::runtime_error("Invalid Limb ID");
+        }
+
+        /**
+         * @brief Get whether or not the left foot is planted.
+         * @return True if left foot is planted, false otherwise.
+         */
+        bool is_left_foot_planted() const {
+            return left_foot_is_planted;
         }
 
         /**
@@ -269,7 +277,7 @@ namespace utility::skill {
          * @brief Update the time.
          * @param dt Time step.
          */
-        void update_time(const float& dt) {
+        void update_time(const Scalar& dt) {
             // Check for negative time step
             if (dt <= 0.0f) {
                 NUClear::log<NUClear::WARN>("dt <= 0.0f");

@@ -14,6 +14,8 @@
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
+#include "utility/nusight/NUhelpers.hpp"
+
 
 namespace module::skill {
 
@@ -35,6 +37,7 @@ namespace module::skill {
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::nusight::graph;
 
     FootController::FootController(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -50,7 +53,16 @@ namespace module::skill {
                 // Construct Leg IK tasks
                 auto left_leg  = std::make_unique<LeftLegIK>();
                 left_leg->time = left_foot.time;
-                left_leg->Htl  = left_foot.Htf.cast<double>().matrix();
+                if (left_foot.keep_level) {
+                    // Calculate the desired foot orientation to keep the foot level with the ground
+                    Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
+                    Eigen::Isometry3d Htf = Eigen::Isometry3d(left_foot.Htf.cast<double>().matrix());
+                    Htf.linear()          = Htr.linear();
+                    left_leg->Htl         = Htf.matrix();
+                }
+                else {
+                    left_leg->Htl = left_foot.Htf.cast<double>().matrix();
+                }
 
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
                     left_leg->servos[id] = cfg.servo_gain;
@@ -65,6 +77,17 @@ namespace module::skill {
                 auto right_leg  = std::make_unique<RightLegIK>();
                 right_leg->time = right_foot.time;
                 right_leg->Htr  = right_foot.Htf.cast<double>().matrix();
+
+                if (right_foot.keep_level) {
+                    // Calculate the desired foot orientation to keep the foot level with the ground
+                    Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
+                    Eigen::Isometry3d Htf = Eigen::Isometry3d(right_foot.Htf.cast<double>().matrix());
+                    Htf.linear()          = Htr.linear();
+                    right_leg->Htr        = Htf.matrix();
+                }
+                else {
+                    right_leg->Htr = right_foot.Htf.cast<double>().matrix();
+                }
 
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {
                     right_leg->servos[id] = cfg.servo_gain;
