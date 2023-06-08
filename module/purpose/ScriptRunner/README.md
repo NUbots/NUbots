@@ -13,10 +13,9 @@ finished at which point it terminates the program.
 ## Consumes
 
 - `CommandLineArguments` containing the list of scripts from the command line
-- `message::AllServoWaypointsComplete` indicates that a script has finished
 
 ## Emits
 
-`message::actuation::LimbsSequence` through the Script extension, which populates the requested Script/s into LimbsSequences.
+- `message::actuation::LimbsSequence` through the Script extension, which populates the requested Script/s into LimbsSequences.
 
 ## Dependencies
