@@ -47,6 +47,8 @@ namespace module::localisation {
             bool save_map = false;
             /// @brief Minimum number of field line points for a measurement update
             size_t min_observations = 0;
+            /// @brief Penalty factor for observations being outside map
+            float outside_map_penalty_factor = 0.0;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
