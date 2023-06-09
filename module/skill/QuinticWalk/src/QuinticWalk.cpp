@@ -11,9 +11,9 @@
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkingState.hpp"
+#include "message/eye/DataPoint.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
-#include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"

@@ -7,8 +7,9 @@ HOME="/home/${USER}"
 HOST="nugus"
 HOSTNAME="${HOST}${ROBOT_NUMBER}"
 IP_ADDR="10.1.1.${ROBOT_NUMBER}"
-ETHERNET_INTERFACE="eno1"
-WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/wlp58s0 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
+ETHERNET_INTERFACE=${ETHERNET_INTERFACE:-"eno1"}
+WIFI_INTERFACE=${WIFI_INTERFACE:-"wlp58s0"}
+WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/${WIFI_INTERFACE} 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
 
 # Setup timezone information
 ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
@@ -117,6 +118,16 @@ Address=${IP_ADDR}/16
 Gateway=10.1.3.1
 DNS=10.1.3.1
 DNS=8.8.8.8
+EOF
+
+# Provide udevd configuration for network interfaces
+cat << EOF > /etc/systemd/99-default.link
+[Match]
+OriginalName=*
+
+[Link]
+NamePolicy=path
+MACAddressPolicy=persistent
 EOF
 
 # Setup wpa_supplicant networks

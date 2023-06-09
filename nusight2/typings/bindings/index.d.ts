@@ -1,11 +1,11 @@
-declare module 'bindings' {
+declare module "bindings" {
   const bindings: (
     name:
       | string
       | {
-          bindings: string
-          module_root: string
+          bindings: string;
+          module_root: string;
         },
-  ) => any
-  export = bindings
+  ) => any;
+  export = bindings;
 }

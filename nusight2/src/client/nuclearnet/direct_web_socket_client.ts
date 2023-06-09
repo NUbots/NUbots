@@ -1,8 +1,8 @@
-import { io, Socket, SocketOptions } from 'socket.io-client'
+import { io, Socket, SocketOptions } from "socket.io-client";
 
-import * as NUClearNetProxyParser from '../../shared/nuclearnet/nuclearnet_proxy_parser'
+import * as NUClearNetProxyParser from "../../shared/nuclearnet/nuclearnet_proxy_parser";
 
-import { WebSocketClient } from './web_socket_client'
+import { WebSocketClient } from "./web_socket_client";
 
 /**
  * The thinnest wrapper possible around the Socket IO client interface. This exists to assist testing
@@ -11,30 +11,50 @@ import { WebSocketClient } from './web_socket_client'
  * There should never be enough logic in here that it needs any testing.
  */
 export class DirectWebSocketClient implements WebSocketClient {
-  constructor(private socket: Socket) {}
+  private socket: Socket;
+
+  constructor(socket: Socket) {
+    this.socket = socket;
+  }
 
   static of(uri: string, opts: SocketOptions) {
-    const socket = io(uri, { ...opts, parser: NUClearNetProxyParser } as any)
-    return new DirectWebSocketClient(socket)
+    const socket = io(uri, { ...opts, parser: NUClearNetProxyParser } as any);
+    return new DirectWebSocketClient(socket);
   }
 
   connect() {
-    this.socket = this.socket.connect()
+    this.socket = this.socket.connect();
   }
 
   disconnect() {
-    this.socket.disconnect()
+    this.socket.disconnect();
   }
 
   on(event: string, fn: (...args: any[]) => void) {
-    this.socket.on(event, fn)
+    this.socket.on(event, (...args: any[]) => {
+      const now = Date.now();
+
+      // Go through the args and replace the ack function with a wrapper that adds the time we
+      // received the message here. This is used for performance measurements on the server.
+      const argsWithAckWrapped = args.map((arg) => {
+        // We assume that any function in args is an ack function, since the only function
+        // we will ever get from a Socket.io connection is the ack function.
+        return typeof arg === "function"
+          ? (...ackArgs: any[]) => {
+              arg(...ackArgs, now);
+            }
+          : arg;
+      });
+
+      fn(...argsWithAckWrapped);
+    });
   }
 
   off(event: string, fn?: Function) {
-    this.socket.off(event, fn)
+    this.socket.off(event, fn);
   }
 
   send(event: string, ...args: any[]) {
-    this.socket.emit(event, ...args)
+    this.socket.emit(event, ...args);
   }
 }

@@ -1,0 +1,2 @@
+# Allow idx files to be tracked
+!*.idx

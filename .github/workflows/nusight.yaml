@@ -29,7 +29,7 @@ jobs:
   # Detects changes to NUsight related files, for conditionally running other jobs
   check_for_changes:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Output the detected changes for conditionally running other jobs
     outputs:
@@ -63,11 +63,11 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
-    # Run on the Node 14 (LTS) container
+    # Run on the Node container
     container:
-      image: node:lts-fermium
+      image: node:18
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -110,11 +110,11 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
-    # Run on the Node 14 (LTS) container
+    # Run on the Node container
     container:
-      image: node:lts-fermium
+      image: node:18
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -157,11 +157,11 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
-    # Run on the Node 14 (LTS) container
+    # Run on the Node container
     container:
-      image: node:lts-fermium
+      image: node:18
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

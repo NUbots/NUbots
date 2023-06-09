@@ -1,29 +1,29 @@
-import { observable } from 'mobx'
+import { observable } from "mobx";
 
-import { FieldDimensions } from '../../../../shared/field/dimensions'
+import { FieldDimensions } from "../../../../shared/field/dimensions";
 
 export class GroundModel {
-  @observable bottomGoalColor: string
-  @observable dimensions: FieldDimensions
-  @observable fieldColor: string
-  @observable lineColor: string
-  @observable topGoalColor: string
+  @observable bottomGoalColor: string;
+  @observable dimensions: FieldDimensions;
+  @observable fieldColor: string;
+  @observable lineColor: string;
+  @observable topGoalColor: string;
 
   constructor({ bottomGoalColor, dimensions, fieldColor, lineColor, topGoalColor }: GroundModel) {
-    this.bottomGoalColor = bottomGoalColor
-    this.dimensions = dimensions
-    this.fieldColor = fieldColor
-    this.lineColor = lineColor
-    this.topGoalColor = topGoalColor
+    this.bottomGoalColor = bottomGoalColor;
+    this.dimensions = dimensions;
+    this.fieldColor = fieldColor;
+    this.lineColor = lineColor;
+    this.topGoalColor = topGoalColor;
   }
 
   static of() {
     return new GroundModel({
-      bottomGoalColor: '#0000ff',
+      bottomGoalColor: "#0000ff",
       dimensions: FieldDimensions.postYear2017(),
-      fieldColor: '#009688',
-      lineColor: '#ffffff',
-      topGoalColor: '#ffff00',
-    })
+      fieldColor: "#009688",
+      lineColor: "#ffffff",
+      topGoalColor: "#ffff00",
+    });
   }
 }
