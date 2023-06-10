@@ -2,14 +2,16 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/inpiut/RoboCup.hpp"
 #include "message/input/GameState"
+#include "message/input/RoboCup.hpp"
 #include "message/localisation/FilteredBall.hpp"
+// add includes
 
 namespace module::network {
 
     using extension::Configuration;
     using message::input::RoboCup;
+    // add usings
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -17,8 +19,10 @@ namespace module::network {
         on<Configuration>("RobotCommunication.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RobotCommunication.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            send_port       = config["send_port"].as<uint>();
-            broadcast_ip    = config["broadcast_ip"].as<uint>();
+            // need to determine send and receive ports
+            send_port = config["send_port"].as<uint>();
+            // need to determine broadcast ip
+            broadcast_ip = config["broadcast_ip"].as<uint>();
 
             // If we are changing ports (the port starts at 0 so this should start it the first time)
             if (config["receive_port"].as<uint>() != receive_port) {
@@ -38,35 +42,31 @@ namespace module::network {
             }
         });
 
-        on<Trigger<FilteredBall>,
-           With<Ball>,
-           With<Stability>,
-           With<WalkCommand>,
-           With<Kick>,
-           With<Field>,
-           With<GameStateProto>,
-           With<GlobalConfig>>()
+        // walk command should be updated to director
+        // determine way to do this where we don't require a filtered ball trigger (optional triggers, every...)
+        on<Trigger<FilteredBall>, With<WalkCommand>, With<Kick>, With<Field>, With<GameState>, With<GlobalConfig>>()
             .then([this](const FilteredBall& ball,
-                         const Ball& ballData const Kick& kick,
+                         const Kick& kick,
                          const WalkCommand& walk,
                          const Field& field,
                          const GameState& game_state,
                          const GlobalConfig& config) {
                 auto msg = std::make_unique<RoboCup>();
 
-                msg->state               = game_state.Phase;
-                msg->current_pose        = field.covariance;
-                eamMessage->walk_command = walk.command;
-                msg->kick_target         = kick.target;
+                msg->state        = game_state.Phase;
+                msg->current_pose = field.covariance;
+                msg->walk_command = walk.command;
+                msg->kick_target  = kick.target;
 
                 msg->Robot->player_id  = config.player_id;
                 msg->Robot->position   = game_state.Hfw;
                 msg->Robot->covariance = game_state.covariance;
                 msg->Robot->team       = config.team_id;
 
-                msg->ball->position   = ball.rBTt;
-                msg->ball->velocity   = 0;  // velocity is n/a atm
-                msg->ball->covariance = ballData.measurement.covariance;
+                msg->ball->position = ball.rBTt;
+                // todo: should add covariance and velocity to the ball message
+                // msg->ball->velocity   = 0;  // velocity is n/a atm
+                // msg->ball->covariance = ballData.measurement.covariance;
 
                 emit<Scope::UDP>(msg, broadcast_ip, send_port);
             });
