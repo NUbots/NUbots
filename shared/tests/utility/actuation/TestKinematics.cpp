@@ -19,7 +19,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
@@ -30,10 +31,10 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 
+using Catch::Matchers::WithinAbs;
 using message::actuation::BodySide;
 using message::actuation::KinematicsModel;
 using message::input::Sensors;
-
 using utility::input::LimbID;
 using utility::input::ServoID;
 
@@ -80,9 +81,9 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
                                                               ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
-        REQUIRE(double(Htc(0, 0) - camera_vector[0]) == Approx(0.0).margin(ERROR_THRESHOLD));
-        REQUIRE(double(Htc(1, 0) - camera_vector[1]) == Approx(0.0).margin(ERROR_THRESHOLD));
-        REQUIRE(double(Htc(2, 0) - camera_vector[2]) == Approx(0.0).margin(ERROR_THRESHOLD));
+        REQUIRE_THAT(double(Htc(0, 0) - camera_vector[0]), WithinAbs(0.0, ERROR_THRESHOLD));
+        REQUIRE_THAT(double(Htc(1, 0) - camera_vector[1]), WithinAbs(0.0, ERROR_THRESHOLD));
+        REQUIRE_THAT(double(Htc(2, 0) - camera_vector[2]), WithinAbs(0.0, ERROR_THRESHOLD));
     }
 }
 
@@ -144,7 +145,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         double lerror = (left_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
         double rerror = (right_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
 
-        REQUIRE(lerror == Approx(0.0).margin(ERROR_THRESHOLD));
-        REQUIRE(rerror == Approx(0.0).margin(ERROR_THRESHOLD));
+        REQUIRE_THAT(lerror, WithinAbs(0.0, ERROR_THRESHOLD));
+        REQUIRE_THAT(rerror, WithinAbs(0.0, ERROR_THRESHOLD));
     }
 }

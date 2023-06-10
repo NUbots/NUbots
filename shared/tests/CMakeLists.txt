@@ -1,3 +1,5 @@
+find_package(Catch2 REQUIRED)
+
 # This gets all of our source files
 file(GLOB_RECURSE test_src "*/**.cpp" "*/**.hpp")
 
@@ -25,8 +27,10 @@ if(test_src)
     )
   endforeach(test_data_file)
 
-  add_executable(TestShared "${CMAKE_SOURCE_DIR}/${NUCLEAR_SHARED_DIR}/tests/test.cpp" ${test_src} ${test_data})
-  target_link_libraries(TestShared PRIVATE nuclear::message nuclear::utility)
+  add_executable(TestShared ${test_src} ${test_data})
+  target_link_libraries(TestShared nuclear::message)
+  target_link_libraries(TestShared nuclear::utility)
+  target_link_libraries(TestShared Catch2::Catch2WithMain)
 
   set_target_properties(TestShared PROPERTIES FOLDER "shared/tests")
 

@@ -19,7 +19,7 @@
 
 #include <Eigen/Core>
 #include <array>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <utility>
 
 #include "VanDerPolModel.hpp"
@@ -53,7 +53,7 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
 
     utility::math::filter::UKF<double, shared::tests::VanDerPolModel> model_filter;
 
-    INFO("Configuring the UKF with")
+    INFO("Configuring the UKF with");
     INFO("    Time step.........: " << deltaT);
     INFO("    Process Noise.....: " << process_noise.transpose());
     INFO("    Initial State.....: " << initial_state.transpose());
@@ -75,7 +75,7 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
         actual_state.push_back(std::make_pair(model_filter.get_state(), model_filter.get_covariance()));
     }
 
-    INFO("Calculating statistics")
+    INFO("Calculating statistics");
 
     double count_x1                  = 0.0;
     double count_x2                  = 0.0;
@@ -161,7 +161,7 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
         actual_state.push_back(std::make_pair(model_filter.get_state(), model_filter.get_covariance()));
     }
 
-    INFO("Calculating statistics")
+    INFO("Calculating statistics");
 
     double count_x1                  = 0.0;
     double count_x2                  = 0.0;

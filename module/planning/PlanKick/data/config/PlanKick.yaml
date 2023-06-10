@@ -10,7 +10,7 @@ ball_distance_threshold: 0.25
 ball_angle_threshold: 0.4
 
 # Maximum angle of the target from the torso's x-axis required to kick the ball (in radians), both clockwise and anticlockwise
-target_angle_threshold: PI
+target_angle_threshold: 23 * pi / 180
 
 # Is a LimbID - UNKNOWN, LEFT_LEG, RIGHT_LEG are valid options
 # Left will only kick with the left leg, right only with the right, and unknown will determine the leg from the ball position
