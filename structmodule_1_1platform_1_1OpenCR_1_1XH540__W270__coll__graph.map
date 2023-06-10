@@ -1,0 +1,5 @@
+<map id="module::platform::OpenCR::XH540_W270" name="module::platform::OpenCR::XH540_W270">
+<area shape="rect" id="node1" title=" " alt="" coords="5,184,200,225"/>
+<area shape="rect" id="node2" href="$structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html" title=" " alt="" coords="5,95,200,136"/>
+<area shape="rect" id="node3" href="$classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html" title=" " alt="" coords="5,5,200,47"/>
+</map>

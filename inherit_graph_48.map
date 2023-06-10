@@ -1,3 +1,4 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html" title="Stores configuration values." alt="" coords="5,5,245,61"/>
+<area shape="rect" id="node1" href="$structextension_1_1behaviour_1_1Uses.html" title="Adds a Uses object to the callback to allow access to information from the context of this provider." alt="" coords="5,5,164,47"/>
+<area shape="rect" id="node2" href="$structextension_1_1behaviour_1_1Needs.html" title="Create a Needs relationship between this provider and the provider specified by T." alt="" coords="212,5,371,47"/>
 </map>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['yaw_1076',['yaw',['../classmodule_1_1input_1_1SensorFilter.html#a75af4bca7a29316d14fb488a4f013ee2',1,'module::input::SensorFilter']]]
+  ['xh540_5fw270_1154',['XH540_W270',['../structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html',1,'module::platform::OpenCR']]]
 ];

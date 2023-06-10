@@ -1,0 +1,324 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::platform::OpenCR::HardwareIO::ServoState Struct Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::platform::OpenCR::HardwareIO::ServoState Struct Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a96e16f787c99e4b86cbd1b44b4649ce8"><td class="memItemLeft" align="right" valign="top"><a id="a96e16f787c99e4b86cbd1b44b4649ce8"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a96e16f787c99e4b86cbd1b44b4649ce8">dirty</a> = false</td></tr>
+<tr class="memdesc:a96e16f787c99e4b86cbd1b44b4649ce8"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if we need to write new values to the hardware. <br /></td></tr>
+<tr class="separator:a96e16f787c99e4b86cbd1b44b4649ce8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cd109679b44dfa742fe0d2dfd223aae"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a4cd109679b44dfa742fe0d2dfd223aae">error_flags</a> = 0</td></tr>
+<tr class="memdesc:a4cd109679b44dfa742fe0d2dfd223aae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error state of the servo.  <a href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a4cd109679b44dfa742fe0d2dfd223aae">More...</a><br /></td></tr>
+<tr class="separator:a4cd109679b44dfa742fe0d2dfd223aae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2bdedc873e432b27cf9ea70743f21d5"><td class="memItemLeft" align="right" valign="top"><a id="af2bdedc873e432b27cf9ea70743f21d5"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#af2bdedc873e432b27cf9ea70743f21d5">feedforward_1st_gain</a> = 0.0f</td></tr>
+<tr class="memdesc:af2bdedc873e432b27cf9ea70743f21d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The first feedforward torque coefficient. <br /></td></tr>
+<tr class="separator:af2bdedc873e432b27cf9ea70743f21d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aace48aceb4d8b25c68787465664cbbb5"><td class="memItemLeft" align="right" valign="top"><a id="aace48aceb4d8b25c68787465664cbbb5"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aace48aceb4d8b25c68787465664cbbb5">feedforward_2nd_gain</a> = 0.0f</td></tr>
+<tr class="memdesc:aace48aceb4d8b25c68787465664cbbb5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The second feedforward torque coefficient. <br /></td></tr>
+<tr class="separator:aace48aceb4d8b25c68787465664cbbb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa92b26f40237dab96c67083de345e775"><td class="memItemLeft" align="right" valign="top"><a id="aa92b26f40237dab96c67083de345e775"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aa92b26f40237dab96c67083de345e775">goal_current</a> = 6.52176f / 0.00336f</td></tr>
+<tr class="memdesc:aa92b26f40237dab96c67083de345e775"><td class="mdescLeft">&#160;</td><td class="mdescRight">The target current of the servo. <br /></td></tr>
+<tr class="separator:aa92b26f40237dab96c67083de345e775"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b8543f9eb2822e5a182bbb2c1d783be"><td class="memItemLeft" align="right" valign="top"><a id="a2b8543f9eb2822e5a182bbb2c1d783be"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a2b8543f9eb2822e5a182bbb2c1d783be">goal_position</a> = 0.0f</td></tr>
+<tr class="memdesc:a2b8543f9eb2822e5a182bbb2c1d783be"><td class="mdescLeft">&#160;</td><td class="mdescRight">The target position of the servo. <br /></td></tr>
+<tr class="separator:a2b8543f9eb2822e5a182bbb2c1d783be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1704a2f486bab4dbb48ae2406d9fbd1e"><td class="memItemLeft" align="right" valign="top"><a id="a1704a2f486bab4dbb48ae2406d9fbd1e"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a1704a2f486bab4dbb48ae2406d9fbd1e">goal_pwm</a> = 885.0f</td></tr>
+<tr class="memdesc:a1704a2f486bab4dbb48ae2406d9fbd1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The target pulse width modulation of the servo. <br /></td></tr>
+<tr class="separator:a1704a2f486bab4dbb48ae2406d9fbd1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a86b7ec98409fd004c87ca35ec4e7a5"><td class="memItemLeft" align="right" valign="top"><a id="a6a86b7ec98409fd004c87ca35ec4e7a5"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a6a86b7ec98409fd004c87ca35ec4e7a5">goal_velocity</a> = 1.08775f</td></tr>
+<tr class="memdesc:a6a86b7ec98409fd004c87ca35ec4e7a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The target velocity of the servo, not used by the servos. <br /></td></tr>
+<tr class="separator:a6a86b7ec98409fd004c87ca35ec4e7a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8d43ee56250e07fe856e7883f7dae951"><td class="memItemLeft" align="right" valign="top"><a id="a8d43ee56250e07fe856e7883f7dae951"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a8d43ee56250e07fe856e7883f7dae951">position_d_gain</a> = 0.0f</td></tr>
+<tr class="memdesc:a8d43ee56250e07fe856e7883f7dae951"><td class="mdescLeft">&#160;</td><td class="mdescRight">The derivative gain of the position. <br /></td></tr>
+<tr class="separator:a8d43ee56250e07fe856e7883f7dae951"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61a1b33f7d80d3f451dbb0e45a5bded4"><td class="memItemLeft" align="right" valign="top"><a id="a61a1b33f7d80d3f451dbb0e45a5bded4"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a61a1b33f7d80d3f451dbb0e45a5bded4">position_i_gain</a> = 0.0f</td></tr>
+<tr class="memdesc:a61a1b33f7d80d3f451dbb0e45a5bded4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The integral gain of the position. <br /></td></tr>
+<tr class="separator:a61a1b33f7d80d3f451dbb0e45a5bded4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4ef188024cc964f5c53417b26a1feb3"><td class="memItemLeft" align="right" valign="top"><a id="aa4ef188024cc964f5c53417b26a1feb3"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aa4ef188024cc964f5c53417b26a1feb3">position_p_gain</a> = 850.0f / 128.0f</td></tr>
+<tr class="memdesc:aa4ef188024cc964f5c53417b26a1feb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">The proportional gain of the position. <br /></td></tr>
+<tr class="separator:aa4ef188024cc964f5c53417b26a1feb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e64663f5450270a3027fa9364839259"><td class="memItemLeft" align="right" valign="top"><a id="a1e64663f5450270a3027fa9364839259"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a1e64663f5450270a3027fa9364839259">present_current</a> = 0.0f</td></tr>
+<tr class="memdesc:a1e64663f5450270a3027fa9364839259"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last read current of the servo. <br /></td></tr>
+<tr class="separator:a1e64663f5450270a3027fa9364839259"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4d667fc067be834627affca5f99eda8"><td class="memItemLeft" align="right" valign="top"><a id="ab4d667fc067be834627affca5f99eda8"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ab4d667fc067be834627affca5f99eda8">present_position</a> = 0.0f</td></tr>
+<tr class="memdesc:ab4d667fc067be834627affca5f99eda8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last read position of the servo. <br /></td></tr>
+<tr class="separator:ab4d667fc067be834627affca5f99eda8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1607495f9e1e934655e1a4add19a4a9"><td class="memItemLeft" align="right" valign="top"><a id="ad1607495f9e1e934655e1a4add19a4a9"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ad1607495f9e1e934655e1a4add19a4a9">present_pwm</a> = 0.0f</td></tr>
+<tr class="memdesc:ad1607495f9e1e934655e1a4add19a4a9"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last read pulse width modulation of the servo. <br /></td></tr>
+<tr class="separator:ad1607495f9e1e934655e1a4add19a4a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4576dd22ff2b20f1c6a4ae0fd9324b1"><td class="memItemLeft" align="right" valign="top"><a id="aa4576dd22ff2b20f1c6a4ae0fd9324b1"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aa4576dd22ff2b20f1c6a4ae0fd9324b1">present_velocity</a> = 0.0f</td></tr>
+<tr class="memdesc:aa4576dd22ff2b20f1c6a4ae0fd9324b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last read velocity of the servo. <br /></td></tr>
+<tr class="separator:aa4576dd22ff2b20f1c6a4ae0fd9324b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad38f7dbfdc2ddd98c524d9b0efa52958"><td class="memItemLeft" align="right" valign="top"><a id="ad38f7dbfdc2ddd98c524d9b0efa52958"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ad38f7dbfdc2ddd98c524d9b0efa52958">profile_acceleration</a> = 0.0f</td></tr>
+<tr class="memdesc:ad38f7dbfdc2ddd98c524d9b0efa52958"><td class="mdescLeft">&#160;</td><td class="mdescRight">The target acceleration of the servo. <br /></td></tr>
+<tr class="separator:ad38f7dbfdc2ddd98c524d9b0efa52958"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a1917e77fb6f3dd077074bc72b25362"><td class="memItemLeft" align="right" valign="top"><a id="a5a1917e77fb6f3dd077074bc72b25362"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a5a1917e77fb6f3dd077074bc72b25362">profile_velocity</a> = 0.0f</td></tr>
+<tr class="memdesc:a5a1917e77fb6f3dd077074bc72b25362"><td class="mdescLeft">&#160;</td><td class="mdescRight">The target velocity of the servo, replacing moving speed in v1 protocol. <br /></td></tr>
+<tr class="separator:a5a1917e77fb6f3dd077074bc72b25362"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae2336f27b3f17eb8b1343592ac1441ab"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ae2336f27b3f17eb8b1343592ac1441ab">simulated</a> = false</td></tr>
+<tr class="memdesc:ae2336f27b3f17eb8b1343592ac1441ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if we simulate where we think the servos should be.  <a href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ae2336f27b3f17eb8b1343592ac1441ab">More...</a><br /></td></tr>
+<tr class="separator:ae2336f27b3f17eb8b1343592ac1441ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a812008a2c7441d99aa8a352013a79c44"><td class="memItemLeft" align="right" valign="top"><a id="a812008a2c7441d99aa8a352013a79c44"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a812008a2c7441d99aa8a352013a79c44">temperature</a> = 0.0f</td></tr>
+<tr class="memdesc:a812008a2c7441d99aa8a352013a79c44"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last read temperature of the servo. <br /></td></tr>
+<tr class="separator:a812008a2c7441d99aa8a352013a79c44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61d8a87bd561cf929f274a9ced25db4e"><td class="memItemLeft" align="right" valign="top"><a id="a61d8a87bd561cf929f274a9ced25db4e"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a61d8a87bd561cf929f274a9ced25db4e">torque</a> = 0</td></tr>
+<tr class="memdesc:a61d8a87bd561cf929f274a9ced25db4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Our internal system torque target, this is never sent to the servo. <br /></td></tr>
+<tr class="separator:a61d8a87bd561cf929f274a9ced25db4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a710b55d2008adc8f9c37f676888f2a1d"><td class="memItemLeft" align="right" valign="top"><a id="a710b55d2008adc8f9c37f676888f2a1d"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a710b55d2008adc8f9c37f676888f2a1d">torque_enabled</a> = true</td></tr>
+<tr class="memdesc:a710b55d2008adc8f9c37f676888f2a1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the servo's torque is enabled, allowing it to move. <br /></td></tr>
+<tr class="separator:a710b55d2008adc8f9c37f676888f2a1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a21aa2517f4bf159d876a9ed3487a931f"><td class="memItemLeft" align="right" valign="top"><a id="a21aa2517f4bf159d876a9ed3487a931f"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a21aa2517f4bf159d876a9ed3487a931f">velocity_i_gain</a> = 1920.0f / 65536.0f</td></tr>
+<tr class="memdesc:a21aa2517f4bf159d876a9ed3487a931f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The integral gain of the velocity. <br /></td></tr>
+<tr class="separator:a21aa2517f4bf159d876a9ed3487a931f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeb4e6ce2004c49838a8e83aac48e656e"><td class="memItemLeft" align="right" valign="top"><a id="aeb4e6ce2004c49838a8e83aac48e656e"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aeb4e6ce2004c49838a8e83aac48e656e">velocity_p_gain</a> = 100.0f / 128.0f</td></tr>
+<tr class="memdesc:aeb4e6ce2004c49838a8e83aac48e656e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The proportional gain of the velocity. <br /></td></tr>
+<tr class="separator:aeb4e6ce2004c49838a8e83aac48e656e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a750d9ee9fcb97105ef04f6b84d09058e"><td class="memItemLeft" align="right" valign="top"><a id="a750d9ee9fcb97105ef04f6b84d09058e"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a750d9ee9fcb97105ef04f6b84d09058e">voltage</a> = 0.0f</td></tr>
+<tr class="memdesc:a750d9ee9fcb97105ef04f6b84d09058e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last read voltage of the servo. <br /></td></tr>
+<tr class="separator:a750d9ee9fcb97105ef04f6b84d09058e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c" title="The state of the servos, used to store read values and to store values to be written.">servo_states</a> </dd></dl>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="a4cd109679b44dfa742fe0d2dfd223aae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cd109679b44dfa742fe0d2dfd223aae">&#9670;&nbsp;</a></span>error_flags</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t module::platform::OpenCR::HardwareIO::ServoState::error_flags = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Current error state of the servo. </p>
+<dl class="section warning"><dt>Warning</dt><dd>different to the dynamixel packet error status </dd></dl>
+
+</div>
+</div>
+<a id="ae2336f27b3f17eb8b1343592ac1441ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae2336f27b3f17eb8b1343592ac1441ab">&#9670;&nbsp;</a></span>simulated</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool module::platform::OpenCR::HardwareIO::ServoState::simulated = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>True if we simulate where we think the servos should be. </p>
+<dl class="section note"><dt>Note</dt><dd>that we still write the commands to hardware </dd></dl>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>module/platform/OpenCR/HardwareIO/src/<a class="el" href="OpenCR_2HardwareIO_2src_2HardwareIO_8hpp_source.html">HardwareIO.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html">ServoState</a></li>
+    <li class="footer">Generated on Sat Jun 10 2023 15:24:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

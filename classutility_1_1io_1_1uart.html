@@ -229,9 +229,17 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:adf4728cbc36031cb3d14549b144b2133"><td class="memItemLeft" align="right" valign="top"><a id="adf4728cbc36031cb3d14549b144b2133"></a>
 <a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&amp;<a class="el" href="classutility_1_1io_1_1uart.html">uart</a>)=delete</td></tr>
 <tr class="separator:adf4728cbc36031cb3d14549b144b2133"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa054f62d6603f56da4b8628c89a465d1"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:aa054f62d6603f56da4b8628c89a465d1"><td class="memTemplItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#aa054f62d6603f56da4b8628c89a465d1">read</a> (T &amp;data)</td></tr>
+<tr class="memdesc:aa054f62d6603f56da4b8628c89a465d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read from the device into a structure.  <a href="classutility_1_1io_1_1uart.html#aa054f62d6603f56da4b8628c89a465d1">More...</a><br /></td></tr>
+<tr class="separator:aa054f62d6603f56da4b8628c89a465d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9746ed9646023eb5f7d1df4746e607bb"><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a9746ed9646023eb5f7d1df4746e607bb">read</a> (void *buf, size_t count)</td></tr>
 <tr class="memdesc:a9746ed9646023eb5f7d1df4746e607bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read from the device into a buffer.  <a href="classutility_1_1io_1_1uart.html#a9746ed9646023eb5f7d1df4746e607bb">More...</a><br /></td></tr>
 <tr class="separator:a9746ed9646023eb5f7d1df4746e607bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e72ef83228a60b020a0d13630681d0c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a7e72ef83228a60b020a0d13630681d0c"><td class="memTemplItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a7e72ef83228a60b020a0d13630681d0c">write</a> (const T &amp;data)</td></tr>
+<tr class="memdesc:a7e72ef83228a60b020a0d13630681d0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write bytes to the uart.  <a href="classutility_1_1io_1_1uart.html#a7e72ef83228a60b020a0d13630681d0c">More...</a><br /></td></tr>
+<tr class="separator:a7e72ef83228a60b020a0d13630681d0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abdcf291d53486048af03fd3b4180247e"><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#abdcf291d53486048af03fd3b4180247e">write</a> (const void *buf, size_t count)</td></tr>
 <tr class="memdesc:abdcf291d53486048af03fd3b4180247e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write bytes to the uart.  <a href="classutility_1_1io_1_1uart.html#abdcf291d53486048af03fd3b4180247e">More...</a><br /></td></tr>
 <tr class="separator:abdcf291d53486048af03fd3b4180247e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -371,8 +379,46 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
 
 </div>
 </div>
+<a id="aa054f62d6603f56da4b8628c89a465d1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa054f62d6603f56da4b8628c89a465d1">&#9670;&nbsp;</a></span>read() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ssize_t utility::io::uart::read </td>
+          <td>(</td>
+          <td class="paramtype">T &amp;&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Read from the device into a structure. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>the structure to read in to</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were actually read, or -1 if fail. See ::read</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Implementation in header file to stop the compiler from optimising it away </dd></dl>
+
+</div>
+</div>
 <a id="a9746ed9646023eb5f7d1df4746e607bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9746ed9646023eb5f7d1df4746e607bb">&#9670;&nbsp;</a></span>read()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9746ed9646023eb5f7d1df4746e607bb">&#9670;&nbsp;</a></span>read() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -443,8 +489,46 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
 
 </div>
 </div>
+<a id="a7e72ef83228a60b020a0d13630681d0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e72ef83228a60b020a0d13630681d0c">&#9670;&nbsp;</a></span>write() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">ssize_t utility::io::uart::write </td>
+          <td>(</td>
+          <td class="paramtype">const T &amp;&#160;</td>
+          <td class="paramname"><em>data</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Write bytes to the uart. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>the data to write</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were written</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Implementation in header file to stop the compiler from optimising it away </dd></dl>
+
+</div>
+</div>
 <a id="abdcf291d53486048af03fd3b4180247e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abdcf291d53486048af03fd3b4180247e">&#9670;&nbsp;</a></span>write()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#abdcf291d53486048af03fd3b4180247e">&#9670;&nbsp;</a></span>write() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -491,7 +575,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>io</b></li><li class="navelem"><a class="el" href="classutility_1_1io_1_1uart.html">uart</a></li>
-    <li class="footer">Generated on Sat Jun 10 2023 01:33:49 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jun 10 2023 15:24:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

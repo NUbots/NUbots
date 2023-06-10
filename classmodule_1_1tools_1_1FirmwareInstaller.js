@@ -10,7 +10,8 @@ var classmodule_1_1tools_1_1FirmwareInstaller =
       [ "NO_DEVICE", "classmodule_1_1tools_1_1FirmwareInstaller.html#a7e88c8a5f6c4da0de076e53f34242d27a173b79680182bb76597d6e0dd7298832", null ],
       [ "CM730", "classmodule_1_1tools_1_1FirmwareInstaller.html#a7e88c8a5f6c4da0de076e53f34242d27aa05bc8556c6502580ed2e7f3ef39eaac", null ],
       [ "CM740", "classmodule_1_1tools_1_1FirmwareInstaller.html#a7e88c8a5f6c4da0de076e53f34242d27a6af66b1c8a6757793ed24dd89d6e0d83", null ],
-      [ "DYNAMIXEL", "classmodule_1_1tools_1_1FirmwareInstaller.html#a7e88c8a5f6c4da0de076e53f34242d27affad10acb919cf172d139c1b6959fab0", null ]
+      [ "DYNAMIXEL", "classmodule_1_1tools_1_1FirmwareInstaller.html#a7e88c8a5f6c4da0de076e53f34242d27affad10acb919cf172d139c1b6959fab0", null ],
+      [ "OPENCR", "classmodule_1_1tools_1_1FirmwareInstaller.html#a7e88c8a5f6c4da0de076e53f34242d27aad792c328bad328965acb39b87017871", null ]
     ] ],
     [ "MenuState", "classmodule_1_1tools_1_1FirmwareInstaller.html#a9a02a64d630115854dea37ebbc0a3087", [
       [ "NO_MENU", "classmodule_1_1tools_1_1FirmwareInstaller.html#a9a02a64d630115854dea37ebbc0a3087aa3eacc1abaac1882528df1eda078d581", null ],

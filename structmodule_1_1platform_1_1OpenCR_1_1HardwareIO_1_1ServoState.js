@@ -1,0 +1,27 @@
+var structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState =
+[
+    [ "dirty", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a96e16f787c99e4b86cbd1b44b4649ce8", null ],
+    [ "error_flags", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a4cd109679b44dfa742fe0d2dfd223aae", null ],
+    [ "feedforward_1st_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#af2bdedc873e432b27cf9ea70743f21d5", null ],
+    [ "feedforward_2nd_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aace48aceb4d8b25c68787465664cbbb5", null ],
+    [ "goal_current", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aa92b26f40237dab96c67083de345e775", null ],
+    [ "goal_position", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a2b8543f9eb2822e5a182bbb2c1d783be", null ],
+    [ "goal_pwm", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a1704a2f486bab4dbb48ae2406d9fbd1e", null ],
+    [ "goal_velocity", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a6a86b7ec98409fd004c87ca35ec4e7a5", null ],
+    [ "position_d_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a8d43ee56250e07fe856e7883f7dae951", null ],
+    [ "position_i_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a61a1b33f7d80d3f451dbb0e45a5bded4", null ],
+    [ "position_p_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aa4ef188024cc964f5c53417b26a1feb3", null ],
+    [ "present_current", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a1e64663f5450270a3027fa9364839259", null ],
+    [ "present_position", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ab4d667fc067be834627affca5f99eda8", null ],
+    [ "present_pwm", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ad1607495f9e1e934655e1a4add19a4a9", null ],
+    [ "present_velocity", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aa4576dd22ff2b20f1c6a4ae0fd9324b1", null ],
+    [ "profile_acceleration", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ad38f7dbfdc2ddd98c524d9b0efa52958", null ],
+    [ "profile_velocity", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a5a1917e77fb6f3dd077074bc72b25362", null ],
+    [ "simulated", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ae2336f27b3f17eb8b1343592ac1441ab", null ],
+    [ "temperature", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a812008a2c7441d99aa8a352013a79c44", null ],
+    [ "torque", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a61d8a87bd561cf929f274a9ced25db4e", null ],
+    [ "torque_enabled", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a710b55d2008adc8f9c37f676888f2a1d", null ],
+    [ "velocity_i_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a21aa2517f4bf159d876a9ed3487a931f", null ],
+    [ "velocity_p_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aeb4e6ce2004c49838a8e83aac48e656e", null ],
+    [ "voltage", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a750d9ee9fcb97105ef04f6b84d09058e", null ]
+];

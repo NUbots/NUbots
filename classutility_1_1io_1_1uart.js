@@ -12,8 +12,10 @@ var classutility_1_1io_1_1uart =
     [ "open", "classutility_1_1io_1_1uart.html#a575335d772428e6cac047da73fc15c90", null ],
     [ "operator=", "classutility_1_1io_1_1uart.html#a83ddf4c5b2eb447a4f409da82262e8b4", null ],
     [ "operator=", "classutility_1_1io_1_1uart.html#adf4728cbc36031cb3d14549b144b2133", null ],
+    [ "read", "classutility_1_1io_1_1uart.html#aa054f62d6603f56da4b8628c89a465d1", null ],
     [ "read", "classutility_1_1io_1_1uart.html#a9746ed9646023eb5f7d1df4746e607bb", null ],
     [ "set_baud", "classutility_1_1io_1_1uart.html#aa692a36f0b648bd70a44d72848ae6d5d", null ],
+    [ "write", "classutility_1_1io_1_1uart.html#a7e72ef83228a60b020a0d13630681d0c", null ],
     [ "write", "classutility_1_1io_1_1uart.html#abdcf291d53486048af03fd3b4180247e", null ],
     [ "device", "classutility_1_1io_1_1uart.html#a28face5c2423de44135feff13a911302", null ],
     [ "fd", "classutility_1_1io_1_1uart.html#a234ce99884102680eb4e26ab7dbb12c7", null ]

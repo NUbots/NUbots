@@ -19,6 +19,25 @@ var annotated_dup =
       [ "Servo", "classCM740_1_1Servo.html", "classCM740_1_1Servo" ],
       [ "UART", "classCM740_1_1UART.html", "classCM740_1_1UART" ]
     ] ],
+    [ "dynamixel", null, [
+      [ "v2", null, [
+        [ "ActionCommand", "structdynamixel_1_1v2_1_1ActionCommand.html", "structdynamixel_1_1v2_1_1ActionCommand" ],
+        [ "BulkReadCommand", "structdynamixel_1_1v2_1_1BulkReadCommand.html", "structdynamixel_1_1v2_1_1BulkReadCommand" ],
+        [ "BulkReadData", "structdynamixel_1_1v2_1_1BulkReadData.html", "structdynamixel_1_1v2_1_1BulkReadData" ],
+        [ "BulkWriteCommand", "structdynamixel_1_1v2_1_1BulkWriteCommand.html", "structdynamixel_1_1v2_1_1BulkWriteCommand" ],
+        [ "BulkWriteData", "structdynamixel_1_1v2_1_1BulkWriteData.html", "structdynamixel_1_1v2_1_1BulkWriteData" ],
+        [ "FactoryResetCommand", "structdynamixel_1_1v2_1_1FactoryResetCommand.html", "structdynamixel_1_1v2_1_1FactoryResetCommand" ],
+        [ "PingCommand", "structdynamixel_1_1v2_1_1PingCommand.html", "structdynamixel_1_1v2_1_1PingCommand" ],
+        [ "ReadCommand", "structdynamixel_1_1v2_1_1ReadCommand.html", "structdynamixel_1_1v2_1_1ReadCommand" ],
+        [ "RebootCommand", "structdynamixel_1_1v2_1_1RebootCommand.html", "structdynamixel_1_1v2_1_1RebootCommand" ],
+        [ "RegWriteCommand", "structdynamixel_1_1v2_1_1RegWriteCommand.html", "structdynamixel_1_1v2_1_1RegWriteCommand" ],
+        [ "StatusReturnCommand", "structdynamixel_1_1v2_1_1StatusReturnCommand.html", "structdynamixel_1_1v2_1_1StatusReturnCommand" ],
+        [ "SyncReadCommand", "structdynamixel_1_1v2_1_1SyncReadCommand.html", "structdynamixel_1_1v2_1_1SyncReadCommand" ],
+        [ "SyncWriteCommand", "structdynamixel_1_1v2_1_1SyncWriteCommand.html", "structdynamixel_1_1v2_1_1SyncWriteCommand" ],
+        [ "SyncWriteData", "structdynamixel_1_1v2_1_1SyncWriteData.html", "structdynamixel_1_1v2_1_1SyncWriteData" ],
+        [ "WriteCommand", "structdynamixel_1_1v2_1_1WriteCommand.html", "structdynamixel_1_1v2_1_1WriteCommand" ]
+      ] ]
+    ] ],
     [ "extension", null, [
       [ "behaviour", null, [
         [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", [
@@ -241,6 +260,22 @@ var annotated_dup =
           [ "Convert", "structmodule_1_1platform_1_1cm740_1_1Convert.html", "structmodule_1_1platform_1_1cm740_1_1Convert" ],
           [ "HardwareIO", "classmodule_1_1platform_1_1cm740_1_1HardwareIO.html", "classmodule_1_1platform_1_1cm740_1_1HardwareIO" ],
           [ "HardwareSimulator", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator" ]
+        ] ],
+        [ "OpenCR", null, [
+          [ "DynamixelDevice", "classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html", null ],
+          [ "DynamixelServo", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo" ],
+          [ "DynamixelServoReadData", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoReadData" ],
+          [ "DynamixelServoWriteDataPart1", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1" ],
+          [ "DynamixelServoWriteDataPart2", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2" ],
+          [ "FSR", "structmodule_1_1platform_1_1OpenCR_1_1FSR.html", "structmodule_1_1platform_1_1OpenCR_1_1FSR" ],
+          [ "HardwareIO", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO" ],
+          [ "MX106", "structmodule_1_1platform_1_1OpenCR_1_1MX106.html", "structmodule_1_1platform_1_1OpenCR_1_1MX106" ],
+          [ "MX64", "structmodule_1_1platform_1_1OpenCR_1_1MX64.html", "structmodule_1_1platform_1_1OpenCR_1_1MX64" ],
+          [ "NUgus", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html", "classmodule_1_1platform_1_1OpenCR_1_1NUgus" ],
+          [ "OpenCR", "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html", "classmodule_1_1platform_1_1OpenCR_1_1OpenCR" ],
+          [ "OpenCRReadData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRReadData.html", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRReadData" ],
+          [ "OpenCRWriteData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData" ],
+          [ "XH540_W270", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270" ]
         ] ],
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ]
       ] ],

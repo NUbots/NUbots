@@ -1,0 +1,393 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::platform::OpenCR::NUgus Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1platform_1_1OpenCR_1_1NUgus.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-types">Public Types</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="classmodule_1_1platform_1_1OpenCR_1_1NUgus-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::platform::OpenCR::NUgus Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+Collaboration diagram for module::platform::OpenCR::NUgus:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1platform_1_1OpenCR_1_1NUgus__coll__graph.png" border="0" usemap="#amodule_1_1platform_1_1OpenCR_1_1NUgus_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1platform_1_1OpenCR_1_1NUgus_coll__map" id="amodule_1_1platform_1_1OpenCR_1_1NUgus_coll__map">
+<area shape="rect" title=" " alt="" coords="1063,237,1257,278"/>
+<area shape="rect" href="structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html" title=" " alt="" coords="687,49,881,90"/>
+<area shape="rect" href="structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html" title=" " alt="" coords="249,221,444,262"/>
+<area shape="rect" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html" title=" " alt="" coords="687,169,881,210"/>
+<area shape="rect" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html" title=" " alt="" coords="687,262,881,303"/>
+<area shape="rect" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html" title=" " alt="" coords="5,267,200,309"/>
+<area shape="rect" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html" title=" " alt="" coords="468,291,663,333"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a7d4616f4d0f4738c0eec5691d014a9ba"><td class="memItemLeft" align="right" valign="top"><a id="a7d4616f4d0f4738c0eec5691d014a9ba"></a>enum class &#160;</td><td class="memItemRight" valign="bottom"><b>ID</b> : uint8_t { <br />
+&#160;&#160;<b>NO_ID</b> = 0
+, <b>R_SHOULDER_PITCH</b> = 1
+, <b>L_SHOULDER_PITCH</b> = 2
+, <b>R_SHOULDER_ROLL</b> = 3
+, <br />
+&#160;&#160;<b>L_SHOULDER_ROLL</b> = 4
+, <b>R_ELBOW</b> = 5
+, <b>L_ELBOW</b> = 6
+, <b>R_HIP_YAW</b> = 7
+, <br />
+&#160;&#160;<b>L_HIP_YAW</b> = 8
+, <b>R_HIP_ROLL</b> = 9
+, <b>L_HIP_ROLL</b> = 10
+, <b>R_HIP_PITCH</b> = 11
+, <br />
+&#160;&#160;<b>L_HIP_PITCH</b> = 12
+, <b>R_KNEE</b> = 13
+, <b>L_KNEE</b> = 14
+, <b>R_ANKLE_PITCH</b> = 15
+, <br />
+&#160;&#160;<b>L_ANKLE_PITCH</b> = 16
+, <b>R_ANKLE_ROLL</b> = 17
+, <b>L_ANKLE_ROLL</b> = 18
+, <b>HEAD_YAW</b> = 19
+, <br />
+&#160;&#160;<b>HEAD_PITCH</b> = 20
+, <b>R_FSR</b> = 111
+, <b>L_FSR</b> = 112
+, <b>OPENCR</b> = 200
+, <br />
+&#160;&#160;<b>BROADCAST</b> = 254
+<br />
+ }</td></tr>
+<tr class="separator:a7d4616f4d0f4738c0eec5691d014a9ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a67a03d38221e26440cdd8cd404096fd6"><td class="memItemLeft" align="right" valign="top">constexpr <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html">DynamixelDevice</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a67a03d38221e26440cdd8cd404096fd6">operator[]</a> (const ID &amp;id)</td></tr>
+<tr class="memdesc:a67a03d38221e26440cdd8cd404096fd6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get a reference to the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html">DynamixelDevice</a> with the given ID.  <a href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a67a03d38221e26440cdd8cd404096fd6">More...</a><br /></td></tr>
+<tr class="separator:a67a03d38221e26440cdd8cd404096fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6925b8414d2a4b7add6b98547afb216"><td class="memItemLeft" align="right" valign="top">constexpr std::array&lt; uint8_t, 20 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6925b8414d2a4b7add6b98547afb216">servo_ids</a> () const</td></tr>
+<tr class="memdesc:af6925b8414d2a4b7add6b98547afb216"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get an array of the dynamixel IDs of each servo.  <a href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6925b8414d2a4b7add6b98547afb216">More...</a><br /></td></tr>
+<tr class="separator:af6925b8414d2a4b7add6b98547afb216"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:ae50f0e505f49f69c1f0c907744fdcea5"><td class="memItemLeft" align="right" valign="top"><a id="ae50f0e505f49f69c1f0c907744fdcea5"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>HEAD_PITCH</b></td></tr>
+<tr class="separator:ae50f0e505f49f69c1f0c907744fdcea5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ade5ea8211516dc2994d75e48a5d3aa2a"><td class="memItemLeft" align="right" valign="top"><a id="ade5ea8211516dc2994d75e48a5d3aa2a"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>HEAD_YAW</b></td></tr>
+<tr class="separator:ade5ea8211516dc2994d75e48a5d3aa2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6e65a63edaf8af2bc5eb4d0e28ac2e3"><td class="memItemLeft" align="right" valign="top"><a id="af6e65a63edaf8af2bc5eb4d0e28ac2e3"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_ANKLE_PITCH</b></td></tr>
+<tr class="separator:af6e65a63edaf8af2bc5eb4d0e28ac2e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3c45f44402ffa517065206e46a23135"><td class="memItemLeft" align="right" valign="top"><a id="ae3c45f44402ffa517065206e46a23135"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_ANKLE_ROLL</b></td></tr>
+<tr class="separator:ae3c45f44402ffa517065206e46a23135"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b7d28b47fd11687cbbff13f00d7e327"><td class="memItemLeft" align="right" valign="top"><a id="a7b7d28b47fd11687cbbff13f00d7e327"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_ELBOW</b></td></tr>
+<tr class="separator:a7b7d28b47fd11687cbbff13f00d7e327"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59f53def6aa2dc25a47c5da862bb81e0"><td class="memItemLeft" align="right" valign="top"><a id="a59f53def6aa2dc25a47c5da862bb81e0"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_HIP_PITCH</b></td></tr>
+<tr class="separator:a59f53def6aa2dc25a47c5da862bb81e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d4bb1fbcc2b376e8566cc39750bee7b"><td class="memItemLeft" align="right" valign="top"><a id="a0d4bb1fbcc2b376e8566cc39750bee7b"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_HIP_ROLL</b></td></tr>
+<tr class="separator:a0d4bb1fbcc2b376e8566cc39750bee7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a140c222fc68570d2bf9e580967df2da2"><td class="memItemLeft" align="right" valign="top"><a id="a140c222fc68570d2bf9e580967df2da2"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_HIP_YAW</b></td></tr>
+<tr class="separator:a140c222fc68570d2bf9e580967df2da2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0f7070051752e5c09845fcacae36c40"><td class="memItemLeft" align="right" valign="top"><a id="ae0f7070051752e5c09845fcacae36c40"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html">XH540_W270</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_KNEE</b></td></tr>
+<tr class="separator:ae0f7070051752e5c09845fcacae36c40"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d089062a79b3384a1d268bc12055417"><td class="memItemLeft" align="right" valign="top"><a id="a7d089062a79b3384a1d268bc12055417"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_SHOULDER_PITCH</b></td></tr>
+<tr class="separator:a7d089062a79b3384a1d268bc12055417"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2e0125bf8db4c85e8ad3cdd27d90a370"><td class="memItemLeft" align="right" valign="top"><a id="a2e0125bf8db4c85e8ad3cdd27d90a370"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>L_SHOULDER_ROLL</b></td></tr>
+<tr class="separator:a2e0125bf8db4c85e8ad3cdd27d90a370"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac9f5682a2a56b4f0ad2b859eab0f4e8d"><td class="memItemLeft" align="right" valign="top"><a id="ac9f5682a2a56b4f0ad2b859eab0f4e8d"></a>
+<a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html">OpenCR</a>&#160;</td><td class="memItemRight" valign="bottom"><b>OPENCR</b></td></tr>
+<tr class="separator:ac9f5682a2a56b4f0ad2b859eab0f4e8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65e40f3b1b1488fe285dbfd0aa7faf62"><td class="memItemLeft" align="right" valign="top"><a id="a65e40f3b1b1488fe285dbfd0aa7faf62"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_ANKLE_PITCH</b></td></tr>
+<tr class="separator:a65e40f3b1b1488fe285dbfd0aa7faf62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a482e434121bc4317870ad2d1876915c3"><td class="memItemLeft" align="right" valign="top"><a id="a482e434121bc4317870ad2d1876915c3"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_ANKLE_ROLL</b></td></tr>
+<tr class="separator:a482e434121bc4317870ad2d1876915c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9dd0fa446e384e99451e4db3af2bd6c4"><td class="memItemLeft" align="right" valign="top"><a id="a9dd0fa446e384e99451e4db3af2bd6c4"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_ELBOW</b></td></tr>
+<tr class="separator:a9dd0fa446e384e99451e4db3af2bd6c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a667e5012027deea7c3176e89d9d5b40e"><td class="memItemLeft" align="right" valign="top"><a id="a667e5012027deea7c3176e89d9d5b40e"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_HIP_PITCH</b></td></tr>
+<tr class="separator:a667e5012027deea7c3176e89d9d5b40e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefc6746236a4d356498d0b02732895af"><td class="memItemLeft" align="right" valign="top"><a id="aefc6746236a4d356498d0b02732895af"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_HIP_ROLL</b></td></tr>
+<tr class="separator:aefc6746236a4d356498d0b02732895af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc86710d9415fef0a150f776adc88fa8"><td class="memItemLeft" align="right" valign="top"><a id="afc86710d9415fef0a150f776adc88fa8"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX106.html">MX106</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_HIP_YAW</b></td></tr>
+<tr class="separator:afc86710d9415fef0a150f776adc88fa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a019a1eb24660f5fe13dc458ad798df20"><td class="memItemLeft" align="right" valign="top"><a id="a019a1eb24660f5fe13dc458ad798df20"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html">XH540_W270</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_KNEE</b></td></tr>
+<tr class="separator:a019a1eb24660f5fe13dc458ad798df20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a368186b2dc5dbac4f70f911708323b3e"><td class="memItemLeft" align="right" valign="top"><a id="a368186b2dc5dbac4f70f911708323b3e"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_SHOULDER_PITCH</b></td></tr>
+<tr class="separator:a368186b2dc5dbac4f70f911708323b3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c4a09b37dbba30c768649d83cf6ed52"><td class="memItemLeft" align="right" valign="top"><a id="a5c4a09b37dbba30c768649d83cf6ed52"></a>
+<a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1MX64.html">MX64</a>&#160;</td><td class="memItemRight" valign="bottom"><b>R_SHOULDER_ROLL</b></td></tr>
+<tr class="separator:a5c4a09b37dbba30c768649d83cf6ed52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a294f24d6e5f4922b024a9e61756c65ba"><td class="memItemLeft" align="right" valign="top"><a id="a294f24d6e5f4922b024a9e61756c65ba"></a>
+std::array&lt; int8_t, 20 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a294f24d6e5f4922b024a9e61756c65ba">servo_direction</a> {}</td></tr>
+<tr class="memdesc:a294f24d6e5f4922b024a9e61756c65ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">The direction (clockwise or anticlockwise) to measure each motor in. <br /></td></tr>
+<tr class="separator:a294f24d6e5f4922b024a9e61756c65ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32e951fd51fe728424c5b8809be2117f"><td class="memItemLeft" align="right" valign="top"><a id="a32e951fd51fe728424c5b8809be2117f"></a>
+std::array&lt; double, 20 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a32e951fd51fe728424c5b8809be2117f">servo_offset</a> {}</td></tr>
+<tr class="memdesc:a32e951fd51fe728424c5b8809be2117f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Offsets the radian angles of motors to change their 0 position. <br /></td></tr>
+<tr class="separator:a32e951fd51fe728424c5b8809be2117f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a67a03d38221e26440cdd8cd404096fd6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a67a03d38221e26440cdd8cd404096fd6">&#9670;&nbsp;</a></span>operator[]()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html">DynamixelDevice</a>&amp; module::platform::OpenCR::NUgus::operator[] </td>
+          <td>(</td>
+          <td class="paramtype">const ID &amp;&#160;</td>
+          <td class="paramname"><em>id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get a reference to the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html">DynamixelDevice</a> with the given ID. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">id</td><td>The ID of the device to get </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A reference to the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html">DynamixelDevice</a> with the given ID </dd></dl>
+
+</div>
+</div>
+<a id="af6925b8414d2a4b7add6b98547afb216"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6925b8414d2a4b7add6b98547afb216">&#9670;&nbsp;</a></span>servo_ids()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">constexpr std::array&lt;uint8_t, 20&gt; module::platform::OpenCR::NUgus::servo_ids </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get an array of the dynamixel IDs of each servo. </p>
+<dl class="section warning"><dt>Warning</dt><dd>Different to <a class="el" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a> which is zero indexed </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Array of uint8_t containing the IDs in order </dd></dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/platform/OpenCR/HardwareIO/src/<a class="el" href="NUgus_8hpp_source.html">NUgus.hpp</a></li>
+<li>module/platform/OpenCR/HardwareIO/src/NUgus.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html">NUgus</a></li>
+    <li class="footer">Generated on Sat Jun 10 2023 15:24:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

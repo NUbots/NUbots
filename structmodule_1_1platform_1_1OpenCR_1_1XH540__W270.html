@@ -1,0 +1,585 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::platform::OpenCR::XH540_W270 Struct Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="structmodule_1_1platform_1_1OpenCR_1_1XH540__W270-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::platform::OpenCR::XH540_W270 Struct Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+Inheritance diagram for module::platform::OpenCR::XH540_W270:</div>
+<div class="dyncontent">
+<div class="center"><img src="structmodule_1_1platform_1_1OpenCR_1_1XH540__W270__inherit__graph.png" border="0" usemap="#amodule_1_1platform_1_1OpenCR_1_1XH540__W270_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1platform_1_1OpenCR_1_1XH540__W270_inherit__map" id="amodule_1_1platform_1_1OpenCR_1_1XH540__W270_inherit__map">
+<area shape="rect" title=" " alt="" coords="5,184,200,225"/>
+<area shape="rect" href="structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html" title=" " alt="" coords="5,95,200,136"/>
+<area shape="rect" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html" title=" " alt="" coords="5,5,200,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::platform::OpenCR::XH540_W270:</div>
+<div class="dyncontent">
+<div class="center"><img src="structmodule_1_1platform_1_1OpenCR_1_1XH540__W270__coll__graph.png" border="0" usemap="#amodule_1_1platform_1_1OpenCR_1_1XH540__W270_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1platform_1_1OpenCR_1_1XH540__W270_coll__map" id="amodule_1_1platform_1_1OpenCR_1_1XH540__W270_coll__map">
+<area shape="rect" title=" " alt="" coords="5,184,200,225"/>
+<area shape="rect" href="structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html" title=" " alt="" coords="5,95,200,136"/>
+<area shape="rect" href="classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html" title=" " alt="" coords="5,5,200,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a95c0d730676fc227ccf454cfe729fd5c"><td class="memItemLeft" align="right" valign="top"><a id="a95c0d730676fc227ccf454cfe729fd5c"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>XH540_W270</b> (uint8_t ID)</td></tr>
+<tr class="separator:a95c0d730676fc227ccf454cfe729fd5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a6f863abdd339fd96af6e5ee7981bc596"><td class="memItemLeft" align="right" valign="top"><a id="a6f863abdd339fd96af6e5ee7981bc596"></a>
+const uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>ID</b></td></tr>
+<tr class="separator:a6f863abdd339fd96af6e5ee7981bc596"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_types_structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo"><td colspan="2" onclick="javascript:toggleInherit('pub_types_structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html">module::platform::OpenCR::DynamixelServo</a></td></tr>
+<tr class="memitem:aa97cee3a2970d4d241056630b3a2227d inherit pub_types_structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227d">Address</a> : uint16_t { <br />
+&#160;&#160;<b>MODEL_NUMBER_L</b> = 0
+, <b>MODEL_NUMBER_H</b> = 1
+, <b>MODEL_INFORMATION_L</b> = 2
+, <b>MODEL_INFORMATION_2</b> = 3
+, <br />
+&#160;&#160;<b>MODEL_INFORMATION_3</b> = 4
+, <b>MODEL_INFORMATION_H</b> = 5
+, <b>FIRMWARE_VERSION</b> = 6
+, <b>ID</b> = 7
+, <br />
+&#160;&#160;<b>BAUD_RATE</b> = 8
+, <b>RETURN_DELAY_TIME</b> = 9
+, <b>DRIVE_MODE</b> = 10
+, <b>OPERATING_MODE</b> = 11
+, <br />
+&#160;&#160;<b>SECONDARY_ID</b> = 12
+, <b>PROTOCOL_VERSION</b> = 13
+, <b>HOMING_OFFSET_L</b> = 20
+, <b>HOMING_OFFSET_2</b> = 21
+, <br />
+&#160;&#160;<b>HOMING_OFFSET_3</b> = 22
+, <b>HOMING_OFFSET_H</b> = 23
+, <b>MOVING_THRESHOLD_L</b> = 24
+, <b>MOVING_THRESHOLD_2</b> = 25
+, <br />
+&#160;&#160;<b>MOVING_THRESHOLD_3</b> = 26
+, <b>MOVING_THRESHOLD_H</b> = 27
+, <b>TEMPERATURE_LIMIT</b> = 31
+, <b>MAX_VOLTAGE_LIMIT_L</b> = 32
+, <br />
+&#160;&#160;<b>MAX_VOLTAGE_LIMIT_H</b> = 33
+, <b>MIN_VOLTAGE_LIMIT_L</b> = 34
+, <b>MIN_VOLTAGE_LIMIT_H</b> = 35
+, <b>PWM_LIMIT_L</b> = 36
+, <br />
+&#160;&#160;<b>PWM_LIMIT_H</b> = 37
+, <b>CURRENT_LIMIT_L</b> = 38
+, <b>CURRENT_LIMIT_H</b> = 39
+, <b>ACCELERATION_LIMIT_L</b> = 40
+, <br />
+&#160;&#160;<b>ACCELERATION_LIMIT_2</b> = 41
+, <b>ACCELERATION_LIMIT_3</b> = 42
+, <b>ACCELERATION_LIMIT_H</b> = 43
+, <b>VELOCITY_LIMIT_L</b> = 44
+, <br />
+&#160;&#160;<b>VELOCITY_LIMIT_2</b> = 45
+, <b>VELOCITY_LIMIT_3</b> = 46
+, <b>VELOCITY_LIMIT_H</b> = 47
+, <b>MAX_POSITION_LIMIT_L</b> = 48
+, <br />
+&#160;&#160;<b>MAX_POSITION_LIMIT_2</b> = 49
+, <b>MAX_POSITION_LIMIT_3</b> = 50
+, <b>MAX_POSITION_LIMIT_H</b> = 51
+, <b>MIN_POSITION_LIMIT_L</b> = 52
+, <br />
+&#160;&#160;<b>MIN_POSITION_LIMIT_2</b> = 53
+, <b>MIN_POSITION_LIMIT_3</b> = 54
+, <b>MIN_POSITION_LIMIT_H</b> = 55
+, <b>SHUTDOWN</b> = 63
+, <br />
+&#160;&#160;<b>TORQUE_ENABLE</b> = 64
+, <b>LED</b> = 65
+, <b>STATUS_RETURN_LEVEL</b> = 68
+, <b>REGISTERED_INSTRUCTION</b> = 69
+, <br />
+&#160;&#160;<b>HARDWARE_ERROR_STATUS</b> = 70
+, <b>VELOCITY_I_GAIN_L</b> = 76
+, <b>VELOCITY_I_GAIN_H</b> = 77
+, <b>VELOCITY_P_GAIN_L</b> = 78
+, <br />
+&#160;&#160;<b>VELOCITY_P_GAIN_H</b> = 79
+, <b>POSITION_D_GAIN_L</b> = 80
+, <b>POSITION_D_GAIN_H</b> = 81
+, <b>POSITION_I_GAIN_L</b> = 82
+, <br />
+&#160;&#160;<b>POSITION_I_GAIN_H</b> = 83
+, <b>POSITION_P_GAIN_L</b> = 84
+, <b>POSITION_P_GAIN_H</b> = 85
+, <b>FEEDFORWARD_2ND_GAIN_L</b> = 88
+, <br />
+&#160;&#160;<b>FEEDFORWARD_2ND_GAIN_H</b> = 89
+, <b>FEEDFORWARD_1ST_GAIN_L</b> = 90
+, <b>FEEDFORWARD_1ST_GAIN_H</b> = 91
+, <b>BUS_WATCHDOG</b> = 98
+, <br />
+&#160;&#160;<b>GOAL_PWM_L</b> = 100
+, <b>GOAL_PWM_H</b> = 101
+, <b>GOAL_CURRENT_L</b> = 102
+, <b>GOAL_CURRENT_H</b> = 103
+, <br />
+&#160;&#160;<b>GOAL_VELOCITY_L</b> = 104
+, <b>GOAL_VELOCITY_2</b> = 105
+, <b>GOAL_VELOCITY_3</b> = 106
+, <b>GOAL_VELOCITY_H</b> = 107
+, <br />
+&#160;&#160;<b>PROFILE_ACCELERATION_L</b> = 108
+, <b>PROFILE_ACCELERATION_2</b> = 109
+, <b>PROFILE_ACCELERATION_3</b> = 110
+, <b>PROFILE_ACCELERATION_H</b> = 111
+, <br />
+&#160;&#160;<b>PROFILE_VELOCITY_L</b> = 112
+, <b>PROFILE_VELOCITY_2</b> = 113
+, <b>PROFILE_VELOCITY_3</b> = 114
+, <b>PROFILE_VELOCITY_H</b> = 115
+, <br />
+&#160;&#160;<b>GOAL_POSITION_L</b> = 116
+, <b>GOAL_POSITION_2</b> = 117
+, <b>GOAL_POSITION_3</b> = 118
+, <b>GOAL_POSITION_H</b> = 119
+, <br />
+&#160;&#160;<b>REALTIME_TICK_L</b> = 120
+, <b>REALTIME_TICK_H</b> = 121
+, <b>MOVING</b> = 122
+, <b>MOVING_STATUS</b> = 123
+, <br />
+&#160;&#160;<b>PRESENT_PWM_L</b> = 124
+, <b>PRESENT_PWM_H</b> = 125
+, <b>PRESENT_CURRENT_L</b> = 126
+, <b>PRESENT_CURRENT_H</b> = 127
+, <br />
+&#160;&#160;<b>PRESENT_VELOCITY_L</b> = 128
+, <b>PRESENT_VELOCITY_2</b> = 129
+, <b>PRESENT_VELOCITY_3</b> = 130
+, <b>PRESENT_VELOCITY_H</b> = 131
+, <br />
+&#160;&#160;<b>PRESENT_POSITION_L</b> = 132
+, <b>PRESENT_POSITION_2</b> = 133
+, <b>PRESENT_POSITION_3</b> = 134
+, <b>PRESENT_POSITION_H</b> = 135
+, <br />
+&#160;&#160;<b>VELOCITY_TRAJECTORY_L</b> = 136
+, <b>VELOCITY_TRAJECTORY_2</b> = 137
+, <b>VELOCITY_TRAJECTORY_3</b> = 138
+, <b>VELOCITY_TRAJECTORY_H</b> = 139
+, <br />
+&#160;&#160;<b>POSITION_TRAJECTORY_L</b> = 140
+, <b>POSITION_TRAJECTORY_2</b> = 141
+, <b>POSITION_TRAJECTORY_3</b> = 142
+, <b>POSITION_TRAJECTORY_H</b> = 143
+, <br />
+&#160;&#160;<b>PRESENT_INPUT_VOLTAGE_L</b> = 144
+, <b>PRESENT_INPUT_VOLTAGE_H</b> = 145
+, <b>PRESENT_TEMPERATURE</b> = 146
+, <b>INDIRECT_ADDRESS_1_L</b> = 168
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_1_H</b> = 169
+, <b>INDIRECT_ADDRESS_2_L</b> = 170
+, <b>INDIRECT_ADDRESS_2_H</b> = 171
+, <b>INDIRECT_ADDRESS_3_L</b> = 172
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_3_H</b> = 173
+, <b>INDIRECT_ADDRESS_4_L</b> = 174
+, <b>INDIRECT_ADDRESS_4_H</b> = 175
+, <b>INDIRECT_ADDRESS_5_L</b> = 176
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_5_H</b> = 177
+, <b>INDIRECT_ADDRESS_6_L</b> = 178
+, <b>INDIRECT_ADDRESS_6_H</b> = 179
+, <b>INDIRECT_ADDRESS_7_L</b> = 180
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_7_H</b> = 181
+, <b>INDIRECT_ADDRESS_8_L</b> = 182
+, <b>INDIRECT_ADDRESS_8_H</b> = 183
+, <b>INDIRECT_ADDRESS_9_L</b> = 184
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_9_H</b> = 185
+, <b>INDIRECT_ADDRESS_10_L</b> = 186
+, <b>INDIRECT_ADDRESS_10_H</b> = 187
+, <b>INDIRECT_ADDRESS_11_L</b> = 188
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_11_H</b> = 189
+, <b>INDIRECT_ADDRESS_12_L</b> = 190
+, <b>INDIRECT_ADDRESS_12_H</b> = 191
+, <b>INDIRECT_ADDRESS_13_L</b> = 192
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_13_H</b> = 193
+, <b>INDIRECT_ADDRESS_14_L</b> = 194
+, <b>INDIRECT_ADDRESS_14_H</b> = 195
+, <b>INDIRECT_ADDRESS_15_L</b> = 196
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_15_H</b> = 197
+, <b>INDIRECT_ADDRESS_16_L</b> = 198
+, <b>INDIRECT_ADDRESS_16_H</b> = 199
+, <b>INDIRECT_ADDRESS_17_L</b> = 200
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_17_H</b> = 201
+, <b>INDIRECT_ADDRESS_18_L</b> = 202
+, <b>INDIRECT_ADDRESS_18_H</b> = 203
+, <b>INDIRECT_ADDRESS_19_L</b> = 204
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_19_H</b> = 205
+, <b>INDIRECT_ADDRESS_20_L</b> = 206
+, <b>INDIRECT_ADDRESS_20_H</b> = 207
+, <b>INDIRECT_ADDRESS_21_L</b> = 208
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_21_H</b> = 209
+, <b>INDIRECT_ADDRESS_22_L</b> = 210
+, <b>INDIRECT_ADDRESS_22_H</b> = 211
+, <b>INDIRECT_ADDRESS_23_L</b> = 212
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_23_H</b> = 213
+, <b>INDIRECT_ADDRESS_24_L</b> = 214
+, <b>INDIRECT_ADDRESS_24_H</b> = 215
+, <b>INDIRECT_ADDRESS_25_L</b> = 216
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_25_H</b> = 217
+, <b>INDIRECT_ADDRESS_26_L</b> = 218
+, <b>INDIRECT_ADDRESS_26_H</b> = 219
+, <b>INDIRECT_ADDRESS_27_L</b> = 220
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_27_H</b> = 221
+, <b>INDIRECT_ADDRESS_28_L</b> = 222
+, <b>INDIRECT_ADDRESS_28_H</b> = 223
+, <b>INDIRECT_DATA_1</b> = 224
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_2</b> = 225
+, <b>INDIRECT_DATA_3</b> = 226
+, <b>INDIRECT_DATA_4</b> = 227
+, <b>INDIRECT_DATA_5</b> = 228
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_6</b> = 229
+, <b>INDIRECT_DATA_7</b> = 230
+, <b>INDIRECT_DATA_8</b> = 231
+, <b>INDIRECT_DATA_9</b> = 232
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_10</b> = 233
+, <b>INDIRECT_DATA_11</b> = 234
+, <b>INDIRECT_DATA_12</b> = 235
+, <b>INDIRECT_DATA_13</b> = 236
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_14</b> = 237
+, <b>INDIRECT_DATA_15</b> = 238
+, <b>INDIRECT_DATA_16</b> = 239
+, <b>INDIRECT_DATA_17</b> = 240
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_18</b> = 241
+, <b>INDIRECT_DATA_19</b> = 242
+, <b>INDIRECT_DATA_20</b> = 243
+, <b>INDIRECT_DATA_21</b> = 244
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_22</b> = 245
+, <b>INDIRECT_DATA_23</b> = 246
+, <b>INDIRECT_DATA_24</b> = 247
+, <b>INDIRECT_DATA_25</b> = 248
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_26</b> = 249
+, <b>INDIRECT_DATA_27</b> = 250
+, <b>INDIRECT_DATA_28</b> = 251
+, <b>INDIRECT_ADDRESS_29_L</b> = 578
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_29_H</b> = 579
+, <b>INDIRECT_ADDRESS_30_L</b> = 580
+, <b>INDIRECT_ADDRESS_30_H</b> = 581
+, <b>INDIRECT_ADDRESS_31_L</b> = 582
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_31_H</b> = 583
+, <b>INDIRECT_ADDRESS_32_L</b> = 584
+, <b>INDIRECT_ADDRESS_32_H</b> = 585
+, <b>INDIRECT_ADDRESS_33_L</b> = 586
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_33_H</b> = 587
+, <b>INDIRECT_ADDRESS_34_L</b> = 588
+, <b>INDIRECT_ADDRESS_34_H</b> = 589
+, <b>INDIRECT_ADDRESS_35_L</b> = 590
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_35_H</b> = 591
+, <b>INDIRECT_ADDRESS_36_L</b> = 592
+, <b>INDIRECT_ADDRESS_36_H</b> = 593
+, <b>INDIRECT_ADDRESS_37_L</b> = 594
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_37_H</b> = 595
+, <b>INDIRECT_ADDRESS_38_L</b> = 596
+, <b>INDIRECT_ADDRESS_38_H</b> = 597
+, <b>INDIRECT_ADDRESS_39_L</b> = 598
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_39_H</b> = 599
+, <b>INDIRECT_ADDRESS_40_L</b> = 600
+, <b>INDIRECT_ADDRESS_40_H</b> = 601
+, <b>INDIRECT_ADDRESS_41_L</b> = 602
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_41_H</b> = 603
+, <b>INDIRECT_ADDRESS_42_L</b> = 604
+, <b>INDIRECT_ADDRESS_42_H</b> = 605
+, <b>INDIRECT_ADDRESS_43_L</b> = 606
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_43_H</b> = 607
+, <b>INDIRECT_ADDRESS_44_L</b> = 608
+, <b>INDIRECT_ADDRESS_44_H</b> = 609
+, <b>INDIRECT_ADDRESS_45_L</b> = 610
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_45_H</b> = 611
+, <b>INDIRECT_ADDRESS_46_L</b> = 612
+, <b>INDIRECT_ADDRESS_46_H</b> = 613
+, <b>INDIRECT_ADDRESS_47_L</b> = 614
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_47_H</b> = 615
+, <b>INDIRECT_ADDRESS_48_L</b> = 616
+, <b>INDIRECT_ADDRESS_48_H</b> = 617
+, <b>INDIRECT_ADDRESS_49_L</b> = 618
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_49_H</b> = 619
+, <b>INDIRECT_ADDRESS_50_L</b> = 620
+, <b>INDIRECT_ADDRESS_50_H</b> = 621
+, <b>INDIRECT_ADDRESS_51_L</b> = 622
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_51_H</b> = 623
+, <b>INDIRECT_ADDRESS_52_L</b> = 624
+, <b>INDIRECT_ADDRESS_52_H</b> = 625
+, <b>INDIRECT_ADDRESS_53_L</b> = 626
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_53_H</b> = 627
+, <b>INDIRECT_ADDRESS_54_L</b> = 628
+, <b>INDIRECT_ADDRESS_54_H</b> = 629
+, <b>INDIRECT_ADDRESS_55_L</b> = 630
+, <br />
+&#160;&#160;<b>INDIRECT_ADDRESS_55_H</b> = 631
+, <b>INDIRECT_ADDRESS_56_L</b> = 632
+, <b>INDIRECT_ADDRESS_56_H</b> = 633
+, <b>INDIRECT_DATA_29</b> = 634
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_30</b> = 635
+, <b>INDIRECT_DATA_31</b> = 636
+, <b>INDIRECT_DATA_32</b> = 637
+, <b>INDIRECT_DATA_33</b> = 638
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_34</b> = 639
+, <b>INDIRECT_DATA_35</b> = 640
+, <b>INDIRECT_DATA_36</b> = 641
+, <b>INDIRECT_DATA_37</b> = 642
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_38</b> = 643
+, <b>INDIRECT_DATA_39</b> = 644
+, <b>INDIRECT_DATA_40</b> = 645
+, <b>INDIRECT_DATA_41</b> = 646
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_42</b> = 647
+, <b>INDIRECT_DATA_43</b> = 648
+, <b>INDIRECT_DATA_44</b> = 649
+, <b>INDIRECT_DATA_45</b> = 650
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_46</b> = 651
+, <b>INDIRECT_DATA_47</b> = 652
+, <b>INDIRECT_DATA_48</b> = 653
+, <b>INDIRECT_DATA_49</b> = 654
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_50</b> = 655
+, <b>INDIRECT_DATA_51</b> = 656
+, <b>INDIRECT_DATA_52</b> = 657
+, <b>INDIRECT_DATA_53</b> = 658
+, <br />
+&#160;&#160;<b>INDIRECT_DATA_54</b> = 659
+, <b>INDIRECT_DATA_55</b> = 660
+, <b>INDIRECT_DATA_56</b> = 661
+<br />
+ }</td></tr>
+<tr class="memdesc:aa97cee3a2970d4d241056630b3a2227d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Holds the addresses of the various bytes in the RAM table of a Dynamixel V2 servo.  <a href="structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227d">More...</a><br /></td></tr>
+<tr class="separator:aa97cee3a2970d4d241056630b3a2227d inherit pub_types_structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<hr/>The documentation for this struct was generated from the following file:<ul>
+<li>module/platform/OpenCR/HardwareIO/src/<a class="el" href="NUgus_8hpp_source.html">NUgus.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html">XH540_W270</a></li>
+    <li class="footer">Generated on Sat Jun 10 2023 15:24:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>
