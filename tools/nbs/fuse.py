@@ -9,14 +9,19 @@ from utility.nbs import Encoder, LinearDecoder
 
 
 def register(command):
-    command.help = "Take a group of nbs files and fuse them back into a single set of nbs files ordered by timestamp"
+    command.description = (
+        "Take a group of nbs files and fuse them back into a single set of nbs files ordered by timestamp"
+    )
 
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to convert to json")
-    command.add_argument("-o", "--output", default="out.nbs", help="The output file to store the fused nbs in")
+    command.add_argument("-o", "--output", help="The output file to store the fused nbs in")
 
 
 def run(files, output, **kwargs):
+    # If we don't have a output, choose a default output name
+    if output is None:
+        output = "fused.nbs"
 
     # Index and load all the nbs files
     index = LinearDecoder(*files, show_progress=True)

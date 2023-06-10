@@ -79,7 +79,8 @@ file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/${NUCLEAR_SHARED_DIR})
 # Add the subdirectory for our messages
 add_subdirectory("message")
 
-# Add the subdirectory for our utilities. Is after messages as it can use messages
+# * Add the subdirectory for our utilities.
+# * This is after messages as it can use messages
 add_subdirectory("utility")
 
 # Add the subdirectory for our extensions
@@ -88,7 +89,8 @@ add_subdirectory("extension")
 # Add the subdirectory for our roles
 add_subdirectory("roles")
 
-# Add the subdirectory for module. This must be after roles as roles determines which modules to build
+# * Add the subdirectory for module
+# * This must be after roles as roles determines which modules to build
 add_subdirectory("module")
 
 if(BUILD_TESTS)
