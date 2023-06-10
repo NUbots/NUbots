@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+ball_distance_threshold: 0.6
+angle_threshold: 23 * PI / 180

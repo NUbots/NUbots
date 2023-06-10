@@ -1,18 +1,23 @@
-import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useContext } from "react";
+import { observer } from "mobx-react";
 
-import { Transform } from '../../math/transform'
-import { CircleGeometry } from '../geometry/circle_geometry'
-import { Shape } from '../object/shape'
+import { CircleGeometry } from "../geometry/circle_geometry";
+import { Shape } from "../object/shape";
+import { rendererTransformsContext } from "../svg_renderer";
 
-import { toSvgProps } from './rendering'
+import { toSvgAppearance, toSvgEventHandlers } from "./rendering";
 
-type Props = { model: Shape<CircleGeometry>; world: Transform }
-export const Circle = observer(
-  ({
-    model: {
-      geometry: { x, y, radius },
-      appearance,
-    },
-  }: Props) => <circle cx={x} cy={y} r={radius} {...toSvgProps(appearance)} />,
-)
+type Props = { model: Shape<CircleGeometry> };
+
+export const Circle = observer(({ model: { geometry, appearance, eventHandlers } }: Props) => {
+  const transforms = useContext(rendererTransformsContext);
+  return (
+    <circle
+      cx={geometry.x}
+      cy={geometry.y}
+      r={geometry.radius}
+      {...toSvgAppearance(appearance)}
+      {...toSvgEventHandlers(eventHandlers, transforms)}
+    />
+  );
+});

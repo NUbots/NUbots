@@ -13,6 +13,8 @@ namespace module::strategy {
         struct Config {
             /// @brief Radius to begin aligning with desired field heading
             float align_radius = 0.0f;
+            /// @brief Tolerance for stopping at the field position
+            float stop_tolerance = 0.0f;
         } cfg;
 
     public:

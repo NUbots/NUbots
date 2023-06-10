@@ -6,9 +6,9 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/Behaviour.hpp"
+#include "message/eye/DataPoint.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"

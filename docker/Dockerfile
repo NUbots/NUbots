@@ -10,7 +10,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:base-20210829.0.32635
+FROM --platform=linux/amd64 archlinux:base-20210829.0.32635
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
 RUN echo -e "Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
@@ -36,12 +36,21 @@ RUN install-package \
     sudo \
     python \
     python-pip \
+    python-tqdm \
+    python-requests \
     base-devel \
+    ccache \
     ninja \
     cmake \
     meson \
     git \
-    ncurses
+    openssh \
+    rsync \
+    gdb \
+    colordiff \
+    parallel \
+    vim \
+    nano
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -79,6 +88,9 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr
 #############################################
 ### ADD NEW SYTEM PROGRAMS/LIBRARIES HERE ###
 #############################################
+
+# Install packages for nusight using generic
+RUN PREFIX=/usr install-autotools-from-source https://github.com/nodejs/node/archive/refs/tags/v18.16.0.tar.gz
 
 ################################################
 #  _____           _      _           _        #
@@ -178,11 +190,7 @@ COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
 # Eigen3
-COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
-COPY usr/local/package/eigen3/cxx17-overalign.patch /usr/local/package/cxx17-overalign.patch
-RUN install-from-source-with-patches https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2 \
-    /usr/local/package/deprecated-copy.patch \
-    /usr/local/package/cxx17-overalign.patch --
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 
 # tcmalloc
 RUN install-from-source \
@@ -191,10 +199,14 @@ RUN install-from-source \
     --enable-minimal
 
 # Protobuf
-RUN install-package protobuf
-RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-cpp-3.17.3.tar.gz \
-    --with-zlib=/usr/local \
-    --with-protoc=/usr/sbin/protoc
+RUN install-package protobuf && \
+    install-from-source-with-patches https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+    https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
+    -- \
+    -DWITH_PROTOC="/usr/sbin/protoc" \
+    -Dprotobuf_BUILD_TESTS=OFF \
+    -Dprotobuf_BUILD_LIBPROTOC=ON \
+    -DBUILD_SHARED_LIBS=OFF
 
 # Libjpeg
 RUN install-package yasm
@@ -221,7 +233,14 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz \
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
+RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.3.2.tar.gz \
+    -DCATCH_CONFIG_CONSOLE_WIDTH=120 \
+    -DCATCH_CONFIG_CPP11_TO_STRING=ON \
+    -DCATCH_CONFIG_CPP17_UNCAUGHT_EXCEPTIONS=ON \
+    -DCATCH_CONFIG_CPP17_STRING_VIEW=ON \
+    -DCATCH_CONFIG_CPP17_VARIANT=ON \
+    -DCATCH_CONFIG_CPP17_OPTIONAL=ON \
+    -DCATCH_CONFIG_CPP17_BYTE=ON
 
 # libusb - a dependency of aravis
 RUN install-from-source https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
@@ -292,29 +311,14 @@ RUN pip install \
     termcolor \
     stringcase \
     Pillow \
-    protobuf==3.17.3 \
+    protobuf==4.21.2 \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
 RUN install-package \
     arm-none-eabi-gcc \
     arm-none-eabi-newlib \
-    openssh \
-    rsync \
-    gdb \
-    valgrind \
-    colordiff \
-    parallel \
-    vim \
-    nano \
-    clinfo \
     doxygen
-
-# Install packages for nusight
-RUN install-package \
-    nodejs \
-    npm \
-    yarn
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
@@ -323,11 +327,13 @@ RUN pip install --upgrade \
     black==22.3.0
 
 RUN npm install -g \
+    yarn@1.22.19 \
     prettier@2.7.1 \
     eslint@8.27.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
+RUN install-package clinfo
 
 # Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
@@ -347,13 +353,8 @@ RUN groupadd --gid $user_gid nubots \
     && useradd --uid $user_uid --gid $user_gid -m nubots
 USER nubots
 
-# Copy ssh keys over to the system
-RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
-COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
-COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
-COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
+# Copy over GDB alias'
 COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
-RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 
 # Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots
