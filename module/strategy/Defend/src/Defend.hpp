@@ -18,6 +18,8 @@ namespace module::strategy {
 
         } cfg;
 
+        double robot_distance_to_ball = 0.0;
+
     public:
         /// @brief Called by the powerplant to build and setup the Defend reactor.
         explicit Defend(std::unique_ptr<NUClear::Environment> environment);
