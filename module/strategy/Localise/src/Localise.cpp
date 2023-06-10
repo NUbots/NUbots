@@ -6,6 +6,7 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/LookAround.hpp"
+#include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/Localise.hpp"
 
@@ -18,8 +19,9 @@ namespace module::strategy {
     using message::actuation::LimbsSequence;
     using message::localisation::AddNoiseToParticles;
     using message::localisation::Field;
-    using message::localisation::ResetRobotLocalisation;
+    using message::localisation::ResetFieldLocalisation;
     using message::planning::LookAround;
+    using message::skill::Look;
     using message::skill::Walk;
     using utility::skill::load_script;
 
@@ -59,7 +61,7 @@ namespace module::strategy {
                 if (time_since_lost > cfg.max_lost_time) {
                     log<NUClear::INFO>("Lost for too long, reset localisation.");
                     time_point_lost = NUClear::clock::now();
-                    emit(std::make_unique<ResetRobotLocalisation>());
+                    emit(std::make_unique<ResetFieldLocalisation>());
                 }
             }
             else {

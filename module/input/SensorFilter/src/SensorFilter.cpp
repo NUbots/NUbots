@@ -41,7 +41,7 @@ namespace module::input {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkingState;
-    using message::localisation::ResetRobotLocalisation;
+    using message::localisation::ResetFieldLocalisation;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
@@ -145,7 +145,7 @@ namespace module::input {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        on<Trigger<ResetRobotLocalisation>>().then([this] {
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
             // Reset the translation and yaw of odometry
             Hwt.translation().x() = 0;
             Hwt.translation().y() = 0;
