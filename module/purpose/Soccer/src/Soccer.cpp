@@ -23,7 +23,7 @@ namespace module::purpose {
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using message::behaviour::state::Stability;
     using message::input::GameEvents;
-    using message::localisation::ResetRobotLocalisation;
+    using message::localisation::ResetFieldLocalisation;
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
     using message::purpose::Defender;
@@ -70,7 +70,7 @@ namespace module::purpose {
             if (self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
-                emit(std::make_unique<ResetRobotLocalisation>());
+                emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
                 // emit<Task>(std::make_unique<StandStill>());
             }

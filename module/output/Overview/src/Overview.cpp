@@ -91,7 +91,7 @@ namespace module::output {
                     // If we have field information
                     if (field) {
                         // Transform the field state into Hfw
-                        Eigen::Isometry3d Hfw = Eigen::Isometry3f(field->Hfw).cast<double>();
+                        Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
 
                         // Get our torso in field space
                         Eigen::Isometry3d Hft = Hfw * Htw.inverse();
