@@ -57,7 +57,7 @@ namespace module::skill {
                 if (left_foot.keep_level && cfg.keep_level) {
                     // Calculate the desired foot orientation to keep the foot level with the ground
                     Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
-                    Eigen::Isometry3d Htf = Eigen::Isometry3d(left_foot.Htf.cast<double>().matrix());
+                    Eigen::Isometry3d Htf = Eigen::Isometry3d(left_foot.Htf.cast<double>());
                     Htf.linear()          = Htr.linear();
                     left_leg->Htl         = Htf.matrix();
                 }
@@ -82,7 +82,7 @@ namespace module::skill {
                 if (right_foot.keep_level && cfg.keep_level) {
                     // Calculate the desired foot orientation to keep the foot level with the ground
                     Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
-                    Eigen::Isometry3d Htf = Eigen::Isometry3d(right_foot.Htf.cast<double>().matrix());
+                    Eigen::Isometry3d Htf = Eigen::Isometry3d(right_foot.Htf.cast<double>());
                     Htf.linear()          = Htr.linear();
                     right_leg->Htr        = Htf.matrix();
                 }
