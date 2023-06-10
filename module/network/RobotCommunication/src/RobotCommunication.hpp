@@ -9,7 +9,14 @@ namespace module::network {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief The port to communicate over
+            uint send_port    = 0;
+            uint receive_port = 0;
+            uint broadcast_ip = 0;
         } cfg;
+
+        ReactionHandle listen_handle;
+
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotCommunication reactor.

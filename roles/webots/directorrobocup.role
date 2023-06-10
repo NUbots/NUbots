@@ -11,6 +11,7 @@ nuclear_role(
   network::PlotJuggler
   # Sensors
   input::GameController
+  input::RobotCommunication
   input::SensorFilter
   platform::Webots
   # Vision
