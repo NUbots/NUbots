@@ -44,7 +44,6 @@ RUN install-package \
     cmake \
     meson \
     git \
-    ncurses \
     zlib \
     openssh \
     rsync \
