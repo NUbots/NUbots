@@ -248,6 +248,8 @@ namespace module::localisation {
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
+            // Add noise to the particles
+            add_noise();
             if (!falling && field_lines.points.size() > cfg.min_observations) {
 
                 // Project the field line observations (uPCr) onto the field plane
@@ -304,7 +306,7 @@ namespace module::localisation {
             auto field(std::make_unique<Field>());
             Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
             Hfw.translation()  = Eigen::Vector3d(state.x(), state.y(), 0);
-            Hfw.linear()       = Eigen::AngleAxisd(state.z(), 0.5 * Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            Hfw.linear()       = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
             field->Hfw         = Hfw.matrix();
             field->covariance  = covariance;
             field->uncertainty = covariance.trace();
