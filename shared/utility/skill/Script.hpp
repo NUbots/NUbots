@@ -1,6 +1,7 @@
 #ifndef UTILITY_SKILL_SCRIPT_HPP
 #define UTILITY_SKILL_SCRIPT_HPP
 
+#include <filesystem>
 #include <nuclear>
 #include <regex>
 #include <yaml-cpp/yaml.h>
@@ -13,6 +14,7 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/support/hostname.hpp"
 
+namespace fs = ::std::filesystem;
 
 /**
  * @author Ysobel Sims
@@ -79,6 +81,19 @@ namespace utility::skill {
                                 ("Failed to extract platform name from '" + hostname + "'."));
     }
 
+    /// @brief utility function to fetch the first command line argument, used to get the binary name
+    /// @returns If the first command line argument exists, it is returned. Otherwise, the empty string is returned
+    [[nodiscard]] static inline std::string get_first_command_line_arg() {
+        std::shared_ptr<const NUClear::message::CommandLineArguments> args =
+            NUClear::dsl::store::DataStore<NUClear::message::CommandLineArguments>::get();
+
+        // args is effectively a shared_ptr<std::vector<std::string>>
+        if (!args->empty()) {
+            return (*args)[0];
+        }
+        return std::string{};  // Empty string
+    }
+
     /// @brief If a robot-specific script exists, load the YAML file as a script. If not, loads the
     /// platform-specific script. If neither exist, throws a runtime error.
     /// @param script The name of the script to run.
@@ -89,15 +104,22 @@ namespace utility::skill {
         auto hostname      = utility::support::getHostname();
         auto robot_path    = "scripts/" + hostname + "/" + script;
         auto platform_path = "scripts/" + get_platform(hostname) + "/" + script;
+        auto folder        = fs::path(get_first_command_line_arg()).parent_path().filename().string();
+        auto folder_path   = "scripts/" + folder + "/" + script;
 
         // Try getting the robot-specific script first
         if (utility::file::exists(robot_path)) {
-            NUClear::log<NUClear::DEBUG>("Parsing robot specific script:", script);
+            NUClear::log<NUClear::DEBUG>("Parsing robot specific script:", script, robot_path);
             return YAML::LoadFile(robot_path);
+        }
+        // If no robot-specific, check for a binary folder-specific script
+        else if (utility::file::exists(folder_path)) {
+            NUClear::log<NUClear::DEBUG>("Parsing folder specific script:", script, folder_path);
+            return YAML::LoadFile(folder_path);
         }
         // If there was no robot-specific script, then get the platform-specific script
         else if (utility::file::exists(platform_path)) {
-            NUClear::log<NUClear::DEBUG>("Parsing default platform script:", script);
+            NUClear::log<NUClear::DEBUG>("Parsing default platform script:", script, platform_path);
             return YAML::LoadFile(platform_path);
         }
         // The script doesn't exist, tell the user

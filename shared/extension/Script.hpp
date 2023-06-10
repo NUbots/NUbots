@@ -19,6 +19,7 @@
 #define EXTENSION_SCRIPT_HPP
 
 #include <cstdlib>
+#include <filesystem>
 #include <nuclear>
 #include <regex>
 #include <string>
@@ -32,6 +33,8 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/strutil/strutil.hpp"
 #include "utility/support/hostname.hpp"
+
+namespace fs = ::std::filesystem;
 
 namespace extension {
 
@@ -50,7 +53,7 @@ namespace extension {
                 Target(Target&& other) noexcept
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
                 Target& operator=(const Target& other) = default;
-                Target& operator                       =(Target&& other) noexcept {
+                Target& operator=(Target&& other) noexcept {
                     id       = other.id;
                     position = other.position;
                     gain     = other.gain;
@@ -72,31 +75,46 @@ namespace extension {
             std::vector<Target> targets;
         };
 
-        std::string fileName, hostname, platform;
+        std::string fileName, hostname, platform, folder;
         YAML::Node config;
         std::vector<Frame> frames;
 
-        Script() : hostname(utility::support::getHostname()), platform(Script::getPlatform(hostname)), config() {}
+        Script()
+            : hostname(utility::support::getHostname())
+            , platform(Script::getPlatform(hostname))
+            , folder(fs::path(Script::get_first_command_line_arg()).parent_path().filename())
+            , config() {}
 
         Script(std::vector<Frame> frames)
             : hostname(utility::support::getHostname())
             , platform(Script::getPlatform(hostname))
+            , folder(fs::path(Script::get_first_command_line_arg()).parent_path().filename())
             , config()
             , frames(std::move(frames)) {}
 
         Script(const std::string& fileName,
                const std::string& hostname,
                const std::string& platform,
+               const std::string& folder,
                const YAML::Node& config,
                const std::vector<Frame>& frames)
-            : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
+            : fileName(fileName)
+            , hostname(hostname)
+            , platform(platform)
+            , folder(folder)
+            , config(config)
+            , frames(frames) {}
 
-        Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
-            : fileName(fileName), hostname(hostname), platform(platform), config() {
+        Script(const std::string& fileName,
+               const std::string& hostname,
+               const std::string& platform,
+               const std::string& folder)
+            : fileName(fileName), hostname(hostname), platform(platform), folder(folder), config() {
 
             // Per robot scripts:    Scripts that are specific to a certain robot (e.g. nugus1).
             //                       These are to account for minor hardware variations in a robot and, as such, take
             //                       precedence over per platform scripts.
+            // Per folder scripts:   Scripts that are specific to the binary folder (e.g. webots).
             // Per platform scripts: Scripts that are specific to a certain platform (e.g. nugus).
             //                       These are the default scripts, it is an error for this version of the script to not
             //                       exist.
@@ -104,6 +122,11 @@ namespace extension {
             if (utility::file::exists("scripts/" + hostname + "/" + fileName)) {
                 NUClear::log<NUClear::INFO>("Parsing robot specific script:", fileName);
                 config = YAML::LoadFile("scripts/" + hostname + "/" + fileName);
+            }
+
+            else if (utility::file::exists("scripts/" + folder + "/" + fileName)) {
+                NUClear::log<NUClear::INFO>("Parsing folder specific script:", fileName);
+                config = YAML::LoadFile("scripts/" + folder + "/" + fileName);
             }
 
             else if (utility::file::exists("scripts/" + platform + "/" + fileName)) {
@@ -134,36 +157,49 @@ namespace extension {
                                     ("Failed to extract platform name from '" + hostname + "'."));
         }
 
+        /// @brief utility function to fetch the first command line argument, used to get the binary name
+        /// @returns If the first command line argument exists, it is returned. Otherwise, the empty string is returned
+        [[nodiscard]] static inline std::string get_first_command_line_arg() {
+            std::shared_ptr<const NUClear::message::CommandLineArguments> args =
+                NUClear::dsl::store::DataStore<NUClear::message::CommandLineArguments>::get();
+
+            // args is effectively a shared_ptr<std::vector<std::string>>
+            if (!args->empty()) {
+                return (*args)[0];
+            }
+            return std::string{};  // Empty string
+        }
+
         Script operator[](const std::string& key) {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(fileName, hostname, platform, folder, config[key], frames);
         }
 
         Script operator[](const std::string& key) const {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(fileName, hostname, platform, folder, config[key], frames);
         }
 
         Script operator[](const char* key) {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(fileName, hostname, platform, folder, config[key], frames);
         }
 
         Script operator[](const char* key) const {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(fileName, hostname, platform, folder, config[key], frames);
         }
 
         Script operator[](size_t index) {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(fileName, hostname, platform, folder, config[index], frames);
         }
 
         Script operator[](size_t index) const {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(fileName, hostname, platform, folder, config[index], frames);
         }
 
         Script operator[](int index) {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(fileName, hostname, platform, folder, config[index], frames);
         }
 
         Script operator[](int index) const {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(fileName, hostname, platform, folder, config[index], frames);
         }
 
         template <typename T>
@@ -283,18 +319,28 @@ namespace NUClear::dsl {
 
                 std::string hostname = utility::support::getHostname();
                 std::string platform(::extension::Script::getPlatform(hostname));
+                std::string folder(
+                    fs::path(::extension::Script::get_first_command_line_arg()).parent_path().filename());
 
                 // Set paths to the script files.
                 auto robotScript    = "scripts/" + hostname + "/" + path;
                 auto platformScript = "scripts/" + platform + "/" + path;
+                // Folder that the binary exists within, eg webots
+                auto folder_script = "scripts/" + folder + "/" + path;
 
-                // The platform script is the default script. This must exist!
-                if (!utility::file::exists(platformScript)) {
-                    throw std::runtime_error("Script file '" + platformScript + "' does not exist.");
+                // The platform script is the default script. This must exist! We also allow folder script for webots
+                if (!utility::file::exists(platformScript) && !utility::file::exists(folder_script)) {
+                    throw std::runtime_error("Script file '" + platformScript + "' or '" + folder_script
+                                             + "' does not exist.");
                 }
 
                 // Bind our default path
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformScript, flags);
+
+                // Bind the folder specific path if it exists
+                if (utility::file::exists(folder_script)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, folder_script, flags);
+                }
 
                 // Bind our robot specific path if it exists
                 if (utility::file::exists(robotScript)) {
@@ -314,6 +360,8 @@ namespace NUClear::dsl {
                     try {
                         std::string hostname = utility::support::getHostname();
                         std::string platform(::extension::Script::getPlatform(hostname));
+                        std::string folder =
+                            fs::path(::extension::Script::get_first_command_line_arg()).parent_path().filename();
 
                         // Get relative path to script file.
                         auto components = utility::strutil::split(watch.path, '/');
@@ -322,7 +370,7 @@ namespace NUClear::dsl {
 
                         for (const auto& component : components) {
                             // Ignore the hostname/platform name if they are present.
-                            if (flag && (component != hostname) && (component != platform)) {
+                            if (flag && (component != hostname) && (component != platform) && (component != folder)) {
                                 relativePath.append(component + "/");
                             }
 
@@ -335,7 +383,7 @@ namespace NUClear::dsl {
                         // There will be a trailing / character.
                         relativePath.pop_back();
 
-                        return std::make_shared<::extension::Script>(relativePath, hostname, platform);
+                        return std::make_shared<::extension::Script>(relativePath, hostname, platform, folder);
                     }
                     catch (const YAML::ParserException& e) {
                         throw std::runtime_error(watch.path + " " + std::string(e.what()));
