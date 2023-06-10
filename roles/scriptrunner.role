@@ -8,7 +8,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   network::NUClearNet
   network::NetworkForwarder
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   behaviour::Controller
   motion::ScriptEngine
   behaviour::tools::ScriptRunner
