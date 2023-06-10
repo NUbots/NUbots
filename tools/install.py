@@ -32,7 +32,16 @@ def register(command):
 
 
 @run_on_docker
-def run(target, user, config, toolchain, **kwargs):
+def run(target, local, user, config, toolchain, **kwargs):
+    # Replace hostname with its IP address if the hostname is already known
+    if not local:
+        num_robots = 4
+        target = {
+            "{}{}".format(k, num): "10.1.1.{}".format(num)
+            for num in range(1, num_robots + 1)
+            for k, v in zip(("nugus", "n", "i", "igus"), [num] * num_robots)
+        }.get(target, target)
+
     # If no user, use our user
     if user is None:
         import getpass
