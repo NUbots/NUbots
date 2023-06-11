@@ -18,7 +18,7 @@
  */
 
 #include <Eigen/Geometry>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <fmt/format.h>
 
 #include "utility/motion/splines/Combination.hpp"
