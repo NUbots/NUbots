@@ -3,7 +3,7 @@ nuclear_role(
   extension::FileWatcher
   # Config
   actuation::KinematicsConfiguration
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # Director
   extension::Director
