@@ -19,6 +19,7 @@ namespace module::strategy {
         } cfg;
 
         double robot_distance_to_ball = 0.0;
+        double range_x                = 0.0;
 
     public:
         /// @brief Called by the powerplant to build and setup the Defend reactor.

@@ -10,6 +10,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/localisation/FilteredBall.hpp"
 #include "message/planning/KickTo.hpp"
+#include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -23,6 +24,7 @@ namespace module::strategy {
     using Ball = message::localisation::FilteredBall;
     using message::input::Sensors;
     using message::localisation::Field;
+    using message::strategy::AlignBallToGoal;
     using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
 
@@ -61,6 +63,17 @@ namespace module::strategy {
                     rDFf.x()             = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
                     rDFf.y()             = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x(), rDFf.y(), 0), -M_PI));
+
+                    // if (rBFf.x() < 0 && rRFf.y()) {  // != rBFf.y() && robot_distance_to_ball > 1) {
+                    // rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
+                    // range_x  = rDFf.x() - (0.5 * robot_distance_to_ball);
+                    // emit<Task>(std::make_unique<AlignBallToGoal>());  // Eigen::Vector3f(range, rBFf.y(), 0),
+                    // -M_PI));
+                    // emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(range_x, rBFf.y(), 0), -M_PI));
+                    //}
+                    // else {
+
+                    // }
 
                     log<NUClear::DEBUG>("Ball is outside of defending region");
                 }
