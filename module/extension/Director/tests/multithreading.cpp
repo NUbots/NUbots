@@ -69,7 +69,7 @@ namespace {
                 // Start of this main task loop
                 log_event(fmt::format("loop {}: start", t.loop_id));
 
-                // Emit 3 optional tasks so they can all run in parallel if possible
+                // Emit optional tasks so they can all run in parallel if possible
                 log_event(fmt::format("loop {}: emitting task 1", t.loop_id));
                 emit<Task>(std::make_unique<SubTask<1>>(t.loop_id), 0, true);
                 log_event(fmt::format("loop {}: emitting task 2", t.loop_id));
@@ -93,7 +93,7 @@ namespace {
             });
 
             on<Provide<Dependency>>().then([this](const Dependency& t) {
-                log_event(fmt::format("loop {}: dependent from subtask {}", t.loop_id, t.subtask_id));
+                log_event(fmt::format("loop {}: dependency from subtask {}", t.loop_id, t.subtask_id));
 
                 // Trigger another step of the main task loop out of band
                 if (t.loop_id < MAX_LOOPS) {
