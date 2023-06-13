@@ -121,8 +121,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # Binaries containing 'webots' (ie in the webots folder) should be given the hostname 'webots'
         # to ensure the config files are chosen correctly
         is_webots = False
-        if len(kwargs["args"]) > 0 and func.__name__ == "run":
-            is_webots = re.search("webots", kwargs["args"][0])
+        if len(kwargs.get("args", [])) > 0 and func.__name__ == "run":
+            is_webots = bool(re.search("webots", kwargs.get("args", [])[0]))
 
         # Docker arguments
         docker_args = [
