@@ -200,12 +200,12 @@ namespace module::localisation {
                 }
             }
 
-            // Left side penalty mark
+
+            // Intialise the initial state of the robot to be distributed along either sides of the positive half of the
+            // field, facing towards the field
             cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
                                            (fd.dimensions.field_width / 2.0),
                                            -M_PI_2);
-
-            // Right side penalty mark
             cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
                                            (-fd.dimensions.field_width / 2.0),
                                            M_PI_2);
