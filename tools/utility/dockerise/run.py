@@ -123,7 +123,7 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         docker_hostname = hostname
         if kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
-                docker_hostname="webots"
+                docker_hostname = "webots"
 
         # Docker arguments
         docker_args = [
