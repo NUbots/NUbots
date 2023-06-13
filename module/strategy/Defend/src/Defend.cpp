@@ -62,18 +62,26 @@ namespace module::strategy {
                     Eigen::Vector3f rDFf = Eigen::Vector3f::Zero();
                     rDFf.x()             = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
                     rDFf.y()             = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
+
+                    log<NUClear::DEBUG>("rDFf x: ", rDFf.x());
+                    log<NUClear::DEBUG>("rDFf y: ", rDFf.y());
+
                     emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x(), rDFf.y(), 0), -M_PI));
 
-                    // if (rBFf.x() < 0 && rRFf.y()) {  // != rBFf.y() && robot_distance_to_ball > 1) {
-                    // rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
-                    // range_x  = rDFf.x() - (0.5 * robot_distance_to_ball);
-                    // emit<Task>(std::make_unique<AlignBallToGoal>());  // Eigen::Vector3f(range, rBFf.y(), 0),
-                    // -M_PI));
-                    // emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(range_x, rBFf.y(), 0), -M_PI));
-                    //}
-                    // else {
+                    if (rBFf.x() > 0 && rBFf.y() > cfg.defending_region(2)) {
+                        log<NUClear::DEBUG>("Ouside region in in own half");
 
-                    // }
+
+                        // rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
+                        range_x = rDFf.x() - (0.5 * robot_distance_to_ball);
+                        //  emit<Task>(
+                        //      std::make_unique<AlignBallToGoal>());  // Eigen::Vector3f(range, rBFf.y(), 0),-M_PI));
+                        emit<Task>(
+                            std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x() + 1.0, rDFf.y(), 0), -M_PI));
+                    }
+                    else {
+                        // log<NUClear::DEBUG>("Ball is outside of defending region and aligned with ball");
+                    }
 
                     log<NUClear::DEBUG>("Ball is outside of defending region");
                 }
