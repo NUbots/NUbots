@@ -5,7 +5,7 @@ nuclear_role(
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   behaviour::tools::ScriptTuner
   behaviour::Controller
   network::NUClearNet

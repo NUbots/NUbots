@@ -15,7 +15,7 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Platform
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::Camera
   input::SensorFilter
   # Network

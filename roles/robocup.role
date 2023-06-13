@@ -16,7 +16,7 @@ nuclear_role(
   input::GameController
   # Sensors
   input::Camera
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # Vision
   vision::VisualMesh

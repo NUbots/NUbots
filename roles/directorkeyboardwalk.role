@@ -9,7 +9,7 @@ nuclear_role(
   network::PlotJuggler
   # Sensors
   input::SensorFilter
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   # Director
   extension::Director
   # Servos
