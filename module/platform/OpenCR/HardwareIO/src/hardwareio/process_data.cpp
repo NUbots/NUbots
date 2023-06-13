@@ -47,14 +47,13 @@ namespace module::platform::OpenCR {
         // Button Left = 0x04
         opencr_state.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
-        opencr_state.gyro = Eigen::Vector3f(convert::gyro(data.gyro[2]),    // X
-                                            convert::gyro(data.gyro[1]),    // Y
-                                            -convert::gyro(data.gyro[0]));  // Z
+        opencr_state.gyro = Eigen::Vector3f(convert::gyro(data.gyro[0]),    // X
+                                            -convert::gyro(data.gyro[1]),   // Y
+                                            -convert::gyro(data.gyro[2]));  // Z
 
-        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),   // X
-                                           convert::acc(data.acc[1]),   // Y
-                                           convert::acc(data.acc[2]));  // Z
-
+        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),    // X
+                                           -convert::acc(data.acc[1]),   // Y
+                                           -convert::acc(data.acc[2]));  // Z
         // Command send/receive errors only
         opencr_state.alert_flag   = static_cast<bool>(packet.alert);
         opencr_state.error_number = static_cast<int>(packet.error);
