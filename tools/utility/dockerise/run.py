@@ -120,10 +120,10 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # the hostname should be docker or webots
         # Binaries containing 'webots' (ie in the webots folder) should be given the hostname 'webots'
         # to ensure the config files are chosen correctly
-        hostname = "docker"
+        docker_hostname = hostname
         if kwargs["command"] == "run":
             if any(["webots" in arg for arg in kwargs["args"]]):
-                hostname="webots"
+                docker_hostname="webots"
 
         # Docker arguments
         docker_args = [
@@ -139,7 +139,7 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             "--attach",
             "stderr",
             "--hostname",
-            hostname,
+            docker_hostname,
             "--interactive",
             "--env",
             f"EDITOR={os.environ.get('EDITOR', 'nano')}",
