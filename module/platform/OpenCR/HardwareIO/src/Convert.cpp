@@ -50,7 +50,7 @@ namespace module::platform::OpenCR {
             //             max_acc(raw) - min_acc(raw)
             //
 
-            return float(raw * 2 / INT16_MAX);
+            return float(raw * 2 * 9.80665 / INT16_MAX);
         }
 
         int16_t acc(float gs) {
