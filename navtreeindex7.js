@@ -1,5 +1,8 @@
 var NAVTREEINDEX7 =
 {
+"classmodule_1_1vision_1_1BallDetector.html#a1bd43a7e2be88f3c4924ec311af6213f":[2,0,3,15,1,2],
+"classmodule_1_1vision_1_1BallDetector.html#a1d11876da2dc92451e94f4344028e9c3":[2,0,3,15,1,0],
+"classmodule_1_1vision_1_1BallDetector.html#a2519d88b77f7cf6cadbd00a2d6ffd0ad":[2,0,3,15,1,4],
 "classmodule_1_1vision_1_1BallDetector.html#a2c4e394ad29d20d31c901b286676d74b":[2,0,3,15,1,7],
 "classmodule_1_1vision_1_1BallDetector.html#a3c71262b721a63d157a5c6f258bfcad7":[2,0,3,15,1,5],
 "classmodule_1_1vision_1_1BallDetector.html#acf5627528f8b85dba93c938a064ce65c":[2,0,3,15,1,1],
@@ -246,8 +249,5 @@ var NAVTREEINDEX7 =
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a79aee31c4b0f589cf99374542dab3491":[2,0,6,6,0,2,16],
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a7de918faf931d8d26f607f034253dfdf":[2,0,6,6,0,2,14],
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a7fc40b9b5229003847d20777e265abf1":[2,0,6,6,0,2,4],
-"classutility_1_1motion_1_1splines_1_1Polynom.html#a93dc366324586e4a5c64282bd170408d":[2,0,6,6,0,2,10],
-"classutility_1_1motion_1_1splines_1_1Polynom.html#a96f9906730991cefd7c4666cb9709ce4":[2,0,6,6,0,2,6],
-"classutility_1_1motion_1_1splines_1_1Polynom.html#ab111fb9a6913a5f3fd36b6b5e476b91c":[2,0,6,6,0,2,5],
-"classutility_1_1motion_1_1splines_1_1Polynom.html#ab3598e46326d5eb504f6ce1fe200b08d":[2,0,6,6,0,2,2]
+"classutility_1_1motion_1_1splines_1_1Polynom.html#a93dc366324586e4a5c64282bd170408d":[2,0,6,6,0,2,10]
 };

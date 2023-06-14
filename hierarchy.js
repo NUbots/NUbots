@@ -304,6 +304,7 @@ var hierarchy =
         [ "module::planning::PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", null ],
         [ "module::purpose::Goalie", "classmodule_1_1purpose_1_1Goalie.html", null ],
         [ "module::purpose::KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", null ],
+        [ "module::purpose::ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", null ],
         [ "module::purpose::Soccer", "classmodule_1_1purpose_1_1Soccer.html", null ],
         [ "module::purpose::Striker", "classmodule_1_1purpose_1_1Striker.html", null ],
         [ "module::skill::Dive", "classmodule_1_1skill_1_1Dive.html", null ],

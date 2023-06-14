@@ -183,8 +183,8 @@ var namespaces_dup =
           [ "ScriptRunner", "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html", "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner" ],
           [ "ScriptTuner", "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html", "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner" ],
           [ "SpeakTest", "classmodule_1_1behaviour_1_1tools_1_1SpeakTest.html", "classmodule_1_1behaviour_1_1tools_1_1SpeakTest" ],
-          [ "LimbID", "ScriptRunner_8cpp.html#ae48948b22587fc92330708238823b701", null ],
-          [ "ServoID", "ScriptRunner_8cpp.html#a1dc0a64fc9ccd09606e8468329b82216", null ]
+          [ "LimbID", "behaviour_2tools_2ScriptRunner_2src_2ScriptRunner_8cpp.html#ae48948b22587fc92330708238823b701", null ],
+          [ "ServoID", "behaviour_2tools_2ScriptRunner_2src_2ScriptRunner_8cpp.html#a1dc0a64fc9ccd09606e8468329b82216", null ]
         ] ],
         [ "Controller", "classmodule_1_1behaviour_1_1Controller.html", "classmodule_1_1behaviour_1_1Controller" ],
         [ "Request", "structmodule_1_1behaviour_1_1Request.html", "structmodule_1_1behaviour_1_1Request" ],
@@ -665,6 +665,7 @@ var namespaces_dup =
       [ "purpose", null, [
         [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
+        [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "GameMode", "Goalie_8cpp.html#a2a5932ecf6b4477c7ba24d1de6dafb43", null ],
