@@ -132,30 +132,28 @@ message RawSensors {
         // keep this for compatibility with cm740/v1 while we need it
         uint32        error_flags           = 1; // components of type RawSensors::Error (but can have multiple bits set)
         // this is for the protocol v2
-        uint32        packet_error          = 2; // components of type RawSensors::PacketError (but can have multiple bits set)
-        uint32        hardware_error        = 3; // components of type RawSensors::HardwareError (but can have multiple bits set)
-
-        bool          torque_enabled        = 4;
-        float         velocity_i_gain       = 5;
-        float         velocity_p_gain       = 6;
-        float         position_d_gain       = 7;
-        float         position_i_gain       = 8;
-        float         position_p_gain       = 9;
-        float         feed_forward_1st_Gain = 10;
-        float         feed_forward_2nd_Gain = 11;
-        float         present_PWM           = 12;
-        float         present_current       = 13;
-        float         present_velocity      = 14;
-        float         present_position      = 15;
-        float         goal_PWM              = 16;
-        float         goal_current          = 17;
-        float         goal_velocity         = 18;
-        float         goal_position         = 19;
-        float         voltage               = 20;
-        float         temperature           = 21;
-        float         profile_acceleration  = 22;
+        uint32        hardware_error        = 2; // components of type RawSensors::HardwareError (but can have multiple bits set)
+        bool          torque_enabled        = 3;
+        float         velocity_i_gain       = 4;
+        float         velocity_p_gain       = 5;
+        float         position_d_gain       = 6;
+        float         position_i_gain       = 7;
+        float         position_p_gain       = 8;
+        float         feed_forward_1st_Gain = 9;
+        float         feed_forward_2nd_Gain = 10;
+        float         present_PWM           = 11;
+        float         present_current       = 12;
+        float         present_velocity      = 13;
+        float         present_position      = 14;
+        float         goal_PWM              = 15;
+        float         goal_current          = 16;
+        float         goal_velocity         = 17;
+        float         goal_position         = 18;
+        float         voltage               = 19;
+        float         temperature           = 20;
+        float         profile_acceleration  = 21;
         // Replaces "Moving speed" from v1 protocol, basically just the set speed.
-        float         profile_velocity      = 23;
+        float         profile_velocity      = 22;
     };
 
     /// Set of all the servos on the robot

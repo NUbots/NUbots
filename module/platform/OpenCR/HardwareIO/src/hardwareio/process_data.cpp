@@ -51,12 +51,11 @@ namespace module::platform::OpenCR {
                                             -convert::gyro(data.gyro[1]),   // Y
                                             -convert::gyro(data.gyro[2]));  // Z
 
-        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),    // X
-                                           -convert::acc(data.acc[1]),   // Y
-                                           -convert::acc(data.acc[2]));  // Z
+        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),       // X
+                                           -convert::acc(data.acc[1]),      // Y
+                                           -convert::acc(data.acc[2]));     // Z
         // Command send/receive errors only
-        opencr_state.alert_flag   = static_cast<bool>(packet.alert);
-        opencr_state.error_number = static_cast<int>(packet.error);
+        opencr_state.error_flags = packet.error;
 
         // Work out a battery charged percentage
         battery_state.current_voltage = convert::voltage(data.voltage);
@@ -114,9 +113,13 @@ namespace module::platform::OpenCR {
 
         servo_states[servo_index].torque_enabled = (data.torque_enable == 1);
 
-        // Servo error status, NOT dynamixel status packet error.
-        servo_states[servo_index].error_flags = data.hardware_error_status;
+        // Servo error status from control table, NOT dynamixel status packet error.
+        servo_states[servo_index].hardware_error = data.hardware_error_status;
 
+        // Add packet errors to platform error flags for bulk processing
+        servo_states[servo_index].packet_error = packet.error;
+
+        // We might not need to do this if we add processing to RawSensors.cpp
         // Print error flags if there is an error
         /**
          * Bit      Item	                        Description
@@ -131,9 +134,9 @@ namespace module::platform::OpenCR {
          * Bit 1	-	                            Unused, Always ‘0’
          * Bit 0	Input Voltage Error             Detects that input voltage exceeds the configured operating voltage
          */
-        if (servo_states[servo_index].error_flags != 0) {
+        if (servo_states[servo_index].hardware_error != 0) {
             log<NUClear::ERROR>(
-                fmt::format("Servo {} error: {:#010b}", servo_index + 1, servo_states[servo_index].error_flags));
+                fmt::format("Servo {} error: {:#010b}", packet.id, servo_states[servo_index].error_flags));
         }
 
         servo_states[servo_index].present_pwm      = convert::PWM(data.present_pwm);

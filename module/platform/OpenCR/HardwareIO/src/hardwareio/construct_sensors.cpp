@@ -13,13 +13,13 @@ namespace module::platform::OpenCR {
         sensors.timestamp = NUClear::clock::now();
 
         /* OpenCR data */
-        sensors.platform_error_flags = RawSensors::Error::OK;
-        sensors.led_panel            = opencr_state.led_panel;
-        sensors.head_led             = opencr_state.head_led;
-        sensors.eye_led              = opencr_state.eye_led;
-        sensors.buttons              = opencr_state.buttons;
-        sensors.accelerometer        = opencr_state.acc;
-        sensors.gyroscope            = opencr_state.gyro;
+        sensors.subcontroller_error = opencr_state.error_flags;
+        sensors.led_panel           = opencr_state.led_panel;
+        sensors.head_led            = opencr_state.head_led;
+        sensors.eye_led             = opencr_state.eye_led;
+        sensors.buttons             = opencr_state.buttons;
+        sensors.accelerometer       = opencr_state.acc;
+        sensors.gyroscope           = opencr_state.gyro;
 
         /* Battery data */
         sensors.battery = battery_state.current_voltage;
@@ -78,12 +78,10 @@ namespace module::platform::OpenCR {
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.error_flags = servo_states[i].error_flags;
+                servo.error_flags = servo_states[i].hardware_error;
 
-                // Add relevant servo error flags to platform error flags
-                sensors.platform_error_flags |= (servo.error_flags
-                                                 & (RawSensors::Error::INPUT_VOLTAGE | RawSensors::Error::OVERHEATING
-                                                    | RawSensors::Error::OVERLOAD));
+                // Accumulate all packet error flags to read at once
+                sensors.subcontroller_error |= servo_states[i].packet_error;
 
                 // Present Data
                 servo.present_position = servo_states[i].present_position;
