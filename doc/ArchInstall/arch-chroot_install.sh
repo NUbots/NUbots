@@ -8,7 +8,7 @@ HOST="nugus"
 HOSTNAME="${HOST}${ROBOT_NUMBER}"
 IP_ADDR="10.1.1.${ROBOT_NUMBER}"
 ETHERNET_INTERFACE=${ETHERNET_INTERFACE:-"enp86s0"}
-WIFI_INTERFACE=${WIFI_INTERFACE:-"wlp0s20f3"}
+WIFI_INTERFACE=${WIFI_INTERFACE:-"wlan0"}
 WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/${WIFI_INTERFACE} 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
 
 # Setup timezone information
