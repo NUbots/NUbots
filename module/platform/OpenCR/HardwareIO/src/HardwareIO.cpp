@@ -144,7 +144,7 @@ namespace module::platform::OpenCR {
             packet_queue[packet_id].erase(packet_queue[packet_id].begin());
 
             // Check for packet errors
-            if ((packet.packet_error & 0x7f) != StatusReturn::CommandError::NO_ERROR) {
+            if ((packet.error & 0x7f) != StatusReturn::CommandError::NO_ERROR) {
                 log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet_id));
             }
 
