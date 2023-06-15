@@ -66,25 +66,25 @@ namespace utility::platform {
         std::stringstream s;
         s << "Error on Servo " << (servo_id + 1) << " (" << static_cast<ServoID>(servo_id) << "):";
 
-        if (RawSensors::Error::_INPUT_VOLTAGE != 0u) {
+        if ((servo.error_flags & RawSensors::Error::_INPUT_VOLTAGE) != 0u) {
             s << " Input Voltage - " << servo.voltage;
         }
-        if (RawSensors::Error::_ANGLE_LIMIT != 0u) {
+        if ((servo.error_flags & RawSensors::Error::_ANGLE_LIMIT) != 0u) {
             s << " Angle Limit - " << servo.present_position;
         }
-        if (RawSensors::Error::_OVERHEATING != 0u) {
+        if ((servo.error_flags & RawSensors::Error::_OVERHEATING) != 0u) {
             s << " Overheating - " << servo.temperature;
         }
-        if (RawSensors::Error::_OVERLOAD != 0u) {
+        if ((servo.error_flags & RawSensors::Error::_OVERLOAD) != 0u) {
             s << " Overloaded - " << servo.present_current;
         }
-        if (RawSensors::Error::_INSTRUCTION != 0u) {
+        if ((servo.error_flags & RawSensors::Error::_INSTRUCTION) != 0u) {
             s << " Bad Instruction ";
         }
-        if (RawSensors::Error::_CORRUPT_DATA != 0u) {
+        if ((servo.error_flags & RawSensors::Error::_CORRUPT_DATA) != 0u) {
             s << " Corrupt Data ";
         }
-        if (RawSensors::Error::_TIMEOUT != 0u) {
+        if ((servo.error_flags & RawSensors::Error::_TIMEOUT) != 0u) {
             s << " Timeout ";
         }
         return s.str();
