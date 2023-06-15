@@ -96,6 +96,11 @@ namespace module::platform::OpenCR {
             }
         }
 
+        // handle unused compatibility fields
+        sensors.platform_error_flags  = RawSensors::Error::_OK;
+        sensors.fsr.left.error_flags  = RawSensors::Error::_OK;
+        sensors.fsr.right.error_flags = RawSensors::Error::_OK;
+
         return sensors;
     }
 
