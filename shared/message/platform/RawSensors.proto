@@ -32,21 +32,19 @@ message RawSensors {
     /// Set of error flags/statuses.
     /// bitmask values.
 
-    /// @note these are kind of out of date or are triggered elsewhere in Dynamixel v2
-    ///       ANGLE_LIMIT, CORRUPT_DATA and TIMEOUT won't get triggered
-    ///       RANGE, CHECKSUM and INSTRUCTION are processed per status-return packet so
-    ///       will never make it to a RawSensors message.
+    /// @note RawSensors::Error is kept for protocol v1 compatibility only.
+    /// Values are prefixed with an underscore to resolve naming conflicts.
     enum Error {
-        OK            = 0;  // not really a flag but the lack of any other flag
-        INPUT_VOLTAGE = 1;
-        ANGLE_LIMIT   = 2;
-        OVERHEATING   = 4;
-        RANGE         = 8;
-        CHECKSUM      = 16;
-        OVERLOAD      = 32;
-        INSTRUCTION   = 64;
-        CORRUPT_DATA  = 128;
-        TIMEOUT       = 256;
+        _OK            = 0;  // not really a flag but the lack of any other flag
+        _INPUT_VOLTAGE = 1;
+        _ANGLE_LIMIT   = 2;
+        _OVERHEATING   = 4;
+        _RANGE         = 8;
+        _CHECKSUM      = 16;
+        _OVERLOAD      = 32;
+        _INSTRUCTION   = 64;
+        _CORRUPT_DATA  = 128;
+        _TIMEOUT       = 256;
     }
 
     // See https://emanual.robotis.com/docs/en/dxl/protocol2/#error

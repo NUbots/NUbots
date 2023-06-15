@@ -36,13 +36,13 @@ namespace module::input {
                                           const std::shared_ptr<const Sensors>& previous_sensors,
                                           const RawSensors& raw_sensors) {
         // Check for errors on the platform and FSRs
-        if (raw_sensors.platform_error_flags != RawSensors::Error::OK) {
+        if (raw_sensors.platform_error_flags != RawSensors::Error::_OK) {
             NUClear::log<NUClear::WARN>(make_error_string("Platform", raw_sensors.platform_error_flags));
         }
-        if (raw_sensors.fsr.left.error_flags != RawSensors::Error::OK) {
+        if (raw_sensors.fsr.left.error_flags != RawSensors::Error::_OK) {
             NUClear::log<NUClear::WARN>(make_error_string("Left FSR", raw_sensors.fsr.left.error_flags));
         }
-        if (raw_sensors.fsr.right.error_flags != RawSensors::Error::OK) {
+        if (raw_sensors.fsr.right.error_flags != RawSensors::Error::_OK) {
             NUClear::log<NUClear::WARN>(make_error_string("Right FSR", raw_sensors.fsr.right.error_flags));
         }
 
@@ -51,12 +51,12 @@ namespace module::input {
             const auto& original = getRawServo(id, raw_sensors);
             const auto& error    = original.error_flags;
             // Check for an error on the servo and report it
-            if (error != RawSensors::Error::OK) {
+            if (error != RawSensors::Error::_OK) {
                 NUClear::log<NUClear::WARN>(make_servo_error_string(original, id));
             }
             // If current Sensors message for this servo has an error and we have a previous sensors
             // message available, then we use our previous sensor values with some updates
-            if (error != RawSensors::Error::OK && previous_sensors) {
+            if (error != RawSensors::Error::_OK && previous_sensors) {
                 // Add the sensor values to the system properly
                 sensors->servo.emplace_back(error,
                                             id,

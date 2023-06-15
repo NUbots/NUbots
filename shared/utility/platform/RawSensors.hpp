@@ -37,25 +37,25 @@ namespace utility::platform {
         s << src;
         s << ":";
 
-        if ((error_code & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
+        if ((error_code & RawSensors::Error::_INPUT_VOLTAGE) != 0u) {
             s << " Input Voltage ";
         }
-        if ((error_code & RawSensors::Error::ANGLE_LIMIT) != 0u) {
+        if ((error_code & RawSensors::Error::_ANGLE_LIMIT) != 0u) {
             s << " Angle Limit ";
         }
-        if ((error_code & RawSensors::Error::OVERHEATING) != 0u) {
+        if ((error_code & RawSensors::Error::_OVERHEATING) != 0u) {
             s << " Overheating ";
         }
-        if ((error_code & RawSensors::Error::OVERLOAD) != 0u) {
+        if ((error_code & RawSensors::Error::_OVERLOAD) != 0u) {
             s << " Overloaded ";
         }
-        if ((error_code & RawSensors::Error::INSTRUCTION) != 0u) {
+        if ((error_code & RawSensors::Error::_INSTRUCTION) != 0u) {
             s << " Bad Instruction ";
         }
-        if ((error_code & RawSensors::Error::CORRUPT_DATA) != 0u) {
+        if ((error_code & RawSensors::Error::_CORRUPT_DATA) != 0u) {
             s << " Corrupt Data ";
         }
-        if ((error_code & RawSensors::Error::TIMEOUT) != 0u) {
+        if ((error_code & RawSensors::Error::_TIMEOUT) != 0u) {
             s << " Timeout ";
         }
 
@@ -66,25 +66,25 @@ namespace utility::platform {
         std::stringstream s;
         s << "Error on Servo " << (servo_id + 1) << " (" << static_cast<ServoID>(servo_id) << "):";
 
-        if (RawSensors::Error::INPUT_VOLTAGE != 0u) {
+        if (RawSensors::Error::_INPUT_VOLTAGE != 0u) {
             s << " Input Voltage - " << servo.voltage;
         }
-        if (RawSensors::Error::ANGLE_LIMIT != 0u) {
+        if (RawSensors::Error::_ANGLE_LIMIT != 0u) {
             s << " Angle Limit - " << servo.present_position;
         }
-        if (RawSensors::Error::OVERHEATING != 0u) {
+        if (RawSensors::Error::_OVERHEATING != 0u) {
             s << " Overheating - " << servo.temperature;
         }
-        if (RawSensors::Error::OVERLOAD != 0u) {
+        if (RawSensors::Error::_OVERLOAD != 0u) {
             s << " Overloaded - " << servo.present_current;
         }
-        if (RawSensors::Error::INSTRUCTION != 0u) {
+        if (RawSensors::Error::_INSTRUCTION != 0u) {
             s << " Bad Instruction ";
         }
-        if (RawSensors::Error::CORRUPT_DATA != 0u) {
+        if (RawSensors::Error::_CORRUPT_DATA != 0u) {
             s << " Corrupt Data ";
         }
-        if (RawSensors::Error::TIMEOUT != 0u) {
+        if (RawSensors::Error::_TIMEOUT != 0u) {
             s << " Timeout ";
         }
         return s.str();
