@@ -136,7 +136,7 @@ namespace module::platform::OpenCR {
          */
         if (servo_states[servo_index].hardware_error != 0) {
             log<NUClear::ERROR>(
-                fmt::format("Servo {} error: {:#010b}", packet.id, servo_states[servo_index].error_flags));
+                fmt::format("Servo {} error: {:#010b}", packet.id, servo_states[servo_index].hardware_error));
         }
 
         servo_states[servo_index].present_pwm      = convert::PWM(data.present_pwm);
