@@ -49,7 +49,7 @@ message RawSensors {
 
     // See https://emanual.robotis.com/docs/en/dxl/protocol2/#error
     enum PacketError {
-        OK          = 0;
+        PACKET_OK   = 0;
         RESULT_FAIL = 1;   // Failed to process the sent Instruction Packet
         INSTRUCTION = 2;   // Undefined Instruction has been used OR Action has been used without Reg Write
         CRC         = 4;   // CRC of the sent Packet does not match
@@ -63,7 +63,7 @@ message RawSensors {
     // See https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#hardware-error-status70
     // Same for all servo types (MX64(2), MX106(2), XH540)
     enum HardwareError {
-        OK               = 0;
+        HARDWARE_OK      = 0;
         INPUT_VOLTAGE    = 1;
         UNUSED_BIT_1     = 2; // Unused, Always 0
         OVERHEATING      = 4;
