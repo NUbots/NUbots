@@ -30,8 +30,7 @@ namespace module::platform::OpenCR {
             msg->instruction = response[7];
 
             // Extract alert flag from byte & cast the rest to CommandError
-            msg->alert = response[8] >> 7;
-            msg->error = static_cast<StatusReturn::CommandError>(response[8] & 0x7F);
+            msg->packet_error = response[8];
 
             // Param field starts 9 bytes after start, CRC takes up last 2
             std::copy(response.begin() + 9, response.end() - 2, std::back_inserter(msg->data));

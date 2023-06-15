@@ -55,7 +55,7 @@ namespace module::platform::OpenCR {
                                            -convert::acc(data.acc[1]),      // Y
                                            -convert::acc(data.acc[2]));     // Z
         // Command send/receive errors only
-        opencr_state.error_flags = packet.error;
+        opencr_state.error_flags = packet.packet_error;
 
         // Work out a battery charged percentage
         battery_state.current_voltage = convert::voltage(data.voltage);
@@ -117,7 +117,7 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].hardware_error = data.hardware_error_status;
 
         // Add packet errors to platform error flags for bulk processing
-        servo_states[servo_index].packet_error = packet.error;
+        servo_states[servo_index].packet_error = packet.packet_error;
 
         // We might not need to do this if we add processing to RawSensors.cpp
         // Print error flags if there is an error
