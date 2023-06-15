@@ -91,10 +91,8 @@ namespace module::platform::OpenCR {
                 servo.voltage     = servo_states[i].voltage;
                 servo.temperature = servo_states[i].temperature;
 
-                // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
-                if (servo.voltage <= battery_state.charged_voltage) {
-                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
-                }
+                /* Note: removed input voltage bit clear here as it wasn't clear how it fits into the refactor. If there
+                 * are problems with input voltage errors coming up too frequently then this is likely the culprit */
             }
         }
 
