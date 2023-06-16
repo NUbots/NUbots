@@ -9,11 +9,6 @@ namespace module::input::decompressor::turbojpeg {
     class Decompressor : public decompressor::Decompressor {
     public:
         Decompressor(const uint32_t& width, const uint32_t& height, const uint32_t& format);
-        Decompressor(const Decompressor&) = default;
-        Decompressor(Decompressor&&)      = default;
-        Decompressor& operator=(const Decompressor&) = default;
-        Decompressor& operator=(Decompressor&&) = default;
-        virtual ~Decompressor();
         std::pair<std::vector<uint8_t>, int> decompress(const std::vector<uint8_t>& data) override;
 
     private:

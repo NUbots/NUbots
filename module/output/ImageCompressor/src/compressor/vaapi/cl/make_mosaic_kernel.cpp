@@ -47,7 +47,7 @@ namespace module::output::compressor::vaapi::cl {
             throw std::system_error(
                 error,
                 cl::opencl_error_category(),
-                "Error building projection program\n" + std::string(log.begin(), log.begin() + used));
+                "Error building projection program\n" + std::string(log.begin(), log.begin() + ssize_t(used)));
         }
 
         cl::kernel kernel(::clCreateKernel(program, "mosaic_to_surface", &error), ::clReleaseKernel);
