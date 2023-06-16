@@ -176,14 +176,14 @@ $(document).ready(function(){initNavTree('structmodule_1_1output_1_1ImageCompres
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a65639c76c49c8bdb10b9ef0259dc1c60"><td class="memItemLeft" align="right" valign="top"><a id="a65639c76c49c8bdb10b9ef0259dc1c60"></a>
-std::unique_ptr&lt; std::atomic&lt; bool &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext_1_1Compressor.html#a65639c76c49c8bdb10b9ef0259dc1c60">active</a></td></tr>
-<tr class="memdesc:a65639c76c49c8bdb10b9ef0259dc1c60"><td class="mdescLeft">&#160;</td><td class="mdescRight">This atomic bool gets turned on/off depending on if it is in use. <br /></td></tr>
-<tr class="separator:a65639c76c49c8bdb10b9ef0259dc1c60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa45d8d3b15bbd18e64b899874e495d28"><td class="memItemLeft" align="right" valign="top"><a id="aa45d8d3b15bbd18e64b899874e495d28"></a>
 std::shared_ptr&lt; <a class="el" href="classmodule_1_1output_1_1compressor_1_1Compressor.html">compressor::Compressor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext_1_1Compressor.html#aa45d8d3b15bbd18e64b899874e495d28">compressor</a></td></tr>
 <tr class="memdesc:aa45d8d3b15bbd18e64b899874e495d28"><td class="mdescLeft">&#160;</td><td class="mdescRight">The actual compressor that will convert the image to jpeg format. <br /></td></tr>
 <tr class="separator:aa45d8d3b15bbd18e64b899874e495d28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa24611a5bd8e3aae927c5795ff797a00"><td class="memItemLeft" align="right" valign="top"><a id="aa24611a5bd8e3aae927c5795ff797a00"></a>
+std::unique_ptr&lt; std::mutex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext_1_1Compressor.html#aa24611a5bd8e3aae927c5795ff797a00">mutex</a></td></tr>
+<tr class="memdesc:aa24611a5bd8e3aae927c5795ff797a00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex controlling access to this compressor instance. <br /></td></tr>
+<tr class="separator:aa24611a5bd8e3aae927c5795ff797a00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/output/ImageCompressor/src/<a class="el" href="ImageCompressor_8hpp_source.html">ImageCompressor.hpp</a></li>
@@ -194,7 +194,7 @@ std::shared_ptr&lt; <a class="el" href="classmodule_1_1output_1_1compressor_1_1C
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>output</b></li><li class="navelem"><a class="el" href="classmodule_1_1output_1_1ImageCompressor.html">ImageCompressor</a></li><li class="navelem"><a class="el" href="structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext.html">CompressorContext</a></li><li class="navelem"><a class="el" href="structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext_1_1Compressor.html">Compressor</a></li>
-    <li class="footer">Generated on Wed Jun 14 2023 01:54:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Jun 16 2023 07:03:26 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

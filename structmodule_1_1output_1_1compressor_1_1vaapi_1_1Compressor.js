@@ -2,10 +2,10 @@ var structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor =
 [
     [ "Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a931471e764a4a27ad07d6d06c816e63b", null ],
     [ "Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a4702560384b2ebbda50f351c32d339c3", null ],
-    [ "Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a3d5ae755105236f763e5a21f011446c1", null ],
-    [ "~Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#ac106982e7cdc65fec03cc1cbddecea99", null ],
+    [ "Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a599582452dea48425e214ce7316914ac", null ],
+    [ "~Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a18121e3bbcfaef8681b0ef8656b912ce", null ],
     [ "compress", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a51a42f6475f1c17f3ede56a5a61c0f3a", null ],
-    [ "operator=", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a1dfdf14b56b825ec2e3ef33ca54a219a", null ],
+    [ "operator=", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#ab06eced26761ad5d85d33658f1d848fe", null ],
     [ "operator=", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a6d9dd9049e4b71c9409e54bf6d0eac62", null ],
     [ "buffers", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#ab0a591b4424cfa093e7564b414f2a00e", null ],
     [ "cctx", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a0aaa4a6f8a1336de68899b84075eb792", null ],

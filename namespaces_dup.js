@@ -501,7 +501,8 @@ var namespaces_dup =
                 [ "SOF0_Monochrome", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome" ],
                 [ "SOI", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI" ],
                 [ "SOS_Colour", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour" ],
-                [ "SOS_Monochrome", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome" ]
+                [ "SOS_Monochrome", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome" ],
+                [ "__attribute__", "jpeg__header_8cpp.html#ae9e11a86bb80238187d9c7dbd5eab91d", null ]
               ] ],
               [ "create_surface", "create__surface_8cpp.html#a00feee931436ee31114ee37a251899f0", null ],
               [ "emplace_bytes", "jpeg__header_8cpp.html#a9322a2b0379d88a649d39d63bfac2315", null ],

@@ -176,14 +176,14 @@ $(document).ready(function(){initNavTree('structmodule_1_1input_1_1ImageDecompre
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a42b5359c927507d75c9d591b1939d6a7"><td class="memItemLeft" align="right" valign="top"><a id="a42b5359c927507d75c9d591b1939d6a7"></a>
-std::unique_ptr&lt; std::atomic&lt; bool &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html#a42b5359c927507d75c9d591b1939d6a7">active</a></td></tr>
-<tr class="memdesc:a42b5359c927507d75c9d591b1939d6a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">This atomic bool gets turned on/off depending on if it is in use. <br /></td></tr>
-<tr class="separator:a42b5359c927507d75c9d591b1939d6a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3fc2684a829d0292e9d3b9dab31f663a"><td class="memItemLeft" align="right" valign="top"><a id="a3fc2684a829d0292e9d3b9dab31f663a"></a>
 std::shared_ptr&lt; <a class="el" href="classmodule_1_1input_1_1decompressor_1_1Decompressor.html">decompressor::Decompressor</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html#a3fc2684a829d0292e9d3b9dab31f663a">decompressor</a></td></tr>
 <tr class="memdesc:a3fc2684a829d0292e9d3b9dab31f663a"><td class="mdescLeft">&#160;</td><td class="mdescRight">The actual decompressor that will convert the image to jpeg format. <br /></td></tr>
 <tr class="separator:a3fc2684a829d0292e9d3b9dab31f663a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6b15f6cc52f1b862fe242a16836e235"><td class="memItemLeft" align="right" valign="top"><a id="ae6b15f6cc52f1b862fe242a16836e235"></a>
+std::unique_ptr&lt; std::mutex &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html#ae6b15f6cc52f1b862fe242a16836e235">mutex</a></td></tr>
+<tr class="memdesc:ae6b15f6cc52f1b862fe242a16836e235"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex controlling access to this decompressor instance. <br /></td></tr>
+<tr class="separator:ae6b15f6cc52f1b862fe242a16836e235"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/input/ImageDecompressor/src/<a class="el" href="ImageDecompressor_8hpp_source.html">ImageDecompressor.hpp</a></li>
@@ -194,7 +194,7 @@ std::shared_ptr&lt; <a class="el" href="classmodule_1_1input_1_1decompressor_1_1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1ImageDecompressor.html">ImageDecompressor</a></li><li class="navelem"><a class="el" href="structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext.html">DecompressorContext</a></li><li class="navelem"><a class="el" href="structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext_1_1Decompressor.html">Decompressor</a></li>
-    <li class="footer">Generated on Wed Jun 14 2023 01:54:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Jun 16 2023 07:03:26 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

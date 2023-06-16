@@ -1,5 +1,9 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad41e95a92b0e179bcf04702ba20cc899":[2,0,3,9,1,1,0,6],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad4a5f401008b2aeac50d15ab4f3724d8":[2,0,3,9,1,1,0,271],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad56304c4babfc4025446e277493dbcff":[2,0,3,9,1,1,0,53],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad735b21d9b2a4a711fa475854ab683e3":[2,0,3,9,1,1,0,62],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dad96997cbe2f85f1573684e711a8fb881":[2,0,3,9,1,1,0,201],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dada8cea1f63f48a124f55888e402050ff":[2,0,3,9,1,1,0,29],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dadbe3ded5d15abc5957279acca687b0e4":[2,0,3,9,1,1,0,66],
@@ -245,9 +249,5 @@ var NAVTREEINDEX16 =
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#ae58bf5504f4f4859d0b561aaa22134a8aecf65ed2ac54461cf254456c0b2972bb":[2,0,3,10,3,1,0,2],
 "structmodule_1_1purpose_1_1Soccer_1_1Position.html#afe04122a3da30b52b02575066e866e81":[2,0,3,10,3,1,3],
 "structmodule_1_1purpose_1_1Striker_1_1Config.html":[2,0,3,10,4,0],
-"structmodule_1_1purpose_1_1Striker_1_1Config.html#a92be4939f75b369d452c20c2406b1aee":[2,0,3,10,4,0,0],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html":[2,0,3,11,1,0],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#a15df7091f6c30e256529aafe4eba2f58":[2,0,3,11,1,0,5],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#a518b29943f662419a208390bc46ff6d8":[2,0,3,11,1,0,4],
-"structmodule_1_1skill_1_1GetUp_1_1Config.html#a7199e1a9117a0abe3af6baa9245a5477":[2,0,3,11,1,0,1]
+"structmodule_1_1purpose_1_1Striker_1_1Config.html#a92be4939f75b369d452c20c2406b1aee":[2,0,3,10,4,0,0]
 };
