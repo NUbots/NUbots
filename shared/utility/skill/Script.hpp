@@ -212,10 +212,10 @@ namespace YAML {
         static inline bool decode(const Node& node, ::utility::skill::Frame::Target& rhs) {
             // Try to read and save the target information
             try {
-                rhs = {node["id"].as<std::string>(),
-                       node["position"].as<float>(),
-                       node["gain"].as<float>(),
-                       node["torque"] != nullptr ? node["torque"].as<float>() : 100};
+                rhs = ::utility::skill::Frame::Target{node["id"].as<std::string>(),
+                                                      node["position"].as<float>(),
+                                                      node["gain"].as<float>(),
+                                                      node["torque"].IsDefined() ? node["torque"].as<float>() : 100.0f};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",

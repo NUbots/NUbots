@@ -40,11 +40,7 @@ namespace module::input {
             return true;
         }
         static std::string unit(ArvGcInteger* setting) {
-            GError* error = nullptr;
-            const char* u = arv_gc_integer_get_unit(setting, &error);
-            if (error != nullptr) {
-                g_error_free(error);
-            }
+            const char* u = arv_gc_integer_get_unit(setting);
             return u == nullptr ? "" : u;
         }
     };
@@ -76,11 +72,7 @@ namespace module::input {
             return true;
         }
         static std::string unit(ArvGcFloat* setting) {
-            GError* error = nullptr;
-            const char* u = arv_gc_float_get_unit(setting, &error);
-            if (error != nullptr) {
-                g_error_free(error);
-            }
+            const char* u = arv_gc_float_get_unit(setting);
             return u == nullptr ? "" : u;
         }
     };
@@ -113,7 +105,7 @@ namespace module::input {
         static bool valid(ArvGcEnumeration* setting, const std::string& v) {
             GError* error       = nullptr;
             unsigned int len    = 0;
-            const char** values = arv_gc_enumeration_get_available_string_values(setting, &len, &error);
+            const char** values = arv_gc_enumeration_dup_available_string_values(setting, &len, &error);
             if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;

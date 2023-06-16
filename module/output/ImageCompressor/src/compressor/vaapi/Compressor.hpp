@@ -1,6 +1,7 @@
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_HPP
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_HPP
 
+#include <array>
 #include <memory>
 #include <va/va.h>
 
@@ -17,10 +18,10 @@ namespace module::output::compressor::vaapi {
                    const uint32_t& height,
                    const uint32_t& format,
                    const int& quality);
-        Compressor(const Compressor&) = default;
-        Compressor(Compressor&&)      = default;
+        Compressor(const Compressor&)            = default;
+        Compressor(Compressor&&)                 = default;
         Compressor& operator=(const Compressor&) = default;
-        Compressor& operator=(Compressor&&) = default;
+        Compressor& operator=(Compressor&&)      = default;
         virtual ~Compressor();
 
         std::vector<uint8_t> compress(const std::vector<uint8_t>& data) override;
