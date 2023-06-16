@@ -18,19 +18,7 @@
   "files.associations": {
     "*.role": "cmake",
     ".clang-tidy": "yaml",
-    ".Doxyfile": "properties",
-    "optional": "cpp",
-    "ratio": "cpp",
-    "system_error": "cpp",
-    "array": "cpp",
-    "functional": "cpp",
-    "tuple": "cpp",
-    "type_traits": "cpp",
-    "utility": "cpp",
-    "variant": "cpp",
-    "*.tcc": "cpp",
-    "deque": "cpp",
-    "vector": "cpp"
+    ".Doxyfile": "properties"
   },
   "python.analysis.extraPaths": ["${workspaceFolder}/tools", "${workspaceFolder}/nuclear"],
   "python.formatting.provider": "black",
