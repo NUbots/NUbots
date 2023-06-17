@@ -91,6 +91,11 @@ namespace module::platform::OpenCR {
         /// @return Raw dynamixel velocity in the range -210 to 210 where each unit is 0.229 rpm
         int32_t velocity(float velocity);
 
+        /// @brief Converts the float profile velocity in milliseconds (time span) to raw dynamixel profile velocity
+        /// @param profile_velocity The profile velocity in milliseconds (time span to reach goal position)
+        /// @return The raw dynamixel profile velocity value
+        uint32_t profile_velocity(float profile_velocity);
+
         /// @brief Converts the raw dynamixel current value to amps
         /// @param current The current value between -1941 and 1941 where each unit is 3.36mA
         /// @return The current value in amps
