@@ -1,28 +1,9 @@
-/*
- * This file is part of the NUbots Codebase.
- *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2022 NUbots <nubots@nubots.net>
- */
-
 #ifndef MODULE_EXTENSION_DIRECTOR_LCS_HPP
 #define MODULE_EXTENSION_DIRECTOR_LCS_HPP
 
 #include <Eigen/Core>
 
-namespace util {
+namespace utility::algorithm {
 
     /**
      * Longest common subsequence algorithm that returns which elements from a and b form the common subsequence.
@@ -38,7 +19,8 @@ namespace util {
      * @return two vectors of bools indicating which elements participate in the longest common subexpression
      */
     template <typename T>
-    std::pair<std::vector<bool>, std::vector<bool>> lcs(const std::vector<T>& a, const std::vector<T>& b) {
+    [[nodiscard]] std::pair<std::vector<bool>, std::vector<bool>> lcs(const std::vector<T>& a,
+                                                                      const std::vector<T>& b) {
 
         // Start with nothing matching
         std::vector<bool> match_a(a.size(), false);
@@ -110,6 +92,6 @@ namespace util {
         return std::make_pair(match_a, match_b);
     }
 
-}  // namespace util
+}  // namespace utility::algorithm
 
 #endif  // MODULE_EXTENSION_DIRECTOR_LCS_HPP
