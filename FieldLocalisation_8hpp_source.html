@@ -1,0 +1,322 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module/localisation/FieldLocalisation/src/FieldLocalisation.hpp Source File</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('FieldLocalisation_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">FieldLocalisation.hpp</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef MODULE_LOCALISATION_FIELDLOCALISATION_HPP</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define MODULE_LOCALISATION_FIELDLOCALISATION_HPP</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160; </div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &quot;message/eye/DataPoint.hpp&quot;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &quot;message/localisation/Field.hpp&quot;</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &quot;message/motion/GetupCommand.hpp&quot;</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &quot;message/motion/WalkCommand.hpp&quot;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;message/support/FieldDescription.hpp&quot;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;message/vision/FieldLines.hpp&quot;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;utility/localisation/OccupancyMap.hpp&quot;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;utility/math/stats/multivariate.hpp&quot;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="preprocessor">#include &quot;utility/nusight/NUhelpers.hpp&quot;</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &quot;utility/support/yaml_expression.hpp&quot;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160; </div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="keyword">namespace </span>module::localisation {</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160; </div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;    <span class="comment">// Particle struct</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1Particle.html">   22</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1Particle.html">Particle</a> {</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        Eigen::Vector3f state = Eigen::Vector3f::Zero();  <span class="comment">// (x, y, theta) of world space in field space</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        <span class="keywordtype">float</span> weight          = 1.0;</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    };</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1FieldLocalisation.html">   27</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html">FieldLocalisation</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="comment">        /// @brief Stores configuration values</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html">   30</a></span>&#160;<span class="comment"></span>        <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html">Config</a> {<span class="comment"></span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment">            /// @brief Size of the grid cells in the occupancy grid [m]</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a68c22dd2bc9b0ced72d132a7e05a904b">   32</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">float</span> <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a68c22dd2bc9b0ced72d132a7e05a904b">grid_size</a> = 0.0;<span class="comment"></span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">            /// @brief Number of particles to use in the particle filter</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab1e7f3b79690f9e0095edf4aebbb4c07">   34</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">int</span> <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab1e7f3b79690f9e0095edf4aebbb4c07">n_particles</a> = 0;<span class="comment"></span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="comment">            /// @brief Uncertainty in the process model</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#accdc0fd0d345204ba6f248a5c2969ae2">   36</a></span>&#160;<span class="comment"></span>            Eigen::Matrix3f <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#accdc0fd0d345204ba6f248a5c2969ae2">process_noise</a> = Eigen::Matrix3f::Zero();<span class="comment"></span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">            /// @brief Uncertainty in the measurement model</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a4cb979a6b45370cf418b63a6405971f7">   38</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">float</span> <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a4cb979a6b45370cf418b63a6405971f7">measurement_noise</a> = 0;<span class="comment"></span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">            /// @brief Maximum distance a field line can be from a particle to be considered an observation [m]</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a6aa74fd34f3a30e07c3a3ba43b0d6da5">   40</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">float</span> <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a6aa74fd34f3a30e07c3a3ba43b0d6da5">max_range</a> = 0;<span class="comment"></span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">            /// @brief Initial state (x,y,theta) of the robot, saved for resetting</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a4321ddac909119cb7fcf33be54cfa209">   42</a></span>&#160;<span class="comment"></span>            std::vector&lt;Eigen::Vector3f&gt; <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a4321ddac909119cb7fcf33be54cfa209">initial_state</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">            /// @brief Initial covariance matrix of the robot&#39;s state, saved for resetting</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5272be8c66a041c92eb16e9b65244681">   44</a></span>&#160;<span class="comment"></span>            Eigen::Matrix3f <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5272be8c66a041c92eb16e9b65244681">initial_covariance</a> = Eigen::Matrix3f::Identity();<span class="comment"></span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">            /// @brief Bool to enable/disable saving the generated map as a csv file</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5ab7059ddff8e0eafa08690c8fd35582">   46</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">bool</span> <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5ab7059ddff8e0eafa08690c8fd35582">save_map</a> = <span class="keyword">false</span>;<span class="comment"></span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">            /// @brief Minimum number of field line points for a measurement update</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#aa7b06ccdb5eaf8ffd8ae98989f84ba81">   48</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">size_t</span> <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#aa7b06ccdb5eaf8ffd8ae98989f84ba81">min_observations</a> = 0;<span class="comment"></span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">            /// @brief Penalty factor for observations being outside map</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a64b2c8a9efc3de65dd182758fe8514a1">   50</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">float</span> <a class="code" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a64b2c8a9efc3de65dd182758fe8514a1">outside_map_penalty_factor</a> = 0.0;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        } cfg;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        NUClear::clock::time_point last_time_update_time;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">        /// @brief Occupancy grid map of the field lines</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1FieldLocalisation.html#afd7299b96e7357b906da3c692dda4f1d">   56</a></span>&#160;<span class="comment"></span>        <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html">OccupancyMap&lt;float&gt;</a> <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#afd7299b96e7357b906da3c692dda4f1d">fieldline_map</a>;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">        /// @brief State (x,y,theta) of the robot</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a335ca7f1dfbe04931ce99d3a107a7dca">   59</a></span>&#160;<span class="comment"></span>        Eigen::Vector3f <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a335ca7f1dfbe04931ce99d3a107a7dca">state</a> = Eigen::Vector3f::Zero();</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">        /// @brief Covariance matrix of the robot&#39;s state</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9a5c332e459c508396ce8a63d9b4b2ff">   62</a></span>&#160;<span class="comment"></span>        Eigen::Matrix3f <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9a5c332e459c508396ce8a63d9b4b2ff">covariance</a> = Eigen::Matrix3f::Identity();</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">        /// @brief Status of if the robot is falling</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a89d7cb30ff43910bba580191eef78bdd">   65</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a89d7cb30ff43910bba580191eef78bdd">falling</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">        /// @brief Particles used in the particle filter</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1FieldLocalisation.html#ae1ee5b507145d9c986f1e706b637489a">   68</a></span>&#160;<span class="comment"></span>        std::vector&lt;Particle&gt; <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#ae1ee5b507145d9c986f1e706b637489a">particles</a>{};</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a45bd53aeb8a3cdadbbcca05e5715ad27">FieldLocalisation</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment">        /// @brief Transform a point in the robot&#39;s coordinate frame into an index in the map</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">        /// @param particle The state of the particle (x,y,theta)</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">        /// @param rPRw The field point (x, y) in world space {w} [m]</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">        /// @return The observation location (x, y) in the map</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment"></span>        Eigen::Vector2i <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a3d3aec20a8ab99513c768f34405e63bc">position_in_map</a>(<span class="keyword">const</span> Eigen::Vector3f particle, <span class="keyword">const</span> Eigen::Vector3f rPRw);</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">        /// @brief Get the weight of a particle given a set of observations</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">        /// @param particle The state of the particle (x,y,theta)</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">        /// @param observations The observations (x, y) in the robot&#39;s coordinate frame [m]</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">        /// @return The weight of the particle</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment"></span>        <span class="keywordtype">float</span> <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a59185f31119e989510700d7b57ee27e3">calculate_weight</a>(<span class="keyword">const</span> Eigen::Vector3f particle, <span class="keyword">const</span> std::vector&lt;Eigen::Vector3f&gt;&amp; observations);</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">        /// @brief Get the current mean (state) of the robot</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment"></span>        <span class="comment">// @return The current mean (state) of the robot</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        Eigen::Vector3f <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a6cc5dfd580c80f0b1723772ca8f13ec5">compute_mean</a>();</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment">        /// @brief Get the current covariance matrix of the robot&#39;s state</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment"></span>        <span class="comment">// @return The current covariance matrix of the robot&#39;s state</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        Eigen::Matrix3f <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a8b85ccee52c658fbd02b27f85813faff">compute_covariance</a>();</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">        /// @brief Perform a time update on the particles</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment">        /// @param walk_command The walk command (dx, dy, dtheta)</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="comment">        /// @param dt The time since the last time update</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9bb3dd02e901d3ff96bb043933c4bec2">   98</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9bb3dd02e901d3ff96bb043933c4bec2">time_update</a>();</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment">        /// @brief Resample the particles based on their weights</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="comment">        /// @param particles Vector of particles to be resampled</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment">        /// @return The resampled particles</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de">resample</a>();</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="comment">        /// @brief Add some noise to the particles to compensate for the fact that we don&#39;t have a perfect model</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="comment">        /// @param particles Vector of particles to be resampled</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="comment">        /// @return The particles with noise added</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1FieldLocalisation.html#adb67cee9e176d77a01368f3d28cfa480">add_noise</a>();</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    };</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;}  <span class="comment">// namespace module::localisation</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_LOCALISATION_FIELDLOCALISATION_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html">module::localisation::FieldLocalisation</a></div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:27</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a335ca7f1dfbe04931ce99d3a107a7dca"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a335ca7f1dfbe04931ce99d3a107a7dca">module::localisation::FieldLocalisation::state</a></div><div class="ttdeci">Eigen::Vector3f state</div><div class="ttdoc">State (x,y,theta) of the robot.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:59</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a3d3aec20a8ab99513c768f34405e63bc"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a3d3aec20a8ab99513c768f34405e63bc">module::localisation::FieldLocalisation::position_in_map</a></div><div class="ttdeci">Eigen::Vector2i position_in_map(const Eigen::Vector3f particle, const Eigen::Vector3f rPRw)</div><div class="ttdoc">Transform a point in the robot's coordinate frame into an index in the map.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.cpp:308</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a45bd53aeb8a3cdadbbcca05e5715ad27"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a45bd53aeb8a3cdadbbcca05e5715ad27">module::localisation::FieldLocalisation::FieldLocalisation</a></div><div class="ttdeci">FieldLocalisation(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the FieldLocalisation reactor.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.cpp:31</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a59185f31119e989510700d7b57ee27e3"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a59185f31119e989510700d7b57ee27e3">module::localisation::FieldLocalisation::calculate_weight</a></div><div class="ttdeci">float calculate_weight(const Eigen::Vector3f particle, const std::vector&lt; Eigen::Vector3f &gt; &amp;observations)</div><div class="ttdoc">Get the weight of a particle given a set of observations.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.cpp:321</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a6cc5dfd580c80f0b1723772ca8f13ec5"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a6cc5dfd580c80f0b1723772ca8f13ec5">module::localisation::FieldLocalisation::compute_mean</a></div><div class="ttdeci">Eigen::Vector3f compute_mean()</div><div class="ttdoc">Get the current mean (state) of the robot.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.cpp:372</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a70c42ad45895d12a46c376c6e339d6de"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de">module::localisation::FieldLocalisation::resample</a></div><div class="ttdeci">void resample()</div><div class="ttdoc">Resample the particles based on their weights.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.cpp:343</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a89d7cb30ff43910bba580191eef78bdd"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a89d7cb30ff43910bba580191eef78bdd">module::localisation::FieldLocalisation::falling</a></div><div class="ttdeci">bool falling</div><div class="ttdoc">Status of if the robot is falling.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:65</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a8b85ccee52c658fbd02b27f85813faff"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a8b85ccee52c658fbd02b27f85813faff">module::localisation::FieldLocalisation::compute_covariance</a></div><div class="ttdeci">Eigen::Matrix3f compute_covariance()</div><div class="ttdoc">Get the current covariance matrix of the robot's state.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.cpp:380</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a9a5c332e459c508396ce8a63d9b4b2ff"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9a5c332e459c508396ce8a63d9b4b2ff">module::localisation::FieldLocalisation::covariance</a></div><div class="ttdeci">Eigen::Matrix3f covariance</div><div class="ttdoc">Covariance matrix of the robot's state.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:62</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_a9bb3dd02e901d3ff96bb043933c4bec2"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9bb3dd02e901d3ff96bb043933c4bec2">module::localisation::FieldLocalisation::time_update</a></div><div class="ttdeci">void time_update()</div><div class="ttdoc">Perform a time update on the particles.</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_adb67cee9e176d77a01368f3d28cfa480"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#adb67cee9e176d77a01368f3d28cfa480">module::localisation::FieldLocalisation::add_noise</a></div><div class="ttdeci">void add_noise()</div><div class="ttdoc">Add some noise to the particles to compensate for the fact that we don't have a perfect model.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.cpp:390</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_ae1ee5b507145d9c986f1e706b637489a"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#ae1ee5b507145d9c986f1e706b637489a">module::localisation::FieldLocalisation::particles</a></div><div class="ttdeci">std::vector&lt; Particle &gt; particles</div><div class="ttdoc">Particles used in the particle filter.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:68</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1FieldLocalisation_html_afd7299b96e7357b906da3c692dda4f1d"><div class="ttname"><a href="classmodule_1_1localisation_1_1FieldLocalisation.html#afd7299b96e7357b906da3c692dda4f1d">module::localisation::FieldLocalisation::fieldline_map</a></div><div class="ttdeci">OccupancyMap&lt; float &gt; fieldline_map</div><div class="ttdoc">Occupancy grid map of the field lines.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:56</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap&lt; float &gt;</a></div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html">module::localisation::FieldLocalisation::Config</a></div><div class="ttdoc">Stores configuration values.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:30</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_a4321ddac909119cb7fcf33be54cfa209"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a4321ddac909119cb7fcf33be54cfa209">module::localisation::FieldLocalisation::Config::initial_state</a></div><div class="ttdeci">std::vector&lt; Eigen::Vector3f &gt; initial_state</div><div class="ttdoc">Initial state (x,y,theta) of the robot, saved for resetting.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:42</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_a4cb979a6b45370cf418b63a6405971f7"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a4cb979a6b45370cf418b63a6405971f7">module::localisation::FieldLocalisation::Config::measurement_noise</a></div><div class="ttdeci">float measurement_noise</div><div class="ttdoc">Uncertainty in the measurement model.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:38</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_a5272be8c66a041c92eb16e9b65244681"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5272be8c66a041c92eb16e9b65244681">module::localisation::FieldLocalisation::Config::initial_covariance</a></div><div class="ttdeci">Eigen::Matrix3f initial_covariance</div><div class="ttdoc">Initial covariance matrix of the robot's state, saved for resetting.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:44</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_a5ab7059ddff8e0eafa08690c8fd35582"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5ab7059ddff8e0eafa08690c8fd35582">module::localisation::FieldLocalisation::Config::save_map</a></div><div class="ttdeci">bool save_map</div><div class="ttdoc">Bool to enable/disable saving the generated map as a csv file.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:46</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_a64b2c8a9efc3de65dd182758fe8514a1"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a64b2c8a9efc3de65dd182758fe8514a1">module::localisation::FieldLocalisation::Config::outside_map_penalty_factor</a></div><div class="ttdeci">float outside_map_penalty_factor</div><div class="ttdoc">Penalty factor for observations being outside map.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:50</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_a68c22dd2bc9b0ced72d132a7e05a904b"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a68c22dd2bc9b0ced72d132a7e05a904b">module::localisation::FieldLocalisation::Config::grid_size</a></div><div class="ttdeci">float grid_size</div><div class="ttdoc">Size of the grid cells in the occupancy grid [m].</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:32</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_a6aa74fd34f3a30e07c3a3ba43b0d6da5"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a6aa74fd34f3a30e07c3a3ba43b0d6da5">module::localisation::FieldLocalisation::Config::max_range</a></div><div class="ttdeci">float max_range</div><div class="ttdoc">Maximum distance a field line can be from a particle to be considered an observation [m].</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:40</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_aa7b06ccdb5eaf8ffd8ae98989f84ba81"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#aa7b06ccdb5eaf8ffd8ae98989f84ba81">module::localisation::FieldLocalisation::Config::min_observations</a></div><div class="ttdeci">size_t min_observations</div><div class="ttdoc">Minimum number of field line points for a measurement update.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:48</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_ab1e7f3b79690f9e0095edf4aebbb4c07"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab1e7f3b79690f9e0095edf4aebbb4c07">module::localisation::FieldLocalisation::Config::n_particles</a></div><div class="ttdeci">int n_particles</div><div class="ttdoc">Number of particles to use in the particle filter.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:34</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1FieldLocalisation_1_1Config_html_accdc0fd0d345204ba6f248a5c2969ae2"><div class="ttname"><a href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#accdc0fd0d345204ba6f248a5c2969ae2">module::localisation::FieldLocalisation::Config::process_noise</a></div><div class="ttdeci">Eigen::Matrix3f process_noise</div><div class="ttdoc">Uncertainty in the process model.</div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:36</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1Particle_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1Particle.html">module::localisation::Particle</a></div><div class="ttdef"><b>Definition:</b> FieldLocalisation.hpp:22</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_033e104c2ead1f4a62ad583bb66b5a18.html">localisation</a></li><li class="navelem"><a class="el" href="dir_5004ae7ce47f85c9793a7e1b837dd98f.html">FieldLocalisation</a></li><li class="navelem"><a class="el" href="dir_b2a7152a965932078ec23c6dea180790.html">src</a></li><li class="navelem"><b>FieldLocalisation.hpp</b></li>
+    <li class="footer">Generated on Sat Jun 17 2023 04:17:00 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

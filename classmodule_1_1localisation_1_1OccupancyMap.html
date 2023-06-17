@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: module::localisation::OccupancyMap Class Reference</title>
+    <title>NUbots: module::localisation::OccupancyMap&lt; Scalar &gt; Class Template Reference</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -171,71 +171,73 @@ $(document).ready(function(){initNavTree('classmodule_1_1localisation_1_1Occupan
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1localisation_1_1OccupancyMap-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">module::localisation::OccupancyMap Class Reference</div>  </div>
+<div class="title">module::localisation::OccupancyMap&lt; Scalar &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad670b8607ccce0096397556723244c1f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#ad670b8607ccce0096397556723244c1f">add_circle</a> (const int X0, const int Y0, const int radius, const int inner_width)</td></tr>
-<tr class="memdesc:ad670b8607ccce0096397556723244c1f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a circle to the map with specified origin, radius and line width.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#ad670b8607ccce0096397556723244c1f">More...</a><br /></td></tr>
-<tr class="separator:ad670b8607ccce0096397556723244c1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d2417987621f5efecedde30e83e0b1c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a4d2417987621f5efecedde30e83e0b1c">add_cross</a> (const int X0, const int Y0, const int radius, const int inner_width)</td></tr>
-<tr class="memdesc:a4d2417987621f5efecedde30e83e0b1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rectangular cross to the map with specified origin, radius and line width.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a4d2417987621f5efecedde30e83e0b1c">More...</a><br /></td></tr>
-<tr class="separator:a4d2417987621f5efecedde30e83e0b1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60c56efc123b4cc2dd643113bf9b1aba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a60c56efc123b4cc2dd643113bf9b1aba">add_horizontal_line</a> (int x0, int y0, int length)</td></tr>
-<tr class="memdesc:a60c56efc123b4cc2dd643113bf9b1aba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a horizontal line to the map.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a60c56efc123b4cc2dd643113bf9b1aba">More...</a><br /></td></tr>
-<tr class="separator:a60c56efc123b4cc2dd643113bf9b1aba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67a9bbd10ea8c70597d9cfb690ba2cec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a67a9bbd10ea8c70597d9cfb690ba2cec">add_rectangle</a> (int x0, int y0, int width, int height)</td></tr>
-<tr class="memdesc:a67a9bbd10ea8c70597d9cfb690ba2cec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rectangle to the map with width of 1 grid cell.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a67a9bbd10ea8c70597d9cfb690ba2cec">More...</a><br /></td></tr>
-<tr class="separator:a67a9bbd10ea8c70597d9cfb690ba2cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9eeca22bbf63233373d67e5e81bfd3d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#af9eeca22bbf63233373d67e5e81bfd3d">add_rectangle</a> (int x0, int y0, int width, int height, int inner_width)</td></tr>
-<tr class="memdesc:af9eeca22bbf63233373d67e5e81bfd3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rectangle to the map with specified inner width.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#af9eeca22bbf63233373d67e5e81bfd3d">More...</a><br /></td></tr>
-<tr class="separator:af9eeca22bbf63233373d67e5e81bfd3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a076ebde6b4e618f826f2180b1e46ce91"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a076ebde6b4e618f826f2180b1e46ce91">add_vertical_line</a> (int x0, int y0, int length)</td></tr>
-<tr class="memdesc:a076ebde6b4e618f826f2180b1e46ce91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a vertical line to the map.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a076ebde6b4e618f826f2180b1e46ce91">More...</a><br /></td></tr>
-<tr class="separator:a076ebde6b4e618f826f2180b1e46ce91"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1833c2c21a07630bfec48545e6b06f8"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#aa1833c2c21a07630bfec48545e6b06f8">create_distance_map</a> (double grid_size)</td></tr>
-<tr class="memdesc:aa1833c2c21a07630bfec48545e6b06f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace map with a new map with occupancy values which encode the minimum distance to the closest occupied cell.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#aa1833c2c21a07630bfec48545e6b06f8">More...</a><br /></td></tr>
-<tr class="separator:aa1833c2c21a07630bfec48545e6b06f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad1d708019f05d482b1c65bed97baca11"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#ad1d708019f05d482b1c65bed97baca11">fill_surrounding_cells</a> (int range)</td></tr>
-<tr class="memdesc:ad1d708019f05d482b1c65bed97baca11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills the surrounding cells with a decreasing occupancy value from 1 for a user-specified range.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#ad1d708019f05d482b1c65bed97baca11">More...</a><br /></td></tr>
-<tr class="separator:ad1d708019f05d482b1c65bed97baca11"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4389f12c14ab117eeed54e36432d9145"><td class="memItemLeft" align="right" valign="top"><a id="a4389f12c14ab117eeed54e36432d9145"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a4389f12c14ab117eeed54e36432d9145">get_length</a> ()</td></tr>
-<tr class="memdesc:a4389f12c14ab117eeed54e36432d9145"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the length (number of rows) of the map. <br /></td></tr>
-<tr class="separator:a4389f12c14ab117eeed54e36432d9145"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78b7a02770befb2b93bad15b8d91e26c"><td class="memItemLeft" align="right" valign="top"><a id="a78b7a02770befb2b93bad15b8d91e26c"></a>
-Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a78b7a02770befb2b93bad15b8d91e26c">get_map</a> ()</td></tr>
-<tr class="memdesc:a78b7a02770befb2b93bad15b8d91e26c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Getter for the map data. <br /></td></tr>
-<tr class="separator:a78b7a02770befb2b93bad15b8d91e26c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5828244266bc9a165df395803b8358f5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a5828244266bc9a165df395803b8358f5">get_occupancy_value</a> (int x, int y)</td></tr>
-<tr class="memdesc:a5828244266bc9a165df395803b8358f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the value of the map at the specified coordinates or return -1 if the coordinates are outside the map bounds.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a5828244266bc9a165df395803b8358f5">More...</a><br /></td></tr>
-<tr class="separator:a5828244266bc9a165df395803b8358f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ec468fbeed8ecdd4740fa3d1475572a"><td class="memItemLeft" align="right" valign="top"><a id="a1ec468fbeed8ecdd4740fa3d1475572a"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a1ec468fbeed8ecdd4740fa3d1475572a">get_width</a> ()</td></tr>
-<tr class="memdesc:a1ec468fbeed8ecdd4740fa3d1475572a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the width (number of columns) of the map. <br /></td></tr>
-<tr class="separator:a1ec468fbeed8ecdd4740fa3d1475572a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d0c87dabf20efaed337e2f4e73b8dd3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a5d0c87dabf20efaed337e2f4e73b8dd3">resize</a> (int width, int length)</td></tr>
-<tr class="memdesc:a5d0c87dabf20efaed337e2f4e73b8dd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resize the map to specified width and length, and set all values to zero.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a5d0c87dabf20efaed337e2f4e73b8dd3">More...</a><br /></td></tr>
-<tr class="separator:a5d0c87dabf20efaed337e2f4e73b8dd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acddd3b34ecf9b2f0520359cbd6cc7828"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">add_circle</a> (const int X0, const int Y0, const int radius, const int inner_width)</td></tr>
+<tr class="memdesc:acddd3b34ecf9b2f0520359cbd6cc7828"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a circle to the map with specified origin, radius and line width.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">More...</a><br /></td></tr>
+<tr class="separator:acddd3b34ecf9b2f0520359cbd6cc7828"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75cc84bbae363d61630898069aac013d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">add_cross</a> (const int X0, const int Y0, const int radius, const int inner_width)</td></tr>
+<tr class="memdesc:a75cc84bbae363d61630898069aac013d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rectangular cross to the map with specified origin, radius and line width.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">More...</a><br /></td></tr>
+<tr class="separator:a75cc84bbae363d61630898069aac013d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b4ead5da00d9640976cfaebbd989a7f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a3b4ead5da00d9640976cfaebbd989a7f">add_horizontal_line</a> (int x0, int y0, int length)</td></tr>
+<tr class="memdesc:a3b4ead5da00d9640976cfaebbd989a7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a horizontal line to the map.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a3b4ead5da00d9640976cfaebbd989a7f">More...</a><br /></td></tr>
+<tr class="separator:a3b4ead5da00d9640976cfaebbd989a7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1f4588e0d084d046f81b5a9e246c610"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#ac1f4588e0d084d046f81b5a9e246c610">add_rectangle</a> (int x0, int y0, int width, int height)</td></tr>
+<tr class="memdesc:ac1f4588e0d084d046f81b5a9e246c610"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rectangle to the map with width of 1 grid cell.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#ac1f4588e0d084d046f81b5a9e246c610">More...</a><br /></td></tr>
+<tr class="separator:ac1f4588e0d084d046f81b5a9e246c610"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a01726e6e4877e9d4fda1bf6104bc3a03"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03">add_rectangle</a> (int x0, int y0, int width, int height, int inner_width)</td></tr>
+<tr class="memdesc:a01726e6e4877e9d4fda1bf6104bc3a03"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a rectangle to the map with specified inner width.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03">More...</a><br /></td></tr>
+<tr class="separator:a01726e6e4877e9d4fda1bf6104bc3a03"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca1a52f02c6a66c9f4be1933bb5384bd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#aca1a52f02c6a66c9f4be1933bb5384bd">add_vertical_line</a> (int x0, int y0, int length)</td></tr>
+<tr class="memdesc:aca1a52f02c6a66c9f4be1933bb5384bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add a vertical line to the map.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#aca1a52f02c6a66c9f4be1933bb5384bd">More...</a><br /></td></tr>
+<tr class="separator:aca1a52f02c6a66c9f4be1933bb5384bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60338a0ecceff589c466e4e21d770ff3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">create_distance_map</a> (Scalar grid_size)</td></tr>
+<tr class="memdesc:a60338a0ecceff589c466e4e21d770ff3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Replace map with a new map with occupancy values which encode the minimum distance to the closest occupied cell.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">More...</a><br /></td></tr>
+<tr class="separator:a60338a0ecceff589c466e4e21d770ff3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ce98900abdb784a2478820dd69ee47d"><td class="memItemLeft" align="right" valign="top"><a id="a2ce98900abdb784a2478820dd69ee47d"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a2ce98900abdb784a2478820dd69ee47d">get_length</a> ()</td></tr>
+<tr class="memdesc:a2ce98900abdb784a2478820dd69ee47d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the length (number of rows) of the map. <br /></td></tr>
+<tr class="separator:a2ce98900abdb784a2478820dd69ee47d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c7e484bb9bf64b1c85469d9eb718cf5"><td class="memItemLeft" align="right" valign="top"><a id="a7c7e484bb9bf64b1c85469d9eb718cf5"></a>
+Eigen::Matrix&lt; Scalar, Eigen::Dynamic, Eigen::Dynamic &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a7c7e484bb9bf64b1c85469d9eb718cf5">get_map</a> ()</td></tr>
+<tr class="memdesc:a7c7e484bb9bf64b1c85469d9eb718cf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Getter for the map data. <br /></td></tr>
+<tr class="separator:a7c7e484bb9bf64b1c85469d9eb718cf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9ea4344bbf8685568ba4a0300ee209f"><td class="memItemLeft" align="right" valign="top">Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#af9ea4344bbf8685568ba4a0300ee209f">get_occupancy_value</a> (int x, int y)</td></tr>
+<tr class="memdesc:af9ea4344bbf8685568ba4a0300ee209f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the value of the map at the specified coordinates or return -1 if the coordinates are outside the map bounds.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#af9ea4344bbf8685568ba4a0300ee209f">More...</a><br /></td></tr>
+<tr class="separator:af9ea4344bbf8685568ba4a0300ee209f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15c1432dc72c7ec98ff12b1fc689d0d8"><td class="memItemLeft" align="right" valign="top"><a id="a15c1432dc72c7ec98ff12b1fc689d0d8"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a15c1432dc72c7ec98ff12b1fc689d0d8">get_width</a> ()</td></tr>
+<tr class="memdesc:a15c1432dc72c7ec98ff12b1fc689d0d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the width (number of columns) of the map. <br /></td></tr>
+<tr class="separator:a15c1432dc72c7ec98ff12b1fc689d0d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b7b361737f80ba27fdd80df0fedc304"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a4b7b361737f80ba27fdd80df0fedc304">resize</a> (int width, int length)</td></tr>
+<tr class="memdesc:a4b7b361737f80ba27fdd80df0fedc304"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resize the map to specified width and length, and set all values to zero.  <a href="classmodule_1_1localisation_1_1OccupancyMap.html#a4b7b361737f80ba27fdd80df0fedc304">More...</a><br /></td></tr>
+<tr class="separator:a4b7b361737f80ba27fdd80df0fedc304"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a39002046e21aab5086a33afdbd981888"><td class="memItemLeft" align="right" valign="top"><a id="a39002046e21aab5086a33afdbd981888"></a>
-Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a39002046e21aab5086a33afdbd981888">map</a></td></tr>
-<tr class="memdesc:a39002046e21aab5086a33afdbd981888"><td class="mdescLeft">&#160;</td><td class="mdescRight">Eigen matrix which stores the map data. <br /></td></tr>
-<tr class="separator:a39002046e21aab5086a33afdbd981888"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef2566637f1e4f449975c11e9542fa85"><td class="memItemLeft" align="right" valign="top"><a id="aef2566637f1e4f449975c11e9542fa85"></a>
+Eigen::Matrix&lt; Scalar, Eigen::Dynamic, Eigen::Dynamic &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a></td></tr>
+<tr class="memdesc:aef2566637f1e4f449975c11e9542fa85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Eigen matrix which stores the map data. <br /></td></tr>
+<tr class="separator:aef2566637f1e4f449975c11e9542fa85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad670b8607ccce0096397556723244c1f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad670b8607ccce0096397556723244c1f">&#9670;&nbsp;</a></span>add_circle()</h2>
+<a id="acddd3b34ecf9b2f0520359cbd6cc7828"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acddd3b34ecf9b2f0520359cbd6cc7828">&#9670;&nbsp;</a></span>add_circle()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::add_circle </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::add_circle </td>
           <td>(</td>
           <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>X0</em>, </td>
@@ -264,6 +266,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Add a circle to the map with specified origin, radius and line width. </p>
@@ -278,14 +285,19 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="a4d2417987621f5efecedde30e83e0b1c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d2417987621f5efecedde30e83e0b1c">&#9670;&nbsp;</a></span>add_cross()</h2>
+<a id="a75cc84bbae363d61630898069aac013d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75cc84bbae363d61630898069aac013d">&#9670;&nbsp;</a></span>add_cross()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::add_cross </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::add_cross </td>
           <td>(</td>
           <td class="paramtype">const int&#160;</td>
           <td class="paramname"><em>X0</em>, </td>
@@ -314,6 +326,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Add a rectangular cross to the map with specified origin, radius and line width. </p>
@@ -328,14 +345,19 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="a60c56efc123b4cc2dd643113bf9b1aba"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a60c56efc123b4cc2dd643113bf9b1aba">&#9670;&nbsp;</a></span>add_horizontal_line()</h2>
+<a id="a3b4ead5da00d9640976cfaebbd989a7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3b4ead5da00d9640976cfaebbd989a7f">&#9670;&nbsp;</a></span>add_horizontal_line()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::add_horizontal_line </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::add_horizontal_line </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>x0</em>, </td>
@@ -358,6 +380,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Add a horizontal line to the map. </p>
@@ -373,14 +400,19 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="a67a9bbd10ea8c70597d9cfb690ba2cec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a67a9bbd10ea8c70597d9cfb690ba2cec">&#9670;&nbsp;</a></span>add_rectangle() <span class="overload">[1/2]</span></h2>
+<a id="ac1f4588e0d084d046f81b5a9e246c610"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1f4588e0d084d046f81b5a9e246c610">&#9670;&nbsp;</a></span>add_rectangle() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::add_rectangle </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::add_rectangle </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>x0</em>, </td>
@@ -409,6 +441,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Add a rectangle to the map with width of 1 grid cell. </p>
@@ -424,14 +461,19 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="af9eeca22bbf63233373d67e5e81bfd3d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af9eeca22bbf63233373d67e5e81bfd3d">&#9670;&nbsp;</a></span>add_rectangle() <span class="overload">[2/2]</span></h2>
+<a id="a01726e6e4877e9d4fda1bf6104bc3a03"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01726e6e4877e9d4fda1bf6104bc3a03">&#9670;&nbsp;</a></span>add_rectangle() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::add_rectangle </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::add_rectangle </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>x0</em>, </td>
@@ -466,6 +508,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Add a rectangle to the map with specified inner width. </p>
@@ -482,14 +529,19 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="a076ebde6b4e618f826f2180b1e46ce91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a076ebde6b4e618f826f2180b1e46ce91">&#9670;&nbsp;</a></span>add_vertical_line()</h2>
+<a id="aca1a52f02c6a66c9f4be1933bb5384bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aca1a52f02c6a66c9f4be1933bb5384bd">&#9670;&nbsp;</a></span>add_vertical_line()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::add_vertical_line </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::add_vertical_line </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>x0</em>, </td>
@@ -512,6 +564,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Add a vertical line to the map. </p>
@@ -527,20 +584,30 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="aa1833c2c21a07630bfec48545e6b06f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1833c2c21a07630bfec48545e6b06f8">&#9670;&nbsp;</a></span>create_distance_map()</h2>
+<a id="a60338a0ecceff589c466e4e21d770ff3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a60338a0ecceff589c466e4e21d770ff3">&#9670;&nbsp;</a></span>create_distance_map()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::create_distance_map </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::create_distance_map </td>
           <td>(</td>
-          <td class="paramtype">double&#160;</td>
+          <td class="paramtype">Scalar&#160;</td>
           <td class="paramname"><em>grid_size</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Replace map with a new map with occupancy values which encode the minimum distance to the closest occupied cell. </p>
@@ -554,41 +621,19 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="ad1d708019f05d482b1c65bed97baca11"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1d708019f05d482b1c65bed97baca11">&#9670;&nbsp;</a></span>fill_surrounding_cells()</h2>
+<a id="af9ea4344bbf8685568ba4a0300ee209f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af9ea4344bbf8685568ba4a0300ee209f">&#9670;&nbsp;</a></span>get_occupancy_value()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::fill_surrounding_cells </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>range</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Fills the surrounding cells with a decreasing occupancy value from 1 for a user-specified range. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">map</td><td>The pre-filled Map </td></tr>
-    <tr><td class="paramname">range</td><td>The range for the surrounding cells </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a5828244266bc9a165df395803b8358f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5828244266bc9a165df395803b8358f5">&#9670;&nbsp;</a></span>get_occupancy_value()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">double module::localisation::OccupancyMap::get_occupancy_value </td>
+          <td class="memname">Scalar <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::get_occupancy_value </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>x</em>, </td>
@@ -605,6 +650,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Get the value of the map at the specified coordinates or return -1 if the coordinates are outside the map bounds. </p>
@@ -619,14 +669,19 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="a5d0c87dabf20efaed337e2f4e73b8dd3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d0c87dabf20efaed337e2f4e73b8dd3">&#9670;&nbsp;</a></span>resize()</h2>
+<a id="a4b7b361737f80ba27fdd80df0fedc304"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4b7b361737f80ba27fdd80df0fedc304">&#9670;&nbsp;</a></span>resize()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::OccupancyMap::resize </td>
+          <td class="memname">void <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a>&lt; Scalar &gt;::resize </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>width</em>, </td>
@@ -643,6 +698,11 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Resize the map to specified width and length, and set all values to zero. </p>
@@ -656,9 +716,8 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<hr/>The documentation for this class was generated from the following files:<ul>
+<hr/>The documentation for this class was generated from the following file:<ul>
 <li>shared/utility/localisation/<a class="el" href="OccupancyMap_8hpp_source.html">OccupancyMap.hpp</a></li>
-<li>shared/utility/localisation/OccupancyMap.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -666,7 +725,7 @@ Eigen::MatrixXd&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">OccupancyMap</a></li>
-    <li class="footer">Generated on Sat Jun 17 2023 04:10:12 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jun 17 2023 04:17:00 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

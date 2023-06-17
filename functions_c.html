@@ -174,7 +174,7 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 , <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6b58111e28c0058c11b4e8080eff150a">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 </li>
 <li>calculate_weight()
-: <a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#aa4b6253b6e99455ab6d19f560438b795">module::localisation::RobotLocalisation</a>
+: <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a59185f31119e989510700d7b57ee27e3">module::localisation::FieldLocalisation</a>
 </li>
 <li>callbacks
 : <a class="el" href="classutility_1_1nbs_1_1Decoder.html#aab37fdd21ec2a92487833acb948ff29e">utility::nbs::Decoder</a>
@@ -199,6 +199,7 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 </li>
 <li>cfg
 : <a class="el" href="classmodule_1_1vision_1_1BallDetector.html#a1bd43a7e2be88f3c4924ec311af6213f">module::vision::BallDetector</a>
+, <a class="el" href="classmodule_1_1vision_1_1FieldLineDetector.html#ab58ddcd40221a625d0da773d67c66b51">module::vision::FieldLineDetector</a>
 </li>
 <li>challenge_priority()
 : <a class="el" href="classmodule_1_1extension_1_1Director.html#a6e12b0846a7c148a6dea84299670b45c">module::extension::Director</a>
@@ -247,13 +248,13 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 </li>
 <li>cm740
 : <a class="el" href="structCM740_1_1BulkReadResults.html#a0d03ea6d3a23ef63afe10fa21fbbd0b8">CM740::BulkReadResults</a>
-, <a class="el" href="classCM740_1_1CM740.html#a754384f8de861de8efbd590904a76ae4">CM740::CM740</a>
 </li>
 <li>CM740()
 : <a class="el" href="classCM740_1_1CM740.html#a60699ca75777cc26297a7865ec0526d2">CM740::CM740</a>
 </li>
 <li>cm740
-: <a class="el" href="classmodule_1_1platform_1_1cm740_1_1HardwareIO.html#a4eb2bd5014a37965785d7049c0009d88">module::platform::cm740::HardwareIO</a>
+: <a class="el" href="classCM740_1_1CM740.html#a754384f8de861de8efbd590904a76ae4">CM740::CM740</a>
+, <a class="el" href="classmodule_1_1platform_1_1cm740_1_1HardwareIO.html#a4eb2bd5014a37965785d7049c0009d88">module::platform::cm740::HardwareIO</a>
 </li>
 <li>cm740ErrorCode
 : <a class="el" href="structCM740_1_1BulkReadResults.html#afd7e4540ccf409acb4eb6118d393fef2">CM740::BulkReadResults</a>
@@ -286,10 +287,10 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 : <a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html#aaa39fd322b8783b180b2864939df773d">utility::skill::QuinticWalkEngine</a>
 </li>
 <li>compute_covariance()
-: <a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a65f2a053920cf35e3a4efd8b746a5cfa">module::localisation::RobotLocalisation</a>
+: <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a8b85ccee52c658fbd02b27f85813faff">module::localisation::FieldLocalisation</a>
 </li>
 <li>compute_mean()
-: <a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a626145d3a591a61787b9741304157e30">module::localisation::RobotLocalisation</a>
+: <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a6cc5dfd580c80f0b1723772ca8f13ec5">module::localisation::FieldLocalisation</a>
 </li>
 <li>computeSplines()
 : <a class="el" href="classutility_1_1motion_1_1splines_1_1SmoothSpline.html#a21c67e61de57403a1005d6f7cc4325f5">utility::motion::splines::SmoothSpline&lt; Scalar &gt;</a>
@@ -301,7 +302,6 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 : <a class="el" href="classmodule_1_1input_1_1FakeCamera.html#a1fc5c8feb289885618e190ef2a394929">module::input::FakeCamera</a>
 , <a class="el" href="structmodule_1_1output_1_1compressor_1_1vaapi_1_1CompressionContext_1_1VAAPIContext.html#a6ca0cc5aad4c05bea80763f1213676c7">module::output::compressor::vaapi::CompressionContext::VAAPIContext</a>
 , <a class="el" href="classmodule_1_1support_1_1LocalisationSimulator.html#acdd89907a1c92f9efbc23b0d8bc6dbcb">module::support::LocalisationSimulator</a>
-, <a class="el" href="classmodule_1_1vision_1_1FieldLineDetector.html#ac70a07a3109947aaf2ff809d7631e78f">module::vision::FieldLineDetector</a>
 </li>
 <li>Configuration()
 : <a class="el" href="structextension_1_1Configuration.html#ae86cb3aed1f65b8d3e851d1e06a4e775">extension::Configuration</a>
@@ -348,12 +348,12 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 , <a class="el" href="structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a36c9aaa5698f5757aad0c4a0f025895a">utility::math::stats::resample::Systematic&lt; Scalar &gt;</a>
 </li>
 <li>covariance
-: <a class="el" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a7c7797f432962ba953a49c20938a3ec6">module::localisation::RobotLocalisation</a>
+: <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9a5c332e459c508396ce8a63d9b4b2ff">module::localisation::FieldLocalisation</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#ac5cb95bece64e0df2abf38c8352753ae">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 , <a class="el" href="structutility_1_1math_1_1stats_1_1MultivariateNormal.html#a823d2e304cd889c67ddbbc6562b3e684">utility::math::stats::MultivariateNormal&lt; Scalar, N &gt;</a>
 </li>
 <li>create_distance_map()
-: <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#aa1833c2c21a07630bfec48545e6b06f8">module::localisation::OccupancyMap</a>
+: <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">module::localisation::OccupancyMap&lt; Scalar &gt;</a>
 </li>
 <li>create_windows()
 : <a class="el" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ab38ef90c692e2898b1c6d666cc000330">module::purpose::KeyboardWalk</a>
@@ -389,7 +389,7 @@ $(document).ready(function(){initNavTree('functions_c.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Jun 17 2023 04:10:13 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jun 17 2023 04:17:01 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

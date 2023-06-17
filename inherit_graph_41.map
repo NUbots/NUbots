@@ -29,8 +29,8 @@
 <area shape="rect" id="node55" href="$classmodule_1_1input_1_1SensorFilter.html" title=" " alt="" coords="317,2197,514,2223"/>
 <area shape="rect" id="node56" href="$classmodule_1_1localisation_1_1BallFilter.html" title=" " alt="" coords="338,2248,493,2289"/>
 <area shape="rect" id="node57" href="$classmodule_1_1localisation_1_1BallLocalisation.html" title=" " alt="" coords="338,2313,493,2355"/>
-<area shape="rect" id="node58" href="$classmodule_1_1localisation_1_1OdometryLocalisation.html" title=" " alt="" coords="329,2379,502,2420"/>
-<area shape="rect" id="node59" href="$classmodule_1_1localisation_1_1RobotLocalisation.html" title=" " alt="" coords="338,2444,493,2485"/>
+<area shape="rect" id="node58" href="$classmodule_1_1localisation_1_1FieldLocalisation.html" title=" " alt="" coords="338,2379,493,2420"/>
+<area shape="rect" id="node59" href="$classmodule_1_1localisation_1_1OdometryLocalisation.html" title=" " alt="" coords="329,2444,502,2485"/>
 <area shape="rect" id="node60" href="$classmodule_1_1localisation_1_1RobotParticleLocalisation.html" title=" " alt="" coords="318,2509,513,2551"/>
 <area shape="rect" id="node61" href="$classmodule_1_1motion_1_1HeadController.html" title="Executes a HeadController action." alt="" coords="300,2575,531,2602"/>
 <area shape="rect" id="node62" href="$classmodule_1_1motion_1_1IKKick.html" title=" " alt="" coords="328,2626,503,2653"/>
