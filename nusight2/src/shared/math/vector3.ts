@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { Matrix4 } from './matrix4'
 
+import { Matrix4 } from "./matrix4";
 import { Vector } from "./vector";
 
 export class Vector3 extends Vector {

@@ -1,7 +1,7 @@
 import { computed } from "mobx";
-import { Mesh } from 'three'
-import { MeshBasicMaterial } from 'three'
-import { CircleBufferGeometry } from 'three'
+import { Mesh } from "three";
+import { MeshBasicMaterial } from "three";
+import { CircleBufferGeometry } from "three";
 import { HemisphereLight } from "three";
 import { PointLight } from "three";
 import { Object3D } from "three";
@@ -83,13 +83,15 @@ export class LocalisationViewModel {
   @computed
   private get fieldLineDots() {
     const geometry = new CircleBufferGeometry(0.02, 20);
-    const material = new MeshBasicMaterial({ color: 'blue' });
+    const material = new MeshBasicMaterial({ color: "blue" });
     const group = new Object3D();
-    this.model.robots.forEach(robot => robot.fieldLinesDots.rPWw.forEach(d => {
-      const mesh = new Mesh(geometry, material)
-      mesh.position.copy(new Vector3(d.x, d.y, 0.01).toThree());
-      group.add(mesh);
-    }));
+    this.model.robots.forEach((robot) =>
+      robot.fieldLinesDots.rPWw.forEach((d) => {
+        const mesh = new Mesh(geometry, material);
+        mesh.position.copy(d.add(new Vector3(0, 0, 0.005)).toThree());
+        group.add(mesh);
+      }),
+    );
     return group;
   }
 }
