@@ -245,13 +245,13 @@ namespace module::localisation {
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             Eigen::Isometry3f Hcw = Eigen::Isometry3f(field_lines.Hcw.cast<float>());
-            if (!falling && field_lines.rPCw.size() > cfg.min_observations) {
+            if (!falling && field_lines.rPWw.size() > cfg.min_observations) {
                 // Add noise to the particles
                 add_noise();
 
                 // Calculate the weight of each particle based on the observations occupancy values
                 for (int i = 0; i < cfg.n_particles; i++) {
-                    particles[i].weight = calculate_weight(particles[i].state, field_lines.rPCw);
+                    particles[i].weight = calculate_weight(particles[i].state, field_lines.rPWw);
                     if (log_level <= NUClear::DEBUG) {
                         auto particle_cell = position_in_map(particles[i].state, Eigen::Vector3f::Zero());
                         emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
@@ -266,8 +266,8 @@ namespace module::localisation {
             covariance = compute_covariance();
             if (log_level <= NUClear::DEBUG) {
 
-                for (auto rPCw : field_lines.rPCw) {
-                    auto observation_cell = position_in_map(state, rPCw);
+                for (auto rPWw : field_lines.rPWw) {
+                    auto observation_cell = position_in_map(state, rPWw);
                     emit(graph("Field line point", observation_cell.x(), observation_cell.y()));
                 }
 
@@ -305,12 +305,12 @@ namespace module::localisation {
         });
     }
 
-    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3f particle, const Eigen::Vector3f rPRw) {
+    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3f particle, const Eigen::Vector3f rPWw) {
         // Transform observations from world {w} to field {f} space
         Eigen::Isometry3f Hfw;
         Hfw.translation()    = Eigen::Vector3f(particle(0), particle(1), 0.0f);
         Hfw.linear()         = Eigen::AngleAxisf(particle(2), Eigen::Vector3f::UnitZ()).toRotationMatrix();
-        Eigen::Vector3f rPFf = Hfw * rPRw;
+        Eigen::Vector3f rPFf = Hfw * rPWw;
 
         // Get the associated position/index in the map [x, y]
         int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
