@@ -17,7 +17,7 @@ const messageSourceFiles = [
   `${messagesDir}/**/*.proto`,
   `${nuclearMessagesDir}/**/*.proto`,
   `${googleMessagesDir}/**/*.proto`,
-].map(f => f.replaceAll(path.win32.sep, path.posix.sep)); // pbjs expects posix directory separators.
+].map((f) => f.replaceAll(path.win32.sep, path.posix.sep)); // pbjs expects posix directory separators.
 
 // Data types to protobuf wire types
 const protobufWireTypes = {
