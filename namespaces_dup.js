@@ -615,6 +615,7 @@ var namespaces_dup =
             [ "p_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#ad64e075a2d608b04877d3876c9d3f653", null ],
             [ "position", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a331b52b30254067c1c84ca82e749ec91", null ],
             [ "position", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a0fd7f0f4d115e94e2745564e448a8d30", null ],
+            [ "profile_velocity", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a2c259c120f23fcedb4fe385ba98c4370", null ],
             [ "PWM", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a0df1198182ac8a145b01ffc6137ef38f", null ],
             [ "temperature", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a07395c0ca1da53593af92347d292c1d3", null ],
             [ "temperature", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a928f5adad1d849326afe9047e2d5d9d6", null ],

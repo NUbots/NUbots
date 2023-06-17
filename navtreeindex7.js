@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"classmodule_1_1tools_1_1FirmwareInstaller.html#af9fb541b04d2b37bef15fc593c92084f":[2,0,3,14,0,8],
 "classmodule_1_1tools_1_1SystemConfiguration.html":[2,0,3,14,3],
 "classmodule_1_1tools_1_1SystemConfiguration.html#a272ed36c30b133276492cb8f4bcfecfd":[2,0,3,14,3,0],
 "classmodule_1_1vision_1_1BallDetector.html":[2,0,3,15,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a21fcbec1b9d0cb659494810cb00c42ca":[2,0,6,6,0,2,3],
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a363b888968765bf8ef5b064aadcd8fbe":[2,0,6,6,0,2,9],
 "classutility_1_1motion_1_1splines_1_1Polynom.html#a3f849a986d959dd1a638e12f5ea2cb2d":[2,0,6,6,0,2,0],
-"classutility_1_1motion_1_1splines_1_1Polynom.html#a743f9ad5d04016f3669209d8e90682a7":[2,0,6,6,0,2,12],
-"classutility_1_1motion_1_1splines_1_1Polynom.html#a79aee31c4b0f589cf99374542dab3491":[2,0,6,6,0,2,16]
+"classutility_1_1motion_1_1splines_1_1Polynom.html#a743f9ad5d04016f3669209d8e90682a7":[2,0,6,6,0,2,12]
 };

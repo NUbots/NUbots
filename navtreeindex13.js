@@ -1,5 +1,6 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97ba70ec42829d2436823649c564347d9e21":[2,0,3,3,8,0,0,2],
 "structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97ba71f0edbf80e818c89b0356a7403a0507":[2,0,3,3,8,0,0,9],
 "structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97ba87e803a7f3cfb14161a5efbfe6917413":[2,0,3,3,8,0,0,11],
 "structmodule_1_1input_1_1MotionModel_1_1StateVec.html#ab3e03cc1633c0ef91111eea59445f97ba90374c098aa24349691d3d426573164e":[2,0,3,3,8,0,0,5],
@@ -248,6 +249,5 @@ var NAVTREEINDEX13 =
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a4b78874185cc755f80ac661b3620bfb2":[2,0,3,3,1,2,2],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5af89d7f8025ae236d65a8e93f7754aa":[2,0,3,3,1,2,1],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5c6a1a3cb7800d2f719adf73c42b7b31":[2,0,3,3,1,2,3],
-"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a7f7b55a68a1bcd12e5ddc6e6cca73002":[2,0,3,3,1,2,0],
-"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a8c519d4aff13dda9d7e404e50d393141":[2,0,3,3,1,2,5]
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a7f7b55a68a1bcd12e5ddc6e6cca73002":[2,0,3,3,1,2,0]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1motion_1_1QuinticWalk.html#a20ccab9156762e4060022a5eadb831f8":[2,0,3,5,8,19],
 "classmodule_1_1motion_1_1QuinticWalk.html#a2b122b948b51333281bb48b682632352":[2,0,3,5,8,2],
 "classmodule_1_1motion_1_1QuinticWalk.html#a2c4771bbf7c1ebd0161e12a7b709bdab":[2,0,3,5,8,11],
 "classmodule_1_1motion_1_1QuinticWalk.html#a3062c39f5d65d9460979d297b368096b":[2,0,3,5,8,17],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a3e95d36229cba341096ebed87c72532c":[2,0,3,9,1,10,0,0],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a3edc593224441f930bbde3b316ef31c3":[2,0,3,9,1,10,0,26],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a4f2afd1392f44f40c2f9d3f04eca665a":[2,0,3,9,1,10,0,24],
-"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a53e0dbc06e48e3d381ac224fa8bae3df":[2,0,3,9,1,10,0,8],
-"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a567c6b092b7022df5dff239b8667c4c1":[2,0,3,9,1,10,0,31]
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a53e0dbc06e48e3d381ac224fa8bae3df":[2,0,3,9,1,10,0,8]
 };

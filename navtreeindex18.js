@@ -1,5 +1,6 @@
 var NAVTREEINDEX18 =
 {
+"structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#aaf2b70491f73ad58d39949e0acfce0d2":[2,0,6,5,2,0,4],
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#ab61268591d8022034e9782a0fa2b61ab":[2,0,6,5,2,0,2],
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#abba1ec1a83d5177613770f896525caf4":[2,0,6,5,2,0,0],
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#ae7dff3235ab29b308da2fa3639b71512":[2,0,6,5,2,0,3],
@@ -174,11 +175,11 @@ var NAVTREEINDEX18 =
 "structutility_1_1support_1_1Expression.html#aa98ac82792d5e9302f95c379ba772372":[2,0,6,11,1,1],
 "structutility_1_1support_1_1Expression.html#acb87986fbdf5badbb3e40e983187887c":[2,0,6,11,1,9],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,8],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,6],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,5],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,7],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,3],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,6],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,4],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,6,11,1,3],
 "structutility_1_1support_1_1LazyEvaluation.html":[2,0,6,11,2],
 "structutility_1_1support_1_1LazyEvaluation.html#a405f3e6a7d2f4a3630296a9a291b7c46":[2,0,6,11,2,1],
 "structutility_1_1support_1_1LazyEvaluation.html#a6fc2eba1f57246dd848e823a211111ba":[2,0,6,11,2,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX18 =
 "structutility_1_1vision_1_1Colour.html#aeb8aa59a9345724687661780dbc277a9":[2,0,6,13,0,11],
 "structutility_1_1vision_1_1Pixel.html":[2,0,6,13,2],
 "structutility_1_1vision_1_1Pixel.html#a042d4052eaa9fff25a605b3cda93a46e":[2,0,6,13,2,10],
-"structutility_1_1vision_1_1Pixel.html#a07aa97c9a002dd7597c64ceb69cc83b6":[2,0,6,13,2,7],
-"structutility_1_1vision_1_1Pixel.html#a0c8ccee8adc902938011887604e0cc43":[2,0,6,13,2,13]
+"structutility_1_1vision_1_1Pixel.html#a07aa97c9a002dd7597c64ceb69cc83b6":[2,0,6,13,2,7]
 };

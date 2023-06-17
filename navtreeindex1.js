@@ -1,5 +1,6 @@
 var NAVTREEINDEX1 =
 {
+"StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893ae1435d7f366c537097b73e89e39a3b59":[1,0,1,0,15,7],
 "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893afde7dcbac92720d696e3ef02bf6435db":[1,0,1,0,15,3],
 "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3":[1,0,3,10,9],
 "SystemConfiguration_8cpp.html#a04e3ec51060d2852b18d7b7eceed5b9e":[1,0,3,14,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea280d840b114570a3c6fd6c335698a15e":[2,0,0,8,0,47],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea28a890f656451488851a3d5217c58c1c":[2,0,0,8,0,29],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea2b6541f0f9713636a1a89fad63d4534d":[2,0,0,8,0,54],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea336b9c3d3ffb8b2e42b87116d3445584":[2,0,0,8,0,11],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea38448007efead1c900238907cd6a3ba4":[2,0,0,8,0,50]
+"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea336b9c3d3ffb8b2e42b87116d3445584":[2,0,0,8,0,11]
 };

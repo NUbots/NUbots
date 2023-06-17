@@ -1,5 +1,6 @@
 var NAVTREEINDEX6 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a567c6b092b7022df5dff239b8667c4c1":[2,0,3,9,1,10,0,31],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a57b35198356d373bcd2a6e08abcb3795":[2,0,3,9,1,10,0,13],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a5a5f6aeae27081db41c5c5cd5d644fdf":[2,0,3,9,1,10,0,20],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a5a619f7694797486d89b9670ccefff1e":[2,0,3,9,1,10,0,21],
@@ -248,6 +249,5 @@ var NAVTREEINDEX6 =
 "classmodule_1_1tools_1_1FirmwareInstaller.html#a9a02a64d630115854dea37ebbc0a3087a7d9484466c850853a5312aea4432e0b3":[2,0,3,14,0,3,2],
 "classmodule_1_1tools_1_1FirmwareInstaller.html#a9a02a64d630115854dea37ebbc0a3087aa3eacc1abaac1882528df1eda078d581":[2,0,3,14,0,3,0],
 "classmodule_1_1tools_1_1FirmwareInstaller.html#a9d12532158bb842e4d75832f134d174f":[2,0,3,14,0,6],
-"classmodule_1_1tools_1_1FirmwareInstaller.html#adccf9735f699d7069746ac92a1b6bd6e":[2,0,3,14,0,4],
-"classmodule_1_1tools_1_1FirmwareInstaller.html#af9fb541b04d2b37bef15fc593c92084f":[2,0,3,14,0,8]
+"classmodule_1_1tools_1_1FirmwareInstaller.html#adccf9735f699d7069746ac92a1b6bd6e":[2,0,3,14,0,4]
 };

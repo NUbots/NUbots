@@ -1,5 +1,6 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a8c519d4aff13dda9d7e404e50d393141":[2,0,3,3,1,2,5],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#aa88fd24f59543e583a9f37653e0c4aae":[2,0,3,3,1,2,4],
 "structmodule_1_1input_1_1gamecontroller_1_1Team.html":[2,0,3,3,1,3],
 "structmodule_1_1input_1_1gamecontroller_1_1Team.html#a19b249139bf7eb8441055bbf1d25e70e":[2,0,3,3,1,3,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a2741e8ba6a7913f95465d4c02d6b16e2":[2,0,3,8,4,0,10],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a2d2226d77db341a3b10a09d69e680808":[2,0,3,8,4,0,0],
 "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a559c10f78e96f285f6c4d533432b97f8":[2,0,3,8,4,0,11],
-"structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a64d4d6df6eef94f0fdf9d659ddef0658":[2,0,3,8,4,0,8],
-"structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a78c41765b8c652a26c81173f9766cfb3":[2,0,3,8,4,0,1]
+"structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a64d4d6df6eef94f0fdf9d659ddef0658":[2,0,3,8,4,0,8]
 };

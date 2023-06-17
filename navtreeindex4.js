@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1input_1_1NatNet.html#abb19bfa3257394f86e4d3c8a93dd8a25":[2,0,3,3,9,10],
 "classmodule_1_1input_1_1NatNet.html#add85a441e29e769cd026575e050ce2e3":[2,0,3,3,9,11],
 "classmodule_1_1input_1_1NatNet.html#af082bbb632b8f5a080001c21980f523a":[2,0,3,3,9,20],
 "classmodule_1_1input_1_1NatNet.html#af91ccca272638d23211dd7eb8e69c461":[2,0,3,3,9,9],
@@ -109,8 +110,8 @@ var NAVTREEINDEX4 =
 "classmodule_1_1localisation_1_1BallModel.html#aa7dfff8a4aae4b26be9b9504bf7e699c":[2,0,3,4,3,17],
 "classmodule_1_1localisation_1_1BallModel.html#ab4685659132d9d2da03a619c44225e10":[2,0,3,4,3,5],
 "classmodule_1_1localisation_1_1BallModel.html#ab5dd839d6ebb7872af0aa46e5d1a2065":[2,0,3,4,3,24],
-"classmodule_1_1localisation_1_1BallModel.html#abcde4d2070a49eaac2748d33689f9ffd":[2,0,3,4,3,2],
 "classmodule_1_1localisation_1_1BallModel.html#abcde4d2070a49eaac2748d33689f9ffd":[2,0,3,4,3,3],
+"classmodule_1_1localisation_1_1BallModel.html#abcde4d2070a49eaac2748d33689f9ffd":[2,0,3,4,3,2],
 "classmodule_1_1localisation_1_1BallModel.html#ac7113e963b520b3bc6fd1588e7be977f":[2,0,3,4,3,16],
 "classmodule_1_1localisation_1_1BallModel.html#ae0d7c00c86ff2ca549e08cb6accbb969":[2,0,3,4,3,26],
 "classmodule_1_1localisation_1_1BallModel.html#ae677463493bc3fae481ca281f472293e":[2,0,3,4,3,14],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1motion_1_1Kicker.html#afdd481eb1b0e6986c13da4ceb1099215":[2,0,3,5,7,9],
 "classmodule_1_1motion_1_1QuinticWalk.html":[2,0,3,5,8],
 "classmodule_1_1motion_1_1QuinticWalk.html#a02de60c6425ea1bff949800ea6d1d0eb":[2,0,3,5,8,7],
-"classmodule_1_1motion_1_1QuinticWalk.html#a0f1bc9e1a94e15f158b68b288d7777ea":[2,0,3,5,8,12],
-"classmodule_1_1motion_1_1QuinticWalk.html#a20ccab9156762e4060022a5eadb831f8":[2,0,3,5,8,19]
+"classmodule_1_1motion_1_1QuinticWalk.html#a0f1bc9e1a94e15f158b68b288d7777ea":[2,0,3,5,8,12]
 };

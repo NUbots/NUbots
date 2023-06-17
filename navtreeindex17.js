@@ -1,5 +1,6 @@
 var NAVTREEINDEX17 =
 {
+"structmodule_1_1purpose_1_1Striker_1_1Config.html#a92be4939f75b369d452c20c2406b1aee":[2,0,3,10,4,0,0],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html":[2,0,3,11,1,0],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a15df7091f6c30e256529aafe4eba2f58":[2,0,3,11,1,0,5],
 "structmodule_1_1skill_1_1GetUp_1_1Config.html#a518b29943f662419a208390bc46ff6d8":[2,0,3,11,1,0,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1input_1_1ServoID.html#ae288a8918d32fbcb246a1d7940d90935":[2,0,6,3,1,28],
 "structutility_1_1input_1_1ServoID.html#af184f60da6834cd3cb9211fa7ea1b6d4":[2,0,6,3,1,11],
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html":[2,0,6,5,2,0],
-"structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#a74cba839ec317f862fb402e2646d07e4":[2,0,6,5,2,0,1],
-"structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#aaf2b70491f73ad58d39949e0acfce0d2":[2,0,6,5,2,0,4]
+"structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#a74cba839ec317f862fb402e2646d07e4":[2,0,6,5,2,0,1]
 };
