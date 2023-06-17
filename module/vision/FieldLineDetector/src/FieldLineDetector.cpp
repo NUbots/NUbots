@@ -77,8 +77,7 @@ namespace module::vision {
 
             // Create the FieldLines message, which will contain a FieldLine for every cluster that is a valid field
             // line
-            auto lines = std::make_unique<FieldLines>();
-
+            auto lines            = std::make_unique<FieldLines>();
             lines->id             = horizon.id;         // camera id
             lines->timestamp      = horizon.timestamp;  // time when the image was taken
             lines->Hcw            = horizon.Hcw;        // world to camera transform at the time the image was taken
@@ -89,7 +88,7 @@ namespace module::vision {
                     // Project the field line point onto the field plane
                     Eigen::Vector3f rCWw = Eigen::Vector3f(Hwc.translation().x(), Hwc.translation().y(), 0.0);
                     Eigen::Vector3f rPCw = uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + rCWw;
-                    lines->rPCw.push_back(rPCw.head<2>());
+                    lines->rPCw.push_back(rPCw);
                 }
             }
 

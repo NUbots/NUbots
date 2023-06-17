@@ -253,7 +253,7 @@ namespace module::localisation {
                 for (int i = 0; i < cfg.n_particles; i++) {
                     particles[i].weight = calculate_weight(particles[i].state, field_lines.rPCw);
                     if (log_level <= NUClear::DEBUG) {
-                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector2f::Zero());
+                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector3f::Zero());
                         emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
                     }
                 }
@@ -272,23 +272,23 @@ namespace module::localisation {
                 }
 
                 // Graph where the world frame is positioned in the map
-                auto state_cell = position_in_map(state, Eigen::Vector2f::Zero());
+                auto state_cell = position_in_map(state, Eigen::Vector3f::Zero());
                 emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
 
                 // Graph the cell 0.5m in front of the world frame to visualise the direction of world frame x
-                auto direction_cell = position_in_map(state, 0.5 * Eigen::Vector2f::UnitX());
+                auto direction_cell = position_in_map(state, 0.5 * Eigen::Vector3f::UnitX());
                 emit(graph("World (theta)", direction_cell.x(), direction_cell.y()));
 
                 // Graph where the robot is positioned in the map
                 Eigen::Isometry3f Hwc = Hcw.inverse();
-                Eigen::Vector2f rCWw  = Eigen::Vector2f(Hwc.translation().x(), Hwc.translation().y());
+                Eigen::Vector3f rCWw  = Eigen::Vector3f(Hwc.translation().x(), Hwc.translation().y(), 0.0f);
                 auto robot_cell       = position_in_map(state, rCWw);
                 emit(graph("Robot (x,y)", robot_cell.x(), robot_cell.y()));
 
                 // Graph the cell 0.5m in front of the robot to visualise the direction it's facing
                 Eigen::Vector3f rPCc  = Eigen::Vector3f::UnitX();
                 Eigen::Vector3f rPWw  = Hwc * rPCc;
-                auto robot_theta_cell = position_in_map(state, rPWw.head(2));
+                auto robot_theta_cell = position_in_map(state, rPWw);
                 emit(graph("Robot (theta)", robot_theta_cell.x(), robot_theta_cell.y()));
 
                 emit(graph("Localisation Uncertainty", covariance.trace()));
@@ -305,12 +305,12 @@ namespace module::localisation {
         });
     }
 
-    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3f particle, const Eigen::Vector2f rPRw) {
+    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3f particle, const Eigen::Vector3f rPRw) {
         // Transform observations from world {w} to field {f} space
-        Eigen::Isometry2f Hfw;
-        Hfw.translation()    = Eigen::Vector2f(particle(0), particle(1));
-        Hfw.linear()         = Eigen::Rotation2Df(particle(2)).toRotationMatrix();
-        Eigen::Vector2f rPFf = Hfw * rPRw;
+        Eigen::Isometry3f Hfw;
+        Hfw.translation()    = Eigen::Vector3f(particle(0), particle(1), 0.0f);
+        Hfw.linear()         = Eigen::AngleAxisf(particle(2), Eigen::Vector3f::UnitZ()).toRotationMatrix();
+        Eigen::Vector3f rPFf = Hfw * rPRw;
 
         // Get the associated position/index in the map [x, y]
         int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
@@ -319,7 +319,7 @@ namespace module::localisation {
     }
 
     float FieldLocalisation::calculate_weight(const Eigen::Vector3f particle,
-                                              const std::vector<Eigen::Vector2f>& observations) {
+                                              const std::vector<Eigen::Vector3f>& observations) {
         float weight = 0;
         for (auto rORr : observations) {
             // Get the position of the observation in the map for this particle [x, y]

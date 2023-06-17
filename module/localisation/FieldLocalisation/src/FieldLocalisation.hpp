@@ -72,24 +72,17 @@ namespace module::localisation {
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
         explicit FieldLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief Converts a unit vector of point from the camera in robot space to a (x,y) point relative to the robot
-        /// on the field plane
-        /// @param uPCw unit vector of point from the camera in world space
-        /// @param Hcw the world from camera transform
-        /// @return the field point measurement (x,y) relative to the robot
-        Eigen::Vector2f ray_to_field_plane(Eigen::Vector3f uPCw, Eigen::Isometry3d Hcw);
-
         /// @brief Transform a point in the robot's coordinate frame into an index in the map
         /// @param particle The state of the particle (x,y,theta)
         /// @param rPRw The field point (x, y) in world space {w} [m]
         /// @return The observation location (x, y) in the map
-        Eigen::Vector2i position_in_map(const Eigen::Vector3f particle, const Eigen::Vector2f rPRw);
+        Eigen::Vector2i position_in_map(const Eigen::Vector3f particle, const Eigen::Vector3f rPRw);
 
         /// @brief Get the weight of a particle given a set of observations
         /// @param particle The state of the particle (x,y,theta)
         /// @param observations The observations (x, y) in the robot's coordinate frame [m]
         /// @return The weight of the particle
-        float calculate_weight(const Eigen::Vector3f particle, const std::vector<Eigen::Vector2f>& observations);
+        float calculate_weight(const Eigen::Vector3f particle, const std::vector<Eigen::Vector3f>& observations);
 
         /// @brief Get the current mean (state) of the robot
         // @return The current mean (state) of the robot
