@@ -23,10 +23,12 @@ package message.localisation;
 import "Matrix.proto";
 
 message Field {
-    /// Isometry2d position transform of world from field
+    /// Homogeneous transformation matrix from world to field space
     mat4 Hfw = 1;
     /// Covariance of (x, y, theta)
     mat3 covariance = 2;
+    /// Sum of the covariance matrix diagonals to quantify the filters uncertainty as a single value
+    float uncertainty = 3;
 }
 
-message ResetRobotLocalisation {}
+message ResetFieldLocalisation {}

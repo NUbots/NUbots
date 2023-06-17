@@ -11,7 +11,7 @@ namespace module::vision {
         struct {
             float cluster_points       = 0.0f;
             float confidence_threshold = 0.0f;
-        } config;
+        } cfg;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLineDetector reactor.
