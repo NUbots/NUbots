@@ -82,10 +82,6 @@ var annotated_dup =
         [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
       ] ],
       [ "behaviour", null, [
-        [ "planning", null, [
-          [ "KickPlanner", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner" ],
-          [ "SimpleWalkPathPlanner", "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html", "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner" ]
-        ] ],
         [ "skills", null, [
           [ "DirectWalkController", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController" ],
           [ "ExecuteKick", "structmodule_1_1behaviour_1_1skills_1_1ExecuteKick.html", null ],
@@ -95,7 +91,6 @@ var annotated_dup =
           [ "FallingRelax", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax.html", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax" ],
           [ "FinishKick", "structmodule_1_1behaviour_1_1skills_1_1FinishKick.html", null ],
           [ "Getup", "classmodule_1_1behaviour_1_1skills_1_1Getup.html", "classmodule_1_1behaviour_1_1skills_1_1Getup" ],
-          [ "HeadBehaviourSoccer", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer" ],
           [ "KickScript", "classmodule_1_1behaviour_1_1skills_1_1KickScript.html", "classmodule_1_1behaviour_1_1skills_1_1KickScript" ],
           [ "KillFalling", "structmodule_1_1behaviour_1_1skills_1_1KillFalling.html", null ],
           [ "Nod", "classmodule_1_1behaviour_1_1skills_1_1Nod.html", "classmodule_1_1behaviour_1_1skills_1_1Nod" ],
@@ -103,8 +98,7 @@ var annotated_dup =
         ] ],
         [ "strategy", null, [
           [ "KeyboardWalk", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk" ],
-          [ "PS3Walk", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk" ],
-          [ "SoccerStrategy", "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html", "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy" ]
+          [ "PS3Walk", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk" ]
         ] ],
         [ "tools", null, [
           [ "ExecuteNextScript", "structmodule_1_1behaviour_1_1tools_1_1ExecuteNextScript.html", null ],

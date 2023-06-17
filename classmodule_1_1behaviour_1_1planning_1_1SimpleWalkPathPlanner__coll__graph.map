@@ -1,6 +1,0 @@
-<map id="module::behaviour::planning::SimpleWalkPathPlanner" name="module::behaviour::planning::SimpleWalkPathPlanner">
-<area shape="rect" id="node1" title=" " alt="" coords="407,63,647,105"/>
-<area shape="rect" id="node2" title=" " alt="" coords="58,5,193,32"/>
-<area shape="rect" id="node3" href="$structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html" title="Stores configuration values." alt="" coords="5,56,245,112"/>
-<area shape="rect" id="node4" title=" " alt="" coords="58,136,193,163"/>
-</map>

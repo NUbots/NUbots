@@ -1,69 +1,65 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="5,636,240,677"/>
 <area shape="rect" id="node2" href="$classmodule_1_1extension_1_1Director.html" title=" " alt="" coords="340,636,491,677"/>
-<area shape="rect" id="node3" title=" " alt="" coords="55,2575,190,2602"/>
+<area shape="rect" id="node3" title=" " alt="" coords="55,2415,190,2442"/>
 <area shape="rect" id="node4" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="336,701,495,743"/>
 <area shape="rect" id="node32" href="$classmodule_1_1actuation_1_1KinematicsConfiguration.html" title=" " alt="" coords="324,767,507,808"/>
 <area shape="rect" id="node33" href="$classmodule_1_1behaviour_1_1Controller.html" title="Controls which of the behaviours are able to access motors." alt="" coords="339,832,491,873"/>
-<area shape="rect" id="node34" href="$classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html" title=" " alt="" coords="334,897,497,939"/>
-<area shape="rect" id="node35" href="$classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html" title=" " alt="" coords="295,963,535,1004"/>
-<area shape="rect" id="node36" href="$classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html" title=" " alt="" coords="316,1028,515,1069"/>
-<area shape="rect" id="node37" href="$classmodule_1_1behaviour_1_1skills_1_1FallingRelax.html" title="Executes a falling script if the robot falls over." alt="" coords="339,1093,491,1135"/>
-<area shape="rect" id="node38" href="$classmodule_1_1behaviour_1_1skills_1_1Getup.html" title="Executes a getup script if the robot falls over." alt="" coords="339,1159,491,1200"/>
-<area shape="rect" id="node39" href="$classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html" title="Executes a HeadBehaviourSoccer action." alt="" coords="312,1224,519,1265"/>
-<area shape="rect" id="node40" href="$classmodule_1_1behaviour_1_1skills_1_1KickScript.html" title=" " alt="" coords="339,1289,491,1331"/>
-<area shape="rect" id="node41" href="$classmodule_1_1behaviour_1_1skills_1_1Nod.html" title=" " alt="" coords="339,1355,491,1396"/>
-<area shape="rect" id="node42" href="$classmodule_1_1behaviour_1_1skills_1_1Stand.html" title="Executes stand script." alt="" coords="339,1420,491,1461"/>
-<area shape="rect" id="node43" href="$classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html" title=" " alt="" coords="327,1485,503,1527"/>
-<area shape="rect" id="node44" href="$classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html" title=" " alt="" coords="339,1551,491,1592"/>
-<area shape="rect" id="node45" href="$classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html" title=" " alt="" coords="325,1616,506,1657"/>
-<area shape="rect" id="node46" href="$classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html" title="Executes a series of scripts provided by the command line in order." alt="" coords="339,1681,491,1723"/>
-<area shape="rect" id="node47" href="$classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html" title="Provides a Curses interface to let the user customize scripts." alt="" coords="339,1747,491,1788"/>
-<area shape="rect" id="node48" href="$classmodule_1_1behaviour_1_1tools_1_1SpeakTest.html" title=" " alt="" coords="339,1812,491,1853"/>
-<area shape="rect" id="node49" href="$classmodule_1_1extension_1_1FileWatcher.html" title=" " alt="" coords="340,1877,491,1919"/>
-<area shape="rect" id="node50" href="$classmodule_1_1input_1_1Camera.html" title=" " alt="" coords="330,1943,501,1970"/>
-<area shape="rect" id="node51" href="$classmodule_1_1input_1_1FakeCamera.html" title=" " alt="" coords="315,1994,515,2021"/>
-<area shape="rect" id="node52" href="$classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller." alt="" coords="304,2045,527,2071"/>
-<area shape="rect" id="node53" href="$classmodule_1_1input_1_1ImageDecompressor.html" title=" " alt="" coords="288,2095,543,2122"/>
-<area shape="rect" id="node54" href="$classmodule_1_1input_1_1NatNet.html" title=" " alt="" coords="332,2146,499,2173"/>
-<area shape="rect" id="node55" href="$classmodule_1_1input_1_1SensorFilter.html" title=" " alt="" coords="317,2197,514,2223"/>
-<area shape="rect" id="node56" href="$classmodule_1_1localisation_1_1BallFilter.html" title=" " alt="" coords="338,2248,493,2289"/>
-<area shape="rect" id="node57" href="$classmodule_1_1localisation_1_1BallLocalisation.html" title=" " alt="" coords="338,2313,493,2355"/>
-<area shape="rect" id="node58" href="$classmodule_1_1localisation_1_1FieldLocalisation.html" title=" " alt="" coords="338,2379,493,2420"/>
-<area shape="rect" id="node59" href="$classmodule_1_1localisation_1_1OdometryLocalisation.html" title=" " alt="" coords="329,2444,502,2485"/>
-<area shape="rect" id="node60" href="$classmodule_1_1localisation_1_1RobotParticleLocalisation.html" title=" " alt="" coords="318,2509,513,2551"/>
-<area shape="rect" id="node61" href="$classmodule_1_1motion_1_1HeadController.html" title="Executes a HeadController action." alt="" coords="300,2575,531,2602"/>
-<area shape="rect" id="node62" href="$classmodule_1_1motion_1_1IKKick.html" title=" " alt="" coords="328,2626,503,2653"/>
-<area shape="rect" id="node63" href="$classmodule_1_1motion_1_1QuinticWalk.html" title=" " alt="" coords="310,2677,521,2703"/>
-<area shape="rect" id="node64" href="$classmodule_1_1motion_1_1ScriptEngine.html" title="Executes scripts as a series of waypoints." alt="" coords="308,2727,523,2754"/>
-<area shape="rect" id="node65" href="$classmodule_1_1network_1_1NUClearNet.html" title=" " alt="" coords="307,2778,524,2805"/>
-<area shape="rect" id="node66" href="$classmodule_1_1network_1_1NetworkForwarder.html" title=" " alt="" coords="318,2829,513,2871"/>
-<area shape="rect" id="node67" href="$classmodule_1_1network_1_1PlotJuggler.html" title=" " alt="" coords="310,2895,521,2922"/>
-<area shape="rect" id="node68" href="$classmodule_1_1output_1_1ImageCompressor.html" title=" " alt="" coords="291,2946,539,2973"/>
-<area shape="rect" id="node69" href="$classmodule_1_1output_1_1Overview.html" title=" " alt="" coords="320,2997,511,3023"/>
-<area shape="rect" id="node70" href="$classmodule_1_1output_1_1eSpeak.html" title="Takes strings given to it and plays them using text to speech." alt="" coords="327,3047,504,3074"/>
-<area shape="rect" id="node71" href="$classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html" title=" " alt="" coords="318,3099,513,3140"/>
-<area shape="rect" id="node72" href="$classmodule_1_1platform_1_1Webots.html" title=" " alt="" coords="320,3165,511,3191"/>
-<area shape="rect" id="node73" href="$classmodule_1_1platform_1_1cm740_1_1HardwareIO.html" title="This NUClear Reactor is responsible for reading in the data from the CM740 and emitting it to the res..." alt="" coords="322,3216,509,3257"/>
-<area shape="rect" id="node74" href="$classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html" title="This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to..." alt="" coords="322,3281,509,3323"/>
-<area shape="rect" id="node75" href="$classmodule_1_1purpose_1_1ScriptTuner.html" title="Provides a Curses interface to let the user customize scripts." alt="" coords="310,3347,521,3374"/>
-<area shape="rect" id="node76" href="$classmodule_1_1support_1_1LocalisationSimulator.html" title=" " alt="" coords="308,3399,523,3440"/>
-<area shape="rect" id="node77" href="$classmodule_1_1support_1_1NUsightHarness.html" title=" " alt="" coords="321,3464,509,3505"/>
-<area shape="rect" id="node78" href="$classmodule_1_1support_1_1ReactionTimer.html" title=" " alt="" coords="319,3529,512,3571"/>
-<area shape="rect" id="node79" href="$classmodule_1_1support_1_1SignalCatcher.html" title="Handles OS interrupt signals." alt="" coords="302,3595,529,3622"/>
-<area shape="rect" id="node80" href="$classmodule_1_1support_1_1configuration_1_1GlobalConfig.html" title=" " alt="" coords="305,3647,526,3688"/>
-<area shape="rect" id="node81" href="$classmodule_1_1support_1_1configuration_1_1SoccerConfig.html" title=" " alt="" coords="305,3712,526,3753"/>
-<area shape="rect" id="node82" href="$classmodule_1_1support_1_1logging_1_1ConsoleLogHandler.html" title="Handles the logging of log messages to the console in a thread safe manner." alt="" coords="323,3777,507,3819"/>
-<area shape="rect" id="node83" href="$classmodule_1_1support_1_1logging_1_1DataLogging.html" title=" " alt="" coords="323,3843,507,3884"/>
-<area shape="rect" id="node84" href="$classmodule_1_1support_1_1logging_1_1DataPlayback.html" title=" " alt="" coords="323,3908,507,3949"/>
-<area shape="rect" id="node85" href="$classmodule_1_1support_1_1logging_1_1FileLogHandler.html" title=" " alt="" coords="323,3973,507,4015"/>
-<area shape="rect" id="node86" href="$classmodule_1_1tools_1_1FirmwareInstaller.html" title=" " alt="" coords="299,4039,532,4066"/>
-<area shape="rect" id="node87" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="288,4090,543,4117"/>
-<area shape="rect" id="node88" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="312,4141,519,4167"/>
-<area shape="rect" id="node89" href="$classmodule_1_1vision_1_1FieldLineDetector.html" title=" " alt="" coords="323,4192,507,4233"/>
-<area shape="rect" id="node90" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="309,4258,521,4285"/>
-<area shape="rect" id="node91" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="308,4309,523,4351"/>
-<area shape="rect" id="node92" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,4375,516,4402"/>
+<area shape="rect" id="node34" href="$classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html" title=" " alt="" coords="316,897,515,939"/>
+<area shape="rect" id="node35" href="$classmodule_1_1behaviour_1_1skills_1_1FallingRelax.html" title="Executes a falling script if the robot falls over." alt="" coords="339,963,491,1004"/>
+<area shape="rect" id="node36" href="$classmodule_1_1behaviour_1_1skills_1_1Getup.html" title="Executes a getup script if the robot falls over." alt="" coords="339,1028,491,1069"/>
+<area shape="rect" id="node37" href="$classmodule_1_1behaviour_1_1skills_1_1KickScript.html" title=" " alt="" coords="339,1093,491,1135"/>
+<area shape="rect" id="node38" href="$classmodule_1_1behaviour_1_1skills_1_1Nod.html" title=" " alt="" coords="339,1159,491,1200"/>
+<area shape="rect" id="node39" href="$classmodule_1_1behaviour_1_1skills_1_1Stand.html" title="Executes stand script." alt="" coords="339,1224,491,1265"/>
+<area shape="rect" id="node40" href="$classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html" title=" " alt="" coords="327,1289,503,1331"/>
+<area shape="rect" id="node41" href="$classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html" title=" " alt="" coords="339,1355,491,1396"/>
+<area shape="rect" id="node42" href="$classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html" title="Executes a series of scripts provided by the command line in order." alt="" coords="339,1420,491,1461"/>
+<area shape="rect" id="node43" href="$classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html" title="Provides a Curses interface to let the user customize scripts." alt="" coords="339,1485,491,1527"/>
+<area shape="rect" id="node44" href="$classmodule_1_1behaviour_1_1tools_1_1SpeakTest.html" title=" " alt="" coords="339,1551,491,1592"/>
+<area shape="rect" id="node45" href="$classmodule_1_1extension_1_1FileWatcher.html" title=" " alt="" coords="340,1616,491,1657"/>
+<area shape="rect" id="node46" href="$classmodule_1_1input_1_1Camera.html" title=" " alt="" coords="330,1682,501,1709"/>
+<area shape="rect" id="node47" href="$classmodule_1_1input_1_1FakeCamera.html" title=" " alt="" coords="315,1733,515,1759"/>
+<area shape="rect" id="node48" href="$classmodule_1_1input_1_1GameController.html" title="Monitors the match Game Controller." alt="" coords="304,1783,527,1810"/>
+<area shape="rect" id="node49" href="$classmodule_1_1input_1_1ImageDecompressor.html" title=" " alt="" coords="288,1834,543,1861"/>
+<area shape="rect" id="node50" href="$classmodule_1_1input_1_1NatNet.html" title=" " alt="" coords="332,1885,499,1911"/>
+<area shape="rect" id="node51" href="$classmodule_1_1input_1_1SensorFilter.html" title=" " alt="" coords="317,1935,514,1962"/>
+<area shape="rect" id="node52" href="$classmodule_1_1localisation_1_1BallFilter.html" title=" " alt="" coords="338,1987,493,2028"/>
+<area shape="rect" id="node53" href="$classmodule_1_1localisation_1_1BallLocalisation.html" title=" " alt="" coords="338,2052,493,2093"/>
+<area shape="rect" id="node54" href="$classmodule_1_1localisation_1_1FieldLocalisation.html" title=" " alt="" coords="338,2117,493,2159"/>
+<area shape="rect" id="node55" href="$classmodule_1_1localisation_1_1OdometryLocalisation.html" title=" " alt="" coords="329,2183,502,2224"/>
+<area shape="rect" id="node56" href="$classmodule_1_1localisation_1_1RobotParticleLocalisation.html" title=" " alt="" coords="318,2248,513,2289"/>
+<area shape="rect" id="node57" href="$classmodule_1_1motion_1_1HeadController.html" title="Executes a HeadController action." alt="" coords="300,2314,531,2341"/>
+<area shape="rect" id="node58" href="$classmodule_1_1motion_1_1IKKick.html" title=" " alt="" coords="328,2365,503,2391"/>
+<area shape="rect" id="node59" href="$classmodule_1_1motion_1_1QuinticWalk.html" title=" " alt="" coords="310,2415,521,2442"/>
+<area shape="rect" id="node60" href="$classmodule_1_1motion_1_1ScriptEngine.html" title="Executes scripts as a series of waypoints." alt="" coords="308,2466,523,2493"/>
+<area shape="rect" id="node61" href="$classmodule_1_1network_1_1NUClearNet.html" title=" " alt="" coords="307,2517,524,2543"/>
+<area shape="rect" id="node62" href="$classmodule_1_1network_1_1NetworkForwarder.html" title=" " alt="" coords="318,2568,513,2609"/>
+<area shape="rect" id="node63" href="$classmodule_1_1network_1_1PlotJuggler.html" title=" " alt="" coords="310,2634,521,2661"/>
+<area shape="rect" id="node64" href="$classmodule_1_1output_1_1ImageCompressor.html" title=" " alt="" coords="291,2685,539,2711"/>
+<area shape="rect" id="node65" href="$classmodule_1_1output_1_1Overview.html" title=" " alt="" coords="320,2735,511,2762"/>
+<area shape="rect" id="node66" href="$classmodule_1_1output_1_1eSpeak.html" title="Takes strings given to it and plays them using text to speech." alt="" coords="327,2786,504,2813"/>
+<area shape="rect" id="node67" href="$classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html" title=" " alt="" coords="318,2837,513,2879"/>
+<area shape="rect" id="node68" href="$classmodule_1_1platform_1_1Webots.html" title=" " alt="" coords="320,2903,511,2930"/>
+<area shape="rect" id="node69" href="$classmodule_1_1platform_1_1cm740_1_1HardwareIO.html" title="This NUClear Reactor is responsible for reading in the data from the CM740 and emitting it to the res..." alt="" coords="322,2955,509,2996"/>
+<area shape="rect" id="node70" href="$classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html" title="This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to..." alt="" coords="322,3020,509,3061"/>
+<area shape="rect" id="node71" href="$classmodule_1_1purpose_1_1ScriptTuner.html" title="Provides a Curses interface to let the user customize scripts." alt="" coords="310,3086,521,3113"/>
+<area shape="rect" id="node72" href="$classmodule_1_1support_1_1LocalisationSimulator.html" title=" " alt="" coords="308,3137,523,3179"/>
+<area shape="rect" id="node73" href="$classmodule_1_1support_1_1NUsightHarness.html" title=" " alt="" coords="321,3203,509,3244"/>
+<area shape="rect" id="node74" href="$classmodule_1_1support_1_1ReactionTimer.html" title=" " alt="" coords="319,3268,512,3309"/>
+<area shape="rect" id="node75" href="$classmodule_1_1support_1_1SignalCatcher.html" title="Handles OS interrupt signals." alt="" coords="302,3334,529,3361"/>
+<area shape="rect" id="node76" href="$classmodule_1_1support_1_1configuration_1_1GlobalConfig.html" title=" " alt="" coords="305,3385,526,3427"/>
+<area shape="rect" id="node77" href="$classmodule_1_1support_1_1configuration_1_1SoccerConfig.html" title=" " alt="" coords="305,3451,526,3492"/>
+<area shape="rect" id="node78" href="$classmodule_1_1support_1_1logging_1_1ConsoleLogHandler.html" title="Handles the logging of log messages to the console in a thread safe manner." alt="" coords="323,3516,507,3557"/>
+<area shape="rect" id="node79" href="$classmodule_1_1support_1_1logging_1_1DataLogging.html" title=" " alt="" coords="323,3581,507,3623"/>
+<area shape="rect" id="node80" href="$classmodule_1_1support_1_1logging_1_1DataPlayback.html" title=" " alt="" coords="323,3647,507,3688"/>
+<area shape="rect" id="node81" href="$classmodule_1_1support_1_1logging_1_1FileLogHandler.html" title=" " alt="" coords="323,3712,507,3753"/>
+<area shape="rect" id="node82" href="$classmodule_1_1tools_1_1FirmwareInstaller.html" title=" " alt="" coords="299,3778,532,3805"/>
+<area shape="rect" id="node83" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="288,3829,543,3855"/>
+<area shape="rect" id="node84" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="312,3879,519,3906"/>
+<area shape="rect" id="node85" href="$classmodule_1_1vision_1_1FieldLineDetector.html" title=" " alt="" coords="323,3931,507,3972"/>
+<area shape="rect" id="node86" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="309,3997,521,4023"/>
+<area shape="rect" id="node87" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="308,4048,523,4089"/>
+<area shape="rect" id="node88" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,4114,516,4141"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="635,5,783,47"/>
 <area shape="rect" id="node6" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="635,71,783,112"/>
 <area shape="rect" id="node7" href="$classmodule_1_1planning_1_1FallingRelaxPlanner.html" title=" " alt="" coords="617,136,802,177"/>

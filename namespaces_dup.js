@@ -127,15 +127,6 @@ var namespaces_dup =
         [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
       ] ],
       [ "behaviour", null, [
-        [ "planning", null, [
-          [ "KickPlanner", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner" ],
-          [ "SimpleWalkPathPlanner", "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html", "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner" ],
-          [ "FilteredBall", "SimpleWalkPathPlanner_8cpp.html#a6431375dde63e4a3887ef0678e9f92a4", null ],
-          [ "KickType", "KickPlanner_8cpp.html#a77ce7f359ee342116a6129934e9ffe9c", null ],
-          [ "PenaltyReason", "KickPlanner_8cpp.html#adbd31b53341649234480b001a93c7e79", null ],
-          [ "Phase", "KickPlanner_8cpp.html#aa5b1713757eb54288a24d4f49696ed1a", null ],
-          [ "VisionBalls", "KickPlanner_8cpp.html#ae704620d768f5038531cdebeea5af674", null ]
-        ] ],
         [ "skills", null, [
           [ "DirectWalkController", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController" ],
           [ "ExecuteKick", "structmodule_1_1behaviour_1_1skills_1_1ExecuteKick.html", null ],
@@ -145,28 +136,17 @@ var namespaces_dup =
           [ "FallingRelax", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax.html", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax" ],
           [ "FinishKick", "structmodule_1_1behaviour_1_1skills_1_1FinishKick.html", null ],
           [ "Getup", "classmodule_1_1behaviour_1_1skills_1_1Getup.html", "classmodule_1_1behaviour_1_1skills_1_1Getup" ],
-          [ "HeadBehaviourSoccer", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer" ],
           [ "KickScript", "classmodule_1_1behaviour_1_1skills_1_1KickScript.html", "classmodule_1_1behaviour_1_1skills_1_1KickScript" ],
           [ "KillFalling", "structmodule_1_1behaviour_1_1skills_1_1KillFalling.html", null ],
           [ "Nod", "classmodule_1_1behaviour_1_1skills_1_1Nod.html", "classmodule_1_1behaviour_1_1skills_1_1Nod" ],
           [ "Stand", "classmodule_1_1behaviour_1_1skills_1_1Stand.html", "classmodule_1_1behaviour_1_1skills_1_1Stand" ],
-          [ "FilteredBall", "HeadBehaviourSoccer_8cpp.html#a72632f60a6c00a0a9dff651cd87c883d", null ],
           [ "LimbID", "DirectWalkController_8cpp.html#a4b39d1fbd3ce1cdf8d80f5e8f10e7710", null ],
-          [ "ServoID", "DirectWalkController_8cpp.html#a3e2e3b6303ff82786fac995c78cd1a9e", null ],
-          [ "screenAngularFromObjectDirection", "HeadBehaviourSoccer_8cpp.html#a735073bf28a0e9dbba961cc45dc1ecab", null ]
+          [ "ServoID", "DirectWalkController_8cpp.html#a3e2e3b6303ff82786fac995c78cd1a9e", null ]
         ] ],
         [ "strategy", null, [
           [ "KeyboardWalk", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk" ],
           [ "PS3Walk", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk" ],
-          [ "SoccerStrategy", "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html", "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy" ],
-          [ "FilteredBall", "SoccerStrategy_8cpp.html#a188d9f5c8624f945069490b50e6a7e9f", null ],
-          [ "GameMode", "SoccerStrategy_8cpp.html#a8fad8ed963c6dad1e02f4eb0a96a6585", null ],
-          [ "KickOffTeam", "SoccerStrategy_8cpp.html#a6935be65b3388ffcac2b66aabb7372f3", null ],
-          [ "LimbID", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8cpp.html#aea4d2d941460a64845429cc8997b0588", null ],
-          [ "Penalisation", "SoccerStrategy_8cpp.html#a71c4805a25c5691864b93a873effe6ae", null ],
-          [ "Phase", "SoccerStrategy_8cpp.html#a62d1de9b84b1d9915dd8d5c2c7446610", null ],
-          [ "Unpenalisation", "SoccerStrategy_8cpp.html#a7f6b91188f8d0311dccba44e4b564898", null ],
-          [ "VisionGoals", "SoccerStrategy_8cpp.html#a710c97c9bf8d73d8e7892d5467c10ba1", null ],
+          [ "LimbID", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8cpp.html#a1f4a6735ee336fba86afb929b7af0934", null ],
           [ "LogColours", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9", [
             [ "TRACE_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a03edadf0bc773fb94b4f5301fb3586b6", null ],
             [ "DEBUG_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aabaeda8c8c137f659606924c7e40f2d5", null ],
