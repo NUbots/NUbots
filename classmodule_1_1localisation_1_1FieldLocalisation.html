@@ -222,9 +222,9 @@ Eigen::Matrix3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a6cc5dfd580c80f0b1723772ca8f13ec5">compute_mean</a> ()</td></tr>
 <tr class="memdesc:a6cc5dfd580c80f0b1723772ca8f13ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current mean (state) of the robot. <br /></td></tr>
 <tr class="separator:a6cc5dfd580c80f0b1723772ca8f13ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3d3aec20a8ab99513c768f34405e63bc"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a3d3aec20a8ab99513c768f34405e63bc">position_in_map</a> (const Eigen::Vector3f particle, const Eigen::Vector3f rPRw)</td></tr>
-<tr class="memdesc:a3d3aec20a8ab99513c768f34405e63bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a point in the robot's coordinate frame into an index in the map.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a3d3aec20a8ab99513c768f34405e63bc">More...</a><br /></td></tr>
-<tr class="separator:a3d3aec20a8ab99513c768f34405e63bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75131ba3e5c23145a961bfd249041cca"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a75131ba3e5c23145a961bfd249041cca">position_in_map</a> (const Eigen::Vector3f particle, const Eigen::Vector3f rPWw)</td></tr>
+<tr class="memdesc:a75131ba3e5c23145a961bfd249041cca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a point in the robot's coordinate frame into an index in the map.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a75131ba3e5c23145a961bfd249041cca">More...</a><br /></td></tr>
+<tr class="separator:a75131ba3e5c23145a961bfd249041cca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70c42ad45895d12a46c376c6e339d6de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de">resample</a> ()</td></tr>
 <tr class="memdesc:a70c42ad45895d12a46c376c6e339d6de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resample the particles based on their weights.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de">More...</a><br /></td></tr>
 <tr class="separator:a70c42ad45895d12a46c376c6e339d6de"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -326,8 +326,8 @@ Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 
 </div>
 </div>
-<a id="a3d3aec20a8ab99513c768f34405e63bc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3d3aec20a8ab99513c768f34405e63bc">&#9670;&nbsp;</a></span>position_in_map()</h2>
+<a id="a75131ba3e5c23145a961bfd249041cca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75131ba3e5c23145a961bfd249041cca">&#9670;&nbsp;</a></span>position_in_map()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -342,7 +342,7 @@ Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const Eigen::Vector3f&#160;</td>
-          <td class="paramname"><em>rPRw</em>&#160;</td>
+          <td class="paramname"><em>rPWw</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -356,7 +356,7 @@ Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">particle</td><td>The state of the particle (x,y,theta) </td></tr>
-    <tr><td class="paramname">rPRw</td><td>The field point (x, y) in world space {w} [m] </td></tr>
+    <tr><td class="paramname">rPWw</td><td>The field point (x, y) in world space {w} [m] </td></tr>
   </table>
   </dd>
 </dl>
@@ -426,7 +426,7 @@ Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html">FieldLocalisation</a></li>
-    <li class="footer">Generated on Sat Jun 17 2023 10:12:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jun 17 2023 12:38:09 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

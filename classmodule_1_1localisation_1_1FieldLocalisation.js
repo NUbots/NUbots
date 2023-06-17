@@ -6,7 +6,7 @@ var classmodule_1_1localisation_1_1FieldLocalisation =
     [ "calculate_weight", "classmodule_1_1localisation_1_1FieldLocalisation.html#a59185f31119e989510700d7b57ee27e3", null ],
     [ "compute_covariance", "classmodule_1_1localisation_1_1FieldLocalisation.html#a8b85ccee52c658fbd02b27f85813faff", null ],
     [ "compute_mean", "classmodule_1_1localisation_1_1FieldLocalisation.html#a6cc5dfd580c80f0b1723772ca8f13ec5", null ],
-    [ "position_in_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#a3d3aec20a8ab99513c768f34405e63bc", null ],
+    [ "position_in_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#a75131ba3e5c23145a961bfd249041cca", null ],
     [ "resample", "classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de", null ],
     [ "time_update", "classmodule_1_1localisation_1_1FieldLocalisation.html#a9bb3dd02e901d3ff96bb043933c4bec2", null ],
     [ "cfg", "classmodule_1_1localisation_1_1FieldLocalisation.html#adf5d1af90cac7a1c998dcaa5f4adbb08", null ],
