@@ -39,5 +39,5 @@ message Ball {
     google.protobuf.Timestamp time_of_measurement = 4;
 
     /// Homogeneous transformation matrix from world to camera space
-    mat4 Hcw  = 5;
+    mat4 Hcw = 5;
 }
