@@ -9,8 +9,6 @@ import { useEffect } from "react";
 import { Vector2 } from "../../../../shared/math/vector2";
 import { Vector3 } from "../../../../shared/math/vector3";
 import { fullscreen } from "../../storybook/fullscreen";
-import { meshPhongMaterial } from "../builders";
-import { mesh } from "../builders";
 import { PerspectiveCamera, ThreeFiber } from "../three_fiber";
 
 type Story = StoryObj<typeof BoxVisualiser>;
