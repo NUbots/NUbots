@@ -1,0 +1,338 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::purpose::ScriptTuner Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1purpose_1_1ScriptTuner.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="classmodule_1_1purpose_1_1ScriptTuner-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::purpose::ScriptTuner Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>Provides a Curses interface to let the user customize scripts.  
+ <a href="classmodule_1_1purpose_1_1ScriptTuner.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="purpose_2ScriptTuner_2src_2ScriptTuner_8hpp_source.html">ScriptTuner.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for module::purpose::ScriptTuner:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1purpose_1_1ScriptTuner__inherit__graph.png" border="0" usemap="#amodule_1_1purpose_1_1ScriptTuner_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1purpose_1_1ScriptTuner_inherit__map" id="amodule_1_1purpose_1_1ScriptTuner_inherit__map">
+<area shape="rect" title="Provides a Curses interface to let the user customize scripts." alt="" coords="5,80,216,107"/>
+<area shape="rect" title=" " alt="" coords="43,5,178,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::purpose::ScriptTuner:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1purpose_1_1ScriptTuner__coll__graph.png" border="0" usemap="#amodule_1_1purpose_1_1ScriptTuner_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1purpose_1_1ScriptTuner_coll__map" id="amodule_1_1purpose_1_1ScriptTuner_coll__map">
+<area shape="rect" title="Provides a Curses interface to let the user customize scripts." alt="" coords="51,109,262,136"/>
+<area shape="rect" title=" " alt="" coords="5,13,140,39"/>
+<area shape="rect" href="structutility_1_1skill_1_1Script.html" title=" " alt="" coords="165,5,319,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:affdf36ab572d8227827132b5b9a15377"><td class="memItemLeft" align="right" valign="top"><a id="affdf36ab572d8227827132b5b9a15377"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ScriptTuner</b> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+<tr class="separator:affdf36ab572d8227827132b5b9a15377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a5b59f2405b96f78447dd89cabf5aa02b"><td class="memItemLeft" align="right" valign="top"><a id="a5b59f2405b96f78447dd89cabf5aa02b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a5b59f2405b96f78447dd89cabf5aa02b">activate_frame</a> (int <a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a31600ca9b917d01fd56a34e0cdae152f">frame</a>)</td></tr>
+<tr class="memdesc:a5b59f2405b96f78447dd89cabf5aa02b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits targets of the current frame. <br /></td></tr>
+<tr class="separator:a5b59f2405b96f78447dd89cabf5aa02b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca74bd25a5339ba473d81d5f2e9d3cf6"><td class="memItemLeft" align="right" valign="top"><a id="aca74bd25a5339ba473d81d5f2e9d3cf6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#aca74bd25a5339ba473d81d5f2e9d3cf6">delete_frame</a> ()</td></tr>
+<tr class="memdesc:aca74bd25a5339ba473d81d5f2e9d3cf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deletes the current frame from the script. <br /></td></tr>
+<tr class="separator:aca74bd25a5339ba473d81d5f2e9d3cf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a535cb85088f3e46e64e098ff7bd21165"><td class="memItemLeft" align="right" valign="top"><a id="a535cb85088f3e46e64e098ff7bd21165"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a535cb85088f3e46e64e098ff7bd21165">edit_duration</a> ()</td></tr>
+<tr class="memdesc:a535cb85088f3e46e64e098ff7bd21165"><td class="mdescLeft">&#160;</td><td class="mdescRight">Edits the duration of the current frame. <br /></td></tr>
+<tr class="separator:a535cb85088f3e46e64e098ff7bd21165"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3112afbb9fef917cffe73a2a07e0f891"><td class="memItemLeft" align="right" valign="top"><a id="a3112afbb9fef917cffe73a2a07e0f891"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a3112afbb9fef917cffe73a2a07e0f891">edit_gain</a> ()</td></tr>
+<tr class="memdesc:a3112afbb9fef917cffe73a2a07e0f891"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allows user to edit the gain for the entire script or specified frame. <br /></td></tr>
+<tr class="separator:a3112afbb9fef917cffe73a2a07e0f891"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a664f11ed4d234f95b91ffa3e00308f08"><td class="memItemLeft" align="right" valign="top"><a id="a664f11ed4d234f95b91ffa3e00308f08"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>edit_gain_input</b> ()</td></tr>
+<tr class="separator:a664f11ed4d234f95b91ffa3e00308f08"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ec1770b24a68119f2a56fc77171b314"><td class="memItemLeft" align="right" valign="top"><a id="a0ec1770b24a68119f2a56fc77171b314"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a0ec1770b24a68119f2a56fc77171b314">edit_selection</a> ()</td></tr>
+<tr class="memdesc:a0ec1770b24a68119f2a56fc77171b314"><td class="mdescLeft">&#160;</td><td class="mdescRight">Edits the angle of the current selection. <br /></td></tr>
+<tr class="separator:a0ec1770b24a68119f2a56fc77171b314"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34a806909e93abdce689276139956126"><td class="memItemLeft" align="right" valign="top"><a id="a34a806909e93abdce689276139956126"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a34a806909e93abdce689276139956126">help</a> ()</td></tr>
+<tr class="memdesc:a34a806909e93abdce689276139956126"><td class="mdescLeft">&#160;</td><td class="mdescRight">Prints a list of commands to the screen. <br /></td></tr>
+<tr class="separator:a34a806909e93abdce689276139956126"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6239ff1d8acdcb2d1b0b23b8551b2589"><td class="memItemLeft" align="right" valign="top"><a id="a6239ff1d8acdcb2d1b0b23b8551b2589"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a6239ff1d8acdcb2d1b0b23b8551b2589">jump_to_frame</a> ()</td></tr>
+<tr class="memdesc:a6239ff1d8acdcb2d1b0b23b8551b2589"><td class="mdescLeft">&#160;</td><td class="mdescRight">Jumps to the specified frame without moving the robot. <br /></td></tr>
+<tr class="separator:a6239ff1d8acdcb2d1b0b23b8551b2589"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c29ea71985862e5eaeb026f65c1ced3"><td class="memItemLeft" align="right" valign="top"><a id="a8c29ea71985862e5eaeb026f65c1ced3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a8c29ea71985862e5eaeb026f65c1ced3">load_script</a> (const std::string &amp;path)</td></tr>
+<tr class="memdesc:a8c29ea71985862e5eaeb026f65c1ced3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads in the script from the specified path. <br /></td></tr>
+<tr class="separator:a8c29ea71985862e5eaeb026f65c1ced3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f194395aeb3e09545a848486d15c379"><td class="memItemLeft" align="right" valign="top"><a id="a9f194395aeb3e09545a848486d15c379"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a9f194395aeb3e09545a848486d15c379">mirror_script</a> ()</td></tr>
+<tr class="memdesc:a9f194395aeb3e09545a848486d15c379"><td class="mdescLeft">&#160;</td><td class="mdescRight">Switches angle and gains between corresponding left and right motors, flips script around z axis. <br /></td></tr>
+<tr class="separator:a9f194395aeb3e09545a848486d15c379"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac93ba3407b55686131335cd8f44bc6cd"><td class="memItemLeft" align="right" valign="top"><a id="ac93ba3407b55686131335cd8f44bc6cd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#ac93ba3407b55686131335cd8f44bc6cd">new_frame</a> ()</td></tr>
+<tr class="memdesc:ac93ba3407b55686131335cd8f44bc6cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a new frame to the script. <br /></td></tr>
+<tr class="separator:ac93ba3407b55686131335cd8f44bc6cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7453a29d722accd8356c8e54c27287ba"><td class="memItemLeft" align="right" valign="top"><a id="a7453a29d722accd8356c8e54c27287ba"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a7453a29d722accd8356c8e54c27287ba">play_script</a> ()</td></tr>
+<tr class="memdesc:a7453a29d722accd8356c8e54c27287ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Plays the script. <br /></td></tr>
+<tr class="separator:a7453a29d722accd8356c8e54c27287ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae79c06b94af2e712d497c387a00022d6"><td class="memItemLeft" align="right" valign="top"><a id="ae79c06b94af2e712d497c387a00022d6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#ae79c06b94af2e712d497c387a00022d6">refresh_view</a> ()</td></tr>
+<tr class="memdesc:ae79c06b94af2e712d497c387a00022d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Refreshes the ncurses view. <br /></td></tr>
+<tr class="separator:ae79c06b94af2e712d497c387a00022d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9924b83d5603f29a953bb7df0c8dea50"><td class="memItemLeft" align="right" valign="top"><a id="a9924b83d5603f29a953bb7df0c8dea50"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a9924b83d5603f29a953bb7df0c8dea50">save_script</a> ()</td></tr>
+<tr class="memdesc:a9924b83d5603f29a953bb7df0c8dea50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the current script. <br /></td></tr>
+<tr class="separator:a9924b83d5603f29a953bb7df0c8dea50"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9a37811d5765932cd82b9e9065469da1"><td class="memItemLeft" align="right" valign="top"><a id="a9a37811d5765932cd82b9e9065469da1"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a9a37811d5765932cd82b9e9065469da1">save_script_as</a> ()</td></tr>
+<tr class="memdesc:a9a37811d5765932cd82b9e9065469da1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Change script_path and then call save_script to Save As. <br /></td></tr>
+<tr class="separator:a9a37811d5765932cd82b9e9065469da1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f93eb9452bd3a9178d6b85942d5e162"><td class="memItemLeft" align="right" valign="top"><a id="a5f93eb9452bd3a9178d6b85942d5e162"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>toggle_lock_motor</b> ()</td></tr>
+<tr class="separator:a5f93eb9452bd3a9178d6b85942d5e162"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83e67897d3203546ab0b1316c8e68683"><td class="memItemLeft" align="right" valign="top"><a id="a83e67897d3203546ab0b1316c8e68683"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a83e67897d3203546ab0b1316c8e68683">user_input_to_frame</a> ()</td></tr>
+<tr class="memdesc:a83e67897d3203546ab0b1316c8e68683"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks user input is a number and converts it a number that becomes the new frame number. <br /></td></tr>
+<tr class="separator:a83e67897d3203546ab0b1316c8e68683"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:a6ac81e9ce39c48560a918f1f6cff716e"><td class="memItemLeft" align="right" valign="top"><a id="a6ac81e9ce39c48560a918f1f6cff716e"></a>
+static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a6ac81e9ce39c48560a918f1f6cff716e">user_input</a> ()</td></tr>
+<tr class="memdesc:a6ac81e9ce39c48560a918f1f6cff716e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Listens for user input. <br /></td></tr>
+<tr class="separator:a6ac81e9ce39c48560a918f1f6cff716e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91a69e5e3105be7acd63940c2f633c17"><td class="memItemLeft" align="right" valign="top"><a id="a91a69e5e3105be7acd63940c2f633c17"></a>
+static float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a91a69e5e3105be7acd63940c2f633c17">user_input_to_gain</a> ()</td></tr>
+<tr class="memdesc:a91a69e5e3105be7acd63940c2f633c17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts valid user input to gain. <br /></td></tr>
+<tr class="separator:a91a69e5e3105be7acd63940c2f633c17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:abe21098e5c8895bd186b4b0347c7d3f9"><td class="memItemLeft" align="right" valign="top"><a id="abe21098e5c8895bd186b4b0347c7d3f9"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#abe21098e5c8895bd186b4b0347c7d3f9">angle_or_gain</a></td></tr>
+<tr class="memdesc:abe21098e5c8895bd186b4b0347c7d3f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">If we are selecting the angle or gain for this item. <br /></td></tr>
+<tr class="separator:abe21098e5c8895bd186b4b0347c7d3f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bebb7648a33300bab7ac42397f5e444"><td class="memItemLeft" align="right" valign="top"><a id="a1bebb7648a33300bab7ac42397f5e444"></a>
+const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a1bebb7648a33300bab7ac42397f5e444">default_duration</a> = 1000</td></tr>
+<tr class="memdesc:a1bebb7648a33300bab7ac42397f5e444"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default duration for new frames. <br /></td></tr>
+<tr class="separator:a1bebb7648a33300bab7ac42397f5e444"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeba1cce7254d97122005cc23d4eef467"><td class="memItemLeft" align="right" valign="top"><a id="aeba1cce7254d97122005cc23d4eef467"></a>
+const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#aeba1cce7254d97122005cc23d4eef467">default_gain</a> = 10</td></tr>
+<tr class="memdesc:aeba1cce7254d97122005cc23d4eef467"><td class="mdescLeft">&#160;</td><td class="mdescRight">Default gain for new frames. <br /></td></tr>
+<tr class="separator:aeba1cce7254d97122005cc23d4eef467"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a31600ca9b917d01fd56a34e0cdae152f"><td class="memItemLeft" align="right" valign="top"><a id="a31600ca9b917d01fd56a34e0cdae152f"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a31600ca9b917d01fd56a34e0cdae152f">frame</a></td></tr>
+<tr class="memdesc:a31600ca9b917d01fd56a34e0cdae152f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The index of the frame we are currently editing. <br /></td></tr>
+<tr class="separator:a31600ca9b917d01fd56a34e0cdae152f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad20608adb0c1c9e701617cf00e49784f"><td class="memItemLeft" align="right" valign="top"><a id="ad20608adb0c1c9e701617cf00e49784f"></a>
+<a class="el" href="structutility_1_1skill_1_1Script.html">Script</a>&lt; LimbsSequence &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#ad20608adb0c1c9e701617cf00e49784f">script</a></td></tr>
+<tr class="memdesc:ad20608adb0c1c9e701617cf00e49784f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The script object we are editing. <br /></td></tr>
+<tr class="separator:ad20608adb0c1c9e701617cf00e49784f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc8fa2ed65ebe13655d2fd0ddbc951ae"><td class="memItemLeft" align="right" valign="top"><a id="abc8fa2ed65ebe13655d2fd0ddbc951ae"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#abc8fa2ed65ebe13655d2fd0ddbc951ae">script_path</a></td></tr>
+<tr class="memdesc:abc8fa2ed65ebe13655d2fd0ddbc951ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">The path to the script we are editing. <br /></td></tr>
+<tr class="separator:abc8fa2ed65ebe13655d2fd0ddbc951ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97c28b73c65def68471b975309fc584f"><td class="memItemLeft" align="right" valign="top"><a id="a97c28b73c65def68471b975309fc584f"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html#a97c28b73c65def68471b975309fc584f">selection</a></td></tr>
+<tr class="memdesc:a97c28b73c65def68471b975309fc584f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The index of the item we are selecting. <br /></td></tr>
+<tr class="separator:a97c28b73c65def68471b975309fc584f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Provides a Curses interface to let the user customize scripts. </p>
+<dl class="section author"><dt>Author</dt><dd>Trent Houliston </dd></dl>
+</div><hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/purpose/ScriptTuner/src/<a class="el" href="purpose_2ScriptTuner_2src_2ScriptTuner_8hpp_source.html">ScriptTuner.hpp</a></li>
+<li>module/purpose/ScriptTuner/src/ScriptTuner.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>purpose</b></li><li class="navelem"><a class="el" href="classmodule_1_1purpose_1_1ScriptTuner.html">ScriptTuner</a></li>
+    <li class="footer">Generated on Sat Jun 17 2023 06:52:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -214,6 +214,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a165293156a62b9e4bb7899e5364d7cd8"><td class="memItemLeft" align="right" valign="top">static YAML::Node&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8">load</a> (const std::string &amp;script)</td></tr>
 <tr class="memdesc:a165293156a62b9e4bb7899e5364d7cd8"><td class="mdescLeft">&#160;</td><td class="mdescRight">If a robot-specific script exists, load the YAML file as a script. If not, loads the platform-specific script. If neither exist, throws a runtime error.  <a href="namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8">More...</a><br /></td></tr>
 <tr class="separator:a165293156a62b9e4bb7899e5364d7cd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af969d59d9969565d63f77fc7d1deb588"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
+<tr class="memitem:af969d59d9969565d63f77fc7d1deb588"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#af969d59d9969565d63f77fc7d1deb588">load_script</a> (const <a class="el" href="structutility_1_1skill_1_1Script.html">Script</a>&lt; Sequence &gt; &amp;script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:af969d59d9969565d63f77fc7d1deb588"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates sequences of servos from the <a class="el" href="structutility_1_1skill_1_1Script.html">Script</a> given.  <a href="namespaceutility_1_1skill.html#af969d59d9969565d63f77fc7d1deb588">More...</a><br /></td></tr>
+<tr class="separator:af969d59d9969565d63f77fc7d1deb588"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53142677645a7166736a733b2096b67b"><td class="memTemplParams" colspan="2">template&lt;typename Sequence &gt; </td></tr>
 <tr class="memitem:a53142677645a7166736a733b2096b67b"><td class="memTemplItemLeft" align="right" valign="top">static std::unique_ptr&lt; Sequence &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1skill.html#a53142677645a7166736a733b2096b67b">load_script</a> (const <a class="el" href="structutility_1_1skill_1_1ScriptRequest.html">ScriptRequest</a> script, NUClear::clock::time_point start=NUClear::clock::now())</td></tr>
 <tr class="memdesc:a53142677645a7166736a733b2096b67b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits a script function with one script request which is then sent through to the multi script version above.  <a href="namespaceutility_1_1skill.html#a53142677645a7166736a733b2096b67b">More...</a><br /></td></tr>
@@ -316,8 +320,56 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="af969d59d9969565d63f77fc7d1deb588"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af969d59d9969565d63f77fc7d1deb588">&#9670;&nbsp;</a></span>load_script() <span class="overload">[1/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sequence &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static std::unique_ptr&lt;Sequence&gt; utility::skill::load_script </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structutility_1_1skill_1_1Script.html">Script</a>&lt; Sequence &gt; &amp;&#160;</td>
+          <td class="paramname"><em>script</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">NUClear::clock::time_point&#160;</td>
+          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates sequences of servos from the <a class="el" href="structutility_1_1skill_1_1Script.html">Script</a> given. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">script</td><td><a class="el" href="structutility_1_1skill_1_1Script.html">Script</a> to load </td></tr>
+    <tr><td class="paramname">start</td><td>When the first script should start executing. Default is now. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Sequence message which will be filled with sequences of servos and can then be emitted as a Task. </dd></dl>
+
+</div>
+</div>
 <a id="a53142677645a7166736a733b2096b67b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a53142677645a7166736a733b2096b67b">&#9670;&nbsp;</a></span>load_script() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a53142677645a7166736a733b2096b67b">&#9670;&nbsp;</a></span>load_script() <span class="overload">[2/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -365,7 +417,7 @@ template&lt;typename Sequence &gt; </div>
 </div>
 </div>
 <a id="a5d1ce6757ddb8c5386c3da34f1d185db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d1ce6757ddb8c5386c3da34f1d185db">&#9670;&nbsp;</a></span>load_script() <span class="overload">[2/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a5d1ce6757ddb8c5386c3da34f1d185db">&#9670;&nbsp;</a></span>load_script() <span class="overload">[3/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -413,7 +465,7 @@ template&lt;typename Sequence &gt; </div>
 </div>
 </div>
 <a id="a917b6229cb1233389f832c2abf62378b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a917b6229cb1233389f832c2abf62378b">&#9670;&nbsp;</a></span>load_script() <span class="overload">[3/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a917b6229cb1233389f832c2abf62378b">&#9670;&nbsp;</a></span>load_script() <span class="overload">[4/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -461,7 +513,7 @@ template&lt;typename Sequence &gt; </div>
 </div>
 </div>
 <a id="a73510cc3b1b8dfa1de8a0f8fb3b98330"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a73510cc3b1b8dfa1de8a0f8fb3b98330">&#9670;&nbsp;</a></span>load_script() <span class="overload">[4/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a73510cc3b1b8dfa1de8a0f8fb3b98330">&#9670;&nbsp;</a></span>load_script() <span class="overload">[5/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -514,7 +566,7 @@ template&lt;typename Sequence &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1skill.html">skill</a></li>
-    <li class="footer">Generated on Sat Jun 17 2023 05:56:16 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Jun 17 2023 06:52:07 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

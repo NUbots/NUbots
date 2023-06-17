@@ -667,13 +667,17 @@ var namespaces_dup =
       [ "purpose", null, [
         [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
+        [ "LockServo", "structmodule_1_1purpose_1_1LockServo.html", null ],
         [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
+        [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
         [ "GameMode", "Goalie_8cpp.html#a2a5932ecf6b4477c7ba24d1de6dafb43", null ],
         [ "GoalieTask", "Goalie_8cpp.html#a0ad4596d701cecf7cd4cc55d022ed6ad", null ],
+        [ "LimbID", "purpose_2ScriptTuner_2src_2ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268", null ],
         [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
         [ "Phase", "Goalie_8cpp.html#a19ac08a0be5f41ccc26e7b0186c14e68", null ],
+        [ "ServoID", "purpose_2ScriptTuner_2src_2ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
         [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],
         [ "LogColours", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [
