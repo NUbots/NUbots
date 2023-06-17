@@ -189,6 +189,10 @@ jobs:
         working-directory: nusight2
         run: yarn --prefer-offline
 
+      - name: Type Check NUsight
+        working-directory: nusight2
+        run: yarn tscheck
+
       - name: Build NUsight
         working-directory: nusight2
         run: yarn test:ci
