@@ -3,6 +3,8 @@ import * as THREE from "three";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
+import { Vector2 } from "../../../shared/math/vector2";
+import { Vector3 } from "../../../shared/math/vector3";
 import { message } from "../../../shared/messages";
 import { Imat4 } from "../../../shared/messages";
 import { Network } from "../../network/network";
@@ -16,6 +18,7 @@ export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
+    this.network.on(message.vision.FieldLines, this.onFieldLines);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -32,6 +35,12 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
   };
+
+  @action.bound
+  private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.fieldLinesDots = fieldLines.rPCw.map(rPWw => Vector2.from(Vector3.from(rPWw).applyMatrix4(robot.Hfw)))
+  }
 
   @action
   private onSensors = (robotModel: RobotModel, sensors: message.input.Sensors) => {

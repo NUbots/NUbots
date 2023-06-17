@@ -1,4 +1,7 @@
 import { computed } from "mobx";
+import { Mesh } from 'three'
+import { MeshBasicMaterial } from 'three'
+import { CircleBufferGeometry } from 'three'
 import { HemisphereLight } from "three";
 import { PointLight } from "three";
 import { Object3D } from "three";
@@ -45,7 +48,7 @@ export class LocalisationViewModel {
   }));
 
   private readonly scene = scene(() => ({
-    children: [...this.robots, this.field, this.skybox, this.hemisphereLight, this.pointLight],
+    children: [...this.robots, this.field, this.skybox, this.hemisphereLight, this.pointLight, this.fieldLineDots],
   }));
 
   @computed
@@ -75,5 +78,18 @@ export class LocalisationViewModel {
     const light = new PointLight("#fff");
     light.position.set(this.model.camera.position.x, this.model.camera.position.y, this.model.camera.position.z);
     return light;
+  }
+
+  @computed
+  private get fieldLineDots() {
+    const geometry = new CircleBufferGeometry(0.02);
+    const material = new MeshBasicMaterial({ color: 'lightgray' });
+    const group = new Object3D();
+    this.model.robots.forEach(robot => robot.fieldLinesDots.forEach(d => {
+      const mesh = new Mesh(geometry, material)
+      mesh.position.copy(new Vector3(d.x, d.y, 0.1).toThree());
+      group.add(mesh);
+    }));
+    return group;
   }
 }
