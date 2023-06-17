@@ -28,7 +28,7 @@ namespace module::strategy {
         });
 
         on<Provide<StandStillTask>, Uses<LimbsSequence>, Trigger<Stability>>().then(
-            [this](const Stability& stability, const Uses<LimbsSequence>& limbs) {
+            [this](const Uses<LimbsSequence>& limbs, const Stability& stability) {
                 // If we are stable, then we can provide the StandStill command
                 if (stability != Stability::STANDING) {
                     standing = false;
@@ -40,6 +40,7 @@ namespace module::strategy {
                     emit<Task>(load_script<LimbsSequence>("Stand.yaml"));
                 }
             });
+
         on<Start<StandStillTask>>().then([this] {
             // We don't know that we are standing, so reset to false
             standing = false;
