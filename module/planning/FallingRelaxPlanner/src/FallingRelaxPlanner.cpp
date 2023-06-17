@@ -56,70 +56,67 @@ namespace module::planning {
             cfg.fall_script         = config["fall_script"].as<std::string>();
         });
 
-        on<Provide<RelaxWhenFalling>, Uses<BodySequence>, Trigger<Sensors>>().then(
-            [this](const RunInfo& info, const Uses<BodySequence>& body, const Sensors& sensors) {
-                // OTHER_TRIGGER means we ran because of a sensors update
-                if (info.run_reason == RunInfo::OTHER_TRIGGER) {
-                    auto& a = sensors.accelerometer;
-                    auto& g = sensors.gyroscope;
+        on<Provide<RelaxWhenFalling>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
+            // OTHER_TRIGGER means we ran because of a sensors update
+            if (info.run_reason == RunInfo::OTHER_TRIGGER) {
+                auto& a = sensors.accelerometer;
+                auto& g = sensors.gyroscope;
 
-                    // Smooth the values we use to determine if we are falling
-                    gyro_mag  = smooth(gyro_mag,
-                                      std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
-                                      cfg.gyro_mag.smoothing);
-                    acc_mag   = smooth(acc_mag,  //
-                                     std::abs(a.norm() - cfg.acc_mag.mean),
-                                     cfg.acc_mag.smoothing);
-                    acc_angle = smooth(acc_angle,
-                                       std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
-                                       cfg.acc_angle.smoothing);
+                // Smooth the values we use to determine if we are falling
+                gyro_mag  = smooth(gyro_mag,
+                                  std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
+                                  cfg.gyro_mag.smoothing);
+                acc_mag   = smooth(acc_mag,  //
+                                 std::abs(a.norm() - cfg.acc_mag.mean),
+                                 cfg.acc_mag.smoothing);
+                acc_angle = smooth(acc_angle,
+                                   std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
+                                   cfg.acc_angle.smoothing);
 
-                    // Check if we are stable according to each sensor
-                    State gyro_mag_state  = gyro_mag < cfg.gyro_mag.unstable  ? State::STABLE
-                                            : gyro_mag < cfg.gyro_mag.falling ? State::UNSTABLE
-                                                                              : State::FALLING;
-                    State acc_mag_state   = acc_mag < cfg.acc_mag.unstable  ? State::STABLE
-                                            : acc_mag < cfg.acc_mag.falling ? State::UNSTABLE
+                // Check if we are stable according to each sensor
+                State gyro_mag_state  = gyro_mag < cfg.gyro_mag.unstable  ? State::STABLE
+                                        : gyro_mag < cfg.gyro_mag.falling ? State::UNSTABLE
+                                                                          : State::FALLING;
+                State acc_mag_state   = acc_mag < cfg.acc_mag.unstable  ? State::STABLE
+                                        : acc_mag < cfg.acc_mag.falling ? State::UNSTABLE
+                                                                        : State::FALLING;
+                State acc_angle_state = acc_angle < cfg.acc_angle.unstable  ? State::STABLE
+                                        : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
                                                                             : State::FALLING;
-                    State acc_angle_state = acc_angle < cfg.acc_angle.unstable  ? State::STABLE
-                                            : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
-                                                                                : State::FALLING;
 
-                    // Falling if at least two of the three checks are unstable or if any one of them is falling
-                    bool falling = (gyro_mag_state == State::FALLING || acc_mag_state == State::FALLING
-                                    || acc_angle_state == State::FALLING)
-                                   || (gyro_mag_state == State::UNSTABLE && acc_mag_state == State::UNSTABLE)
-                                   || (gyro_mag_state == State::UNSTABLE && acc_angle_state == State::UNSTABLE)
-                                   || (acc_mag_state == State::UNSTABLE && acc_angle_state == State::UNSTABLE);
+                // Falling if at least two of the three checks are unstable or if any one of them is falling
+                bool falling = (gyro_mag_state == State::FALLING || acc_mag_state == State::FALLING
+                                || acc_angle_state == State::FALLING)
+                               || (gyro_mag_state == State::UNSTABLE && acc_mag_state == State::UNSTABLE)
+                               || (gyro_mag_state == State::UNSTABLE && acc_angle_state == State::UNSTABLE)
+                               || (acc_mag_state == State::UNSTABLE && acc_angle_state == State::UNSTABLE);
 
-                    // We are falling
-                    if (falling) {
-                        // We are falling! Relax the limbs!
-                        log<NUClear::DEBUG>("Falling:",
-                                            "Gyroscope Magnitude:",
-                                            gyro_mag_state == State::FALLING    ? "FALLING"
-                                            : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                                : "STABLE",
-                                            "Accelerometer Magnitude:",
-                                            acc_mag_state == State::FALLING    ? "FALLING"
-                                            : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
-                                                                               : "STABLE",
-                                            "Accelerometer Angle:",
-                                            acc_angle_state == State::FALLING    ? "FALLING"
-                                            : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
-                                                                                 : "STABLE");
+                // We are falling
+                if (falling) {
+                    // We are falling! Relax the limbs!
+                    log<NUClear::DEBUG>("Falling:",
+                                        "Gyroscope Magnitude:",
+                                        gyro_mag_state == State::FALLING    ? "FALLING"
+                                        : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                            : "STABLE",
+                                        "Accelerometer Magnitude:",
+                                        acc_mag_state == State::FALLING    ? "FALLING"
+                                        : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                           : "STABLE",
+                                        "Accelerometer Angle:",
+                                        acc_angle_state == State::FALLING    ? "FALLING"
+                                        : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
+                                                                             : "STABLE");
 
-                        emit(std::make_unique<Stability>(Stability::FALLING));
-                        if (body.run_state == GroupInfo::RunState::NO_TASK) {
-                            emit<Task>(load_script<BodySequence>(cfg.fall_script));
-                        }
-                    }
+                    emit(std::make_unique<Stability>(Stability::FALLING));
+                    emit<Task>(load_script<BodySequence>(cfg.fall_script));
                 }
-                else {
-                    // Emit an idle task for every other reason
-                    emit(std::make_unique<Idle>());
-                }
-            });
+            }
+            else {
+                // Emit an idle task for every other reason
+                emit(std::make_unique<Idle>());
+            }
+        });
     }
 
 }  // namespace module::planning
