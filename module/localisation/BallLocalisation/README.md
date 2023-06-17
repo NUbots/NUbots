@@ -17,6 +17,6 @@ Include this module to allow the robot to estimate the balls position and veloci
 
 ## Emits
 
-- `message::localisation::FilteredBall` contains filtered ball position measurement
+- `message::localisation::Ball` contains filtered ball position measurement
 
 ## Dependencies

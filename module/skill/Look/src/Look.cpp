@@ -7,7 +7,7 @@
 #include "message/actuation/LimbsIK.hpp"
 #include "message/actuation/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/localisation/FilteredBall.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/skill/Look.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -21,7 +21,7 @@ namespace module::skill {
     using message::actuation::LimbsSequence;
     using message::actuation::ServoState;
     using message::input::Sensors;
-    using message::localisation::FilteredBall;
+    using message::localisation::Ball;
     using utility::input::ServoID;
     using utility::math::coordinates::screen_angular_from_object_direction;
     using utility::math::coordinates::sphericalToCartesian;
