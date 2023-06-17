@@ -81,7 +81,7 @@ namespace module::vision {
             lines->id             = horizon.id;         // camera id
             lines->timestamp      = horizon.timestamp;  // time when the image was taken
             lines->Hcw            = horizon.Hcw;        // world to camera transform at the time the image was taken
-            Eigen::Isometry3d Hwc = Eigen::Isometry3d(horizon.Hcw).inverse();
+            Eigen::Isometry3d Hwc = horizon.Hcw.inverse();
             for (auto& cluster : clusters) {
                 for (const auto& idx : cluster) {
                     lines->points.push_back(uPCw.col(idx));

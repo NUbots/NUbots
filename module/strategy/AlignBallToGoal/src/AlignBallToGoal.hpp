@@ -13,9 +13,9 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
             /// @brief How close the ball needs to be before we start aligning
-            float ball_distance_threshold = 0.0f;
+            double ball_distance_threshold = 0.0f;
             /// @brief If the angle to the goal is between the threshold and 0, we stop aligning
-            float angle_threshold = 0.0f;
+            double angle_threshold = 0.0f;
         } cfg;
 
     public:

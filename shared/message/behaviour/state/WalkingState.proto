@@ -28,5 +28,5 @@ message WalkingState {
     bool is_walking = 1;
 
     /// Current walk command (dx, dy, dtheta)
-    fvec3 walk_command = 2;
+    vec3 walk_command = 2;
 }

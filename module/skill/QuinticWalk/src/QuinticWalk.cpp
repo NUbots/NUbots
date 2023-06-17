@@ -53,72 +53,71 @@ namespace module::skill {
      * @param config The destination configuration that we will write to.
      */
     void QuinticWalk::load_quintic_walk(const Configuration& config, Config& cfg) {
-        cfg.params.freq                          = config["walk"]["freq"].as<float>();
-        cfg.params.double_support_ratio          = config["walk"]["double_support_ratio"].as<float>();
-        cfg.params.first_step_swing_factor       = config["walk"]["first_step_swing_factor"].as<float>();
-        cfg.params.foot_distance                 = config["walk"]["foot"]["distance"].as<float>();
-        cfg.params.foot_rise                     = config["walk"]["foot"]["rise"].as<float>();
-        cfg.params.foot_z_pause                  = config["walk"]["foot"]["z_pause"].as<float>();
-        cfg.params.foot_put_down_z_offset        = config["walk"]["foot"]["put_down"]["z_offset"].as<float>();
-        cfg.params.foot_put_down_phase           = config["walk"]["foot"]["put_down"]["phase"].as<float>();
-        cfg.params.foot_put_down_roll_offset     = config["walk"]["foot"]["put_down"]["roll_offset"].as<float>();
-        cfg.params.foot_apex_phase               = config["walk"]["foot"]["apex_phase"].as<float>();
-        cfg.params.foot_overshoot_ratio          = config["walk"]["foot"]["overshoot"]["ratio"].as<float>();
-        cfg.params.foot_overshoot_phase          = config["walk"]["foot"]["overshoot"]["phase"].as<float>();
-        cfg.params.trunk_height                  = config["walk"]["trunk"]["height"].as<float>();
+        cfg.params.freq                          = config["walk"]["freq"].as<double>();
+        cfg.params.double_support_ratio          = config["walk"]["double_support_ratio"].as<double>();
+        cfg.params.first_step_swing_factor       = config["walk"]["first_step_swing_factor"].as<double>();
+        cfg.params.foot_distance                 = config["walk"]["foot"]["distance"].as<double>();
+        cfg.params.foot_rise                     = config["walk"]["foot"]["rise"].as<double>();
+        cfg.params.foot_z_pause                  = config["walk"]["foot"]["z_pause"].as<double>();
+        cfg.params.foot_put_down_z_offset        = config["walk"]["foot"]["put_down"]["z_offset"].as<double>();
+        cfg.params.foot_put_down_phase           = config["walk"]["foot"]["put_down"]["phase"].as<double>();
+        cfg.params.foot_put_down_roll_offset     = config["walk"]["foot"]["put_down"]["roll_offset"].as<double>();
+        cfg.params.foot_apex_phase               = config["walk"]["foot"]["apex_phase"].as<double>();
+        cfg.params.foot_overshoot_ratio          = config["walk"]["foot"]["overshoot"]["ratio"].as<double>();
+        cfg.params.foot_overshoot_phase          = config["walk"]["foot"]["overshoot"]["phase"].as<double>();
+        cfg.params.trunk_height                  = config["walk"]["trunk"]["height"].as<double>();
         cfg.params.trunk_pitch                   = config["walk"]["trunk"]["pitch"].as<Expression>();
-        cfg.params.trunk_phase                   = config["walk"]["trunk"]["phase"].as<float>();
-        cfg.params.trunk_x_offset                = config["walk"]["trunk"]["x_offset"].as<float>();
-        cfg.params.trunk_y_offset                = config["walk"]["trunk"]["y_offset"].as<float>();
-        cfg.params.trunk_swing                   = config["walk"]["trunk"]["swing"].as<float>();
-        cfg.params.trunk_pause                   = config["walk"]["trunk"]["pause"].as<float>();
-        cfg.params.trunk_x_offset_p_coef_forward = config["walk"]["trunk"]["x_offset_p_coef"]["forward"].as<float>();
-        cfg.params.trunk_x_offset_p_coef_turn    = config["walk"]["trunk"]["x_offset_p_coef"]["turn"].as<float>();
+        cfg.params.trunk_phase                   = config["walk"]["trunk"]["phase"].as<double>();
+        cfg.params.trunk_x_offset                = config["walk"]["trunk"]["x_offset"].as<double>();
+        cfg.params.trunk_y_offset                = config["walk"]["trunk"]["y_offset"].as<double>();
+        cfg.params.trunk_swing                   = config["walk"]["trunk"]["swing"].as<double>();
+        cfg.params.trunk_pause                   = config["walk"]["trunk"]["pause"].as<double>();
+        cfg.params.trunk_x_offset_p_coef_forward = config["walk"]["trunk"]["x_offset_p_coef"]["forward"].as<double>();
+        cfg.params.trunk_x_offset_p_coef_turn    = config["walk"]["trunk"]["x_offset_p_coef"]["turn"].as<double>();
         cfg.params.trunk_pitch_p_coef_forward =
-            1.0f + config["walk"]["trunk"]["pitch_p_coef"]["forward"].as<Expression>();
-        cfg.params.trunk_pitch_p_coef_turn = 1.0f + config["walk"]["trunk"]["pitch_p_coef"]["turn"].as<Expression>();
-        cfg.params.kick_length             = config["walk"]["kick"]["length"].as<float>();
-        cfg.params.kick_phase              = config["walk"]["kick"]["phase"].as<float>();
-        cfg.params.kick_vel                = config["walk"]["kick"]["vel"].as<float>();
-        cfg.params.pause_duration          = config["walk"]["pause"]["duration"].as<float>();
+            1.0 + config["walk"]["trunk"]["pitch_p_coef"]["forward"].as<Expression>();
+        cfg.params.trunk_pitch_p_coef_turn = 1.0 + config["walk"]["trunk"]["pitch_p_coef"]["turn"].as<Expression>();
+        cfg.params.kick_length             = config["walk"]["kick"]["length"].as<double>();
+        cfg.params.kick_phase              = config["walk"]["kick"]["phase"].as<double>();
+        cfg.params.kick_vel                = config["walk"]["kick"]["vel"].as<double>();
+        cfg.params.pause_duration          = config["walk"]["pause"]["duration"].as<double>();
 
-        cfg.max_step.x() = config["max_step"]["x"].as<float>();
-        cfg.max_step.y() = config["max_step"]["y"].as<float>();
-        cfg.max_step.z() = config["max_step"]["z"].as<float>();
-        cfg.max_step_xy  = config["max_step"]["xy"].as<float>();
+        cfg.max_step.x() = config["max_step"]["x"].as<double>();
+        cfg.max_step.y() = config["max_step"]["y"].as<double>();
+        cfg.max_step.z() = config["max_step"]["z"].as<double>();
+        cfg.max_step_xy  = config["max_step"]["xy"].as<double>();
 
         cfg.imu_active          = config["imu"]["active"].as<bool>();
-        cfg.imu_pitch_threshold = 1.0f + config["imu"]["pitch"]["threshold"].as<float>();
-        cfg.imu_roll_threshold  = config["imu"]["roll"]["threshold"].as<float>();
+        cfg.imu_pitch_threshold = 1.0 + config["imu"]["pitch"]["threshold"].as<double>();
+        cfg.imu_roll_threshold  = config["imu"]["roll"]["threshold"].as<double>();
 
         for (int id = 0; id < ServoID::NUMBER_OF_SERVOS; ++id) {
             // Sets the leg gains
             if ((id >= ServoID::R_HIP_YAW) && (id < ServoID::HEAD_YAW)) {
-                cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<float>(), 100);
+                cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<double>(), 100);
             }
             // Sets the arm gains
             if (id < ServoID::R_HIP_YAW) {
-                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<float>(), 100);
+                cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<double>(), 100);
             }
         }
 
-        cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH, config["arms"]["right_shoulder_pitch"].as<float>());
-        cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_PITCH, config["arms"]["left_shoulder_pitch"].as<float>());
-        cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_ROLL, config["arms"]["right_shoulder_roll"].as<float>());
-        cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<float>());
-        cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<float>());
-        cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<float>());
+        cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH, config["arms"]["right_shoulder_pitch"].as<double>());
+        cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_PITCH, config["arms"]["left_shoulder_pitch"].as<double>());
+        cfg.arm_positions.emplace_back(ServoID::R_SHOULDER_ROLL, config["arms"]["right_shoulder_roll"].as<double>());
+        cfg.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, config["arms"]["left_shoulder_roll"].as<double>());
+        cfg.arm_positions.emplace_back(ServoID::R_ELBOW, config["arms"]["right_elbow"].as<double>());
+        cfg.arm_positions.emplace_back(ServoID::L_ELBOW, config["arms"]["left_elbow"].as<double>());
     }
 
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            Eigen::Vector3f RPY =
-                utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<float>());
+            Eigen::Vector3d RPY = utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.rotation().cast<double>());
 
             // compute the pitch offset to the currently wanted pitch of the engine
-            float wanted_pitch =
+            double wanted_pitch =
                 current_cfg.params.trunk_pitch
                 + current_cfg.params.trunk_pitch_p_coef_forward * walk_engine.get_footstep().get_next().x()
                 + current_cfg.params.trunk_pitch_p_coef_turn * std::abs(walk_engine.get_footstep().get_next().z());
@@ -180,14 +179,14 @@ namespace module::skill {
                 imu_reaction.enable(current_cfg.imu_active);
 
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(true, Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkingState>(true, Eigen::Vector3d::Zero()));
             });
 
         // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] {
             imu_reaction.enable(false);
             // Update the walking state
-            emit(std::make_unique<WalkingState>(false, Eigen::Vector3f::Zero()));
+            emit(std::make_unique<WalkingState>(false, Eigen::Vector3d::Zero()));
         });
 
         // MAIN LOOP
@@ -206,8 +205,8 @@ namespace module::skill {
                 }
                 // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
                 // a double step factor 2 since the order distance is only for a single step, not double step
-                const float factor             = (1.0f / (current_cfg.params.freq)) * 0.5f;
-                const Eigen::Vector3f& command = walk.velocity_target.cast<float>() * factor;
+                const double factor            = (1.0 / (current_cfg.params.freq)) * 0.5;
+                const Eigen::Vector3d& command = walk.velocity_target.cast<double>() * factor;
 
                 // Clamp velocity command
                 current_orders =
@@ -215,9 +214,9 @@ namespace module::skill {
 
                 // translational orders (x+y) should not exceed combined limit. scale if necessary
                 if (current_cfg.max_step_xy != 0) {
-                    float scaling_factor =
-                        1.0f / std::max(1.0f, (current_orders.x() + current_orders.y()) / current_cfg.max_step_xy);
-                    current_orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
+                    double scaling_factor =
+                        1.0 / std::max(1.0, (current_orders.x() + current_orders.y()) / current_cfg.max_step_xy);
+                    current_orders.cwiseProduct(Eigen::Vector3d(scaling_factor, scaling_factor, 1.0));
                 }
 
                 // warn user that speed was limited
@@ -235,11 +234,11 @@ namespace module::skill {
                         current_cfg.max_step_xy / factor));
                 }
 
-                const float dt = get_time_delta();
+                const double dt = get_time_delta();
                 // If the walk engine is still running, call the calculate_joint_goals function,
                 // which will emit the tasks for the limbs.
                 // If there are no new goals, no tasks are emitted, removing child tasks from the Director tree.
-                if (walk_engine.update_state(dt, current_orders)) {
+                if (walk_engine.update_state(dt, current_orders.cast<float>())) {
                     calculate_joint_goals();
                 }
                 // Update the walking state
@@ -255,9 +254,9 @@ namespace module::skill {
            Single>()
             .then([this] {
                 // Stop the walk engine
-                const float dt = get_time_delta();
+                const double dt = get_time_delta();
                 current_orders.setZero();
-                walk_engine.update_state(dt, current_orders);
+                walk_engine.update_state(dt, current_orders.cast<float>());
                 // Check if we are in the IDLE state
                 if (walk_engine.get_state() == WalkEngineState::IDLE) {
                     emit(std::make_unique<Stability>(Stability::STANDING));
@@ -265,15 +264,15 @@ namespace module::skill {
                 calculate_joint_goals();
 
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(false, Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkingState>(false, Eigen::Vector3d::Zero()));
             });
     }
 
 
-    float QuinticWalk::get_time_delta() {
+    double QuinticWalk::get_time_delta() {
         // compute time delta depended if we are currently in simulation or reality
         const auto current_time = NUClear::clock::now();
-        float dt =
+        double dt =
             std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
 
         if (dt == 0.0f) {

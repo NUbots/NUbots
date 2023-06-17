@@ -24,6 +24,7 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
+import "Transform.proto";
 
 message FieldLines {
     /// ID of the camera that took the image containing the lines
@@ -31,7 +32,7 @@ message FieldLines {
     /// When the image was taken that this measurement is derived from
     google.protobuf.Timestamp timestamp = 2;
     /// Affine3d transform from world space to camera space at the time that the image was taken
-    mat4 Hcw = 3;
+    iso3 Hcw = 3;
     /// Could be empty, if there were no lines detected in the image
     repeated fvec3 points = 4;
     /// Field line points projected onto the world XY plane from the camera {c} in world {w} space

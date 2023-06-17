@@ -31,21 +31,21 @@ namespace module::skill {
         ReactionHandle imu_reaction{};
 
         void calculate_joint_goals();
-        [[nodiscard]] float get_time_delta();
+        [[nodiscard]] double get_time_delta();
 
         struct Config {
-            Eigen::Vector3f max_step = Eigen::Vector3f::Zero();
-            float max_step_xy        = 0.0f;
+            Eigen::Vector3d max_step = Eigen::Vector3d::Zero();
+            double max_step_xy       = 0.0f;
 
-            bool imu_active           = true;
-            float imu_pitch_threshold = 0.0f;
-            float imu_roll_threshold  = 0.0f;
+            bool imu_active            = true;
+            double imu_pitch_threshold = 0.0f;
+            double imu_roll_threshold  = 0.0f;
 
             utility::skill::WalkingParameter params{};
 
             std::map<utility::input::ServoID, message::actuation::ServoState> servo_states{};
 
-            std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
+            std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
         } normal_cfg{}, goalie_cfg{};
 
         static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);
@@ -55,7 +55,7 @@ namespace module::skill {
 
         bool first_cfg = true;
 
-        Eigen::Vector3f current_orders = Eigen::Vector3f::Zero();
+        Eigen::Vector3d current_orders = Eigen::Vector3d::Zero();
         bool is_left_support           = true;
         bool first_run                 = true;
 

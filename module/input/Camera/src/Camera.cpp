@@ -439,7 +439,7 @@ namespace module::input {
                 }
 
                 msg->lens = context->lens;
-                msg->Hcw  = Hcw.matrix();
+                msg->Hcw  = Hcw;
 
                 reactor.emit(msg);
 
