@@ -28,10 +28,10 @@ namespace module::output::compressor::vaapi {
 
         // Contexts and buffers used for compressing images
         CompressionContext cctx;
-        VASurfaceID surface;
-        VAContextID context;
-        VABufferID encoded;
-        std::array<VABufferID, 6> buffers;
+        VASurfaceID surface{};
+        VAContextID context{};
+        VABufferID encoded{};
+        std::array<VABufferID, 6> buffers{};
 
         // OpenCL things
         cl::command_queue command_queue;

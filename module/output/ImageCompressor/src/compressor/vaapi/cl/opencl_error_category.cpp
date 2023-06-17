@@ -24,7 +24,7 @@ namespace module::output::compressor::vaapi::cl {
     }
 
     std::error_condition make_error_condition(opencl_error_code e) {
-        return std::error_condition(static_cast<int>(e), opencl_error_category());
+        return {static_cast<int>(e), opencl_error_category()};
     }
 
     const char* opencl_error_category_t::name() const noexcept {
@@ -34,75 +34,71 @@ namespace module::output::compressor::vaapi::cl {
     std::error_condition opencl_error_category_t::default_error_condition(int code) const noexcept {
         using cle = opencl_error_code;
         switch (code) {
-            case CL_SUCCESS: return std::error_condition(cle::SUCCESS);
-            case CL_DEVICE_NOT_FOUND: return std::error_condition(cle::DEVICE_NOT_FOUND);
-            case CL_DEVICE_NOT_AVAILABLE: return std::error_condition(cle::DEVICE_NOT_AVAILABLE);
-            case CL_COMPILER_NOT_AVAILABLE: return std::error_condition(cle::COMPILER_NOT_AVAILABLE);
-            case CL_MEM_OBJECT_ALLOCATION_FAILURE: return std::error_condition(cle::MEM_OBJECT_ALLOCATION_FAILURE);
-            case CL_OUT_OF_RESOURCES: return std::error_condition(cle::OUT_OF_RESOURCES);
-            case CL_OUT_OF_HOST_MEMORY: return std::error_condition(cle::OUT_OF_HOST_MEMORY);
-            case CL_PROFILING_INFO_NOT_AVAILABLE: return std::error_condition(cle::PROFILING_INFO_NOT_AVAILABLE);
-            case CL_MEM_COPY_OVERLAP: return std::error_condition(cle::MEM_COPY_OVERLAP);
-            case CL_IMAGE_FORMAT_MISMATCH: return std::error_condition(cle::IMAGE_FORMAT_MISMATCH);
-            case CL_IMAGE_FORMAT_NOT_SUPPORTED: return std::error_condition(cle::IMAGE_FORMAT_NOT_SUPPORTED);
-            case CL_BUILD_PROGRAM_FAILURE: return std::error_condition(cle::BUILD_PROGRAM_FAILURE);
-            case CL_MAP_FAILURE: return std::error_condition(cle::MAP_FAILURE);
-            case CL_MISALIGNED_SUB_BUFFER_OFFSET: return std::error_condition(cle::MISALIGNED_SUB_BUFFER_OFFSET);
-            case CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST:
-                return std::error_condition(cle::EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST);
-            case CL_COMPILE_PROGRAM_FAILURE: return std::error_condition(cle::COMPILE_PROGRAM_FAILURE);
-            case CL_LINKER_NOT_AVAILABLE: return std::error_condition(cle::LINKER_NOT_AVAILABLE);
-            case CL_LINK_PROGRAM_FAILURE: return std::error_condition(cle::LINK_PROGRAM_FAILURE);
-            case CL_DEVICE_PARTITION_FAILED: return std::error_condition(cle::DEVICE_PARTITION_FAILED);
-            case CL_KERNEL_ARG_INFO_NOT_AVAILABLE: return std::error_condition(cle::KERNEL_ARG_INFO_NOT_AVAILABLE);
-            case CL_INVALID_VALUE: return std::error_condition(cle::INVALID_VALUE);
-            case CL_INVALID_DEVICE_TYPE: return std::error_condition(cle::INVALID_DEVICE_TYPE);
-            case CL_INVALID_PLATFORM: return std::error_condition(cle::INVALID_PLATFORM);
-            case CL_INVALID_DEVICE: return std::error_condition(cle::INVALID_DEVICE);
-            case CL_INVALID_CONTEXT: return std::error_condition(cle::INVALID_CONTEXT);
-            case CL_INVALID_QUEUE_PROPERTIES: return std::error_condition(cle::INVALID_QUEUE_PROPERTIES);
-            case CL_INVALID_COMMAND_QUEUE: return std::error_condition(cle::INVALID_COMMAND_QUEUE);
-            case CL_INVALID_HOST_PTR: return std::error_condition(cle::INVALID_HOST_PTR);
-            case CL_INVALID_MEM_OBJECT: return std::error_condition(cle::INVALID_MEM_OBJECT);
-            case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR: return std::error_condition(cle::INVALID_IMAGE_FORMAT_DESCRIPTOR);
-            case CL_INVALID_IMAGE_SIZE: return std::error_condition(cle::INVALID_IMAGE_SIZE);
-            case CL_INVALID_SAMPLER: return std::error_condition(cle::INVALID_SAMPLER);
-            case CL_INVALID_BINARY: return std::error_condition(cle::INVALID_BINARY);
-            case CL_INVALID_BUILD_OPTIONS: return std::error_condition(cle::INVALID_BUILD_OPTIONS);
-            case CL_INVALID_PROGRAM: return std::error_condition(cle::INVALID_PROGRAM);
-            case CL_INVALID_PROGRAM_EXECUTABLE: return std::error_condition(cle::INVALID_PROGRAM_EXECUTABLE);
-            case CL_INVALID_KERNEL_NAME: return std::error_condition(cle::INVALID_KERNEL_NAME);
-            case CL_INVALID_KERNEL_DEFINITION: return std::error_condition(cle::INVALID_KERNEL_DEFINITION);
-            case CL_INVALID_KERNEL: return std::error_condition(cle::INVALID_KERNEL);
-            case CL_INVALID_ARG_INDEX: return std::error_condition(cle::INVALID_ARG_INDEX);
-            case CL_INVALID_ARG_VALUE: return std::error_condition(cle::INVALID_ARG_VALUE);
-            case CL_INVALID_ARG_SIZE: return std::error_condition(cle::INVALID_ARG_SIZE);
-            case CL_INVALID_KERNEL_ARGS: return std::error_condition(cle::INVALID_KERNEL_ARGS);
-            case CL_INVALID_WORK_DIMENSION: return std::error_condition(cle::INVALID_WORK_DIMENSION);
-            case CL_INVALID_WORK_GROUP_SIZE: return std::error_condition(cle::INVALID_WORK_GROUP_SIZE);
-            case CL_INVALID_WORK_ITEM_SIZE: return std::error_condition(cle::INVALID_WORK_ITEM_SIZE);
-            case CL_INVALID_GLOBAL_OFFSET: return std::error_condition(cle::INVALID_GLOBAL_OFFSET);
-            case CL_INVALID_EVENT_WAIT_LIST: return std::error_condition(cle::INVALID_EVENT_WAIT_LIST);
-            case CL_INVALID_EVENT: return std::error_condition(cle::INVALID_EVENT);
-            case CL_INVALID_OPERATION: return std::error_condition(cle::INVALID_OPERATION);
-            case CL_INVALID_GL_OBJECT: return std::error_condition(cle::INVALID_GL_OBJECT);
-            case CL_INVALID_BUFFER_SIZE: return std::error_condition(cle::INVALID_BUFFER_SIZE);
-            case CL_INVALID_MIP_LEVEL: return std::error_condition(cle::INVALID_MIP_LEVEL);
-            case CL_INVALID_GLOBAL_WORK_SIZE: return std::error_condition(cle::INVALID_GLOBAL_WORK_SIZE);
-            case CL_INVALID_PROPERTY: return std::error_condition(cle::INVALID_PROPERTY);
-            case CL_INVALID_IMAGE_DESCRIPTOR: return std::error_condition(cle::INVALID_IMAGE_DESCRIPTOR);
-            case CL_INVALID_COMPILER_OPTIONS: return std::error_condition(cle::INVALID_COMPILER_OPTIONS);
-            case CL_INVALID_LINKER_OPTIONS: return std::error_condition(cle::INVALID_LINKER_OPTIONS);
-            case CL_INVALID_DEVICE_PARTITION_COUNT: return std::error_condition(cle::INVALID_DEVICE_PARTITION_COUNT);
-            case CL_INVALID_VA_API_MEDIA_ADAPTER_INTEL:
-                return std::error_condition(cle::INVALID_VA_API_MEDIA_ADAPTER_INTEL);
-            case CL_INVALID_VA_API_MEDIA_SURFACE_INTEL:
-                return std::error_condition(cle::INVALID_VA_API_MEDIA_SURFACE_INTEL);
+            case CL_SUCCESS: return {cle::SUCCESS};
+            case CL_DEVICE_NOT_FOUND: return {cle::DEVICE_NOT_FOUND};
+            case CL_DEVICE_NOT_AVAILABLE: return {cle::DEVICE_NOT_AVAILABLE};
+            case CL_COMPILER_NOT_AVAILABLE: return {cle::COMPILER_NOT_AVAILABLE};
+            case CL_MEM_OBJECT_ALLOCATION_FAILURE: return {cle::MEM_OBJECT_ALLOCATION_FAILURE};
+            case CL_OUT_OF_RESOURCES: return {cle::OUT_OF_RESOURCES};
+            case CL_OUT_OF_HOST_MEMORY: return {cle::OUT_OF_HOST_MEMORY};
+            case CL_PROFILING_INFO_NOT_AVAILABLE: return {cle::PROFILING_INFO_NOT_AVAILABLE};
+            case CL_MEM_COPY_OVERLAP: return {cle::MEM_COPY_OVERLAP};
+            case CL_IMAGE_FORMAT_MISMATCH: return {cle::IMAGE_FORMAT_MISMATCH};
+            case CL_IMAGE_FORMAT_NOT_SUPPORTED: return {cle::IMAGE_FORMAT_NOT_SUPPORTED};
+            case CL_BUILD_PROGRAM_FAILURE: return {cle::BUILD_PROGRAM_FAILURE};
+            case CL_MAP_FAILURE: return {cle::MAP_FAILURE};
+            case CL_MISALIGNED_SUB_BUFFER_OFFSET: return {cle::MISALIGNED_SUB_BUFFER_OFFSET};
+            case CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST: return {cle::EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST};
+            case CL_COMPILE_PROGRAM_FAILURE: return {cle::COMPILE_PROGRAM_FAILURE};
+            case CL_LINKER_NOT_AVAILABLE: return {cle::LINKER_NOT_AVAILABLE};
+            case CL_LINK_PROGRAM_FAILURE: return {cle::LINK_PROGRAM_FAILURE};
+            case CL_DEVICE_PARTITION_FAILED: return {cle::DEVICE_PARTITION_FAILED};
+            case CL_KERNEL_ARG_INFO_NOT_AVAILABLE: return {cle::KERNEL_ARG_INFO_NOT_AVAILABLE};
+            case CL_INVALID_VALUE: return {cle::INVALID_VALUE};
+            case CL_INVALID_DEVICE_TYPE: return {cle::INVALID_DEVICE_TYPE};
+            case CL_INVALID_PLATFORM: return {cle::INVALID_PLATFORM};
+            case CL_INVALID_DEVICE: return {cle::INVALID_DEVICE};
+            case CL_INVALID_CONTEXT: return {cle::INVALID_CONTEXT};
+            case CL_INVALID_QUEUE_PROPERTIES: return {cle::INVALID_QUEUE_PROPERTIES};
+            case CL_INVALID_COMMAND_QUEUE: return {cle::INVALID_COMMAND_QUEUE};
+            case CL_INVALID_HOST_PTR: return {cle::INVALID_HOST_PTR};
+            case CL_INVALID_MEM_OBJECT: return {cle::INVALID_MEM_OBJECT};
+            case CL_INVALID_IMAGE_FORMAT_DESCRIPTOR: return {cle::INVALID_IMAGE_FORMAT_DESCRIPTOR};
+            case CL_INVALID_IMAGE_SIZE: return {cle::INVALID_IMAGE_SIZE};
+            case CL_INVALID_SAMPLER: return {cle::INVALID_SAMPLER};
+            case CL_INVALID_BINARY: return {cle::INVALID_BINARY};
+            case CL_INVALID_BUILD_OPTIONS: return {cle::INVALID_BUILD_OPTIONS};
+            case CL_INVALID_PROGRAM: return {cle::INVALID_PROGRAM};
+            case CL_INVALID_PROGRAM_EXECUTABLE: return {cle::INVALID_PROGRAM_EXECUTABLE};
+            case CL_INVALID_KERNEL_NAME: return {cle::INVALID_KERNEL_NAME};
+            case CL_INVALID_KERNEL_DEFINITION: return {cle::INVALID_KERNEL_DEFINITION};
+            case CL_INVALID_KERNEL: return {cle::INVALID_KERNEL};
+            case CL_INVALID_ARG_INDEX: return {cle::INVALID_ARG_INDEX};
+            case CL_INVALID_ARG_VALUE: return {cle::INVALID_ARG_VALUE};
+            case CL_INVALID_ARG_SIZE: return {cle::INVALID_ARG_SIZE};
+            case CL_INVALID_KERNEL_ARGS: return {cle::INVALID_KERNEL_ARGS};
+            case CL_INVALID_WORK_DIMENSION: return {cle::INVALID_WORK_DIMENSION};
+            case CL_INVALID_WORK_GROUP_SIZE: return {cle::INVALID_WORK_GROUP_SIZE};
+            case CL_INVALID_WORK_ITEM_SIZE: return {cle::INVALID_WORK_ITEM_SIZE};
+            case CL_INVALID_GLOBAL_OFFSET: return {cle::INVALID_GLOBAL_OFFSET};
+            case CL_INVALID_EVENT_WAIT_LIST: return {cle::INVALID_EVENT_WAIT_LIST};
+            case CL_INVALID_EVENT: return {cle::INVALID_EVENT};
+            case CL_INVALID_OPERATION: return {cle::INVALID_OPERATION};
+            case CL_INVALID_GL_OBJECT: return {cle::INVALID_GL_OBJECT};
+            case CL_INVALID_BUFFER_SIZE: return {cle::INVALID_BUFFER_SIZE};
+            case CL_INVALID_MIP_LEVEL: return {cle::INVALID_MIP_LEVEL};
+            case CL_INVALID_GLOBAL_WORK_SIZE: return {cle::INVALID_GLOBAL_WORK_SIZE};
+            case CL_INVALID_PROPERTY: return {cle::INVALID_PROPERTY};
+            case CL_INVALID_IMAGE_DESCRIPTOR: return {cle::INVALID_IMAGE_DESCRIPTOR};
+            case CL_INVALID_COMPILER_OPTIONS: return {cle::INVALID_COMPILER_OPTIONS};
+            case CL_INVALID_LINKER_OPTIONS: return {cle::INVALID_LINKER_OPTIONS};
+            case CL_INVALID_DEVICE_PARTITION_COUNT: return {cle::INVALID_DEVICE_PARTITION_COUNT};
+            case CL_INVALID_VA_API_MEDIA_ADAPTER_INTEL: return {cle::INVALID_VA_API_MEDIA_ADAPTER_INTEL};
+            case CL_INVALID_VA_API_MEDIA_SURFACE_INTEL: return {cle::INVALID_VA_API_MEDIA_SURFACE_INTEL};
             case CL_VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL:
-                return std::error_condition(cle::VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL);
-            case CL_VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL:
-                return std::error_condition(cle::VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL);
-            default: return std::error_condition(cle::UNKNOWN);
+                return {cle::VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL};
+            case CL_VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL: return {cle::VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL};
+            default: return {cle::UNKNOWN};
         }
     }
 

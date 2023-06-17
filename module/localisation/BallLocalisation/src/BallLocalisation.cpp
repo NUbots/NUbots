@@ -136,7 +136,7 @@ namespace module::localisation {
                 // Otherwise reset balls to the [0, 0] field position
                 else {
                     // Set the filter state to the field origin relative to us
-                    Eigen::Isometry3d Hfw = Eigen::Isometry3d(field.Hfw);
+                    Eigen::Isometry3d Hfw = Eigen::Isometry3d(field.Hfw.cast<double>());
                     filter.set_state(Hfw.translation().head(2), config.start_variance.asDiagonal());
                 }
             });

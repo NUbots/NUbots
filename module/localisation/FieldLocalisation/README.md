@@ -1,13 +1,13 @@
-# RobotLocalisation
+# FieldLocalisation
 
 ## Description
 
-A particle filter based localisation method for estimating the robot's position and orientation (x, y, theta) in
-field space, which relies solely on field line observations.
+A particle filter based localisation method for estimating the where the field is in world space, which relies solely on
+field line observations.
 
 ## Usage
 
-Include this module to allow the robot to estimate its state (x, y, theta) on the field.
+Include this module to allow the robot to estimate where the field is in world space.
 
 ## Consumes
 
