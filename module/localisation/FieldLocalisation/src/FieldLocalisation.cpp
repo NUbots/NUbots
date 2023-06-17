@@ -245,25 +245,13 @@ namespace module::localisation {
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
-            if (!falling && field_lines.points.size() > cfg.min_observations) {
+            if (!falling && field_lines.rPCw.size() > cfg.min_observations) {
                 // Add noise to the particles
                 add_noise();
 
-                // Project the field line observations (uPCr) onto the field plane
-                std::vector<Eigen::Vector2d> field_point_observations;
-                for (auto point : field_lines.points) {
-                    auto uPCw = point.cast<double>();
-                    auto rPCw = ray_to_field_plane(uPCw, Hcw);
-                    field_point_observations.push_back(rPCw);
-                    if (log_level <= NUClear::DEBUG) {
-                        auto cell = position_in_map(state, rPCw);
-                        emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
-                    }
-                }
-
                 // Calculate the weight of each particle based on the observations occupancy values
                 for (int i = 0; i < cfg.n_particles; i++) {
-                    particles[i].weight = calculate_weight(particles[i].state, field_point_observations);
+                    particles[i].weight = calculate_weight(particles[i].state, field_lines.rPCw);
                     if (log_level <= NUClear::DEBUG) {
                         auto particle_cell = position_in_map(particles[i].state, Eigen::Vector2d::Zero());
                         emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
@@ -277,6 +265,12 @@ namespace module::localisation {
             state      = compute_mean();
             covariance = compute_covariance();
             if (log_level <= NUClear::DEBUG) {
+
+                for (auto rPCw : field_lines.rPCw) {
+                    auto observation_cell = position_in_map(state, rPCw);
+                    emit(graph("Field line point", observation_cell.x(), observation_cell.y()));
+                }
+
                 // Graph where the world frame is positioned in the map
                 auto state_cell = position_in_map(state, Eigen::Vector2d::Zero());
                 emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
@@ -309,14 +303,6 @@ namespace module::localisation {
             field->uncertainty = covariance.trace();
             emit(field);
         });
-    }
-
-    Eigen::Vector2d FieldLocalisation::ray_to_field_plane(Eigen::Vector3d uPCr, Eigen::Isometry3d Hcw) {
-        // Project the field line points onto the field plane
-        auto Hwc             = Hcw.inverse();
-        Eigen::Vector3d rCWw = Eigen::Vector3d(Hwc.translation().x(), Hwc.translation().y(), 0.0);
-        Eigen::Vector3d rPCw = uPCr * std::abs(Hwc.translation().z() / uPCr.z()) + rCWw;
-        return rPCw.head(2);
     }
 
     Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d particle, const Eigen::Vector2d rPRw) {
