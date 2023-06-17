@@ -495,7 +495,6 @@ namespace module::input {
             }
         }
 
-
         if ((state->data.mode != GameState::Data::Mode::NORMAL
              && state->data.mode != GameState::Data::Mode::PENALTY_SHOOTOUT
              && state->data.mode != GameState::Data::Mode::OVERTIME)
