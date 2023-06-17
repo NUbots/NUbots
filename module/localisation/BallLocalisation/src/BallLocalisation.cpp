@@ -1,4 +1,4 @@
-#include "BallFilter.hpp"
+#include "BallLocalisation.hpp"
 
 #include <Eigen/Geometry>
 #include <chrono>
@@ -31,12 +31,12 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    BallFilter::BallFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         using message::localisation::FilteredBall;
         using utility::math::coordinates::reciprocalSphericalToCartesian;
 
-        on<Configuration>("BallFilter.yaml").then([this](const Configuration& config) {
+        on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
             // Set our measurement noise
             cfg.ukf.noise.measurement.position =
