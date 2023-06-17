@@ -23,7 +23,7 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
-#include "util/diff_string.hpp"
+#include "utility/strutil/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
