@@ -43,6 +43,13 @@ namespace module::platform::OpenCR {
         opencr.write(
             dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::RETURN_DELAY_TIME), data));
 
+        // Set up the dynamixels to use time-based profile velocity control
+        for (int i = 0; i < 20; ++i) {
+            // ensure write command targets the ID (ID != i)
+            data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 4);
+        }
+        opencr.write(dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::DRIVE_MODE), data));
+
         // Set up indirect addressing for read addresses for each dynamixel
         dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>> read_data[20];
 

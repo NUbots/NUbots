@@ -165,6 +165,14 @@ namespace module::platform::OpenCR {
             return int32_t(utility::math::clamp(-167.0f, (velocity * 60.0f / 0.229f), 167.0f));
         }
 
+        uint32_t profile_velocity(float profile_velocity) {
+            // Base unit: 1 millisecond
+            // Range: 0 - 32767 milliseconds
+            // Time-based Profile sets the time span to reach the goal position
+            uint32_t data = uint32_t(profile_velocity);
+            return utility::math::clamp(uint32_t(0), data, uint32_t(32767));
+        }
+
 
         float current(int16_t current) {
             // Base unit: 3.36mA = 0.00336A
