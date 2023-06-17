@@ -39,7 +39,7 @@ export class LocalisationNetwork {
   @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.fieldLinesDots = fieldLines.rPCw.map(rPWw => Vector2.from(Vector3.from(rPWw).applyMatrix4(robot.Hfw)))
+    robot.fieldLinesDots.rPWw = fieldLines.rPCw.map(rPWw => Vector3.from(rPWw).applyMatrix4(robot.Hfw))
   }
 
   @action
