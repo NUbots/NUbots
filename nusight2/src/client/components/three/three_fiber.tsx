@@ -1,5 +1,5 @@
-import { Canvas, useThree } from "@react-three/fiber";
 import React from "react";
+import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 export const ThreeFiber = ({ children }: { children: React.ReactNode }) => (

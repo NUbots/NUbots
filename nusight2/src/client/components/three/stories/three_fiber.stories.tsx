@@ -1,10 +1,10 @@
-import { observable } from "mobx";
-import { observer } from "mobx-react";
 import React from "react";
-import { Meta, StoryObj } from "@storybook/react";
-import { reaction } from "mobx";
-import { now } from "mobx-utils";
 import { useEffect } from "react";
+import { Meta, StoryObj } from "@storybook/react";
+import { observable } from "mobx";
+import { reaction } from "mobx";
+import { observer } from "mobx-react";
+import { now } from "mobx-utils";
 
 import { Vector2 } from "../../../../shared/math/vector2";
 import { Vector3 } from "../../../../shared/math/vector3";
