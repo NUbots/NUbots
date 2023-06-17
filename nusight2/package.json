@@ -104,6 +104,8 @@
     "vite": "^3.0.9"
   },
   "dependencies": {
+    "@react-three/fiber": "^8.13.0",
+    "@use-it/interval": "1.0.0",
     "binary": "0.3.0",
     "binary-search-bounds": "2.0.5",
     "bindings": "1.5.0",
