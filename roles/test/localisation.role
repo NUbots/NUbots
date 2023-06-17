@@ -33,7 +33,7 @@ nuclear_role(
   vision::FieldLineDetector
   # Localisation
   localisation::BallFilter
-  localisation::RobotLocalisation
+  localisation::FieldLocalisation
   # Behaviour
   behaviour::Controller
   behaviour::skills::Getup

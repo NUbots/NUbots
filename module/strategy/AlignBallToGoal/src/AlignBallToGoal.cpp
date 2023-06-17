@@ -47,7 +47,8 @@ namespace module::strategy {
                 float distance_to_ball = ball.rBRr.head(2).norm();
                 if (distance_to_ball < cfg.ball_distance_threshold) {
                     // Get the robot's position (pose) on the field
-                    Eigen::Isometry3d Hrf = Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse());
+                    Eigen::Isometry3d Hrf =
+                        Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse().cast<double>());
 
                     // Goal position relative to robot
                     Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.dimensions.field_length / 2.0, 0.0, 0.0);
