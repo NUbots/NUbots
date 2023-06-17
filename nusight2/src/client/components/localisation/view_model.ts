@@ -1,12 +1,13 @@
 import { computed } from "mobx";
+import { Color } from "three";
 import { Mesh } from "three";
-import { MeshBasicMaterial } from "three";
-import { CircleBufferGeometry } from "three";
 import { HemisphereLight } from "three";
 import { PointLight } from "three";
 import { Object3D } from "three";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { meshBasicMaterial } from "../three/builders";
+import { circleBufferGeometry } from "../three/builders";
 import { stage } from "../three/builders";
 import { scene } from "../three/builders";
 import { perspectiveCamera } from "../three/builders";
@@ -82,16 +83,21 @@ export class LocalisationViewModel {
 
   @computed
   private get fieldLineDots() {
-    const geometry = new CircleBufferGeometry(0.02, 20);
-    const material = new MeshBasicMaterial({ color: "blue" });
     const group = new Object3D();
     this.model.robots.forEach((robot) =>
       robot.fieldLinesDots.rPWw.forEach((d) => {
-        const mesh = new Mesh(geometry, material);
+        const mesh = new Mesh(
+          LocalisationViewModel.fieldLineDotGeometry(),
+          LocalisationViewModel.fieldLineDotMaterial(),
+        );
         mesh.position.copy(d.add(new Vector3(0, 0, 0.005)).toThree());
         group.add(mesh);
       }),
     );
     return group;
   }
+
+  private static readonly fieldLineDotGeometry = circleBufferGeometry(() => ({ radius: 0.02, segments: 20 }));
+
+  private static readonly fieldLineDotMaterial = meshBasicMaterial(() => ({ color: new Color("blue") }));
 }
