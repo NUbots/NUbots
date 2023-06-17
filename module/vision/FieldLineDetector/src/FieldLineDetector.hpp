@@ -9,8 +9,8 @@ namespace module::vision {
     private:
         /// The configuration variables for this reactor
         struct {
-            double cluster_points       = 0.0f;
-            double confidence_threshold = 0.0f;
+            float cluster_points       = 0.0f;
+            float confidence_threshold = 0.0f;
         } cfg;
 
     public:
