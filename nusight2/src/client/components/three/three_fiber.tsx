@@ -1,12 +1,14 @@
 import React from "react";
 import { Canvas, useThree } from "@react-three/fiber";
+import { CanvasProps } from "@react-three/fiber/dist/declarations/src/web/Canvas";
 import * as THREE from "three";
 
-export const ThreeFiber = ({ children }: { children: React.ReactNode }) => (
-  <Canvas frameloop="demand" linear flat gl={{ antialias: true }} style={{ background: "black" }}>
+type Props = { children: React.ReactNode } & CanvasProps;
+export const ThreeFiber = React.forwardRef<HTMLCanvasElement, Props>(({ children, ...props }: Props, ref) => (
+  <Canvas ref={ref} frameloop="demand" linear flat gl={{ antialias: true }} style={{ background: "black" }} {...props}>
     {children}
   </Canvas>
-);
+));
 
 export const PerspectiveCamera = (
   props: JSX.IntrinsicElements["perspectiveCamera"] & {

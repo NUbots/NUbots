@@ -1,21 +1,23 @@
-import { PropsWithChildren } from "react";
 import React from "react";
+import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
-import { computed } from "mobx";
-import { disposeOnUnmount } from "mobx-react";
 import { observer } from "mobx-react";
+import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 
-import { Canvas } from "../three/three";
-import { Three } from "../three/three";
+import { Vector3 } from "../../../shared/math/vector3";
+import { PerspectiveCamera } from "../three/three_fiber";
+import { ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
+import { FieldView } from "./field/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
+import { NUgusView } from "./nugus_robot/view";
+import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
-import { LocalisationViewModel } from "./view_model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -26,7 +28,7 @@ type LocalisationViewProps = {
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
-  private readonly canvas = React.createRef<Three>();
+  private readonly canvas = React.createRef<HTMLCanvasElement>();
 
   componentDidMount(): void {
     document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
@@ -54,14 +56,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
       <div className={style.localisation}>
         <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
         <div className={style.localisation__canvas}>
-          <Three ref={this.canvas} onClick={this.onClick} stage={this.stage} />
+          <ThreeFiber ref={this.canvas} onClick={this.onClick}>
+            <LocalisationViewModel model={this.props.model} />
+          </ThreeFiber>
         </div>
         <StatusBar model={this.props.model} />
       </div>
     );
   }
-
-  private stage = (canvas: Canvas) => computed(() => [LocalisationViewModel.of(canvas, this.props.model).stage]);
 
   requestPointerLock() {
     this.canvas.current!.requestPointerLock();
@@ -80,7 +82,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   };
 
   private onPointerLockChange = () => {
-    this.props.controller.onPointerLockChange(this.props.model, this.canvas.current!.isPointerLocked());
+    this.props.controller.onPointerLockChange(this.props.model, this.canvas.current === document.pointerLockElement);
   };
 
   private onMouseMove = (e: MouseEvent) => {
@@ -157,3 +159,42 @@ function viewModeString(viewMode: ViewMode) {
       throw new Error(`No string defined for view mode ${viewMode}`);
   }
 }
+
+export const LocalisationViewModel = observer(({ model }: { model: LocalisationModel }) => {
+  return (
+    <object3D>
+      <PerspectiveCamera
+        args={[75, 1, 0.01, 100]}
+        position={model.camera.position.toArray()}
+        rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}
+        up={[0, 0, 1]}
+      >
+        <pointLight color="white" />
+      </PerspectiveCamera>
+      <FieldView model={model.field} />
+      <SkyboxView model={model.skybox} />
+      <hemisphereLight args={["#fff", "#fff", 0.6]} />
+      {model.robots.map((robotModel) => {
+        return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel} />;
+      })}
+      <FieldLineDots model={model} />
+    </object3D>
+  );
+});
+
+const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map((robot) => (
+      <object3D key={robot.id}>
+        {robot.fieldLinesDots.rPWw.map((d, i) => {
+          return (
+            <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
+              <circleBufferGeometry args={[0.02, 20]} />
+              <meshBasicMaterial color="blue" />
+            </mesh>
+          );
+        })}
+      </object3D>
+    ))}
+  </>
+);
