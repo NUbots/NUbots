@@ -156,9 +156,7 @@ namespace utility::actuation::tinyrobotics {
         const std::vector<Eigen::Transform<double, 3, Eigen::Isometry>>& transforms) {
         std::map<ServoID, Eigen::Isometry3d> servo_map{};
         for (const auto& [link_index, servo_id] : link_map) {
-            // if (link_index < static_cast<int>(transforms.size())) {
             servo_map[servo_id] = transforms[link_index];
-            // }
         }
         return servo_map;
     }
