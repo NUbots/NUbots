@@ -44,7 +44,7 @@ export class LocalisationController {
   onHawkEyeClick(model: LocalisationModel) {
     model.controls.pitch = -Math.PI / 2;
     model.controls.yaw = Math.PI / 2;
-    model.camera.position = new Vector3(0, 0, 8);
+    model.camera.position = new Vector3(0, 0, 5);
     model.viewMode = ViewMode.FreeCamera;
     this.updatePosition(model);
   }
