@@ -70,6 +70,7 @@ namespace module::input {
             configure_ukf(config);
             configure_kf(config);
             configure_mahony(config);
+            configure_inekf(config);
 
             // Deadreckoning
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
@@ -167,6 +168,9 @@ namespace module::input {
                                         case FilteringMethod::MAHONY:
                                             update_odometry_mahony(sensors, previous_sensors, raw_sensors);
                                             break;
+                                        case FilteringMethod::INEKF:
+                                            update_odometry_inekf(sensors, previous_sensors, raw_sensors);
+                                            break;
                                         default: log<NUClear::WARN>("Unknown Filtering Method"); break;
                                     }
 
@@ -208,8 +212,8 @@ namespace module::input {
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
         Eigen::Vector3d est_rTWw = Hwt.translation();
         Eigen::Vector3d est_Rwt  = MatrixToEulerIntrinsic(Hwt.rotation());
-        emit(graph("Htw est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
-        emit(graph("Rtw est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
+        emit(graph("Hwt est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
+        emit(graph("Rwt est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (raw_sensors.odometry_ground_truth.exists) {
@@ -224,8 +228,8 @@ namespace module::input {
             double quat_rot_error     = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
 
             // Graph translation and its error
-            emit(graph("Htw true translation (rTWw)", true_rTWw.x(), true_rTWw.y(), true_rTWw.z()));
-            emit(graph("Htw translation error", error_rTWw.x(), error_rTWw.y(), error_rTWw.z()));
+            emit(graph("Hwt true translation (rTWw)", true_rTWw.x(), true_rTWw.y(), true_rTWw.z()));
+            emit(graph("Hwt translation error", error_rTWw.x(), error_rTWw.y(), error_rTWw.z()));
             // Graph angles and error
             emit(graph("Rwt true angles (rpy)", true_Rwt.x(), true_Rwt.y(), true_Rwt.z()));
             emit(graph("Rwt error (rpy)", error_Rwt.x(), error_Rwt.y(), error_Rwt.z()));

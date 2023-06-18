@@ -35,6 +35,7 @@
 
 #include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
+#include "utility/math/filter/inekf/InEKF.hpp"
 
 using extension::Configuration;
 
@@ -66,6 +67,9 @@ namespace module::input {
 
         /// @brief Kalman filter for pose estimation
         utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
+
+        /// @brief InEKF filter
+        utility::math::filter::inekf::InEKF inekf_filter{};
 
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
@@ -102,7 +106,7 @@ namespace module::input {
         };
 
         struct FilteringMethod {
-            enum Value { UNKNOWN = 0, UKF = 1, KF = 2, MAHONY = 3 };
+            enum Value { UNKNOWN = 0, UKF = 1, KF = 2, MAHONY = 3, INEKF = 4 };
             Value value = Value::UNKNOWN;
 
             // Constructors
@@ -114,6 +118,7 @@ namespace module::input {
                         if      (str == "UKF") { value = Value::UKF; }
                         else if (str == "KF") { value = Value::KF; }
                         else if (str == "MAHONY")  { value = Value::MAHONY; }
+                        else if (str == "INEKF")  { value = Value::INEKF; }
                         else {
                             value = Value::UNKNOWN;
                             throw std::runtime_error("String " + str + " did not match any enum for FilteringMethod");
@@ -130,6 +135,7 @@ namespace module::input {
                     case Value::UKF: return "UKF";
                     case Value::KF: return "KF";
                     case Value::MAHONY: return "MAHONY";
+                    case Value::INEKF: return "INEKF";
                     default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
                 }
             }
@@ -249,6 +255,20 @@ namespace module::input {
 
             /// @brief Mahony filter integral gain
             double Kp = 0.0;
+
+            //  **************************************** InEKF Filter Config ****************************************
+            struct InEKF {
+                Eigen::Matrix3d initial_orientation{};
+                Eigen::Vector3d initial_velocity{};
+                Eigen::Vector3d initial_position{};
+                Eigen::Vector3d initial_gyro_bias{};
+                Eigen::Vector3d initial_acc_bias{};
+                double noise_gyro         = 0.0;
+                double noise_acc          = 0.0;
+                double noise_gyro_bias    = 0.0;
+                double noise_acc_bias     = 0.0;
+                double noise_foot_sensors = 0.0;
+            } inekf{};
         } cfg;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
@@ -287,6 +307,9 @@ namespace module::input {
         /// @brief Configure Mahony filter
         void configure_mahony(const Configuration& config);
 
+        /// @brief Configure InEKF filter
+        void configure_inekf(const Configuration& config);
+
         /// @brief Updates the sensors message with odometry data filtered using UKF. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
         /// @param sensors The sensors message to update
@@ -314,6 +337,15 @@ namespace module::input {
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
                                     const RawSensors& raw_sensors);
+
+        /// @brief Updates the sensors message with odometry data filtered using InEKF. This includes the
+        // position, orientation, velocity and rotational velocity of the torso in world space.
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        void update_odometry_inekf(std::unique_ptr<Sensors>& sensors,
+                                   const std::shared_ptr<const Sensors>& previous_sensors,
+                                   const RawSensors& raw_sensors);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update

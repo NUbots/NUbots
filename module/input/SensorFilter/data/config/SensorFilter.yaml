@@ -82,5 +82,22 @@ mahony:
 # Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
 deadreckoning_scale: [1, 1, 0.6]
 
-# Specify which filtering method to use, either UKF, KF or MAHONY
-filtering_method: MAHONY
+inekf:
+  initial_state:
+    orientation:
+      - [1.0, 0.0, 0.0]
+      - [0.0, 1.0, 0.0]
+      - [0.0, 0.0, 1.0]
+    velocity: [0.0, 0.0, 0.0]
+    position: [0.0, 0.0, 0.5]
+    gyro_bias: [0.0, 0.0, 0.0]
+    acc_bias: [0.0, 0.0, 0.0]
+  noise:
+    gyro: 0.01
+    acc: 0.1
+    gyro_bias: 0.00001
+    acc_bias: 0.0001
+    foot_sensors: 0.01
+
+# Specify which filtering method to use, either UKF, KF, MAHONY or INEKF
+filtering_method: INEKF
