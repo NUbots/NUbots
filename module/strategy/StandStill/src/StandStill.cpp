@@ -39,6 +39,9 @@ namespace module::strategy {
                     standing = true;
                     emit<Task>(load_script<LimbsSequence>("Stand.yaml"));
                 }
+                else {
+                    emit<Task>(std::make_unique<Idle>());
+                }
             });
 
         on<Start<StandStillTask>>().then([this] {
