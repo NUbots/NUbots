@@ -22,22 +22,18 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
-
-#include "utility/strutil/diff_string.hpp"
+#include "util/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
 
     struct MainTask {
         explicit MainTask(int subtask_) : subtask(subtask_) {}
-        int subtask
+        int subtask;
     };
 
     template <int I>
-    struct Subtask {
-        explicit Subtask(const std::string& msg_) : msg(msg_) {}
-        std::string msg;
-    };
+    struct Subtask {};
 
     struct CommonDependency {
         explicit CommonDependency(const std::string& msg_) : msg(msg_) {}
@@ -63,12 +59,12 @@ namespace {
                 }
             });
 
-            on<Provide<Subtask<1>>, Needs<CommonDependency>>().then([this](const Subtask<1>& task) {
+            on<Provide<Subtask<1>>, Needs<CommonDependency>>().then([this] {
                 events.push_back("running subtask 1");
                 emit<Task>(std::make_unique<CommonDependency>("from subtask 1"));
             });
 
-            on<Provide<Subtask<2>>, Needs<CommonDependency>>().then([this](const Subtask<2>& task) {
+            on<Provide<Subtask<2>>, Needs<CommonDependency>>().then([this] {
                 events.push_back("running subtask 2");
                 emit<Task>(std::make_unique<CommonDependency>("from subtask 2"));
             });
@@ -86,7 +82,7 @@ namespace {
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 events.push_back("requesting main task with subtask 1");
-                emit<Task>(std::make_unique<MainTask>(1));
+                emit<Task>(std::make_unique<MainTask>(2));
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
@@ -107,7 +103,18 @@ TEST_CASE("Test a provider can replace its task when the new task overlaps in de
     powerplant.install<TestReactor>();
     powerplant.start();
 
-    std::vector<std::string> expected = {};
+    std::vector<std::string> expected = {
+        "requesting main task with subtask 1",
+        "running main task",
+        "requesting subtask 1",
+        "running subtask 1",
+        "running common dependency from from subtask 1",
+        "requesting main task with subtask 1",
+        "running main task",
+        "requesting subtask 2",
+        "running subtask 2",
+        "running common dependency from from subtask 2",
+    };
 
     // Make an info print the diff in an easy to read way if we fail
     INFO(util::diff_string(expected, events));
