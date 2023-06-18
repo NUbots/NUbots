@@ -222,7 +222,7 @@ $(document).ready(function(){initNavTree('extension_2Script_8hpp_source.html',''
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                <a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>(<a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>&amp;&amp; other) noexcept</div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;                    : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;                <a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>&amp; operator=(<span class="keyword">const</span> <a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>&amp; other) = <span class="keywordflow">default</span>;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>&amp; operator                       =(<a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>&amp;&amp; other) noexcept {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                <a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>&amp; operator=(<a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">Target</a>&amp;&amp; other) noexcept {</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                    <span class="keywordtype">id</span>       = other.id;</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                    position = other.position;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                    gain     = other.gain;</div>
@@ -544,98 +544,99 @@ $(document).ready(function(){initNavTree('extension_2Script_8hpp_source.html',''
 <div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160; </div>
 <div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">extension::Script::Frame::Target</a>&amp; rhs) {</div>
 <div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;            <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;                rhs = {node[<span class="stringliteral">&quot;id&quot;</span>].as&lt;std::string&gt;(),</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;                       node[<span class="stringliteral">&quot;position&quot;</span>].as&lt;float&gt;(),</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;                       node[<span class="stringliteral">&quot;gain&quot;</span>].as&lt;<span class="keywordtype">float</span>&gt;(),</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;                       node[<span class="stringliteral">&quot;torque&quot;</span>] != <span class="keyword">nullptr</span> ? node[<span class="stringliteral">&quot;torque&quot;</span>].as&lt;float&gt;() : 100};</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;            }</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;                NUClear::log&lt;NUClear::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;                                             <span class="stringliteral">&quot;Line:&quot;</span>,</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;                                             e.mark.line,</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                                             <span class="stringliteral">&quot;Column:&quot;</span>,</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;                                             e.mark.column,</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;                                             <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;                                             e.mark.pos,</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;                                             <span class="stringliteral">&quot;Message:&quot;</span>,</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;                                             e.msg);</div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;            }</div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160; </div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;        }</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;    };</div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160; </div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00398"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html">  398</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structextension_1_1Script_1_1Frame.html">extension::Script::Frame</a>&gt; {</div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> Node encode(const ::extension::Script::Frame&amp; rhs) {</div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;            Node node;</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160; </div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;            node[<span class="stringliteral">&quot;duration&quot;</span>] = std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(rhs.duration).count();</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;            node[<span class="stringliteral">&quot;targets&quot;</span>]  = rhs.targets;</div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160; </div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;            <span class="keywordflow">return</span> node;</div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;        }</div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160; </div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structextension_1_1Script_1_1Frame.html">extension::Script::Frame</a>&amp; rhs) {</div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;            <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;                <span class="keywordtype">int</span> millis = node[<span class="stringliteral">&quot;duration&quot;</span>].as&lt;<span class="keywordtype">int</span>&gt;();</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                std::chrono::milliseconds duration(millis);</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160; </div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                <span class="keyword">auto</span> targets = node[<span class="stringliteral">&quot;targets&quot;</span>].as&lt;std::vector&lt;::extension::Script::Frame::Target&gt;&gt;();</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;                rhs          = {duration, targets};</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;            }</div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                NUClear::log&lt;NUClear::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;                                             <span class="stringliteral">&quot;Line:&quot;</span>,</div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                                             e.mark.line,</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                                             <span class="stringliteral">&quot;Column:&quot;</span>,</div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                                             e.mark.column,</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                                             <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;                                             e.mark.pos,</div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;                                             <span class="stringliteral">&quot;Message:&quot;</span>,</div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;                                             e.msg);</div>
-<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;            }</div>
-<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160; </div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;        }</div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;    };</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160; </div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00434"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html">  434</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structextension_1_1Script.html">extension::Script</a>&gt; {</div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> Node encode(const ::extension::Script&amp; rhs) {</div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;            Node node;</div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160; </div>
-<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;            node = rhs.frames;</div>
-<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160; </div>
-<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;            <span class="keywordflow">return</span> node;</div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;        }</div>
-<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160; </div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structextension_1_1Script.html">extension::Script</a>&amp; rhs) {</div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;            <span class="keywordflow">try</span> {</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;                <span class="keyword">auto</span> frames = node.as&lt;std::vector&lt;::extension::Script::Frame&gt;&gt;();</div>
-<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;                rhs         = {frames};</div>
-<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;            }</div>
-<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
-<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;                NUClear::log&lt;NUClear::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
-<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;                                             <span class="stringliteral">&quot;Line:&quot;</span>,</div>
-<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;                                             e.mark.line,</div>
-<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;                                             <span class="stringliteral">&quot;Column:&quot;</span>,</div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;                                             e.mark.column,</div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;                                             <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;                                             e.mark.pos,</div>
-<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;                                             <span class="stringliteral">&quot;Message:&quot;</span>,</div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;                                             e.msg);</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;            }</div>
-<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160; </div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;        }</div>
-<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;    };</div>
-<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;}  <span class="comment">// namespace YAML</span></div>
-<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160; </div>
-<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// EXTENSION_SCRIPT_HPP</span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;                rhs = <a class="code" href="structextension_1_1Script_1_1Frame_1_1Target.html">::extension::Script::Frame::Target</a>{</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;                    node[<span class="stringliteral">&quot;id&quot;</span>].as&lt;std::string&gt;(),</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;                    node[<span class="stringliteral">&quot;position&quot;</span>].as&lt;float&gt;(),</div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;                    node[<span class="stringliteral">&quot;gain&quot;</span>].as&lt;<span class="keywordtype">float</span>&gt;(),</div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;                    node[<span class="stringliteral">&quot;torque&quot;</span>].IsDefined() ? node[<span class="stringliteral">&quot;torque&quot;</span>].as&lt;<span class="keywordtype">float</span>&gt;() : 100.0f};</div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;            }</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;                NUClear::log&lt;NUClear::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;                                             <span class="stringliteral">&quot;Line:&quot;</span>,</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                                             e.mark.line,</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;                                             <span class="stringliteral">&quot;Column:&quot;</span>,</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;                                             e.mark.column,</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;                                             <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;                                             e.mark.pos,</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;                                             <span class="stringliteral">&quot;Message:&quot;</span>,</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;                                             e.msg);</div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;            }</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160; </div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;        }</div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;    };</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160; </div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00399"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html">  399</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structextension_1_1Script_1_1Frame.html">extension::Script::Frame</a>&gt; {</div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> Node encode(const ::extension::Script::Frame&amp; rhs) {</div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;            Node node;</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160; </div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;            node[<span class="stringliteral">&quot;duration&quot;</span>] = std::chrono::duration_cast&lt;std::chrono::milliseconds&gt;(rhs.duration).count();</div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;            node[<span class="stringliteral">&quot;targets&quot;</span>]  = rhs.targets;</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160; </div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;            <span class="keywordflow">return</span> node;</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;        }</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160; </div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structextension_1_1Script_1_1Frame.html">extension::Script::Frame</a>&amp; rhs) {</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;            <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                <span class="keywordtype">int</span> millis = node[<span class="stringliteral">&quot;duration&quot;</span>].as&lt;<span class="keywordtype">int</span>&gt;();</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;                std::chrono::milliseconds duration(millis);</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160; </div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;                <span class="keyword">auto</span> targets = node[<span class="stringliteral">&quot;targets&quot;</span>].as&lt;std::vector&lt;::extension::Script::Frame::Target&gt;&gt;();</div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;                rhs          = {duration, targets};</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;            }</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;                NUClear::log&lt;NUClear::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;                                             <span class="stringliteral">&quot;Line:&quot;</span>,</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                                             e.mark.line,</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                                             <span class="stringliteral">&quot;Column:&quot;</span>,</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                                             e.mark.column,</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;                                             <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;                                             e.mark.pos,</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;                                             <span class="stringliteral">&quot;Message:&quot;</span>,</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;                                             e.msg);</div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;            }</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160; </div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;        }</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;    };</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160; </div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00435"></a><span class="lineno"><a class="line" href="structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html">  435</a></span>&#160;    <span class="keyword">struct </span>convert&lt;::<a class="code" href="structextension_1_1Script.html">extension::Script</a>&gt; {</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> Node encode(const ::extension::Script&amp; rhs) {</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;            Node node;</div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160; </div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;            node = rhs.frames;</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160; </div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;            <span class="keywordflow">return</span> node;</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;        }</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160; </div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;        <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">bool</span> decode(<span class="keyword">const</span> Node&amp; node, ::<a class="code" href="structextension_1_1Script.html">extension::Script</a>&amp; rhs) {</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;            <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;                <span class="keyword">auto</span> frames = node.as&lt;std::vector&lt;::extension::Script::Frame&gt;&gt;();</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;                rhs         = {frames};</div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;            }</div>
+<div class="line"><a name="l00449"></a><span class="lineno">  449</span>&#160;            <span class="keywordflow">catch</span> (<span class="keyword">const</span> YAML::Exception&amp; e) {</div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;                NUClear::log&lt;NUClear::ERROR&gt;(<span class="stringliteral">&quot;Error parsing script -&quot;</span>,</div>
+<div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;                                             <span class="stringliteral">&quot;Line:&quot;</span>,</div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;                                             e.mark.line,</div>
+<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;                                             <span class="stringliteral">&quot;Column:&quot;</span>,</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;                                             e.mark.column,</div>
+<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;                                             <span class="stringliteral">&quot;Pos:&quot;</span>,</div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;                                             e.mark.pos,</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;                                             <span class="stringliteral">&quot;Message:&quot;</span>,</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;                                             e.msg);</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;                <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;            }</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160; </div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160;        }</div>
+<div class="line"><a name="l00464"></a><span class="lineno">  464</span>&#160;    };</div>
+<div class="line"><a name="l00465"></a><span class="lineno">  465</span>&#160;}  <span class="comment">// namespace YAML</span></div>
+<div class="line"><a name="l00466"></a><span class="lineno">  466</span>&#160; </div>
+<div class="line"><a name="l00467"></a><span class="lineno">  467</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// EXTENSION_SCRIPT_HPP</span></div>
 <div class="ttc" id="astructextension_1_1ExecuteScriptByName_html"><div class="ttname"><a href="structextension_1_1ExecuteScriptByName.html">extension::ExecuteScriptByName</a></div><div class="ttdef"><b>Definition:</b> Script.hpp:201</div></div>
 <div class="ttc" id="astructextension_1_1ExecuteScript_html"><div class="ttname"><a href="structextension_1_1ExecuteScript.html">extension::ExecuteScript</a></div><div class="ttdef"><b>Definition:</b> Script.hpp:236</div></div>
 <div class="ttc" id="astructextension_1_1FileWatch_html"><div class="ttname"><a href="structextension_1_1FileWatch.html">extension::FileWatch</a></div><div class="ttdef"><b>Definition:</b> FileWatch.hpp:25</div></div>
@@ -649,7 +650,7 @@ $(document).ready(function(){initNavTree('extension_2Script_8hpp_source.html',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_c23e0f9c1b229783d92a813e01cca46a.html">extension</a></li><li class="navelem"><b>Script.hpp</b></li>
-    <li class="footer">Generated on Sun Jun 18 2023 08:46:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jun 18 2023 14:58:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

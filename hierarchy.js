@@ -81,6 +81,11 @@ var hierarchy =
     [ "extension::Script", "structextension_1_1Script.html", null ],
     [ "extension::Script::Frame", "structextension_1_1Script_1_1Frame.html", null ],
     [ "extension::Script::Frame::Target", "structextension_1_1Script_1_1Frame_1_1Target.html", null ],
+    [ "fmt::ostream_formatter", null, [
+      [ "fmt::formatter< Eigen::Matrix4d >", "structfmt_1_1formatter_3_01Eigen_1_1Matrix4d_01_4.html", null ],
+      [ "fmt::formatter< Eigen::Transpose< Derived > >", "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html", null ],
+      [ "fmt::formatter< Eigen::Transpose< Derived > >", "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html", null ]
+    ] ],
     [ "Joystick", "classJoystick.html", null ],
     [ "JoystickEvent", "classJoystickEvent.html", null ],
     [ "utility::math::filter::KalmanFilter< double, n_states, n_inputs, n_measurements >", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", null ],

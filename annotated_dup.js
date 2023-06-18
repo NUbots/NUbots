@@ -75,6 +75,10 @@ var annotated_dup =
       [ "FileWatchRequest", "structextension_1_1FileWatchRequest.html", "structextension_1_1FileWatchRequest" ],
       [ "Script", "structextension_1_1Script.html", "structextension_1_1Script" ]
     ] ],
+    [ "fmt", null, [
+      [ "formatter< Eigen::Matrix4d >", "structfmt_1_1formatter_3_01Eigen_1_1Matrix4d_01_4.html", null ],
+      [ "formatter< Eigen::Transpose< Derived > >", "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html", null ]
+    ] ],
     [ "module", null, [
       [ "actuation", null, [
         [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],

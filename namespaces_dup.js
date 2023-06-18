@@ -120,6 +120,10 @@ var namespaces_dup =
       [ "ServoID", "extension_2Script_8hpp.html#a4aa852c55712c180ac0fbfbd21460690", null ],
       [ "operator+", "extension_2Script_8hpp.html#a16765e7ef6a14c78ee0b454ddd05be0f", null ]
     ] ],
+    [ "fmt", null, [
+      [ "formatter< Eigen::Matrix4d >", "structfmt_1_1formatter_3_01Eigen_1_1Matrix4d_01_4.html", null ],
+      [ "formatter< Eigen::Transpose< Derived > >", "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html", null ]
+    ] ],
     [ "module", null, [
       [ "actuation", null, [
         [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
@@ -185,13 +189,19 @@ var namespaces_dup =
       ] ],
       [ "input", null, [
         [ "arv", null, [
+          [ "camera_create_stream", "aravis__wrap_8hpp.html#a8a36797581b15174818f230a4bf2ceea", null ],
           [ "camera_get_payload", "aravis__wrap_8hpp.html#aecdb4e7ab0c7bbd1416b3913ccbeff43", null ],
           [ "camera_gv_set_packet_size", "aravis__wrap_8hpp.html#a52c51ae266287b805d6228099973b442", null ],
+          [ "camera_new", "aravis__wrap_8hpp.html#a175c5d0592934f5c03f311a010aa355f", null ],
           [ "camera_set_region", "aravis__wrap_8hpp.html#aa56824a375e1f884278f36d28aaf7fb3", null ],
           [ "camera_start_acquisition", "aravis__wrap_8hpp.html#a6494355a5e2e24d8c0a0ad94b821e448", null ],
           [ "camera_stop_acquisition", "aravis__wrap_8hpp.html#a41e040ba0acdfc91885358cce1c389a5", null ],
           [ "device_execute_command", "aravis__wrap_8hpp.html#a6d6482e68b918be05df61f075f53a8e0", null ],
-          [ "device_get_integer_feature_value", "aravis__wrap_8hpp.html#ab00bf069ccb135cd348ece76228daeac", null ]
+          [ "device_get_boolean_feature_value", "aravis__wrap_8hpp.html#a524fdabf8819bb3acee846db4c9bc55c", null ],
+          [ "device_get_integer_feature_value", "aravis__wrap_8hpp.html#ab00bf069ccb135cd348ece76228daeac", null ],
+          [ "stream_set_emit_signals", "aravis__wrap_8hpp.html#a9485b5e748a036dddd778481f7051b49", null ],
+          [ "wrap", "aravis__wrap_8hpp.html#aa9f04b5489f2a37ff2b3fc1159801fb8", null ],
+          [ "wrap_return", "aravis__wrap_8hpp.html#adb011fe415c8799b0551910da7322b76", null ]
         ] ],
         [ "decompressor", null, [
           [ "turbojpeg", null, [
