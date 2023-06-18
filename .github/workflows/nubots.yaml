@@ -198,9 +198,6 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set Git Security
-        run: git config --global --add safe.directory '*'
-
       - name: Install NUsight dependencies for formatting
         run: ./b yarn
 

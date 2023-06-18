@@ -366,6 +366,9 @@ RUN groupadd --gid $user_gid nubots \
     && useradd --uid $user_uid --gid $user_gid -m nubots
 USER nubots
 
+# Without this git gets very angry and confused about the state of the user
+RUN git config --global --add safe.directory '*'
+
 # Copy over GDB alias'
 COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 
