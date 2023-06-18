@@ -54,35 +54,34 @@ namespace module::strategy {
                 // Check if the ball is in the defending region
                 if (rBFf.x() > cfg.defending_region(0) && rBFf.x() < cfg.defending_region(1)
                     && rBFf.y() > cfg.defending_region(2) && rBFf.y() < cfg.defending_region(3)) {
+
                     log<NUClear::DEBUG>("Ball inside of defending region");
+
                     // Do nothing, play normally
                 }
                 else {
-                    // Calculate the defender position
-                    Eigen::Vector3f rDFf = Eigen::Vector3f::Zero();
-                    rDFf.x()             = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
-                    rDFf.y()             = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
-
                     log<NUClear::DEBUG>("rDFf x: ", rDFf.x());
                     log<NUClear::DEBUG>("rDFf y: ", rDFf.y());
 
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x(), rDFf.y(), 0), -M_PI));
+                    // If ball is in own half and outside the defending bounding box of robot
+                    if (rBFf.x() >= 0 && rBFf.y() > cfg.defending_region(3)) {
+                        log<NUClear::DEBUG>("Ball is in own half and in other region");
 
-                    if (rBFf.x() > 0 && rBFf.y() > cfg.defending_region(2)) {
-                        log<NUClear::DEBUG>("Ouside region in in own half");
-
-
-                        // rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
-                        range_x = rDFf.x() - (0.5 * robot_distance_to_ball);
-                        //  emit<Task>(
-                        //      std::make_unique<AlignBallToGoal>());  // Eigen::Vector3f(range, rBFf.y(), 0),-M_PI));
-                        emit<Task>(
-                            std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x() + 1.0, rDFf.y(), 0), -M_PI));
+                        // Calculate the defender position
+                        // Clamps to x direction of the ball and bounding box an 1 metre behind the ball
+                        rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
+                        rDFf.y() = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
+                        rDFf.x() += 1.0;
                     }
                     else {
-                        // log<NUClear::DEBUG>("Ball is outside of defending region and aligned with ball");
+                        // Calculate the defender position
+                        // Robot clamped to defending bounding box
+                        rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
+                        rDFf.y() = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
                     }
 
+                    // Walk to determined position
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x(), rDFf.y(), 0), -M_PI));
                     log<NUClear::DEBUG>("Ball is outside of defending region");
                 }
             });

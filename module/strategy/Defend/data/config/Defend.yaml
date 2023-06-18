@@ -4,5 +4,5 @@ log_level: DEBUG
 # Position on field to walk to (x,y,theta)
 defender_position: [2, -1.5, -3.14]
 
-# Bounding box of the side of the field that is defended (x min, x max, y min, y max)
-defending_region: [-0.2, 4.5, -3, -0.05]
+# Bounding box of the side of the field that is defended (x min, x max, y max y min)
+defending_region: [-0.5, 3.8, -3.0, 0.0]
