@@ -2,7 +2,7 @@
 
 ## Description
 
-Keeps the robot clamped inside a bounded box, from which it will play soccer normally.
+Keeps the robot clamped inside a bounded box.
 
 If ball is outside bounded box area and ball is in opposition half, defender is clamped to the edge of bounding box closest to ball.
 

@@ -24,13 +24,13 @@ Add this module to play as a defender in soccer!
 
 ## Emits
 
-- `message::strategy::WalkInsideBoundedBox` a Task requesting to play as a defender in the normal game state clamewd to bounded box
+- `message::strategy::WalkInsideBoundedBox` a Task requesting to play as a defender in the normal game state clamped to bounded box
 - `message::strategy::Ready` a Task requesting to walk to the ready position
 - `message::strategy::StandStill` a Task requesting to stand still and not move
 - `message::strategy::FindBall` a Task requesting to look and move around to find the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball
 - `message::strategy::WalkToBall` a Task requesting to walk to a known ball
-- `message::strategy::AlignBallToGoal` a Task requesting to align the robot to face the goal with the ball infront of it
+- `message::strategy::AlignBallToGoal` a Task requesting to align the robot to face the goal with the ball in front of it
 - `message::planning::KickToGoal` a Task requesting to kick the ball towards the goal
 
 ## Dependencies

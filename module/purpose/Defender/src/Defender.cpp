@@ -48,10 +48,10 @@ namespace module::purpose {
         });
 
         on<Provide<DefenderTask>, Optional<Trigger<GameState>>>().then(
-            [this](const DefenderTask& Defender_task, const std::shared_ptr<const GameState>& game_state) {
+            [this](const DefenderTask& defender_task, const std::shared_ptr<const GameState>& game_state) {
                 log<NUClear::DEBUG>("DEFENDER");
                 // Do not use GameController information if force playing or force penalty shootout
-                if (Defender_task.force_playing) {
+                if (defender_task.force_playing) {
                     play();
                     return;
                 }
