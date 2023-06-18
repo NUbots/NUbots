@@ -13,17 +13,10 @@ namespace module::platform::OpenCR {
                                                           uint16_t(OpenCR::Address::RETURN_DELAY_TIME),
                                                           uint8_t(0)));
 
-        // Disable and then enable power to the servos
-        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
-                                                          uint8_t(0)));
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
-        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
-                                                          uint8_t(1)));
-
-        // Wait about 300ms for the dynamixels to start up
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        // We do not disable and enable the servo power on startup because doing so would make the robot collapse if it
+        // were standing, possibly resulting in damage. Instead, we leave the servos powered on and if there are any
+        // servo errors, they can be cleared by using the red button to power off the servos, or by turning off the
+        // robot entirely.
 
         // Set all dynamixels to not return a status packet when written to (to allow consecutive writes)
         dynamixel::v2::SyncWriteData<uint8_t> data[20];
@@ -133,6 +126,10 @@ namespace module::platform::OpenCR {
             dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
                                                                           write_data2));
 
+        // Loop over all servo states and set the servos to uninitialised
+        for (auto& servo_state : servo_states) {
+            servo_state.initialised = false;
+        }
 
         // Find OpenCR firmware and model versions
         // This has to be called last, as we need to wait for the response packet before starting

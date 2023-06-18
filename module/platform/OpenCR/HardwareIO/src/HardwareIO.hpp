@@ -155,6 +155,9 @@ namespace module::platform::OpenCR {
             float voltage = 0.0f;
             /// @brief The last read temperature of the servo
             float temperature = 0.0f;
+
+            /// @brief Whether we have initialised this servo yet
+            bool initialised = false;
         };
 
         /// @brief Contains the current state of the OpenCR device
