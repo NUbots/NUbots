@@ -18,6 +18,12 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+// Make a formatter for Eigen::Matrix type so fmt::format know how to deal with it
+template <>
+struct fmt::formatter<Eigen::Matrix4d> : fmt::ostream_formatter {};
+template <typename Derived>
+struct fmt::formatter<Eigen::Transpose<Derived>> : fmt::ostream_formatter {};
+
 namespace module::localisation {
 
     using extension::Configuration;
@@ -111,7 +117,7 @@ namespace module::localisation {
                                     // Run a measurement for the opposition goal post and store how likely the filter
                                     // thinks this is a real measurement
                                     auto opp_filter = filter;
-                                    const auto opp_logits =
+                                    const double opp_logits =
                                         opp_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post.side, fd, false),

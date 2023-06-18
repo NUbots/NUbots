@@ -1,12 +1,9 @@
 #ifndef MODULE_INPUT_CAMERA_HPP
 #define MODULE_INPUT_CAMERA_HPP
 
-extern "C" {
-#include <aravis-0.8/arv.h>
-}
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <aravis-0.8/arv.h>
 #include <mutex>
 
 #include "CameraContext.hpp"
