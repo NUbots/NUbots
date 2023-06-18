@@ -130,9 +130,9 @@ namespace module::input {
     void GameController::sendReplyMessage(const ReplyMessage& message) {
         auto packet     = std::make_unique<GameControllerReplyPacket>();
         packet->header  = {gamecontroller::RETURN_HEADER[0],
-                          gamecontroller::RETURN_HEADER[1],
-                          gamecontroller::RETURN_HEADER[2],
-                          gamecontroller::RETURN_HEADER[3]};
+                           gamecontroller::RETURN_HEADER[1],
+                           gamecontroller::RETURN_HEADER[2],
+                           gamecontroller::RETURN_HEADER[3]};
         packet->version = gamecontroller::RETURN_VERSION;
         packet->team    = TEAM_ID;
         packet->player  = PLAYER_ID;
