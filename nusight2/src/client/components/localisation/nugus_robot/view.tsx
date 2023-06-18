@@ -1,3 +1,4 @@
+import { useThree } from '@react-three/fiber'
 import { observer } from 'mobx-react'
 import { useMemo } from "react";
 import React from "react";
@@ -16,6 +17,7 @@ export const NUgusView = observer(({ model }: { model: LocalisationRobotModel })
   const { scene: originalScene } = useLoader(GLTFLoader, url);
   // Clone so that each instance has its own copy that it may mutate.
   const scene = useMemo(() => originalScene.clone(), [originalScene]);
+  const three = useThree();
   React.useEffect(() => {
     // TODO (Annable): Baking this rotation into the model geometry would be ideal.
     findMesh(scene, "Head").geometry.applyMatrix4(new Matrix4().makeRotationY(-Math.PI / 2));
@@ -47,6 +49,7 @@ export const NUgusView = observer(({ model }: { model: LocalisationRobotModel })
       findMesh(robot, "L_Foot").rotation.set(0, 0, motors.leftAnkleRoll.angle);
       findMesh(robot, "Neck").rotation.set(0, PI + motors.headPan.angle, 0);
       findMesh(robot, "Head").rotation.set(0, 0, motors.headTilt.angle);
+      three.invalidate();
     });
   }, [scene]);
   return <primitive object={scene} key={model.id} />;
