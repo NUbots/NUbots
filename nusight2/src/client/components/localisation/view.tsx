@@ -1,22 +1,23 @@
-import { reaction } from 'mobx'
-import { observer } from 'mobx-react'
-import { disposeOnUnmount } from 'mobx-react'
-import { now } from 'mobx-utils'
-import React from 'react'
-import { PropsWithChildren } from 'react'
-import { ComponentType } from 'react'
-import { Vector3 } from '../../../shared/math/vector3'
-import { PerspectiveCamera } from '../three/three_fiber'
-import { ThreeFiber } from '../three/three_fiber'
+import React from "react";
+import { PropsWithChildren } from "react";
+import { ComponentType } from "react";
+import { reaction } from "mobx";
+import { observer } from "mobx-react";
+import { disposeOnUnmount } from "mobx-react";
+import { now } from "mobx-utils";
 
-import { LocalisationController } from './controller'
-import { FieldView } from './field/view'
-import { LocalisationModel } from './model'
-import { ViewMode } from './model'
-import { LocalisationNetwork } from './network'
-import { NUgusView } from './nugus_robot/view'
-import { SkyboxView } from './skybox/view'
-import style from './style.module.css'
+import { Vector3 } from "../../../shared/math/vector3";
+import { PerspectiveCamera } from "../three/three_fiber";
+import { ThreeFiber } from "../three/three_fiber";
+
+import { LocalisationController } from "./controller";
+import { FieldView } from "./field/view";
+import { LocalisationModel } from "./model";
+import { ViewMode } from "./model";
+import { LocalisationNetwork } from "./network";
+import { NUgusView } from "./nugus_robot/view";
+import { SkyboxView } from "./skybox/view";
+import style from "./style.module.css";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -56,7 +57,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
         <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
-            <LocalisationViewModel model={this.props.model}/>
+            <LocalisationViewModel model={this.props.model} />
           </ThreeFiber>
         </div>
         <StatusBar model={this.props.model} />
@@ -160,35 +161,38 @@ function viewModeString(viewMode: ViewMode) {
 }
 
 export const LocalisationViewModel = observer(({ model }: { model: LocalisationModel }) => {
-  return <object3D>
-    <PerspectiveCamera
-      args={[75, 1, 0.01, 100]}
-      position={model.camera.position.toArray()}
-      rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, 'ZXY']}
-      up={[0, 0, 1]}
-    >
-      <pointLight color="white"/>
-    </PerspectiveCamera>
-    <FieldView model={model.field}/>
-    <SkyboxView model={model.skybox}/>
-    <hemisphereLight args={['#fff', '#fff', 0.6]}/>
-    {model.robots.map((robotModel) => {
-      return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel}/>
-    })}
-    <FieldLineDots model={model}/>
-  </object3D>
-})
+  return (
+    <object3D>
+      <PerspectiveCamera
+        args={[75, 1, 0.01, 100]}
+        position={model.camera.position.toArray()}
+        rotation={[Math.PI / 2 + model.camera.pitch, 0, -Math.PI / 2 + model.camera.yaw, "ZXY"]}
+        up={[0, 0, 1]}
+      >
+        <pointLight color="white" />
+      </PerspectiveCamera>
+      <FieldView model={model.field} />
+      <SkyboxView model={model.skybox} />
+      <hemisphereLight args={["#fff", "#fff", 0.6]} />
+      {model.robots.map((robotModel) => {
+        return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel} />;
+      })}
+      <FieldLineDots model={model} />
+    </object3D>
+  );
+});
 
 const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
   <object3D>
     {model.robots.flatMap((robot) =>
       robot.fieldLinesDots.rPWw.map((d, i) => {
-        return <mesh key={`${robot.id}-${i}`} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
-          <circleBufferGeometry args={[0.02, 20]}/>
-          <meshBasicMaterial color="blue"/>
-        </mesh>
+        return (
+          <mesh key={`${robot.id}-${i}`} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
+            <circleBufferGeometry args={[0.02, 20]} />
+            <meshBasicMaterial color="blue" />
+          </mesh>
+        );
       }),
-    )
-    }
+    )}
   </object3D>
-)
+);
