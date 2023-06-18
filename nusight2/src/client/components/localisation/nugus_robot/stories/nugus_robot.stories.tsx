@@ -7,7 +7,7 @@ import { now } from "mobx-utils";
 import { Vector3 } from "../../../../../shared/math/vector3";
 import { RobotModel } from "../../../robot/model";
 import { LocalisationRobotModel } from "../../robot_model";
-import { NUgusViewModel } from "../view_model";
+import { NUgusView } from "../view";
 
 import { ModelVisualiser } from "./model_visualizer";
 
@@ -52,7 +52,7 @@ class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
           { fireImmediately: true },
         ),
       );
-    return () => NUgusViewModel.of(model).robot;
+    return () => NUgusView.of(model).robot;
   }
 
   simulateWalk(model: LocalisationRobotModel, t: number) {

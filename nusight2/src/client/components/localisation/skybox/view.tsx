@@ -7,7 +7,7 @@ import { SkyboxModel } from './model'
 import skyboxFrag from './skybox.frag'
 import skyboxVert from './skybox.vert'
 
-export class SkyboxViewModel extends React.Component<{
+export class SkyboxView extends React.Component<{
   model: SkyboxModel
 }> {
   private get model() {

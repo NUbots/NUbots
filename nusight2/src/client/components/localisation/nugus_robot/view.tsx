@@ -11,7 +11,7 @@ import { LocalisationRobotModel } from '../robot_model'
 
 import url from './config/nugus.glb?url'
 
-export const NUgusViewModel = ({ model }: {
+export const NUgusView = ({ model }: {
   model: LocalisationRobotModel
 }) => {
   const { scene: originalScene } = useLoader(GLTFLoader, url)
