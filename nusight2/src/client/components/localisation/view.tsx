@@ -9,6 +9,7 @@ import { now } from "mobx-utils";
 
 import { Canvas } from "../three/three";
 import { Three } from "../three/three";
+import { ThreeFiber } from '../three/three_fiber'
 
 import { LocalisationController } from "./controller";
 import { LocalisationModel } from "./model";
@@ -54,14 +55,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
       <div className={style.localisation}>
         <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
         <div className={style.localisation__canvas}>
-          <Three ref={this.canvas} onClick={this.onClick} stage={this.stage} />
+          <ThreeFiber>
+            <LocalisationViewModel model={this.props.model}/>
+          </ThreeFiber>
         </div>
         <StatusBar model={this.props.model} />
       </div>
     );
   }
-
-  private stage = (canvas: Canvas) => computed(() => [LocalisationViewModel.of(canvas, this.props.model).stage]);
 
   requestPointerLock() {
     this.canvas.current!.requestPointerLock();
