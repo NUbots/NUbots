@@ -7,7 +7,7 @@ import { now } from "mobx-utils";
 import { Vector3 } from "../../../../../shared/math/vector3";
 import { RobotModel } from "../../../robot/model";
 import { LocalisationRobotModel } from "../../robot_model";
-import { NUgusView } from "../view";
+import { NUgusView } from "../view_model";
 
 import { ModelVisualiser } from "./model_visualizer";
 
