@@ -2,10 +2,9 @@ var NAVTREEINDEX0 =
 {
 "AlignBallToGoal_8cpp.html#a032efbe33e5aa366221b4501fddd7ee4":[1,0,3,12,10],
 "Balance_8cpp.html#a28c1d9a56af71ecba96a88e15459e1d6":[1,0,6,8,2],
-"BallFilter_8cpp.html#a4ad6316274fd8f0b673332247c525d36":[1,0,3,4,10],
-"BallFilter_8cpp.html#a7378478e3724029be976cb9a4af37da3":[1,0,3,4,12],
-"BallFilter_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d":[1,0,3,4,13],
-"BallLocalisation_8cpp.html#a30ca8dc5cb71d23c52deccbee5bb9dd9":[1,0,3,4,11],
+"BallLocalisation_8cpp.html#a166ffc812dedb579bbb1dcbf0c921d8a":[1,0,3,4,9],
+"BallLocalisation_8cpp.html#a7378478e3724029be976cb9a4af37da3":[1,0,3,4,10],
+"BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d":[1,0,3,4,11],
 "CM740_8cpp.html#aa4a6391af58f24ca8332ed4e2a2f22e3":[1,0,0,11],
 "Camera_8cpp.html#a18ed7bb4fb26212f5032b5bf837d81aa":[1,0,3,3,59],
 "Camera_8cpp.html#ac248d5d3941892924ca670ecfdfe26a5":[1,0,3,3,61],
@@ -216,8 +215,8 @@ var NAVTREEINDEX0 =
 "ProgressBar_8cpp.html#a59ebcbb561e8769499753467f224fe19":[1,0,6,15,4],
 "ProgressBar_8cpp.html#a98cdc17896fbd838d11e820acbf9942a":[1,0,6,15,10],
 "Ready_8cpp.html#ad71cfd87761d266ccd997e1c01aee34f":[1,0,3,12,14],
-"RobotParticleLocalisation_8cpp.html#a555e4584b906d95add31b8b4f7e0b068":[1,0,3,4,14],
-"RobotParticleLocalisation_8cpp.html#aad0bb3dc95ad54474ec44e2ee759aa03":[1,0,3,4,15],
+"RobotParticleLocalisation_8cpp.html#a555e4584b906d95add31b8b4f7e0b068":[1,0,3,4,12],
+"RobotParticleLocalisation_8cpp.html#aad0bb3dc95ad54474ec44e2ee759aa03":[1,0,3,4,13],
 "ServoID_8cpp.html#a11209a4933e52343c652ddd60c0d4d62":[1,0,6,4,4],
 "SignalCatcher_8cpp.html#a624c5a0cc6f409de2f6a7540b3b36e09":[1,0,3,13,6],
 "SignalCatcher_8cpp.html#a6fb2c65ed6e2ef01c78a40ff06798673":[1,0,3,13,10],
@@ -249,5 +248,6 @@ var NAVTREEINDEX0 =
 "TrajectoryUtils_8hpp.html#a748c4e4b798d740908e5f87e217a207a":[1,0,6,8,0,13],
 "TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef":[1,0,6,8,0,7],
 "TrajectoryUtils_8hpp.html#acba54f0f4522861817101d7fe9143d4e":[1,0,6,8,0,12],
-"TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34":[1,0,6,8,0,8]
+"TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34":[1,0,6,8,0,8],
+"UART_8cpp.html#a87051e79be4cf051a9481ef3e881c9be":[1,0,0,12]
 };

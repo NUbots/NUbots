@@ -167,6 +167,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1localisation_1_1BallLoc
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1localisation_1_1BallLocalisation-members.html">List of all members</a>  </div>
@@ -188,12 +189,27 @@ Collaboration diagram for module::localisation::BallLocalisation:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1localisation_1_1BallLocalisation__coll__graph.png" border="0" usemap="#amodule_1_1localisation_1_1BallLocalisation_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1localisation_1_1BallLocalisation_coll__map" id="amodule_1_1localisation_1_1BallLocalisation_coll__map">
-<area shape="rect" title=" " alt="" coords="335,31,489,73"/>
-<area shape="rect" title=" " alt="" coords="61,5,196,32"/>
-<area shape="rect" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html" title=" " alt="" coords="5,56,252,112"/>
+<area shape="rect" title=" " alt="" coords="1328,58,1483,99"/>
+<area shape="rect" title=" " alt="" coords="1091,7,1225,33"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html" title=" " alt="" coords="1067,58,1249,99"/>
+<area shape="rect" href="classmodule_1_1localisation_1_1BallModel.html" title=" " alt="" coords="700,21,869,62"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallModel_1_1StateVec.html" title=" " alt="" coords="357,5,522,61"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF.html" title="UKF config." alt="" coords="676,93,893,134"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial.html" title=" " alt="" coords="348,85,531,141"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Mean.html" title=" " alt="" coords="13,5,196,61"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Covariance.html" title=" " alt="" coords="13,85,196,141"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise.html" title=" " alt="" coords="348,165,531,221"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html" title=" " alt="" coords="13,165,196,221"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html" title=" " alt="" coords="5,245,204,301"/>
+<area shape="rect" href="classutility_1_1math_1_1filter_1_1UKF.html" title=" " alt="" coords="1061,124,1255,180"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html">Config</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1b74f959a8666a57fe02c9f877dc4c71"><td class="memItemLeft" align="right" valign="top"><a id="a1b74f959a8666a57fe02c9f877dc4c71"></a>
@@ -203,28 +219,17 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:ad4943e4390ee393bb23b98c4e3b66102"><td class="memItemLeft" align="right" valign="top"><a id="ad4943e4390ee393bb23b98c4e3b66102"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>ball_pos_log</b></td></tr>
-<tr class="separator:ad4943e4390ee393bb23b98c4e3b66102"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f0b273950b925ce88e8ef9801770f96"><td class="memItemLeft" ><a id="a6f0b273950b925ce88e8ef9801770f96"></a>
-struct {</td></tr>
-<tr class="memitem:a2eb1892f45931a6e0fe1faffb6859c15"><td class="memItemLeft" >
-&#160;&#160;&#160;std::vector&lt; Eigen::Vector2d &gt;&#160;&#160;&#160;<b>start_state</b> {}</td></tr>
-<tr class="separator:a2eb1892f45931a6e0fe1faffb6859c15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae8cfadbbd656fcea997cfa5748785d79"><td class="memItemLeft" >
-&#160;&#160;&#160;Eigen::Vector2d&#160;&#160;&#160;<b>start_variance</b> = Eigen::Vector2d::Zero()</td></tr>
-<tr class="separator:ae8cfadbbd656fcea997cfa5748785d79"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6f0b273950b925ce88e8ef9801770f96"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><b>config</b></td></tr>
-<tr class="separator:a6f0b273950b925ce88e8ef9801770f96"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa2d5a5dbfc0c04ba737e72495023658a"><td class="memItemLeft" align="right" valign="top"><a id="aa2d5a5dbfc0c04ba737e72495023658a"></a>
-<a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html">utility::math::filter::ParticleFilter</a>&lt; double, <a class="el" href="classmodule_1_1localisation_1_1BallModel.html">BallModel</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>filter</b></td></tr>
-<tr class="separator:aa2d5a5dbfc0c04ba737e72495023658a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a083f58d77fbc44eebdeeea80efbed85e"><td class="memItemLeft" align="right" valign="top"><a id="a083f58d77fbc44eebdeeea80efbed85e"></a>
-NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b>last_measurement_update_time</b></td></tr>
-<tr class="separator:a083f58d77fbc44eebdeeea80efbed85e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfe025681ee2d46b660528838468903d"><td class="memItemLeft" align="right" valign="top"><a id="acfe025681ee2d46b660528838468903d"></a>
-NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b>last_time_update_time</b></td></tr>
-<tr class="separator:acfe025681ee2d46b660528838468903d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5378b44efc6fa1084a16203eecd52c9b"><td class="memItemLeft" align="right" valign="top"><a id="a5378b44efc6fa1084a16203eecd52c9b"></a>
+struct <a class="el" href="structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html">module::localisation::BallLocalisation::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
+<tr class="separator:a5378b44efc6fa1084a16203eecd52c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4346bd4a6a9a623344cb362e2892437f"><td class="memItemLeft" align="right" valign="top"><a id="a4346bd4a6a9a623344cb362e2892437f"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1BallLocalisation.html#a4346bd4a6a9a623344cb362e2892437f">last_time_update</a></td></tr>
+<tr class="memdesc:a4346bd4a6a9a623344cb362e2892437f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time of the last time update. <br /></td></tr>
+<tr class="separator:a4346bd4a6a9a623344cb362e2892437f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0d2ad24495d922de17be6a79bf308760"><td class="memItemLeft" align="right" valign="top"><a id="a0d2ad24495d922de17be6a79bf308760"></a>
+<a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html">utility::math::filter::UKF</a>&lt; double, <a class="el" href="classmodule_1_1localisation_1_1BallModel.html">BallModel</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1BallLocalisation.html#a0d2ad24495d922de17be6a79bf308760">ukf</a> {}</td></tr>
+<tr class="memdesc:a0d2ad24495d922de17be6a79bf308760"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unscented Kalman Filter for ball filtering. <br /></td></tr>
+<tr class="separator:a0d2ad24495d922de17be6a79bf308760"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/localisation/BallLocalisation/src/<a class="el" href="BallLocalisation_8hpp_source.html">BallLocalisation.hpp</a></li>
@@ -236,7 +241,7 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1BallLocalisation.html">BallLocalisation</a></li>
-    <li class="footer">Generated on Sun Jun 18 2023 04:33:54 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jun 18 2023 04:56:03 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

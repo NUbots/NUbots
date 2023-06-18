@@ -1,0 +1,12 @@
+<map id="module::localisation::BallLocalisation::Config" name="module::localisation::BallLocalisation::Config">
+<area shape="rect" id="node1" title=" " alt="" coords="1061,61,1244,102"/>
+<area shape="rect" id="node2" href="$classmodule_1_1localisation_1_1BallModel.html" title=" " alt="" coords="700,21,869,62"/>
+<area shape="rect" id="node3" href="$structmodule_1_1localisation_1_1BallModel_1_1StateVec.html" title=" " alt="" coords="357,5,522,61"/>
+<area shape="rect" id="node4" href="$structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF.html" title="UKF config." alt="" coords="676,93,893,134"/>
+<area shape="rect" id="node5" href="$structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial.html" title=" " alt="" coords="348,85,531,141"/>
+<area shape="rect" id="node6" href="$structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Mean.html" title=" " alt="" coords="13,5,196,61"/>
+<area shape="rect" id="node7" href="$structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Covariance.html" title=" " alt="" coords="13,85,196,141"/>
+<area shape="rect" id="node8" href="$structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise.html" title=" " alt="" coords="348,165,531,221"/>
+<area shape="rect" id="node9" href="$structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html" title=" " alt="" coords="13,165,196,221"/>
+<area shape="rect" id="node10" href="$structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html" title=" " alt="" coords="5,245,204,301"/>
+</map>

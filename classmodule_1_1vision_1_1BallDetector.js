@@ -2,7 +2,7 @@ var classmodule_1_1vision_1_1BallDetector =
 [
     [ "BallDetector", "classmodule_1_1vision_1_1BallDetector.html#a1d11876da2dc92451e94f4344028e9c3", null ],
     [ "ball_angular_cov", "classmodule_1_1vision_1_1BallDetector.html#acf5627528f8b85dba93c938a064ce65c", null ],
-    [ "cfg", "classmodule_1_1vision_1_1BallDetector.html#a1bd43a7e2be88f3c4924ec311af6213f", null ],
+    [ "cfg", "classmodule_1_1vision_1_1BallDetector.html#a8bcc18383863ce4a92b956963860c860", null ],
     [ "cluster_points", "classmodule_1_1vision_1_1BallDetector.html#af27571cebdabe6fd96ca31df77a22d3a", null ],
     [ "confidence_threshold", "classmodule_1_1vision_1_1BallDetector.html#a2519d88b77f7cf6cadbd00a2d6ffd0ad", null ],
     [ "distance_disagreement", "classmodule_1_1vision_1_1BallDetector.html#a3c71262b721a63d157a5c6f258bfcad7", null ],

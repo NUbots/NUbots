@@ -178,7 +178,6 @@ var annotated_dup =
         [ "MeasurementType", null, [
           [ "BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ]
         ] ],
-        [ "BallFilter", "classmodule_1_1localisation_1_1BallFilter.html", "classmodule_1_1localisation_1_1BallFilter" ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],

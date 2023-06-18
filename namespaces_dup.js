@@ -336,7 +336,6 @@ var namespaces_dup =
         [ "MeasurementType", null, [
           [ "BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ]
         ] ],
-        [ "BallFilter", "classmodule_1_1localisation_1_1BallFilter.html", "classmodule_1_1localisation_1_1BallFilter" ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
@@ -345,10 +344,9 @@ var namespaces_dup =
         [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ],
         [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "RobotParticleLocalisation", "classmodule_1_1localisation_1_1RobotParticleLocalisation.html", "classmodule_1_1localisation_1_1RobotParticleLocalisation" ],
-        [ "FilteredBall", "BallFilter_8cpp.html#a4ad6316274fd8f0b673332247c525d36", null ],
-        [ "ServoID", "BallLocalisation_8cpp.html#a30ca8dc5cb71d23c52deccbee5bb9dd9", null ],
-        [ "VisionBall", "BallFilter_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
-        [ "VisionBalls", "BallFilter_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ],
+        [ "Ball", "BallLocalisation_8cpp.html#a166ffc812dedb579bbb1dcbf0c921d8a", null ],
+        [ "VisionBall", "BallLocalisation_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
+        [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ],
         [ "VisionGoal", "RobotParticleLocalisation_8cpp.html#a555e4584b906d95add31b8b4f7e0b068", null ],
         [ "VisionGoals", "RobotParticleLocalisation_8cpp.html#aad0bb3dc95ad54474ec44e2ee759aa03", null ]
       ] ],
