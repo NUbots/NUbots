@@ -1,3 +1,4 @@
+import { observer } from 'mobx-react'
 import { useMemo } from "react";
 import React from "react";
 import { useLoader } from "@react-three/fiber";
@@ -11,7 +12,7 @@ import { LocalisationRobotModel } from "../robot_model";
 
 import url from "./config/nugus.glb?url";
 
-export const NUgusView = ({ model }: { model: LocalisationRobotModel }) => {
+export const NUgusView = observer(({ model }: { model: LocalisationRobotModel }) => {
   const { scene: originalScene } = useLoader(GLTFLoader, url);
   // Clone so that each instance has its own copy that it may mutate.
   const scene = useMemo(() => originalScene.clone(), [originalScene]);
@@ -49,7 +50,7 @@ export const NUgusView = ({ model }: { model: LocalisationRobotModel }) => {
     });
   }, [scene]);
   return <primitive object={scene} key={model.id} />;
-};
+});
 
 const findMesh = (root: Object3D, name: string): Mesh => {
   const object = root.getObjectByName(name);
