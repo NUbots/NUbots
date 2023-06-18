@@ -1,9 +1,9 @@
-import { useThree } from '@react-three/fiber'
-import { observer } from 'mobx-react'
 import { useMemo } from "react";
 import React from "react";
+import { useThree } from "@react-three/fiber";
 import { useLoader } from "@react-three/fiber";
 import { autorun } from "mobx";
+import { observer } from "mobx-react";
 import { Matrix4 } from "three";
 import { Mesh } from "three";
 import { Object3D } from "three";
