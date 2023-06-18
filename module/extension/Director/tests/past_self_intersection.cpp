@@ -109,7 +109,7 @@ TEST_CASE("Test a provider can replace its task when the new task overlaps in de
         "requesting subtask 1",
         "running subtask 1",
         "running common dependency from from subtask 1",
-        "requesting main task with subtask 1",
+        "requesting main task with subtask 2",
         "running main task",
         "requesting subtask 2",
         "running subtask 2",
