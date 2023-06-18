@@ -148,7 +148,7 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.
 # Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
 # -Dwith_x11 requires x11 to be installed
 RUN install-package xorg-server
-RUN install-from-source https://github.com/intel/libva/releases/download/2.18.0/libva-2.18.0.tar.bz2 \
+RUN install-from-source https://github.com/intel/libva/releases/download/2.12.0/libva-2.12.0.tar.bz2 \
     -DENABLE_VA_MESSAGING=ON \
     -Dwith_x11=yes
 
@@ -304,10 +304,7 @@ RUN install-header-from-source https://github.com/nlohmann/json/releases/downloa
 RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
 
 # TinyXML
-RUN install-package tinyxml2
-
-# Catch2
-RUN install-package catch2
+RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
 
 # tinyrobotics
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.0.tar.gz \
