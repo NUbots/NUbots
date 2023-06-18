@@ -81,7 +81,7 @@ namespace {
                 emit<Task>(std::make_unique<MainTask>(1));
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("requesting main task with subtask 1");
+                events.push_back("requesting main task with subtask 2");
                 emit<Task>(std::make_unique<MainTask>(2));
             });
             on<Startup>().then([this] {
