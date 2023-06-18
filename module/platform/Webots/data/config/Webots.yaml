@@ -17,5 +17,5 @@ min_sensor_time_step: 8
 clock_smoothing: 0.6
 
 # Connection details
-server_address: "10.1.0.102"
+server_address: "127.0.1.1"
 port: 10001

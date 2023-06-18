@@ -40,12 +40,15 @@ namespace module::strategy {
 
         on<Provide<DefendTask>, Trigger<Ball>, With<Field>, With<Sensors>>().then(
             [this](const DefendTask& defend_task, const Ball& ball, const Field& field, const Sensors& sensor) {
-                Eigen::Isometry3f Hfw  = Eigen::Isometry3f(field.Hfw.cast<float>());
-                Eigen::Isometry3f Hrw  = Eigen::Isometry3f(sensor.Hrw.cast<float>());
-                Eigen::Isometry3f Hfr  = Hfw * Hrw.inverse();
-                Eigen::Vector3f rBFf   = Hfw * ball.rBWw;
-                Eigen::Vector3f rRFf   = Hfr.translation();
-                robot_distance_to_ball = sqrt(abs(pow(rBFf.x() - rRFf.x(), 2.0) - pow(rBFf.y() - rRFf.y(), 2.0)));
+                Eigen::Isometry3f Hfw = Eigen::Isometry3f(field.Hfw.cast<float>());
+                Eigen::Isometry3f Hrw = Eigen::Isometry3f(sensor.Hrw.cast<float>());
+                Eigen::Isometry3f Hfr = Hfw * Hrw.inverse();
+                Eigen::Vector3f rBFf  = Hfw * ball.rBWw;
+                Eigen::Vector3f rRFf  = Hfr.translation();
+
+                // The distance of the robot from the ball
+                double robot_distance_to_ball =
+                    sqrt(abs(pow(rBFf.x() - rRFf.x(), 2.0) - pow(rBFf.y() - rRFf.y(), 2.0)));
 
                 log<NUClear::DEBUG>("rRFf: ", rRFf.transpose());
                 log<NUClear::DEBUG>("rBFf: ", rBFf.transpose());
@@ -60,6 +63,9 @@ namespace module::strategy {
                     // Do nothing, play normally
                 }
                 else {
+                    // Robot - Defending position on field
+                    Eigen::Vector3f rDFf = Eigen::Vector3f::Zero();
+
                     log<NUClear::DEBUG>("rDFf x: ", rDFf.x());
                     log<NUClear::DEBUG>("rDFf y: ", rDFf.y());
 

@@ -18,12 +18,6 @@ namespace module::strategy {
 
         } cfg;
 
-        /// @brief Robot - Defending position on field
-        Eigen::Vector3f rDFf = Eigen::Vector3f::Zero();
-
-        /// @brief The distance of the robot from the ball
-        double robot_distance_to_ball = 0.0;
-
     public:
         /// @brief Called by the powerplant to build and setup the Defend reactor.
         explicit Defend(std::unique_ptr<NUClear::Environment> environment);
