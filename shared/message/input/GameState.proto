@@ -26,16 +26,17 @@ message GameState {
 
     message Data {
         enum Mode {
-            NORMAL            = 0;
-            PENALTY_SHOOTOUT  = 1;
-            OVERTIME          = 2;
-            TIMEOUT_MODE      = 3;
-            DIRECT_FREEKICK   = 4;
-            INDIRECT_FREEKICK = 5;
-            PENALTYKICK       = 6;
-            CORNER_KICK       = 7;
-            GOAL_KICK         = 8;
-            THROW_IN          = 9;
+            UNKNOWN_MODE      = 0;
+            NORMAL            = 1;
+            PENALTY_SHOOTOUT  = 2;
+            OVERTIME          = 3;
+            TIMEOUT_MODE      = 4;
+            DIRECT_FREEKICK   = 5;
+            INDIRECT_FREEKICK = 6;
+            PENALTYKICK       = 7;
+            CORNER_KICK       = 8;
+            GOAL_KICK         = 9;
+            THROW_IN          = 10;
         }
         enum Phase {
             UNKNOWN_PHASE = 0;
