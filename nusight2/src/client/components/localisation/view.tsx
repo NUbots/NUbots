@@ -183,16 +183,18 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
 });
 
 const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
-  <object3D>
-    {model.robots.flatMap((robot) =>
-      robot.fieldLinesDots.rPWw.map((d, i) => {
-        return (
-          <mesh key={`${robot.id}-${i}`} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
-            <circleBufferGeometry args={[0.02, 20]} />
-            <meshBasicMaterial color="blue" />
-          </mesh>
-        );
-      }),
-    )}
-  </object3D>
+  <>
+    {model.robots.map((robot) => (
+      <object3D key={robot.id}>
+        {robot.fieldLinesDots.rPWw.map((d, i) => {
+          return (
+            <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
+              <circleBufferGeometry args={[0.02, 20]} />
+              <meshBasicMaterial color="blue" />
+            </mesh>
+          );
+        })}
+      </object3D>
+    ))}
+  </>
 );
