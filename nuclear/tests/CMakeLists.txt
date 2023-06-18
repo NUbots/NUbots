@@ -1,11 +1,14 @@
 # Silence warnings about target_sources converting relative paths to abolutes
 cmake_policy(SET CMP0076 NEW)
 
-add_executable(TestNUClearRoles "${CMAKE_CURRENT_SOURCE_DIR}/test.cpp")
+find_package(Catch2 REQUIRED)
+
+add_executable(TestNUClearRoles)
 
 # Add all of the tests
 add_subdirectory(message)
 target_link_libraries(TestNUClearRoles PUBLIC nuclear::message)
+target_link_libraries(TestNUClearRoles PUBLIC Catch2::Catch2WithMain)
 
 set_property(TARGET TestNUClearRoles PROPERTY FOLDER "nuclear/tests")
 

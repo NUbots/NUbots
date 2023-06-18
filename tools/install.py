@@ -2,7 +2,6 @@
 
 import glob
 import os
-import re
 import subprocess
 
 from termcolor import cprint
@@ -13,7 +12,7 @@ from utility.dockerise import run_on_docker
 
 @run_on_docker
 def register(command):
-    command.help = "Install the system onto the target system"
+    command.description = "Install the system onto the target system"
 
     command.add_argument("target", help="The target host or directory to install the packages to")
 
@@ -49,10 +48,6 @@ def run(target, local, user, config, toolchain, **kwargs):
 
         user = getpass.getuser()
 
-    # Make sure ssh keys are installed on the target
-    # This will ask the user for a password if the key does not already exist on the target
-    subprocess.Popen("ssh-copy-id -i $HOME/.ssh/id_rsa.pub {}@{}".format(user, target), shell=True)
-
     # Target location to install to
     if local:
         target_binaries_dir = os.path.abspath(os.path.join(target, f"binaries{os.sep}"))
@@ -73,7 +68,7 @@ def run(target, local, user, config, toolchain, **kwargs):
     files = glob.glob(os.path.join(build_dir, "bin", "**", "*"), recursive=True)
 
     # Add a /./ to files so rsync --relative/-R behaves how we want it to
-    # For example, /home/fourtel/build/bin/horus will become /home/fourtel/build/bin/./horus
+    # For example, /home/NUbots/build/bin/binary will become /home/NUbots/build/bin/./binary
     common_path = os.path.commonpath(files)
     files = [os.path.join(common_path, f.replace(common_path, ".")) for f in files]
     subprocess.call(["rsync", "-avPlR", "--checksum", "-e ssh"] + files + [target_binaries_dir])
@@ -145,6 +140,6 @@ def run(target, local, user, config, toolchain, **kwargs):
     version_file = os.path.join(build_dir, "version.txt")
     with open(version_file, "w") as f:
         os.chdir(b.project_dir)
-        subprocess.run(["git", "log", "-1"], stdout=f)
+        subprocess.run(["git", "log", "-1", "--pretty=format:'%H'"], stdout=f)
 
     subprocess.run(["scp", version_file, target_binaries_dir])

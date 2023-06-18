@@ -66,7 +66,7 @@ namespace module::output::compressor::vaapi {
     }
 
     inline std::error_condition make_error_condition(vaapi_error_code e) {
-        return std::error_condition(static_cast<int>(e), vaapi_error_category());
+        return {static_cast<int>(e), vaapi_error_category()};
     }
 
 }  // namespace module::output::compressor::vaapi

@@ -15,7 +15,7 @@ nuclear_role(
   output::Overview
   output::ImageCompressor
   # Platform
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::Camera
   input::SensorFilter
   # Network
@@ -32,8 +32,8 @@ nuclear_role(
   vision::BallDetector
   vision::FieldLineDetector
   # Localisation
-  localisation::BallFilter
-  localisation::RobotLocalisation
+  localisation::BallLocalisation
+  localisation::FieldLocalisation
   # Behaviour
   behaviour::Controller
   behaviour::skills::Getup

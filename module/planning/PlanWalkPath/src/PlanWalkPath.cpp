@@ -3,7 +3,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/localisation/FilteredBall.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Walk.hpp"
 
@@ -13,7 +13,7 @@ namespace module::planning {
 
     using extension::Configuration;
 
-    using message::localisation::FilteredBall;
+    using message::localisation::Ball;
     using message::planning::TurnAroundBall;
     using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
