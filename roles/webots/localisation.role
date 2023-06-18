@@ -33,7 +33,7 @@ nuclear_role(
   output::ImageCompressor
   # Localisation
   localisation::BallFilter
-  localisation::RobotLocalisation
+  localisation::FieldLocalisation
   # Behaviour
   behaviour::Controller
   behaviour::skills::Getup

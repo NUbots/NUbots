@@ -805,7 +805,7 @@ namespace module::platform {
             image->data           = camera.image;
 
             image->id        = camera_context[camera.name].id;
-            image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
+            image->timestamp = NUClear::clock::now();
 
             Eigen::Isometry3d Hcw;
 
