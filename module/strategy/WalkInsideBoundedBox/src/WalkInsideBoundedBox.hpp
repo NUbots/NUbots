@@ -14,7 +14,7 @@ namespace module::strategy {
         struct Config {
 
             /// @brief Bounded box of region to defend the ball - x min, x max, y max, y min
-            Eigen::Vector4f defending_region = Eigen::Vector4f::Zero();
+            Eigen::Vector4f bounded_region = Eigen::Vector4f::Zero();
 
         } cfg;
 

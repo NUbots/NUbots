@@ -29,15 +29,13 @@ namespace module::strategy {
 
     WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
-
-        on<Configuration>("Defend.yaml").then([this](const Configuration& config) {
+        on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defend.yaml
-            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.defending_region = Eigen::Vector4f(config["defending_region"].as<Expression>());
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            cfg.bounded_region = Eigen::Vector4f(config["bounded_region"].as<Expression>());
 
-            log<NUClear::DEBUG>("cfg.defending_region ", cfg.defending_region.transpose());
+            log<NUClear::DEBUG>("cfg.bounded_region ", cfg.bounded_region.transpose());
         });
-
         on<Provide<DefendTask>, Trigger<Ball>, With<Field>, With<Sensors>>().then(
             [this](const DefendTask& defend_task, const Ball& ball, const Field& field, const Sensors& sensor) {
                 Eigen::Isometry3f Hfw = Eigen::Isometry3f(field.Hfw.cast<float>());
