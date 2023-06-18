@@ -86,9 +86,9 @@ namespace module::vision {
                 for (const auto& idx : cluster) {
                     lines->points.push_back(uPCw.col(idx));
                     // Project the field line point onto the field plane
-                    Eigen::Vector3f rCWw = Eigen::Vector3f(Hwc.translation().x(), Hwc.translation().y(), 0.0);
-                    Eigen::Vector3f rPCw = uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + rCWw;
-                    lines->rPCw.push_back(rPCw);
+                    Eigen::Vector3f rPWw =
+                        uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + Hwc.translation();
+                    lines->rPWw.push_back(rPWw);
                 }
             }
 
