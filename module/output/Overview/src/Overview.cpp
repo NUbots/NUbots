@@ -91,7 +91,7 @@ namespace module::output {
                     // If we have field information
                     if (field) {
                         // Transform the field state into Hfw
-                        Eigen::Isometry3d Hfw(field->Hfw);
+                        Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
 
                         // Get our torso in field space
                         Eigen::Isometry3d Hft = Hfw * Htw.inverse();
@@ -104,12 +104,12 @@ namespace module::output {
 
                         if (loc_ball) {
                             // Get our ball in field space
-                            Eigen::Vector4d rBWw(loc_ball->position.x(), loc_ball->position.y(), 0.0, 1.0);
-                            Eigen::Vector4d rBFf = Hfw * rBWw;
+                            Eigen::Vector3d rBWw = loc_ball->rBWw;
+                            Eigen::Vector3d rBFf = Hfw * rBWw;
 
                             // Store our position from field to ball
                             msg->ball_position            = Eigen::Vector2f(rBFf.x(), rBFf.y());
-                            msg->ball_position_covariance = loc_ball->covariance.cast<float>();
+                            msg->ball_position_covariance = loc_ball->covariance.block(0, 0, 2, 2).cast<float>();
                         }
                     }
                 }

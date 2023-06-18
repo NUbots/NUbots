@@ -282,17 +282,20 @@ namespace module::extension {
             }
         }
 
+
+        // Make a copy of group.subtasks so we can remove tasks from it with updated subtasks
+        auto old_subtasks = group.subtasks;
+        // Update the group's subtasks to the new subtasks
+        group.subtasks = tasks;
+
         // Remove any tasks that were marked as dying earlier
         // This is at the end, so that if one of our new tasks uses something the old tasks did then we won't run other
         // tasks with lower priority for a single cycle until this one runs
-        for (const auto& t : group.subtasks) {
+        for (const auto& t : old_subtasks) {
             if (t->dying) {
                 remove_task(t);
             }
         }
-
-        // Update the new subtasks
-        group.subtasks = tasks;
     }
 
 }  // namespace module::extension

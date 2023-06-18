@@ -186,6 +186,41 @@ namespace utility::skill {
         return load_script<Sequence>(std::vector{ScriptRequest(script)}, start);
     }
 
+    /// @brief Creates sequences of servos from the Script given
+    /// @param script Script to load
+    /// @param start When the first script should start executing. Default is now.
+    /// @return Sequence message which will be filled with sequences of servos and can then be emitted as a
+    /// Task.
+    template <typename Sequence>
+    static std::unique_ptr<Sequence> load_script(const Script<Sequence>& script,
+                                                 NUClear::clock::time_point start = NUClear::clock::now()) {
+        // Create sequence message
+        auto msg = std::make_unique<Sequence>();
+
+        // First script begins at start time
+        auto time = start;
+
+        // Time will be incremented through each frame
+        // Loop over the frames and add them as sequences of servos into the Sequence message
+        for (const auto& frame : script.frames) {
+            // This frame should finish after frame.duration time has passed
+            time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(frame.duration);
+
+            // Add the servos in the frame to a map
+            std::map<uint32_t, ServoCommand> servos{};
+            for (const auto& target : frame.targets) {
+                servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+            }
+
+            // Add the map to the pack. This represents one sequence of servos.
+            msg->frames.emplace_back(servos);
+        }
+
+        // Return the message which can then be emitted as a Task
+        return msg;
+    }
+
+
 }  // namespace utility::skill
 
 // Functionality for reading in scripts

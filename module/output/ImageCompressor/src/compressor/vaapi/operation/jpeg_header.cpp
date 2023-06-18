@@ -11,7 +11,6 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-#pragma pack(push, 1)
     namespace markers {
 
         /// htons is used throughout the code to fix the endian issue
@@ -22,7 +21,7 @@ namespace module::output::compressor::vaapi::operation {
         struct SOI {
             uint8_t marker = 0xFF;
             uint8_t type   = 0xD8;
-        };
+        } __attribute__((packed));
 
         // Application Data
         struct AppData {
@@ -37,7 +36,7 @@ namespace module::output::compressor::vaapi::operation {
             uint16_t y_density         = htons(72);
             uint8_t thumbnail_width    = 0;
             uint8_t thumbnail_height   = 0;
-        };
+        } __attribute__((packed));
 
         // Define quantisation table
         struct DQT {
@@ -55,7 +54,7 @@ namespace module::output::compressor::vaapi::operation {
                     quant[i] = std::max(1, std::min(255, v));
                 }
             }
-        };
+        } __attribute__((packed));
 
         // Define huffman table
         template <int Entries>
@@ -70,7 +69,7 @@ namespace module::output::compressor::vaapi::operation {
             std::array<uint8_t, 1 + 16 + Entries> table;
 
             DHT(const std::array<uint8_t, 1 + 16 + Entries>& table) : table(table) {}
-        };
+        } __attribute__((packed));
 
         struct SOS_Monochrome {
             uint8_t marker       = 0xFF;
@@ -82,7 +81,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t start        = 0x00;
             uint8_t end          = 0x3F;
             uint8_t sp           = 0x00;
-        };
+        } __attribute__((packed));
 
         struct SOS_Colour {
             uint8_t marker       = 0xFF;
@@ -98,7 +97,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t start        = 0x00;
             uint8_t end          = 0x3F;
             uint8_t sp           = 0x00;
-        };
+        } __attribute__((packed));
 
         // Start of frame
         struct SOF0_Monochrome {
@@ -115,7 +114,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t y_quant_table_no = 0;
 
             SOF0_Monochrome(uint16_t width, uint16_t height) : height(htons(height)), width(htons(width)) {}
-        };
+        } __attribute__((packed));
 
         struct SOF0_Colour {
             uint8_t marker    = 0xFF;
@@ -139,10 +138,9 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t v_quant_table_no = 1;
 
             SOF0_Colour(uint16_t width, uint16_t height) : height(height), width(width) {}
-        };
+        } __attribute__((packed));
 
     }  // namespace markers
-#pragma pack(pop)
 
     template <typename T, typename... Args>
     void emplace_bytes(std::vector<uint8_t>& v, Args&&... args) {

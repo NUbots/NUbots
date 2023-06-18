@@ -1,9 +1,13 @@
 import { computed } from "mobx";
+import { Color } from "three";
+import { Mesh } from "three";
 import { HemisphereLight } from "three";
 import { PointLight } from "three";
 import { Object3D } from "three";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { meshBasicMaterial } from "../three/builders";
+import { circleBufferGeometry } from "../three/builders";
 import { stage } from "../three/builders";
 import { scene } from "../three/builders";
 import { perspectiveCamera } from "../three/builders";
@@ -45,7 +49,7 @@ export class LocalisationViewModel {
   }));
 
   private readonly scene = scene(() => ({
-    children: [...this.robots, this.field, this.skybox, this.hemisphereLight, this.pointLight],
+    children: [...this.robots, this.field, this.skybox, this.hemisphereLight, this.pointLight, this.fieldLineDots],
   }));
 
   @computed
@@ -76,4 +80,24 @@ export class LocalisationViewModel {
     light.position.set(this.model.camera.position.x, this.model.camera.position.y, this.model.camera.position.z);
     return light;
   }
+
+  @computed
+  private get fieldLineDots() {
+    const group = new Object3D();
+    this.model.robots.forEach((robot) =>
+      robot.fieldLinesDots.rPWw.forEach((d) => {
+        const mesh = new Mesh(
+          LocalisationViewModel.fieldLineDotGeometry(),
+          LocalisationViewModel.fieldLineDotMaterial(),
+        );
+        mesh.position.copy(d.add(new Vector3(0, 0, 0.005)).toThree());
+        group.add(mesh);
+      }),
+    );
+    return group;
+  }
+
+  private static readonly fieldLineDotGeometry = circleBufferGeometry(() => ({ radius: 0.02, segments: 20 }));
+
+  private static readonly fieldLineDotMaterial = meshBasicMaterial(() => ({ color: new Color("blue") }));
 }

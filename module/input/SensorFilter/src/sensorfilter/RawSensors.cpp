@@ -61,11 +61,11 @@ namespace module::input {
                 sensors->servo.emplace_back(error,
                                             id,
                                             original.torque_enabled,
-                                            original.p_gain,
-                                            original.i_gain,
-                                            original.d_gain,
+                                            original.position_p_gain,
+                                            original.position_i_gain,
+                                            original.position_d_gain,
                                             original.goal_position,
-                                            original.moving_speed,
+                                            original.profile_velocity,
                                             previous_sensors->servo[id].present_position,
                                             previous_sensors->servo[id].present_velocity,
                                             previous_sensors->servo[id].load,
@@ -78,14 +78,14 @@ namespace module::input {
                 sensors->servo.emplace_back(error,
                                             id,
                                             original.torque_enabled,
-                                            original.p_gain,
-                                            original.i_gain,
-                                            original.d_gain,
+                                            original.position_p_gain,
+                                            original.position_i_gain,
+                                            original.position_d_gain,
                                             original.goal_position,
-                                            original.moving_speed,
+                                            original.profile_velocity,
                                             original.present_position,
-                                            original.present_speed,
-                                            original.load,
+                                            original.present_velocity,
+                                            original.present_current,
                                             original.voltage,
                                             static_cast<float>(original.temperature));
             }
@@ -119,7 +119,7 @@ namespace module::input {
 
         // **************** Battery Voltage  ****************
         // Update the current battery voltage of the whole robot
-        sensors->voltage = raw_sensors.voltage;
+        sensors->voltage = raw_sensors.battery;
 
         // **************** Buttons and LEDs ****************
         sensors->button.reserve(2);
