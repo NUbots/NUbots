@@ -95,4 +95,4 @@ namespace module::localisation {
         }
     };
 }  // namespace module::localisation
-#endif  // MODULE_INPUT_BALLMODEL_HPP
+#endif  // MODULE_LOCALISATION_BALLMODEL_HPP
