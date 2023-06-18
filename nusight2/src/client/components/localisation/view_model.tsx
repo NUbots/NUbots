@@ -34,6 +34,10 @@ export class LocalisationViewModel extends React.Component<{
       <FieldView model={this.model.field}/>
       <SkyboxViewModel model={this.model.skybox}/>
       <hemisphereLight args={['#fff', '#fff', 0.6]}/>
+
+      {this.model.robots.map((robotModel) => {
+        return robotModel.visible && <NUgusViewModel key={robotModel.id} model={robotModel} />
+      })}
     </object3D>
   }
 
