@@ -1,5 +1,5 @@
-#ifndef MODULE_INPUT_BALLMODEL_HPP
-#define MODULE_INPUT_BALLMODEL_HPP
+#ifndef MODULE_LOCALISATION_BALLMODEL_HPP
+#define MODULE_LOCALISATION_BALLMODEL_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -95,4 +95,4 @@ namespace module::localisation {
         }
     };
 }  // namespace module::localisation
-#endif  // MODULE_INPUT_BALLMODEL_HPP
+#endif  // MODULE_LOCALISATION_BALLMODEL_HPP
