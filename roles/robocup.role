@@ -17,6 +17,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   # Localisation
+  localisation::FieldLocalisation
   localisation::BallLocalisation
   # Director
   extension::Director
@@ -43,6 +44,7 @@ nuclear_role(
   strategy::FindObject
   strategy::Ready
   strategy::DiveToBall
+  strategy::Localise
   # Purposes
   purpose::Striker
   purpose::Soccer

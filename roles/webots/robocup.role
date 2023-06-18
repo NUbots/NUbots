@@ -8,6 +8,8 @@ nuclear_role(
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
   # Network
+  network::NUClearNet
+  network::NetworkForwarder
   network::PlotJuggler
   # Sensors
   input::GameController
@@ -49,6 +51,7 @@ nuclear_role(
   strategy::DiveToBall
   strategy::KickToGoal
   strategy::AlignBallToGoal
+  strategy::Localise
   # Purposes
   purpose::Striker
   purpose::Soccer
