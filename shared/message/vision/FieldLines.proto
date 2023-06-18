@@ -34,7 +34,7 @@ message FieldLines {
     /// Affine3d transform from world space to camera space at the time that the image was taken
     iso3 Hcw = 3;
     /// Could be empty, if there were no lines detected in the image
-    repeated fvec3 points = 4;
+    repeated vec3 points = 4;
     /// Field line points projected onto the world XY plane from the world {W} in world {w} space
-    repeated fvec3 rPWw = 5;
+    repeated vec3 rPWw = 5;
 }
