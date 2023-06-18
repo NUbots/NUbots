@@ -21,5 +21,5 @@ syntax = "proto3";
 
 package message.strategy;
 
-/// A task that will tell robot to walk to its defender position if the ball is not in its defending region
-message Defend {}
+/// A task that will tell robot to walk to its position if the ball is not in its bounded box region
+message WalkInsideBoundedBox {}

@@ -48,7 +48,7 @@ nuclear_role(
   strategy::Ready
   strategy::DiveToBall
   strategy::KickToGoal
-  strategy::Defend
+  strategy::WalkInsideBoundedBox
   strategy::AlignBallToGoal
   # Purposes
   purpose::Striker

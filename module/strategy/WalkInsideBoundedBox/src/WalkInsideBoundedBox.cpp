@@ -1,6 +1,4 @@
-#include "message/strategy/Defend.hpp"
-
-#include "Defend.hpp"
+#include "WalkInsideBoundedBox.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -12,6 +10,7 @@
 #include "message/planning/KickTo.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
 #include "utility/support/yaml_expression.hpp"
@@ -19,7 +18,7 @@
 namespace module::strategy {
 
     using extension::Configuration;
-    using DefendTask = message::strategy::Defend;
+    using DefendTask = message::strategy::WalkInsideBoundedBox;
     using utility::support::Expression;
     using Ball = message::localisation::FilteredBall;
     using message::input::Sensors;
@@ -28,7 +27,8 @@ namespace module::strategy {
     using message::strategy::StandStill;
     using message::strategy::WalkToFieldPosition;
 
-    Defend::Defend(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
+    WalkInsideBoundedBox::WalkInsideBoundedBox(std::unique_ptr<NUClear::Environment> environment)
+        : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Defend.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defend.yaml

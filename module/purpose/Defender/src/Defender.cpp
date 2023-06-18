@@ -7,12 +7,12 @@
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
-#include "message/strategy/Defend.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -28,12 +28,12 @@ namespace module::purpose {
     using message::purpose::NormalDefender;
     using message::purpose::PenaltyShootoutDefender;
     using message::strategy::AlignBallToGoal;
-    using message::strategy::Defend;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
+    using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
 
@@ -107,9 +107,9 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);  // Aligning ball to goal to aim kick
-        emit<Task>(std::make_unique<KickToGoal>(), 5);       // kick the ball if possible
-        emit<Task>(std::make_unique<Defend>(), 6);
+        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);       // Aligning ball to goal to aim kick
+        emit<Task>(std::make_unique<KickToGoal>(), 5);            // kick the ball if possible
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 6);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose

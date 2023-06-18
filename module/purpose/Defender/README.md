@@ -14,13 +14,13 @@ If ball is outside bounded box area and ball is in own half, defender is clamped
 
 ## Usage
 
-Add this module to play as a striker in soccer!
+Add this module to play as a defender in soccer!
 
 ## Consumes
 
 - `message::input::GameState` to get information about the state of the game
 - `message::input::GameState::Data::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
-- `message::strategy::Denfender` a Task requesting to play as a Defender
+- `message::strategy::WalkInsideBounded` a Task requesting to play as a Defender
 
 ## Emits
 
