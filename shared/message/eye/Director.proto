@@ -1,0 +1,81 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.eye;
+
+message Reaction {
+    string reactor_name = 1;
+    string identifier   = 2;
+    uint64 id           = 3;
+}
+
+message Provider {
+    enum Classification {
+        UNKNOWN = 0;
+        PROVIDE = 1;
+        START   = 2;
+        STOP    = 3;
+        ROOT    = 4;
+    }
+
+    message WhenCondition {
+        string type    = 1;
+        bool   current = 2;
+    }
+
+    string                 group_type     = 1;
+    uint64                 id             = 2;
+    Classification         classification = 3;
+    string                 type           = 4;
+    Reaction               reaction       = 5;
+    repeated WhenCondition when           = 6;
+    map<string, int32>     causing        = 7;
+    repeated string        needs          = 8;
+}
+
+message DirectorTask {
+    string type              = 1;
+    uint64 requester_id      = 2;
+    uint64 requester_task_id = 3;
+    string name              = 4;
+    int32  priority          = 5;
+    bool   optional          = 6;
+};
+
+message ProviderGroup {
+    string          type               = 1;
+    repeated uint64 provider_ids       = 2;
+    bool            done               = 3;
+    int64           active_task_ptr    = 4;
+    uint64          active_provider_id = 5;
+    repeated int64  watcher_task_ptrs  = 6;
+    repeated int64  subtask_ptrs       = 7;
+}
+
+message DirectorState {
+    /// Maps group.type (string) to group
+    map<string, ProviderGroup> groups = 1;
+
+    /// Maps provider.id (uint64) to provider
+    map<uint64, Provider> providers = 2;
+
+    /// Maps task pointer (cast to 64-bit int) to task
+    map<int64, DirectorTask> tasks = 3;
+}

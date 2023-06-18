@@ -2,6 +2,7 @@ nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher
   support::SignalCatcher
+  support::logging::FileLogHandler
   support::logging::ConsoleLogHandler
   # Config
   support::configuration::SoccerConfig
@@ -53,4 +54,5 @@ nuclear_role(
   purpose::Striker
   purpose::Soccer
   purpose::Goalie
+  support::logging::DataLogging
 )

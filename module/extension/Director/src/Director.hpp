@@ -31,6 +31,8 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/eye/Director.hpp"
+
 namespace module::extension {
 
     class Director
@@ -402,6 +404,10 @@ namespace module::extension {
          * @return a lock object that will reset `current_run_reason` to its default when destroyed
          */
         RunReasonLock hold_run_reason(const ::extension::behaviour::RunInfo::RunReason& reason);
+
+        int64_t add_task_to_state(std::shared_ptr<component::DirectorTask> task, message::eye::DirectorState& state);
+        void emit_current_state();
+
 
     public:
         /// Called by the powerplant to build and setup the Director reactor.

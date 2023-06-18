@@ -21,6 +21,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/eye/Director.hpp"
+
 namespace module::extension {
 
     using component::DirectorTask;
@@ -219,6 +221,93 @@ namespace module::extension {
         }
     }
 
+    int64_t Director::add_task_to_state(std::shared_ptr<DirectorTask> task, message::eye::DirectorState& state) {
+        auto task_id = reinterpret_cast<std::uintptr_t>(task.get());
+
+        if (!state.tasks.contains(task_id)) {
+            auto t               = message::eye::DirectorTask{};
+            t.type               = task->type.name();
+            t.requester_id       = task->requester_id;
+            t.requester_task_id  = task->requester_task_id;
+            t.name               = task->name;
+            t.priority           = task->priority;
+            t.optional           = task->optional;
+            state.tasks[task_id] = t;
+        }
+
+        return task_id;
+    }
+
+    void Director::emit_current_state() {
+        auto state = std::make_unique<message::eye::DirectorState>();
+
+        for (auto id_provider_pair : providers) {
+            auto id       = id_provider_pair.first;
+            auto provider = id_provider_pair.second.get();
+
+            auto p = message::eye::Provider{};
+
+            p.group_type = provider->group.type.name();
+            p.id         = id;
+            // p.classification = provider->classification;
+            p.type = provider->type.name();
+
+            p.reaction = message::eye::Reaction{};
+            if (provider->reaction) {
+                p.reaction.reactor_name = provider->reaction->reactor.reactor_name;
+                p.reaction.identifier   = provider->reaction->identifier[0].empty() ? provider->reaction->identifier[1]
+                                                                                    : provider->reaction->identifier[0];
+                p.reaction.id           = provider->reaction->id;
+            }
+
+            for (auto when : provider->when) {
+                auto w    = message::eye::Provider::WhenCondition{};
+                w.type    = when->type.name();
+                w.current = when->current;
+                p.when.push_back(w);
+            }
+
+            for (auto x : provider->causing) {
+                p.causing[x.first.name()] = x.second;
+            }
+
+            for (auto x : provider->needs) {
+                p.needs.push_back(x.name());
+            }
+
+            state->providers[id] = p;
+        }
+
+        for (auto type_group_pair : groups) {
+            auto type  = type_group_pair.first;
+            auto group = type_group_pair.second;
+
+            auto g = message::eye::ProviderGroup{};
+
+            g.type = type.name();
+            for (auto x : group.providers) {
+                g.provider_ids.push_back(x->id);
+            }
+            g.done = group.done;
+            if (group.active_task) {
+                g.active_task_ptr = add_task_to_state(group.active_task, *state);
+            }
+            if (group.active_provider) {
+                g.active_provider_id = group.active_provider->id;
+            }
+            for (auto x : group.watchers) {
+                g.watcher_task_ptrs.push_back(add_task_to_state(x, *state));
+            }
+            for (auto x : group.subtasks) {
+                g.subtask_ptrs.push_back(add_task_to_state(x, *state));
+            }
+
+            state->groups[g.type] = g;
+        }
+
+        emit(state);
+    }
+
     Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         if (source != nullptr) {
             throw std::runtime_error("Multiple behaviour directors are not allowed.");
@@ -338,6 +427,7 @@ namespace module::extension {
         // We have a new task pack to run
         on<Trigger<TaskPack>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
             std::lock_guard<std::recursive_mutex> lock(director_mutex);
+            this->emit_current_state();
             run_task_pack(pack);
         });
     }

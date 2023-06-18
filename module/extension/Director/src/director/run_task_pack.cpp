@@ -143,9 +143,29 @@ namespace module::extension {
     }
 
     void Director::run_task_pack(const TaskPack& pack) {
-
         const auto& provider = pack.first;
         auto& group          = provider->group;
+
+
+        // Print the task pack
+        log<NUClear::INFO>("Running task pack for provider ",
+                           provider->type.name(),
+                           " with ",
+                           pack.second.size(),
+                           " tasks");
+        for (const auto& t : pack.second) {
+            log<NUClear::INFO>("  ", t->type.name());
+        }
+
+        // Print groups and their active task, if they have one
+        for (const auto& g : groups) {
+            if (g.second.active_task != nullptr) {
+                log<NUClear::INFO>("    ", g.first.name(), ": ", g.second.active_task->type.name());
+            }
+            else {
+                log<NUClear::INFO>("    ", g.first.name(), " : no active task");
+            }
+        }
 
         // Check if this Provider is active and allowed to make subtasks
         if (provider != group.active_provider) {
