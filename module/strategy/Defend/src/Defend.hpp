@@ -18,10 +18,10 @@ namespace module::strategy {
 
         } cfg;
 
-        // Robot - Defending position on field
+        /// @brief Robot - Defending position on field
         Eigen::Vector3f rDFf = Eigen::Vector3f::Zero();
 
-        // Thge distance of the robot from the ball
+        /// @brief The distance of the robot from the ball
         double robot_distance_to_ball = 0.0;
 
     public:
