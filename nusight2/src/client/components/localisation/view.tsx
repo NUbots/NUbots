@@ -27,7 +27,7 @@ type LocalisationViewProps = {
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
-  private readonly canvas = React.createRef<Three>();
+  private readonly canvas = React.createRef<HTMLCanvasElement>();
 
   componentDidMount(): void {
     document.addEventListener("pointerlockchange", this.onPointerLockChange, false);
@@ -55,7 +55,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
       <div className={style.localisation}>
         <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
         <div className={style.localisation__canvas}>
-          <ThreeFiber>
+          <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model}/>
           </ThreeFiber>
         </div>
@@ -81,7 +81,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   };
 
   private onPointerLockChange = () => {
-    this.props.controller.onPointerLockChange(this.props.model, this.canvas.current!.isPointerLocked());
+    this.props.controller.onPointerLockChange(this.props.model, this.canvas.current === document.pointerLockElement);
   };
 
   private onMouseMove = (e: MouseEvent) => {

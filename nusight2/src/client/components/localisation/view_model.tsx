@@ -27,7 +27,7 @@ export class LocalisationViewModel extends React.Component<{
         args={[75, 1, 0.01, 100]}
         position={this.model.camera.position.toArray()}
         rotation={[Math.PI / 2 + this.model.camera.pitch, 0, -Math.PI / 2 + this.model.camera.yaw, 'ZXY']}
-        up={Vector3.from({ x: 0, y: 0, z: 1 }).toArray()}
+        up={[0, 0, 1]}
       >
         <pointLight color="white"/>
       </PerspectiveCamera>
