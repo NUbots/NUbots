@@ -17,7 +17,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   # Localisation
-  localisation::BallFilter
+  localisation::BallLocalisation
   # Director
   extension::Director
   # Servos

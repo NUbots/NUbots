@@ -20,7 +20,7 @@ nuclear_role(
   vision::FieldLineDetector
   # Localisation
   localisation::FieldLocalisation
-  localisation::BallFilter
+  localisation::BallLocalisation
   # Director
   extension::Director
   # Servos
