@@ -92,12 +92,12 @@ namespace utility::skill {
 
         // Try getting the robot-specific script first
         if (utility::file::exists(robot_path)) {
-            NUClear::log<NUClear::DEBUG>("Parsing robot specific script:", script);
+            NUClear::log<NUClear::INFO>("Parsing robot specific script:", script);
             return YAML::LoadFile(robot_path);
         }
         // If there was no robot-specific script, then get the platform-specific script
         else if (utility::file::exists(platform_path)) {
-            NUClear::log<NUClear::DEBUG>("Parsing default platform script:", script);
+            NUClear::log<NUClear::INFO>("Parsing default platform script:", script);
             return YAML::LoadFile(platform_path);
         }
         // The script doesn't exist, tell the user
