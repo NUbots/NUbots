@@ -126,7 +126,8 @@ namespace module::platform::OpenCR {
             dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
                                                                           write_data2));
 
-        // Loop over all servo states and set the servos to uninitialised
+        // Loop over all servo states and set the servos to uninitialised so we can read their state and update our
+        // internal goal state
         for (auto& servo_state : servo_states) {
             servo_state.initialised = false;
         }

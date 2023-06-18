@@ -169,6 +169,7 @@ namespace module::platform::OpenCR {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
 
                         // At the start, we want to query the motors so we can store their state internally
+                        // This will start the loop of reading and writing to the servos and opencr
                         for (const auto& id : nugus.servo_ids()) {
                             packet_queue[NUgus::ID(id)].push_back(PacketTypes::SERVO_DATA);
                         }

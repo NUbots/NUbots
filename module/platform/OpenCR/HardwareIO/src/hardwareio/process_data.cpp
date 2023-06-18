@@ -144,21 +144,11 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
-        // If this servo has not been initialised yet, set the goal position and gains
+        // If this servo has not been initialised yet, set the goal states to the current states
         if (!servo_states[servo_index].initialised) {
             servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
-            servo_states[servo_index].goal_velocity = servo_states[servo_index].present_velocity;
-            servo_states[servo_index].goal_current  = servo_states[servo_index].present_current;
-
-            servo_states[servo_index].torque = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
-
-            log<NUClear::ERROR>(fmt::format("Servo {} torque {} torque enabled {} torque enable {}",
-                                            servo_index + 1,
-                                            servo_states[servo_index].torque,
-                                            servo_states[servo_index].torque_enabled,
-                                            data.torque_enable));
-            servo_states[servo_index].profile_velocity = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
-            servo_states[servo_index].initialised      = true;
+            servo_states[servo_index].torque        = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
+            servo_states[servo_index].initialised   = true;
         }
     }
 
