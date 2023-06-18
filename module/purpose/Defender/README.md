@@ -24,7 +24,7 @@ Add this module to play as a defender in soccer!
 
 ## Emits
 
-- `message::strategy::Defend` a Task requesting to play as a Striker in the normal game state
+- `message::strategy::WalkInsideBoundedBox` a Task requesting to play as a defender in the normal game state clamewd to bounded box
 - `message::strategy::Ready` a Task requesting to walk to the ready position
 - `message::strategy::StandStill` a Task requesting to stand still and not move
 - `message::strategy::FindBall` a Task requesting to look and move around to find the ball
