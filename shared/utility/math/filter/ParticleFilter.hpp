@@ -71,7 +71,7 @@ namespace utility::math::filter {
 
         using Model = FilterModel<Scalar>;
         // The model
-        Model model;
+        Model model{};
 
         using StateVec = Eigen::Matrix<Scalar, Model::size, 1>;
         using StateMat = Eigen::Matrix<Scalar, Model::size, Model::size>;
@@ -186,8 +186,8 @@ namespace utility::math::filter {
         using ParticleList    = Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic>;
         using ParticleWeights = std::vector<Scalar>;
 
-        ParticleList particles;
-        ParticleWeights weights;
+        ParticleList particles{};
+        ParticleWeights weights{};
 
         /**
          * @brief Clears all particles in the filter and samples new particles from the multivariate normal
