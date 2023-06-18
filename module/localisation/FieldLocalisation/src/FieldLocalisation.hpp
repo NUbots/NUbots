@@ -74,9 +74,9 @@ namespace module::localisation {
 
         /// @brief Transform a point in the robot's coordinate frame into an index in the map
         /// @param particle The state of the particle (x,y,theta)
-        /// @param rPRw The field point (x, y) in world space {w} [m]
+        /// @param rPWw The field point (x, y) in world space {w} [m]
         /// @return The observation location (x, y) in the map
-        Eigen::Vector2i position_in_map(const Eigen::Vector3f particle, const Eigen::Vector3f rPRw);
+        Eigen::Vector2i position_in_map(const Eigen::Vector3f particle, const Eigen::Vector3f rPWw);
 
         /// @brief Get the weight of a particle given a set of observations
         /// @param particle The state of the particle (x,y,theta)
