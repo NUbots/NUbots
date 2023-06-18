@@ -13,10 +13,10 @@ import { scene } from "../three/builders";
 import { perspectiveCamera } from "../three/builders";
 import { Canvas } from "../three/three";
 
-import { FieldViewModel } from "./field/view_model";
+import { FieldView } from "./field/view";
 import { LocalisationModel } from "./model";
-import { NUgusViewModel } from "./nugus_robot/view_model";
-import { SkyboxViewModel } from "./skybox/view_model";
+import { NUgusView } from "./nugus_robot/view";
+import { SkyboxView } from "./skybox/view";
 
 export class LocalisationViewModel {
   private readonly canvas: Canvas;
@@ -54,14 +54,14 @@ export class LocalisationViewModel {
 
   @computed
   private get field() {
-    return FieldViewModel.of(this.model.field).field;
+    return FieldView.of(this.model.field).field;
   }
 
   @computed
   private get robots(): Object3D[] {
     return this.model.robots
       .filter((robotModel) => robotModel.visible)
-      .map((robotModel) => NUgusViewModel.of(robotModel).robot);
+      .map((robotModel) => NUgusView.of(robotModel).robot);
   }
 
   @computed
@@ -71,7 +71,7 @@ export class LocalisationViewModel {
 
   @computed
   private get skybox() {
-    return SkyboxViewModel.of(this.model.skybox).skybox;
+    return SkyboxView.of(this.model.skybox).skybox;
   }
 
   @computed
