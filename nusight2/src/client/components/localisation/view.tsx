@@ -1,18 +1,19 @@
-import { reaction } from 'mobx'
-import { observer } from 'mobx-react'
-import { disposeOnUnmount } from 'mobx-react'
-import { now } from 'mobx-utils'
-import React from 'react'
-import { PropsWithChildren } from 'react'
-import { ComponentType } from 'react'
-import { ThreeFiber } from '../three/three_fiber'
+import React from "react";
+import { PropsWithChildren } from "react";
+import { ComponentType } from "react";
+import { reaction } from "mobx";
+import { observer } from "mobx-react";
+import { disposeOnUnmount } from "mobx-react";
+import { now } from "mobx-utils";
 
-import { LocalisationController } from './controller'
-import { LocalisationModel } from './model'
-import { ViewMode } from './model'
-import { LocalisationNetwork } from './network'
-import style from './style.module.css'
-import { LocalisationViewModel } from './view_model'
+import { ThreeFiber } from "../three/three_fiber";
+
+import { LocalisationController } from "./controller";
+import { LocalisationModel } from "./model";
+import { ViewMode } from "./model";
+import { LocalisationNetwork } from "./network";
+import style from "./style.module.css";
+import { LocalisationViewModel } from "./view_model";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -154,4 +155,3 @@ function viewModeString(viewMode: ViewMode) {
       throw new Error(`No string defined for view mode ${viewMode}`);
   }
 }
-
