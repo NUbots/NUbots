@@ -3,6 +3,7 @@ import { computed } from "mobx";
 
 import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
+import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 
@@ -118,6 +119,7 @@ export class LocalisationRobotModel {
   @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
+  @observable fieldLinesDots: { rPWw: Vector3[] };
 
   constructor({
     model,
@@ -127,6 +129,7 @@ export class LocalisationRobotModel {
     Hfw,
     Rwt,
     motors,
+    fieldLinesDots,
   }: {
     model: RobotModel;
     name: string;
@@ -135,6 +138,7 @@ export class LocalisationRobotModel {
     Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
+    fieldLinesDots: { rPWw: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
@@ -143,6 +147,7 @@ export class LocalisationRobotModel {
     this.Hfw = Hfw;
     this.Rwt = Rwt;
     this.motors = motors;
+    this.fieldLinesDots = fieldLinesDots;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -153,6 +158,7 @@ export class LocalisationRobotModel {
       Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
+      fieldLinesDots: { rPWw: [] },
     });
   });
 
