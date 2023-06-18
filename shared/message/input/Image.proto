@@ -23,7 +23,6 @@ package message.input;
 
 import "message/platform/webots/messages.proto";
 import "google/protobuf/timestamp.proto";
-import "Matrix.proto";
 import "Vector.proto";
 import "Transform.proto";
 
