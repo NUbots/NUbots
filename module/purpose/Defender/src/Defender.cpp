@@ -26,7 +26,6 @@ namespace module::purpose {
     using message::input::GameState;
     using message::planning::KickTo;
     using message::purpose::NormalDefender;
-    using message::purpose::PenaltyShootoutDefender;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
@@ -60,7 +59,6 @@ namespace module::purpose {
                 // Check if there is GameState information, and if so act based on the current mode
                 if (game_state) {
                     switch (game_state->data.mode.value) {
-                        case GameMode::PENALTY_SHOOTOUT: emit<Task>(std::make_unique<PenaltyShootoutDefender>()); break;
                         case GameMode::NORMAL:
                         case GameMode::OVERTIME: emit<Task>(std::make_unique<NormalDefender>()); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
@@ -89,16 +87,6 @@ namespace module::purpose {
             log<NUClear::DEBUG>("INITIAL");
             emit<Task>(std::make_unique<StandStill>());
         });
-
-        // Penalty shootout PLAYING state
-        on<Provide<PenaltyShootoutDefender>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
-
-        // Penalty shootout UNKNOWN state
-        on<Provide<PenaltyShootoutDefender>, When<Phase, std::equal_to, Phase::UNKNOWN_PHASE>>().then(
-            [this] { log<NUClear::WARN>("Unknown penalty shootout game phase."); });
-
-        // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
-        on<Provide<PenaltyShootoutDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
     void Defender::play() {
