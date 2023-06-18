@@ -32,7 +32,7 @@ nuclear_role(
   vision::BallDetector
   vision::FieldLineDetector
   # Localisation
-  localisation::BallFilter
+  localisation::BallLocalisation
   localisation::FieldLocalisation
   # Behaviour
   behaviour::Controller

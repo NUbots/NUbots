@@ -81,14 +81,14 @@ namespace module::vision {
             lines->id             = horizon.id;         // camera id
             lines->timestamp      = horizon.timestamp;  // time when the image was taken
             lines->Hcw            = horizon.Hcw;        // world to camera transform at the time the image was taken
-            Eigen::Isometry3d Hwc = Eigen::Isometry3d(horizon.Hcw).inverse();
+            Eigen::Isometry3f Hwc = Eigen::Isometry3f(horizon.Hcw.cast<float>()).inverse();
             for (auto& cluster : clusters) {
                 for (const auto& idx : cluster) {
                     lines->points.push_back(uPCw.col(idx));
                     // Project the field line point onto the field plane
-                    Eigen::Vector3f rCWw = Eigen::Vector3f(Hwc.translation().x(), Hwc.translation().y(), 0.0);
-                    Eigen::Vector3f rPCw = uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + rCWw;
-                    lines->rPCw.push_back(rPCw);
+                    Eigen::Vector3f rPWw =
+                        uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + Hwc.translation();
+                    lines->rPWw.push_back(rPWw);
                 }
             }
 
