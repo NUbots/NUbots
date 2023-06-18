@@ -95,7 +95,7 @@ namespace module::platform::OpenCR {
             for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
+                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
                 // set flag
                 packet_dropped = true;
             }
@@ -130,7 +130,7 @@ namespace module::platform::OpenCR {
 
             // Check we're expecting the packet
             if (packet_queue[packet_id].empty()) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet_id));
+                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
                 return;
             }
 
@@ -145,10 +145,10 @@ namespace module::platform::OpenCR {
 
             // Check for packet errors
             if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet_id));
+                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", int(packet_id)));
             }
             if (packet.alert) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", packet_id));
+                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", int(packet_id)));
             }
 
             /// @brief handle incoming packets, and send next request if all packets were handled
