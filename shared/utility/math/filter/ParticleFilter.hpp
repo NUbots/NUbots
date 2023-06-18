@@ -409,7 +409,11 @@ namespace utility::math::filter {
             logits = Eigen::exp(logits.array() - logits.maxCoeff());
 
             // Return the mean log probability
-            return logits.mean();
+            Scalar sum(0);
+            for (int i = 0; i < logits.size(); ++i) {
+                sum += logits[i];
+            }
+            return sum / Scalar(logits.size());
         }
 
         /**
