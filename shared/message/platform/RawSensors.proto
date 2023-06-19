@@ -33,7 +33,7 @@ message RawSensors {
     /// bitmask values.
 
     /// @note RawSensors::Error is kept for protocol v1 compatibility only.
-    /// Values are prefixed with an underscore to resolve naming conflicts.
+    /// Values are suffixed with an underscore to resolve naming conflicts.
     enum Error {
         OK_            = 0;  // not really a flag but the lack of any other flag
         INPUT_VOLTAGE_ = 1;
