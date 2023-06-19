@@ -5,8 +5,8 @@
 
 #include "message/input/GameState.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-// #include "message/localisation/FilteredBall.hpp"
 // #include "message/planning/KickTo.hpp"
 // #include "message/strategy/AlignBallToGoal.hpp"
 // #include "message/strategy/StandStill.hpp"
@@ -20,7 +20,7 @@ namespace module::strategy {
     using extension::Configuration;
     using DefendTask = message::strategy::WalkInsideBoundedBox;
     using utility::support::Expression;
-    // using Ball = message::localisation::;
+    using Ball = message::localisation::Ball;
     using message::input::Sensors;
     using message::localisation::Field;
     using message::strategy::WalkToFieldPosition;
@@ -29,8 +29,11 @@ namespace module::strategy {
         : BehaviourReactor(std::move(environment)) {
         on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defend.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            // cfg.bounded_region = Eigen::Vector4f(config["bounded_region"].as<Expression>());
+            this->log_level          = config["log_level"].as<NUClear::LogLevel>();
+            cfg.bounded_region_x_min = float(config["bounded_region_x_min"].as<Expression>());
+            cfg.bounded_region_x_max = float(config["bounded_region_x_max"].as<Expression>());
+            cfg.bounded_region_y_min = float(config["bounded_region_y_min"].as<Expression>());
+            cfg.bounded_region_y_max = float(config["bounded_region_y_max"].as<Expression>());
 
             // log<NUClear::DEBUG>("cfg.bounded_region ", cfg.bounded_region.transpose());
         });
@@ -51,8 +54,8 @@ namespace module::strategy {
                 log<NUClear::DEBUG>("Dist: ", robot_distance_to_ball);
 
                 // Check if the ball is in the defending region
-                if (rBFf.x() > cfg.defending_region(0) && rBFf.x() < cfg.defending_region(1)
-                    && rBFf.y() > cfg.defending_region(2) && rBFf.y() < cfg.defending_region(3)) {
+                if (rBFf.x() > cfg.bounded_region_x_min && rBFf.x() < cfg.bounded_region_x_max
+                    && rBFf.y() > cfg.bounded_region_y_max && rBFf.y() < cfg.bounded_region_y_min) {
 
                     log<NUClear::DEBUG>("Ball inside of defending region");
 
@@ -67,21 +70,21 @@ namespace module::strategy {
 
                     // If ball is in own half and outside the defending bounding box of robot we clamp in the y
                     // direction and move to 1m behind ball
-                    if (rBFf.x() >= 0 && rBFf.y() > cfg.defending_region(3)) {
+                    if (rBFf.x() >= 0 && rBFf.y() > cfg.bounded_region_y_min) {
                         log<NUClear::DEBUG>("Ball is in own half and in other region");
 
                         // Calculate the defender position
                         // Clamps to x direction of the ball and bounding box an 1 metre behind the ball
-                        rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
-                        rDFf.y() = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
+                        rDFf.x() = std::clamp(rBFf.x(), cfg.bounded_region_x_min, cfg.bounded_region_x_max);
+                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_max, cfg.bounded_region_y_min);
                         rDFf.x() += 1.0;  // For positioning of robot 1 metre behind ball when ball is in own half but
                                           // not inside robots bounded box
                     }
                     else {
                         // Calculate the defender position
                         // Robot clamped to defending bounding box
-                        rDFf.x() = std::clamp(rBFf.x(), cfg.defending_region(0), cfg.defending_region(1));
-                        rDFf.y() = std::clamp(rBFf.y(), cfg.defending_region(2), cfg.defending_region(3));
+                        rDFf.x() = std::clamp(rBFf.x(), cfg.bounded_region_x_min, cfg.bounded_region_x_max);
+                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_max, cfg.bounded_region_y_min);
                     }
 
                     // Walk to determined position given by vector rDFf
