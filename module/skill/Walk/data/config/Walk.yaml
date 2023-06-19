@@ -8,8 +8,8 @@ walk:
     width: 0.19
     apex_ratio: 0.5
   torso:
-    height: 0.44
-    pitch: 0.45
+    height: 0.45
+    pitch: 0.47
     sway_offset: [0, 0.09, 0]
     sway_ratio: 0.1
 
