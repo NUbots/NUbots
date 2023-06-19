@@ -7,7 +7,7 @@ controller.
 
 ## Usage
 
-OpenCR Hardware I/O connects at startup to the OpenCR controller and sets up the starting state of the device, including power cycling the Dynamixel servos.
+OpenCR Hardware I/O connects at startup to the OpenCR controller and sets up the starting state of the device.
 
 The module runs a continuous loop where it
 

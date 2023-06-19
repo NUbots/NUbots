@@ -8,11 +8,11 @@ namespace module::input::decompressor {
 
     class Decompressor {
     public:
-        Decompressor()                        = default;
-        virtual ~Decompressor()               = default;
-        Decompressor(const Decompressor&)     = default;
-        Decompressor(Decompressor&&) noexcept = default;
-        Decompressor& operator=(const Decompressor&) = default;
+        Decompressor()                                   = default;
+        virtual ~Decompressor()                          = default;
+        Decompressor(const Decompressor&)                = default;
+        Decompressor(Decompressor&&) noexcept            = default;
+        Decompressor& operator=(const Decompressor&)     = default;
         Decompressor& operator=(Decompressor&&) noexcept = default;
 
         virtual std::pair<std::vector<uint8_t>, int> decompress(const std::vector<uint8_t>& data) = 0;
