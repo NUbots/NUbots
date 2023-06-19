@@ -101,13 +101,17 @@ namespace module::skill {
             .then([this](const WalkTask& walk_task) {
                 switch (walk_engine.update(compute_time_delta(), walk_task.velocity_target.cast<double>()).value) {
                     case WalkState::State::WALKING:
-                    case WalkState::State::STOPPING: walk(); break;
+                    case WalkState::State::STOPPING:
+                        walk();
+                        emit(std::make_unique<Stability>(Stability::DYNAMIC));
+                        break;
                     case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                     case WalkState::State::UNKNOWN:
                     default: NUClear::log<NUClear::WARN>("Unknown state."); break;
                 }
+
                 // Emit the walking state
-                emit(std::make_unique<WalkState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkState>(walk_engine.get_state(), walk_task.velocity_target));
             });
 
         // Stand Reaction - Sets walk_engine commands to zero, checks walk engine state and sets stability state
@@ -121,7 +125,10 @@ namespace module::skill {
                 // Stop the walk engine (request zero velocity)
                 switch (walk_engine.update(compute_time_delta(), Eigen::Vector3d::Zero()).value) {
                     case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
-                    case WalkState::State::STOPPING: walk(); break;
+                    case WalkState::State::STOPPING:
+                        walk();
+                        emit(std::make_unique<Stability>(Stability::DYNAMIC));
+                        break;
                     case WalkState::State::WALKING: log<NUClear::WARN>("Walk engine state shouldn't be here."); break;
                     case WalkState::State::UNKNOWN:
                     default: NUClear::log<NUClear::WARN>("Unknown state"); break;
@@ -173,9 +180,6 @@ namespace module::skill {
 
         emit<Task>(left_arm, 0, true, "Walk left arm");
         emit<Task>(right_arm, 0, true, "Walk right arm");
-
-        // Emit stability state of dynamic
-        emit(std::make_unique<Stability>(Stability::DYNAMIC));
 
         // Plot the desired feet poses in the torso {t} frame
         if (log_level <= NUClear::DEBUG) {
