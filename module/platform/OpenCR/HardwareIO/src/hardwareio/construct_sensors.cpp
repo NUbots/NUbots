@@ -80,6 +80,22 @@ namespace module::platform::OpenCR {
                 // Error code
                 servo.error_flags = servo_states[i].hardware_error;
 
+                // spoof error
+                switch (i) {
+                    case 0: servo.error_flags |= RawSensors::HardwareError::INPUT_VOLTAGE; break;
+                    case 2: servo.error_flags |= RawSensors::HardwareError::OVERHEATING; break;
+                    case 3: servo.error_flags |= RawSensors::HardwareError::MOTOR_ENCODER; break;
+                    case 4: servo.error_flags |= RawSensors::HardwareError::ELECTRICAL_SHOCK; break;
+                    case 5: servo.error_flags |= RawSensors::HardwareError::OVERLOAD; break;
+                    case 13:
+                        servo.error_flags |= RawSensors::HardwareError::INPUT_VOLTAGE;
+                        servo.error_flags |= RawSensors::HardwareError::OVERHEATING;
+                        servo.error_flags |= RawSensors::HardwareError::MOTOR_ENCODER;
+                        servo.error_flags |= RawSensors::HardwareError::ELECTRICAL_SHOCK;
+                        servo.error_flags |= RawSensors::HardwareError::OVERLOAD;
+                        break;
+                }
+
                 // Accumulate all packet error flags to read at once
                 sensors.subcontroller_error |= servo_states[i].packet_error;
 
