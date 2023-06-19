@@ -22,6 +22,7 @@
 #include "message/actuation/BodySide.hpp"
 
 #include "utility/actuation/ForwardKinematics.hpp"
+#include "utility/actuation/tinyrobotics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 
@@ -32,22 +33,30 @@ namespace module::input {
     using utility::actuation::kinematics::calculateAllPositions;
     using utility::actuation::kinematics::calculateCentreOfMass;
     using utility::actuation::kinematics::calculateInertialTensor;
+    using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
+    using utility::actuation::tinyrobotics::sensors_to_configuration;
     using utility::input::ServoID;
 
     void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors,
                                          const KinematicsModel& kinematics_model,
                                          const RawSensors& raw_sensors) {
 
+        // Convert the sensor joint angles to a configuration vector
+        Eigen::Matrix<double, 20, 1> q = sensors_to_configuration(sensors);
+
         // **************** Kinematics ****************
         // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
-        auto Htx = calculateAllPositions(kinematics_model, *sensors);
+        std::vector<Eigen::Isometry3d> fk = forward_kinematics(nugus_model, q);
+        auto Htx                          = forward_kinematics_to_servo_map(fk);
         for (const auto& entry : Htx) {
             sensors->Htx[entry.first] = entry.second.matrix();
         }
+        auto Htx_old = calculateAllPositions(kinematics_model, *sensors);
+        // TODO: Fix Hpc in cameras
+        sensors->Htx[ServoID::HEAD_PITCH].block(0, 0, 3, 3) = Htx_old[ServoID::HEAD_PITCH].rotation();
 
         // **************** Centre of Mass and Inertia Tensor ****************
-        sensors->rMTt           = calculateCentreOfMass(kinematics_model, sensors->Htx);
-        sensors->inertia_tensor = calculateInertialTensor(kinematics_model, sensors->Htx);
+        sensors->rMTt = centre_of_mass(nugus_model, q);
 
         // **************** Foot Down Information ****************
         sensors->feet[BodySide::RIGHT].down = true;
