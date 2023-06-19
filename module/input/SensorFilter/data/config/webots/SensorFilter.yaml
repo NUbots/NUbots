@@ -77,5 +77,5 @@ mahony:
 # Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
 deadreckoning_scale: [1, 1, 0.6]
 
-# Specify which filtering method to use, either UKF, KF or MAHONY
+# Specify which filtering method to use, either UKF, KF, MAHONY or GROUND_TRUTH
 filtering_method: MAHONY
