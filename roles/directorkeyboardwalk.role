@@ -16,15 +16,14 @@ nuclear_role(
   actuation::Kinematics
   actuation::Servos
   # Skills
-  skill::QuinticWalk
+  skill::Walk
+  skill::FootController
   skill::ScriptKick
   skill::GetUp
   skill::Look
   # Planners
   planning::GetUpPlanner
-  planning::FallingRelaxPlanner
-  # Strategies
-  strategy::FallRecovery
+  # planning::FallingRelaxPlanner Strategies strategy::FallRecovery
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
