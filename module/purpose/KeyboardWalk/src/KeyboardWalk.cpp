@@ -10,6 +10,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -21,6 +22,7 @@ namespace module::purpose {
     using extension::Configuration;
     using extension::behaviour::Task;
     using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
@@ -42,6 +44,7 @@ namespace module::purpose {
             // At the start of the program, we should be standing
             // Without this emit, modules that need a Stability message may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 4);
