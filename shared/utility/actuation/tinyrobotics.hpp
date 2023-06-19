@@ -107,9 +107,9 @@ namespace utility::actuation::tinyrobotics {
      * @tparam Servos type of the Servos message
      * @return tinyrobotics joint configuration vector
      */
-    template <typename Servos>
-    inline Eigen::Matrix<double, 20, 1> servos_to_configuration(const Servos* servos) {
-        Eigen::Matrix<double, 20, 1> q = Eigen::Matrix<double, 20, 1>::Zero();
+    template <typename Servos, typename Scalar>
+    inline Eigen::Matrix<Scalar, 20, 1> servos_to_configuration(const Servos* servos) {
+        Eigen::Matrix<Scalar, 20, 1> q = Eigen::Matrix<Scalar, 20, 1>::Zero();
         for (const auto& [index, servo_id] : joint_map) {
             if (servo_exists(servos->servos, servo_id)) {
                 q(index, 0) = servos->servos.at(servo_id).position;
@@ -124,8 +124,8 @@ namespace utility::actuation::tinyrobotics {
      * @tparam Servos type of the Servos message
      * @return tinyrobotics joint configuration vector
      */
-    template <typename Servos>
-    inline void configuration_to_servos(Servos* servos, const Eigen::Matrix<double, 20, 1>& q) {
+    template <typename Servos, typename Scalar>
+    inline void configuration_to_servos(Servos* servos, const Eigen::Matrix<Scalar, 20, 1>& q) {
         for (const auto& [index, servo_id] : joint_map) {
             if (index < q.size() && servo_exists(servos->servos, servo_id)) {
                 servos->servos[servo_id].position = q(index, 0);
@@ -138,8 +138,9 @@ namespace utility::actuation::tinyrobotics {
      * @param sensors Sensors message to convert
      * @return tinyrobotics joint configuraSensorstion vector
      */
-    inline Eigen::Matrix<double, 20, 1> sensors_to_configuration(const std::unique_ptr<Sensors>& sensors) {
-        Eigen::Matrix<double, 20, 1> q = Eigen::Matrix<double, 20, 1>::Zero();
+    template <typename Scalar>
+    inline Eigen::Matrix<Scalar, 20, 1> sensors_to_configuration(const std::unique_ptr<Sensors>& sensors) {
+        Eigen::Matrix<Scalar, 20, 1> q = Eigen::Matrix<Scalar, 20, 1>::Zero();
         for (const auto& [index, servo_id] : joint_map) {
             q(index, 0) = sensors->servo.at(servo_id).present_position;
         }
@@ -152,9 +153,10 @@ namespace utility::actuation::tinyrobotics {
      index
      * @return map of ServoID to the associated forward kinematics transform
      */
-    inline std::map<ServoID, Eigen::Isometry3d> forward_kinematics_to_servo_map(
-        const std::vector<Eigen::Transform<double, 3, Eigen::Isometry>>& transforms) {
-        std::map<ServoID, Eigen::Isometry3d> servo_map{};
+    template <typename Scalar>
+    inline std::map<ServoID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> forward_kinematics_to_servo_map(
+        const std::vector<Eigen::Transform<Scalar, 3, Eigen::Isometry>>& transforms) {
+        std::map<ServoID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> servo_map{};
         for (const auto& [link_index, servo_id] : link_map) {
             servo_map[servo_id] = transforms[link_index];
         }

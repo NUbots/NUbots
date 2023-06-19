@@ -40,7 +40,7 @@ namespace module::input {
     void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
 
         // Convert the sensor joint angles to a configuration vector
-        Eigen::Matrix<double, 20, 1> q = sensors_to_configuration(sensors);
+        Eigen::Matrix<double, 20, 1> q = sensors_to_configuration<double>(sensors);
 
         // **************** Kinematics ****************
         // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
