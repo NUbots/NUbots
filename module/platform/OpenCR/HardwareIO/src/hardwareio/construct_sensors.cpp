@@ -81,21 +81,12 @@ namespace module::platform::OpenCR {
                 servo.error_flags = servo_states[i].hardware_error;
 
                 // spoof error
-                log<NUClear::DEBUG>("Spoofing errors on servos 1,3,4,5,6,14");
-                switch (i) {
-                    case 0: servo.error_flags |= RawSensors::HardwareError::INPUT_VOLTAGE; break;
-                    case 2: servo.error_flags |= RawSensors::HardwareError::OVERHEATING; break;
-                    case 3: servo.error_flags |= RawSensors::HardwareError::MOTOR_ENCODER; break;
-                    case 4: servo.error_flags |= RawSensors::HardwareError::ELECTRICAL_SHOCK; break;
-                    case 5: servo.error_flags |= RawSensors::HardwareError::OVERLOAD; break;
-                    case 13:
-                        servo.error_flags |= RawSensors::HardwareError::INPUT_VOLTAGE;
-                        servo.error_flags |= RawSensors::HardwareError::OVERHEATING;
-                        servo.error_flags |= RawSensors::HardwareError::MOTOR_ENCODER;
-                        servo.error_flags |= RawSensors::HardwareError::ELECTRICAL_SHOCK;
-                        servo.error_flags |= RawSensors::HardwareError::OVERLOAD;
-                        break;
-                }
+                log<NUClear::DEBUG>("Spoofing all errors on all servos");
+                servo.error_flags |= RawSensors::HardwareError::INPUT_VOLTAGE;
+                servo.error_flags |= RawSensors::HardwareError::OVERHEATING;
+                servo.error_flags |= RawSensors::HardwareError::MOTOR_ENCODER;
+                servo.error_flags |= RawSensors::HardwareError::ELECTRICAL_SHOCK;
+                servo.error_flags |= RawSensors::HardwareError::OVERLOAD;
 
                 // Accumulate all packet error flags to read at once
                 sensors.subcontroller_error |= servo_states[i].packet_error;
