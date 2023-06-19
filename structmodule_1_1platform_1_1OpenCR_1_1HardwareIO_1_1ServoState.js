@@ -8,6 +8,7 @@ var structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState =
     [ "goal_position", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a2b8543f9eb2822e5a182bbb2c1d783be", null ],
     [ "goal_pwm", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a1704a2f486bab4dbb48ae2406d9fbd1e", null ],
     [ "goal_velocity", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a6a86b7ec98409fd004c87ca35ec4e7a5", null ],
+    [ "initialised", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a21fdb36be9cd778de8fc2fa1afb3c686", null ],
     [ "position_d_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a8d43ee56250e07fe856e7883f7dae951", null ],
     [ "position_i_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a61a1b33f7d80d3f451dbb0e45a5bded4", null ],
     [ "position_p_gain", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aa4ef188024cc964f5c53417b26a1feb3", null ],
