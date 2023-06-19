@@ -43,13 +43,13 @@ namespace module::input {
             NUClear::log<NUClear::WARN>(make_packet_error_string("Platform", raw_sensors.subcontroller_error));
         }
         /* COMPATIBILITY WITH OLD PROTOCOL V1 STUFF */
-        if (raw_sensors.platform_error_flags != RawSensors::Error::_OK) {
+        if (raw_sensors.platform_error_flags != RawSensors::Error::OK_) {
             NUClear::log<NUClear::WARN>(make_error_string_v1("Platform", raw_sensors.platform_error_flags));
         }
-        if (raw_sensors.fsr.left.error_flags != RawSensors::Error::_OK) {
+        if (raw_sensors.fsr.left.error_flags != RawSensors::Error::OK_) {
             NUClear::log<NUClear::WARN>(make_error_string_v1("Left FSR", raw_sensors.fsr.left.error_flags));
         }
-        if (raw_sensors.fsr.right.error_flags != RawSensors::Error::_OK) {
+        if (raw_sensors.fsr.right.error_flags != RawSensors::Error::OK_) {
             NUClear::log<NUClear::WARN>(make_error_string_v1("Right FSR", raw_sensors.fsr.right.error_flags));
         }
 
@@ -66,7 +66,7 @@ namespace module::input {
             /* COMPATIBILITY WITH OLD PROTOCOL V1 STUFF */
             const auto& error = original.error_flags;
             // Check for an error on the servo and report it
-            if (error != RawSensors::Error::_OK) {
+            if (error != RawSensors::Error::OK_) {
                 NUClear::log<NUClear::WARN>(make_servo_error_string_v1(original, id));
             }
 
@@ -74,7 +74,7 @@ namespace module::input {
             // fields as we don't know if we are working with protoco v1 or protocol v2. So set the field to whichever
             // error is active, or zero if none.
             const uint32_t message_error = (hardware_status != RawSensors::HardwareError::HARDWARE_OK) ? hardware_status
-                                           : (error != RawSensors::Error::_OK)                         ? error
+                                           : (error != RawSensors::Error::OK_)                         ? error
                                                                                                        : 0;
             // If current Sensors message for this servo has an error and we have a previous sensors
             // message available, then we use our previous sensor values with some updates

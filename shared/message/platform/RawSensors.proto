@@ -35,16 +35,16 @@ message RawSensors {
     /// @note RawSensors::Error is kept for protocol v1 compatibility only.
     /// Values are prefixed with an underscore to resolve naming conflicts.
     enum Error {
-        _OK            = 0;  // not really a flag but the lack of any other flag
-        _INPUT_VOLTAGE = 1;
-        _ANGLE_LIMIT   = 2;
-        _OVERHEATING   = 4;
-        _RANGE         = 8;
-        _CHECKSUM      = 16;
-        _OVERLOAD      = 32;
-        _INSTRUCTION   = 64;
-        _CORRUPT_DATA  = 128;
-        _TIMEOUT       = 256;
+        OK_            = 0;  // not really a flag but the lack of any other flag
+        INPUT_VOLTAGE_ = 1;
+        ANGLE_LIMIT_   = 2;
+        OVERHEATING_   = 4;
+        RANGE_         = 8;
+        CHECKSUM_      = 16;
+        OVERLOAD_      = 32;
+        INSTRUCTION_   = 64;
+        CORRUPT_DATA_  = 128;
+        TIMEOUT_       = 256;
     }
 
     // See https://emanual.robotis.com/docs/en/dxl/protocol2/#error
