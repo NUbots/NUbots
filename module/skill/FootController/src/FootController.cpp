@@ -4,6 +4,7 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
+#include "message/actuation/ServoCommand.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/eye/DataPoint.hpp"
@@ -66,10 +67,11 @@ namespace module::skill {
                 }
 
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
-                    left_leg->servos[id] = cfg.servo_gain;
+                    left_leg->servos[id] = ServoState(cfg.servo_gain, 100);
                 }
 
                 // Emit IK tasks to achieve the desired pose
+                log<NUClear::DEBUG>("Emitting left leg IK task");
                 emit<Task>(left_leg, 0, false, "Control left foot");
             });
 
@@ -91,10 +93,11 @@ namespace module::skill {
                 }
 
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {
-                    right_leg->servos[id] = cfg.servo_gain;
+                    right_leg->servos[id] = ServoState(cfg.servo_gain, 100);
                 }
 
                 // Emit IK tasks to achieve the desired pose
+                log<NUClear::DEBUG>("Emitting right leg IK task");
                 emit<Task>(right_leg, 0, false, "Control right foot");
             });
     }
