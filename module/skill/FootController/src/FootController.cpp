@@ -71,7 +71,6 @@ namespace module::skill {
                 }
 
                 // Emit IK tasks to achieve the desired pose
-                log<NUClear::DEBUG>("Emitting left leg IK task");
                 emit<Task>(left_leg, 0, false, "Control left foot");
             });
 
@@ -97,7 +96,6 @@ namespace module::skill {
                 }
 
                 // Emit IK tasks to achieve the desired pose
-                log<NUClear::DEBUG>("Emitting right leg IK task");
                 emit<Task>(right_leg, 0, false, "Control right foot");
             });
     }
