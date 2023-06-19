@@ -50,7 +50,7 @@ namespace extension {
                 Target(Target&& other) noexcept
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
                 Target& operator=(const Target& other) = default;
-                Target& operator                       =(Target&& other) noexcept {
+                Target& operator=(Target&& other) noexcept {
                     id       = other.id;
                     position = other.position;
                     gain     = other.gain;
@@ -372,10 +372,11 @@ namespace YAML {
 
         static inline bool decode(const Node& node, ::extension::Script::Frame::Target& rhs) {
             try {
-                rhs = {node["id"].as<std::string>(),
-                       node["position"].as<float>(),
-                       node["gain"].as<float>(),
-                       node["torque"] != nullptr ? node["torque"].as<float>() : 100};
+                rhs = ::extension::Script::Frame::Target{
+                    node["id"].as<std::string>(),
+                    node["position"].as<float>(),
+                    node["gain"].as<float>(),
+                    node["torque"].IsDefined() ? node["torque"].as<float>() : 100.0f};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
