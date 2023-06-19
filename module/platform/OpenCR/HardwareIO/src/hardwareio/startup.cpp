@@ -17,6 +17,12 @@ namespace module::platform::OpenCR {
         // were standing, possibly resulting in damage. Instead, we leave the servos powered on and if there are any
         // servo errors, they can be cleared by using the red button to power off the servos, or by turning off the
         // robot entirely.
+        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
+                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
+                                                          uint8_t(1)));
+
+        // Wait about 300ms for the dynamixels to start up
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
         // Set all dynamixels to not return a status packet when written to (to allow consecutive writes)
         dynamixel::v2::SyncWriteData<uint8_t> data[20];
