@@ -4,8 +4,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/localisation/FilteredBall.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -16,8 +16,8 @@ namespace module::strategy {
 
     using extension::Configuration;
     using message::input::Sensors;
+    using message::localisation::Ball;
     using message::localisation::Field;
-    using message::localisation::FilteredBall;
     using message::planning::TurnAroundBall;
     using message::support::FieldDescription;
     using AlignBallToGoalTask = message::strategy::AlignBallToGoal;
@@ -34,20 +34,23 @@ namespace module::strategy {
         });
 
         on<Provide<AlignBallToGoalTask>,
-           With<FilteredBall>,
+           With<Ball>,
            With<Field>,
            With<Sensors>,
            With<FieldDescription>,
            Every<30, Per<std::chrono::seconds>>>()
-            .then([this](const FilteredBall& ball,
+            .then([this](const Ball& ball,
                          const Field& field,
                          const Sensors& sensors,
                          const FieldDescription& field_description) {
                 // If the ball is close, align towards the goal
-                float distance_to_ball = ball.rBRr.head(2).norm();
+                const Eigen::Isometry3d Hrw = Eigen::Isometry3d(sensors.Hrw);
+                Eigen::Vector3d rBRr        = Hrw * ball.rBWw;
+                float distance_to_ball      = rBRr.head(2).norm();
                 if (distance_to_ball < cfg.ball_distance_threshold) {
                     // Get the robot's position (pose) on the field
-                    Eigen::Isometry3d Hrf = Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse());
+                    Eigen::Isometry3d Hrf =
+                        Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse().cast<double>());
 
                     // Goal position relative to robot
                     Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.dimensions.field_length / 2.0, 0.0, 0.0);

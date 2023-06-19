@@ -95,7 +95,7 @@ namespace module::platform::OpenCR {
             for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
+                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
                 // set flag
                 packet_dropped = true;
             }
@@ -130,7 +130,7 @@ namespace module::platform::OpenCR {
 
             // Check we're expecting the packet
             if (packet_queue[packet_id].empty()) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet_id));
+                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
                 return;
             }
 
@@ -199,19 +199,11 @@ namespace module::platform::OpenCR {
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
-                // Get the difference between the current and goal servo position to calculate speed
-                float diff =
-                    utility::math::angle::difference(command.position, servo_states[command.id].present_position);
-
+                // Desired time to reach the goal position (in milliseconds)
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
-
-                float speed;
-                if (duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                }
-                else {
-                    speed = 0.0f;
-                }
+                float time_span = float(duration.count()) / float(NUClear::clock::period::den) * 1000.0f;
+                // Ensure the time span is positive
+                time_span = std::max(time_span, 0.0f);
 
                 // Update our internal state
                 if (servo_states[command.id].torque != command.torque
@@ -219,7 +211,7 @@ namespace module::platform::OpenCR {
                     || servo_states[command.id].position_i_gain != command.gain * 0
                     || servo_states[command.id].position_d_gain != command.gain * 0
                     || servo_states[command.id].goal_position != command.position
-                    || servo_states[command.id].profile_velocity != speed) {
+                    || servo_states[command.id].profile_velocity != time_span) {
 
                     servo_states[command.id].dirty = true;
 
@@ -229,8 +221,10 @@ namespace module::platform::OpenCR {
                     servo_states[command.id].position_i_gain = command.gain * 0;
                     servo_states[command.id].position_d_gain = command.gain * 0;
 
-                    servo_states[command.id].goal_position    = command.position;
-                    servo_states[command.id].profile_velocity = speed;
+                    servo_states[command.id].goal_position = command.position;
+                    // Drive Mode is Time-Based, so we need to set the profile velocity to the time (in milliseconds) we
+                    // want to take to reach the goal position
+                    servo_states[command.id].profile_velocity = time_span;
                 }
             }
         });
