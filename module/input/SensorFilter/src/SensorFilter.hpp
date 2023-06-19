@@ -279,10 +279,8 @@ namespace module::input {
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
-        /// @param kinematics_model The kinematics model to use for calculations
-        void update_kinematics(std::unique_ptr<Sensors>& sensors,
-                               const KinematicsModel& kinematics_model,
-                               const RawSensors& raw_sensors);
+        /// @param raw_sensors The raw sensor data
+        void update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
         /// @param sensors The sensors message to update

@@ -37,9 +37,7 @@ namespace module::input {
     using utility::actuation::tinyrobotics::sensors_to_configuration;
     using utility::input::ServoID;
 
-    void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors,
-                                         const KinematicsModel& kinematics_model,
-                                         const RawSensors& raw_sensors) {
+    void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
 
         // Convert the sensor joint angles to a configuration vector
         Eigen::Matrix<double, 20, 1> q = sensors_to_configuration(sensors);
@@ -51,9 +49,6 @@ namespace module::input {
         for (const auto& entry : Htx) {
             sensors->Htx[entry.first] = entry.second.matrix();
         }
-        auto Htx_old = calculateAllPositions(kinematics_model, *sensors);
-        // TODO: Fix Hpc in cameras
-        sensors->Htx[ServoID::HEAD_PITCH].block(0, 0, 3, 3) = Htx_old[ServoID::HEAD_PITCH].rotation();
 
         // **************** Centre of Mass and Inertia Tensor ****************
         sensors->rMTt = centre_of_mass(nugus_model, q);

@@ -23,9 +23,9 @@ lens:
   fov: 2.0944
   # The homogenous transform from the rigid platform this camera is attached to to its optical location
   Hpc:
-    - [1.0, 0.0, 0.0, 0.0889361]
-    - [0.0, 1.0, 0.0, 0.0352991]
-    - [0.0, 0.0, 1.0, 0.0713675]
+    - [0.0, 0.0, 1.0, 0.0889361]
+    - [1.0, 0.0, 0.0, 0.0352991]
+    - [0.0, 1.0, 0.0, 0.0713675]
     - [0.0, 0.0, 0.0, 1.0]
 
 settings:

@@ -147,41 +147,40 @@ namespace module::input {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        update_loop = on<Trigger<RawSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>()
-                          .then("Main Sensors Loop",
-                                [this](const RawSensors& raw_sensors,
-                                       const std::shared_ptr<const Sensors>& previous_sensors,
-                                       const KinematicsModel& kinematics_model) {
-                                    auto sensors = std::make_unique<Sensors>();
+        update_loop =
+            on<Trigger<RawSensors>, Optional<With<Sensors>>, Single, Priority::HIGH>()
+                .then("Main Sensors Loop",
+                      [this](const RawSensors& raw_sensors, const std::shared_ptr<const Sensors>& previous_sensors) {
+                          auto sensors = std::make_unique<Sensors>();
 
-                                    // Updates message with raw sensor data
-                                    update_raw_sensors(sensors, previous_sensors, raw_sensors);
+                          // Updates message with raw sensor data
+                          update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
-                                    // Updates the message with kinematics data
-                                    update_kinematics(sensors, kinematics_model, raw_sensors);
+                          // Updates the message with kinematics data
+                          update_kinematics(sensors, raw_sensors);
 
-                                    // Updates the Sensors message with odometry data filtered using specified filter
-                                    switch (cfg.filtering_method.value) {
-                                        case FilteringMethod::UKF:
-                                            update_odometry_ukf(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        case FilteringMethod::KF:
-                                            update_odometry_kf(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        case FilteringMethod::MAHONY:
-                                            update_odometry_mahony(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        default: log<NUClear::WARN>("Unknown Filtering Method"); break;
-                                    }
+                          // Updates the Sensors message with odometry data filtered using specified filter
+                          switch (cfg.filtering_method.value) {
+                              case FilteringMethod::UKF:
+                                  update_odometry_ukf(sensors, previous_sensors, raw_sensors);
+                                  break;
+                              case FilteringMethod::KF:
+                                  update_odometry_kf(sensors, previous_sensors, raw_sensors);
+                                  break;
+                              case FilteringMethod::MAHONY:
+                                  update_odometry_mahony(sensors, previous_sensors, raw_sensors);
+                                  break;
+                              default: log<NUClear::WARN>("Unknown Filtering Method"); break;
+                          }
 
-                                    // Graph debug information
-                                    if (log_level <= NUClear::DEBUG) {
-                                        debug_sensor_filter(sensors, raw_sensors);
-                                    }
+                          // Graph debug information
+                          if (log_level <= NUClear::DEBUG) {
+                              debug_sensor_filter(sensors, raw_sensors);
+                          }
 
-                                    emit(std::move(sensors));
-                                })
-                          .disable();
+                          emit(std::move(sensors));
+                      })
+                .disable();
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
