@@ -81,6 +81,7 @@ namespace module::platform::OpenCR {
                 servo.error_flags = servo_states[i].hardware_error;
 
                 // spoof error
+                log<NUClear::DEBUG>("Spoofing errors on servos 1,3,4,5,6,14");
                 switch (i) {
                     case 0: servo.error_flags |= RawSensors::HardwareError::INPUT_VOLTAGE; break;
                     case 2: servo.error_flags |= RawSensors::HardwareError::OVERHEATING; break;
