@@ -143,6 +143,13 @@ namespace module::platform::OpenCR {
             convert::position(servo_index, data.present_position, nugus.servo_direction, nugus.servo_offset);
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
+
+        // If this servo has not been initialised yet, set the goal states to the current states
+        if (!servo_states[servo_index].initialised) {
+            servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
+            servo_states[servo_index].torque        = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
+            servo_states[servo_index].initialised   = true;
+        }
     }
 
 }  // namespace module::platform::OpenCR
