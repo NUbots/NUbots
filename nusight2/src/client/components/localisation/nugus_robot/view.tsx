@@ -9,6 +9,7 @@ import { Mesh } from "three";
 import { Object3D } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
+import { memoize } from "../../../base/memoize";
 import { LocalisationRobotModel } from "../robot_model";
 
 import url from "./config/nugus.glb?url";
@@ -16,11 +17,9 @@ import url from "./config/nugus.glb?url";
 export const NUgusView = observer(({ model }: { model: LocalisationRobotModel }) => {
   const { scene: originalScene } = useLoader(GLTFLoader, url);
   // Clone so that each instance has its own copy that it may mutate.
-  const scene = useMemo(() => originalScene.clone(), [originalScene]);
+  const scene = useMemo(() => fixHead(originalScene).clone(), [originalScene]);
   const three = useThree();
   React.useEffect(() => {
-    // TODO (Annable): Baking this rotation into the model geometry would be ideal.
-    findMesh(scene, "Head").geometry.applyMatrix4(new Matrix4().makeRotationY(-Math.PI / 2));
     return autorun(() => {
       const robot = findMesh(scene, "Torso");
       const motors = model.motors;
@@ -53,6 +52,12 @@ export const NUgusView = observer(({ model }: { model: LocalisationRobotModel })
     });
   }, [scene]);
   return <primitive object={scene} key={model.id} />;
+});
+
+const fixHead = memoize((scene: Object3D): Object3D => {
+  // TODO (Annable): Baking this rotation into the model geometry would be ideal.
+  findMesh(scene, "Head").geometry.applyMatrix4(new Matrix4().makeRotationY(-Math.PI / 2));
+  return scene;
 });
 
 const findMesh = (root: Object3D, name: string): Mesh => {
