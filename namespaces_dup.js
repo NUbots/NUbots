@@ -1021,8 +1021,10 @@ var namespaces_dup =
       [ "platform", null, [
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
         [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ],
-        [ "make_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#a2594ea6b08bf054326817ca5ecec7c83", null ],
-        [ "make_servo_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#a7b9fad892f307b3fc1326e724225e5e6", null ]
+        [ "make_error_string_v1", "shared_2utility_2platform_2RawSensors_8hpp.html#a7632c53b6a9fdc88115294b268a7c4fe", null ],
+        [ "make_packet_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
+        [ "make_servo_error_string_v1", "shared_2utility_2platform_2RawSensors_8hpp.html#acf66ddef285ab82abef2d5a9afdbc9ec", null ],
+        [ "make_servo_hardware_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
       ] ],
       [ "reflection", null, [
         [ "unknown_message", "structutility_1_1reflection_1_1unknown__message.html", "structutility_1_1reflection_1_1unknown__message" ]

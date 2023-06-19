@@ -180,10 +180,6 @@ Public Attributes</h2></td></tr>
 Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a9cc3c946ff42f33eb89168d33a2c52d8">acc</a> = Eigen::Vector3f::Zero()</td></tr>
 <tr class="memdesc:a9cc3c946ff42f33eb89168d33a2c52d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accelerometer value of the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html">OpenCR</a> IMU. <br /></td></tr>
 <tr class="separator:a9cc3c946ff42f33eb89168d33a2c52d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2bc411e3375eef3a701179d2bb584310"><td class="memItemLeft" align="right" valign="top"><a id="a2bc411e3375eef3a701179d2bb584310"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a2bc411e3375eef3a701179d2bb584310">alert_flag</a> = false</td></tr>
-<tr class="memdesc:a2bc411e3375eef3a701179d2bb584310"><td class="mdescLeft">&#160;</td><td class="mdescRight">Error status of the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html">OpenCR</a> device. <br /></td></tr>
-<tr class="separator:a2bc411e3375eef3a701179d2bb584310"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7a13a8057ee6f3aae47238eb9f686b4c"><td class="memItemLeft" align="right" valign="top"><a id="a7a13a8057ee6f3aae47238eb9f686b4c"></a>
 message::platform::RawSensors::Buttons&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a7a13a8057ee6f3aae47238eb9f686b4c">buttons</a> = {false, false, false}</td></tr>
 <tr class="memdesc:a7a13a8057ee6f3aae47238eb9f686b4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pushed state of the buttons - left, middle, right. <br /></td></tr>
@@ -196,10 +192,10 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a130a00f4058b3cf38ce164c6fc14aa9c">dirty</a> = false</td></tr>
 <tr class="memdesc:a130a00f4058b3cf38ce164c6fc14aa9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether any of the variables in this struct have changed. <br /></td></tr>
 <tr class="separator:a130a00f4058b3cf38ce164c6fc14aa9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad93cc178a55d1c844dfaa9b9ba2c5231"><td class="memItemLeft" align="right" valign="top"><a id="ad93cc178a55d1c844dfaa9b9ba2c5231"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#ad93cc178a55d1c844dfaa9b9ba2c5231">error_number</a> = 0</td></tr>
-<tr class="memdesc:ad93cc178a55d1c844dfaa9b9ba2c5231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specific error from the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html">OpenCR</a> device. <br /></td></tr>
-<tr class="separator:ad93cc178a55d1c844dfaa9b9ba2c5231"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9ce5d2d360ce756b240011c51b10009"><td class="memItemLeft" align="right" valign="top"><a id="ae9ce5d2d360ce756b240011c51b10009"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#ae9ce5d2d360ce756b240011c51b10009">error_flags</a> = 0</td></tr>
+<tr class="memdesc:ae9ce5d2d360ce756b240011c51b10009"><td class="mdescLeft">&#160;</td><td class="mdescRight">Most recent packet error from the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html">OpenCR</a> device. <br /></td></tr>
+<tr class="separator:ae9ce5d2d360ce756b240011c51b10009"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3f80ef8831498164b8cd1acd29811a2"><td class="memItemLeft" align="right" valign="top">message::platform::RawSensors::EyeLED&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2">eye_led</a> = {0x000000FF}</td></tr>
 <tr class="memdesc:af3f80ef8831498164b8cd1acd29811a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Colour of the eye LED.  <a href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2">More...</a><br /></td></tr>
 <tr class="separator:af3f80ef8831498164b8cd1acd29811a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -261,7 +257,7 @@ message::platform::RawSensors::LEDPanel&#160;</td><td class="memItemRight" valig
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html">OpenCRState</a></li>
-    <li class="footer">Generated on Mon Jun 19 2023 22:27:24 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 19 2023 23:10:42 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -180,9 +180,6 @@ Public Attributes</h2></td></tr>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a96e16f787c99e4b86cbd1b44b4649ce8">dirty</a> = false</td></tr>
 <tr class="memdesc:a96e16f787c99e4b86cbd1b44b4649ce8"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if we need to write new values to the hardware. <br /></td></tr>
 <tr class="separator:a96e16f787c99e4b86cbd1b44b4649ce8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4cd109679b44dfa742fe0d2dfd223aae"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a4cd109679b44dfa742fe0d2dfd223aae">error_flags</a> = 0</td></tr>
-<tr class="memdesc:a4cd109679b44dfa742fe0d2dfd223aae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error state of the servo.  <a href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a4cd109679b44dfa742fe0d2dfd223aae">More...</a><br /></td></tr>
-<tr class="separator:a4cd109679b44dfa742fe0d2dfd223aae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2bdedc873e432b27cf9ea70743f21d5"><td class="memItemLeft" align="right" valign="top"><a id="af2bdedc873e432b27cf9ea70743f21d5"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#af2bdedc873e432b27cf9ea70743f21d5">feedforward_1st_gain</a> = 0.0f</td></tr>
 <tr class="memdesc:af2bdedc873e432b27cf9ea70743f21d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The first feedforward torque coefficient. <br /></td></tr>
@@ -207,10 +204,17 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="str
 float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a6a86b7ec98409fd004c87ca35ec4e7a5">goal_velocity</a> = 1.08775f</td></tr>
 <tr class="memdesc:a6a86b7ec98409fd004c87ca35ec4e7a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The target velocity of the servo, not used by the servos. <br /></td></tr>
 <tr class="separator:a6a86b7ec98409fd004c87ca35ec4e7a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae3d4166f42916fe2b092da859c9f4e9a"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ae3d4166f42916fe2b092da859c9f4e9a">hardware_error</a> = 0</td></tr>
+<tr class="memdesc:ae3d4166f42916fe2b092da859c9f4e9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current error state of the servo.  <a href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#ae3d4166f42916fe2b092da859c9f4e9a">More...</a><br /></td></tr>
+<tr class="separator:ae3d4166f42916fe2b092da859c9f4e9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a21fdb36be9cd778de8fc2fa1afb3c686"><td class="memItemLeft" align="right" valign="top"><a id="a21fdb36be9cd778de8fc2fa1afb3c686"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a21fdb36be9cd778de8fc2fa1afb3c686">initialised</a> = false</td></tr>
 <tr class="memdesc:a21fdb36be9cd778de8fc2fa1afb3c686"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether we have initialised this servo yet. <br /></td></tr>
 <tr class="separator:a21fdb36be9cd778de8fc2fa1afb3c686"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ab55c4747eab87b87257970480391c2"><td class="memItemLeft" align="right" valign="top"><a id="a2ab55c4747eab87b87257970480391c2"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a2ab55c4747eab87b87257970480391c2">packet_error</a> = 0</td></tr>
+<tr class="memdesc:a2ab55c4747eab87b87257970480391c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Most recent packet error recieved, to cache before RawSensors is emitted. <br /></td></tr>
+<tr class="separator:a2ab55c4747eab87b87257970480391c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8d43ee56250e07fe856e7883f7dae951"><td class="memItemLeft" align="right" valign="top"><a id="a8d43ee56250e07fe856e7883f7dae951"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a8d43ee56250e07fe856e7883f7dae951">position_d_gain</a> = 0.0f</td></tr>
 <tr class="memdesc:a8d43ee56250e07fe856e7883f7dae951"><td class="mdescLeft">&#160;</td><td class="mdescRight">The derivative gain of the position. <br /></td></tr>
@@ -278,20 +282,20 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="str
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c" title="The state of the servos, used to store read values and to store values to be written.">servo_states</a> </dd></dl>
 </div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="a4cd109679b44dfa742fe0d2dfd223aae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4cd109679b44dfa742fe0d2dfd223aae">&#9670;&nbsp;</a></span>error_flags</h2>
+<a id="ae3d4166f42916fe2b092da859c9f4e9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae3d4166f42916fe2b092da859c9f4e9a">&#9670;&nbsp;</a></span>hardware_error</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t module::platform::OpenCR::HardwareIO::ServoState::error_flags = 0</td>
+          <td class="memname">uint8_t module::platform::OpenCR::HardwareIO::ServoState::hardware_error = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>Current error state of the servo. </p>
-<dl class="section warning"><dt>Warning</dt><dd>different to the dynamixel packet error status </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>different to the dynamixel packet error status </dd></dl>
 
 </div>
 </div>
@@ -321,7 +325,7 @@ float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="str
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html">ServoState</a></li>
-    <li class="footer">Generated on Mon Jun 19 2023 22:27:24 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 19 2023 23:10:42 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
