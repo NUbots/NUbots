@@ -14,10 +14,10 @@ namespace module::strategy {
         struct Config {
 
             /// @brief Bounded box of region to defend the ball - x min, x max, y max, y min
-            float bounded_region_x_min = 0.0;
-            float bounded_region_x_max = 0.0;
-            float bounded_region_y_min = 0.0;
-            float bounded_region_y_max = 0.0;
+            double bounded_region_x_min = 0.0;
+            double bounded_region_x_max = 0.0;
+            double bounded_region_y_min = 0.0;
+            double bounded_region_y_max = 0.0;
 
         } cfg;
 

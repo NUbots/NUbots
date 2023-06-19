@@ -30,20 +30,20 @@ namespace module::strategy {
         on<Configuration>("WalkInsideBoundedBox.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defend.yaml
             this->log_level          = config["log_level"].as<NUClear::LogLevel>();
-            cfg.bounded_region_x_min = float(config["bounded_region_x_min"].as<Expression>());
-            cfg.bounded_region_x_max = float(config["bounded_region_x_max"].as<Expression>());
-            cfg.bounded_region_y_min = float(config["bounded_region_y_min"].as<Expression>());
-            cfg.bounded_region_y_max = float(config["bounded_region_y_max"].as<Expression>());
+            cfg.bounded_region_x_min = config["bounded_region_x_min"].as<Expression>();
+            cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
+            cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
+            cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
 
             // log<NUClear::DEBUG>("cfg.bounded_region ", cfg.bounded_region.transpose());
         });
         on<Provide<DefendTask>, Trigger<Ball>, With<Field>, With<Sensors>>().then(
             [this](const DefendTask& defend_task, const Ball& ball, const Field& field, const Sensors& sensor) {
-                Eigen::Isometry3f Hfw = Eigen::Isometry3f(field.Hfw.cast<float>());
-                Eigen::Isometry3f Hrw = Eigen::Isometry3f(sensor.Hrw.cast<float>());
-                Eigen::Isometry3f Hfr = Hfw * Hrw.inverse();
-                Eigen::Vector3f rBFf  = Hfw * ball.rBWw;
-                Eigen::Vector3f rRFf  = Hfr.translation();
+                Eigen::Isometry3d Hfw = Eigen::Isometry3d(field.Hfw.cast<double>());
+                Eigen::Isometry3d Hrw = Eigen::Isometry3d(sensor.Hrw.cast<double>());
+                Eigen::Isometry3d Hfr = Hfw * Hrw.inverse();
+                Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
+                Eigen::Vector3d rRFf  = Hfr.translation();
 
                 // The distance of the robot from the ball
                 double robot_distance_to_ball =
@@ -63,7 +63,7 @@ namespace module::strategy {
                 }
                 else {  // Determines robots as ball has left bounded region
                     // Robot - Defending position on field
-                    Eigen::Vector3f rDFf = Eigen::Vector3f::Zero();
+                    Eigen::Vector3d rDFf = Eigen::Vector3d::Zero();
 
                     log<NUClear::DEBUG>("rDFf x: ", rDFf.x());
                     log<NUClear::DEBUG>("rDFf y: ", rDFf.y());
