@@ -51,9 +51,9 @@ namespace module::platform::OpenCR {
                                             -convert::gyro(data.gyro[1]),   // Y
                                             -convert::gyro(data.gyro[2]));  // Z
 
-        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),       // X
-                                           -convert::acc(data.acc[1]),      // Y
-                                           -convert::acc(data.acc[2]));     // Z
+        opencr_state.acc = Eigen::Vector3f(convert::acc(data.acc[0]),    // X
+                                           -convert::acc(data.acc[1]),   // Y
+                                           -convert::acc(data.acc[2]));  // Z
         // Command send/receive errors only
         opencr_state.error_flags = packet.error;
 

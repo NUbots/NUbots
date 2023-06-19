@@ -50,14 +50,15 @@ message RawSensors {
     // See https://emanual.robotis.com/docs/en/dxl/protocol2/#error
     enum PacketError {
         PACKET_OK   = 0;
-        RESULT_FAIL = 1;   // Failed to process the sent Instruction Packet
-        INSTRUCTION = 2;   // Undefined Instruction has been used OR Action has been used without Reg Write
-        CRC         = 4;   // CRC of the sent Packet does not match
-        DATA_RANGE  = 8;   // Data to be written in the corresponding Address is outside the range of the minimum/maximum value
+        RESULT_FAIL = 1;  // Failed to process the sent Instruction Packet
+        INSTRUCTION = 2;  // Undefined Instruction has been used OR Action has been used without Reg Write
+        CRC         = 4;  // CRC of the sent Packet does not match
+        DATA_RANGE =
+            8;  // Data to be written in the corresponding Address is outside the range of the minimum/maximum value
         DATA_LENGTH = 16;  // Attempt to write Data that is shorter than the data length of the corresponding Address
         DATA_LIMIT  = 32;  // Data to be written in the corresponding Address is outside of the Limit value
-        ACCESS      = 64;  // Attempt to read/write a value in an Address that is Write/Read Only or has not been defined
-        ALERT       = 128; // Error with device, check the Hardware Error Status of the control table
+        ACCESS = 64;   // Attempt to read/write a value in an Address that is Write/Read Only or has not been defined
+        ALERT  = 128;  // Error with device, check the Hardware Error Status of the control table
     }
 
     // See https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#hardware-error-status70
@@ -65,7 +66,7 @@ message RawSensors {
     enum HardwareError {
         HARDWARE_OK      = 0;
         INPUT_VOLTAGE    = 1;
-        UNUSED_BIT_1     = 2; // Unused, Always 0
+        UNUSED_BIT_1     = 2;  // Unused, Always 0
         OVERHEATING      = 4;
         MOTOR_ENCODER    = 8;
         ELECTRICAL_SHOCK = 16;
@@ -128,30 +129,30 @@ message RawSensors {
     // Full set of information to use for servos using Dynamixel v2 firmware
     message Servo {
         // keep this for compatibility with cm740/v1 while we need it
-        uint32        error_flags           = 1; // components of type RawSensors::Error (but can have multiple bits set)
+        uint32 error_flags = 1;  // components of type RawSensors::Error (but can have multiple bits set)
         // this is for the protocol v2
-        uint32        hardware_error        = 2; // components of type RawSensors::HardwareError (but can have multiple bits set)
-        bool          torque_enabled        = 3;
-        float         velocity_i_gain       = 4;
-        float         velocity_p_gain       = 5;
-        float         position_d_gain       = 6;
-        float         position_i_gain       = 7;
-        float         position_p_gain       = 8;
-        float         feed_forward_1st_Gain = 9;
-        float         feed_forward_2nd_Gain = 10;
-        float         present_PWM           = 11;
-        float         present_current       = 12;
-        float         present_velocity      = 13;
-        float         present_position      = 14;
-        float         goal_PWM              = 15;
-        float         goal_current          = 16;
-        float         goal_velocity         = 17;
-        float         goal_position         = 18;
-        float         voltage               = 19;
-        float         temperature           = 20;
-        float         profile_acceleration  = 21;
+        uint32 hardware_error  = 2;  // components of type RawSensors::HardwareError (but can have multiple bits set)
+        bool   torque_enabled  = 3;
+        float  velocity_i_gain = 4;
+        float  velocity_p_gain = 5;
+        float  position_d_gain = 6;
+        float  position_i_gain = 7;
+        float  position_p_gain = 8;
+        float  feed_forward_1st_Gain = 9;
+        float  feed_forward_2nd_Gain = 10;
+        float  present_PWM           = 11;
+        float  present_current       = 12;
+        float  present_velocity      = 13;
+        float  present_position      = 14;
+        float  goal_PWM              = 15;
+        float  goal_current          = 16;
+        float  goal_velocity         = 17;
+        float  goal_position         = 18;
+        float  voltage               = 19;
+        float  temperature           = 20;
+        float  profile_acceleration  = 21;
         // Replaces "Moving speed" from v1 protocol, basically just the set speed.
-        float         profile_velocity      = 22;
+        float profile_velocity = 22;
     };
 
     /// Set of all the servos on the robot
@@ -178,22 +179,22 @@ message RawSensors {
         Servo head_tilt        = 20;
     }
 
-    google.protobuf.Timestamp timestamp            = 1;  // Timestamp when our data were taken
+    google.protobuf.Timestamp timestamp = 1;  // Timestamp when our data were taken
 
     // again, keep this for compatibility with cm740/v1 while we need it
-    uint32                    platform_error_flags = 2;
+    uint32 platform_error_flags = 2;
     // this is for protocol v2
-    uint32                    subcontroller_error  = 3; // components of type RawSensors::PacketError (but can have multiple bits set)
+    uint32 subcontroller_error = 3;  // components of type RawSensors::PacketError (but can have multiple bits set)
 
-    LEDPanel                  led_panel            = 4;
-    HeadLED                   head_led             = 5;
-    EyeLED                    eye_led              = 6;
-    Buttons                   buttons              = 7;
-    fvec3                     accelerometer        = 8;
-    fvec3                     gyroscope            = 9;
-    Servos                    servo                = 10;
-    float                     battery              = 11;
-    FSRs                      fsr                  = 12;
+    LEDPanel led_panel     = 4;
+    HeadLED  head_led      = 5;
+    EyeLED   eye_led       = 6;
+    Buttons  buttons       = 7;
+    fvec3    accelerometer = 8;
+    fvec3    gyroscope     = 9;
+    Servos   servo         = 10;
+    float    battery       = 11;
+    FSRs     fsr           = 12;
 
     /// Ground truth from a simulator
     webots.OdometryGroundTruth odometry_ground_truth = 13;

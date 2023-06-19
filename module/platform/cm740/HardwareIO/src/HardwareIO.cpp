@@ -101,8 +101,8 @@ namespace module::platform::cm740 {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.error_flags =
-            data.fsrErrorCodes[0] == 0xFF ? RawSensors::Error::TIMEOUT_ : RawSensors::Error(data.fsrErrorCodes[0]).value;
+        sensors.fsr.right.error_flags = data.fsrErrorCodes[0] == 0xFF ? RawSensors::Error::TIMEOUT_
+                                                                      : RawSensors::Error(data.fsrErrorCodes[0]).value;
 
         // Sensors
         sensors.fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -118,8 +118,8 @@ namespace module::platform::cm740 {
 
         // Left Sensor
         // Error
-        sensors.fsr.left.error_flags =
-            data.fsrErrorCodes[1] == 0xFF ? RawSensors::Error::TIMEOUT_ : RawSensors::Error(data.fsrErrorCodes[1]).value;
+        sensors.fsr.left.error_flags = data.fsrErrorCodes[1] == 0xFF ? RawSensors::Error::TIMEOUT_
+                                                                     : RawSensors::Error(data.fsrErrorCodes[1]).value;
 
         // Sensors
         sensors.fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);

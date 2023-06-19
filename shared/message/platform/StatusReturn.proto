@@ -41,12 +41,12 @@ message StatusReturn {
         ACCESS_ERROR      = 7;
     }
 
-    int32                     magic          = 1;  /// Magic number that heads up every packet
-    int32                     id             = 2;  /// The ID of the device that we are communicating with
-    int32                     length         = 3;  /// The total length of the data packet (4 plus the size of data)
-    int32                     instruction    = 4;  /// Will always be Instruction::STATUS_RETURN
-    int32                     error          = 6;  /// Alert and Error number
-    bytes                     data           = 8;  /// Expected return data
-    int32                     checksum       = 9;  /// Our checksum for this command
-    google.protobuf.Timestamp timestamp      = 10;
+    int32                     magic       = 1;  /// Magic number that heads up every packet
+    int32                     id          = 2;  /// The ID of the device that we are communicating with
+    int32                     length      = 3;  /// The total length of the data packet (4 plus the size of data)
+    int32                     instruction = 4;  /// Will always be Instruction::STATUS_RETURN
+    int32                     error       = 6;  /// Alert and Error number
+    bytes                     data        = 8;  /// Expected return data
+    int32                     checksum    = 9;  /// Our checksum for this command
+    google.protobuf.Timestamp timestamp   = 10;
 }
