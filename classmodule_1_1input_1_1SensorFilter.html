@@ -253,6 +253,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a20b36e902024f87a8f2e1193179539b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a20b36e902024f87a8f2e1193179539b1">update_kinematics</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const KinematicsModel &amp;kinematics_model, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a20b36e902024f87a8f2e1193179539b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the sensors message with kinematics data.  <a href="classmodule_1_1input_1_1SensorFilter.html#a20b36e902024f87a8f2e1193179539b1">More...</a><br /></td></tr>
 <tr class="separator:a20b36e902024f87a8f2e1193179539b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a02988d6e1c81b5fa00fcfc62a307af51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a02988d6e1c81b5fa00fcfc62a307af51">update_odometry_ground_truth</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const RawSensors &amp;raw_sensors)</td></tr>
+<tr class="memdesc:a02988d6e1c81b5fa00fcfc62a307af51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes the position, orientation, velocity and rotational velocity of the torso in world space.  <a href="classmodule_1_1input_1_1SensorFilter.html#a02988d6e1c81b5fa00fcfc62a307af51">More...</a><br /></td></tr>
+<tr class="separator:a02988d6e1c81b5fa00fcfc62a307af51"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abf51502eb8c5ac5e27bc69b66b936dc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#abf51502eb8c5ac5e27bc69b66b936dc4">update_odometry_kf</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const std::shared_ptr&lt; const Sensors &gt; &amp;previous_sensors, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:abf51502eb8c5ac5e27bc69b66b936dc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with odometry data filtered using Kalman Filter. This includes the.  <a href="classmodule_1_1input_1_1SensorFilter.html#abf51502eb8c5ac5e27bc69b66b936dc4">More...</a><br /></td></tr>
 <tr class="separator:abf51502eb8c5ac5e27bc69b66b936dc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -482,6 +485,44 @@ Trent Houliston </dd></dl>
 
 </div>
 </div>
+<a id="a02988d6e1c81b5fa00fcfc62a307af51"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02988d6e1c81b5fa00fcfc62a307af51">&#9670;&nbsp;</a></span>update_odometry_ground_truth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::input::SensorFilter::update_odometry_ground_truth </td>
+          <td>(</td>
+          <td class="paramtype">std::unique_ptr&lt; Sensors &gt; &amp;&#160;</td>
+          <td class="paramname"><em>sensors</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const RawSensors &amp;&#160;</td>
+          <td class="paramname"><em>raw_sensors</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes the position, orientation, velocity and rotational velocity of the torso in world space. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sensors</td><td>The sensors message to update </td></tr>
+    <tr><td class="paramname">previous_sensors</td><td>The previous sensors message </td></tr>
+    <tr><td class="paramname">raw_sensors</td><td>The raw sensor data </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="abf51502eb8c5ac5e27bc69b66b936dc4"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abf51502eb8c5ac5e27bc69b66b936dc4">&#9670;&nbsp;</a></span>update_odometry_kf()</h2>
 
@@ -660,6 +701,7 @@ Trent Houliston </dd></dl>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/input/SensorFilter/src/<a class="el" href="SensorFilter_8hpp_source.html">SensorFilter.hpp</a></li>
+<li>module/input/SensorFilter/src/sensorfilter/GroundTruth.cpp</li>
 <li>module/input/SensorFilter/src/sensorfilter/KalmanFilter.cpp</li>
 <li>module/input/SensorFilter/src/sensorfilter/Kinematics.cpp</li>
 <li>module/input/SensorFilter/src/sensorfilter/MahonyFilter.cpp</li>
@@ -673,7 +715,7 @@ Trent Houliston </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html">SensorFilter</a></li>
-    <li class="footer">Generated on Sun Jun 18 2023 14:58:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 19 2023 11:09:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

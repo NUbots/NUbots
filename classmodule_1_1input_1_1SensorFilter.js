@@ -11,6 +11,7 @@ var classmodule_1_1input_1_1SensorFilter =
     [ "detect_button_press", "classmodule_1_1input_1_1SensorFilter.html#ac4789707f822dcd67eaaca831e9607cc", null ],
     [ "integrate_walkcommand", "classmodule_1_1input_1_1SensorFilter.html#a6bd060097f472e9db0c8e1200e012988", null ],
     [ "update_kinematics", "classmodule_1_1input_1_1SensorFilter.html#a20b36e902024f87a8f2e1193179539b1", null ],
+    [ "update_odometry_ground_truth", "classmodule_1_1input_1_1SensorFilter.html#a02988d6e1c81b5fa00fcfc62a307af51", null ],
     [ "update_odometry_kf", "classmodule_1_1input_1_1SensorFilter.html#abf51502eb8c5ac5e27bc69b66b936dc4", null ],
     [ "update_odometry_mahony", "classmodule_1_1input_1_1SensorFilter.html#a63603b19aeb80eff6e99bbb271fb5cce", null ],
     [ "update_odometry_ukf", "classmodule_1_1input_1_1SensorFilter.html#ae9b2d07b30f8986dc9cb79b5aeb9f671", null ],
