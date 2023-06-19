@@ -80,14 +80,6 @@ namespace module::platform::OpenCR {
                 // Error code
                 servo.error_flags = servo_states[i].hardware_error;
 
-                // spoof error
-                log<NUClear::DEBUG>("Spoofing all errors on all servos");
-                servo.error_flags |= RawSensors::HardwareError::INPUT_VOLTAGE;
-                servo.error_flags |= RawSensors::HardwareError::OVERHEATING;
-                servo.error_flags |= RawSensors::HardwareError::MOTOR_ENCODER;
-                servo.error_flags |= RawSensors::HardwareError::ELECTRICAL_SHOCK;
-                servo.error_flags |= RawSensors::HardwareError::OVERLOAD;
-
                 // Accumulate all packet error flags to read at once
                 sensors.subcontroller_error |= servo_states[i].packet_error;
 
