@@ -113,31 +113,12 @@ namespace module::platform::OpenCR {
 
         servo_states[servo_index].torque_enabled = (data.torque_enable == 1);
 
-        // Servo error status from control table, NOT dynamixel status packet error.
-        servo_states[servo_index].hardware_error = data.hardware_error_status;
-
-        // Add packet errors to platform error flags for bulk processing
+        // Although they're stored in the servo state here, packet errors are combined and processed all at once as
+        // subcontroller errors in the RawSensors message
         servo_states[servo_index].packet_error = packet.error;
 
-        // We might not need to do this if we add processing to RawSensors.cpp
-        // Print error flags if there is an error
-        /**
-         * Bit      Item	                        Description
-         * Bit 7	-	                            Unused, Always ‘0’
-         * Bit 6	-	                            Unused, Always ‘0’
-         * Bit 5	Overload Error(default)	        Detects that persistent load that exceeds maximum output
-         * Bit 4	Electrical Shock Error(default)	Detects electric shock on the circuit or insufficient power to
-         *                                          operate the motor
-         * Bit 3	Motor Encoder Error	            Detects malfunction of the motor encoder
-         * Bit 2    Overheating Error(default)	    Detects that internal temperature exceeds the configured operating
-         *                                          temperature
-         * Bit 1	-	                            Unused, Always ‘0’
-         * Bit 0	Input Voltage Error             Detects that input voltage exceeds the configured operating voltage
-         */
-        if (servo_states[servo_index].hardware_error != 0) {
-            log<NUClear::ERROR>(
-                fmt::format("Servo {} error: {:#010b}", packet.id, servo_states[servo_index].hardware_error));
-        }
+        // Servo error status from control table, NOT dynamixel status packet error.
+        servo_states[servo_index].hardware_error = data.hardware_error_status;
 
         servo_states[servo_index].present_pwm      = convert::PWM(data.present_pwm);
         servo_states[servo_index].present_current  = convert::current(data.present_current);

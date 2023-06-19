@@ -57,10 +57,12 @@ namespace module::input {
         for (uint32_t id = 0; id < 20; ++id) {
             const auto& original        = getRawServo(id, raw_sensors);
             const auto& hardware_status = original.hardware_error;
+
             // Check for an error on the servo and report it
             if (hardware_status != RawSensors::HardwareError::HARDWARE_OK) {
                 NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(original, id));
             }
+
             /* COMPATIBILITY WITH OLD PROTOCOL V1 STUFF */
             const auto& error = original.error_flags;
             // Check for an error on the servo and report it
