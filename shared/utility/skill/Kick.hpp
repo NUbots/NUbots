@@ -22,7 +22,6 @@ namespace utility::skill {
     using utility::motion::splines::TrajectoryDimension::YAW;
     using utility::motion::splines::TrajectoryDimension::Z;
 
-
     /// @brief Motion generation options.
     template <typename Scalar>
     struct KickOptions {
@@ -138,8 +137,21 @@ namespace utility::skill {
          * @param dt Time step.
          * @return Engine state.
          */
-        void update(const Scalar& dt) {
-            NUClear::log<NUClear::DEBUG>("dt: ", dt);
+        void update(const Scalar& dt, const LimbID& limb) {
+
+            // Generate either left or right foot kick trajectory
+            if (limb == LimbID::LEFT_LEG) {
+                left_foot_is_planted = false;
+            }
+            else if (limb == LimbID::RIGHT_LEG) {
+                left_foot_is_planted = true;
+            }
+            else {
+                throw std::runtime_error("Invalid Limb ID");
+            }
+
+            generate_trajectories();
+
             // Check for negative time step
             if (dt <= 0.0f) {
                 NUClear::log<NUClear::WARN>("dt <= 0.0f");

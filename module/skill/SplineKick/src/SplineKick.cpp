@@ -89,7 +89,7 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
 
                 // Update the kick engine
-                kick_generator.update(time_delta);
+                kick_generator.update(time_delta, kick.leg);
 
                 // If this is a new task and time has elapsed, then we need to start a new kick
                 if ((info.run_reason != RunInfo::RunReason::NEW_TASK)
