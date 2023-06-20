@@ -7,9 +7,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-// #include "message/planning/KickTo.hpp"
-// #include "message/strategy/AlignBallToGoal.hpp"
-// #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
@@ -68,7 +65,7 @@ namespace module::strategy {
                     log<NUClear::DEBUG>("rDFf x: ", rDFf.x());
                     log<NUClear::DEBUG>("rDFf y: ", rDFf.y());
 
-                    // If ball is in own half and outside the defending bounding box of robot we clamp in the y
+                    // If ball is in a region parallel and outside own bounding box of robot we clamp in the y
                     // direction and move to 1m behind ball
                     if (rBFf.x() >= 0 && rBFf.y() > cfg.bounded_region_y_min) {
                         log<NUClear::DEBUG>("Ball is in own half and in other region");
