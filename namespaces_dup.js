@@ -921,8 +921,8 @@ var namespaces_dup =
           [ "KalmanFilter", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", "classutility_1_1math_1_1filter_1_1KalmanFilter" ],
           [ "ParticleFilter", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", "classutility_1_1math_1_1filter_1_1ParticleFilter" ],
           [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ],
-          [ "MahonyUpdate", "MahonyFilter_8hpp.html#a827f331e690e2569e06d8cedad3c5e8d", null ],
-          [ "skew", "MahonyFilter_8hpp.html#a526abc991bda7fa4540eb788d55a956c", null ]
+          [ "MahonyUpdate", "MahonyFilter_8hpp.html#a18007f2896cd23ddb50268e15dbdcc7a", null ],
+          [ "skew", "MahonyFilter_8hpp.html#aebfeab9b0ce237e16a2c9f088826f635", null ]
         ] ],
         [ "geometry", null, [
           [ "Quad", "classutility_1_1math_1_1geometry_1_1Quad.html", "classutility_1_1math_1_1geometry_1_1Quad" ],

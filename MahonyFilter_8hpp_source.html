@@ -204,9 +204,9 @@ $(document).ready(function(){initNavTree('MahonyFilter_8hpp_source.html',''); in
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment">             * @param v: input vector</span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">             * @return skew of v</span></div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">             */</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;            Eigen::Matrix&lt;T, 3, 3&gt; skew(<span class="keyword">const</span> Eigen::Matrix&lt;T, 3, 1&gt;&amp; v) {</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;                Eigen::Matrix&lt;T, 3, 3&gt; skew;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;            Eigen::Matrix&lt;Scalar, 3, 3&gt; skew(<span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt;&amp; v) {</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;                Eigen::Matrix&lt;Scalar, 3, 3&gt; skew;</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;                skew &lt;&lt; 0, -v(2), v(1), v(2), 0, -v(0), -v(1), v(0), 0;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;                <span class="keywordflow">return</span> skew;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;            }</div>
@@ -222,70 +222,61 @@ $(document).ready(function(){initNavTree('MahonyFilter_8hpp_source.html',''); in
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">             * @param Hwb:     Homogeneous transformation matrix from world to body frame of IMU</span></div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment">             * @param bias:    gyroscope bias</span></div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">             */</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="keywordtype">void</span> MahonyUpdate(<span class="keyword">const</span> Eigen::Vector3d&amp; acc,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                              <span class="keyword">const</span> Eigen::Vector3d&amp; gyro,</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                              Eigen::Isometry3d&amp; Hwb,</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                              <span class="keyword">const</span> <span class="keywordtype">double</span> ts,</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                              <span class="keyword">const</span> <span class="keywordtype">double</span> Ki,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                              <span class="keyword">const</span> <span class="keywordtype">double</span> Kp,</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                              Eigen::Vector3d&amp; bias) {</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                <span class="comment">// Normalize the accelerometer reading</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                Eigen::Vector3d rGTt = acc.normalized();</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                <span class="comment">// Invert the rotation matrix to get the body-to-world transformation</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                Eigen::Matrix3d Rbw = Hwb.linear().transpose();</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                <span class="comment">// Rotate the world gravity vector in the world frame into the body frame</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                Eigen::Vector3d rGBb(0, 0, 1);</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                Eigen::Vector3d est_rGTt = Rbw * rGBb;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            <span class="keywordtype">void</span> MahonyUpdate(<span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt;&amp; acc,</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                              <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt;&amp; gyro,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                              Eigen::Isometry3d&amp; Hwb,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                              <span class="keyword">const</span> Scalar ts,</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                              <span class="keyword">const</span> Scalar Ki,</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                              <span class="keyword">const</span> Scalar Kp,</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                              Eigen::Matrix&lt;Scalar, 3, 1&gt;&amp; bias) {</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                <span class="comment">// Normalize the accelerometer reading</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                Eigen::Matrix&lt;Scalar, 3, 1&gt; rGBb = acc.normalized();</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                <span class="comment">// Invert the rotation matrix to get the body-to-world transformation</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;                Eigen::Matrix&lt;Scalar, 3, 3&gt; Rbw = Hwb.rotation().transpose();</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                <span class="comment">// Rotate the world gravity vector in the world frame into the body frame</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                Eigen::Matrix&lt;Scalar, 3, 1&gt; est_rGBb = Rbw * Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ();</div>
 <div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                <span class="comment">// Calculate the error between the measured and estimated acceleration vectors</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                Eigen::Matrix3d a_corr    = rGTt * est_rGTt.transpose() - est_rGTt * rGTt.transpose();</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                Eigen::Vector3d omega_mes = -1 * Eigen::Vector3d(a_corr(2, 1), a_corr(0, 2), a_corr(1, 0));</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                Eigen::Matrix&lt;Scalar, 3, 3&gt; a_corr = rGBb * est_rGBb.transpose() - est_rGBb * rGBb.transpose();</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                Eigen::Matrix&lt;Scalar, 3, 1&gt; omega_mes =</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                    -1 * Eigen::Matrix&lt;Scalar, 3, 1&gt;(a_corr(2, 1), a_corr(0, 2), a_corr(1, 0));</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                <span class="comment">// Integrate the error vector to estimate the gyro bias</span></div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;                bias += Ki * omega_mes * ts;</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                <span class="comment">// Depolarizing the gyroscope bias</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                Eigen::Vector3d l_omega = gyro + Kp * omega_mes + bias;</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                Eigen::Matrix&lt;Scalar, 3, 1&gt; l_omega = gyro + Kp * omega_mes + bias;</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160; </div>
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                <span class="comment">// Find the quaternions rate of change</span></div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                Eigen::Matrix3d omega_x = skew(l_omega);</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                Eigen::Matrix4d ome     = Eigen::Matrix4d::Zero();</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                ome.block&lt;3, 3&gt;(0, 0)   = -omega_x;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                ome.block&lt;1, 3&gt;(3, 0)   = -l_omega.transpose();</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                ome.block&lt;3, 1&gt;(0, 3)   = l_omega;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                ome(3, 3)               = 0;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                Eigen::Quaterniond quat(Hwb.linear());</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                Eigen::Vector4d quat_vec(quat.x(), quat.y(), quat.z(), quat.w());</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                Eigen::Vector4d q_d(0.5 * ome * quat_vec);</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                <span class="comment">// Calculate integral to find the attitude quaternion</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                quat_vec += ts * q_d;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                Eigen::Matrix&lt;Scalar, 4, 4&gt; ome = Eigen::Matrix&lt;Scalar, 4, 4&gt;::Zero();</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                ome.block(0, 0, 3, 3)           = -skew(l_omega);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                ome.block(3, 0, 1, 3)           = -l_omega.transpose();</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                ome.block(0, 3, 3, 1)           = l_omega;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                <span class="comment">// Calculate integral to find the attitude quaternion</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                Eigen::Matrix&lt;Scalar, 4, 1&gt; quat = Eigen::Quaternion&lt;Scalar&gt;(Hwb.linear()).coeffs();</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                quat += ts * Eigen::Matrix&lt;Scalar, 4, 1&gt;(0.5 * ome * quat);</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                <span class="comment">// Set the rotation matrix</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                Hwb.linear() = Eigen::Quaternion&lt;Scalar&gt;(quat(3), quat(0), quat(1), quat(2)).toRotationMatrix();</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            }</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160; </div>
 <div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                <span class="comment">// Set quat (Rwt) and normalise</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                quat = Eigen::Quaterniond(quat_vec(3), quat_vec(0), quat_vec(1), quat_vec(2));</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                quat.normalize();</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        }  <span class="comment">// namespace filter</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    }      <span class="comment">// namespace math</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;}  <span class="comment">// namespace utility</span></div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                <span class="comment">// Set the rotation matrix</span></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                Hwb.linear() = quat.toRotationMatrix();</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;            }</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        }  <span class="comment">// namespace filter</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    }      <span class="comment">// namespace math</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;}  <span class="comment">// namespace utility</span></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="preprocessor">#endif</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_5224ab8e38918af5170b4d41508acb75.html">math</a></li><li class="navelem"><a class="el" href="dir_fed9a7e5f7982def48d7b0b369283e25.html">filter</a></li><li class="navelem"><b>MahonyFilter.hpp</b></li>
-    <li class="footer">Generated on Tue Jun 20 2023 01:20:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jun 20 2023 02:34:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
