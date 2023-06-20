@@ -24,6 +24,7 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Matrix.proto";
+import "Transform.proto";
 
 message Goal {
     enum Side {
@@ -67,7 +68,7 @@ message Goals {
     uint32                    id        = 1;
     google.protobuf.Timestamp timestamp = 2;
     /// Isometry3d transform from world space to camera space at the time that the image was taken
-    mat4 Hcw = 3;
+    iso3 Hcw = 3;
 
     repeated Goal goals = 4;
 }
