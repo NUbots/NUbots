@@ -39,15 +39,16 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
+  actuation::FootController
   # Skills
   skill::Walk
-  actuation::FootController
   skill::ScriptKick
   skill::GetUp
   skill::Look
   # Planners
   planning::GetUpPlanner
-  # planning::FallingRelaxPlanner Strategies
+  planning::FallingRelaxPlanner
+  # Strategies
   strategy::FallRecovery
   strategy::StandStill
   # Purpose
