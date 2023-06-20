@@ -79,6 +79,206 @@ namespace utility::skill {
             torso_sway_ratio  = options.torso_sway_ratio;
         }
 
+        /**
+         * @brief Get the swing foot pose at the current time.
+         * @return Trajectory of torso.
+         */
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_swing_foot_pose() const {
+            return swingfoot_trajectory.pose(t);
+        }
+
+        /**
+         * @brief Get the swing foot pose at the given time.
+         * @param t Time.
+         * @return Swing foot pose at time t.
+         */
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_swing_foot_pose(Scalar t) const {
+            return swingfoot_trajectory.pose(t);
+        }
+
+        /**
+         * @brief Get the torso pose object at the current time.
+         * @return Pose of torso.
+         */
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose() const {
+            return torso_trajectory.pose(t);
+        }
+
+        /**
+         * @brief Get the torso pose object at the given time.
+         * @param t Time.
+         * @return Pose of torso at time t.
+         */
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose(Scalar t) const {
+            return torso_trajectory.pose(t);
+        }
+
+        /**
+         * @brief Get the left or right foot pose at the given time in the torso {t} frame.
+         * @param t Time.
+         * @param limb Limb ID of foot to get pose of.
+         * @return Swing foot pose at time t.
+         */
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(const LimbID& limb) const {
+            // Assign the value based on the foot planted
+            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htl =
+                left_foot_is_planted ? get_torso_pose().inverse() : get_torso_pose().inverse() * get_swing_foot_pose();
+            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htr =
+                left_foot_is_planted ? get_torso_pose().inverse() * get_swing_foot_pose() : get_torso_pose().inverse();
+
+            // Return the desired pose of the specified foot
+            if (limb == LimbID::LEFT_LEG)
+                return Htl;
+            if (limb == LimbID::RIGHT_LEG)
+                return Htr;
+            throw std::runtime_error("Invalid Limb ID");
+        }
+
+        /**
+         * @brief Get whether or not the left foot is planted.
+         * @return True if left foot is planted, false otherwise.
+         */
+        bool is_left_foot_planted() const {
+            return left_foot_is_planted;
+        }
+
+        /**
+         * @brief Reset walk engine.
+         */
+        void reset() {
+            // Initialize swing foot pose
+            Hps_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset(), 0.0);
+            Hps_start.linear().setIdentity();
+
+            // Initialize torso pose
+            Hpt_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height);
+            Hpt_start.linear() =
+                Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
+
+            // Initialize swing foot and torso trajectories
+            generate_swingfoot_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
+            generate_torso_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
+
+            // Start time at end of step period to avoid taking a step when starting.
+            t = step_period;
+
+            // Set engine state to stopped
+            engine_state = WalkState::State::STOPPED;
+        }
+
+        /**
+         * @brief Run an update of the walk engine, updating the time and engine state and trajectories.
+         * @param dt Time step.
+         * @param velocity_target Requested velocity target (dx, dy, dtheta).
+         * @return Engine state.
+         */
+        WalkState::State update(const Scalar& dt, const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
+            if (velocity_target.isZero() && t < step_period) {
+                // Requested velocity target is zero and we haven't finished taking a step, continue stopping
+                engine_state = WalkState::State::STOPPING;
+            }
+            else if (velocity_target.isZero() && t >= step_period) {
+                // Requested velocity target is zero and we have finished taking a step, remain stopped
+                engine_state = WalkState::State::STOPPED;
+            }
+            else {
+                // Requested velocity target is non-zero, walk
+                engine_state = WalkState::State::WALKING;
+            }
+
+            switch (engine_state.value) {
+                case WalkState::State::WALKING:
+                    update_time(dt);
+                    // If we are at the end of the step, switch the planted foot and reset time
+                    if (t >= step_period) {
+                        switch_planted_foot();
+                    }
+                    break;
+                case WalkState::State::STOPPING:
+                    update_time(dt);
+                    // We do not switch the planted foot here because we want to transition to the standing state
+                    break;
+                case WalkState::State::STOPPED:
+                    // We do not update the time here because we want to remain in the standing state
+                    break;
+                default: NUClear::log<NUClear::WARN>("Unknown state"); break;
+            }
+
+            // Generate the torso and swing foot trajectories
+            generate_swingfoot_trajectory(velocity_target);
+            generate_torso_trajectory(velocity_target);
+
+            return engine_state;
+        }
+
+        /**
+         * @brief Get the current state of the walk engine.
+         * @return Current state of the walk engine.
+         */
+        WalkState::State get_state() const {
+            return engine_state;
+        }
+
+    private:
+        // ******************************** Options ********************************
+
+        /// @brief Maximum step limits in x, y, and theta.
+        Eigen::Matrix<Scalar, 3, 1> step_limits = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Step height.
+        Scalar step_height = 0.0;
+
+        /// @brief Step period (in seconds). Time for one complete step.
+        Scalar step_period = 0.0;
+
+        /// @brief Half of step period (in seconds).
+        Scalar half_step_period = 0.0;
+
+        /// @brief Ratio of the step_period where the swing foot should be at its maximum height, between [0 1].
+        Scalar step_apex_ratio = 0.0;
+
+        /// @brief Lateral distance between feet. (how spread apart the feet should be)
+        Scalar step_width = 0.0;
+
+        /// @brief Torso height.
+        Scalar torso_height = 0.0;
+
+        /// @brief Torso pitch.
+        Scalar torso_pitch = 0.0;
+
+        /// @brief Torso offset at half step period from the planted foot.
+        Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1].
+        Scalar torso_sway_ratio = 0.0;
+
+        // ******************************** State ********************************
+
+        /// @brief Current engine state.
+        WalkState::State engine_state = WalkState::State::STOPPED;
+
+        /// @brief Transform from planted {p} foot to swing {s} foot current placement at start of step.
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> Hps_start =
+            Eigen::Transform<Scalar, 3, Eigen::Isometry>::Identity();
+
+        /// @brief Transform from planted {p} foot to the torso {t} at start of step.
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> Hpt_start =
+            Eigen::Transform<Scalar, 3, Eigen::Isometry>::Identity();
+
+        /// @brief Whether the left foot is planted.
+        bool left_foot_is_planted = true;
+
+        /// @brief Current time in the step cycle [0, step_period]
+        Scalar t = 0.0;
+
+        // ******************************** Trajectories ********************************
+
+        // 6D piecewise polynomial trajectory for swing foot.
+        Trajectory<Scalar> swingfoot_trajectory;
+
+        // 6D piecewise polynomial trajectory for torso.
+        Trajectory<Scalar> torso_trajectory;
+
         /// @brief Get the lateral distance between feet in current planted foot frame.
         /// @return Lateral distance between feet.
         Scalar get_foot_width_offset() const {
@@ -193,69 +393,6 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Get the swing foot pose at the current time.
-         * @return Trajectory of torso.
-         */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_swing_foot_pose() const {
-            return swingfoot_trajectory.pose(t);
-        }
-
-        /**
-         * @brief Get the swing foot pose at the given time.
-         * @param t Time.
-         * @return Swing foot pose at time t.
-         */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_swing_foot_pose(Scalar t) const {
-            return swingfoot_trajectory.pose(t);
-        }
-
-        /**
-         * @brief Get the torso pose object at the current time.
-         * @return Pose of torso.
-         */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose() const {
-            return torso_trajectory.pose(t);
-        }
-
-        /**
-         * @brief Get the torso pose object at the given time.
-         * @param t Time.
-         * @return Pose of torso at time t.
-         */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose(Scalar t) const {
-            return torso_trajectory.pose(t);
-        }
-
-        /**
-         * @brief Get the left or right foot pose at the given time in the torso {t} frame.
-         * @param t Time.
-         * @param limb Limb ID of foot to get pose of.
-         * @return Swing foot pose at time t.
-         */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(const LimbID& limb) const {
-            // Assign the value based on the foot planted
-            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htl =
-                left_foot_is_planted ? get_torso_pose().inverse() : get_torso_pose().inverse() * get_swing_foot_pose();
-            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htr =
-                left_foot_is_planted ? get_torso_pose().inverse() * get_swing_foot_pose() : get_torso_pose().inverse();
-
-            // Return the desired pose of the specified foot
-            if (limb == LimbID::LEFT_LEG)
-                return Htl;
-            if (limb == LimbID::RIGHT_LEG)
-                return Htr;
-            throw std::runtime_error("Invalid Limb ID");
-        }
-
-        /**
-         * @brief Get whether or not the left foot is planted.
-         * @return True if left foot is planted, false otherwise.
-         */
-        bool is_left_foot_planted() const {
-            return left_foot_is_planted;
-        }
-
-        /**
          * @brief Switch planted foot.
          * @details This function switches the planted foot and updates the start torso and start swing foot poses.
          */
@@ -298,145 +435,6 @@ namespace utility::skill {
                 t = step_period;
             }
         }
-
-        /**
-         * @brief Reset walk engine.
-         */
-        void reset() {
-            // Initialize swing foot pose
-            Hps_start.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset(), 0.0));
-            Hps_start.linear().setIdentity();
-
-            // Initialize torso pose
-            Hpt_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height);
-            Hpt_start.linear() =
-                Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
-
-            // Initialize swing foot and torso trajectory
-            generate_swingfoot_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
-            generate_torso_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
-
-            // Start time at end of step period to avoid taking a step when starting.
-            t = step_period;
-
-            // Set engine state to stopped
-            engine_state = WalkState::State::STOPPED;
-        }
-
-        /**
-         * @brief Run an update of the walk engine, updating the time and engine state and trajectories.
-         * @param dt Time step.
-         * @param velocity_target Requested velocity target (dx, dy, dtheta).
-         * @return Engine state.
-         */
-        WalkState::State update(const Scalar& dt, const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
-            const bool velocity_target_zero = velocity_target.isZero();
-
-            if (velocity_target_zero && t < step_period) {
-                // Requested velocity target is zero and we haven't finished taking a step, continue stopping.
-                engine_state = WalkState::State::STOPPING;
-            }
-            else if (velocity_target_zero && t >= step_period) {
-                // Requested velocity target is zero and we have finished taking a step, remain stopped.
-                engine_state = WalkState::State::STOPPED;
-            }
-            else {
-                // Requested velocity target is greater than zero, walk.
-                engine_state = WalkState::State::WALKING;
-            }
-
-            switch (engine_state.value) {
-                case WalkState::State::WALKING:
-                    update_time(dt);
-                    // If we are at the end of the step, switch the planted foot and reset time
-                    if (t >= step_period) {
-                        switch_planted_foot();
-                    }
-                    break;
-                case WalkState::State::STOPPING:
-                    update_time(dt);
-                    // We do not switch the planted foot here because we want to transition to the standing state
-                    break;
-                case WalkState::State::STOPPED:
-                    // We do not update the time here because we want to remain in the standing state
-                    break;
-                default: NUClear::log<NUClear::WARN>("Unknown state"); break;
-            }
-
-            // Generate the torso and swing foot trajectories
-            generate_swingfoot_trajectory(velocity_target);
-            generate_torso_trajectory(velocity_target);
-
-            return engine_state;
-        }
-
-        /**
-         * @brief Get the current state of the walk engine.
-         * @return Current state of the walk engine.
-         */
-        WalkState::State get_state() const {
-            return engine_state;
-        }
-
-    private:
-        // ******************************** Options ********************************
-
-        /// @brief Maximum step limits in x, y, and theta.
-        Eigen::Matrix<Scalar, 3, 1> step_limits = Eigen::Matrix<Scalar, 3, 1>::Zero();
-
-        /// @brief Step height.
-        Scalar step_height = 0.0;
-
-        /// @brief Step period (in seconds). Time for one complete step.
-        Scalar step_period = 0.0;
-
-        /// @brief Half of step period (in seconds).
-        Scalar half_step_period = 0.0;
-
-        /// @brief Ratio of the step_period where the swing foot should be at its maximum height, between [0 1].
-        Scalar step_apex_ratio = 0.0;
-
-        /// @brief Lateral distance between feet. (how spread apart the feet should be)
-        Scalar step_width = 0.0;
-
-        /// @brief Torso height.
-        Scalar torso_height = 0.0;
-
-        /// @brief Torso pitch.
-        Scalar torso_pitch = 0.0;
-
-        /// @brief Torso offset at half step period from the planted foot.
-        Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
-
-        /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1].
-        Scalar torso_sway_ratio = 0.0;
-
-        // ******************************** State ********************************
-
-        /// @brief Current engine state.
-        WalkState::State engine_state = WalkState::State::STOPPED;
-
-        /// @brief Transform from planted {p} foot to swing {s} foot current placement at start of step.
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> Hps_start =
-            Eigen::Transform<Scalar, 3, Eigen::Isometry>::Identity();
-
-        /// @brief Transform from planted {p} foot to the torso {t} at start of step.
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> Hpt_start =
-            Eigen::Transform<Scalar, 3, Eigen::Isometry>::Identity();
-
-        /// @brief Whether the left foot is planted.
-        bool left_foot_is_planted = true;
-
-        /// @brief Current time in the step cycle [0, step_period]
-        Scalar t = 0.0;
-
-        // ******************************** Trajectories ********************************
-
-        // 6D piecewise polynomial trajectory for swing foot.
-        Trajectory<Scalar> swingfoot_trajectory;
-
-        // 6D piecewise polynomial trajectory for torso.
-        Trajectory<Scalar> torso_trajectory;
     };
 }  // namespace utility::skill
 #endif
