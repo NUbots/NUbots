@@ -46,7 +46,7 @@ namespace module::actuation {
         on<Configuration>("FootController.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FootController.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.servo_gain  = config["servo_gain"].as<float>();
+            cfg.servo_gain  = config["servo_gain"].as<double>();
             cfg.keep_level  = config["keep_level"].as<bool>();
         });
 
@@ -55,15 +55,16 @@ namespace module::actuation {
                 // Construct Leg IK tasks
                 auto left_leg  = std::make_unique<LeftLegIK>();
                 left_leg->time = left_foot.time;
+
                 if (left_foot.keep_level && cfg.keep_level) {
                     // Calculate the desired foot orientation to keep the foot level with the ground
-                    Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
-                    Eigen::Isometry3d Htf = Eigen::Isometry3d(left_foot.Htf.cast<double>());
-                    Htf.linear()          = Htr.linear();
-                    left_leg->Htl         = Htf.matrix();
+                    Eigen::Isometry3d Htr           = sensors.Htw * sensors.Hrw.inverse();
+                    Eigen::Isometry3d Htf_corrected = left_foot.Htf;
+                    Htf_corrected.linear()          = Htr.linear();
+                    left_leg->Htl                   = Htf_corrected;
                 }
                 else {
-                    left_leg->Htl = left_foot.Htf.cast<double>().matrix();
+                    left_leg->Htl = left_foot.Htf;
                 }
 
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
@@ -78,17 +79,16 @@ namespace module::actuation {
             [this](const ControlRightFoot& right_foot, const Sensors& sensors) {
                 auto right_leg  = std::make_unique<RightLegIK>();
                 right_leg->time = right_foot.time;
-                right_leg->Htr  = right_foot.Htf.cast<double>().matrix();
 
                 if (right_foot.keep_level && cfg.keep_level) {
                     // Calculate the desired foot orientation to keep the foot level with the ground
-                    Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors.Htw * sensors.Hrw.inverse());
-                    Eigen::Isometry3d Htf = Eigen::Isometry3d(right_foot.Htf.cast<double>());
-                    Htf.linear()          = Htr.linear();
-                    right_leg->Htr        = Htf.matrix();
+                    Eigen::Isometry3d Htr           = sensors.Htw * sensors.Hrw.inverse();
+                    Eigen::Isometry3d Htf_corrected = right_foot.Htf;
+                    Htf_corrected.linear()          = Htr.linear();
+                    right_leg->Htr                  = Htf_corrected;
                 }
                 else {
-                    right_leg->Htr = right_foot.Htf.cast<double>().matrix();
+                    right_leg->Htr = right_foot.Htf;
                 }
 
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {

@@ -20,12 +20,12 @@ syntax = "proto3";
 
 package message.skill;
 
-import "Matrix.proto";
+import "Transform.proto";
 import "google/protobuf/timestamp.proto";
 
 message ControlLeftFoot {
     // Desired left foot {f} pose in torso {t} space
-    mat4 Htf = 1;
+    iso3 Htf = 1;
     // Time to complete the motion
     google.protobuf.Timestamp time = 2;
     // Bool to indicate whether or not to attempt to keep foot level with ground
@@ -34,7 +34,7 @@ message ControlLeftFoot {
 
 message ControlRightFoot {
     // Desired right foot {f} pose in torso {t} space
-    mat4 Htf = 1;
+    iso3 Htf = 1;
     // Time to complete the motion
     google.protobuf.Timestamp time = 2;
     // Bool to indicate whether or not to attempt to keep foot level with ground

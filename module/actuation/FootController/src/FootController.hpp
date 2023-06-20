@@ -12,7 +12,7 @@ namespace module::actuation {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Gains for the servos
-            float servo_gain = 0.0f;
+            double servo_gain = 0.0;
             /// @brief Whether or not to level the foot with the ground
             bool keep_level = false;
         } cfg;

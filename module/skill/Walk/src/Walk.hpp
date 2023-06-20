@@ -36,17 +36,6 @@ namespace module::skill {
 
         /// @brief Walk engine, generates swing foot and torso trajectories for walk velocity target
         utility::skill::MotionGeneration<double> walk_engine{};
-
-        /**
-         * @brief Emits task to achieve desired joint positions to follow walking trajectories
-         */
-        void walk();
-
-        /**
-         * @brief Computes the time delta since the last time we updated the desired joint positions
-         * @return Time since the last update
-         */
-        [[nodiscard]] double compute_time_delta();
     };
 }  // namespace module::skill
 
