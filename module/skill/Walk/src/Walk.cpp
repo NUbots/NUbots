@@ -62,10 +62,6 @@ namespace module::skill {
             walk_engine.reset();
             last_update_time = NUClear::clock::now();
 
-            for (auto id : utility::input::LimbID::servos_for_legs()) {
-                cfg.servo_states[id] = ServoState(config["gains"]["legs"].as<double>(), 100);
-            }
-
             for (auto id : utility::input::LimbID::servos_for_arms()) {
                 cfg.servo_states[id] = ServoState(config["gains"]["arms"].as<double>(), 100);
             }

@@ -40,22 +40,22 @@ namespace utility::skill {
         /// @brief Step height (in meters)
         Scalar step_height = 0.0;
 
-        /// @brief Lateral distance between feet (how spread apart the feet should be)
+        /// @brief Lateral distance in meters between feet (how spread apart the feet should be)
         Scalar step_width = 0.0;
 
-        /// @brief Ratio of the step_period where the foot should be at its highest point, between [0 1].
+        /// @brief Ratio of the step_period where the foot should be at its highest point, between [0 1]
         Scalar step_apex_ratio = 0.0;
 
-        /// @brief Torso height.
+        /// @brief Torso height (in meters)
         Scalar torso_height = 0.0;
 
-        /// @brief Torso pitch.
+        /// @brief Torso pitch (in radians)
         Scalar torso_pitch = 0.0;
 
-        /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1].
+        /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
         Scalar torso_sway_ratio = 0.0;
 
-        /// @brief Torso offset at torso_sway_ratio*step_period from the planted foot.
+        /// @brief Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
         Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
     };
 
