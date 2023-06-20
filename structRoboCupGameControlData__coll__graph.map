@@ -1,5 +1,0 @@
-<map id="RoboCupGameControlData" name="RoboCupGameControlData">
-<area shape="rect" id="node1" title=" " alt="" coords="5,199,203,225"/>
-<area shape="rect" id="node2" href="$structTeamInfo.html" title=" " alt="" coords="63,109,145,136"/>
-<area shape="rect" id="node3" href="$structRobotInfo.html" title=" " alt="" coords="61,5,147,32"/>
-</map>

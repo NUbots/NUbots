@@ -492,9 +492,5 @@ var annotated_dup =
     ] ],
     [ "Joystick", "classJoystick.html", "classJoystick" ],
     [ "JoystickEvent", "classJoystickEvent.html", "classJoystickEvent" ],
-    [ "RoboCupGameControlData", "structRoboCupGameControlData.html", "structRoboCupGameControlData" ],
-    [ "RoboCupGameControlReturnData", "structRoboCupGameControlReturnData.html", "structRoboCupGameControlReturnData" ],
-    [ "RobotInfo", "structRobotInfo.html", "structRobotInfo" ],
-    [ "TeamInfo", "structTeamInfo.html", "structTeamInfo" ],
     [ "Timer", "classTimer.html", "classTimer" ]
 ];

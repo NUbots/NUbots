@@ -9,7 +9,7 @@ var structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket =
     [ "mode", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a29d5536a8dd324998eba2c932e69c033", null ],
     [ "packetNumber", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#aee25e8f1d8bc0abf2ddc1a0036ee71ee", null ],
     [ "playersPerTeam", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a4efd6ece6d388814d003345ed60883d0", null ],
-    [ "secondaryStateInfo", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a6f37ed2631e70abe2441b8aa2ac9d941", null ],
+    [ "secondaryStateInfo", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a656914637fa43cb1ab6bc913c19df67d", null ],
     [ "secondaryTime", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a97f61d5fdce1438315202323ba7dd488", null ],
     [ "secsRemaining", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a4995366065f81d24b645ae4f481a2028", null ],
     [ "state", "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#abe68d8d10a444f8092af635ddb7e928c", null ],

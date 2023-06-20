@@ -227,8 +227,12 @@ var namespaces_dup =
             [ "PENALTY_SHOOTOUT", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea654e91e7d93eb77fc971a217c7811f3f", null ],
             [ "OVERTIME", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea1185e652e1f2d6d6a18861aee840cbb4", null ],
             [ "TIMEOUT", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea070a0fb40f6c308ab544b227660aadff", null ],
-            [ "FREEKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541eae54cd9a2c8e453c64f87ba462fe2ee2c", null ],
-            [ "PENALTYKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea084b86cd45b4d23e3145d21e781f4e51", null ]
+            [ "DIRECT_FREEKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea0ffc0c2697ebcf8b7da76213a7f53c80", null ],
+            [ "INDIRECT_FREEKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541eaaf04625962fe8ac1933a88baf20346c7", null ],
+            [ "PENALTYKICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea084b86cd45b4d23e3145d21e781f4e51", null ],
+            [ "CORNER_KICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea472f3d45de8018bfb63987a203dca8e4", null ],
+            [ "GOAL_KICK", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea0fdbca2289dacdc8f12ccf9b31c3ed08", null ],
+            [ "THROW_IN", "GameControllerData_8hpp.html#a2977c762ff824f97ca881943659e541ea4652c1e0327ad75fd82cbc5e7bf322bf", null ]
           ] ],
           [ "PenaltyState", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02d", [
             [ "UNPENALISED", "GameControllerData_8hpp.html#a7719ba09c8929ffce935ba94227fc02dae73408f8b4266198a9118042e5e9e31e", null ],

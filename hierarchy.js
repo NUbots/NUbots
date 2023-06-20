@@ -392,9 +392,6 @@ var hierarchy =
     [ "extension::behaviour::ProviderBase< T, commands::ProviderClassification::STOP >", "structextension_1_1behaviour_1_1ProviderBase.html", [
       [ "extension::behaviour::Stop< T >", "structextension_1_1behaviour_1_1Stop.html", null ]
     ] ],
-    [ "RoboCupGameControlData", "structRoboCupGameControlData.html", null ],
-    [ "RoboCupGameControlReturnData", "structRoboCupGameControlReturnData.html", null ],
-    [ "RobotInfo", "structRobotInfo.html", null ],
     [ "utility::skill::Script< LimbsSequence >", "structutility_1_1skill_1_1Script.html", null ],
     [ "std::error_category", null, [
       [ "module::output::compressor::vaapi::cl::opencl_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html", null ],
@@ -413,7 +410,6 @@ var hierarchy =
       [ "std::is_error_condition_enum< module::output::compressor::vaapi::cl::opencl_error_code >", "structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__code_01_4.html", null ],
       [ "std::is_error_condition_enum< module::output::compressor::vaapi::vaapi_error_code >", "structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html", null ]
     ] ],
-    [ "TeamInfo", "structTeamInfo.html", null ],
     [ "Timer", "classTimer.html", null ],
     [ "utility::math::filter::UKF< double, module::input::MotionModel >", "classutility_1_1math_1_1filter_1_1UKF.html", null ],
     [ "utility::math::filter::UKF< double, module::localisation::BallModel >", "classutility_1_1math_1_1filter_1_1UKF.html", null ],
