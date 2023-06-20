@@ -16,7 +16,9 @@ nuclear_role(
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::BallDetector
+  vision::FieldLineDetector
   # Localisation
+  localisation::FieldLocalisation
   localisation::BallLocalisation
   # Director
   extension::Director
@@ -39,12 +41,15 @@ nuclear_role(
   # Strategies
   strategy::FallRecovery
   strategy::StandStill
+  strategy::WalkToFieldPosition
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
-  strategy::Ready
+  strategy::KickToGoal
+  strategy::AlignBallToGoal
   strategy::DiveToBall
   # Purposes
   purpose::Striker
+  purpose::Goalie
   purpose::Soccer
 )
