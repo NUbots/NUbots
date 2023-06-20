@@ -208,8 +208,7 @@ RUN install-package protobuf && \
     -DWITH_PROTOC="/usr/sbin/protoc" \
     -Dprotobuf_BUILD_TESTS=OFF \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
-    -DBUILD_SHARED_LIBS=OFF \
-    # -DZLIB_ROOT=${prefix}
+    -DBUILD_SHARED_LIBS=OFF
 
 # Libjpeg
 RUN install-package yasm
