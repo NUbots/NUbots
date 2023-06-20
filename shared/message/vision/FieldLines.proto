@@ -34,4 +34,6 @@ message FieldLines {
     mat4 Hcw = 3;
     /// Could be empty, if there were no lines detected in the image
     repeated fvec3 points = 4;
+    /// Field line points projected onto the world XY plane from the world {W} in world {w} space
+    repeated fvec3 rPWw = 5;
 }

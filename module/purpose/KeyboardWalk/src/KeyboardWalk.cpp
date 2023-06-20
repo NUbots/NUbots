@@ -4,7 +4,6 @@
 #include <csignal>
 #include <cstdio>
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 #include <string>
 
 #include "extension/Behaviour.hpp"
