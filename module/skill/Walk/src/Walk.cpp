@@ -85,12 +85,12 @@ namespace module::skill {
         on<Start<WalkTask>>().then([this]() {
             last_update_time = NUClear::clock::now();
             walk_engine.reset();
-            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero()));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
 
         // Stop - Runs every time the Walk task is removed from the director tree
         on<Stop<WalkTask>>().then(
-            [this] { emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3f::Zero())); });
+            [this] { emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero())); });
 
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
@@ -99,7 +99,7 @@ namespace module::skill {
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
             .then([this](const WalkTask& walk_task) {
-                switch (walk_engine.update(compute_time_delta(), walk_task.velocity_target.cast<double>()).value) {
+                switch (walk_engine.update(compute_time_delta(), walk_task.velocity_target).value) {
                     case WalkState::State::WALKING:
                     case WalkState::State::STOPPING:
                         walk();
@@ -135,7 +135,7 @@ namespace module::skill {
                 }
 
                 // Emit the walking state
-                emit(std::make_unique<WalkState>(walk_engine.get_state(), Eigen::Vector3f::Zero()));
+                emit(std::make_unique<WalkState>(walk_engine.get_state(), Eigen::Vector3d::Zero()));
             });
     }
 

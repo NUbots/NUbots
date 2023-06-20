@@ -35,5 +35,5 @@ message WalkState {
     State state = 1;
 
     /// Current requested velocity target (dx, dy, dtheta)
-    fvec3 velocity_target = 2;
+    vec3 velocity_target = 2;
 }
