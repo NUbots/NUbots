@@ -12,7 +12,7 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Distance in meters used as a threshold to start a dive
-            float diving_distance_threshold = 0;
+            double diving_distance_threshold = 0;
         } cfg;
 
     public:

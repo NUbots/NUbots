@@ -24,30 +24,30 @@ namespace module::strategy {
         on<Configuration>("WalkToFieldPosition.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToFieldPosition.yaml
             this->log_level    = config["log_level"].as<NUClear::LogLevel>();
-            cfg.align_radius   = config["align_radius"].as<float>();
-            cfg.stop_tolerance = config["stop_tolerance"].as<float>();
+            cfg.align_radius   = config["align_radius"].as<double>();
+            cfg.stop_tolerance = config["stop_tolerance"].as<double>();
         });
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
             [this](const WalkToFieldPositionTask& walk_to_field_position, const Field& field, const Sensors& sensors) {
-                const Eigen::Isometry3f Hfw = Eigen::Isometry3f(field.Hfw.cast<float>());
-                const Eigen::Isometry3f Hrw = Eigen::Isometry3f(sensors.Hrw.cast<float>());
-                const Eigen::Isometry3f Hrf = Hrw * Hfw.inverse();
-                const Eigen::Isometry3f Hfr = Hrf.inverse();
-                const Eigen::Vector3f rPFf(walk_to_field_position.rPFf.x(), walk_to_field_position.rPFf.y(), 0.0f);
+                const Eigen::Isometry3d Hfw = Eigen::Isometry3d(field.Hfw.cast<double>());
+                const Eigen::Isometry3d Hrw = Eigen::Isometry3d(sensors.Hrw.cast<double>());
+                const Eigen::Isometry3d Hrf = Hrw * Hfw.inverse();
+                const Eigen::Isometry3d Hfr = Hrf.inverse();
+                const Eigen::Vector3d rPFf(walk_to_field_position.rPFf.x(), walk_to_field_position.rPFf.y(), 0.0);
 
                 // Create a unit vector in the direction of the desired heading in field space
-                const Eigen::Vector3f uHFf(std::cos(walk_to_field_position.heading),
+                const Eigen::Vector3d uHFf(std::cos(walk_to_field_position.heading),
                                            std::sin(walk_to_field_position.heading),
-                                           0.0f);
+                                           0.0);
 
                 // Transform the field position from field {f} space to robot {r} space
-                const Eigen::Vector3f rPRr(Hrf * rPFf);
+                const Eigen::Vector3d rPRr(Hrf * rPFf);
 
                 // Compute the current position error and heading error in field {f} space
-                const float position_error = (Hfr.translation().head(2) - rPFf.head(2)).norm();
-                const Eigen::Vector3f uXRf = Hfr.linear().col(0).head(2);
-                const float heading_error  = std::acos(std::max(-1.0f, std::min(1.0f, uXRf.dot(uHFf.head(2)))));
+                const double position_error = (Hfr.translation().head(2) - rPFf.head(2)).norm();
+                const Eigen::Vector3d uXRf  = Hfr.linear().col(0).head(2);
+                const double heading_error  = std::acos(std::max(-1.0, std::min(1.0, uXRf.dot(uHFf.head(2)))));
                 log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
 
                 // If the error in the desired field position and heading is low enough, stand still
@@ -57,13 +57,13 @@ namespace module::strategy {
                 // If we are getting close to the field position begin to align with the desired heading in field space
                 else if (position_error < cfg.align_radius) {
                     // Rotate the desired heading in field {f} space to robot space
-                    const Eigen::Vector3f uHRr(Hrf.linear() * uHFf);
-                    const float desired_heading = std::atan2(uHRr.y(), uHRr.x());
+                    const Eigen::Vector3d uHRr(Hrf.linear() * uHFf);
+                    const double desired_heading = std::atan2(uHRr.y(), uHRr.x());
                     emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
                 }
                 // Otherwise, walk directly to the field position
                 else {
-                    const float desired_heading = std::atan2(rPRr.y(), rPRr.x());
+                    const double desired_heading = std::atan2(rPRr.y(), rPRr.x());
                     emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
                 }
             });

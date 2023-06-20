@@ -309,7 +309,7 @@ namespace module::purpose {
     void KeyboardWalk::walk_toggle() {
         if (walk_enabled) {
             walk_enabled = false;
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()), 2);
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
         }
         else {
             walk_enabled = true;
@@ -319,7 +319,7 @@ namespace module::purpose {
     }
 
     void KeyboardWalk::reset() {
-        walk_command = Eigen::Vector3f::Zero();
+        walk_command = Eigen::Vector3d::Zero();
         head_yaw     = 0.0f;
         head_pitch   = 0.0f;
         update_command();
@@ -335,7 +335,7 @@ namespace module::purpose {
     void KeyboardWalk::update_command() {
         // If walking is enabled, update the walk command
         if (walk_enabled) {
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(walk_command.x(), walk_command.y(), walk_command.z())),
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(walk_command.x(), walk_command.y(), walk_command.z())),
                        2);
         }
 

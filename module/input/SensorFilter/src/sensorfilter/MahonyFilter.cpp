@@ -102,12 +102,12 @@ namespace module::input {
         const double roll  = rpy(0);
         const double pitch = rpy(1);
         Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
-        sensors->Htw       = Hwt.inverse().matrix();
+        sensors->Htw       = Hwt.inverse();
 
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
         Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
-        sensors->Hrw          = Hwr.inverse().matrix();
+        sensors->Hrw          = Hwr.inverse();
         update_loop.enable();
     }
 }  // namespace module::input

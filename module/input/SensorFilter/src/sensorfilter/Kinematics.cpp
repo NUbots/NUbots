@@ -40,7 +40,7 @@ namespace module::input {
 
         // **************** Kinematics ****************
         // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
-        auto Htx = calculateAllPositions(kinematics_model, *sensors);
+        std::map<ServoID, Eigen::Isometry3d> Htx = calculateAllPositions(kinematics_model, *sensors);
         for (const auto& entry : Htx) {
             sensors->Htx[entry.first] = entry.second.matrix();
         }

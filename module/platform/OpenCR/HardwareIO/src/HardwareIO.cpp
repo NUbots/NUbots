@@ -143,14 +143,6 @@ namespace module::platform::OpenCR {
             auto& info = packet_queue[packet_id].front();
             packet_queue[packet_id].erase(packet_queue[packet_id].begin());
 
-            // Check for packet errors
-            if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", int(packet_id)));
-            }
-            if (packet.alert) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", int(packet_id)));
-            }
-
             /// @brief handle incoming packets, and send next request if all packets were handled
             // -> Recieved model information packet
             //    -> Trigger first servo request
