@@ -18,7 +18,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 
 
-namespace module::skill {
+namespace module::actuation {
 
     using extension::Configuration;
 
@@ -100,4 +100,4 @@ namespace module::skill {
             });
     }
 
-}  // namespace module::skill
+}  // namespace module::actuation

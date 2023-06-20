@@ -4,7 +4,7 @@ walk:
   # Time for one complete step (in seconds).
   period: 0.25
   step:
-    # Maximum step limits in x, y, and theta.
+    # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.1, 0.4]
     # Step height (in meters)
     height: 0.08
@@ -16,7 +16,7 @@ walk:
     # Torso height (in meters)
     height: 0.42
     # Torso pitch (in radians)
-    pitch: 0.35
+    pitch: 20 * pi / 180
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
     sway_offset: [0, 0.05, 0]
     # Ratio of the step_period where the torso should be at its maximum sway, between [0 1]

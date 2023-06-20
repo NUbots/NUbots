@@ -1,11 +1,11 @@
-#ifndef MODULE_SKILL_FOOTCONTROLLER_HPP
-#define MODULE_SKILL_FOOTCONTROLLER_HPP
+#ifndef MODULE_ACTUATION_FOOTCONTROLLER_HPP
+#define MODULE_ACTUATION_FOOTCONTROLLER_HPP
 
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
 
-namespace module::skill {
+namespace module::actuation {
 
     class FootController : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -22,6 +22,6 @@ namespace module::skill {
         explicit FootController(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::skill
+}  // namespace module::actuation
 
-#endif  // MODULE_SKILL_FOOTCONTROLLER_HPP
+#endif  // MODULE_ACTUATION_FOOTCONTROLLER_HPP

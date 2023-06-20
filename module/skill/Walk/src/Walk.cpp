@@ -55,7 +55,7 @@ namespace module::skill {
             walk_engine_options.step_height       = config["walk"]["step"]["height"].as<double>();
             walk_engine_options.step_width        = config["walk"]["step"]["width"].as<double>();
             walk_engine_options.torso_height      = config["walk"]["torso"]["height"].as<double>();
-            walk_engine_options.torso_pitch       = config["walk"]["torso"]["pitch"].as<double>();
+            walk_engine_options.torso_pitch       = config["walk"]["torso"]["pitch"].as<Expression>();
             walk_engine_options.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
             walk_engine_options.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
             walk_engine.configure(walk_engine_options);
