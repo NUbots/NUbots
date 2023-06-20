@@ -273,10 +273,10 @@ namespace utility::skill {
 
         // ******************************** Trajectories ********************************
 
-        // 6D piecewise polynomial trajectory for swing foot.
+        /// @brief 6D piecewise polynomial trajectory for swing foot.
         Trajectory<Scalar> swingfoot_trajectory;
 
-        // 6D piecewise polynomial trajectory for torso.
+        /// @brief 6D piecewise polynomial trajectory for torso.
         Trajectory<Scalar> torso_trajectory;
 
         /// @brief Get the lateral distance between feet in current planted foot frame.
