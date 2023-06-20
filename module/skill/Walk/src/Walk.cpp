@@ -144,7 +144,8 @@ namespace module::skill {
 
     void Walk::walk() {
         // Compute the goal position time
-        const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+        const NUClear::clock::time_point goal_time =
+            NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
         // Get desired feet poses in the torso {t} frame from the walk engine
         Eigen::Transform<double, 3, Eigen::Isometry> Htl = walk_engine.get_foot_pose(LimbID::LEFT_LEG);
@@ -152,14 +153,14 @@ namespace module::skill {
 
 
         if (walk_engine.is_left_foot_planted()) {
-            emit<Task>(std::make_unique<ControlLeftFoot>(Htl.matrix(), time, false));
+            emit<Task>(std::make_unique<ControlLeftFoot>(Htl.matrix(), goal_time, false));
             // Keep the right foot (swing foot) level with the ground plane
-            emit<Task>(std::make_unique<ControlRightFoot>(Htr.matrix(), time, true));
+            emit<Task>(std::make_unique<ControlRightFoot>(Htr.matrix(), goal_time, true));
         }
         else {
             // Keep the left foot (swing foot) level with the ground plane
-            emit<Task>(std::make_unique<ControlLeftFoot>(Htl.matrix(), time, true));
-            emit<Task>(std::make_unique<ControlRightFoot>(Htr.matrix(), time, false));
+            emit<Task>(std::make_unique<ControlLeftFoot>(Htl.matrix(), goal_time, true));
+            emit<Task>(std::make_unique<ControlRightFoot>(Htr.matrix(), goal_time, false));
         }
 
         // Construct Arm IK tasks
@@ -167,11 +168,11 @@ namespace module::skill {
         auto right_arm = std::make_unique<RightArm>();
         for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
             right_arm->servos[id] =
-                ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
+                ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
         }
         for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_ARM)) {
             left_arm->servos[id] =
-                ServoCommand(time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
+                ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
         }
 
         emit<Task>(left_arm, 0, true, "Walk left arm");
