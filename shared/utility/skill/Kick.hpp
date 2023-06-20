@@ -155,9 +155,9 @@ namespace utility::skill {
             // Update the phase
             t += dt;
 
-            // Reset time after it reaches the end of the kick
+            // Clamp the time to the duration of the kick if greater or equal to the duration
             if (t >= kick_duration) {
-                t = 0;
+                t = kick_duration;
             }
         }
 

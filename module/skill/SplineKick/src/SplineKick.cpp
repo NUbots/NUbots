@@ -91,6 +91,19 @@ namespace module::skill {
                 // Update the kick engine
                 kick_generator.update(time_delta);
 
+                // If this is a new task and time has elapsed, then we need to start a new kick
+                if ((info.run_reason != RunInfo::RunReason::NEW_TASK)
+                    && kick_generator.get_time() == kick_generator.get_duration()) {
+                    emit<Task>(std::make_unique<Done>());
+                    return;
+                }
+
+                if ((info.run_reason == RunInfo::RunReason::NEW_TASK)
+                    && kick_generator.get_time() == kick_generator.get_duration()) {
+                    // Start a new kick
+                    kick_generator.reset();
+                }
+
                 // Compute the goal position time
                 const NUClear::clock::time_point goal_time =
                     NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
