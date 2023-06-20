@@ -2,9 +2,9 @@ var searchData=
 [
   ['b_1895',['B',['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#ad8fc648944e0dd12eaf8d2d1320ee41c',1,'utility::math::filter::KalmanFilter']]],
   ['ball_5fangular_5fcov_1896',['ball_angular_cov',['../classmodule_1_1vision_1_1BallDetector.html#acf5627528f8b85dba93c938a064ce65c',1,'module::vision::BallDetector']]],
-  ['ball_5fdistance_5fthreshold_1897',['ball_distance_threshold',['../structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#a1549295da5407ee1ee0419139a81f657',1,'module::strategy::AlignBallToGoal::Config']]],
+  ['ball_5fdistance_5fthreshold_1897',['ball_distance_threshold',['../structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#a9071a554cc6a41123f346fd865f32b18',1,'module::strategy::AlignBallToGoal::Config']]],
   ['ball_5fsearch_5ftimeout_1898',['ball_search_timeout',['../structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3',1,'module::strategy::StrategiseLook::Config::ball_search_timeout()'],['../structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb',1,'module::strategy::WalkToBall::Config::ball_search_timeout()']]],
-  ['ball_5fy_5foffset_1899',['ball_y_offset',['../structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a82d2763570c209a41c41b431813e6244',1,'module::strategy::WalkToBall::Config']]],
+  ['ball_5fy_5foffset_1899',['ball_y_offset',['../structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a958bcdb230880540d2662b7bd4f33779',1,'module::strategy::WalkToBall::Config']]],
   ['bars_1900',['bars',['../classutility_1_1support_1_1ProgressBar.html#a9e4c8f6233e32fabe19d2b96d445e99e',1,'utility::support::ProgressBar']]],
   ['battery_5fstate_1901',['battery_state',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8672cf92d6e9ee88186ac42699bf3a46',1,'module::platform::OpenCR::HardwareIO']]],
   ['bc_1902',['Bc',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#a7bbec7e3d22d886b1ff2389be8f1afde',1,'module::input::SensorFilter::Config']]],

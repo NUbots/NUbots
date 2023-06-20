@@ -65,7 +65,7 @@ var searchData=
   ['goaldetector_423',['GoalDetector',['../classmodule_1_1vision_1_1GoalDetector.html#ae45cd4f8e2ff7da4bb0f4d837d2bbc58',1,'module::vision::GoalDetector::GoalDetector()'],['../classmodule_1_1vision_1_1GoalDetector.html',1,'module::vision::GoalDetector']]],
   ['goalie_424',['Goalie',['../classmodule_1_1purpose_1_1Goalie.html#a77494629dfed2db5048dd044503277af',1,'module::purpose::Goalie::Goalie()'],['../classmodule_1_1purpose_1_1Goalie.html',1,'module::purpose::Goalie']]],
   ['greenhorizondetector_425',['GreenHorizonDetector',['../classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64',1,'module::vision::GreenHorizonDetector::GreenHorizonDetector()'],['../classmodule_1_1vision_1_1GreenHorizonDetector.html',1,'module::vision::GreenHorizonDetector']]],
-  ['grid_5fsize_426',['grid_size',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a68c22dd2bc9b0ced72d132a7e05a904b',1,'module::localisation::FieldLocalisation::Config']]],
+  ['grid_5fsize_426',['grid_size',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ae24e91c5a8c1fc476e5287039c79f7e7',1,'module::localisation::FieldLocalisation::Config']]],
   ['group_427',['group',['../structmodule_1_1extension_1_1component_1_1Provider.html#a7d170dc5268b9ff31ef13af2f48f17ac',1,'module::extension::component::Provider']]],
   ['groupinfo_428',['GroupInfo',['../structextension_1_1behaviour_1_1GroupInfo.html',1,'extension::behaviour']]],
   ['groups_429',['groups',['../classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d',1,'module::extension::Director']]],

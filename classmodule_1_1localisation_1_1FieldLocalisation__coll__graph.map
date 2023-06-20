@@ -1,6 +1,6 @@
 <map id="module::localisation::FieldLocalisation" name="module::localisation::FieldLocalisation">
-<area shape="rect" id="node1" title=" " alt="" coords="335,63,489,105"/>
-<area shape="rect" id="node2" title=" " alt="" coords="32,5,167,32"/>
-<area shape="rect" id="node3" href="$structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html" title="Stores configuration values." alt="" coords="22,56,177,112"/>
-<area shape="rect" id="node4" href="$classmodule_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="5,137,193,178"/>
+<area shape="rect" id="node1" title=" " alt="" coords="349,63,504,105"/>
+<area shape="rect" id="node2" title=" " alt="" coords="39,5,174,32"/>
+<area shape="rect" id="node3" href="$structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html" title="Stores configuration values." alt="" coords="29,56,184,112"/>
+<area shape="rect" id="node4" href="$classmodule_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="5,137,208,178"/>
 </map>

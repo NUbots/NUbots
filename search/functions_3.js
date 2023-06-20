@@ -1,14 +1,14 @@
 var searchData=
 [
-  ['calculate_5fweight_1573',['calculate_weight',['../classmodule_1_1localisation_1_1FieldLocalisation.html#a59185f31119e989510700d7b57ee27e3',1,'module::localisation::FieldLocalisation']]],
+  ['calculate_5fweight_1573',['calculate_weight',['../classmodule_1_1localisation_1_1FieldLocalisation.html#a5dab2151b6930ffdc66d21c11f7e1af0',1,'module::localisation::FieldLocalisation']]],
   ['camera_1574',['Camera',['../classmodule_1_1input_1_1Camera.html#a81af0369c1dfff43949f94131bbbce7c',1,'module::input::Camera']]],
   ['causingexpression_1575',['CausingExpression',['../structextension_1_1behaviour_1_1commands_1_1CausingExpression.html#a3a1024238d22802d992b44fdb14e2c36',1,'extension::behaviour::commands::CausingExpression']]],
   ['challenge_5fpriority_1576',['challenge_priority',['../classmodule_1_1extension_1_1Director.html#a6e12b0846a7c148a6dea84299670b45c',1,'module::extension::Director']]],
   ['close_1577',['close',['../classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05',1,'utility::io::uart::close()'],['../classutility_1_1nbs_1_1Encoder.html#a036a7fd33cd0c7436ae13874fa7215e1',1,'utility::nbs::Encoder::close()']]],
   ['cm740_1578',['CM740',['../classCM740_1_1CM740.html#a60699ca75777cc26297a7865ec0526d2',1,'CM740::CM740']]],
   ['compute_5fcartesian_5fposition_1579',['compute_cartesian_position',['../classutility_1_1skill_1_1QuinticWalkEngine.html#aaa39fd322b8783b180b2864939df773d',1,'utility::skill::QuinticWalkEngine']]],
-  ['compute_5fcovariance_1580',['compute_covariance',['../classmodule_1_1localisation_1_1FieldLocalisation.html#a8b85ccee52c658fbd02b27f85813faff',1,'module::localisation::FieldLocalisation']]],
-  ['compute_5fmean_1581',['compute_mean',['../classmodule_1_1localisation_1_1FieldLocalisation.html#a6cc5dfd580c80f0b1723772ca8f13ec5',1,'module::localisation::FieldLocalisation']]],
+  ['compute_5fcovariance_1580',['compute_covariance',['../classmodule_1_1localisation_1_1FieldLocalisation.html#a306abc5e4b9bb117f95572fa8a841f2d',1,'module::localisation::FieldLocalisation']]],
+  ['compute_5fmean_1581',['compute_mean',['../classmodule_1_1localisation_1_1FieldLocalisation.html#a31ec05258deee3fba3c0fc6c54711f1a',1,'module::localisation::FieldLocalisation']]],
   ['computesplines_1582',['computeSplines',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#a21c67e61de57403a1005d6f7cc4325f5',1,'utility::motion::splines::SmoothSpline']]],
   ['configuration_1583',['Configuration',['../structextension_1_1Configuration.html#ae86cb3aed1f65b8d3e851d1e06a4e775',1,'extension::Configuration']]],
   ['configure_1584',['configure',['../classCM740_1_1UART.html#ad30e00e1763c86aa7f14be0ecdc3ca9e',1,'CM740::UART']]],

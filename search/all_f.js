@@ -1,7 +1,7 @@
 var searchData=
 [
   ['occupancymap_633',['OccupancyMap',['../classmodule_1_1localisation_1_1OccupancyMap.html',1,'module::localisation']]],
-  ['occupancymap_3c_20float_20_3e_634',['OccupancyMap&lt; float &gt;',['../classmodule_1_1localisation_1_1OccupancyMap.html',1,'module::localisation']]],
+  ['occupancymap_3c_20double_20_3e_634',['OccupancyMap&lt; double &gt;',['../classmodule_1_1localisation_1_1OccupancyMap.html',1,'module::localisation']]],
   ['odometrylocalisation_635',['OdometryLocalisation',['../classmodule_1_1localisation_1_1OdometryLocalisation.html',1,'module::localisation::OdometryLocalisation'],['../classmodule_1_1localisation_1_1OdometryLocalisation.html#ac28a332640e958fc6ffa2b5340bc6b5c',1,'module::localisation::OdometryLocalisation::OdometryLocalisation()']]],
   ['offset_636',['offset',['../structutility_1_1nbs_1_1IndexItem.html#a24ad36421839d2e30b63b6a25af74f26',1,'utility::nbs::IndexItem']]],
   ['ok_637',['OK',['../classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77afae7fc26dfef15f5c935685710e572d9',1,'module::extension::Director::OK()'],['../structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html#a3c4425616ac70f59ef80c3ffe6fd0eeca8279e608bb823bcbcf51d08467b42ed2',1,'module::extension::Director::Solution::Option::OK()']]],
@@ -31,7 +31,7 @@ var searchData=
   ['output_5ffile_661',['output_file',['../classutility_1_1nbs_1_1Encoder.html#ac3873201b2c83404d3a8af13f9f475f8',1,'utility::nbs::Encoder']]],
   ['output_5ffile_5fpath_662',['output_file_path',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a1e28b802510291ebad72daedfc7ed2a1',1,'module::support::logging::DataLogging']]],
   ['output_5ffourcc_663',['output_fourcc',['../classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Decompressor.html#ac3b15c300111cca2635e0cca2c62d11c',1,'module::input::decompressor::turbojpeg::Decompressor']]],
-  ['outside_5fmap_5fpenalty_5ffactor_664',['outside_map_penalty_factor',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a64b2c8a9efc3de65dd182758fe8514a1',1,'module::localisation::FieldLocalisation::Config']]],
+  ['outside_5fmap_5fpenalty_5ffactor_664',['outside_map_penalty_factor',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab6083f90b5f87a9031c93032a76761f2',1,'module::localisation::FieldLocalisation::Config']]],
   ['over_5ftime_5fcount_665',['over_time_count',['../structmodule_1_1input_1_1CameraContext_1_1TimeCorrection.html#afddd1659258ab2851d81998af09dff21',1,'module::input::CameraContext::TimeCorrection']]],
   ['overview_666',['Overview',['../classmodule_1_1output_1_1Overview.html',1,'module::output::Overview'],['../classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10',1,'module::output::Overview::Overview()']]]
 ];

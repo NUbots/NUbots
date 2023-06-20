@@ -1,15 +1,15 @@
 var structmodule_1_1planning_1_1PlanWalkPath_1_1Config =
 [
-    [ "acceleration", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a2d2226d77db341a3b10a09d69e680808", null ],
-    [ "approach_radius", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a78c41765b8c652a26c81173f9766cfb3", null ],
-    [ "max_forward_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a82a078de7c140d93543c01b3d38247de", null ],
-    [ "max_turn_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a99c4d0a9643c8ab22007044ec0cfefef", null ],
-    [ "min_forward_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#abcbde44819cfd82b3db6a87b6f4fe6ed", null ],
-    [ "min_turn_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ae56d51343f99adae9c272c78b385a2d7", null ],
-    [ "pivot_ball_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#afc906a2e2b6e83d7c475dd93b55b407c", null ],
-    [ "pivot_ball_speed_x", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a9fbb748ad1f52b96c34ffc0982db15e6", null ],
-    [ "pivot_ball_speed_y", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a64d4d6df6eef94f0fdf9d659ddef0658", null ],
-    [ "rotate_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a95608688f4f552a9e9f66dde62777bb4", null ],
-    [ "rotate_speed_x", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a2741e8ba6a7913f95465d4c02d6b16e2", null ],
-    [ "rotate_speed_y", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a559c10f78e96f285f6c4d533432b97f8", null ]
+    [ "acceleration", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3cadd474fc5462ac44a470a52c14967d", null ],
+    [ "approach_radius", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a0f520e173bd7f6a2d50fc930d0208f85", null ],
+    [ "max_forward_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a8d3dbe9c85cd0a55c3ba00105593cefb", null ],
+    [ "max_turn_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a0fcf01227facf4f87d575b4b7551cca6", null ],
+    [ "min_forward_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ab7c5d5c27222f0916307abdfa6885356", null ],
+    [ "min_turn_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#ae7fc10956c723bb76f7e6a64433bd86d", null ],
+    [ "pivot_ball_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a8aaaa3e8a4802d215d9b65ef08dcd947", null ],
+    [ "pivot_ball_speed_x", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a99a14f419c4b3f3840f2d31f3ac31aed", null ],
+    [ "pivot_ball_speed_y", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#aa3359c5735990625cff340a118958238", null ],
+    [ "rotate_speed", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#aefeb25ae8bdab409af79455f799c6e18", null ],
+    [ "rotate_speed_x", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a26ead6ea2899027dbdd5a7646bddec21", null ],
+    [ "rotate_speed_y", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a0c0a9334530ff728203763972ff2b2c4", null ]
 ];

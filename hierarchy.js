@@ -381,7 +381,7 @@ var hierarchy =
       [ "module::vision::GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", null ],
       [ "module::vision::VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", null ]
     ] ],
-    [ "module::localisation::OccupancyMap< float >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],
+    [ "module::localisation::OccupancyMap< double >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],
     [ "utility::math::filter::ParticleFilter< double, module::localisation::RobotModel >", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", null ],
     [ "extension::behaviour::ProviderBase< T, commands::ProviderClassification::PROVIDE >", "structextension_1_1behaviour_1_1ProviderBase.html", [
       [ "extension::behaviour::Provide< T >", "structextension_1_1behaviour_1_1Provide.html", null ]

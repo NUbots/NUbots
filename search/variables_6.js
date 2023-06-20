@@ -19,7 +19,7 @@ var searchData=
   ['goal_5frobot_5fspace_2024',['goal_robot_space',['../classmodule_1_1motion_1_1HeadController.html#aa551b99efb973aab0c7da597e3b0c529',1,'module::motion::HeadController']]],
   ['goal_5fsearch_5ftimeout_2025',['goal_search_timeout',['../structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a163c7d0607ecc204ce2265d308e0f16c',1,'module::strategy::StrategiseLook::Config']]],
   ['goal_5fvelocity_2026',['goal_velocity',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a6a86b7ec98409fd004c87ca35ec4e7a5',1,'module::platform::OpenCR::HardwareIO::ServoState']]],
-  ['grid_5fsize_2027',['grid_size',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a68c22dd2bc9b0ced72d132a7e05a904b',1,'module::localisation::FieldLocalisation::Config']]],
+  ['grid_5fsize_2027',['grid_size',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ae24e91c5a8c1fc476e5287039c79f7e7',1,'module::localisation::FieldLocalisation::Config']]],
   ['group_2028',['group',['../structmodule_1_1extension_1_1component_1_1Provider.html#a7d170dc5268b9ff31ef13af2f48f17ac',1,'module::extension::component::Provider']]],
   ['groups_2029',['groups',['../classmodule_1_1extension_1_1Director.html#ab2350ea1c07f3e9dd54776dcadf29e4d',1,'module::extension::Director']]],
   ['gyro_2030',['gyro',['../structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#ae6292a1612a41789e1e440cbdab51a0c',1,'module::planning::GetUpPlanner::Config::gyro()'],['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419',1,'module::platform::OpenCR::HardwareIO::OpenCRState::gyro()']]],
