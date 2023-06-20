@@ -87,7 +87,6 @@ namespace module::skill {
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
                         .count();
                 last_update_time = NUClear::clock::now();
-                log<NUClear::INFO>("time_delta: ", time_delta);
 
                 // Update the kick engine
                 kick_generator.update(time_delta);
@@ -99,8 +98,6 @@ namespace module::skill {
                 // Get desired feet poses in the torso {t} frame from the walk engine
                 Eigen::Isometry3d Htl = kick_generator.get_foot_pose(LimbID::LEFT_LEG);
                 Eigen::Isometry3d Htr = kick_generator.get_foot_pose(LimbID::RIGHT_LEG);
-                log<NUClear::INFO>("Htl.translation.transpose():\n", Htl.translation().transpose());
-                log<NUClear::INFO>("Htr.translation.transpose():\n", Htr.translation().transpose());
 
                 // Construct ControlFoot tasks
                 emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, kick_generator.is_left_foot_planted()));
