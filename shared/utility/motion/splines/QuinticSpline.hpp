@@ -20,7 +20,6 @@ namespace utility::motion::splines {
                       const Scalar& t) {
             // Compute the coefficients of the quintic polynomial.
             if (t <= static_cast<Scalar>(1e-5)) {
-
                 throw std::logic_error("QuinticSpline invalid duration: " + std::to_string(t));
             }
             const Scalar t2 = t * t;
@@ -48,13 +47,13 @@ namespace utility::motion::splines {
          * @return Position vector at the given time.
          */
         Scalar position(Scalar time) const {
-            Scalar tt        = 1;
-            Scalar position_ = 0;
+            Scalar tt       = 1;
+            Scalar position = 0;
             for (size_t i = 0; i < size_t(coefficients.size()); ++i) {
-                position_ += coefficients[i] * tt;
+                position += coefficients[i] * tt;
                 tt *= time;
             }
-            return position_;
+            return position;
         }
 
         /**
@@ -63,13 +62,13 @@ namespace utility::motion::splines {
          * @return Velocity at the given time.
          */
         Scalar velocity(Scalar time) const {
-            Scalar tt        = 1;
-            Scalar velocity_ = 0;
+            Scalar tt       = 1;
+            Scalar velocity = 0;
             for (size_t i = 1; i < size_t(coefficients.size()); ++i) {
-                velocity_ += coefficients[i] * i * tt;
+                velocity += coefficients[i] * i * tt;
                 tt *= time;
             }
-            return velocity_;
+            return velocity;
         }
 
         /**
@@ -78,13 +77,13 @@ namespace utility::motion::splines {
          * @return Acceleration at the given time.
          */
         Scalar acceleration(Scalar time) const {
-            Scalar tt            = 1;
-            Scalar acceleration_ = 0;
+            Scalar tt           = 1;
+            Scalar acceleration = 0;
             for (size_t i = 2; i < size_t(coefficients.size()); ++i) {
-                acceleration_ += coefficients[i] * i * (i - 1) * tt;
+                acceleration += coefficients[i] * i * (i - 1) * tt;
                 tt *= time;
             }
-            return acceleration_;
+            return acceleration;
         }
 
     private:
