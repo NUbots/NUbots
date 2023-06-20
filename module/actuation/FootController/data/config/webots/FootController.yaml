@@ -3,4 +3,4 @@ log_level: INFO
 
 servo_gain: 8
 
-keep_level: true
+keep_level: false
