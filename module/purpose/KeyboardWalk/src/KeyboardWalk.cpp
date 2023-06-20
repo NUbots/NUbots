@@ -42,7 +42,7 @@ namespace module::purpose {
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without this emit, modules that need a Stability message may not run
+            // Without these emis, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
