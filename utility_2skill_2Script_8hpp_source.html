@@ -264,12 +264,12 @@ $(document).ready(function(){initNavTree('utility_2skill_2Script_8hpp_source.htm
 <div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="comment">// Try getting the robot-specific script first</span></div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keywordflow">if</span> (utility::file::exists(robot_path)) {</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            NUClear::log&lt;NUClear::DEBUG&gt;(<span class="stringliteral">&quot;Parsing robot specific script:&quot;</span>, script);</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            NUClear::log&lt;NUClear::INFO&gt;(<span class="stringliteral">&quot;Parsing robot specific script:&quot;</span>, script);</div>
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            <span class="keywordflow">return</span> YAML::LoadFile(robot_path);</div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        }</div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        <span class="comment">// If there was no robot-specific script, then get the platform-specific script</span></div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        <span class="keywordflow">else</span> <span class="keywordflow">if</span> (utility::file::exists(platform_path)) {</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            NUClear::log&lt;NUClear::DEBUG&gt;(<span class="stringliteral">&quot;Parsing default platform script:&quot;</span>, script);</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            NUClear::log&lt;NUClear::INFO&gt;(<span class="stringliteral">&quot;Parsing default platform script:&quot;</span>, script);</div>
 <div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;            <span class="keywordflow">return</span> YAML::LoadFile(platform_path);</div>
 <div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        }</div>
 <div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="comment">// The script doesn&#39;t exist, tell the user</span></div>
@@ -552,7 +552,7 @@ $(document).ready(function(){initNavTree('utility_2skill_2Script_8hpp_source.htm
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_e74f07e607724dbb2b9c42172be2da51.html">skill</a></li><li class="navelem"><b>Script.hpp</b></li>
-    <li class="footer">Generated on Tue Jun 20 2023 02:56:25 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jun 20 2023 06:43:45 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
