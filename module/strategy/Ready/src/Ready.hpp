@@ -14,11 +14,11 @@ namespace module::strategy {
             /// @brief The amount of time to walk in ready
             NUClear::clock::duration walk_to_ready_time{};
             /// @brief Walk to ready walk command forward velocity
-            float walk_to_ready_speed_x = 0;
+            double walk_to_ready_speed_x = 0;
             /// @brief Walk to ready walk command side velocity
-            float walk_to_ready_speed_y = 0;
+            double walk_to_ready_speed_y = 0;
             /// @brief Walk to ready walk command angular velocity
-            float walk_to_ready_rotation = 0;
+            double walk_to_ready_rotation = 0;
         } cfg;
 
         /// @brief Stores the time stamp of when the robot starts walking to the ready position

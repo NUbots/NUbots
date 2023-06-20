@@ -27,26 +27,14 @@ namespace module::strategy {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<StandStillTask>, Uses<LimbsSequence>, Trigger<Stability>>().then(
-            [this](const Uses<LimbsSequence>& limbs, const Stability& stability) {
-                // If we are stable, then we can provide the StandStill command
-                if (stability != Stability::STANDING) {
-                    standing = false;
-                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
-                }
-                // If we aren't currently standing and we aren't currently running the stand, then request a stand
-                else if (!standing && limbs.run_state == GroupInfo::RunState::NO_TASK) {
-                    standing = true;
-                    emit<Task>(load_script<LimbsSequence>("Stand.yaml"));
-                }
-                else {
-                    emit<Task>(std::make_unique<Idle>());
-                }
-            });
-
-        on<Start<StandStillTask>>().then([this] {
-            // We don't know that we are standing, so reset to false
-            standing = false;
+        on<Provide<StandStillTask>, Trigger<Stability>>().then([this](const Stability& stability) {
+            // If we are stable, then we can provide the StandStill command
+            if (stability != Stability::STANDING) {
+                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+            }
+            else {
+                emit<Task>(load_script<LimbsSequence>("Stand.yaml"));
+            }
         });
     }
 

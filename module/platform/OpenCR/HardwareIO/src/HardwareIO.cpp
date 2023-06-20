@@ -143,14 +143,6 @@ namespace module::platform::OpenCR {
             auto& info = packet_queue[packet_id].front();
             packet_queue[packet_id].erase(packet_queue[packet_id].begin());
 
-            // Check for packet errors
-            if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", int(packet_id)));
-            }
-            if (packet.alert) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", int(packet_id)));
-            }
-
             /// @brief handle incoming packets, and send next request if all packets were handled
             // -> Recieved model information packet
             //    -> Trigger first servo request
@@ -167,7 +159,15 @@ namespace module::platform::OpenCR {
                     // check if we recieved the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
-                        send_servo_request();
+
+                        // At the start, we want to query the motors so we can store their state internally
+                        // This will start the loop of reading and writing to the servos and opencr
+                        for (const auto& id : nugus.servo_ids()) {
+                            packet_queue[NUgus::ID(id)].push_back(PacketTypes::SERVO_DATA);
+                        }
+                        opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(AddressBook::SERVO_READ),
+                                                                        sizeof(DynamixelServoReadData),
+                                                                        nugus.servo_ids()));
                     }
 
                     break;

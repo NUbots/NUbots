@@ -119,7 +119,7 @@ imu:
     threshold: 0.4
 
 gains:
-  legs: 15
+  legs: 8
   arms: 8
 
 arms:

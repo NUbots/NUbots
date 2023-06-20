@@ -167,6 +167,9 @@ namespace module::input {
                                         case FilteringMethod::MAHONY:
                                             update_odometry_mahony(sensors, previous_sensors, raw_sensors);
                                             break;
+                                        case FilteringMethod::GROUND_TRUTH:
+                                            update_odometry_ground_truth(sensors, raw_sensors);
+                                            break;
                                         default: log<NUClear::WARN>("Unknown Filtering Method"); break;
                                     }
 

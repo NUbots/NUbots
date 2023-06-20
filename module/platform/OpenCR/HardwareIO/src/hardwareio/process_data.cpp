@@ -55,8 +55,7 @@ namespace module::platform::OpenCR {
                                            -convert::acc(data.acc[1]),   // Y
                                            -convert::acc(data.acc[2]));  // Z
         // Command send/receive errors only
-        opencr_state.alert_flag   = static_cast<bool>(packet.alert);
-        opencr_state.error_number = static_cast<int>(packet.error);
+        opencr_state.error_flags = packet.error;
 
         // Work out a battery charged percentage
         battery_state.current_voltage = convert::voltage(data.voltage);
@@ -114,27 +113,12 @@ namespace module::platform::OpenCR {
 
         servo_states[servo_index].torque_enabled = (data.torque_enable == 1);
 
-        // Servo error status, NOT dynamixel status packet error.
-        servo_states[servo_index].error_flags = data.hardware_error_status;
+        // Although they're stored in the servo state here, packet errors are combined and processed all at once as
+        // subcontroller errors in the RawSensors message
+        servo_states[servo_index].packet_error = packet.error;
 
-        // Print error flags if there is an error
-        /**
-         * Bit      Item	                        Description
-         * Bit 7	-	                            Unused, Always ‘0’
-         * Bit 6	-	                            Unused, Always ‘0’
-         * Bit 5	Overload Error(default)	        Detects that persistent load that exceeds maximum output
-         * Bit 4	Electrical Shock Error(default)	Detects electric shock on the circuit or insufficient power to
-         *                                          operate the motor
-         * Bit 3	Motor Encoder Error	            Detects malfunction of the motor encoder
-         * Bit 2    Overheating Error(default)	    Detects that internal temperature exceeds the configured operating
-         *                                          temperature
-         * Bit 1	-	                            Unused, Always ‘0’
-         * Bit 0	Input Voltage Error             Detects that input voltage exceeds the configured operating voltage
-         */
-        if (servo_states[servo_index].error_flags != 0) {
-            log<NUClear::ERROR>(
-                fmt::format("Servo {} error: {:#010b}", servo_index + 1, servo_states[servo_index].error_flags));
-        }
+        // Servo error status from control table, NOT dynamixel status packet error.
+        servo_states[servo_index].hardware_error = data.hardware_error_status;
 
         servo_states[servo_index].present_pwm      = convert::PWM(data.present_pwm);
         servo_states[servo_index].present_current  = convert::current(data.present_current);
@@ -143,6 +127,13 @@ namespace module::platform::OpenCR {
             convert::position(servo_index, data.present_position, nugus.servo_direction, nugus.servo_offset);
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
+
+        // If this servo has not been initialised yet, set the goal states to the current states
+        if (!servo_states[servo_index].initialised) {
+            servo_states[servo_index].goal_position = servo_states[servo_index].present_position;
+            servo_states[servo_index].torque        = servo_states[servo_index].torque_enabled ? 1.0f : 0.0f;
+            servo_states[servo_index].initialised   = true;
+        }
     }
 
 }  // namespace module::platform::OpenCR
