@@ -47,7 +47,6 @@ nuclear_role(
   skill::Look
   # Planners
   planning::GetUpPlanner
-  planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
   strategy::StandStill
