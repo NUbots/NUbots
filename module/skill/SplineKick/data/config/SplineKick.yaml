@@ -2,7 +2,7 @@
 log_level: DEBUG
 
 # Waypoints for kick foot relative to planted foot [time, x, y, z]
-# Assume for a right foot planted kick with left foot and it will be mirrored by kick generator
+# Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
 foot_waypoints:
   - [0, 0.19, 0, 0]
   - [0, 0.19, 0, 0.5]
@@ -13,7 +13,7 @@ foot_waypoints:
   - [0, 0.19, 0, 2.5]
 
 # Waypoints for torso relative to planted foot [time, x, y, z]
-# Assume for a right foot planted kick with left foot and it will be mirrored by kick generator
+# Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
 torso_waypoints:
   - [0, 0.09, 0.42, 0]
   - [0, 0.09, 0.42, 0.5]
