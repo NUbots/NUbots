@@ -9,7 +9,6 @@ import { Mesh } from "three";
 import { Object3D } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 
-import { memoize } from "../../../base/memoize";
 import { LocalisationRobotModel } from "../robot_model";
 
 import url from "./config/nugus.glb?url";
