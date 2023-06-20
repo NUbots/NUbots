@@ -15,8 +15,8 @@ Include this module to allow the robot to walk.
 ## Emits
 
 - `message::behaviour::state::Stability` to indicate when the robot is walking (dynamically stable) and standing.
-- `message::actuation::LeftLegIK` Task requesting the left leg is moved using Inverse Kinematics, containing left leg motion information.
-- `message::actuation::RightLegIK` Task requesting the right leg is moved using Inverse Kinematics, containing right leg motion information.
+- `message::actuation::ControlLeftFoot` Task requesting the left leg is moved to desired pose.
+- `message::actuation::ControlRightFoot` Task requesting the right leg is moved to desired pose.
 - `message::actuation::LeftArm` Task requesting the left arm is moved using Inverse Kinematics, containing left arm servo commands.
 - `message::actuation::RightArm` Task requesting the right arm is moved using Inverse Kinematics, containing right arm servo commands.
 
