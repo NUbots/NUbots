@@ -38,7 +38,7 @@ nuclear_role(
   planning::GetUpPlanner
   planning::FallingRelaxPlanner
   # Strategies
-  # strategy::FallRecovery
+  strategy::FallRecovery
   strategy::StandStill
   strategy::WalkToFieldPosition
   strategy::StrategiseLook
