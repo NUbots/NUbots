@@ -126,6 +126,7 @@ var namespaces_dup =
     ] ],
     [ "module", null, [
       [ "actuation", null, [
+        [ "FootController", "classmodule_1_1actuation_1_1FootController.html", "classmodule_1_1actuation_1_1FootController" ],
         [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
         [ "KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", "classmodule_1_1actuation_1_1KinematicsConfiguration" ],
         [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
@@ -687,9 +688,11 @@ var namespaces_dup =
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
+        [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ],
         [ "DiveTask", "Dive_8cpp.html#aab4cff4ad6c87765b3bf727736fd547f", null ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
-        [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ]
+        [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ],
+        [ "WalkTask", "Walk_8cpp.html#aed1b3430e296f2d58d0ddc7e02a06020", null ]
       ] ],
       [ "strategy", null, [
         [ "AlignBallToGoal", "classmodule_1_1strategy_1_1AlignBallToGoal.html", "classmodule_1_1strategy_1_1AlignBallToGoal" ],
@@ -985,12 +988,22 @@ var namespaces_dup =
           [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
           [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
           [ "Polynom", "classutility_1_1motion_1_1splines_1_1Polynom.html", "classutility_1_1motion_1_1splines_1_1Polynom" ],
+          [ "QuinticSpline", "classutility_1_1motion_1_1splines_1_1QuinticSpline.html", "classutility_1_1motion_1_1splines_1_1QuinticSpline" ],
           [ "SmoothSpline", "classutility_1_1motion_1_1splines_1_1SmoothSpline.html", "classutility_1_1motion_1_1splines_1_1SmoothSpline" ],
           [ "Spline", "classutility_1_1motion_1_1splines_1_1Spline.html", "classutility_1_1motion_1_1splines_1_1Spline" ],
           [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
+          [ "Trajectory", "classutility_1_1motion_1_1splines_1_1Trajectory.html", "classutility_1_1motion_1_1splines_1_1Trajectory" ],
           [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ],
           [ "Trajectories", "TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef", null ],
           [ "Vector3fQuadruple", "TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34", null ],
+          [ "TrajectoryDimension", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4", [
+            [ "X", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4ac8eee871c3b6b295798dcf25c19d5688", null ],
+            [ "Y", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a0228f0b7b5940bad5f82a74cfc51b337", null ],
+            [ "Z", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a9781203e4d472f01e168fd457baff5aa", null ],
+            [ "ROLL", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4ab9415c4ab48b8633820f79a7883a96e0", null ],
+            [ "PITCH", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a08d80bb50940f7f38a9fd01a22a6fa7e", null ],
+            [ "YAW", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a0b232ad594f4184583daae55fca0feb2", null ]
+          ] ],
           [ "diffInv", "Footstep_8cpp.html#a5e5892b709f9e29c5777e3afa5297bf6", null ],
           [ "operator<<", "Polynom_8hpp.html#a6db93f0d85aee6035e22097b31ba1fb1", null ],
           [ "poseAdd", "Footstep_8cpp.html#a4d9e21dbf59a7fcb43d36b86b2c02ef6", null ],

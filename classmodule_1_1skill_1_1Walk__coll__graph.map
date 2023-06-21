@@ -1,0 +1,7 @@
+<map id="module::skill::Walk" name="module::skill::Walk">
+<area shape="rect" id="node1" title=" " alt="" coords="543,78,689,105"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="219,5,378,47"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,13,140,39"/>
+<area shape="rect" id="node4" href="$structmodule_1_1skill_1_1Walk_1_1Config.html" title=" " alt="" coords="225,71,372,112"/>
+<area shape="rect" id="node5" href="$classutility_1_1skill_1_1MotionGeneration.html" title=" " alt="" coords="189,136,408,177"/>
+</map>

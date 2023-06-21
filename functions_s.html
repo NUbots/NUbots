@@ -248,6 +248,9 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 <li>servo_direction
 : <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a294f24d6e5f4922b024a9e61756c65ba">module::platform::OpenCR::NUgus</a>
 </li>
+<li>servo_gain
+: <a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a650b1cbc746a982646a84a768ec102fc">module::actuation::FootController::Config</a>
+</li>
 <li>servo_ids()
 : <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6925b8414d2a4b7add6b98547afb216">module::platform::OpenCR::NUgus</a>
 </li>
@@ -263,6 +266,7 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 </li>
 <li>servo_states
 : <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c">module::platform::OpenCR::HardwareIO</a>
+, <a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#ae7ba1c4e2415aa67e85d22c4fc1c6252">module::skill::Walk::Config</a>
 </li>
 <li>servo_waiting()
 : <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a9aa9639e522a3420a51b1cca915ccd23">module::platform::OpenCR::HardwareIO</a>
@@ -357,6 +361,7 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 </li>
 <li>splines
 : <a class="el" href="classutility_1_1motion_1_1splines_1_1Spline.html#ad126226a6b9e25aa6782c397946eec1d">utility::motion::splines::Spline&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1motion_1_1splines_1_1Trajectory.html#a54a0258bf1e028ac081d795bfa6f9442">utility::motion::splines::Trajectory&lt; Scalar &gt;</a>
 </li>
 <li>split_size
 : <a class="el" href="classmodule_1_1support_1_1logging_1_1DataLogging.html#a1f957f20a75d0601c350b95e7641aef4">module::support::logging::DataLogging</a>
@@ -397,8 +402,28 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 , <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#ae366bcd7d0c2925f0e90958c40c23b13">module::localisation::FieldLocalisation</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#a241c45690549907cbd902968190c2cdc">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 </li>
+<li>step_apex_ratio
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a354b6f3c467729359e1f931c88031684">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#ab51297a909c377fc75339eff24c78b75">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+</li>
 <li>step_from_orders()
 : <a class="el" href="classutility_1_1motion_1_1splines_1_1Footstep.html#a048955d7373a783d84d131a91a577a38">utility::motion::splines::Footstep</a>
+</li>
+<li>step_height
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a33fc0ac7ffcda3ca9df05bfe2f54b291">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#a592f4e383016dc956e6e9d7fa23ddfed">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+</li>
+<li>step_limits
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a6568314ad3941c70ac2e359cb6426bd1">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#a39595752444a71711a533f784e1372bb">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+</li>
+<li>step_period
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a05dd2534d2167c8ed87b638461409998">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#ab9d6c1c759a4bdf32123e288eea4ae30">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+</li>
+<li>step_width
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a1475052c0f1d232fcbe586be5e7d6883">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#a870e4492414ae782502bada2bb6dc6ac">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
 </li>
 <li>stepFromSupport()
 : <a class="el" href="classutility_1_1motion_1_1splines_1_1Footstep.html#abf11aab1730330e0f53ff1809fe701cf">utility::motion::splines::Footstep</a>
@@ -438,6 +463,12 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 <li>support_to_last
 : <a class="el" href="classutility_1_1motion_1_1splines_1_1Footstep.html#a2367ebe7a228622ecda0658c0ba7258f">utility::motion::splines::Footstep</a>
 </li>
+<li>swingfoot_trajectory
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a559d3cd5d191c72be5827294eb87886a">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+</li>
+<li>switch_planted_foot()
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a2c78baef45cad3efd0f76a064a53758c">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+</li>
 <li>Systematic()
 : <a class="el" href="structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a412ccf2b0b4b3aedb0b82b084babadb0">utility::math::stats::resample::Systematic&lt; Scalar &gt;</a>
 </li>
@@ -450,7 +481,7 @@ $(document).ready(function(){initNavTree('functions_s.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jun 21 2023 02:31:32 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jun 21 2023 23:29:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

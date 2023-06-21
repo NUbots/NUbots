@@ -15,7 +15,7 @@ var structutility_1_1input_1_1LimbID =
     [ "LimbID", "structutility_1_1input_1_1LimbID.html#a74feb53f6551a89fdda3e036f00591c5", null ],
     [ "LimbID", "structutility_1_1input_1_1LimbID.html#a41cc2ac47f0dbff0b2b2a42c34c02f5d", null ],
     [ "LimbID", "structutility_1_1input_1_1LimbID.html#a8ff4fb422577de65c95788a31ec98801", null ],
-    [ "limbForServo", "structutility_1_1input_1_1LimbID.html#a59232aecc44a8b46fb551ffb59b91b5f", null ],
+    [ "limb_for_servo", "structutility_1_1input_1_1LimbID.html#a661e8c44b0f264b74986c777423b2df8", null ],
     [ "operator int", "structutility_1_1input_1_1LimbID.html#a1a75bcf9c4f4a265c5466511868671e3", null ],
     [ "operator std::string", "structutility_1_1input_1_1LimbID.html#a87654775b33c5d85862b79bbcc2fdb7e", null ],
     [ "operator uint32_t", "structutility_1_1input_1_1LimbID.html#afc7d69eaf9e751008379b9d8371f2df6", null ],
@@ -34,7 +34,9 @@ var structutility_1_1input_1_1LimbID =
     [ "operator>", "structutility_1_1input_1_1LimbID.html#a29d0e1b1e983d54571c357ec2d234577", null ],
     [ "operator>=", "structutility_1_1input_1_1LimbID.html#aac5d041448c7c1c1f8506db165c7804f", null ],
     [ "operator>=", "structutility_1_1input_1_1LimbID.html#a72cd61b173056a71a00f042b628bebfc", null ],
-    [ "servosForLimb", "structutility_1_1input_1_1LimbID.html#ae7624e9e711960281a8636959bab2c55", null ],
+    [ "servos_for_arms", "structutility_1_1input_1_1LimbID.html#afd8f97218aa8df4f7c682a6bd59b67c4", null ],
+    [ "servos_for_legs", "structutility_1_1input_1_1LimbID.html#a624f3a8c69bff74a0f3853781894fd05", null ],
+    [ "servos_for_limb", "structutility_1_1input_1_1LimbID.html#a686e163834b64a75ec61e9c226df14e5", null ],
     [ "operator<<", "structutility_1_1input_1_1LimbID.html#ae75bb7701b23692899641d01edc33f66", null ],
     [ "value", "structutility_1_1input_1_1LimbID.html#aa692b1f468ea590fa27804580a432337", null ]
 ];

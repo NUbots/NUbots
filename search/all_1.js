@@ -2,10 +2,10 @@ var searchData=
 [
   ['a_3',['A',['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#a0eaaaf9cc3399cbcc275c4acc6f525b1',1,'utility::math::filter::KalmanFilter']]],
   ['ac_4',['Ac',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#a3847624313916e92fd8c1628f7a51916',1,'module::input::SensorFilter::Config']]],
-  ['acc_5',['acc',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a9cc3c946ff42f33eb89168d33a2c52d8',1,'module::platform::OpenCR::HardwareIO::OpenCRState::acc()'],['../structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a8f0384d1fc29494dbe44c602dc738924',1,'module::planning::GetUpPlanner::Config::acc()']]],
+  ['acc_5',['acc',['../structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a8f0384d1fc29494dbe44c602dc738924',1,'module::planning::GetUpPlanner::Config::acc()'],['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a9cc3c946ff42f33eb89168d33a2c52d8',1,'module::platform::OpenCR::HardwareIO::OpenCRState::acc()']]],
   ['acc_5fangle_6',['acc_angle',['../classmodule_1_1planning_1_1FallingRelaxPlanner.html#a75a3de6e1baae8ad737d2885b86d7b3b',1,'module::planning::FallingRelaxPlanner::acc_angle()'],['../structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#a672f7ea74be4ab7081da8d02e8007018',1,'module::planning::FallingRelaxPlanner::Config::acc_angle()']]],
   ['acc_5fmag_7',['acc_mag',['../classmodule_1_1planning_1_1FallingRelaxPlanner.html#acb36460bc3c22017293a96864c00b736',1,'module::planning::FallingRelaxPlanner::acc_mag()'],['../structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#ac9566f2ad8657389143447350e85b71d',1,'module::planning::FallingRelaxPlanner::Config::acc_mag()']]],
-  ['acceleration_8',['acceleration',['../structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3cadd474fc5462ac44a470a52c14967d',1,'module::planning::PlanWalkPath::Config']]],
+  ['acceleration_8',['acceleration',['../classutility_1_1motion_1_1splines_1_1QuinticSpline.html#a359a9702c42d95889450ce35a997dd10',1,'utility::motion::splines::QuinticSpline::acceleration()'],['../structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3cadd474fc5462ac44a470a52c14967d',1,'module::planning::PlanWalkPath::Config::acceleration()']]],
   ['accelerometer_9',['Accelerometer',['../structCM740_1_1Types_1_1Accelerometer.html',1,'CM740::Types']]],
   ['accelerometer_10',['ACCELEROMETER',['../structmodule_1_1input_1_1MeasurementType_1_1ACCELEROMETER.html',1,'module::input::MeasurementType']]],
   ['accelerometer_5fconversion_5ffactor_11',['ACCELEROMETER_CONVERSION_FACTOR',['../structmodule_1_1platform_1_1cm740_1_1Convert.html#ae18c2554fbe5ac3e2f7bb4ad1c50752d',1,'module::platform::cm740::Convert']]],
@@ -65,5 +65,6 @@ var searchData=
   ['ansisgr_3c_20ansicode_3a_3ayellow_20_3e_65',['ANSISGR&lt; ANSICode::YELLOW &gt;',['../structutility_1_1strutil_1_1ANSISGR.html',1,'utility::strutil']]],
   ['appdata_66',['AppData',['../structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1AppData.html',1,'module::output::compressor::vaapi::operation::markers']]],
   ['apply_67',['Apply',['../structutility_1_1strutil_1_1ANSISGR_1_1Apply.html',1,'utility::strutil::ANSISGR']]],
-  ['approach_5fradius_68',['approach_radius',['../structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a0f520e173bd7f6a2d50fc930d0208f85',1,'module::planning::PlanWalkPath::Config']]]
+  ['approach_5fradius_68',['approach_radius',['../structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a0f520e173bd7f6a2d50fc930d0208f85',1,'module::planning::PlanWalkPath::Config']]],
+  ['arm_5fpositions_69',['arm_positions',['../structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087',1,'module::skill::Walk::Config']]]
 ];

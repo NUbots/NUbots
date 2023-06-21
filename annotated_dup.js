@@ -81,6 +81,7 @@ var annotated_dup =
     ] ],
     [ "module", null, [
       [ "actuation", null, [
+        [ "FootController", "classmodule_1_1actuation_1_1FootController.html", "classmodule_1_1actuation_1_1FootController" ],
         [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
         [ "KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", "classmodule_1_1actuation_1_1KinematicsConfiguration" ],
         [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
@@ -290,7 +291,8 @@ var annotated_dup =
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
-        [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ]
+        [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
+        [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ]
       ] ],
       [ "strategy", null, [
         [ "AlignBallToGoal", "classmodule_1_1strategy_1_1AlignBallToGoal.html", "classmodule_1_1strategy_1_1AlignBallToGoal" ],
@@ -432,9 +434,11 @@ var annotated_dup =
           [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
           [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
           [ "Polynom", "classutility_1_1motion_1_1splines_1_1Polynom.html", "classutility_1_1motion_1_1splines_1_1Polynom" ],
+          [ "QuinticSpline", "classutility_1_1motion_1_1splines_1_1QuinticSpline.html", "classutility_1_1motion_1_1splines_1_1QuinticSpline" ],
           [ "SmoothSpline", "classutility_1_1motion_1_1splines_1_1SmoothSpline.html", "classutility_1_1motion_1_1splines_1_1SmoothSpline" ],
           [ "Spline", "classutility_1_1motion_1_1splines_1_1Spline.html", "classutility_1_1motion_1_1splines_1_1Spline" ],
           [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
+          [ "Trajectory", "classutility_1_1motion_1_1splines_1_1Trajectory.html", "classutility_1_1motion_1_1splines_1_1Trajectory" ],
           [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ]
         ] ],
         [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ]
@@ -450,6 +454,8 @@ var annotated_dup =
       ] ],
       [ "skill", "namespaceutility_1_1skill.html", [
         [ "Frame", "structutility_1_1skill_1_1Frame.html", "structutility_1_1skill_1_1Frame" ],
+        [ "MotionGeneration", "classutility_1_1skill_1_1MotionGeneration.html", "classutility_1_1skill_1_1MotionGeneration" ],
+        [ "MotionGenerationOptions", "structutility_1_1skill_1_1MotionGenerationOptions.html", "structutility_1_1skill_1_1MotionGenerationOptions" ],
         [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
         [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
         [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],

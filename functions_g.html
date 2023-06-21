@@ -185,6 +185,12 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <li>generate_sigma_points()
 : <a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html#a5954fe50d51adede30cc53119d6d4511">utility::math::filter::UKF&lt; Scalar, FilterModel &gt;</a>
 </li>
+<li>generate_swingfoot_trajectory()
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#ab9bd7dd59ebe111e653a96e77638de17">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+</li>
+<li>generate_torso_trajectory()
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#ab5e9ffb7e7290228a01dae52ce9b5ccd">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+</li>
 <li>get()
 : <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a0ef50b9c55ff7d57981905fe1ffe9a49">extension::behaviour::ProviderBase&lt; T, classification &gt;</a>
 , <a class="el" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7">NUClear::dsl::operation::DSLProxy&lt;::extension::Configuration &gt;</a>
@@ -196,6 +202,12 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <li>get_covariance()
 : <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#ab51267cfb71e33a457ab08bff182fe23">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a32ed424e8cfa5d9b8c32fdbf4c47bfcb">utility::math::filter::ParticleFilter&lt; Scalar, FilterModel &gt;</a>
+</li>
+<li>get_foot_pose()
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a06e653d7b77ff6d2d73f6051e31e278f">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+</li>
+<li>get_foot_width_offset()
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a16fc5273692d003cfd7f5247dfcd3444">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
 </li>
 <li>get_footstep()
 : <a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html#a9fd5e9448b761bfbc304330616a0474a">utility::skill::QuinticWalkEngine</a>
@@ -230,9 +242,16 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <li>get_state()
 : <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#a25a9f5c2a24da5aad77dc728769a0087">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a7b5d5b95d4c7884dd6801bb8e981d43a">utility::math::filter::ParticleFilter&lt; Scalar, FilterModel &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a200e95736cca76b9164809f21b8705aa">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+</li>
+<li>get_swing_foot_pose()
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#af75e29cc03fc865782f1b53c91523f1b">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
 </li>
 <li>get_task_data()
 : <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">extension::behaviour::information::InformationSource</a>
+</li>
+<li>get_torso_pose()
+: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a0b4321cbbf2756ae19a69785aa5560eb">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
 </li>
 <li>get_trajs_time()
 : <a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html#a77370f29ea6bedde058e130a4054c89b">utility::skill::QuinticWalkEngine</a>
@@ -380,7 +399,7 @@ $(document).ready(function(){initNavTree('functions_g.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Wed Jun 21 2023 02:31:32 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jun 21 2023 23:29:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

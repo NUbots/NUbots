@@ -270,14 +270,17 @@ $(document).ready(function(){initNavTree('LimbID_8hpp_source.html',''); initResi
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        }</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        <span class="keyword">operator</span> std::string() <span class="keyword">const</span>;</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="keyword">static</span> std::set&lt;ServoID&gt; servosForLimb(<span class="keyword">const</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">LimbID</a>&amp; limb);</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keyword">static</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">LimbID</a> limbForServo(<span class="keyword">const</span> <a class="code" href="structutility_1_1input_1_1ServoID.html">ServoID</a>&amp; servo);</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        <span class="keyword">friend</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, <span class="keyword">const</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">LimbID</a>&amp; val);</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    };</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;}  <span class="comment">// namespace utility::input</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160; </div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="keyword">static</span> std::set&lt;ServoID&gt; servos_for_limb(<span class="keyword">const</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">LimbID</a>&amp; limb);</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keyword">static</span> std::set&lt;ServoID&gt; servos_for_legs();</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="keyword">static</span> std::set&lt;ServoID&gt; servos_for_arms();</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        <span class="keyword">static</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">LimbID</a> limb_for_servo(<span class="keyword">const</span> <a class="code" href="structutility_1_1input_1_1ServoID.html">ServoID</a>&amp; servo);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        <span class="keyword">friend</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, <span class="keyword">const</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">LimbID</a>&amp; val);</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    };</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;}  <span class="comment">// namespace utility::input</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="astructutility_1_1input_1_1LimbID_html"><div class="ttname"><a href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a></div><div class="ttdef"><b>Definition:</b> LimbID.hpp:32</div></div>
 <div class="ttc" id="astructutility_1_1input_1_1ServoID_html"><div class="ttname"><a href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a></div><div class="ttdef"><b>Definition:</b> ServoID.hpp:28</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -286,7 +289,7 @@ $(document).ready(function(){initNavTree('LimbID_8hpp_source.html',''); initResi
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_178dbbfaa09f335f101494b2decc1abb.html">input</a></li><li class="navelem"><b>LimbID.hpp</b></li>
-    <li class="footer">Generated on Wed Jun 21 2023 02:31:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Jun 21 2023 23:29:39 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

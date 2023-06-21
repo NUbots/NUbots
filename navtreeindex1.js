@@ -1,8 +1,15 @@
 var NAVTREEINDEX1 =
 {
-"TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef":[1,0,7,8,0,7],
-"TrajectoryUtils_8hpp.html#acba54f0f4522861817101d7fe9143d4e":[1,0,7,8,0,12],
-"TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34":[1,0,7,8,0,8],
+"TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef":[1,0,7,8,0,9],
+"TrajectoryUtils_8hpp.html#acba54f0f4522861817101d7fe9143d4e":[1,0,7,8,0,15],
+"TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34":[1,0,7,8,0,10],
+"Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4":[1,0,7,8,0,11],
+"Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a0228f0b7b5940bad5f82a74cfc51b337":[1,0,7,8,0,11,1],
+"Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a08d80bb50940f7f38a9fd01a22a6fa7e":[1,0,7,8,0,11,4],
+"Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a0b232ad594f4184583daae55fca0feb2":[1,0,7,8,0,11,5],
+"Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4a9781203e4d472f01e168fd457baff5aa":[1,0,7,8,0,11,2],
+"Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4ab9415c4ab48b8633820f79a7883a96e0":[1,0,7,8,0,11,3],
+"Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4ac8eee871c3b6b295798dcf25c19d5688":[1,0,7,8,0,11,0],
 "UART_8cpp.html#a87051e79be4cf051a9481ef3e881c9be":[1,0,0,12],
 "UART_8cpp.html#a92808ba5e8f839a4d595ad774f568e35":[1,0,0,13],
 "Vision_8cpp.html#a153ba05a15cc019fa9430d5905cc58b5":[1,0,7,17,22],
@@ -63,6 +70,7 @@ var NAVTREEINDEX1 =
 "VisualMeshRunner_8cpp.html#aba896e714c3b008bd15a63c709a60a7a":[1,0,4,15,0,0,5],
 "WalkToBall_8cpp.html#a556666d019fe9e4e081a492782ffa34b":[1,0,4,12,16],
 "WalkToFieldPosition_8cpp.html#a7b5f1c28072d68b1b9d5da47a55645f8":[1,0,4,12,17],
+"Walk_8cpp.html#aed1b3430e296f2d58d0ddc7e02a06020":[1,0,4,11,9],
 "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61":[1,0,4,9,5],
 "Webots_8cpp.html#a81eded8b344d72482e2c16f89c1d4a34":[1,0,4,9,4],
 "Webots_8cpp.html#aa06422bdf1cbba3ecfa22842768ccae4":[1,0,4,9,3],
@@ -241,13 +249,5 @@ var NAVTREEINDEX1 =
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea1108899ef8915bc113e0d9278d80f858":[2,0,0,8,0,24],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea1d604cdcd93da931a7b52055d52af69d":[2,0,0,8,0,67],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea24fd0f06d5ae510f9c3186bca1111fbd":[2,0,0,8,0,46],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea280d840b114570a3c6fd6c335698a15e":[2,0,0,8,0,47],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea28a890f656451488851a3d5217c58c1c":[2,0,0,8,0,29],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea2b6541f0f9713636a1a89fad63d4534d":[2,0,0,8,0,54],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea336b9c3d3ffb8b2e42b87116d3445584":[2,0,0,8,0,11],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea38448007efead1c900238907cd6a3ba4":[2,0,0,8,0,50],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea38be8ca94e48e6ae5c262432eeb41ea1":[2,0,0,8,0,8],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea469e189fe59abd4a893f2db5574cd298":[2,0,0,8,0,39],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea4982824c1a95607926b118db7339c0c9":[2,0,0,8,0,59],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea4dc7b99631babd3e420a7ed5dc7f3d3d":[2,0,0,8,0,23]
+"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea280d840b114570a3c6fd6c335698a15e":[2,0,0,8,0,47]
 };

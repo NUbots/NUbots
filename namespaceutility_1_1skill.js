@@ -1,6 +1,8 @@
 var namespaceutility_1_1skill =
 [
     [ "Frame", "structutility_1_1skill_1_1Frame.html", "structutility_1_1skill_1_1Frame" ],
+    [ "MotionGeneration", "classutility_1_1skill_1_1MotionGeneration.html", "classutility_1_1skill_1_1MotionGeneration" ],
+    [ "MotionGenerationOptions", "structutility_1_1skill_1_1MotionGenerationOptions.html", "structutility_1_1skill_1_1MotionGenerationOptions" ],
     [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
     [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
     [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
