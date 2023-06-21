@@ -21,7 +21,6 @@
 
 #include "message/actuation/BodySide.hpp"
 
-#include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/actuation/tinyrobotics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -30,9 +29,6 @@ namespace module::input {
 
     using message::actuation::BodySide;
 
-    using utility::actuation::kinematics::calculateAllPositions;
-    using utility::actuation::kinematics::calculateCentreOfMass;
-    using utility::actuation::kinematics::calculateInertialTensor;
     using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
     using utility::actuation::tinyrobotics::sensors_to_configuration;
     using utility::input::ServoID;

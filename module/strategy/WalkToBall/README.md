@@ -11,7 +11,7 @@ Add this module to walk to the ball.
 ## Consumes
 
 - `message::strategy::WalkToBall` Task requesting to walk to the ball
-- `message::localisation::FilteredBall` information on where the ball is
+- `message::localisation::Ball` information on where the ball is
 
 ## Emits
 

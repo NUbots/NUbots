@@ -29,7 +29,7 @@ namespace module::vision {
             // Use configuration here from file FieldLineDetector.yaml
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.confidence_threshold = config["confidence_threshold"].as<float>();
+            cfg.confidence_threshold = config["confidence_threshold"].as<double>();
             cfg.cluster_points       = config["cluster_points"].as<int>();
         });
 
@@ -38,8 +38,8 @@ namespace module::vision {
             const auto& cls        = horizon.mesh->classifications;
             const auto& neighbours = horizon.mesh->neighbourhood;
             // Unit vectors from camera to a point in the mesh, in world space
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays;
-            const int LINE_INDEX                                = horizon.class_map.at("line");
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays.cast<double>();
+            const int LINE_INDEX                                 = horizon.class_map.at("line");
             // PARTITION INDICES AND CLUSTER
             // Get some indices to partition
             std::vector<int> indices(horizon.mesh->indices.size());
@@ -81,12 +81,12 @@ namespace module::vision {
             lines->id             = horizon.id;         // camera id
             lines->timestamp      = horizon.timestamp;  // time when the image was taken
             lines->Hcw            = horizon.Hcw;        // world to camera transform at the time the image was taken
-            Eigen::Isometry3f Hwc = Eigen::Isometry3f(horizon.Hcw.cast<float>()).inverse();
+            Eigen::Isometry3d Hwc = horizon.Hcw.inverse();
             for (auto& cluster : clusters) {
                 for (const auto& idx : cluster) {
                     lines->points.push_back(uPCw.col(idx));
                     // Project the field line point onto the field plane
-                    Eigen::Vector3f rPWw =
+                    Eigen::Vector3d rPWw =
                         uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + Hwc.translation();
                     lines->rPWw.push_back(rPWw);
                 }

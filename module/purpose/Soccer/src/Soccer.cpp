@@ -6,6 +6,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -22,6 +23,7 @@ namespace module::purpose {
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
     using message::input::GameEvents;
     using message::localisation::ResetFieldLocalisation;
     using message::platform::ButtonMiddleDown;
@@ -47,8 +49,9 @@ namespace module::purpose {
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without this emit, modules that need a Stability message may not run
+            // Without these emis, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>());
             // The robot should always try to recover from falling, if applicable, regardless of purpose

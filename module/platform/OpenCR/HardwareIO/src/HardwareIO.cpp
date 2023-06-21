@@ -95,7 +95,7 @@ namespace module::platform::OpenCR {
             for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
+                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
                 // set flag
                 packet_dropped = true;
             }
@@ -130,7 +130,7 @@ namespace module::platform::OpenCR {
 
             // Check we're expecting the packet
             if (packet_queue[packet_id].empty()) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet_id));
+                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
                 return;
             }
 
@@ -142,14 +142,6 @@ namespace module::platform::OpenCR {
             // Pop the front of the packet queue
             auto& info = packet_queue[packet_id].front();
             packet_queue[packet_id].erase(packet_queue[packet_id].begin());
-
-            // Check for packet errors
-            if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet_id));
-            }
-            if (packet.alert) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", packet_id));
-            }
 
             /// @brief handle incoming packets, and send next request if all packets were handled
             // -> Recieved model information packet
@@ -167,7 +159,15 @@ namespace module::platform::OpenCR {
                     // check if we recieved the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
-                        send_servo_request();
+
+                        // At the start, we want to query the motors so we can store their state internally
+                        // This will start the loop of reading and writing to the servos and opencr
+                        for (const auto& id : nugus.servo_ids()) {
+                            packet_queue[NUgus::ID(id)].push_back(PacketTypes::SERVO_DATA);
+                        }
+                        opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(AddressBook::SERVO_READ),
+                                                                        sizeof(DynamixelServoReadData),
+                                                                        nugus.servo_ids()));
                     }
 
                     break;

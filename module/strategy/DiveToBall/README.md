@@ -11,7 +11,7 @@ Add this module to the role to dive when the ball is close enough.
 ## Consumes
 
 - `message::strategy::DiveToBall` a Task requesting to dive to the ball when it is close enough
-- `message::localisaton::FilteredBall` with the position of the ball
+- `message::localisaton::Ball` with the position of the ball
 
 ## Emits
 
