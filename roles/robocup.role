@@ -16,6 +16,7 @@ nuclear_role(
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::BallDetector
+  vision::FieldLineDetector
   # Localisation
   localisation::FieldLocalisation
   localisation::BallLocalisation
@@ -24,8 +25,9 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
+  actuation::FootController
   # Skills
-  skill::QuinticWalk
+  skill::Walk
   skill::ScriptKick
   skill::GetUp
   skill::Look
@@ -39,13 +41,16 @@ nuclear_role(
   # Strategies
   strategy::FallRecovery
   strategy::StandStill
+  strategy::WalkToFieldPosition
   strategy::StrategiseLook
   strategy::WalkToBall
   strategy::FindObject
-  strategy::Ready
+  strategy::KickToGoal
+  strategy::AlignBallToGoal
   strategy::DiveToBall
   strategy::Localise
   # Purposes
   purpose::Striker
+  purpose::Goalie
   purpose::Soccer
 )

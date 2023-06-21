@@ -26,10 +26,17 @@ message GameState {
 
     message Data {
         enum Mode {
-            UNKNOWN_MODE     = 0;
-            NORMAL           = 1;
-            PENALTY_SHOOTOUT = 2;
-            OVERTIME         = 3;
+            UNKNOWN_MODE      = 0;
+            NORMAL            = 1;
+            PENALTY_SHOOTOUT  = 2;
+            OVERTIME          = 3;
+            TIMEOUT_MODE      = 4;
+            DIRECT_FREEKICK   = 5;
+            INDIRECT_FREEKICK = 6;
+            PENALTYKICK       = 7;
+            CORNER_KICK       = 8;
+            GOAL_KICK         = 9;
+            THROW_IN          = 10;
         }
         enum Phase {
             UNKNOWN_PHASE = 0;
@@ -69,6 +76,12 @@ message GameState {
             string         coach_message = 3;
             repeated Robot players       = 4;
         }
+
+        message SecondaryState {
+            uint32 team_performing = 1;
+            uint32 sub_mode        = 2;
+        }
+
         Phase                     phase            = 1;
         Mode                      mode             = 2;
         bool                      first_half       = 3;
@@ -78,10 +91,11 @@ message GameState {
         /// Timestamp when the robot thinks the half is due to end
         google.protobuf.Timestamp primary_time = 7;
         /// A timestamp used for other times. E.g. how long in ready, or how long until penalty ends
-        google.protobuf.Timestamp secondary_time = 8;
-        Team                      team           = 9;
-        Team                      opponent       = 10;
-        Robot                     self           = 11;
+        google.protobuf.Timestamp secondary_time  = 8;
+        Team                      team            = 9;
+        Team                      opponent        = 10;
+        Robot                     self            = 11;
+        SecondaryState            secondary_state = 12;
     }
     Data data = 1;
 }

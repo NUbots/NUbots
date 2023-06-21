@@ -40,8 +40,8 @@ namespace module::strategy {
             [this](const Ball& ball, const Sensors& sensors) {
                 // If we have a ball and it is recent, look at it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
-                    Eigen::Vector3d rBCc = Eigen::Isometry3d(ball.Hcw) * ball.rBWw;
-                    Eigen::Vector3d rBCt = Eigen::Isometry3d(sensors.Htw * ball.Hcw.inverse()).rotation() * rBCc;
+                    Eigen::Vector3d rBCc = ball.Hcw * ball.rBWw;
+                    Eigen::Vector3d rBCt = (sensors.Htw * ball.Hcw.inverse()).rotation() * rBCc;
                     emit<Task>(std::make_unique<Look>(rBCt, true));
                 }
             });
@@ -55,7 +55,7 @@ namespace module::strategy {
                     // Convert goal measurement to cartesian coordinates
                     Eigen::Vector3d rGCc = sphericalToCartesian(goals.goals[0].measurements[0].srGCc.cast<double>());
                     // Convert to torso space
-                    Eigen::Vector3d rGCt = Eigen::Isometry3d(sensors.Htw * goals.Hcw.inverse()).rotation() * rGCc;
+                    Eigen::Vector3d rGCt = (sensors.Htw * goals.Hcw.inverse()).rotation() * rGCc;
                     // Look at the goal
                     emit<Task>(std::make_unique<Look>(rGCt, true));
                 }

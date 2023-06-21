@@ -32,9 +32,9 @@ namespace module::planning {
         on<Configuration>("PlanKick.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PlanKick.yaml
             this->log_level             = config["log_level"].as<NUClear::LogLevel>();
-            cfg.ball_timeout_threshold  = config["ball_timeout_threshold"].as<float>();
-            cfg.ball_distance_threshold = config["ball_distance_threshold"].as<float>();
-            cfg.ball_angle_threshold    = config["ball_angle_threshold"].as<float>();
+            cfg.ball_timeout_threshold  = config["ball_timeout_threshold"].as<double>();
+            cfg.ball_distance_threshold = config["ball_distance_threshold"].as<double>();
+            cfg.ball_angle_threshold    = config["ball_angle_threshold"].as<double>();
             cfg.target_angle_threshold  = config["target_angle_threshold"].as<Expression>();
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
@@ -61,10 +61,9 @@ namespace module::planning {
 
                 // CHECK IF CLOSE TO BALL
                 // Get the angle and distance to the ball
-                const Eigen::Isometry3d Hrw = Eigen::Isometry3d(sensors.Hrw);
-                const Eigen::Vector3d rBRr  = Hrw * ball.rBWw;
-                float ball_angle            = std::abs(std::atan2(rBRr.y(), rBRr.x()));
-                float ball_distance         = rBRr.head(2).norm();
+                const Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
+                double ball_angle          = std::abs(std::atan2(rBRr.y(), rBRr.x()));
+                double ball_distance       = rBRr.head(2).norm();
 
                 // Need to be near the ball to consider kicking it
                 if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
@@ -72,7 +71,7 @@ namespace module::planning {
                 }
 
                 // CHECK IF FACING POINT TO KICK TO
-                float align_angle = std::abs(std::atan2(kick_to.rPRr.y(), kick_to.rPRr.x()));
+                double align_angle = std::abs(std::atan2(kick_to.rPRr.y(), kick_to.rPRr.x()));
 
                 // Don't kick if we should align but we're not aligned to the target
                 if (align_angle > cfg.target_angle_threshold) {
@@ -89,7 +88,7 @@ namespace module::planning {
 
                 // If the robot is not standing, make it stand before kicking
                 if (stability != Stability::STANDING) {
-                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     return;
                 }
 

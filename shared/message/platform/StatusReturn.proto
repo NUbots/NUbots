@@ -45,9 +45,8 @@ message StatusReturn {
     int32                     id          = 2;  /// The ID of the device that we are communicating with
     int32                     length      = 3;  /// The total length of the data packet (4 plus the size of data)
     int32                     instruction = 4;  /// Will always be Instruction::STATUS_RETURN
-    int32                     alert       = 5;  /// Alert bit (int instead of bool to ensure size is known)
-    CommandError              error       = 6;  /// Error number
-    bytes                     data        = 7;  /// Expected return data
-    int32                     checksum    = 8;  /// Our checksum for this command
-    google.protobuf.Timestamp timestamp   = 9;
+    int32                     error       = 6;  /// Alert and Error number
+    bytes                     data        = 8;  /// Expected return data
+    int32                     checksum    = 9;  /// Our checksum for this command
+    google.protobuf.Timestamp timestamp   = 10;
 }

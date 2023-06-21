@@ -31,12 +31,16 @@ namespace module::input::gamecontroller {
     enum class State : uint8_t { INITIAL = 0, READY = 1, SET = 2, PLAYING = 3, FINISHED = 4 };
 
     enum class Mode : uint8_t {
-        NORMAL           = 0,
-        PENALTY_SHOOTOUT = 1,
-        OVERTIME         = 2,
-        TIMEOUT          = 3,
-        FREEKICK         = 4,
-        PENALTYKICK      = 5
+        NORMAL            = 0,
+        PENALTY_SHOOTOUT  = 1,
+        OVERTIME          = 2,
+        TIMEOUT           = 3,
+        DIRECT_FREEKICK   = 4,
+        INDIRECT_FREEKICK = 5,
+        PENALTYKICK       = 6,
+        CORNER_KICK       = 7,
+        GOAL_KICK         = 8,
+        THROW_IN          = 9,
     };
 
     enum class GameType : uint8_t { ROUND_ROBIN = 0, PLAYOFF = 1, DROPIN = 2 };
@@ -98,17 +102,17 @@ namespace module::input::gamecontroller {
     };
 
     struct GameControllerPacket {
-        std::array<char, 4> header;              // header to identify the structure
-        uint16_t version;                        // version of the data structure
-        uint8_t packetNumber;                    // number incremented with each packet sent (with wraparound)
-        uint8_t playersPerTeam;                  // the number of players on a team
-        GameType gameType;                       // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
-        State state;                             // state of the game (STATE_READY, STATE_PLAYING, etc)
-        bool firstHalf;                          // 1 = game in first half, 0 otherwise
-        uint8_t kickOffTeam;                     // the team number of the next team to kick off or DROPBALL
-        Mode mode;                               // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
-        std::array<char, 4> secondaryStateInfo;  // Extra info on the secondary state
-        TeamColour dropInTeam;                   // number of team that caused last drop in
+        std::array<char, 4> header;  // header to identify the structure
+        uint16_t version;            // version of the data structure
+        uint8_t packetNumber;        // number incremented with each packet sent (with wraparound)
+        uint8_t playersPerTeam;      // the number of players on a team
+        GameType gameType;           // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
+        State state;                 // state of the game (STATE_READY, STATE_PLAYING, etc)
+        bool firstHalf;              // 1 = game in first half, 0 otherwise
+        uint8_t kickOffTeam;         // the team number of the next team to kick off or DROPBALL
+        Mode mode;                   // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
+        std::array<uint8_t, 4> secondaryStateInfo;  // Extra info on the secondary state
+        TeamColour dropInTeam;                      // number of team that caused last drop in
         int16_t dropInTime;      // number of seconds passed since the last drop in. -1 (0xffff) before first dropin
         uint16_t secsRemaining;  // estimate of number of seconds remaining in the half
         uint16_t secondaryTime;  // number of seconds shown as secondary time (remaining ready, until free ball, etc)

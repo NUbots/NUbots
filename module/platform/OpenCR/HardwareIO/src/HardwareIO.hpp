@@ -73,11 +73,8 @@ namespace module::platform::OpenCR {
             /// @brief Buzzer sound level of the OpenCR device
             uint16_t buzzer = 0;
 
-            /// @brief Error status of the OpenCR device
-            bool alert_flag = false;
-
-            /// @brief Specific error from the OpenCR device
-            uint8_t error_number = 0;
+            /// @brief Most recent packet error from the OpenCR device
+            uint8_t error_flags = 0;
         };
 
         /// @see battery_state
@@ -102,8 +99,11 @@ namespace module::platform::OpenCR {
             bool dirty = false;
 
             /// @brief Current error state of the servo
-            /// @warning different to the dynamixel packet error status
-            uint8_t error_flags = 0;
+            /// @note different to the dynamixel packet error status
+            uint8_t hardware_error = 0;
+
+            /// @brief Most recent packet error recieved, to cache before RawSensors is emitted
+            uint8_t packet_error = 0;
 
             /// @brief True if we simulate where we think the servos should be
             /// @note that we still write the commands to hardware
@@ -155,6 +155,9 @@ namespace module::platform::OpenCR {
             float voltage = 0.0f;
             /// @brief The last read temperature of the servo
             float temperature = 0.0f;
+
+            /// @brief Whether we have initialised this servo yet
+            bool initialised = false;
         };
 
         /// @brief Contains the current state of the OpenCR device
