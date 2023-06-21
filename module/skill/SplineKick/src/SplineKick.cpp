@@ -44,15 +44,22 @@ namespace module::skill {
             // Use configuration here from file SplineKick.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Configure the kick generator
+            // Add kick motion waypoints
             for (const auto& foot_waypoint : config["foot_waypoints"].config) {
-                kick_options.foot_waypoints.push_back(foot_waypoint.as<Expression>());
+                Waypoint<double> waypoint;
+                Eigen::Vector4d frame = foot_waypoint.as<Expression>();
+                waypoint.time_point   = frame(3);
+                waypoint.position     = frame.head<3>();
+                kick_generator.add_foot_waypoint(waypoint);
             }
             for (const auto& torso_waypoint : config["torso_waypoints"].config) {
-                kick_options.torso_waypoints.push_back(torso_waypoint.as<Expression>());
+                Waypoint<double> waypoint;
+                Eigen::Vector4d frame = torso_waypoint.as<Expression>();
+                waypoint.time_point   = frame(3);
+                waypoint.position     = frame.head<3>();
+                waypoint.orientation  = Eigen::Vector3d(0, config["torso_pitch"].as<Expression>(), 0);
+                kick_generator.add_torso_waypoint(waypoint);
             }
-            kick_options.torso_pitch = config["torso_pitch"].as<Expression>();
-            kick_generator.configure(kick_options);
 
             // Reset the kick engine and last update time
             kick_generator.reset();

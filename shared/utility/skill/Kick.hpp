@@ -15,57 +15,11 @@ namespace utility::skill {
     using utility::input::LimbID;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::splines::Trajectory;
-    using utility::motion::splines::TrajectoryDimension::PITCH;
-    using utility::motion::splines::TrajectoryDimension::ROLL;
-    using utility::motion::splines::TrajectoryDimension::X;
-    using utility::motion::splines::TrajectoryDimension::Y;
-    using utility::motion::splines::TrajectoryDimension::YAW;
-    using utility::motion::splines::TrajectoryDimension::Z;
-
-    /// @brief Motion generation options.
-    template <typename Scalar>
-    struct KickOptions {
-        /// @brief Foot waypoints
-        std::vector<Eigen::Matrix<Scalar, 4, 1>> foot_waypoints{};
-
-        /// @brief Torso waypoints
-        std::vector<Eigen::Matrix<Scalar, 4, 1>> torso_waypoints{};
-
-        /// @brief Torso pitch (in radians)
-        Scalar torso_pitch = 0.0;
-
-        /// @brief Whether the planted foot should be the left foot or the right foot
-        bool left_foot_is_planted = false;
-    };
+    using utility::motion::splines::Waypoint;
 
     template <typename Scalar>
     class KickGenerator {
     public:
-        /**
-         * @brief Configure kick options.
-         * @param options Kick options.
-         */
-        void configure(const KickOptions<Scalar>& options) {
-            // Configure the torso trajectory
-            foot_waypoints  = options.foot_waypoints;
-            torso_waypoints = options.torso_waypoints;
-            torso_pitch     = options.torso_pitch;
-
-            // Assert that the first timepoint of both trajectories is 0
-            if (foot_waypoints.front()(3) != 0.0 || torso_waypoints.front()(3) != 0.0) {
-                throw std::runtime_error("The first waypoint of the foot and torso trajectories must be at time 0.");
-            }
-
-            // Assert that the length of the foot waypoints is the same as the length of the torso waypoints
-            if (foot_waypoints.back()(3) != torso_waypoints.back()(3)) {
-                throw std::runtime_error(
-                    "The last waypoint of the foot and torso trajectories must have the same time.");
-            }
-
-            // Get the total duration of the kick
-            kick_duration = foot_waypoints.back()(3);
-        }
-
         /**
          * @brief Get the swing foot pose at the current time.
          * @return Trajectory of torso.
@@ -75,28 +29,10 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Get the swing foot pose at the given time.
-         * @param t Time.
-         * @return Swing foot pose at time t.
-         */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_swing_foot_pose(Scalar t) const {
-            return swingfoot_trajectory.pose(t);
-        }
-
-        /**
          * @brief Get the torso pose object at the current time.
          * @return Pose of torso.
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose() const {
-            return torso_trajectory.pose(t);
-        }
-
-        /**
-         * @brief Get the torso pose object at the given time.
-         * @param t Time.
-         * @return Pose of torso at time t.
-         */
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose(Scalar t) const {
             return torso_trajectory.pose(t);
         }
 
@@ -125,11 +61,11 @@ namespace utility::skill {
          * @brief Reset kick generator.
          */
         void reset() {
-            // Generate swing foot and torso trajectories
-            generate_trajectories();
-
             // Reset time
             t = 0;
+
+            // Generate trajectories
+            generate_trajectories();
         }
 
         /**
@@ -173,7 +109,6 @@ namespace utility::skill {
             }
         }
 
-
         /**
          * @brief Getter for the current time.
          * @return Current time.
@@ -198,30 +133,39 @@ namespace utility::skill {
             return left_foot_is_planted;
         }
 
+        /**
+         * @brief Add waypoints to the foot trajectory.
+         */
+        void add_foot_waypoint(const Waypoint<Scalar>& waypoint) {
+            foot_waypoints.push_back(waypoint);
+        }
+
+        /**
+         * @brief Add waypoints to the torso trajectory.
+         */
+        void add_torso_waypoint(const Waypoint<Scalar>& waypoint) {
+            torso_waypoints.push_back(waypoint);
+        }
+
     private:
-        // ******************************** Options ********************************
-
-        /// @brief Foot waypoints
-        std::vector<Eigen::Matrix<Scalar, 4, 1>> foot_waypoints{};
-
-        /// @brief Torso waypoints
-        std::vector<Eigen::Matrix<Scalar, 4, 1>> torso_waypoints{};
-
-        /// @brief Torso pitch (in radians)
-        Scalar torso_pitch = 0.0;
-
         // ******************************** State ********************************
 
-        // Duration of complete kick
+        /// @brief Duration of complete kick.
         Scalar kick_duration = 0.0;
+
+        /// @brief Current time in the step cycle.
+        Scalar t = 0.0;
 
         /// @brief Whether the left foot is planted.
         bool left_foot_is_planted = false;
 
-        /// @brief Current time in the step cycle
-        Scalar t = 0.0;
-
         // ******************************** Trajectories ********************************
+
+        /// @brief Foot waypoints
+        std::vector<Waypoint<Scalar>> foot_waypoints{};
+
+        /// @brief Torso waypoints
+        std::vector<Waypoint<Scalar>> torso_waypoints{};
 
         // 6D piecewise polynomial trajectory for swing foot.
         Trajectory<Scalar> swingfoot_trajectory{};
@@ -238,25 +182,30 @@ namespace utility::skill {
             swingfoot_trajectory.clear();
             torso_trajectory.clear();
 
-            int sign = left_foot_is_planted ? -1 : 1;
-
             // Add waypoints to trajectories
-            for (const auto& waypoint : foot_waypoints) {
-                swingfoot_trajectory.add_waypoint(X, waypoint.w(), waypoint.x(), 0);
-                swingfoot_trajectory.add_waypoint(Y, waypoint.w(), sign * waypoint.y(), 0);
-                swingfoot_trajectory.add_waypoint(Z, waypoint.w(), waypoint.z(), 0);
-                swingfoot_trajectory.add_waypoint(ROLL, waypoint.w(), 0, 0);
-                swingfoot_trajectory.add_waypoint(PITCH, waypoint.w(), 0, 0);
-                swingfoot_trajectory.add_waypoint(YAW, waypoint.w(), 0, 0);
+            for (auto waypoint : foot_waypoints) {
+                // Flip y position sign based on which foot is planted
+                waypoint.position.y() *= left_foot_is_planted ? -1.0 : 1.0;
+                swingfoot_trajectory.add_waypoint(waypoint);
             }
 
-            for (const auto& waypoint : torso_waypoints) {
-                torso_trajectory.add_waypoint(X, waypoint.w(), waypoint.x(), 0);
-                torso_trajectory.add_waypoint(Y, waypoint.w(), sign * waypoint.y(), 0);
-                torso_trajectory.add_waypoint(Z, waypoint.w(), waypoint.z(), 0);
-                torso_trajectory.add_waypoint(ROLL, waypoint.w(), 0, 0);
-                torso_trajectory.add_waypoint(PITCH, waypoint.w(), torso_pitch, 0);
-                torso_trajectory.add_waypoint(YAW, waypoint.w(), 0, 0);
+            for (auto waypoint : torso_waypoints) {
+                // Flip y position sign based on which foot is planted
+                waypoint.position.y() *= left_foot_is_planted ? -1.0 : 1.0;
+                torso_trajectory.add_waypoint(waypoint);
+            }
+
+            kick_duration = foot_waypoints.back().time_point;
+
+            // Assert that the first timepoint of both trajectories is 0
+            if (foot_waypoints.front().time_point != 0.0 || torso_waypoints.front().time_point != 0.0) {
+                throw std::runtime_error("The first waypoint of the foot and torso trajectories must start at time 0.");
+            }
+
+            // Assert that the length of the foot waypoints is the same as the length of the torso waypoints
+            if (foot_waypoints.back().time_point != torso_waypoints.back().time_point) {
+                throw std::runtime_error(
+                    "The last waypoint of the foot and torso trajectories must have the same time point.");
             }
         }
     };

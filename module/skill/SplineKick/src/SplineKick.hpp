@@ -9,9 +9,12 @@
 #include "message/actuation/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/motion/splines/Trajectory.hpp"
 #include "utility/skill/Kick.hpp"
 
 namespace module::skill {
+
+    using utility::motion::splines::Waypoint;
 
     class SplineKick : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -29,10 +32,14 @@ namespace module::skill {
         /// @brief Last time we updated the walk engine
         NUClear::clock::time_point last_update_time{};
 
-        /// @brief Walk engine, generates swing foot and torso trajectories for walk velocity target
-
-        utility::skill::KickOptions<double> kick_options;
+        /// @brief Kick generator
         utility::skill::KickGenerator<double> kick_generator{};
+
+        /// @brief Waypoints for the swing foot
+        std::vector<Waypoint<double>> foot_waypoints{};
+
+        /// @brief Waypoints for the torso
+        std::vector<Waypoint<double>> torso_waypoints{};
 
     public:
         /// @brief Called by the powerplant to build and setup the SplineKick reactor.
