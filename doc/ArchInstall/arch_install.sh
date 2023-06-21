@@ -29,8 +29,28 @@ mount ${ROOT} /mnt
 mkdir -p /mnt/boot/efi
 mount ${BOOT} /mnt/boot/efi
 
-# Bootstrap Pacman
-pacstrap /mnt base linux linux-firmware
+# Bootstrap Pacman and trust everything to prevent pgp key errors
+cat << EOF > "/etc/pacman.conf"
+[options]
+HoldPkg      = pacman glibc
+Architecture = auto
+ParallelDownloads = 5
+CheckSpace
+Color
+
+# Trust everything so we don't get signature errors for old packages while date locked
+SigLevel = Never TrustAll
+
+[core]
+Include = /etc/pacman.d/mirrorlist
+
+[extra]
+Include = /etc/pacman.d/mirrorlist
+
+[community]
+Include = /etc/pacman.d/mirrorlist
+EOF
+pacstrap -P /mnt base linux linux-firmware
 
 # Update fstab
 genfstab -U /mnt >> /mnt/etc/fstab
