@@ -12,10 +12,10 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Uncertainty value field localisation needs to be above to localise.
-            float uncertainty_threshold = 0;
+            double uncertainty_threshold = 0;
 
             /// @brief Amount of time the robot can be lost before requesting localisation to reset.
-            float max_lost_time = 0;
+            double max_lost_time = 0;
         } cfg;
 
         /// @brief The time point at which the robot became lost.

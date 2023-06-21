@@ -30,8 +30,8 @@ namespace module::strategy {
         on<Configuration>("Localise.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Localise.yaml
             this->log_level           = config["log_level"].as<NUClear::LogLevel>();
-            cfg.uncertainty_threshold = config["uncertainty_threshold"].as<float>();
-            cfg.max_lost_time         = config["max_lost_time"].as<float>();
+            cfg.uncertainty_threshold = config["uncertainty_threshold"].as<double>();
+            cfg.max_lost_time         = config["max_lost_time"].as<double>();
         });
 
         on<Provide<LocaliseTask>, Trigger<Field>>().then([this](const Field& field) {
@@ -40,7 +40,7 @@ namespace module::strategy {
                 log<NUClear::DEBUG>("Localisation uncertainty is not high enough, stand still.");
 
                 // Stop walking
-                emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(0, 0, 0)));
+                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0, 0, 0)));
 
                 // Look around.
                 emit<Task>(std::make_unique<LookAround>());
@@ -53,7 +53,7 @@ namespace module::strategy {
                     time_point_lost = NUClear::clock::now();
                     just_lost       = true;
                 }
-                float time_since_lost =
+                double time_since_lost =
                     std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - time_point_lost)
                         .count()
                     * 1e-6;
