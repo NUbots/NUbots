@@ -18,12 +18,6 @@ namespace utility::skill {
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::Waypoint;
-    using utility::motion::splines::TrajectoryDimension::PITCH;
-    using utility::motion::splines::TrajectoryDimension::ROLL;
-    using utility::motion::splines::TrajectoryDimension::X;
-    using utility::motion::splines::TrajectoryDimension::Y;
-    using utility::motion::splines::TrajectoryDimension::YAW;
-    using utility::motion::splines::TrajectoryDimension::Z;
 
     /// @brief Motion generation options.
     template <typename Scalar>
