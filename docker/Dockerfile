@@ -48,6 +48,7 @@ RUN install-package \
     cmake \
     meson \
     git \
+    zlib \
     openssh \
     rsync \
     gdb \
@@ -95,9 +96,6 @@ ARG prefix=/usr/local
 # Generate toolchain files for the current platform
 RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
-
-# zlib
-RUN install-from-source https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz
 
 # LLVM and Clang
 RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
@@ -210,8 +208,7 @@ RUN install-package protobuf && \
     -DWITH_PROTOC="/usr/sbin/protoc" \
     -Dprotobuf_BUILD_TESTS=OFF \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DZLIB_ROOT=${prefix}
+    -DBUILD_SHARED_LIBS=OFF
 
 # Libjpeg
 RUN install-package yasm
@@ -250,7 +247,6 @@ RUN install-from-source https://github.com/catchorg/Catch2/archive/refs/tags/v3.
 # Aravis
 RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz \
-    --with-zlib=${prefix} \
     --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.4.2/libffi-3.4.2.tar.gz
 RUN install-from-source https://gitlab.gnome.org/GNOME/glib/-/archive/2.72.3/glib-2.72.3.tar.bz2 \
