@@ -7,8 +7,8 @@
 #include "message/localisation/Field.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/skill/Look.hpp"
-#include "message/skill/Walk.hpp"
 #include "message/strategy/Localise.hpp"
+#include "message/strategy/StandStill.hpp"
 
 #include "utility/skill/Script.hpp"
 
@@ -22,7 +22,7 @@ namespace module::strategy {
     using message::localisation::ResetFieldLocalisation;
     using message::planning::LookAround;
     using message::skill::Look;
-    using message::skill::Walk;
+    using message::strategy::StandStill;
     using utility::skill::load_script;
 
     Localise::Localise(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -35,14 +35,14 @@ namespace module::strategy {
         });
 
         on<Provide<LocaliseTask>, Trigger<Field>>().then([this](const Field& field) {
-            // If we are uncertain on our position on the field, stand still and look around.
-            if (field.uncertainty > cfg.uncertainty_threshold) {
+            // If we are uncertain on our position on the field, stand still and look around
+            if (field.covariance.trace() > cfg.uncertainty_threshold) {
                 log<NUClear::DEBUG>("Localisation uncertainty is not high enough, stand still.");
 
                 // Stop walking
-                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0, 0, 0)));
+                emit<Task>(std::make_unique<StandStill>());
 
-                // Look around.
+                // Look around
                 emit<Task>(std::make_unique<LookAround>());
 
                 // Add extra noise to the particles

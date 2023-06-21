@@ -299,11 +299,10 @@ namespace module::localisation {
             // Build and emit the field message
             auto field(std::make_unique<Field>());
             Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
-            Hfw.translation()  = Eigen::Vector3d(state.x(), state.y(), 0);
-            Hfw.linear()       = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-            field->Hfw         = Hfw.matrix();
-            field->covariance  = covariance;
-            field->uncertainty = covariance.trace();
+            Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
+            Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            field->Hfw        = Hfw.matrix();
+            field->covariance = covariance;
             emit(field);
         });
     }
