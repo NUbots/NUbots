@@ -306,11 +306,11 @@ RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a1
 # JSON for modern C++ (https://github.com/nlohmann/json)
 RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
 
-# NLopt
-RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
-
 # TinyXML
 RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
+
+# NLopt
+RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
 
 # tinyrobotics
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.0.tar.gz \
