@@ -16,6 +16,7 @@ namespace utility::skill {
     using utility::input::LimbID;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::splines::Trajectory;
+    using utility::motion::splines::Waypoint;
     using utility::motion::splines::TrajectoryDimension::PITCH;
     using utility::motion::splines::TrajectoryDimension::ROLL;
     using utility::motion::splines::TrajectoryDimension::X;
@@ -268,10 +269,10 @@ namespace utility::skill {
 
         // ******************************** Trajectories ********************************
 
-        // 6D piecewise polynomial trajectory for swing foot.
+        /// @brief 6D piecewise polynomial trajectory for swing foot.
         Trajectory<Scalar> swingfoot_trajectory;
 
-        // 6D piecewise polynomial trajectory for torso.
+        /// @brief 6D piecewise polynomial trajectory for torso.
         Trajectory<Scalar> torso_trajectory;
 
         /// @brief Get the lateral distance between feet in current planted foot frame.
@@ -299,41 +300,30 @@ namespace utility::skill {
             step_placement.z() =
                 std::max(std::min(velocity_target.z() * step_period, step_limits.z()), -step_limits.z());
 
-            // X position trajectory
-            swingfoot_trajectory.add_waypoint(X, 0, Hps_start.translation().x(), 0);
-            swingfoot_trajectory.add_waypoint(X, step_apex_ratio * step_period, 0, velocity_target.x());
-            swingfoot_trajectory.add_waypoint(X, step_period, step_placement.x(), 0);
+            // Start waypoint
+            Waypoint<Scalar> start_waypoint;
+            start_waypoint.time_point  = 0;
+            start_waypoint.position    = Hps_start.translation();
+            start_waypoint.orientation = MatrixToEulerIntrinsic(Hps_start.rotation());
+            swingfoot_trajectory.add_waypoint(start_waypoint);
 
-            // Y position trajectory
-            swingfoot_trajectory.add_waypoint(Y, 0, Hps_start.translation().y(), 0);
-            swingfoot_trajectory.add_waypoint(Y,
-                                              step_apex_ratio * step_period,
-                                              get_foot_width_offset(),
-                                              velocity_target.y());
-            swingfoot_trajectory.add_waypoint(Y, step_period, get_foot_width_offset() + step_placement.y(), 0);
+            // Apex waypoint
+            Waypoint<Scalar> middle_waypoint;
+            middle_waypoint.time_point = step_apex_ratio * step_period;
+            middle_waypoint.position   = Eigen::Matrix<Scalar, 3, 1>(0, get_foot_width_offset(), step_height);
+            middle_waypoint.velocity   = velocity_target;
+            middle_waypoint.orientation =
+                Eigen::Matrix<Scalar, 3, 1>(0, 0, velocity_target.z() * step_apex_ratio * step_period);
 
-            // Z position trajectory
-            swingfoot_trajectory.add_waypoint(Z, 0, Hps_start.translation().z(), 0);
-            swingfoot_trajectory.add_waypoint(Z, step_apex_ratio * step_period, step_height, 0);
-            swingfoot_trajectory.add_waypoint(Z, step_period, 0, 0);
+            swingfoot_trajectory.add_waypoint(middle_waypoint);
 
-            // Roll trajectory
-            swingfoot_trajectory.add_waypoint(ROLL, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(ROLL, step_apex_ratio * step_period, 0, 0);
-            swingfoot_trajectory.add_waypoint(ROLL, step_period, 0, 0);
-
-            // Pitch trajectory
-            swingfoot_trajectory.add_waypoint(PITCH, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(PITCH, step_apex_ratio * step_period, 0, 0);
-            swingfoot_trajectory.add_waypoint(PITCH, step_period, 0, 0);
-
-            // Yaw trajectory
-            swingfoot_trajectory.add_waypoint(YAW, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(YAW,
-                                              step_apex_ratio * step_period,
-                                              velocity_target.z() * step_apex_ratio * step_period,
-                                              0);
-            swingfoot_trajectory.add_waypoint(YAW, step_period, step_placement.z(), 0);
+            // End waypoint
+            Waypoint<Scalar> end_waypoint;
+            end_waypoint.time_point = step_period;
+            end_waypoint.position =
+                Eigen::Matrix<Scalar, 3, 1>(step_placement.x(), get_foot_width_offset() + step_placement.y(), 0);
+            end_waypoint.orientation = Eigen::Matrix<Scalar, 3, 1>(0, 0, step_placement.z());
+            swingfoot_trajectory.add_waypoint(end_waypoint);
         }
 
         /**
@@ -355,8 +345,8 @@ namespace utility::skill {
             torso_trajectory.add_waypoint(X, step_period, velocity_target.x() * half_step_period, 0);
 
             // Y position trajectory
-            torso_trajectory.add_waypoint(Y, 0, Hpt_start.translation().y(), 0);
             Scalar torso_offset_y = left_foot_is_planted ? -torso_sway_offset.y() : torso_sway_offset.y();
+            torso_trajectory.add_waypoint(Y, 0, Hpt_start.translation().y(), 0);
             torso_trajectory.add_waypoint(Y, torso_sway_ratio * step_period, torso_offset_y, velocity_target.y());
             torso_trajectory.add_waypoint(Y,
                                           step_period,
@@ -385,6 +375,32 @@ namespace utility::skill {
                                           velocity_target.z() * torso_sway_ratio * step_period,
                                           0);
             torso_trajectory.add_waypoint(YAW, step_period, velocity_target.z() * step_period, 0);
+
+            // Start waypoint
+            // Waypoint<Scalar> start_waypoint;
+            // start_waypoint.time_point = 0;
+            // start_waypoint.position   = Hpt_start.translation();
+            // start_waypoint.orientation =
+            //     Eigen::Matrix<Scalar, 3, 1>(0, torso_pitch, MatrixToEulerIntrinsic(Hpt_start.linear()).z());
+            // torso_trajectory.add_waypoint(start_waypoint);
+
+            // // Middle waypoint
+            // Waypoint<Scalar> middle_waypoint;
+            // middle_waypoint.time_point = torso_sway_ratio * step_period;
+            // middle_waypoint.position   = Eigen::Matrix<Scalar, 3, 1>(torso_sway_offset.x(),
+            //                                                        torso_offset_y,
+            //                                                        torso_height + torso_sway_offset.z());
+            // middle_waypoint.velocity   = velocity_target;
+            // middle_waypoint.orientation =
+            //     Eigen::Matrix<Scalar, 3, 1>(0, torso_pitch, velocity_target.z() * torso_sway_ratio * step_period);
+            // torso_trajectory.add_waypoint(middle_waypoint);
+
+            // // End waypoint
+            // Waypoint<Scalar> end_waypoint;
+            // end_waypoint.time_point  = step_period;
+            // end_waypoint.position    = Eigen::Matrix<Scalar, 3, 1>(0, get_foot_width_offset(), torso_height);
+            // end_waypoint.orientation = Eigen::Matrix<Scalar, 3, 1>(0, torso_pitch, velocity_target.z() *
+            // step_period); torso_trajectory.add_waypoint(end_waypoint);
         }
 
         /**

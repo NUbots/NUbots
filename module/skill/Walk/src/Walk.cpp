@@ -11,7 +11,6 @@
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
-#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -27,15 +26,12 @@ namespace module::skill {
     using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
-    using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
-    using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using WalkTask = message::skill::Walk;
 
-    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
