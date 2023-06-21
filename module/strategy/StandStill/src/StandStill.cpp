@@ -3,20 +3,13 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/Limbs.hpp"
-#include "message/behaviour/state/Stability.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/StandStill.hpp"
-
-#include "utility/skill/Script.hpp"
 
 namespace module::strategy {
 
     using extension::Configuration;
-    using message::actuation::LimbsSequence;
-    using message::behaviour::state::Stability;
     using message::skill::Walk;
-    using utility::skill::load_script;
     using StandStillTask = message::strategy::StandStill;
 
     StandStill::StandStill(std::unique_ptr<NUClear::Environment> environment)
@@ -27,13 +20,13 @@ namespace module::strategy {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<StandStillTask>, Trigger<Stability>>().then([this](const Stability& stability) {
-            // If we are stable, then we can provide the StandStill command
-            if (stability != Stability::STANDING) {
-                emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
+        on<Provide<StandStillTask>>().then([this](const RunInfo& info) {
+            // If we haven't emitted yet, then emit a walk task
+            if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
             }
             else {
-                emit<Task>(load_script<LimbsSequence>("Stand.yaml"));
+                emit<Task>(std::make_unique<Idle>());
             }
         });
     }

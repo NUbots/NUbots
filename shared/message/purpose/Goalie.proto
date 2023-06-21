@@ -26,3 +26,9 @@ message Goalie {
 
 message NormalGoalie {}
 message PenaltyShootoutGoalie {}
+message DirectFreeKickGoalie {}
+message InDirectFreeKickGoalie {}
+message PenaltyKickGoalie {}
+message CornerKickGoalie {}
+message GoalKickGoalie {}
+message ThrowInGoalie {}
