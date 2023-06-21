@@ -1,5 +1,5 @@
-#ifndef MODULE_MOTION_KICK_HPP
-#define MODULE_MOTION_KICK_HPP
+#ifndef MODULE_MOTION_KICKGENERATOR_HPP
+#define MODULE_MOTION_KICKGENERATOR_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>

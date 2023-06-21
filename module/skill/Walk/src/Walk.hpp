@@ -9,7 +9,7 @@
 #include "message/actuation/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
-#include "utility/skill/MotionGeneration.hpp"
+#include "utility/skill/WalkGenerator.hpp"
 
 namespace module::skill {
 
@@ -35,7 +35,7 @@ namespace module::skill {
         NUClear::clock::time_point last_update_time{};
 
         /// @brief Walk engine, generates swing foot and torso trajectories for walk velocity target
-        utility::skill::MotionGeneration<double> walk_engine{};
+        utility::skill::WalkGenerator<double> walk_engine{};
     };
 }  // namespace module::skill
 

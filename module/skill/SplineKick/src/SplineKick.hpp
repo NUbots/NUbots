@@ -10,7 +10,7 @@
 
 #include "utility/input/ServoID.hpp"
 #include "utility/motion/splines/Trajectory.hpp"
-#include "utility/skill/Kick.hpp"
+#include "utility/skill/KickGenerator.hpp"
 
 namespace module::skill {
 
@@ -34,12 +34,6 @@ namespace module::skill {
 
         /// @brief Kick generator
         utility::skill::KickGenerator<double> kick_generator{};
-
-        /// @brief Waypoints for the swing foot
-        std::vector<Waypoint<double>> foot_waypoints{};
-
-        /// @brief Waypoints for the torso
-        std::vector<Waypoint<double>> torso_waypoints{};
 
     public:
         /// @brief Called by the powerplant to build and setup the SplineKick reactor.

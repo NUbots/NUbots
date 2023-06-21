@@ -12,7 +12,6 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/skill/Kick.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::skill {

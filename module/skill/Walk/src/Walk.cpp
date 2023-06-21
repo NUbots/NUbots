@@ -44,7 +44,7 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Configure the motion generation options
-            utility::skill::MotionGenerationOptions<double> walk_engine_options;
+            utility::skill::WalkGeneratorOptions<double> walk_engine_options;
             walk_engine_options.step_period       = config["walk"]["period"].as<double>();
             walk_engine_options.step_apex_ratio   = config["walk"]["step"]["apex_ratio"].as<double>();
             walk_engine_options.step_limits       = config["walk"]["step"]["limits"].as<Expression>();

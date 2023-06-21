@@ -1,5 +1,5 @@
-#ifndef MODULE_MOTION_MOTIONGENERATION_HPP
-#define MODULE_MOTION_MOTIONGENERATION_HPP
+#ifndef MODULE_MOTION_WALKGENERATOR_HPP
+#define MODULE_MOTION_WALKGENERATOR_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -21,7 +21,7 @@ namespace utility::skill {
 
     /// @brief Motion generation options.
     template <typename Scalar>
-    struct MotionGenerationOptions {
+    struct WalkGeneratorOptions {
         /// @brief Maximum step limits in x, y, and theta.
         Eigen::Matrix<Scalar, 3, 1> step_limits = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
@@ -51,13 +51,13 @@ namespace utility::skill {
     };
 
     template <typename Scalar>
-    class MotionGeneration {
+    class WalkGenerator {
     public:
         /**
          * @brief Configure motion generation options.
          * @param options Motion generation options.
          */
-        void configure(const MotionGenerationOptions<Scalar>& options) {
+        void configure(const WalkGeneratorOptions<Scalar>& options) {
             step_limits       = options.step_limits;
             step_height       = options.step_height;
             step_period       = options.step_period;
