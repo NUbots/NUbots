@@ -31,7 +31,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
@@ -44,7 +43,6 @@ using extension::Configuration;
 
 namespace module::input {
 
-    using message::actuation::KinematicsModel;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
