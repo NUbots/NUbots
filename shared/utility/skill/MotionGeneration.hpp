@@ -265,10 +265,10 @@ namespace utility::skill {
         // ******************************** Trajectories ********************************
 
         /// @brief 6D piecewise polynomial trajectory for swing foot.
-        Trajectory<Scalar> swingfoot_trajectory;
+        Trajectory<Scalar> swingfoot_trajectory{};
 
         /// @brief 6D piecewise polynomial trajectory for torso.
-        Trajectory<Scalar> torso_trajectory;
+        Trajectory<Scalar> torso_trajectory{};
 
         /// @brief Get the lateral distance between feet in current planted foot frame.
         /// @return Lateral distance between feet.
@@ -309,7 +309,6 @@ namespace utility::skill {
             middle_waypoint.velocity   = velocity_target;
             middle_waypoint.orientation =
                 Eigen::Matrix<Scalar, 3, 1>(0, 0, velocity_target.z() * step_apex_ratio * step_period);
-
             swingfoot_trajectory.add_waypoint(middle_waypoint);
 
             // End waypoint: Place foot at next foot placement on ground at time = step_period
@@ -338,7 +337,8 @@ namespace utility::skill {
             start_waypoint.orientation = MatrixToEulerIntrinsic(Hpt_start.rotation());
             torso_trajectory.add_waypoint(start_waypoint);
 
-            // Sway apex waypoint: Torso shifts to this point relative to planted foot at torso_sway_ratio * step_period
+            // Sway apex waypoint: Torso shifts to this point relative to planted foot at time = torso_sway_ratio *
+            // step_period
             Waypoint<Scalar> middle_waypoint;
             middle_waypoint.time_point = torso_sway_ratio * step_period;
             Scalar torso_offset_y      = left_foot_is_planted ? -torso_sway_offset.y() : torso_sway_offset.y();
@@ -350,8 +350,8 @@ namespace utility::skill {
                 Eigen::Matrix<Scalar, 3, 1>(0, torso_pitch, velocity_target.z() * torso_sway_ratio * step_period);
             torso_trajectory.add_waypoint(middle_waypoint);
 
-            // End waypoint: Torso shifts to this point relative to planted foot at step_period, positioned halfway
-            // between the feet
+            // End waypoint: Torso shifts to this point relative to planted foot at time = step_period, positioned
+            // halfway between the feet
             Waypoint<Scalar> end_waypoint;
             end_waypoint.time_point = step_period;
             end_waypoint.position =
