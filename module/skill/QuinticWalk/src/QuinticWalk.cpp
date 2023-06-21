@@ -10,7 +10,7 @@
 #include "message/actuation/ServoCommand.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
-#include "message/behaviour/state/WalkingState.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
@@ -34,7 +34,7 @@ namespace module::skill {
     using message::actuation::ServoState;
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkingState;
+    using message::behaviour::state::WalkState;
     using message::input::Sensors;
     using message::skill::Walk;
 
@@ -179,14 +179,14 @@ namespace module::skill {
                 imu_reaction.enable(current_cfg.imu_active);
 
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(true, Eigen::Vector3d::Zero()));
+                emit(std::make_unique<WalkState>(WalkState::State::WALKING, Eigen::Vector3d::Zero()));
             });
 
         // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] {
             imu_reaction.enable(false);
             // Update the walking state
-            emit(std::make_unique<WalkingState>(false, Eigen::Vector3d::Zero()));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
 
         // MAIN LOOP
@@ -242,7 +242,7 @@ namespace module::skill {
                     calculate_joint_goals();
                 }
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(true, walk.velocity_target));
+                emit(std::make_unique<WalkState>(WalkState::State::WALKING, walk.velocity_target));
             });
 
         // Stand Reaction - Sets walk_engine commands to zero, checks walk_engine state, Sets stability state
@@ -264,7 +264,7 @@ namespace module::skill {
                 calculate_joint_goals();
 
                 // Update the walking state
-                emit(std::make_unique<WalkingState>(false, Eigen::Vector3d::Zero()));
+                emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
             });
     }
 
@@ -273,16 +273,16 @@ namespace module::skill {
         // compute time delta depended if we are currently in simulation or reality
         const auto current_time = NUClear::clock::now();
         double dt =
-            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
+            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0;
 
-        if (dt == 0.0f) {
-            dt = 0.001f;
+        if (dt == 0.0) {
+            dt = 0.001;
         }
 
         // time is wrong when we run it for the first time
         if (first_run) {
             first_run = false;
-            dt        = 0.0001f;
+            dt        = 0.0001;
         }
 
         last_update_time = current_time;
@@ -335,8 +335,8 @@ namespace module::skill {
         auto right_leg  = std::make_unique<RightLegIK>();
         left_leg->time  = time;
         right_leg->time = time;
-        left_leg->Htl   = Htl.cast<double>().matrix();
-        right_leg->Htr  = Htr.cast<double>().matrix();
+        left_leg->Htl   = Htl.cast<double>();
+        right_leg->Htr  = Htr.cast<double>();
         // Arms
         auto left_arm  = std::make_unique<LeftArm>();
         auto right_arm = std::make_unique<RightArm>();
