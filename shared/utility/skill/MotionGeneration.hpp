@@ -1,8 +1,3 @@
-/*
-This code is based on the original code by Quentin "Leph" Rouxel and Team Rhoban.
-The original files can be found at:
-https://github.com/Rhoban/model/
-*/
 #ifndef MODULE_MOTION_MOTIONGENERATION_HPP
 #define MODULE_MOTION_MOTIONGENERATION_HPP
 
