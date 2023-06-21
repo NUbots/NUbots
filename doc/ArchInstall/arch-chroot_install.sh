@@ -162,8 +162,9 @@ systemctl enable wpa_supplicant@${WIFI_INTERFACE}
 # ZSH SHELL #
 #############
 
-# Change user shell to zsh
+# Change user shell to zsh and create a blank config file to prevent user prompt
 chsh -s /usr/bin/zsh ${USER}
+touch ${HOME}/.zshrc
 
 ############
 # SSH KEYS #
