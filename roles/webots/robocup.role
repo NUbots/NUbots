@@ -38,6 +38,7 @@ nuclear_role(
   planning::PlanLook
   planning::PlanKick
   planning::GetUpPlanner
+  planning::FallingRelaxPlanner
   # Strategies
   strategy::FallRecovery
   strategy::StandStill
