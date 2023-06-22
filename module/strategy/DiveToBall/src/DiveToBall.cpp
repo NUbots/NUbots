@@ -35,13 +35,11 @@ namespace module::strategy {
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
                     return;
                 }
-
-                const Eigen::Isometry3f Hrw = Eigen::Isometry3f(sensors.Hrw.cast<float>());
-                Eigen::Vector3f rBRr        = Hrw * ball.rBWw.cast<float>();
+                Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
                 // If the distance to the ball is less than the threshold, dive
                 if (std::abs(rBRr.x()) < cfg.diving_distance_threshold) {
                     // Determine angle to ball and whether we should dive right or left
-                    float yaw_angle         = std::atan2(rBRr.y(), rBRr.x());
+                    double yaw_angle        = std::atan2(rBRr.y(), rBRr.x());
                     BodySide dive_direction = yaw_angle < 0 ? BodySide::RIGHT : BodySide::LEFT;
                     emit<Task>(std::make_unique<Dive>(dive_direction));
                 }
