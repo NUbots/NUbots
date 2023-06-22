@@ -13,7 +13,7 @@
 #include "utility/math/comparison.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-#define DEBUG_ENABLE_BUTTON_SPOOF 1
+#define DEBUG_ENABLE_BUTTON_SPOOF 0
 
 namespace module::platform::OpenCR {
 
