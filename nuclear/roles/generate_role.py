@@ -51,6 +51,7 @@ with open(role_name, "w", encoding="utf-8") as role_file:
     # Add our main function and include headers
     main = textwrap.dedent(
         """\
+        // NOLINTNEXTLINE(bugprone-exception-escape) who cares
         int main(int argc, char** argv) {"""
     )
     role_file.write(main)

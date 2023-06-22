@@ -41,13 +41,13 @@ namespace module::input {
     using utility::math::filter::MahonyUpdate;
     using utility::support::Expression;
 
-    void SensorFilter::integrate_walkcommand(const double dt) {
+    void SensorFilter::integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state) {
         // Check if we are not currently falling and walking
-        if (!falling && walk_engine_enabled) {
+        if (stability == Stability::DYNAMIC && walk_state.state == WalkState::State::WALKING) {
             // Integrate the walk command to estimate the change in position and yaw orientation
-            double dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
-            double dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
-            yaw += walk_command.z() * dt * cfg.deadreckoning_scale.z();
+            double dx = walk_state.velocity_target.x() * dt * cfg.deadreckoning_scale.x();
+            double dy = walk_state.velocity_target.y() * dt * cfg.deadreckoning_scale.y();
+            yaw += walk_state.velocity_target.z() * dt * cfg.deadreckoning_scale.z();
             // Rotate the change in position into world coordinates before adding it to the current position
             Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
             Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
@@ -64,7 +64,9 @@ namespace module::input {
 
     void SensorFilter::update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                               const std::shared_ptr<const Sensors>& previous_sensors,
-                                              const RawSensors& raw_sensors) {
+                                              const RawSensors& raw_sensors,
+                                              const Stability& stability,
+                                              const WalkState& walk_state) {
         // **************** Time Update ****************
         // Calculate our time offset from the last read then update the filter's time
         const double dt = std::max(
@@ -74,7 +76,7 @@ namespace module::input {
             0.0);
 
         // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
-        integrate_walkcommand(dt);
+        integrate_walkcommand(dt, stability, walk_state);
 
         // **************** Roll/Pitch Orientation Measurement Update ****************
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
@@ -100,12 +102,12 @@ namespace module::input {
         const double roll  = rpy(0);
         const double pitch = rpy(1);
         Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
-        sensors->Htw       = Hwt.inverse().matrix();
+        sensors->Htw       = Hwt.inverse();
 
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
         Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
-        sensors->Hrw          = Hwr.inverse().matrix();
+        sensors->Hrw          = Hwr.inverse();
         update_loop.enable();
     }
 }  // namespace module::input

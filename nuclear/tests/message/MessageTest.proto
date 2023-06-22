@@ -4,6 +4,7 @@ package message.nuclear.tests;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
+import "Transform.proto";
 import "Vector.proto";
 import "Matrix.proto";
 
@@ -28,6 +29,16 @@ message MessageTest {
     bool     b        = 15;
     string   s        = 16;
     bytes    bytes    = 17;
+
+    // Isometry
+    iso2  iso2  = 18;
+    fiso2 fiso2 = 19;
+    iso3  iso3  = 20;
+    fiso3 fiso3 = 21;
+
+    // Quaternion
+    quat  quat  = 22;
+    fquat fquat = 23;
 
     // Vector
     vec    vec    = 24;

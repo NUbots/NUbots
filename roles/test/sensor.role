@@ -9,7 +9,8 @@ nuclear_role(
   support::configuration::GlobalConfig
   network::NetworkForwarder
   network::NUClearNet
-  platform::cm740::HardwareIO
+  network::PlotJuggler
+  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   output::Overview
 )

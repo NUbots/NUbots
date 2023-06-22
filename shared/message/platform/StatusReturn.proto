@@ -1,0 +1,52 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.platform;
+
+import "google/protobuf/timestamp.proto";
+
+/**
+ * Represents a status return packet from a dynamixel device
+ *
+ * @author Alex Biddulph
+ */
+message StatusReturn {
+
+    /// Error values
+    enum CommandError {
+        NO_ERROR          = 0;
+        RESULT_FAIL       = 1;
+        INSTRUCTION_ERROR = 2;
+        CRC_ERROR         = 3;
+        RANGE_ERROR       = 4;
+        LENGTH_ERROR      = 5;
+        LIMIT_ERROR       = 6;
+        ACCESS_ERROR      = 7;
+    }
+
+    int32                     magic       = 1;  /// Magic number that heads up every packet
+    int32                     id          = 2;  /// The ID of the device that we are communicating with
+    int32                     length      = 3;  /// The total length of the data packet (4 plus the size of data)
+    int32                     instruction = 4;  /// Will always be Instruction::STATUS_RETURN
+    int32                     error       = 6;  /// Alert and Error number
+    bytes                     data        = 8;  /// Expected return data
+    int32                     checksum    = 9;  /// Our checksum for this command
+    google.protobuf.Timestamp timestamp   = 10;
+}
