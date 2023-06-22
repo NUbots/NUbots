@@ -55,7 +55,8 @@ namespace utility::actuation::tinyrobotics {
 
     // clang-format off
     /// @brief Maps the ServoID to the joint index in the tinyrobotics model joint configuration vector
-    inline std::vector<std::pair<int, ServoID>> joint_map = {{0, ServoID::L_ANKLE_ROLL},
+    inline std::vector<std::pair<int, ServoID>> joint_map =
+                                                     {{0, ServoID::L_ANKLE_ROLL},
                                                       {1, ServoID::L_ANKLE_PITCH},
                                                       {2, ServoID::L_KNEE},
                                                       {3, ServoID::L_HIP_PITCH},
@@ -83,13 +84,15 @@ namespace utility::actuation::tinyrobotics {
                                                       {3, ServoID::L_HIP_PITCH},
                                                       {4, ServoID::L_KNEE},
                                                       {5, ServoID::L_ANKLE_PITCH},
-                                                      {7, ServoID::L_ANKLE_ROLL},
+                                                      {6, ServoID::L_ANKLE_ROLL},
+                                                      {7, ServoID::L_FOOT_BASE},
                                                       {8, ServoID::R_HIP_YAW},
                                                       {9, ServoID::R_HIP_ROLL},
                                                       {10, ServoID::R_HIP_PITCH},
                                                       {11, ServoID::R_KNEE},
                                                       {12, ServoID::R_ANKLE_PITCH},
-                                                      {14, ServoID::R_ANKLE_ROLL},
+                                                      {13, ServoID::R_ANKLE_ROLL},
+                                                      {14, ServoID::R_FOOT_BASE},
                                                       {15, ServoID::HEAD_YAW},
                                                       {16, ServoID::HEAD_PITCH},
                                                       {17, ServoID::L_SHOULDER_PITCH},
@@ -98,7 +101,6 @@ namespace utility::actuation::tinyrobotics {
                                                       {20, ServoID::R_SHOULDER_PITCH},
                                                       {21, ServoID::R_SHOULDER_ROLL},
                                                       {22, ServoID::R_ELBOW}};
-
     // clang-format on
 
     /**
@@ -107,9 +109,9 @@ namespace utility::actuation::tinyrobotics {
      * @tparam Servos type of the Servos message
      * @return tinyrobotics joint configuration vector
      */
-    template <typename Servos, typename Scalar>
-    inline Eigen::Matrix<Scalar, 20, 1> servos_to_configuration(const Servos* servos) {
-        Eigen::Matrix<Scalar, 20, 1> q = Eigen::Matrix<Scalar, 20, 1>::Zero();
+    template <typename Servos, typename Scalar, int nq>
+    inline Eigen::Matrix<Scalar, nq, 1> servos_to_configuration(const Servos* servos) {
+        Eigen::Matrix<Scalar, nq, 1> q = Eigen::Matrix<Scalar, nq, 1>::Zero();
         for (const auto& [index, servo_id] : joint_map) {
             if (servo_exists(servos->servos, servo_id)) {
                 q(index, 0) = servos->servos.at(servo_id).position;
@@ -124,8 +126,8 @@ namespace utility::actuation::tinyrobotics {
      * @tparam Servos type of the Servos message
      * @return tinyrobotics joint configuration vector
      */
-    template <typename Servos, typename Scalar>
-    inline void configuration_to_servos(Servos* servos, const Eigen::Matrix<Scalar, 20, 1>& q) {
+    template <typename Servos, typename Scalar, int nq>
+    inline void configuration_to_servos(Servos* servos, const Eigen::Matrix<Scalar, nq, 1>& q) {
         for (const auto& [index, servo_id] : joint_map) {
             if (index < q.size() && servo_exists(servos->servos, servo_id)) {
                 servos->servos[servo_id].position = q(index, 0);
@@ -136,11 +138,12 @@ namespace utility::actuation::tinyrobotics {
     /**
      * @brief Converts a Sensors message to a tinyrobotics joint configuration vector
      * @param sensors Sensors message to convert
-     * @return tinyrobotics joint configuraSensorstion vector
+     * @return tinyrobotics joint configuration vector
      */
-    template <typename Scalar>
-    inline Eigen::Matrix<Scalar, 20, 1> sensors_to_configuration(const std::unique_ptr<Sensors>& sensors) {
-        Eigen::Matrix<Scalar, 20, 1> q = Eigen::Matrix<Scalar, 20, 1>::Zero();
+    template <typename Scalar, int nq>
+    inline Eigen::Matrix<Scalar, Eigen::Dynamic, 1> sensors_to_configuration(const std::unique_ptr<Sensors>& sensors) {
+        Eigen::Matrix<Scalar, nq, 1> q = Eigen::Matrix<Scalar, nq, 1>::Zero();
+        q.resize(sensors->servo.size(), 1);
         for (const auto& [index, servo_id] : joint_map) {
             q(index, 0) = sensors->servo.at(servo_id).present_position;
         }
