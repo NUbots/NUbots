@@ -96,9 +96,8 @@ namespace module::input {
 
         // Kinematics data for filter
         // Calculate the average length of both legs from the torso and accumulate this measurement
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-        log<NUClear::DEBUG>("Hrt.translation() = {}", Htr.inverse().translation().transpose());
+        Eigen::Isometry3d Htr = Eigen::Isometry3d(sensors->Htx[ServoID::L_FOOT_BASE]);
+        Eigen::Isometry3d Htl = Eigen::Isometry3d(sensors->Htx[ServoID::R_FOOT_BASE]);
         utility::math::filter::inekf::kinematics measured_kinematics;
         measured_kinematics.emplace_back(
             utility::math::filter::inekf::KinematicPose{0,
