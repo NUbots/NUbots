@@ -79,7 +79,7 @@ namespace module::actuation {
                 }
 
                 // Warm start the optimisation based IK with the analytical solution
-                auto q0 = servos_to_configuration<LeftLeg, double>(servos.get());
+                auto q0 = servos_to_configuration<LeftLeg, double, 20>(servos.get());
 
                 // Run the optimisation based IK
                 auto q_sol = tinyrobotics::inverse_kinematics(nugus_model_left,
@@ -121,7 +121,7 @@ namespace module::actuation {
                 }
 
                 // Warm start the optimisation based IK with the analytical solution
-                auto q0 = servos_to_configuration<RightLeg, double>(servos.get());
+                auto q0 = servos_to_configuration<RightLeg, double, 20>(servos.get());
 
                 // Run the optimisation based IK
                 auto q_sol = tinyrobotics::inverse_kinematics(nugus_model_right,

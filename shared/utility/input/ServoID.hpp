@@ -47,7 +47,9 @@ namespace utility::input {
             L_ANKLE_ROLL     = 17,
             HEAD_YAW         = 18,
             HEAD_PITCH       = 19,
-            NUMBER_OF_SERVOS = 20
+            L_FOOT_BASE           = 20,
+            R_FOOT_BASE           = 21,
+            NUMBER_OF_SERVOS = 22
         };
         Value value = Value::R_SHOULDER_PITCH;
 
