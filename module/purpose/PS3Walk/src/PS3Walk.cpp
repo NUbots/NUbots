@@ -113,7 +113,7 @@ namespace module::purpose {
                             if (event.value > 0) {  // button down
                                 if (moving) {
                                     log<NUClear::DEBUG>("Stop walking");
-                                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()), 2);
+                                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
                                 }
                                 else {
                                     log<NUClear::DEBUG>("Start walking");
@@ -187,7 +187,7 @@ namespace module::purpose {
 
             if (moving) {
                 log<NUClear::DEBUG>("Emitting walk command: ", walk_command.transpose());
-                emit<Task>(std::make_unique<Walk>(walk_command), 2);
+                emit<Task>(std::make_unique<Walk>(walk_command.cast<double>()), 2);
             }
         });
     }

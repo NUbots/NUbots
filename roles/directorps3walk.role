@@ -11,7 +11,7 @@ nuclear_role(
   # Sensors
   input::Camera
   input::SensorFilter
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   output::Overview
   # Director
   extension::Director
