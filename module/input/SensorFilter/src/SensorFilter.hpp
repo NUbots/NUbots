@@ -23,13 +23,16 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
+#include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
@@ -41,9 +44,12 @@ using extension::Configuration;
 
 namespace module::input {
 
-    using message::actuation::KinematicsModel;
+    using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
     using message::input::Sensors;
     using message::platform::RawSensors;
+
+    using namespace tinyrobotics;
 
     /**
      * @author Jade Fountain
@@ -52,6 +58,12 @@ namespace module::input {
     class SensorFilter : public NUClear::Reactor {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Number of actuatable joints in the NUgus robot
+        static const int n_joints = 20;
+
+        /// @brief tinyrobotics NUgus model
+        Model<double, n_joints> nugus_model;
 
         /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};
@@ -106,7 +118,7 @@ namespace module::input {
         };
 
         struct FilteringMethod {
-            enum Value { UNKNOWN = 0, UKF = 1, KF = 2, MAHONY = 3, INEKF = 4 };
+            enum Value { UNKNOWN = 0, UKF = 1, KF = 2, MAHONY = 3, INEKF = 4, GROUND_TRUTH = 5 };
             Value value = Value::UNKNOWN;
 
             // Constructors
@@ -119,6 +131,7 @@ namespace module::input {
                         else if (str == "KF") { value = Value::KF; }
                         else if (str == "MAHONY")  { value = Value::MAHONY; }
                         else if (str == "INEKF")  { value = Value::INEKF; }
+                        else if (str == "GROUND_TRUTH")  { value = Value::GROUND_TRUTH; }
                         else {
                             value = Value::UNKNOWN;
                             throw std::runtime_error("String " + str + " did not match any enum for FilteringMethod");
@@ -136,6 +149,7 @@ namespace module::input {
                     case Value::KF: return "KF";
                     case Value::MAHONY: return "MAHONY";
                     case Value::INEKF: return "INEKF";
+                    case Value::GROUND_TRUTH: return "GROUND_TRUTH";
                     default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
                 }
             }
@@ -143,6 +157,9 @@ namespace module::input {
 
 
         struct Config {
+            /// @brief Path to NUgus URDF file
+            std::string urdf_path = "";
+
             /// @brief Config for the button debouncer
             struct Button {
                 Button() = default;
@@ -286,17 +303,13 @@ namespace module::input {
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
-        /// @param kinematics_model The kinematics model to use for calculations
-        void update_kinematics(std::unique_ptr<Sensors>& sensors,
-                               const KinematicsModel& kinematics_model,
-                               const RawSensors& raw_sensors);
+        /// @param raw_sensors The raw sensor data
+        void update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
-        /// @param sensors The sensors message to update
-        /// @param previous_sensors The previous sensors message
-        /// @param raw_sensors The raw sensor data
         /// @param dt The time since the last update
-        void integrate_walkcommand(const double dt);
+        /// @param walk_state Current state of walk engine
+        void integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state);
 
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
@@ -326,7 +339,9 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry_kf(std::unique_ptr<Sensors>& sensors,
                                 const std::shared_ptr<const Sensors>& previous_sensors,
-                                const RawSensors& raw_sensors);
+                                const RawSensors& raw_sensors,
+                                const Stability& stability,
+                                const WalkState& walk_state);
 
 
         /// @brief Updates the sensors message with odometry data filtered using MahonyFilter. This includes the
@@ -336,7 +351,16 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
-                                    const RawSensors& raw_sensors);
+                                    const RawSensors& raw_sensors,
+                                    const Stability& stability,
+                                    const WalkState& walk_state);
+
+        /// @brief Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes
+        /// the position, orientation, velocity and rotational velocity of the torso in world space.
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        void update_odometry_ground_truth(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Updates the sensors message with odometry data filtered using InEKF. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.

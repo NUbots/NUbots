@@ -66,11 +66,11 @@ kalman:
 
 mahony:
   # Mahony "Proportional" Gain on error
-  Kp: 2
+  Kp: 1
   # Mahony "Integral" Gain used to compute bias
-  Ki: 1
-  # Mahony Filter Initial bias
-  bias: [-0.0967263, 0.00640166, 0.197743]
+  Ki: 0.3
+  # Mahony Filter initial bias
+  bias: [0, 0, 0]
   # Mahony Filter initial deadreckoned position and height
   initial_rTWw: [0, 0, 0.49]
 
@@ -96,3 +96,5 @@ inekf:
 
 # Specify which filtering method to use, either UKF, KF, MAHONY or INEKF
 filtering_method: INEKF
+
+urdf_path: "/home/nubots/NUbots/module/actuation/Kinematics/data/nugus.urdf"

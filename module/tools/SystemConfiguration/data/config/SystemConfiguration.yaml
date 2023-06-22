@@ -35,7 +35,7 @@ systemd:
   - systemd-resolved.service
   - systemd-timesyncd.service
   - sshd.service
-  - wpa_supplicant@wlp58s0.service
+  - wpa_supplicant@wlp0s20f3.service
 
 # Groups that should exist and that the user should be a member of
 groups:

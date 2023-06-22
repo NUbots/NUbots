@@ -13,13 +13,13 @@ namespace module::platform::OpenCR {
         sensors.timestamp = NUClear::clock::now();
 
         /* OpenCR data */
-        sensors.platform_error_flags = RawSensors::Error::OK;
-        sensors.led_panel            = opencr_state.led_panel;
-        sensors.head_led             = opencr_state.head_led;
-        sensors.eye_led              = opencr_state.eye_led;
-        sensors.buttons              = opencr_state.buttons;
-        sensors.accelerometer        = opencr_state.acc;
-        sensors.gyroscope            = opencr_state.gyro;
+        sensors.subcontroller_error = opencr_state.error_flags;
+        sensors.led_panel           = opencr_state.led_panel;
+        sensors.head_led            = opencr_state.head_led;
+        sensors.eye_led             = opencr_state.eye_led;
+        sensors.buttons             = opencr_state.buttons;
+        sensors.accelerometer       = opencr_state.acc;
+        sensors.gyroscope           = opencr_state.gyro;
 
         /* Battery data */
         sensors.battery = battery_state.current_voltage;
@@ -78,12 +78,10 @@ namespace module::platform::OpenCR {
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.error_flags = servo_states[i].error_flags;
+                servo.error_flags = servo_states[i].hardware_error;
 
-                // Add relevant servo error flags to platform error flags
-                sensors.platform_error_flags |= (servo.error_flags
-                                                 & (RawSensors::Error::INPUT_VOLTAGE | RawSensors::Error::OVERHEATING
-                                                    | RawSensors::Error::OVERLOAD));
+                // Accumulate all packet error flags to read at once
+                sensors.subcontroller_error |= servo_states[i].packet_error;
 
                 // Present Data
                 servo.present_position = servo_states[i].present_position;
@@ -93,12 +91,15 @@ namespace module::platform::OpenCR {
                 servo.voltage     = servo_states[i].voltage;
                 servo.temperature = servo_states[i].temperature;
 
-                // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
-                if (servo.voltage <= battery_state.charged_voltage) {
-                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
-                }
+                /* Note: removed input voltage bit clear here as it wasn't clear how it fits into the refactor. If there
+                 * are problems with input voltage errors coming up too frequently then this is likely the culprit */
             }
         }
+
+        // handle unused compatibility fields
+        sensors.platform_error_flags  = RawSensors::Error::OK_;
+        sensors.fsr.left.error_flags  = RawSensors::Error::OK_;
+        sensors.fsr.right.error_flags = RawSensors::Error::OK_;
 
         return sensors;
     }

@@ -53,7 +53,7 @@ namespace module::platform::cm740 {
 
         // Read our Error code
         sensors.platform_error_flags =
-            data.cm740ErrorCode == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.cm740ErrorCode).value;
+            data.cm740ErrorCode == 0xFF ? RawSensors::Error::TIMEOUT_ : RawSensors::Error(data.cm740ErrorCode).value;
 
         // LED Panel
         sensors.led_panel = led_state.led_panel;
@@ -72,7 +72,7 @@ namespace module::platform::cm740 {
         sensors.battery = Convert::voltage(data.cm740.voltage);
 
         if (sensors.battery <= cfg.battery.charged_voltage) {
-            sensors.platform_error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
+            sensors.platform_error_flags &= ~RawSensors::Error::INPUT_VOLTAGE_;
         }
 
         // Accelerometer (in m/s^2)
@@ -101,8 +101,8 @@ namespace module::platform::cm740 {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.error_flags =
-            data.fsrErrorCodes[0] == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.fsrErrorCodes[0]).value;
+        sensors.fsr.right.error_flags = data.fsrErrorCodes[0] == 0xFF ? RawSensors::Error::TIMEOUT_
+                                                                      : RawSensors::Error(data.fsrErrorCodes[0]).value;
 
         // Sensors
         sensors.fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -118,8 +118,8 @@ namespace module::platform::cm740 {
 
         // Left Sensor
         // Error
-        sensors.fsr.left.error_flags =
-            data.fsrErrorCodes[1] == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.fsrErrorCodes[1]).value;
+        sensors.fsr.left.error_flags = data.fsrErrorCodes[1] == 0xFF ? RawSensors::Error::TIMEOUT_
+                                                                     : RawSensors::Error(data.fsrErrorCodes[1]).value;
 
         // Sensors
         sensors.fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -189,7 +189,7 @@ namespace module::platform::cm740 {
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.error_flags = data.servoErrorCodes[i] == 0xFF ? RawSensors::Error::TIMEOUT
+                servo.error_flags = data.servoErrorCodes[i] == 0xFF ? RawSensors::Error::TIMEOUT_
                                                                     : RawSensors::Error(data.servoErrorCodes[i]).value;
 
                 // Present Data
@@ -202,7 +202,7 @@ namespace module::platform::cm740 {
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                 if (servo.voltage <= cfg.battery.charged_voltage) {
-                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
+                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE_;
                 }
             }
         }

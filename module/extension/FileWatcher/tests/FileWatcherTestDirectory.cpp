@@ -88,10 +88,10 @@ namespace {
         }
 
         // We have a non default destructor so rule of 5 is needed
-        TestReactor(const TestReactor&) = delete;
-        TestReactor(TestReactor&&)      = delete;
+        TestReactor(const TestReactor&)            = delete;
+        TestReactor(TestReactor&&)                 = delete;
         TestReactor& operator=(const TestReactor&) = delete;
-        TestReactor& operator=(TestReactor&&) = delete;
+        TestReactor& operator=(TestReactor&&)      = delete;
 
         ~TestReactor() override {
             std::filesystem::remove_all(dir_path);  // Cleanup
