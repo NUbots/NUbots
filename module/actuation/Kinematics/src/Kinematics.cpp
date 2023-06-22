@@ -71,8 +71,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<LeftLeg>();
-                auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htl), LimbID::LEFT_LEG);
+                auto joints = calculateLegJoints<double>(kinematics_model, leg_ik.Htl, LimbID::LEFT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -86,14 +85,14 @@ namespace module::actuation {
                 auto q_sol = tinyrobotics::inverse_kinematics(nugus_model_left,
                                                               cfg.left_foot_name,
                                                               cfg.torso_name,
-                                                              Eigen::Isometry3d(leg_ik.Htl),
+                                                              leg_ik.Htl,
                                                               q0,
                                                               options);
 
                 if (log_level <= NUClear::DEBUG) {
                     // Compute error between the IK solution and desired pose
                     auto Htl_sol = tinyrobotics::forward_kinematics(nugus_model_left, q_sol, cfg.left_foot_name);
-                    auto error   = tinyrobotics::homogeneous_error(Eigen::Isometry3d(leg_ik.Htl), Htl_sol);
+                    auto error   = tinyrobotics::homogeneous_error(leg_ik.Htl, Htl_sol);
                     log<NUClear::DEBUG>("IK left error: {}", error);
                 }
 
@@ -114,8 +113,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<RightLeg>();
-                auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htr), LimbID::RIGHT_LEG);
+                auto joints = calculateLegJoints<double>(kinematics_model, leg_ik.Htr, LimbID::RIGHT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -129,14 +127,14 @@ namespace module::actuation {
                 auto q_sol = tinyrobotics::inverse_kinematics(nugus_model_right,
                                                               cfg.right_foot_name,
                                                               cfg.torso_name,
-                                                              Eigen::Isometry3d(leg_ik.Htr),
+                                                              leg_ik.Htr,
                                                               q0,
                                                               options);
 
                 if (log_level <= NUClear::DEBUG) {
                     // Compute error between the IK solution and desired pose
                     auto Htr_sol = tinyrobotics::forward_kinematics(nugus_model_right, q_sol, cfg.right_foot_name);
-                    auto error   = tinyrobotics::homogeneous_error(Eigen::Isometry3d(leg_ik.Htr), Htr_sol);
+                    auto error   = tinyrobotics::homogeneous_error(leg_ik.Htr, Htr_sol);
                     log<NUClear::DEBUG>("IK right error: {}", error);
                 }
 
@@ -157,7 +155,7 @@ namespace module::actuation {
 
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<Head>();
-                auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
+                auto joints = calculateHeadJoints<double>(head_ik.uPCt);
 
                 // Get head kinematics limits
                 double max_yaw   = kinematics_model.head.MAX_YAW;
