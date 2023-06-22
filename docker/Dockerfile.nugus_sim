@@ -5,8 +5,7 @@ RUN echo -e "Server=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$a
 COPY etc/pacman.conf /etc/pacman.conf
 COPY /usr/local/bin/install-package /usr/local/bin/install-package
 
-
-
+WORKDIR /home/nubots/NUbots
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
 RUN install-package \
@@ -18,7 +17,7 @@ RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
 COPY /etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
 
-WORKDIR /home/nubots/NUbots
+
 # Install python libraries
 RUN pip install ruamel.yaml
 
