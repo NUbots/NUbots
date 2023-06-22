@@ -10,6 +10,7 @@ targets:
   nusight:
     # Overview packets for the overview screen
     message.support.nusight.Overview: true
+    message.support.FieldDescription: true
 
     # DataPoints power the chart view
     message.eye.DataPoint: true
@@ -21,13 +22,13 @@ targets:
     message.input.Image: false # You probably don't want this unless you're testing something very weird
     message.output.CompressedImage: 10
 
-    message.vision.Balls: false
-    message.vision.Goals: false
-    message.vision.GreenHorizon: false
-    message.vision.Lines: false
-    message.vision.Obstacles: false
-    message.vision.VisualMesh: false
+    message.vision.Balls: true
+    message.vision.Goals: true
+    message.vision.GreenHorizon: true
+    message.vision.FieldLines: true
+    message.vision.Obstacles: true
+    message.vision.VisualMesh: true
 
     # Localisation Messages
-    message.localisation.Ball: false
-    message.localisation.Field: false
+    message.localisation.Ball: true
+    message.localisation.Field: true
