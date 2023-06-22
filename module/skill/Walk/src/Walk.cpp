@@ -44,20 +44,22 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Configure the motion generation options
-            utility::skill::WalkGeneratorOptions<double> walk_engine_options;
-            walk_engine_options.step_period       = config["walk"]["period"].as<double>();
-            walk_engine_options.step_apex_ratio   = config["walk"]["step"]["apex_ratio"].as<double>();
-            walk_engine_options.step_limits       = config["walk"]["step"]["limits"].as<Expression>();
-            walk_engine_options.step_height       = config["walk"]["step"]["height"].as<double>();
-            walk_engine_options.step_width        = config["walk"]["step"]["width"].as<double>();
-            walk_engine_options.torso_height      = config["walk"]["torso"]["height"].as<double>();
-            walk_engine_options.torso_pitch       = config["walk"]["torso"]["pitch"].as<Expression>();
-            walk_engine_options.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
-            walk_engine_options.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
-            walk_engine.configure(walk_engine_options);
+            utility::skill::WalkGeneratorOptions<double> walk_generator_options;
+            walk_generator_options.step_period       = config["walk"]["period"].as<double>();
+            walk_generator_options.step_apex_ratio   = config["walk"]["step"]["apex_ratio"].as<double>();
+            walk_generator_options.step_limits       = config["walk"]["step"]["limits"].as<Expression>();
+            walk_generator_options.step_height       = config["walk"]["step"]["height"].as<double>();
+            walk_generator_options.step_width        = config["walk"]["step"]["width"].as<double>();
+            walk_generator_options.torso_height      = config["walk"]["torso"]["height"].as<double>();
+            walk_generator_options.torso_pitch       = config["walk"]["torso"]["pitch"].as<Expression>();
+            walk_generator_options.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
+            walk_generator_options.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
+            walk_generator_options.torso_final_position_ratio =
+                config["walk"]["torso"]["final_position_ratio"].as<Expression>();
+            walk_generator.configure(walk_generator_options);
 
             // Reset the walk engine and last update time
-            walk_engine.reset();
+            walk_generator.reset();
             last_update_time = NUClear::clock::now();
 
             // Configure the arms
@@ -79,7 +81,7 @@ namespace module::skill {
         on<Start<WalkTask>>().then([this]() {
             // Reset the last update time and walk engine
             last_update_time = NUClear::clock::now();
-            walk_engine.reset();
+            walk_generator.reset();
             // Emit a stopped state as we are not yet walking
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED, Eigen::Vector3d::Zero()));
         });
@@ -104,7 +106,7 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
 
                 // Update the walk engine and emit the stability state
-                switch (walk_engine.update(time_delta, walk_task.velocity_target).value) {
+                switch (walk_generator.update(time_delta, walk_task.velocity_target).value) {
                     case WalkState::State::WALKING:
                     case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
                     case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
@@ -117,12 +119,12 @@ namespace module::skill {
                     NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
                 // Get desired feet poses in the torso {t} frame from the walk engine
-                Eigen::Isometry3d Htl = walk_engine.get_foot_pose(LimbID::LEFT_LEG);
-                Eigen::Isometry3d Htr = walk_engine.get_foot_pose(LimbID::RIGHT_LEG);
+                Eigen::Isometry3d Htl = walk_generator.get_foot_pose(LimbID::LEFT_LEG);
+                Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_engine.is_left_foot_planted()));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_engine.is_left_foot_planted()));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_generator.is_left_foot_planted()));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_generator.is_left_foot_planted()));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
@@ -139,7 +141,7 @@ namespace module::skill {
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
                 // Emit walk engine state
-                emit(std::make_unique<WalkState>(walk_engine.get_state(), walk_task.velocity_target));
+                emit(std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target));
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
@@ -149,7 +151,7 @@ namespace module::skill {
                     Eigen::Vector3d thetaTR = MatrixToEulerIntrinsic(Htr.linear());
                     emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
                     emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
-                    Eigen::Isometry3d Hpt   = walk_engine.get_torso_pose();
+                    Eigen::Isometry3d Hpt   = walk_generator.get_torso_pose();
                     Eigen::Vector3d thetaPT = MatrixToEulerIntrinsic(Hpt.linear());
                     emit(graph("Torso desired position (x,y,z)",
                                Hpt.translation().x(),

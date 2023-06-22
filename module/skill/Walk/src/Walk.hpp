@@ -34,8 +34,8 @@ namespace module::skill {
         /// @brief Last time we updated the walk engine
         NUClear::clock::time_point last_update_time{};
 
-        /// @brief Walk engine, generates swing foot and torso trajectories for walk velocity target
-        utility::skill::WalkGenerator<double> walk_engine{};
+        /// @brief Generates swing foot and torso trajectories for given walk velocity target
+        utility::skill::WalkGenerator<double> walk_generator{};
     };
 }  // namespace module::skill
 
