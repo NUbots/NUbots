@@ -17,4 +17,4 @@ rotate_speed_y: 0.0
 # Rotate around ball tuning values
 pivot_ball_speed: 0.5
 pivot_ball_speed_x: 0.0
-pivot_ball_speed_y: -0.2
+pivot_ball_speed_y: -0.4

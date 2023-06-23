@@ -30,7 +30,6 @@ namespace module::skill {
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using message::skill::Kick;
-    using message::skill::KickFinished;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
