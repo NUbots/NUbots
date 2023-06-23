@@ -28,10 +28,10 @@ namespace module::planning {
             // Use configuration here from file PlanWalkPath.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.max_translational_velocity = config["max_translational_velocity"].as<double>();
-            cfg.min_translational_velocity = config["min_translational_velocity"].as<double>();
-            cfg.acceleration               = config["acceleration"].as<double>();
-            cfg.approach_radius            = config["approach_radius"].as<double>();
+            cfg.max_translational_velocity_magnitude = config["max_translational_velocity_magnitude"].as<double>();
+            cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
+            cfg.acceleration                         = config["acceleration"].as<double>();
+            cfg.approach_radius                      = config["approach_radius"].as<double>();
 
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
             cfg.min_angular_velocity = config["min_angular_velocity"].as<double>();
@@ -47,28 +47,27 @@ namespace module::planning {
 
         // Path to walk to a particular point
         on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
-            Eigen::Vector3d rPRr = walk_to.rPRr;
-
             // If robot getting close to the point, begin to decelerate to minimum velocity
-            if (rPRr.head(2).norm() < cfg.approach_radius) {
-                velocity -= cfg.acceleration;
-                velocity = std::max(velocity, cfg.min_translational_velocity);
+            if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
+                velocity_magnitude -= cfg.acceleration;
+                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
             }
             else {
                 // If robot is far away from the point, accelerate to max velocity
-                velocity += cfg.acceleration;
-                velocity = std::max(cfg.min_translational_velocity, std::min(velocity, cfg.max_translational_velocity));
+                velocity_magnitude += cfg.acceleration;
+                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
+                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
             }
 
             // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            Eigen::Vector3d walk_command = rPRr.normalized() * velocity;
+            Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
 
-            // Set the angular velocity component of the walk_command with the angular displacement and saturate with
+            // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
             // value cfg.max_angular_velocity
-            walk_command.z() =
+            velocity_target.z() =
                 utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
 
-            emit<Task>(std::make_unique<Walk>(walk_command));
+            emit<Task>(std::make_unique<Walk>(velocity_target));
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
@@ -90,6 +89,7 @@ namespace module::planning {
         });
 
         // Reset the velocity to minimum velocity after a kick
-        on<Trigger<KickFinished>>().then([this](const KickFinished&) { velocity = cfg.min_translational_velocity; });
+        on<Trigger<KickFinished>>().then(
+            [this](const KickFinished&) { velocity_magnitude = cfg.min_translational_velocity_magnitude; });
     }
 }  // namespace module::planning

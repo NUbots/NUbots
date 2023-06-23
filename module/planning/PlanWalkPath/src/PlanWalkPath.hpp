@@ -11,10 +11,10 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Maximum walk command velocity for walking to ball
-            double max_translational_velocity = 0;
+            /// @brief Maximum walk command velocity magnitude for walking to ball
+            double max_translational_velocity_magnitude = 0;
             /// @brief Minimum walk command velocity for walking to ball
-            double min_translational_velocity = 0;
+            double min_translational_velocity_magnitude = 0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
             double acceleration = 0;
             /// @brief Region around ball to begin decelerating in
@@ -37,8 +37,8 @@ namespace module::planning {
             double pivot_ball_velocity_y = 0;
         } cfg;
 
-        /// @brief The current velocity of the walk command
-        double velocity = 0;
+        /// @brief Current magnitude of the translational velocity of the walk command
+        double velocity_magnitude = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
