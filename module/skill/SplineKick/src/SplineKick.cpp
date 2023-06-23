@@ -17,14 +17,9 @@
 namespace module::skill {
 
     using extension::Configuration;
-    using utility::input::LimbID;
-
-    using extension::Configuration;
 
     using message::actuation::LeftArm;
-    using message::actuation::LeftLegIK;
     using message::actuation::RightArm;
-    using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::skill::ControlLeftFoot;
