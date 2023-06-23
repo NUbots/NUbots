@@ -18,15 +18,17 @@ export class VisualMeshViewModel {
   private readonly model: VisualMeshModel;
   private readonly params: CameraParams;
   private readonly canvas: Canvas;
+  private readonly imageAspectRatio: number;
 
-  constructor(model: VisualMeshModel, params: CameraParams, canvas: Canvas) {
+  constructor(model: VisualMeshModel, params: CameraParams, canvas: Canvas, imageAspectRatio: number) {
     this.model = model;
     this.params = params;
     this.canvas = canvas;
+    this.imageAspectRatio = imageAspectRatio;
   }
 
-  static of(model: VisualMeshModel, params: CameraParams, canvas: Canvas) {
-    return new VisualMeshViewModel(model, params, canvas);
+  static of(model: VisualMeshModel, params: CameraParams, canvas: Canvas, imageAspectRatio: number) {
+    return new VisualMeshViewModel(model, params, canvas, imageAspectRatio);
   }
 
   readonly visualMesh = mesh(() => ({
@@ -77,6 +79,7 @@ export class VisualMeshViewModel {
       focalLength: { value: this.params.lens.focalLength },
       centre: { value: this.params.lens.centre.toThree() },
       k: { value: this.params.lens.distortionCoeffecients.toThree() },
+      imageAspectRatio: { value: this.imageAspectRatio },
       projection: { value: this.params.lens.projection },
     },
     depthTest: false,
