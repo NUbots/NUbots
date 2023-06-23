@@ -96,8 +96,6 @@ namespace module::skill {
                 if ((info.run_reason != RunInfo::RunReason::NEW_TASK)
                     && kick_generator.get_time() == kick_generator.get_duration()) {
                     emit<Task>(std::make_unique<Done>());
-                    // Reset the walk path planner to minimum velocity
-                    emit(std::make_unique<KickFinished>());
                     return;
                 }
 
