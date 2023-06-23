@@ -180,6 +180,13 @@ wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/home/nubots/.ss
 # Fix permissions so ssh will accept our authorized keys
 chmod 600 ${HOME}/.ssh/authorized_keys
 
+#############
+# LIBRARIES #
+#############
+
+# Use local user libraries so systemconfigurator can run
+echo "/usr/local/lib" > /etc/ld.so.conf.d/usrlocal.conf
+
 ###############
 # PERMISSIONS #
 ###############
