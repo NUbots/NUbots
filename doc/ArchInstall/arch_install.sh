@@ -50,7 +50,8 @@ Include = /etc/pacman.d/mirrorlist
 [community]
 Include = /etc/pacman.d/mirrorlist
 EOF
-pacstrap -P /mnt base linux linux-firmware
+pacstrap /mnt base linux linux-firmware
+cp /etc/pacman.conf /mnt/etc/pacman.conf
 
 # Update fstab
 genfstab -U /mnt >> /mnt/etc/fstab
