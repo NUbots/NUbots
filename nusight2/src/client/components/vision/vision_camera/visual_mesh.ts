@@ -18,7 +18,7 @@ export class VisualMeshViewModel {
   private readonly model: VisualMeshModel;
   private readonly params: CameraParams;
   private readonly canvas: Canvas;
-  private readonly imageAspectRatio: number
+  private readonly imageAspectRatio: number;
 
   constructor(model: VisualMeshModel, params: CameraParams, canvas: Canvas, imageAspectRatio: number) {
     this.model = model;
