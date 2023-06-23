@@ -51,7 +51,7 @@ namespace module::strategy {
                 log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
 
                 // If we are stopped but our position error is too high, then we need to start walking again
-                if (stopped && position_error < cfg.resume_tolerance && heading_error < cfg.resume_tolerance) {
+                if (stopped && position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
                     emit<Task>(std::make_unique<StandStill>());
                     stopped = true;
                     return;
