@@ -3,8 +3,13 @@ log_level: INFO
 
 urdf_path: "/home/nubots/nugus.urdf"
 
+# Stopping tolerance for IK
 ik_tolerance: 1e-5
+# Maximum number of iterations for IK
 ik_max_iterations: 500
+# IK method to use, either JACOBIAN, NLOPT, LEVENBERG_MARQUARDT, PARTICLE_SWARM or BFGS
+ik_method: LEVENBERG_MARQUARDT
+
 
 links:
   torso: "torso"
