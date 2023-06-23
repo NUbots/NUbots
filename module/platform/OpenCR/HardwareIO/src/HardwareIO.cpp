@@ -80,6 +80,12 @@ namespace module::platform::OpenCR {
             // First, check if this is the model info packet, because if it is, the system
             // startup failed, and we need to re-trigger it.
             if (opencr_waiting() && packet_queue[NUgus::ID::OPENCR].front() == PacketTypes::MODEL_INFORMATION) {
+                // gross solution to let model information take longer
+                static int counter = 0;
+                // model info can take up to 100 ms
+                if (counter++ < 5)
+                    return;
+                // after 100 ms, actually trigger the watchdog
                 log<NUClear::WARN>(fmt::format("OpenCR model information not recieved, restarting system"));
                 // Clear all packet queues just in case
                 queue_clear_all();
