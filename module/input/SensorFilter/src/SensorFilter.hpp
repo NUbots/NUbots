@@ -48,8 +48,6 @@ namespace module::input {
     using message::input::Sensors;
     using message::platform::RawSensors;
 
-    using namespace tinyrobotics;
-
     /**
      * @author Jade Fountain
      * @author Trent Houliston
@@ -61,8 +59,8 @@ namespace module::input {
         /// @brief Number of actuatable joints in the NUgus robot
         static const int n_joints = 20;
 
-        /// @brief tinyrobotics NUgus model
-        Model<double, n_joints> nugus_model;
+        /// @brief tinyrobotics NUgus model used for kinematics
+        tinyrobotics::Model<double, n_joints> nugus_model;
 
         /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};

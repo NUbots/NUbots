@@ -40,14 +40,14 @@ namespace module::input {
 
         // **************** Kinematics ****************
         // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
-        std::vector<Eigen::Isometry3d> fk = forward_kinematics(nugus_model, q);
+        std::vector<Eigen::Isometry3d> fk = tinyrobotics::forward_kinematics(nugus_model, q);
         auto Htx                          = forward_kinematics_to_servo_map(fk);
         for (const auto& entry : Htx) {
             sensors->Htx[entry.first] = entry.second.matrix();
         }
 
         // **************** Centre of Mass and Inertia Tensor ****************
-        sensors->rMTt = centre_of_mass(nugus_model, q);
+        sensors->rMTt = tinyrobotics::centre_of_mass(nugus_model, q);
 
         // **************** Foot Down Information ****************
         sensors->feet[BodySide::RIGHT].down = true;
