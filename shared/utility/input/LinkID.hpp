@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_INPUT_SERVOID_HPP
-#define UTILITY_INPUT_SERVOID_HPP
+#ifndef UTILITY_INPUT_LINKID_HPP
+#define UTILITY_INPUT_LINKID_HPP
 
 #include <set>
 #include <string>
 
 namespace utility::input {
 
-    struct ServoID {
+    struct LinkID {
         enum Value {
             R_SHOULDER_PITCH = 0,
             L_SHOULDER_PITCH = 1,
@@ -47,54 +47,56 @@ namespace utility::input {
             L_ANKLE_ROLL     = 17,
             HEAD_YAW         = 18,
             HEAD_PITCH       = 19,
-            NUMBER_OF_SERVOS = 20
+            L_FOOT_BASE      = 20,
+            R_FOOT_BASE      = 21,
+            NUMBER_OF_LINKS  = 22
         };
         Value value = Value::R_SHOULDER_PITCH;
 
         // Constructors
-        ServoID() = default;
-        ServoID(uint8_t const& v) : value(static_cast<Value>(v)) {}
-        ServoID(uint32_t const& v) : value(static_cast<Value>(v)) {}
-        ServoID(uint64_t const& v) : value(static_cast<Value>(v)) {}
-        ServoID(int const& v) : value(static_cast<Value>(v)) {}
-        ServoID(Value const& v) : value(v) {}
-        ServoID(std::string const& str);
+        LinkID() = default;
+        LinkID(uint8_t const& v) : value(static_cast<Value>(v)) {}
+        LinkID(uint32_t const& v) : value(static_cast<Value>(v)) {}
+        LinkID(uint64_t const& v) : value(static_cast<Value>(v)) {}
+        LinkID(int const& v) : value(static_cast<Value>(v)) {}
+        LinkID(Value const& v) : value(v) {}
+        LinkID(std::string const& str);
 
         // Operators
-        bool operator<(ServoID const& other) const {
+        bool operator<(LinkID const& other) const {
             return value < other.value;
         }
-        bool operator>(ServoID const& other) const {
+        bool operator>(LinkID const& other) const {
             return value > other.value;
         }
-        bool operator<=(ServoID const& other) const {
+        bool operator<=(LinkID const& other) const {
             return value <= other.value;
         }
-        bool operator>=(ServoID const& other) const {
+        bool operator>=(LinkID const& other) const {
             return value >= other.value;
         }
-        bool operator==(ServoID const& other) const {
+        bool operator==(LinkID const& other) const {
             return value == other.value;
         }
-        bool operator!=(ServoID const& other) const {
+        bool operator!=(LinkID const& other) const {
             return value != other.value;
         }
-        bool operator<(ServoID::Value const& other) const {
+        bool operator<(LinkID::Value const& other) const {
             return value < other;
         }
-        bool operator>(ServoID::Value const& other) const {
+        bool operator>(LinkID::Value const& other) const {
             return value > other;
         }
-        bool operator<=(ServoID::Value const& other) const {
+        bool operator<=(LinkID::Value const& other) const {
             return value <= other;
         }
-        bool operator>=(ServoID::Value const& other) const {
+        bool operator>=(LinkID::Value const& other) const {
             return value >= other;
         }
-        bool operator==(ServoID::Value const& other) const {
+        bool operator==(LinkID::Value const& other) const {
             return value == other;
         }
-        bool operator!=(ServoID::Value const& other) const {
+        bool operator!=(LinkID::Value const& other) const {
             return value != other;
         }
 
@@ -116,11 +118,11 @@ namespace utility::input {
         }
         operator std::string() const;
 
-        friend std::ostream& operator<<(std::ostream& out, const ServoID& val);
+        friend std::ostream& operator<<(std::ostream& out, const LinkID& val);
 
     private:
-        static const std::set<ServoID> values;
+        static const std::set<LinkID> values;
     };
 }  // namespace utility::input
 
-#endif  // UTILITY_INPUT_SERVOID_HPP
+#endif  // UTILITY_INPUT_LINKID_HPP

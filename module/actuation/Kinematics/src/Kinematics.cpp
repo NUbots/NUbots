@@ -93,7 +93,7 @@ namespace module::actuation {
                     // Compute error between the IK solution and desired pose
                     auto Htl_sol = tinyrobotics::forward_kinematics(nugus_model_left, q_sol, cfg.left_foot_name);
                     auto error   = tinyrobotics::homogeneous_error(leg_ik.Htl, Htl_sol);
-                    log<NUClear::DEBUG>("IK left error: {}", error);
+                    log<NUClear::DEBUG>("IK left error: {}", error.squaredNorm());
                 }
 
                 // Convert the IK solution back to servo commands
@@ -135,7 +135,7 @@ namespace module::actuation {
                     // Compute error between the IK solution and desired pose
                     auto Htr_sol = tinyrobotics::forward_kinematics(nugus_model_right, q_sol, cfg.right_foot_name);
                     auto error   = tinyrobotics::homogeneous_error(leg_ik.Htr, Htr_sol);
-                    log<NUClear::DEBUG>("IK right error: {}", error);
+                    log<NUClear::DEBUG>("IK right error: {}", error.squaredNorm());
                 }
 
                 // Convert the IK solution back to servo commands

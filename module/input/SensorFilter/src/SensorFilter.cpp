@@ -23,6 +23,7 @@
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 
+#include "utility/input/LinkID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -31,6 +32,7 @@
 namespace module::input {
 
     using message::actuation::BodySide;
+    using utility::input::LinkID;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
@@ -163,8 +165,8 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Kinematics information
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htl(sensors->Htx[LinkID::L_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htr(sensors->Htx[LinkID::R_ANKLE_ROLL]);
         Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
         Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
         Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();

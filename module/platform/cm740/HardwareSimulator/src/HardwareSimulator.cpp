@@ -153,8 +153,8 @@ namespace module::platform::cm740 {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
             [this](const std::shared_ptr<const Sensors>& previousSensors) {
                 if (previousSensors) {
-                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
-                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[LinkID::R_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[LinkID::L_ANKLE_ROLL]);
                     Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                     Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 

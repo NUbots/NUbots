@@ -23,6 +23,7 @@
 
 #include "utility/actuation/tinyrobotics.hpp"
 #include "utility/input/LimbID.hpp"
+#include "utility/input/LinkID.hpp"
 #include "utility/input/ServoID.hpp"
 
 namespace module::input {
@@ -31,6 +32,7 @@ namespace module::input {
 
     using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
     using utility::actuation::tinyrobotics::sensors_to_configuration;
+    using utility::input::LinkID;
     using utility::input::ServoID;
 
     void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
@@ -39,7 +41,7 @@ namespace module::input {
         Eigen::Matrix<double, n_joints, 1> q = sensors_to_configuration<double, n_joints>(sensors);
 
         // **************** Kinematics ****************
-        // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
+        // Htx is a map from ServoID to homogeneous transforms from each LinkID to the torso
         std::vector<Eigen::Isometry3d> fk = tinyrobotics::forward_kinematics(nugus_model, q);
         auto Htx                          = forward_kinematics_to_servo_map(fk);
         for (const auto& entry : Htx) {
@@ -52,8 +54,8 @@ namespace module::input {
         // **************** Foot Down Information ****************
         sensors->feet[BodySide::RIGHT].down = true;
         sensors->feet[BodySide::LEFT].down  = true;
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htr(sensors->Htx[LinkID::R_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htl(sensors->Htx[LinkID::L_ANKLE_ROLL]);
         const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
         const Eigen::Vector3d rRLl  = Hlr.translation();
         switch (cfg.footDown.method()) {

@@ -296,7 +296,7 @@ namespace module::input {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htp(sensors.Htx[LinkID::HEAD_PITCH]);
             Eigen::Isometry3d Htw(sensors.Htw);
             Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 

@@ -31,6 +31,7 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/LimbID.hpp"
+#include "utility/input/LinkID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 
@@ -39,6 +40,7 @@ namespace utility::actuation::tinyrobotics {
     using message::actuation::BodySide;
     using message::actuation::ServoCommand;
     using utility::input::LimbID;
+    using utility::input::LinkID;
     using utility::input::ServoID;
 
     using message::input::Sensors;
@@ -77,30 +79,30 @@ namespace utility::actuation::tinyrobotics {
                                                       {18, ServoID::R_SHOULDER_ROLL},
                                                       {19, ServoID::R_SHOULDER_PITCH}};
 
-    /// @brief Maps the ServoID to the associated link index in the tinyrobotics model
-    inline std::vector<std::pair<int, ServoID>> link_map = {
-                                                      {1, ServoID::L_HIP_YAW},
-                                                      {2, ServoID::L_HIP_ROLL},
-                                                      {3, ServoID::L_HIP_PITCH},
-                                                      {4, ServoID::L_KNEE},
-                                                      {5, ServoID::L_ANKLE_PITCH},
-                                                      {6, ServoID::L_ANKLE_ROLL},
-                                                      {7, ServoID::L_FOOT_BASE},
-                                                      {8, ServoID::R_HIP_YAW},
-                                                      {9, ServoID::R_HIP_ROLL},
-                                                      {10, ServoID::R_HIP_PITCH},
-                                                      {11, ServoID::R_KNEE},
-                                                      {12, ServoID::R_ANKLE_PITCH},
-                                                      {13, ServoID::R_ANKLE_ROLL},
-                                                      {14, ServoID::R_FOOT_BASE},
-                                                      {15, ServoID::HEAD_YAW},
-                                                      {16, ServoID::HEAD_PITCH},
-                                                      {17, ServoID::L_SHOULDER_PITCH},
-                                                      {18, ServoID::L_SHOULDER_ROLL},
-                                                      {19, ServoID::L_ELBOW},
-                                                      {20, ServoID::R_SHOULDER_PITCH},
-                                                      {21, ServoID::R_SHOULDER_ROLL},
-                                                      {22, ServoID::R_ELBOW}};
+    /// @brief Maps the LinkID to the associated link index in the tinyrobotics model
+    inline std::vector<std::pair<int, LinkID>> link_map = {
+                                                      {1, LinkID::L_HIP_YAW},
+                                                      {2, LinkID::L_HIP_ROLL},
+                                                      {3, LinkID::L_HIP_PITCH},
+                                                      {4, LinkID::L_KNEE},
+                                                      {5, LinkID::L_ANKLE_PITCH},
+                                                      {6, LinkID::L_ANKLE_ROLL},
+                                                      {7, LinkID::L_FOOT_BASE},
+                                                      {8, LinkID::R_HIP_YAW},
+                                                      {9, LinkID::R_HIP_ROLL},
+                                                      {10, LinkID::R_HIP_PITCH},
+                                                      {11, LinkID::R_KNEE},
+                                                      {12, LinkID::R_ANKLE_PITCH},
+                                                      {13, LinkID::R_ANKLE_ROLL},
+                                                      {14, LinkID::R_FOOT_BASE},
+                                                      {15, LinkID::HEAD_YAW},
+                                                      {16, LinkID::HEAD_PITCH},
+                                                      {17, LinkID::L_SHOULDER_PITCH},
+                                                      {18, LinkID::L_SHOULDER_ROLL},
+                                                      {19, LinkID::L_ELBOW},
+                                                      {20, LinkID::R_SHOULDER_PITCH},
+                                                      {21, LinkID::R_SHOULDER_ROLL},
+                                                      {22, LinkID::R_ELBOW}};
     // clang-format on
 
     /**
@@ -151,15 +153,14 @@ namespace utility::actuation::tinyrobotics {
     }
 
     /**
-     * @brief Converts forward kinematics result to a map of ServoID to the associated forward kinematics transform
-     * @param transforms vector of forward kinematics transforms with index corresponding to the tinyrobotics link
-     index
-     * @return map of ServoID to the associated forward kinematics transform
+     * @brief Converts forward kinematics result to a map of LinkID to the associated forward kinematics transform
+     * @param transforms vector of forward kinematics transforms with index corresponding to the tinyrobotics link index
+     * @return map of LinkID to the associated forward kinematics transform
      */
     template <typename Scalar>
-    inline std::map<ServoID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> forward_kinematics_to_servo_map(
+    inline std::map<LinkID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> forward_kinematics_to_servo_map(
         const std::vector<Eigen::Transform<Scalar, 3, Eigen::Isometry>>& transforms) {
-        std::map<ServoID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> servo_map{};
+        std::map<LinkID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> servo_map{};
         for (const auto& [link_index, servo_id] : link_map) {
             servo_map[servo_id] = transforms[link_index];
         }

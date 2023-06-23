@@ -117,8 +117,8 @@ namespace module::motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Eigen::Isometry3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                Eigen::Isometry3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                Eigen::Isometry3d leftFoot(sensors.Htx[LinkID::L_ANKLE_ROLL]);
+                Eigen::Isometry3d rightFoot(sensors.Htx[LinkID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
