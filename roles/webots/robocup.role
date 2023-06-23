@@ -17,7 +17,9 @@ nuclear_role(
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::BallDetector
+  vision::GoalDetector
   vision::FieldLineDetector
+  vision::Benchmarking
   # Localisation
   localisation::FieldLocalisation
   localisation::BallLocalisation
