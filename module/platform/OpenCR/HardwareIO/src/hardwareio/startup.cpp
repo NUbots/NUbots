@@ -13,11 +13,10 @@ namespace module::platform::OpenCR {
                                                           uint16_t(OpenCR::Address::RETURN_DELAY_TIME),
                                                           uint8_t(0)));
 
-        // Disable and then enable power to the servos
-        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
-                                                          uint8_t(0)));
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        // We do not disable and enable the servo power on startup because doing so would make the robot collapse if it
+        // were standing, possibly resulting in damage. Instead, we leave the servos powered on and if there are any
+        // servo errors, they can be cleared by using the red button to power off the servos, or by turning off the
+        // robot entirely.
         opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
                                                           uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
                                                           uint8_t(1)));
@@ -42,6 +41,13 @@ namespace module::platform::OpenCR {
         }
         opencr.write(
             dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::RETURN_DELAY_TIME), data));
+
+        // Set up the dynamixels to use time-based profile velocity control
+        for (int i = 0; i < 20; ++i) {
+            // ensure write command targets the ID (ID != i)
+            data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 4);
+        }
+        opencr.write(dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::DRIVE_MODE), data));
 
         // Set up indirect addressing for read addresses for each dynamixel
         dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>> read_data[20];
@@ -126,6 +132,11 @@ namespace module::platform::OpenCR {
             dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
                                                                           write_data2));
 
+        // Loop over all servo states and set the servos to uninitialised so we can read their state and update our
+        // internal goal state
+        for (auto& servo_state : servo_states) {
+            servo_state.initialised = false;
+        }
 
         // Find OpenCR firmware and model versions
         // This has to be called last, as we need to wait for the response packet before starting

@@ -50,7 +50,7 @@ namespace module::platform::OpenCR {
             //             max_acc(raw) - min_acc(raw)
             //
 
-            return float(raw * 2 / INT16_MAX);
+            return float(raw * 2 * 9.80665 / INT16_MAX);
         }
 
         int16_t acc(float gs) {
@@ -163,6 +163,14 @@ namespace module::platform::OpenCR {
             // Default servo limits for velocity - minimum of all for X-Series, MX-106 and MX-64
             // X-Series has the minimum at 167
             return int32_t(utility::math::clamp(-167.0f, (velocity * 60.0f / 0.229f), 167.0f));
+        }
+
+        uint32_t profile_velocity(float profile_velocity) {
+            // Base unit: 1 millisecond
+            // Range: 0 - 32767 milliseconds
+            // Time-based Profile sets the time span to reach the goal position
+            uint32_t data = uint32_t(profile_velocity);
+            return utility::math::clamp(uint32_t(0), data, uint32_t(32767));
         }
 
 

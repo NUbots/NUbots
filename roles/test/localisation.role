@@ -32,13 +32,25 @@ nuclear_role(
   vision::BallDetector
   vision::FieldLineDetector
   # Localisation
-  localisation::BallFilter
-  localisation::RobotLocalisation
-  # Behaviour
-  behaviour::Controller
-  behaviour::skills::Getup
-  behaviour::skills::Stand
-  behaviour::skills::KickScript
-  behaviour::skills::DirectWalkController
-  behaviour::strategy::KeyboardWalk
+  localisation::BallLocalisation
+  localisation::FieldLocalisation
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  skill::ScriptKick
+  skill::GetUp
+  skill::Look
+  # Planners
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+  # Purpose
+  purpose::KeyboardWalk
 )

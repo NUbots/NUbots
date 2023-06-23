@@ -33,7 +33,8 @@ namespace module::strategy {
            Every<30, Per<std::chrono::seconds>>>()
             .then([this](const Field& field, const Sensors& sensors, const FieldDescription& field_description) {
                 // Get the robot's position (pose) on the field
-                Eigen::Isometry3d Hrf = Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse());
+                Eigen::Isometry3d Hrf =
+                    Eigen::Isometry3d(sensors.Hrw) * Eigen::Isometry3d(field.Hfw.inverse().cast<double>());
 
                 // Get the goal position relative to the robot to kick to
                 Eigen::Vector3d rGFf = Eigen::Vector3d(-field_description.dimensions.field_length / 2.0, 0.0, 0.0);

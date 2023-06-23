@@ -95,7 +95,7 @@ namespace module::platform::OpenCR {
             for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
                 // delete the packet we're waiting on
                 packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", dropout_id));
+                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
                 // set flag
                 packet_dropped = true;
             }
@@ -130,7 +130,7 @@ namespace module::platform::OpenCR {
 
             // Check we're expecting the packet
             if (packet_queue[packet_id].empty()) {
-                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", packet_id));
+                log<NUClear::WARN>(fmt::format("Unexpected packet data received for ID {}.", int(packet_id)));
                 return;
             }
 
@@ -142,14 +142,6 @@ namespace module::platform::OpenCR {
             // Pop the front of the packet queue
             auto& info = packet_queue[packet_id].front();
             packet_queue[packet_id].erase(packet_queue[packet_id].begin());
-
-            // Check for packet errors
-            if (packet.error != StatusReturn::CommandError::NO_ERROR) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with error flag", packet_id));
-            }
-            if (packet.alert) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for ID {} with hardware alert", packet_id));
-            }
 
             /// @brief handle incoming packets, and send next request if all packets were handled
             // -> Recieved model information packet
@@ -167,7 +159,15 @@ namespace module::platform::OpenCR {
                     // check if we recieved the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
-                        send_servo_request();
+
+                        // At the start, we want to query the motors so we can store their state internally
+                        // This will start the loop of reading and writing to the servos and opencr
+                        for (const auto& id : nugus.servo_ids()) {
+                            packet_queue[NUgus::ID(id)].push_back(PacketTypes::SERVO_DATA);
+                        }
+                        opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(AddressBook::SERVO_READ),
+                                                                        sizeof(DynamixelServoReadData),
+                                                                        nugus.servo_ids()));
                     }
 
                     break;
@@ -207,19 +207,11 @@ namespace module::platform::OpenCR {
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             // Loop through each of our commands and update servo state information accordingly
             for (const auto& command : commands.targets) {
-                // Get the difference between the current and goal servo position to calculate speed
-                float diff =
-                    utility::math::angle::difference(command.position, servo_states[command.id].present_position);
-
+                // Desired time to reach the goal position (in milliseconds)
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
-
-                float speed;
-                if (duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                }
-                else {
-                    speed = 0.0f;
-                }
+                float time_span = float(duration.count()) / float(NUClear::clock::period::den) * 1000.0f;
+                // Ensure the time span is positive
+                time_span = std::max(time_span, 0.0f);
 
                 // Update our internal state
                 if (servo_states[command.id].torque != command.torque
@@ -227,7 +219,7 @@ namespace module::platform::OpenCR {
                     || servo_states[command.id].position_i_gain != command.gain * 0
                     || servo_states[command.id].position_d_gain != command.gain * 0
                     || servo_states[command.id].goal_position != command.position
-                    || servo_states[command.id].profile_velocity != speed) {
+                    || servo_states[command.id].profile_velocity != time_span) {
 
                     servo_states[command.id].dirty = true;
 
@@ -237,8 +229,10 @@ namespace module::platform::OpenCR {
                     servo_states[command.id].position_i_gain = command.gain * 0;
                     servo_states[command.id].position_d_gain = command.gain * 0;
 
-                    servo_states[command.id].goal_position    = command.position;
-                    servo_states[command.id].profile_velocity = speed;
+                    servo_states[command.id].goal_position = command.position;
+                    // Drive Mode is Time-Based, so we need to set the profile velocity to the time (in milliseconds) we
+                    // want to take to reach the goal position
+                    servo_states[command.id].profile_velocity = time_span;
                 }
             }
         });

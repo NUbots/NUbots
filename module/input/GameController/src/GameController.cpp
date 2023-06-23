@@ -130,9 +130,9 @@ namespace module::input {
     void GameController::sendReplyMessage(const ReplyMessage& message) {
         auto packet     = std::make_unique<GameControllerReplyPacket>();
         packet->header  = {gamecontroller::RETURN_HEADER[0],
-                          gamecontroller::RETURN_HEADER[1],
-                          gamecontroller::RETURN_HEADER[2],
-                          gamecontroller::RETURN_HEADER[3]};
+                           gamecontroller::RETURN_HEADER[1],
+                           gamecontroller::RETURN_HEADER[2],
+                           gamecontroller::RETURN_HEADER[3]};
         packet->version = gamecontroller::RETURN_VERSION;
         packet->team    = TEAM_ID;
         packet->player  = PLAYER_ID;
@@ -436,6 +436,7 @@ namespace module::input {
         /*******************************************************************************************
          * Process state/mode changes
          ******************************************************************************************/
+
         if (newPacket.mode != mode && oldPacket.mode != gamecontroller::Mode::TIMEOUT
             && newPacket.mode != gamecontroller::Mode::TIMEOUT) {
 
@@ -458,10 +459,53 @@ namespace module::input {
                     stateChanges.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::OVERTIME)); });
                     break;
+                case gamecontroller::Mode::DIRECT_FREEKICK:
+                    state->data.mode = GameState::Data::Mode::DIRECT_FREEKICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::DIRECT_FREEKICK)); });
+                    break;
+                case gamecontroller::Mode::INDIRECT_FREEKICK:
+                    state->data.mode = GameState::Data::Mode::INDIRECT_FREEKICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::INDIRECT_FREEKICK)); });
+                    break;
+                case gamecontroller::Mode::PENALTYKICK:
+                    state->data.mode = GameState::Data::Mode::PENALTYKICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::PENALTYKICK)); });
+                    break;
+                case gamecontroller::Mode::CORNER_KICK:
+                    state->data.mode = GameState::Data::Mode::CORNER_KICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::CORNER_KICK)); });
+                    break;
+                case gamecontroller::Mode::GOAL_KICK:
+                    state->data.mode = GameState::Data::Mode::GOAL_KICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::GOAL_KICK)); });
+                    break;
+                case gamecontroller::Mode::THROW_IN:
+                    state->data.mode = GameState::Data::Mode::THROW_IN;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::THROW_IN)); });
+                    break;
                 default:
                     throw std::runtime_error("Invalid mode change");
                     emit(std::make_unique<GameState::Data::Mode>(state->data.mode));
             }
+        }
+
+        if ((state->data.mode != GameState::Data::Mode::NORMAL
+             && state->data.mode != GameState::Data::Mode::PENALTY_SHOOTOUT
+             && state->data.mode != GameState::Data::Mode::OVERTIME)
+            && (newPacket.secondaryStateInfo[0] != state->data.secondary_state.team_performing
+                || newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode)
+            && newPacket.secondaryStateInfo[0] != 0) {
+            if (newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode) {
+                stateChanges.emplace_back([] {});
+            }
+            state->data.secondary_state.team_performing = newPacket.secondaryStateInfo[0];
+            state->data.secondary_state.sub_mode        = newPacket.secondaryStateInfo[1];
         }
 
         if (oldPacket.mode != gamecontroller::Mode::TIMEOUT && newPacket.mode == gamecontroller::Mode::TIMEOUT) {

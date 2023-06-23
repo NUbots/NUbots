@@ -71,7 +71,7 @@ namespace module::behaviour::skills {
 
         on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
             // Transform to torso {t} from world {w} space
-            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
             // Basis Z vector of torso {t} in world {w} space
             Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
             // Basis X vector of torso {t} in world {w} space

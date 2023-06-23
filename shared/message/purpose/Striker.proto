@@ -26,3 +26,9 @@ message Striker {
 
 message NormalStriker {}
 message PenaltyShootoutStriker {}
+message DirectFreeKickStriker {}
+message InDirectFreeKickStriker {}
+message PenaltyKickStriker {}
+message CornerKickStriker {}
+message GoalKickStriker {}
+message ThrowInStriker {}
