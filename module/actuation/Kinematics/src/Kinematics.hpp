@@ -16,6 +16,8 @@
 
 namespace module::actuation {
 
+    using tinyrobotics::InverseKinematicsMethod;
+
     class Kinematics : public ::extension::behaviour::BehaviourReactor {
     public:
         /// @brief Called by the powerplant to build and setup the Kinematics reactor.
@@ -32,6 +34,14 @@ namespace module::actuation {
 
         /// @brief tinyrobotics inverse kinematics options
         tinyrobotics::InverseKinematicsOptions<double, n_joints> options;
+
+        /**
+         * @brief Converts a string to an InverseKinematicsMethod
+         *
+         * @param method_string
+         * @return InverseKinematicsMethod
+         */
+        InverseKinematicsMethod ik_string_to_method(const std::string& method_string);
 
     private:
         /// @brief Stores configuration values

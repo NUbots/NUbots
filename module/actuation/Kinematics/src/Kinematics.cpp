@@ -52,7 +52,7 @@ namespace module::actuation {
             // tinyrobotics IK options
             options.tolerance      = config["ik_tolerance"].as<double>();
             options.max_iterations = config["ik_max_iterations"].as<int>();
-            options.method         = tinyrobotics::InverseKinematicsMethod::LEVENBERG_MARQUARDT;
+            options.method         = ik_string_to_method(config["ik_method"].as<std::string>());
 
             // Link names in tinyrobotics model
             cfg.torso_name      = config["links"]["torso"].as<std::string>();
@@ -180,6 +180,21 @@ namespace module::actuation {
 
                 emit<Task>(servos);
             });
+    }
+
+    InverseKinematicsMethod Kinematics::ik_string_to_method(const std::string& method_string) {
+        static std::map<std::string, InverseKinematicsMethod> string_to_method_map = {
+            {"JACOBIAN", InverseKinematicsMethod::JACOBIAN},
+            {"NLOPT", InverseKinematicsMethod::NLOPT},
+            {"LEVENBERG_MARQUARDT", InverseKinematicsMethod::LEVENBERG_MARQUARDT},
+            {"PARTICLE_SWARM", InverseKinematicsMethod::PARTICLE_SWARM},
+            {"BFGS", InverseKinematicsMethod::BFGS}};
+
+        auto it = string_to_method_map.find(method_string);
+        if (it == string_to_method_map.end()) {
+            throw std::invalid_argument("Unrecognized method string: " + method_string);
+        }
+        return it->second;
     }
 
 }  // namespace module::actuation
