@@ -76,7 +76,7 @@ namespace module::platform::OpenCR {
             }
         });
 
-        on<Watchdog<HardwareIO, 2, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
+        packet_watchdog = on<Watchdog<HardwareIO, 20, std::chrono::milliseconds>, Sync<HardwareIO>>().then([this] {
             // First, check if this is the model info packet, because if it is, the system
             // startup failed, and we need to re-trigger it.
             if (opencr_waiting() && packet_queue[NUgus::ID::OPENCR].front() == PacketTypes::MODEL_INFORMATION) {
