@@ -47,6 +47,7 @@ namespace module::input {
         cfg.Kp            = config["mahony"]["Kp"].as<Expression>();
         cfg.bias          = Eigen::Vector3d(config["mahony"]["bias"].as<Expression>());
         Hwt.translation() = Eigen::VectorXd(config["mahony"]["initial_rTWw"].as<Expression>());
+        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>()));
     }
 
     void SensorFilter::update_odometry_mahony(std::unique_ptr<Sensors>& sensors,

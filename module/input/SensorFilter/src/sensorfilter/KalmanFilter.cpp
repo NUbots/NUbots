@@ -50,6 +50,7 @@ namespace module::input {
         kf.update(cfg.Ac, cfg.Bc, cfg.C, cfg.Q, cfg.R);
         kf.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
         Hwt.translation() = Eigen::VectorXd(config["kalman"]["initial_rTWw"].as<Expression>());
+        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>()));
         update_loop.enable();
     }
 
