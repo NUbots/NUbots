@@ -16,27 +16,31 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
-syntax = "proto3";
+ syntax = "proto3";
 
-package message.skill;
+ package message.skill;
 
-import "Transform.proto";
-import "google/protobuf/timestamp.proto";
+ import "Transform.proto";
+ import "google/protobuf/timestamp.proto";
 
-message ControlLeftFoot {
-    // Desired left foot {f} pose in torso {t} space
-    iso3 Htf = 1;
-    // Time to complete the motion
-    google.protobuf.Timestamp time = 2;
-    // Bool to indicate whether or not to attempt to keep foot level with ground
-    bool keep_level = 3;
-}
+ message ControlLeftFoot {
+     // Desired left foot {f} pose in torso {t} space
+     iso3 Htf = 1;
+     // Time to complete the motion
+     google.protobuf.Timestamp time = 2;
+     // Bool to indicate whether or not to attempt to correct orientation with IMU
+     bool correction_enabled = 3;
+     // Bool to indicate whether or not to keep the foot orientated with ground
+     bool keep_foot_orientated = 4;
+ }
 
-message ControlRightFoot {
-    // Desired right foot {f} pose in torso {t} space
-    iso3 Htf = 1;
-    // Time to complete the motion
-    google.protobuf.Timestamp time = 2;
-    // Bool to indicate whether or not to attempt to keep foot level with ground
-    bool keep_level = 3;
-}
+ message ControlRightFoot {
+     // Desired right foot {f} pose in torso {t} space
+     iso3 Htf = 1;
+     // Time to complete the motion
+     google.protobuf.Timestamp time = 2;
+     // Bool to indicate whether or not to attempt to correct orientation with IMU
+     bool correction_enabled = 3;
+     // Bool to indicate whether or not to keep the foot orientated with ground
+     bool keep_foot_orientated = 4;
+ }

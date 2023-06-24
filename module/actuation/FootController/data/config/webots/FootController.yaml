@@ -3,4 +3,12 @@ log_level: INFO
 
 servo_gain: 8
 
-keep_level: false
+correction_enabled: true
+
+roll_p_gain: 0.25
+pitch_p_gain: 0.25
+roll_i_gain: 0.1
+pitch_i_gain: 0.1
+max_i_error: 0.1
+roll_d_gain: 0.1
+pitch_d_gain: 0.1
