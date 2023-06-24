@@ -24,6 +24,9 @@ namespace module::platform::OpenCR {
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        struct PacketWatchdog {};
+        struct ModelWatchdog {};
+
         /// @brief Manages the connection with OpenCR
         utility::io::uart opencr{};
 
@@ -215,6 +218,8 @@ namespace module::platform::OpenCR {
         /// @returns the number of packets cleared
         int queue_clear_all();
 
+        /// @brief Handle for the watchdog timer for the model information
+        ReactionHandle model_watchdog;
         /// @brief Handle for our watchdog timer for packet handling
         ReactionHandle packet_watchdog;
     };
