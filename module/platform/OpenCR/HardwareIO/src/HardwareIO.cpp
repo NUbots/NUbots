@@ -33,12 +33,18 @@ namespace module::platform::OpenCR {
         packet_watchdog =
             on<Watchdog<PacketWatchdog, 20, std::chrono::milliseconds>, Sync<PacketWatchdog>>()
                 .then([this] {
+                    // This is a hacky fix because the watchdog is not disabled quickly enough at the beginning. This
+                    // may be related to the out of order packets with Sync within NUClear. This should be fixed in a
+                    // later version of NUClear.
                     if (model_watchdog.enabled()) {
-                        log<NUClear::WARN>("Packet watchdog cannot be enabled while model watchdog is enabled");
+                        log<NUClear::WARN>(
+                            "Packet watchdog cannot be enabled while model watchdog is enabled. You may see this "
+                            "warning at the start of the program. This is expected as the watchdog reaction may still "
+                            "be disabling.");
                         packet_watchdog.disable();
                         return;
                     }
-                    log<NUClear::WARN>("Packet watchdog", packet_watchdog.enabled(), model_watchdog.enabled());
+
                     // Check what the hangup was
                     bool packet_dropped = false;
                     // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
@@ -60,6 +66,7 @@ namespace module::platform::OpenCR {
                     }
                 })
                 .disable();
+
         model_watchdog =
             on<Watchdog<ModelWatchdog, 500, std::chrono::milliseconds>, Sync<ModelWatchdog>>()
                 .then([this] {
@@ -100,10 +107,6 @@ namespace module::platform::OpenCR {
                 nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
-
-            model_watchdog.enable();
-            packet_watchdog.disable();
-            log<NUClear::INFO>("Packet watchdog disabled", packet_watchdog.enabled());
         });
 
 
@@ -113,7 +116,8 @@ namespace module::platform::OpenCR {
             // The packet watchdog is disabled until we start the main loop
             model_watchdog.enable();
             packet_watchdog.disable();
-            log<NUClear::INFO>("Packet watchdog disabled", packet_watchdog.enabled());
+
+            // The startup function sets up the subcontroller state
             startup();
 
 #if DEBUG_ENABLE_BUTTON_SPOOF

@@ -220,6 +220,7 @@ namespace module::platform::OpenCR {
 
         /// @brief Handle for the watchdog timer for the model information
         ReactionHandle model_watchdog;
+
         /// @brief Handle for our watchdog timer for packet handling
         ReactionHandle packet_watchdog;
     };
