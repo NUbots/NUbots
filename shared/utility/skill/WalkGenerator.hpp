@@ -43,6 +43,9 @@ namespace utility::skill {
         /// @brief Torso pitch (in radians)
         Scalar torso_pitch = 0.0;
 
+        /// @brief Torso constant position offset [x,y,z] (in meters)
+        Eigen::Matrix<Scalar, 3, 1> torso_position_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
         /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
         Scalar torso_sway_ratio = 0.0;
 
@@ -68,6 +71,7 @@ namespace utility::skill {
             step_apex_ratio            = options.step_apex_ratio;
             torso_height               = options.torso_height;
             torso_pitch                = options.torso_pitch;
+            torso_position_offset      = options.torso_position_offset;
             torso_sway_ratio           = options.torso_sway_ratio;
             torso_sway_offset          = options.torso_sway_offset;
             torso_final_position_ratio = options.torso_final_position_ratio;
@@ -145,7 +149,8 @@ namespace utility::skill {
             Hps_start.linear().setIdentity();
 
             // Initialize torso pose
-            Hpt_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height);
+            Hpt_start.translation() =
+                Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height) + torso_position_offset;
             Hpt_start.linear() =
                 Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
 
@@ -240,6 +245,9 @@ namespace utility::skill {
 
         /// @brief Torso pitch.
         Scalar torso_pitch = 0.0;
+
+        /// @brief Torso constant position offset [x,y,z] (in meters)
+        Eigen::Matrix<Scalar, 3, 1> torso_position_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
         /// @brief Torso offset at half step period from the planted foot, at time = step_apex_ratio * step_period
         Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
@@ -357,10 +365,10 @@ namespace utility::skill {
             Waypoint<Scalar> middle_waypoint;
             middle_waypoint.time_point = torso_sway_ratio * step_period;
             Scalar torso_offset_y      = left_foot_is_planted ? -torso_sway_offset.y() : torso_sway_offset.y();
-            middle_waypoint.position   = Eigen::Matrix<Scalar, 3, 1>(torso_sway_offset.x(),
-                                                                   torso_offset_y,
-                                                                   torso_height + torso_sway_offset.z());
-            middle_waypoint.velocity   = velocity_target;
+            middle_waypoint.position =
+                Eigen::Matrix<Scalar, 3, 1>(torso_sway_offset.x(), torso_offset_y, torso_height + torso_sway_offset.z())
+                + torso_position_offset;
+            middle_waypoint.velocity = velocity_target;
             middle_waypoint.orientation =
                 Eigen::Matrix<Scalar, 3, 1>(0.0, torso_pitch, velocity_target.z() * torso_sway_ratio * step_period);
             torso_trajectory.add_waypoint(middle_waypoint);
@@ -369,10 +377,12 @@ namespace utility::skill {
             // halfway between the feet
             Waypoint<Scalar> end_waypoint;
             end_waypoint.time_point = step_period;
-            end_waypoint.position   = Eigen::Matrix<Scalar, 3, 1>(
-                torso_final_position_ratio.x() * step_placement.x(),
-                get_foot_width_offset() / 2 + torso_final_position_ratio.y() * step_placement.y(),
-                torso_height);
+            end_waypoint.position =
+                Eigen::Matrix<Scalar, 3, 1>(
+                    torso_final_position_ratio.x() * step_placement.x(),
+                    get_foot_width_offset() / 2 + torso_final_position_ratio.y() * step_placement.y(),
+                    torso_height)
+                + torso_position_offset;
             end_waypoint.orientation =
                 Eigen::Matrix<Scalar, 3, 1>(0.0, torso_pitch, torso_final_position_ratio.z() * step_placement.z());
             torso_trajectory.add_waypoint(end_waypoint);
