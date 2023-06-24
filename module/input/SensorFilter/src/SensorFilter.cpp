@@ -153,6 +153,19 @@ namespace module::input {
                 .disable();
     }
 
+    void SensorFilter::integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state) {
+        // Check if we are not currently falling and walking
+        if (stability == Stability::DYNAMIC && walk_state.state == WalkState::State::WALKING) {
+            // Integrate the walk command to estimate the change in position and yaw orientation
+            double dx = walk_state.velocity_target.x() * dt * cfg.deadreckoning_scale.x();
+            double dy = walk_state.velocity_target.y() * dt * cfg.deadreckoning_scale.y();
+            yaw += walk_state.velocity_target.z() * dt * cfg.deadreckoning_scale.z();
+            // Rotate the change in position into world coordinates before adding it to the current position
+            Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
+            Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
+        }
+    }
+
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
         // Raw accelerometer and gyroscope information
         emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
