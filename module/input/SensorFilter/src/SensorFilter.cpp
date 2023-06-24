@@ -108,7 +108,7 @@ namespace module::input {
             on<Trigger<RawSensors>,
                Optional<With<Sensors>>,
                With<KinematicsModel>,
-               With<Stability>,
+               Optional<With<Stability>>,
                Optional<With<WalkState>>,
                Single,
                Priority::HIGH>()
@@ -116,7 +116,7 @@ namespace module::input {
                       [this](const RawSensors& raw_sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const KinematicsModel& kinematics_model,
-                             const Stability& stability,
+                             const std::shared_ptr<const Stability>& stability,
                              const std::shared_ptr<const WalkState>& walk_state) {
                           auto sensors = std::make_unique<Sensors>();
 

@@ -308,7 +308,7 @@ namespace module::input {
         void update_odometry_kf(std::unique_ptr<Sensors>& sensors,
                                 const std::shared_ptr<const Sensors>& previous_sensors,
                                 const RawSensors& raw_sensors,
-                                const Stability& stability,
+                                const std::shared_ptr<const Stability>& stability,
                                 const std::shared_ptr<const WalkState>& walk_state);
 
 
@@ -320,7 +320,7 @@ namespace module::input {
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
                                     const RawSensors& raw_sensors,
-                                    const Stability& stability,
+                                    const std::shared_ptr<const Stability>& stability,
                                     const std::shared_ptr<const WalkState>& walk_state);
 
         /// @brief Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes
