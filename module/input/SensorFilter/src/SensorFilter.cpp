@@ -109,7 +109,7 @@ namespace module::input {
                Optional<With<Sensors>>,
                With<KinematicsModel>,
                With<Stability>,
-               With<WalkState>,
+               Optional<With<WalkState>>,
                Single,
                Priority::HIGH>()
                 .then("Main Sensors Loop",
@@ -117,7 +117,7 @@ namespace module::input {
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const KinematicsModel& kinematics_model,
                              const Stability& stability,
-                             const WalkState& walk_state) {
+                             const std::shared_ptr<const WalkState>& walk_state) {
                           auto sensors = std::make_unique<Sensors>();
 
                           // Updates message with raw sensor data

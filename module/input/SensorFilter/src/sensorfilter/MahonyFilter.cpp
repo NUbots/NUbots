@@ -66,7 +66,7 @@ namespace module::input {
                                               const std::shared_ptr<const Sensors>& previous_sensors,
                                               const RawSensors& raw_sensors,
                                               const Stability& stability,
-                                              const WalkState& walk_state) {
+                                              const std::shared_ptr<const WalkState>& walk_state) {
         // **************** Time Update ****************
         // Calculate our time offset from the last read then update the filter's time
         const double dt = std::max(
@@ -76,7 +76,9 @@ namespace module::input {
             0.0);
 
         // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
-        integrate_walkcommand(dt, stability, walk_state);
+        if (walk_state != nullptr) {
+            integrate_walkcommand(dt, stability, *walk_state);
+        }
 
         // **************** Roll/Pitch Orientation Measurement Update ****************
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
