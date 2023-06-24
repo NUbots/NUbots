@@ -26,7 +26,7 @@ namespace module::support::logging {
     DataLogging::DataLogging(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         /// This receives every DataLog message as a Sync operation (one at a time) and writes it to the file
-        on<Trigger<DataLog>, Sync<DataLog>>().then([this](const DataLog& data) {
+        logging_reaction = on<Trigger<DataLog>, Sync<DataLog>>().then([this](const DataLog& data) {
             // NBS File Format
             // Name      | Type               |  Description
             // ------------------------------------------------------------
@@ -42,7 +42,7 @@ namespace module::support::logging {
                                         .count();
 
             // The size of our output timestamp hash and data
-            uint32_t size = data.data.size() + sizeof(data.hash) + sizeof(timestamp_us);
+            uint64_t size = data.data.size() + sizeof(data.hash) + sizeof(timestamp_us);
 
             // If the file isn't open, or writing this message will exceed our max size, make a new file
             if (!encoder || !encoder->is_open()
@@ -117,6 +117,7 @@ namespace module::support::logging {
                 // Get the details we need to generate a log file name
                 config.output.directory  = cfg["output"]["directory"].as<std::string>();
                 config.output.split_size = cfg["output"]["split_size"].as<Expression>();
+                config.output.max_size   = cfg["output"]["max_size"].as<Expression>();
 
                 // Get the name of the currently running binary
                 std::vector<char> data(argv[0].cbegin(), argv[0].cend());
@@ -158,6 +159,23 @@ namespace module::support::logging {
                 // New handles become the handles
                 handles = std::move(new_handles);
             });
+
+        // This checks that we haven't reached the max_size
+        log_check_handler = on<Every<5, std::chrono::seconds>, Sync<DataLog>, Single>().then([this]() {
+            long size = 0;
+            for (auto& f : std::filesystem::recursive_directory_iterator(config.output.directory)) {
+                if (f.is_regular_file()) {
+                    size += f.file_size();
+                }
+            }
+            // If we have past the amount of logging we want to do, disable the logging reaction
+            if (size >= config.output.max_size) {
+                logging_reaction.disable();
+                log_check_handler.disable();
+                log<NUClear::WARN>("Datalogging disabled - Maximum logging amount exceeded.");
+                encoder->close();
+            }
+        });
     }
 
 }  // namespace module::support::logging

@@ -1,1 +1,3 @@
 log_file: /home/nubots/NUbots/log/log
+# 10 gigabytes, this was set for robocup2021, its useful for when we have limited file system sizes
+max_size: 9.5 * GiB # This number should be slightly less than the actual max size because we only check file size every 5 seconds

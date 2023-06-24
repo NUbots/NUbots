@@ -3,6 +3,8 @@ log_level: INFO
 output:
   directory: log
   split_size: 5 * GiB
+  # 10 gigabytes limit was set for robocup2021, its useful for when we have limited file system sizes
+  max_size: 9.5 * GiB # slightly less than limit
 
 # You can put any messages that is emitted in the system here and it will be logged
 # The below ones are just the most common and here as an example

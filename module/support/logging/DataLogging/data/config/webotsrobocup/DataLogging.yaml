@@ -3,7 +3,7 @@ log_level: INFO
 output:
   directory: log
   split_size: 5 * GiB
-
+  max_size: 9.5 * GiB # In robocup2021 we've got a limit of 10 gigs, choosing a value slightly less than this
 # You can put any messages that is emitted in the system here and it will be logged
 messages:
   message.output.CompressedImage: false

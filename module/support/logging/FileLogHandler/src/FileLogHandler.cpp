@@ -1,9 +1,12 @@
 #include "FileLogHandler.hpp"
 
+#include <filesystem>
+
 #include "extension/Configuration.hpp"
 
 #include "utility/strutil/ansi.hpp"
 #include "utility/support/evil/pure_evil.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::support::logging {
 
@@ -23,13 +26,20 @@ namespace module::support::logging {
             // Use configuration here from file FileLogHandler.yaml
             log_file_name = config["log_file"].as<std::string>();
 
+            max_size = config["max_size"].as<utility::support::Expression>();
+
             if (log_file.is_open()) {
                 log_file.close();
             }
 
             log_file.open(log_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::ate);
 
-            log_file << "\n*********************************************************************\n" << std::endl;
+            if (log_file.is_open()) {
+                log_file << "\n*********************************************************************\n" << std::endl;
+            }
+            else {
+                log<NUClear::ERROR>("Failed to open log file");
+            }
         });
 
         on<Shutdown>().then([this] {
@@ -38,11 +48,13 @@ namespace module::support::logging {
             }
         });
 
-        on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+        stats_reaction = on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
             if (stats.exception) {
-
                 std::lock_guard<std::mutex> lock(mutex);
-
+                if (!log_file.is_open()) {
+                    log<NUClear::ERROR>("Log file was closed");  // TODO: Cameron maybe reopen this
+                    return;
+                }
                 // Get our reactor name
                 std::string reactor = stats.identifier[1];
 
@@ -51,7 +63,6 @@ namespace module::support::logging {
                 reactor       = last_c == std::string::npos ? reactor : reactor.substr(last_c + 1);
 
 #ifndef NDEBUG  // We have a cold hearted monstrosity that got built!
-
                 // Print our exception detals
                 log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                          << Colour::brightred << "Exception:"
@@ -84,9 +95,8 @@ namespace module::support::logging {
             }
         });
 
-        on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+        logging_reaction = on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
             std::lock_guard<std::mutex> lock(mutex);
-
             // Where this message came from
             std::string source = "";
 
@@ -116,6 +126,27 @@ namespace module::support::logging {
 
             // Output the message
             log_file << message.message << std::endl;
+        });
+
+
+        // This checks that we haven't reached the max_size
+        log_check_handler = on<Every<5, std::chrono::seconds>, Single>().then([this]() {
+            std::lock_guard<std::mutex> lock(mutex);
+            uint64_t size = 0;
+            for (auto& f : std::filesystem::recursive_directory_iterator(log_file_name.remove_filename())) {
+                if (f.is_regular_file()) {
+                    size += f.file_size();
+                }
+            }
+            if (size >= max_size) {
+                logging_reaction.disable();
+                stats_reaction.disable();
+                log_check_handler.disable();
+                log<NUClear::WARN>("FileLogHandler disabled - Maximum logging amount exceeded.");
+                if (log_file.is_open()) {
+                    log_file.close();
+                }
+            }
         });
     }
 }  // namespace module::support::logging
