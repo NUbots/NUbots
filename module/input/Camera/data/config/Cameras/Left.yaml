@@ -7,7 +7,7 @@ settings:
   OffsetX: 0
   OffsetY: 0
   ExposureAuto: Continuous # Options: Off, Once, Continuous
-  AutoExposureExposureTimeUpperLimit: 10000 # Lower time reduces motion blur
+  AutoExposureExposureTimeUpperLimit: 4000 # Lower time reduces motion blur
   GainAuto: Off # Options: Off, Once, Continuous
   Gain: 16
   BalanceWhiteAuto: Continuous # Options: Off, Once, Continuous

@@ -7,6 +7,11 @@ nuclear_role(
   support::configuration::SoccerConfig
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
+  # NUsight
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
+  output::ImageCompressor
   # Sensors
   platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
@@ -17,8 +22,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
-  # Localisation
-  localisation::FieldLocalisation
+  # Localisation localisation::FieldLocalisation
   localisation::BallLocalisation
   # Director
   extension::Director

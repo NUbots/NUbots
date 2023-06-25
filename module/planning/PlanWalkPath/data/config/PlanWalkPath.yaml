@@ -2,12 +2,12 @@
 log_level: INFO
 
 # General playing tuning values for approaching ball
-max_forward_speed: 0.02
-min_forward_speed: 0.01
-max_turn_speed: 0.15
-min_turn_speed: -0.15
-acceleration: 0.001 # maximum increment in walk command velocity
-approach_radius: 1 # region around ball to begin decelerating
+max_forward_speed: 0.1
+min_forward_speed: 0.1
+max_turn_speed: 0.1
+min_turn_speed: -0.1
+acceleration: 0.005 # maximum increment in walk command velocity
+approach_radius: 0.75 # region around ball to begin decelerating
 
 # Rotate on the spot tuning values
 rotate_speed: 0.2

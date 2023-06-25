@@ -69,6 +69,7 @@ namespace module::planning {
                 if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
                     return;
                 }
+                log<NUClear::DEBUG>("Ball distance: ", ball_distance, " Ball angle: ", ball_angle);
 
                 // CHECK IF FACING POINT TO KICK TO
                 double align_angle = std::abs(std::atan2(kick_to.rPRr.y(), kick_to.rPRr.x()));
