@@ -4,7 +4,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
-#include "message/localisation/FilteredBall.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/skill/Look.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/vision/Goal.hpp"
@@ -15,7 +15,7 @@ namespace module::strategy {
 
     using extension::Configuration;
     using message::input::Sensors;
-    using message::localisation::FilteredBall;
+    using message::localisation::Ball;
     using message::skill::Look;
     using message::strategy::LookAtBall;
     using message::strategy::LookAtGoals;
@@ -34,13 +34,15 @@ namespace module::strategy {
                 std::chrono::duration<double>(config["goal_search_timeout"].as<double>()));
         });
 
-        // Trigger on FilteredBall to update readings
+        // Trigger on Ball to update readings
         // Uses Every to update time difference so if the ball is not recent, the Look Task will not be emitted
-        on<Provide<LookAtBall>, Trigger<FilteredBall>, Every<30, Per<std::chrono::seconds>>>().then(
-            [this](const FilteredBall& ball) {
+        on<Provide<LookAtBall>, Trigger<Ball>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
+            [this](const Ball& ball, const Sensors& sensors) {
                 // If we have a ball and it is recent, look at it
                 if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_search_timeout) {
-                    emit<Task>(std::make_unique<Look>(ball.rBCt.cast<double>(), true));
+                    Eigen::Vector3d rBCc = ball.Hcw * ball.rBWw;
+                    Eigen::Vector3d rBCt = (sensors.Htw * ball.Hcw.inverse()).rotation() * rBCc;
+                    emit<Task>(std::make_unique<Look>(rBCt, true));
                 }
             });
 
@@ -53,7 +55,7 @@ namespace module::strategy {
                     // Convert goal measurement to cartesian coordinates
                     Eigen::Vector3d rGCc = sphericalToCartesian(goals.goals[0].measurements[0].srGCc.cast<double>());
                     // Convert to torso space
-                    Eigen::Vector3d rGCt = Eigen::Isometry3d(sensors.Htw * goals.Hcw.inverse()).rotation() * rGCc;
+                    Eigen::Vector3d rGCt = (sensors.Htw * goals.Hcw.inverse()).rotation() * rGCc;
                     // Look at the goal
                     emit<Task>(std::make_unique<Look>(rGCt, true));
                 }

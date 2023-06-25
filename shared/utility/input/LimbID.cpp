@@ -51,7 +51,7 @@ namespace utility::input {
         }
     }
 
-    std::set<ServoID> LimbID::servosForLimb(const LimbID& limb) {
+    std::set<ServoID> LimbID::servos_for_limb(const LimbID& limb) {
         switch (limb.value) {
             case LimbID::HEAD: return {ServoID::HEAD_PITCH, ServoID::HEAD_YAW};
 
@@ -82,7 +82,7 @@ namespace utility::input {
         }
     }
 
-    LimbID LimbID::limbForServo(const ServoID& servo) {
+    LimbID LimbID::limb_for_servo(const ServoID& servo) {
         switch (servo.value) {
             case ServoID::HEAD_PITCH:
             case ServoID::HEAD_YAW: return LimbID::HEAD;
@@ -117,5 +117,29 @@ namespace utility::input {
 
     std::ostream& operator<<(std::ostream& out, const LimbID& val) {
         return out << static_cast<std::string>(val);
+    }
+
+    std::set<ServoID> LimbID::servos_for_legs() {
+        return {ServoID::L_ANKLE_PITCH,
+                ServoID::L_ANKLE_ROLL,
+                ServoID::L_HIP_PITCH,
+                ServoID::L_HIP_ROLL,
+                ServoID::L_HIP_YAW,
+                ServoID::L_KNEE,
+                ServoID::R_ANKLE_PITCH,
+                ServoID::R_ANKLE_ROLL,
+                ServoID::R_HIP_PITCH,
+                ServoID::R_HIP_ROLL,
+                ServoID::R_HIP_YAW,
+                ServoID::R_KNEE};
+    }
+
+    std::set<ServoID> LimbID::servos_for_arms() {
+        return {ServoID::L_SHOULDER_PITCH,
+                ServoID::L_SHOULDER_ROLL,
+                ServoID::L_ELBOW,
+                ServoID::R_SHOULDER_PITCH,
+                ServoID::R_SHOULDER_ROLL,
+                ServoID::R_ELBOW};
     }
 }  // namespace utility::input

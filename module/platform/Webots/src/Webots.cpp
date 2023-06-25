@@ -805,7 +805,7 @@ namespace module::platform {
             image->data           = camera.image;
 
             image->id        = camera_context[camera.name].id;
-            image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
+            image->timestamp = NUClear::clock::now();
 
             Eigen::Isometry3d Hcw;
 
@@ -819,7 +819,7 @@ namespace module::platform {
                     auto Hwp_it = std::lower_bound(Hwps.begin(),
                                                    Hwps.end(),
                                                    std::make_pair(image->timestamp, Eigen::Isometry3d::Identity()),
-                                                   [](const auto& a, const auto& b) { return a.first > b.first; });
+                                                   [](const auto& a, const auto& b) { return a.first < b.first; });
 
                     if (Hwp_it == Hwps.end()) {
                         // Image is newer than most recent sensors
@@ -842,7 +842,7 @@ namespace module::platform {
             }
 
             image->lens = camera_context[camera.name].lens;
-            image->Hcw  = Hcw.matrix();
+            image->Hcw  = Hcw;
 
             // If we got ground truth data, send it through with the image
             if (sensor_measurements.vision_ground_truth.exists) {

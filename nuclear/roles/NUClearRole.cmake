@@ -23,7 +23,7 @@ function(NUCLEAR_ROLE)
 
   # Build our executable from the generated role
   add_executable(${role} "${role}.cpp")
-  set_target_properties(${role} PROPERTIES OUTPUT_NAME ${role_name})
+  set_target_properties(${role} PROPERTIES OUTPUT_NAME "${role_name}")
   set_target_properties(${role} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/${role_path}")
 
   # Make it possible for the role to find all of the module includes

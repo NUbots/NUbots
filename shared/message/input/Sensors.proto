@@ -25,6 +25,7 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "Neutron.proto";
 import "Vector.proto";
+import "Transform.proto";
 
 message Sensors {
     /// Full set of information to use a given servo.
@@ -96,7 +97,7 @@ message Sensors {
     /// Foot information
     message Foot {
         bool down = 1;
-        mat4 Hwf  = 2;
+        iso3 Hwf  = 2;
     }
 
     /// When the data were taken/captured
@@ -138,15 +139,12 @@ message Sensors {
     /// A set of transforms; one for each servo
     repeated mat4 Htx = 12 [(array_size) = 20];
 
-    /// Homogeneous transformation from torso {t} space to ground {g} space
-    mat4 Hgt = 13;
+    /// Homogeneous transform: torso {t} from ground {g}
+    iso3 Hgt = 13;
 
-    /// Homogeneous transformation from world {w} space to robot {r} space
-    mat4 Hrw = 14;
+    /// Homogeneous transform: world {w} from robot {r}
+    iso3 Hrw = 14;
 
-    /// Homogeneous transformation from world {w} space to torso {t} space
-    mat4 Htw = 15;
-
-    /// Ground truth from simulator of Htw
-    mat4 Htw_ground_truth = 16;
+    /// Homogeneous transform: world {w} from torso {t}
+    iso3 Htw = 15;
 }
