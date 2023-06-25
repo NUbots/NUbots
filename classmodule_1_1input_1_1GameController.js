@@ -17,7 +17,7 @@ var classmodule_1_1input_1_1GameController =
     [ "packet", "classmodule_1_1input_1_1GameController.html#ab78f793343a94ccb3bf4461a3be8dc49", null ],
     [ "PLAYER_ID", "classmodule_1_1input_1_1GameController.html#a7483a8699fcfadc5f6afa6b96edb4daa", null ],
     [ "PLAYERS_PER_TEAM", "classmodule_1_1input_1_1GameController.html#a92e61a0a9f53b48ba50028c3ca04dd2a", null ],
-    [ "recieve_port", "classmodule_1_1input_1_1GameController.html#a71aba35128da907aad1a7ac5e1091557", null ],
+    [ "receive_port", "classmodule_1_1input_1_1GameController.html#a94b56ab486d51495d2d4cd3aea83a2b2", null ],
     [ "selfPenalised", "classmodule_1_1input_1_1GameController.html#aad8734158a3433d219bbfe04cf6e787b", null ],
     [ "send_port", "classmodule_1_1input_1_1GameController.html#a7789049cd317c2ef430b09af624bbe01", null ],
     [ "SUPPORTED_VERSION", "classmodule_1_1input_1_1GameController.html#a709e97d9f316e480721cdad1d81fbdf7", null ],
