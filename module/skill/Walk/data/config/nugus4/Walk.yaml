@@ -7,9 +7,9 @@ walk:
     # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.2, 0.4]
     # Step height (in meters)
-    height: 0.07
+    height: 0.075
     # Lateral distance in meters between feet (how spread apart the feet should be)
-    width: 0.24
+    width: 0.235
     # Ratio of the step_period where the foot should be at its highest point, between [0 1].
     apex_ratio: 0.4
   torso:
@@ -35,7 +35,7 @@ gains:
 arms:
   right_shoulder_pitch: 1.7
   left_shoulder_pitch: 1.7
-  right_shoulder_roll: -0.35
+  right_shoulder_roll: -0.4
   left_shoulder_roll: 0.35
   right_elbow: -0.7
   left_elbow: -0.7
