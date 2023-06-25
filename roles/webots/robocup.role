@@ -9,6 +9,11 @@ nuclear_role(
   support::configuration::GlobalConfig
   # Network
   network::PlotJuggler
+  # NUsight
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
+  output::ImageCompressor
   # Sensors
   input::GameController
   input::SensorFilter

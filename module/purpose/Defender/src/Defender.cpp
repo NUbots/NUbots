@@ -4,13 +4,11 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/GameState.hpp"
-#include "message/planning/KickTo.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
-#include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
 #include "message/strategy/WalkToBall.hpp"
@@ -24,13 +22,11 @@ namespace module::purpose {
     using Phase    = message::input::GameState::Data::Phase;
     using GameMode = message::input::GameState::Data::Mode;
     using message::input::GameState;
-    using message::planning::KickTo;
     using message::purpose::NormalDefender;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
-    using message::strategy::Ready;
     using message::strategy::StandStill;
     using message::strategy::WalkInsideBoundedBox;
     using message::strategy::WalkToBall;
@@ -40,7 +36,6 @@ namespace module::purpose {
     using utility::support::Expression;
 
     Defender::Defender(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
-
         on<Configuration>("Defender.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Defender.yaml
             this->log_level    = config["log_level"].as<NUClear::LogLevel>();

@@ -6,7 +6,7 @@ Play soccer in the defender position, which is an defensive position. Either byp
 
 In the ready state, makes a Ready subtask.
 
-In the playing state (for both normal game mode and penalty shootout), finds the ball, fixates on the ball, walks to the ball if the ball is in the defenders bounded box defensive area, and kicks the ball.
+In the playing state for normal game mode, finds the ball, fixates on the ball, walks to the ball if the ball is in the defenders bounded box defensive area, and kicks the ball.
 
 If ball is outside bounded box area and ball is in opposition half, defender is clamped to the edge of bounding box closest to ball.
 
@@ -25,7 +25,6 @@ Add this module to play as a defender in soccer!
 ## Emits
 
 - `message::strategy::WalkInsideBoundedBox` a Task requesting to play as a defender in the normal game state clamped to bounded box
-- `message::strategy::Ready` a Task requesting to walk to the ready position
 - `message::strategy::StandStill` a Task requesting to stand still and not move
 - `message::strategy::FindBall` a Task requesting to look and move around to find the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball

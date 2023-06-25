@@ -31,8 +31,6 @@ namespace module::strategy {
             cfg.bounded_region_x_max = config["bounded_region_x_max"].as<Expression>();
             cfg.bounded_region_y_min = config["bounded_region_y_min"].as<Expression>();
             cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
-
-            // log<NUClear::DEBUG>("cfg.bounded_region ", cfg.bounded_region.transpose());
         });
         on<Provide<DefendTask>, Trigger<Ball>, With<Field>, With<Sensors>>().then(
             [this](const DefendTask& defend_task, const Ball& ball, const Field& field, const Sensors& sensor) {
