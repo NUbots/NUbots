@@ -45,6 +45,10 @@ namespace module::localisation {
             cfg.max_range                     = config["max_range"].as<double>();
             cfg.min_observations              = config["min_observations"].as<size_t>();
             cfg.outside_map_penalty_factor    = config["outside_map_penalty_factor"].as<double>();
+            cfg.use_hardcoded_initial_state   = config["use_hardcoded_initial_state"].as<bool>();
+            if (cfg.use_hardcoded_initial_state) {
+                cfg.initial_state.push_back(Eigen::Vector3d(config["initial_state"].as<Expression>()));
+            }
         });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
@@ -206,12 +210,16 @@ namespace module::localisation {
 
             // Intialise the particles to be distrbuted along either sides of the positive half of the field, facing
             // towards the field
-            cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
-                                           (fd.dimensions.field_width / 2.0),
-                                           -M_PI_2);
-            cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
-                                           (-fd.dimensions.field_width / 2.0),
-                                           M_PI_2);
+
+
+            if (!cfg.use_hardcoded_initial_state) {
+                cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
+                                               (fd.dimensions.field_width / 2.0),
+                                               -M_PI_2);
+                cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
+                                               (-fd.dimensions.field_width / 2.0),
+                                               M_PI_2);
+            }
 
 
             // Initialise the particles with a multivariate normal distribution

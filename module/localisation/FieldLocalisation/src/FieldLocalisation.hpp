@@ -48,6 +48,7 @@ namespace module::localisation {
             size_t min_observations = 0;
             /// @brief Penalty factor for observations being outside map
             double outside_map_penalty_factor = 0.0;
+            bool use_hardcoded_initial_state  = false;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;

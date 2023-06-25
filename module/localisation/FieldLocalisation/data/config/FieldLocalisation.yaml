@@ -7,6 +7,12 @@ grid_size: 0.01
 # Number of particles
 n_particles: 1000
 
+# Use hardcoded initial state
+use_hardcoded_initial_state: true
+
+# Initial state (x,y,theta)
+initial_state: [2, 1.5, -1.571]
+
 # Our confidence in the initial guess of where the robot starts (x is overwritten by field length / 2)
 initial_covariance: [3.0, 0.5, 0.5]
 
