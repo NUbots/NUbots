@@ -1,0 +1,5 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Expected accelerometer values for stationary IMU
+expected_accelerometer: [0, 0, 9.80665]

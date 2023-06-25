@@ -1,0 +1,12 @@
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher
+  support::logging::ConsoleLogHandler
+  platform::Webots
+  # Network
+  network::NetworkForwarder
+  network::NUClearNet
+  network::PlotJuggler
+  # Tools
+  tools::CalibrateIMU
+)
