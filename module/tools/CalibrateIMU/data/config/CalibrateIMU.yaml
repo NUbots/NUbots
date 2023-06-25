@@ -2,4 +2,4 @@
 log_level: INFO
 
 # Expected accelerometer values for stationary IMU
-expected_accelerometer: [0, 0, 9.80665]
+expected_accelerometer: [0, 0, -9.80665]
