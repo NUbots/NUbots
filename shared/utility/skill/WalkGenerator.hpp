@@ -150,7 +150,7 @@ namespace utility::skill {
 
             // Initialize torso pose
             Hpt_start.translation() =
-                Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height) + torso_position_offset;
+                Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 4, torso_height) + torso_position_offset;
             Hpt_start.linear() =
                 Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
 
