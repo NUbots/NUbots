@@ -71,6 +71,9 @@ namespace module::input {
 
             // Deadreckoning
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
+
+            // **************************************** IMU Calibration ****************************************
+            cfg.accelerometer_bias = config["accelerometer_bias"].as<Expression>();
         });
 
         on<Last<20, Trigger<RawSensors>>, Single>().then(

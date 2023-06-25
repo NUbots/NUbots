@@ -79,3 +79,6 @@ deadreckoning_scale: [1, 1, 0.6]
 
 # Specify which filtering method to use, either UKF, KF, MAHONY or GROUND_TRUTH
 filtering_method: MAHONY
+
+# Accelerometer Bias
+accelerometer_bias: [0, 0, 0]

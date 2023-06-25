@@ -255,6 +255,10 @@ namespace module::input {
 
             /// @brief Mahony filter integral gain
             double Kp = 0.0;
+
+            // **************************************** IMU Calibration ****************************************
+            /// @brief Accelerometer bias
+            Eigen::Vector3d accelerometer_bias = Eigen::Vector3d::Zero();
         } cfg;
 
         /// @brief Updates the sensors message with raw sensor data, including the timestamp, battery
