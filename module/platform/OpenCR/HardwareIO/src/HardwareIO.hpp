@@ -102,7 +102,7 @@ namespace module::platform::OpenCR {
             /// @note different to the dynamixel packet error status
             uint8_t hardware_error = 0;
 
-            /// @brief Most recent packet error recieved, to cache before RawSensors is emitted
+            /// @brief Most recent packet error received, to cache before RawSensors is emitted
             uint8_t packet_error = 0;
 
             /// @brief True if we simulate where we think the servos should be

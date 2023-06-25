@@ -43,7 +43,7 @@ namespace module::input {
         static constexpr const uint ACTIVE_PLAYERS_PER_TEAM = 4;
         static constexpr const uint NUM_TEAMS               = 2;
 
-        uint recieve_port;
+        uint receive_port;
         uint send_port;
         uint TEAM_ID;
         uint PLAYER_ID;
