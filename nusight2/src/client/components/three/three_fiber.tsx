@@ -2,14 +2,23 @@ import React from "react";
 import { Canvas, useThree } from "@react-three/fiber";
 import { CanvasProps } from "@react-three/fiber/dist/declarations/src/web/Canvas";
 import * as THREE from "three";
-import style from "./style.module.css";
 
 import { Vector3 } from "../../../shared/math/vector3";
+
+import style from "./style.module.css";
 
 type Props = { children: React.ReactNode } & CanvasProps;
 export const ThreeFiber = React.forwardRef<HTMLCanvasElement, Props>(({ children, ...props }: Props, ref) => (
   <div className={style.canvas}>
-    <Canvas ref={ref} frameloop="demand" linear flat gl={{ antialias: true }} style={{ background: "black" }} {...props}>
+    <Canvas
+      ref={ref}
+      frameloop="demand"
+      linear
+      flat
+      gl={{ antialias: true }}
+      style={{ background: "black" }}
+      {...props}
+    >
       {children}
     </Canvas>
   </div>
