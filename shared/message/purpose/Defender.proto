@@ -25,3 +25,10 @@ message Defender {
 }
 
 message NormalDefender {}
+message PenaltyShootoutDefender {}
+message DirectFreeKickDefender {}
+message InDirectFreeKickDefender {}
+message PenaltyKickDefender {}
+message CornerKickDefender {}
+message GoalKickDefender {}
+message ThrowInDefender {}
