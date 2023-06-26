@@ -17,9 +17,6 @@ namespace module::strategy {
             double stop_tolerance = 0.0f;
         } cfg;
 
-        /// @brief Whether or not we are stopped
-        bool stopped = false;
-
     public:
         /// @brief Called by the powerplant to build and setup the WalkToFieldPosition reactor.
         explicit WalkToFieldPosition(std::unique_ptr<NUClear::Environment> environment);

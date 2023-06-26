@@ -50,23 +50,12 @@ namespace module::strategy {
                 const double heading_error  = std::acos(std::max(-1.0, std::min(1.0, uXRf.dot(uHFf.head(2)))));
                 log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
 
-                // If we are stopped but our position error is too high, then we need to start walking again
-                if (stopped && position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
-                    emit<Task>(std::make_unique<StandStill>());
-                    stopped = true;
-                    return;
-                }
-
                 // If the error in the desired field position and heading is low enough, stand still
-                if (!stopped && position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
+                if (position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
                     emit<Task>(std::make_unique<StandStill>());
-                    stopped = true;
-                    return;
                 }
-
-
                 // If we are getting close to the field position begin to align with the desired heading in field space
-                if (position_error < cfg.align_radius) {
+                else if (position_error < cfg.align_radius) {
                     // Rotate the desired heading in field {f} space to robot space
                     const Eigen::Vector3d uHRr(Hrf.linear() * uHFf);
                     const double desired_heading = std::atan2(uHRr.y(), uHRr.x());
