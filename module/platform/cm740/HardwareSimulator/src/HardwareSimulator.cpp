@@ -30,6 +30,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/input/LinkID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -45,6 +46,7 @@ namespace module::platform::cm740 {
     using message::input::Sensors;
     using message::platform::RawSensors;
 
+    using utility::input::LinkID;
     using utility::input::ServoID;
     using utility::support::Expression;
 

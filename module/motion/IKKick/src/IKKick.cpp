@@ -32,6 +32,7 @@
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
+#include "utility/input/LinkID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
@@ -41,6 +42,7 @@ namespace module::motion {
 
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
+    using LinkID  = utility::input::LinkID;
     using ServoID = utility::input::ServoID;
     using message::behaviour::KickPlan;
     using message::behaviour::ServoCommands;

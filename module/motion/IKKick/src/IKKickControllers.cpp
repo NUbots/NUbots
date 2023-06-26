@@ -21,6 +21,7 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 
+
 namespace module::motion {
 
     using extension::Configuration;
@@ -28,6 +29,7 @@ namespace module::motion {
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
+    using LinkID  = utility::input::LinkID;
     using message::actuation::KinematicsModel;
 
     void KickBalancer::configure(const Configuration& config) {

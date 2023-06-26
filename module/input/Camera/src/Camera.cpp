@@ -15,6 +15,7 @@ extern "C" {
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 
+#include "utility/input/LinkID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -25,6 +26,7 @@ namespace module::input {
     using extension::Configuration;
     using message::input::Image;
     using message::input::Sensors;
+    using utility::input::LinkID;
     using utility::input::ServoID;
     using utility::support::Expression;
 
