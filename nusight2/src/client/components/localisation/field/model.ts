@@ -16,7 +16,7 @@ export class FieldModel {
   static of() {
     return new FieldModel({
       dimensions: FieldDimensions.postYear2017(),
-      fieldColor: "#009900",
+      fieldColor: "#00bb00",
       lineColor: "#ffffff",
     });
   }
