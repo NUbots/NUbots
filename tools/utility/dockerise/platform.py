@@ -68,12 +68,9 @@ def build(image, platform, username, uid, reset):
     # Otherwise caching will not work properly
     for dir_name, dirs, files in os.walk(dockerdir):
         for path in files + dirs:
-            try:
-                p = os.path.join(dir_name, path)
-                current = stat.S_IMODE(os.lstat(p).st_mode)
-                os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
-            except:
-                pass
+            p = os.path.join(dir_name, path)
+            current = stat.S_IMODE(os.lstat(p).st_mode)
+            os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
 
     # Create a buildx instance for building images (for this user)
     builder_name = defaults.image
