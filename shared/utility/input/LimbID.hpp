@@ -98,11 +98,14 @@ namespace utility::input {
         }
         operator std::string() const;
 
-        static std::set<ServoID> servosForLimb(const LimbID& limb);
-        static LimbID limbForServo(const ServoID& servo);
+        static std::set<ServoID> servos_for_limb(const LimbID& limb);
+        static std::set<ServoID> servos_for_legs();
+        static std::set<ServoID> servos_for_arms();
+        static LimbID limb_for_servo(const ServoID& servo);
 
         friend std::ostream& operator<<(std::ostream& out, const LimbID& val);
     };
+
 }  // namespace utility::input
 
 #endif

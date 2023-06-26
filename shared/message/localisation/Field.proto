@@ -21,14 +21,15 @@ syntax = "proto3";
 package message.localisation;
 
 import "Matrix.proto";
+import "Transform.proto";
 
 message Field {
     /// Homogeneous transformation matrix from world to field space
-    mat4 Hfw = 1;
+    iso3 Hfw = 1;
     /// Covariance of (x, y, theta)
     mat3 covariance = 2;
     /// Sum of the covariance matrix diagonals to quantify the filters uncertainty as a single value
-    float uncertainty = 3;
+    double uncertainty = 3;
 }
 
 message ResetFieldLocalisation {}

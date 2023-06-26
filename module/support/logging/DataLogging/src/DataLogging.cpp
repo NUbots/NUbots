@@ -75,8 +75,8 @@ namespace module::support::logging {
                 std::filesystem::create_directories(config.output.directory / config.output.binary);
 
                 // Creates the output ".nbs" file path.
-                output_file_path = std::filesystem::path();
-                output_file_path += config.output.directory / config.output.binary / ("_" + formatted_time() + ".nbs");
+                std::string ftime = formatted_time();
+                output_file_path  = config.output.directory / config.output.binary / ("_" + ftime + ".nbs");
 
                 // Creates the output ".idx" file path.
                 index_file_path = output_file_path;

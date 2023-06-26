@@ -55,7 +55,9 @@ namespace module::input {
 
     void SensorFilter::update_odometry_kf(std::unique_ptr<Sensors>& sensors,
                                           const std::shared_ptr<const Sensors>& previous_sensors,
-                                          const RawSensors& raw_sensors) {
+                                          const RawSensors& raw_sensors,
+                                          const std::shared_ptr<const Stability>& stability,
+                                          const std::shared_ptr<const WalkState>& walk_state) {
         // **************** Time Update ****************
         // Calculate our time offset from the last read then update the filter's time
         const double dt = std::max(
@@ -65,7 +67,9 @@ namespace module::input {
             0.0);
 
         // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
-        integrate_walkcommand(dt);
+        if (walk_state != nullptr && stability != nullptr) {
+            integrate_walkcommand(dt, *stability, *walk_state);
+        }
 
         // Integrate the rotational velocity to predict the change in orientation (roll, pitch)
         Eigen::Matrix<double, n_inputs, 1> u;

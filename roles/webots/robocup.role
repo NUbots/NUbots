@@ -9,6 +9,8 @@ nuclear_role(
   support::configuration::GlobalConfig
   # Network
   network::PlotJuggler
+  network::NUClearNet
+  network::NetworkForwarder
   # Sensors
   input::GameController
   input::SensorFilter
@@ -26,9 +28,10 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
+  actuation::FootController
   # Skills
-  skill::QuinticWalk
-  skill::ScriptKick
+  skill::Walk
+  skill::SplineKick
   skill::GetUp
   skill::Look
   skill::Dive

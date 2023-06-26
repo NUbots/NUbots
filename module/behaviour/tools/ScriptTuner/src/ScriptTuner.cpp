@@ -234,7 +234,7 @@ namespace module::behaviour::tools {
         mvprintw(3, 2, "Frames:");                         // The frames section is filled out after this
         mvprintw(4,
                  2,
-                 "Duration: %d",  // Output the selected frames duration
+                 "Duration: %ld",  // Output the selected frames duration
                  std::chrono::duration_cast<std::chrono::milliseconds>(script.frames[frame].duration).count());
         mvprintw(5, 2, "_");
 
@@ -761,7 +761,7 @@ namespace module::behaviour::tools {
         attroff(A_BOLD);
         mvprintw(5, 2, "For Entire Script:");
         mvprintw(6, 2, "All: ---.- Upper: ---.- Lower: ---.-");
-        mvprintw(7, 2, "For Frame: %d", frame + 1);
+        mvprintw(7, 2, "For Frame: %ld", frame + 1);
         mvprintw(8, 2, "All: ---.- Upper: ---.- Lower: ---.-");
         mvprintw(10, 2, "Use X to exit Edit Gain");
         move(6, 7);
@@ -878,7 +878,7 @@ namespace module::behaviour::tools {
                         mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");
                         move(YPOSITION[i][j], XPOSITION[i][j]);
                         userInputToFrame();
-                        mvprintw(YPOSITION[i][j], XPOSITION[i][j], "%d", frame + 1);
+                        mvprintw(YPOSITION[i][j], XPOSITION[i][j], "%ld", frame + 1);
                     }
                     else {
                         mvprintw(YPOSITION[i][j], XPOSITION[i][j], "     ");

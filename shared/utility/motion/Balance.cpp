@@ -61,7 +61,7 @@ namespace utility::motion {
         //------------------------------------
 
         // Robot coords in world (:Robot -> World)
-        Eigen::Isometry3f Htw         = Eigen::Isometry3d(sensors.Htw).cast<float>();
+        Eigen::Isometry3f Htw         = sensors.Htw.cast<float>();
         Eigen::AngleAxisf orientation = Eigen::AngleAxisf(Htw.rotation().inverse());
 
         // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}
