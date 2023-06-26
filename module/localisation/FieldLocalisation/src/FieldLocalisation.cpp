@@ -13,7 +13,6 @@ namespace module::localisation {
     using extension::Configuration;
 
     using message::behaviour::state::Stability;
-    using message::localisation::AddNoiseToParticles;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
     using message::motion::DisableWalkEngineCommand;
@@ -67,8 +66,6 @@ namespace module::localisation {
                 }
             }
         });
-
-        on<Trigger<AddNoiseToParticles>>().then([this] { add_noise(); });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
             // Resize map to the field dimensions
@@ -207,11 +204,8 @@ namespace module::localisation {
                 }
             }
 
-
             // Intialise the particles to be distrbuted along either sides of the positive half of the field, facing
             // towards the field
-
-
             if (!cfg.use_hardcoded_initial_state) {
                 cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
                                                (fd.dimensions.field_width / 2.0),
@@ -220,7 +214,6 @@ namespace module::localisation {
                                                (-fd.dimensions.field_width / 2.0),
                                                M_PI_2);
             }
-
 
             // Initialise the particles with a multivariate normal distribution
             state      = cfg.initial_state[0];
@@ -241,78 +234,70 @@ namespace module::localisation {
             last_time_update_time = NUClear::clock::now();
         });
 
-        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
+        on<Trigger<FieldLines>, Optional<With<Stability>>>().then(
+            "Particle Filter",
+            [this](const FieldLines& field_lines, const std::shared_ptr<const Stability>& stability) {
+                Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
+                if (stability != nullptr) {
+                    if (*stability != Stability::FALLEN && *stability != Stability::FALLING
+                        && *stability != Stability::UNKNOWN && field_lines.rPWw.size() > cfg.min_observations) {
+                        // Add noise to the particles
+                        add_noise();
 
-        on<Trigger<KillGetup>>().then([this]() { falling = false; });
+                        // Calculate the weight of each particle based on the observations occupancy values
+                        for (int i = 0; i < cfg.n_particles; i++) {
+                            particles[i].weight = calculate_weight(particles[i].state, field_lines.rPWw);
+                            if (log_level <= NUClear::DEBUG) {
+                                auto particle_cell = position_in_map(particles[i].state, Eigen::Vector3d::Zero());
+                                emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
+                            }
+                        }
 
-        on<Trigger<Stability>>().then([this](const Stability& stability) {
-            if (stability == Stability::FALLEN) {
-                falling = true;
-            }
-            else {
-                falling = false;
-            }
-        });
-
-        on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
-            Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
-            if (!falling && field_lines.rPWw.size() > cfg.min_observations) {
-                // Add noise to the particles
-                add_noise();
-
-                // Calculate the weight of each particle based on the observations occupancy values
-                for (int i = 0; i < cfg.n_particles; i++) {
-                    particles[i].weight = calculate_weight(particles[i].state, field_lines.rPWw);
+                        // Resample the particles based on the weights
+                        resample();
+                    }
+                    // Compute the state (mean) and covariance of the particles
+                    state      = compute_mean();
+                    covariance = compute_covariance();
                     if (log_level <= NUClear::DEBUG) {
-                        auto particle_cell = position_in_map(particles[i].state, Eigen::Vector3d::Zero());
-                        emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
+
+                        for (auto rPWw : field_lines.rPWw) {
+                            auto observation_cell = position_in_map(state, rPWw);
+                            emit(graph("Field line point", observation_cell.x(), observation_cell.y()));
+                        }
+
+                        // Graph where the world frame is positioned in the map
+                        auto state_cell = position_in_map(state, Eigen::Vector3d::Zero());
+                        emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
+
+                        // Graph the cell 0.5m in front of the world frame to visualise the direction of world frame x
+                        auto direction_cell = position_in_map(state, 0.5 * Eigen::Vector3d::UnitX());
+                        emit(graph("World (theta)", direction_cell.x(), direction_cell.y()));
+
+                        // Graph where the robot is positioned in the map
+                        Eigen::Isometry3d Hwc = Hcw.inverse();
+                        Eigen::Vector3d rCWw  = Eigen::Vector3d(Hwc.translation().x(), Hwc.translation().y(), 0.0);
+                        auto robot_cell       = position_in_map(state, rCWw);
+                        emit(graph("Robot (x,y)", robot_cell.x(), robot_cell.y()));
+
+                        // Graph the cell 0.5m in front of the robot to visualise the direction it's facing
+                        Eigen::Vector3d rTCc  = Eigen::Vector3d::UnitX();
+                        Eigen::Vector3d rTWw  = Hwc * rTCc;
+                        auto robot_theta_cell = position_in_map(state, rTWw);
+                        emit(graph("Robot (theta)", robot_theta_cell.x(), robot_theta_cell.y()));
+
+                        emit(graph("Localisation Uncertainty", covariance.trace()));
                     }
                 }
-
-                // Resample the particles based on the weights
-                resample();
-            }
-            // Compute the state (mean) and covariance of the particles
-            state      = compute_mean();
-            covariance = compute_covariance();
-            if (log_level <= NUClear::DEBUG) {
-
-                for (auto rPWw : field_lines.rPWw) {
-                    auto observation_cell = position_in_map(state, rPWw);
-                    emit(graph("Field line point", observation_cell.x(), observation_cell.y()));
-                }
-
-                // Graph where the world frame is positioned in the map
-                auto state_cell = position_in_map(state, Eigen::Vector3d::Zero());
-                emit(graph("World (x,y)", state_cell.x(), state_cell.y()));
-
-                // Graph the cell 0.5m in front of the world frame to visualise the direction of world frame x
-                auto direction_cell = position_in_map(state, 0.5 * Eigen::Vector3d::UnitX());
-                emit(graph("World (theta)", direction_cell.x(), direction_cell.y()));
-
-                // Graph where the robot is positioned in the map
-                Eigen::Isometry3d Hwc = Hcw.inverse();
-                Eigen::Vector3d rCWw  = Eigen::Vector3d(Hwc.translation().x(), Hwc.translation().y(), 0.0);
-                auto robot_cell       = position_in_map(state, rCWw);
-                emit(graph("Robot (x,y)", robot_cell.x(), robot_cell.y()));
-
-                // Graph the cell 0.5m in front of the robot to visualise the direction it's facing
-                Eigen::Vector3d rTCc  = Eigen::Vector3d::UnitX();
-                Eigen::Vector3d rTWw  = Hwc * rTCc;
-                auto robot_theta_cell = position_in_map(state, rTWw);
-                emit(graph("Robot (theta)", robot_theta_cell.x(), robot_theta_cell.y()));
-
-                emit(graph("Localisation Uncertainty", covariance.trace()));
-            }
-            // Build and emit the field message
-            auto field(std::make_unique<Field>());
-            Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
-            Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
-            Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-            field->Hfw        = Hfw.matrix();
-            field->covariance = covariance;
-            emit(field);
-        });
+                // Build and emit the field message
+                auto field(std::make_unique<Field>());
+                Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+                Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
+                Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                field->Hfw        = Hfw.matrix();
+                field->covariance = covariance;
+                emit(field);
+            });
     }
 
     Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d particle, const Eigen::Vector3d rPWw) {

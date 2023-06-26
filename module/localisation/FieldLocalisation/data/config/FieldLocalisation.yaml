@@ -11,10 +11,10 @@ n_particles: 1000
 use_hardcoded_initial_state: true
 
 # Initial state (x,y,theta)
-initial_state: [2, 1.5, -1.571]
+initial_state: [2.17, -3.2, 1.571]
 
 # Our confidence in the initial guess of where the robot starts (x is overwritten by field length / 2)
-initial_covariance: [3.0, 0.5, 0.5]
+initial_covariance: [1.0, 0.25, 0.5]
 
 # Amount of noise added to the particles (how much world can move to adjust for drift) at each time update
 process_noise: [0.005, 0.005, 0.001]
@@ -32,4 +32,4 @@ save_map: false
 min_observations: 100
 
 # Penalty factor for observations being outside map
-outside_map_penalty_factor: 0.9
+outside_map_penalty_factor: 1

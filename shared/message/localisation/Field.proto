@@ -31,5 +31,3 @@ message Field {
 }
 
 message ResetFieldLocalisation {}
-
-message AddNoiseToParticles {}
