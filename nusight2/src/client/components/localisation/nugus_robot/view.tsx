@@ -1,13 +1,13 @@
 import { useMemo } from "react";
-import * as THREE from "three";
 import React from "react";
 import { useThree } from "@react-three/fiber";
 import { useLoader } from "@react-three/fiber";
 import { autorun } from "mobx";
 import { observer } from "mobx-react";
+import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { compose } from "../../../../shared/base/compose";
 
+import { compose } from "../../../../shared/base/compose";
 import { LocalisationRobotModel } from "../robot_model";
 
 import url from "./config/nugus.glb?url";
