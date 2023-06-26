@@ -11,34 +11,34 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief Maximum walk command velocity for walking to ball
-            double max_forward_speed = 0;
+            /// @brief Maximum walk command velocity magnitude for walking to ball
+            double max_translational_velocity_magnitude = 0;
             /// @brief Minimum walk command velocity for walking to ball
-            double min_forward_speed = 0;
+            double min_translational_velocity_magnitude = 0;
             /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
             double acceleration = 0;
             /// @brief Region around ball to begin decelerating in
             double approach_radius = 0;
             /// @brief Maximum angular velocity command for walking to ball
-            double max_turn_speed = 0;
+            double max_angular_velocity = 0;
             /// @brief Minimum angular velocity command for walking to ball
-            double min_turn_speed = 0;
+            double min_angular_velocity = 0;
             /// @brief Rotate on spot walk command angular velocity
-            double rotate_speed = 0;
+            double rotate_velocity = 0;
             /// @brief Rotate on spot walk command forward velocity
-            double rotate_speed_x = 0;
+            double rotate_velocity_x = 0;
             /// @brief Rotate on spot walk command side velocity
-            double rotate_speed_y = 0;
+            double rotate_velocity_y = 0;
             /// @brief Pivot ball command angular velocity
-            double pivot_ball_speed = 0;
+            double pivot_ball_velocity = 0;
             /// @brief Pivot ball forward velocity
-            double pivot_ball_speed_x = 0;
+            double pivot_ball_velocity_x = 0;
             /// @brief Pivot ball side velocity
-            double pivot_ball_speed_y = 0;
+            double pivot_ball_velocity_y = 0;
         } cfg;
 
-        /// @brief The current speed of the walk command
-        double speed = 0;
+        /// @brief Current magnitude of the translational velocity of the walk command
+        double velocity_magnitude = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.

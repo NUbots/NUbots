@@ -11,6 +11,8 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   network::PlotJuggler
+  network::NUClearNet
+  network::NetworkForwarder
   # Sensors
   input::GameController
   input::SensorFilter
