@@ -10,7 +10,6 @@ ik_max_iterations: 500
 # IK method to use, either JACOBIAN, NLOPT, LEVENBERG_MARQUARDT, PARTICLE_SWARM or BFGS
 ik_method: LEVENBERG_MARQUARDT
 
-
 links:
   torso: "torso"
   left_foot: "left_foot_base"
