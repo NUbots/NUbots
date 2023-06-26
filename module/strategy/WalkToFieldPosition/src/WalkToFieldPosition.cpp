@@ -50,7 +50,7 @@ namespace module::strategy {
                 const Eigen::Vector3d uXRf  = Hfr.linear().col(0).head(2);
                 const double heading_error  = std::acos(std::max(-1.0, std::min(1.0, uXRf.dot(uHFf.head(2)))));
 
-                // If we have stopped but our position error is too high, then we need to resume walking to position
+                // If we have stopped and our position and heading error is below resume tolerance, then remain stopped
                 if (stopped && position_error < cfg.resume_tolerance && heading_error < cfg.resume_tolerance) {
                     emit<Task>(std::make_unique<StandStill>());
                     stopped = true;
@@ -67,7 +67,7 @@ namespace module::strategy {
                 // If we are getting close to the field position begin to align with the desired heading in field space
                 if (position_error < cfg.align_radius) {
                     // Rotate the desired heading in field {f} space to robot space
-                    const Eigen::Vector3d uHRr(Hrf.linear() * uHFf);
+                    const Eigen::Vector3d uHRr(Hfr.inverse().linear() * uHFf);
                     const double desired_heading = std::atan2(uHRr.y(), uHRr.x());
                     emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
                 }
