@@ -5,4 +5,4 @@ log_level: INFO
 ball_search_timeout: 2
 
 # Y - Offset for ball position such that ball is approached with foot behind ball
-ball_y_offset: 0.0
+ball_y_offset: 0.1
