@@ -25,7 +25,6 @@ namespace module::skill {
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using message::skill::Kick;
-    using message::skill::KickFinished;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
@@ -97,8 +96,6 @@ namespace module::skill {
                 if ((info.run_reason != RunInfo::RunReason::NEW_TASK)
                     && kick_generator.get_time() == kick_generator.get_duration()) {
                     emit<Task>(std::make_unique<Done>());
-                    // Reset the walk path planner to minimum velocity
-                    emit(std::make_unique<KickFinished>());
                     return;
                 }
 

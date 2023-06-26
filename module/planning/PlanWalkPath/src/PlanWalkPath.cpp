@@ -18,7 +18,6 @@ namespace module::planning {
     using message::planning::TurnAroundBall;
     using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
-    using message::skill::KickFinished;
     using message::skill::Walk;
 
     PlanWalkPath::PlanWalkPath(std::unique_ptr<NUClear::Environment> environment)
@@ -46,7 +45,12 @@ namespace module::planning {
         });
 
         // Path to walk to a particular point
-        on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
+        on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
+            // If we haven't got an active walk task, then reset the velocity to minimum velocity
+            if (walk.run_state == GroupInfo::RunState::NO_TASK) {
+                velocity_magnitude = cfg.min_translational_velocity_magnitude;
+            }
+
             // If robot getting close to the point, begin to decelerate to minimum velocity
             if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
                 velocity_magnitude -= cfg.acceleration;
@@ -87,9 +91,5 @@ namespace module::planning {
                                                               sign * cfg.pivot_ball_velocity_y,
                                                               sign * cfg.pivot_ball_velocity)));
         });
-
-        // Reset the velocity to minimum velocity after a kick
-        on<Trigger<KickFinished>>().then(
-            [this](const KickFinished&) { velocity_magnitude = cfg.min_translational_velocity_magnitude; });
     }
 }  // namespace module::planning

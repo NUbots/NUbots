@@ -31,5 +31,3 @@ message Kick {
     /// corresponding to the force of the kick
     vec3 direction = 4;
 }
-
-message KickFinished {}
