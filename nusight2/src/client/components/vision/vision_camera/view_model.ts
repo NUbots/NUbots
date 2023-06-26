@@ -56,6 +56,6 @@ export class VisionCameraViewModel extends CameraViewModel {
   @computed
   private get visualMesh(): VisualMeshViewModel | undefined {
     const { visualMesh, params } = this.model;
-    return visualMesh && VisualMeshViewModel.of(visualMesh, params, this.canvas);
+    return visualMesh && VisualMeshViewModel.of(visualMesh, params, this.canvas, this.imageAspectRatio);
   }
 }

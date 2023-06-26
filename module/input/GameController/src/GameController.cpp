@@ -51,7 +51,7 @@ namespace module::input {
     using TeamColourEvent = message::input::GameEvents::TeamColour;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), recieve_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), mode() {
+        : Reactor(std::move(environment)), receive_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), mode() {
 
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
@@ -66,20 +66,20 @@ namespace module::input {
                       udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
-                      if (config["receive_port"].as<uint>() != recieve_port) {
+                      if (config["receive_port"].as<uint>() != receive_port) {
 
                           // If we have an old binding, then unbind it
                           // The port starts at 0 so this should work
-                          if (recieve_port != 0) {
+                          if (receive_port != 0) {
                               listenHandle.unbind();
                           }
 
                           // Update our port
-                          recieve_port = config["receive_port"].as<uint>();
+                          receive_port = config["receive_port"].as<uint>();
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
-                              on<UDP::Broadcast, With<GameState>, Single>(recieve_port)
+                              on<UDP::Broadcast, With<GameState>, Single>(receive_port)
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
                                       std::string remoteAddr = ipAddressIntToString(p.remote.address);
 
