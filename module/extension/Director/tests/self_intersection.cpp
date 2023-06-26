@@ -85,7 +85,7 @@ namespace {
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 events.push_back("removing main task");
-                emit<Task>(std::unique_ptr<MainTask>());
+                emit<Task>(std::unique_ptr<MainTask>(nullptr));
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 events.push_back("emitting main task");
@@ -93,7 +93,7 @@ namespace {
             });
             on<Trigger<Step<4>>, Priority::LOW>().then([this] {
                 events.push_back("removing main task");
-                emit<Task>(std::unique_ptr<MainTask>());
+                emit<Task>(std::unique_ptr<MainTask>(nullptr));
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
