@@ -16,6 +16,9 @@ namespace module::strategy {
 
             /// @brief Amount of time the robot can be lost before requesting localisation to reset.
             double max_lost_time = 0;
+
+            /// @brief Whether or not to look around when lost.
+            bool look_around = false;
         } cfg;
 
         /// @brief The time point at which the robot became lost.
