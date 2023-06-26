@@ -13,8 +13,6 @@
 #include "utility/math/comparison.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-#define DEBUG_ENABLE_BUTTON_SPOOF 1
-
 namespace module::platform::OpenCR {
 
     using extension::Configuration;
@@ -59,15 +57,7 @@ namespace module::platform::OpenCR {
             }
         });
 
-        on<Startup>().then("HardwareIO Startup", [this] {
-            startup();
-
-#if DEBUG_ENABLE_BUTTON_SPOOF
-            // trigger scriptrunner
-            log<NUClear::INFO>("Simulating Middle Button Down in 3 seconds");
-            emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(3));
-#endif  // DEBUG_ENABLE_BUTTON_SPOOF
-        });
+        on<Startup>().then("HardwareIO Startup", [this] { startup(); });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
             // Close our connection to the OpenCR
