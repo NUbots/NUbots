@@ -14,6 +14,30 @@ namespace utility::motion::splines {
     enum TrajectoryDimension { X, Y, Z, ROLL, PITCH, YAW };
 
     template <typename Scalar>
+    struct Waypoint {
+        /// @brief Time point of the waypoint
+        Scalar time_point = 0.0;
+
+        /// @brief Position (x,y,z) of the waypoint
+        Eigen::Matrix<Scalar, 3, 1> position = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Velocity (x,y,z) of the waypoint
+        Eigen::Matrix<Scalar, 3, 1> velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Acceleration (x,y,z) of the waypoint
+        Eigen::Matrix<Scalar, 3, 1> acceleration = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Orientation (roll,pitch,yaw) of the waypoint
+        Eigen::Matrix<Scalar, 3, 1> orientation = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Angular velocity (roll,pitch,yaw) of the waypoint
+        Eigen::Matrix<Scalar, 3, 1> angular_velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Angular acceleration (roll,pitch,yaw) of the waypoint
+        Eigen::Matrix<Scalar, 3, 1> angular_acceleration = Eigen::Matrix<Scalar, 3, 1>::Zero();
+    };
+
+    template <typename Scalar>
     class Trajectory {
     public:
         // Add waypoint for the specified dimension
@@ -25,6 +49,28 @@ namespace utility::motion::splines {
             waypoints[dimension].push_back(Eigen::Matrix<Scalar, 3, 1>(position, velocity, acceleration));
             timepoints[dimension].push_back(timepoint);
             build_splines_for_dimension(dimension);
+        }
+
+        // Add waypoint for all dimensions
+        void add_waypoint(const Waypoint<Scalar>& waypoint) {
+            add_waypoint(X, waypoint.time_point, waypoint.position(0), waypoint.velocity(0), waypoint.acceleration(0));
+            add_waypoint(Y, waypoint.time_point, waypoint.position(1), waypoint.velocity(1), waypoint.acceleration(1));
+            add_waypoint(Z, waypoint.time_point, waypoint.position(2), waypoint.velocity(2), waypoint.acceleration(2));
+            add_waypoint(ROLL,
+                         waypoint.time_point,
+                         waypoint.orientation(0),
+                         waypoint.angular_velocity(0),
+                         waypoint.angular_acceleration(0));
+            add_waypoint(PITCH,
+                         waypoint.time_point,
+                         waypoint.orientation(1),
+                         waypoint.angular_velocity(1),
+                         waypoint.angular_acceleration(1));
+            add_waypoint(YAW,
+                         waypoint.time_point,
+                         waypoint.orientation(2),
+                         waypoint.angular_velocity(2),
+                         waypoint.angular_acceleration(2));
         }
 
         /// @brief Get position (x,y,z) at a given time
