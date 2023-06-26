@@ -2,9 +2,9 @@
 
 ## Description
 
-Play soccer in the defender position, which is an defensive position. Either bypass GameController and force play, or uses GameController information to decide what to do.
+Play soccer in the defender position. Either bypass GameController and force play, or uses GameController information to decide what to do.
 
-In the ready state, makes a Ready subtask.
+In the ready state, walks to a position on the field.
 
 In the playing state for normal game mode, finds the ball, fixates on the ball, walks to the ball if the ball is in the defenders bounded box defensive area, and kicks the ball.
 
@@ -20,7 +20,7 @@ Add this module to play as a defender in soccer!
 
 - `message::input::GameState` to get information about the state of the game
 - `message::input::GameState::Data::Phase` to get specific information about the current game phase (initial, ready, set, playing, etc).
-- `message::strategy::WalkInsideBounded` a Task requesting to play as a Defender
+- `message::purpose::Defender` a Task requesting to play as a Defender
 
 ## Emits
 
