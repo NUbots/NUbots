@@ -28,7 +28,7 @@ torso_pitch: 26.92902 * pi / 180
 gains:
   arms: 8
 
-# Fixed position of the arm joints during walking
+# Fixed position of the arm joints during kicking
 arms:
   right_shoulder_pitch: 1.7
   left_shoulder_pitch: 1.7

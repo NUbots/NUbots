@@ -45,15 +45,16 @@ namespace module::skill {
 
             // Configure the motion generation options
             utility::skill::WalkGeneratorOptions<double> walk_generator_options;
-            walk_generator_options.step_period       = config["walk"]["period"].as<double>();
-            walk_generator_options.step_apex_ratio   = config["walk"]["step"]["apex_ratio"].as<double>();
-            walk_generator_options.step_limits       = config["walk"]["step"]["limits"].as<Expression>();
-            walk_generator_options.step_height       = config["walk"]["step"]["height"].as<double>();
-            walk_generator_options.step_width        = config["walk"]["step"]["width"].as<double>();
-            walk_generator_options.torso_height      = config["walk"]["torso"]["height"].as<double>();
-            walk_generator_options.torso_pitch       = config["walk"]["torso"]["pitch"].as<Expression>();
-            walk_generator_options.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
-            walk_generator_options.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
+            walk_generator_options.step_period           = config["walk"]["period"].as<double>();
+            walk_generator_options.step_apex_ratio       = config["walk"]["step"]["apex_ratio"].as<double>();
+            walk_generator_options.step_limits           = config["walk"]["step"]["limits"].as<Expression>();
+            walk_generator_options.step_height           = config["walk"]["step"]["height"].as<double>();
+            walk_generator_options.step_width            = config["walk"]["step"]["width"].as<double>();
+            walk_generator_options.torso_height          = config["walk"]["torso"]["height"].as<double>();
+            walk_generator_options.torso_pitch           = config["walk"]["torso"]["pitch"].as<Expression>();
+            walk_generator_options.torso_position_offset = config["walk"]["torso"]["position_offset"].as<Expression>();
+            walk_generator_options.torso_sway_offset     = config["walk"]["torso"]["sway_offset"].as<Expression>();
+            walk_generator_options.torso_sway_ratio      = config["walk"]["torso"]["sway_ratio"].as<double>();
             walk_generator_options.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
             walk_generator.configure(walk_generator_options);
