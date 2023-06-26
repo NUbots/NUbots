@@ -18,7 +18,7 @@ export const NUgusView = observer(({ model }: { model: LocalisationRobotModel })
   const scene = useMemo(() => originalScene.clone(), [originalScene]);
   const three = useThree();
   React.useEffect(() => {
-    const material = new THREE.MeshStandardMaterial({ color: "#666666", roughness: 0.6, metalness: 0.2 });
+    const material = new THREE.MeshStandardMaterial({ color: "#666666", roughness: 0.5, metalness: 0.2 });
     scene.traverse((o: THREE.Object3D) => {
       if (o instanceof THREE.Mesh) {
         o.material = material;
