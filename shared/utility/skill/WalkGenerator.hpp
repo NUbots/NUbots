@@ -54,6 +54,12 @@ namespace utility::skill {
 
         /// @brief Ratio of where to position the torso relative to the next step position [x,y] (in meters)
         Eigen::Matrix<Scalar, 3, 1> torso_final_position_ratio = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Arm shoulder pitch maximum angle.
+        Scalar shoulder_max_pitch = 0.0;
+
+        /// @brief Arm shoulder pitch minimum angle.
+        Scalar shoulder_min_pitch = 0.0;
     };
 
     template <typename Scalar>
@@ -75,6 +81,8 @@ namespace utility::skill {
             torso_sway_ratio           = options.torso_sway_ratio;
             torso_sway_offset          = options.torso_sway_offset;
             torso_final_position_ratio = options.torso_final_position_ratio;
+            shoulder_max_pitch         = options.shoulder_max_pitch;
+            shoulder_min_pitch         = options.shoulder_min_pitch;
         }
 
         /**
@@ -109,6 +117,48 @@ namespace utility::skill {
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose(Scalar t) const {
             return torso_trajectory.pose(t);
+        }
+
+        /**
+         * @brief Get shoulder pitch angle.
+         * @param velocity_target Requested velocity target (dx, dy, dtheta).
+         * @return Trajectory of swing foot to follow to reach next foot placement.
+         */
+        Scalar get_shoulder_pitch(const Eigen::Matrix<Scalar, 3, 1>& velocity_target, const LimbID& limb) {
+
+            // Left arm
+            Scalar pitch = 0.0;
+            if (limb == LimbID::LEFT_ARM) {
+                // If the left foot is planted
+                if (left_foot_is_planted) {
+                    auto pitch_spline = QuinticSpline(Eigen::Matrix<Scalar, 3, 1>(shoulder_min_pitch, 0, 0),
+                                                      Eigen::Matrix<Scalar, 3, 1>(shoulder_max_pitch, 0, 0),
+                                                      step_period);
+                    pitch             = pitch_spline.position(t);
+                }
+                else {
+                    auto pitch_spline = QuinticSpline(Eigen::Matrix<Scalar, 3, 1>(shoulder_max_pitch, 0, 0),
+                                                      Eigen::Matrix<Scalar, 3, 1>(shoulder_min_pitch, 0, 0),
+                                                      step_period);
+                    pitch             = pitch_spline.position(t);
+                }
+            }
+            else if (limb == LimbID::RIGHT_ARM) {
+                // If the right foot is planted
+                if (!left_foot_is_planted) {
+                    auto pitch_spline = QuinticSpline(Eigen::Matrix<Scalar, 3, 1>(shoulder_min_pitch, 0, 0),
+                                                      Eigen::Matrix<Scalar, 3, 1>(shoulder_max_pitch, 0, 0),
+                                                      step_period);
+                    pitch             = pitch_spline.position(t);
+                }
+                else {
+                    auto pitch_spline = QuinticSpline(Eigen::Matrix<Scalar, 3, 1>(shoulder_max_pitch, 0, 0),
+                                                      Eigen::Matrix<Scalar, 3, 1>(shoulder_min_pitch, 0, 0),
+                                                      step_period);
+                    pitch             = pitch_spline.position(t);
+                }
+            }
+            return pitch;
         }
 
         /**
@@ -258,6 +308,12 @@ namespace utility::skill {
         /// @brief Ratio of where to position the torso relative to the next step position [x,y] (in meters)
         Eigen::Matrix<Scalar, 3, 1> torso_final_position_ratio = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
+        /// @brief Arm shoulder pitch maximum angle.
+        Scalar shoulder_max_pitch = 0.0;
+
+        /// @brief Arm shoulder pitch minimum angle.
+        Scalar shoulder_min_pitch = 0.0;
+
         // ******************************** State ********************************
 
         /// @brief Current engine state.
@@ -392,8 +448,7 @@ namespace utility::skill {
          * @brief Switch planted foot.
          * @details This function switches the planted foot and updates the start torso and start swing foot poses.
          */
-        void switch_planted_foot() {
-            // Transform planted foot to swing foot frame at end of step
+        void switch_planted_foot() {  // Transform planted foot to swing foot frame at end of step
             Hps_start = get_swing_foot_pose(step_period).inverse();
 
             // Transform torso to end torso frame at end of step, in the new planted foot frame

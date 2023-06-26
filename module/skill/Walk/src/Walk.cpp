@@ -45,16 +45,19 @@ namespace module::skill {
 
             // Configure the motion generation options
             utility::skill::WalkGeneratorOptions<double> walk_generator_options;
-            walk_generator_options.step_period           = config["walk"]["period"].as<double>();
-            walk_generator_options.step_apex_ratio       = config["walk"]["step"]["apex_ratio"].as<double>();
-            walk_generator_options.step_limits           = config["walk"]["step"]["limits"].as<Expression>();
-            walk_generator_options.step_height           = config["walk"]["step"]["height"].as<double>();
-            walk_generator_options.step_width            = config["walk"]["step"]["width"].as<double>();
-            walk_generator_options.torso_height          = config["walk"]["torso"]["height"].as<double>();
-            walk_generator_options.torso_pitch           = config["walk"]["torso"]["pitch"].as<Expression>();
-            walk_generator_options.torso_position_offset = config["walk"]["torso"]["position_offset"].as<Expression>();
-            walk_generator_options.torso_sway_offset     = config["walk"]["torso"]["sway_offset"].as<Expression>();
-            walk_generator_options.torso_sway_ratio      = config["walk"]["torso"]["sway_ratio"].as<double>();
+            walk_generator_options.step_period           = config["period"].as<double>();
+            walk_generator_options.step_apex_ratio       = config["step"]["apex_ratio"].as<double>();
+            walk_generator_options.step_limits           = config["step"]["limits"].as<Expression>();
+            walk_generator_options.step_height           = config["step"]["height"].as<double>();
+            walk_generator_options.step_width            = config["step"]["width"].as<double>();
+            walk_generator_options.torso_height          = config["torso"]["height"].as<double>();
+            walk_generator_options.torso_pitch           = config["torso"]["pitch"].as<Expression>();
+            walk_generator_options.torso_position_offset = config["torso"]["position_offset"].as<Expression>();
+            walk_generator_options.torso_sway_offset     = config["torso"]["sway_offset"].as<Expression>();
+            walk_generator_options.torso_sway_ratio      = config["torso"]["sway_ratio"].as<double>();
+            walk_generator_options.shoulder_min_pitch    = config["arms"]["min_pitch"].as<double>();
+            walk_generator_options.shoulder_max_pitch    = config["arms"]["max_pitch"].as<double>();
+
             walk_generator_options.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
             walk_generator.configure(walk_generator_options);
@@ -127,7 +130,7 @@ namespace module::skill {
                 emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_generator.is_left_foot_planted()));
                 emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_generator.is_left_foot_planted()));
 
-                // Construct Arm IK tasks
+                // Construct arm tasks
                 auto left_arm  = std::make_unique<LeftArm>();
                 auto right_arm = std::make_unique<RightArm>();
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
@@ -138,6 +141,19 @@ namespace module::skill {
                     left_arm->servos[id] =
                         ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
                 }
+
+                if (!walk_task.velocity_target.isZero()) {
+                    left_arm->servos[ServoID::L_SHOULDER_PITCH] =
+                        ServoCommand(goal_time,
+                                     walk_generator.get_shoulder_pitch(walk_task.velocity_target, LimbID::LEFT_ARM),
+                                     cfg.servo_states[ServoID(ServoID::L_SHOULDER_PITCH)]);
+                    right_arm->servos[ServoID::R_SHOULDER_PITCH] =
+                        ServoCommand(goal_time,
+                                     walk_generator.get_shoulder_pitch(walk_task.velocity_target, LimbID::RIGHT_ARM),
+                                     cfg.servo_states[ServoID(ServoID::R_SHOULDER_PITCH)]);
+                }
+
+
                 emit<Task>(left_arm, 0, true, "Walk left arm");
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
