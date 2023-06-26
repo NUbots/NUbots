@@ -37,7 +37,7 @@ export class SkyboxView extends React.Component<{
         </mesh>
         <mesh name="skyboxGround" position={[0, 0, -0.001]}>
           <planeBufferGeometry args={[27, 18]} />
-          <meshBasicMaterial color="#3d7926" />
+          <meshBasicMaterial color="#3d9926" />
         </mesh>
         <mesh name="skyboxSun" position={this.sunPosition.toArray()} visible={this.model.showSun}>
           <sphereBufferGeometry args={[40, 16, 8]} />
