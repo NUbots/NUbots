@@ -22,7 +22,14 @@ namespace module::purpose {
     using Phase    = message::input::GameState::Data::Phase;
     using GameMode = message::input::GameState::Data::Mode;
     using message::input::GameState;
+    using message::purpose::CornerKickDefender;
+    using message::purpose::DirectFreeKickDefender;
+    using message::purpose::GoalKickDefender;
+    using message::purpose::InDirectFreeKickDefender;
     using message::purpose::NormalDefender;
+    using message::purpose::PenaltyKickDefender;
+    using message::purpose::PenaltyShootoutDefender;
+    using message::purpose::ThrowInDefender;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
@@ -56,10 +63,19 @@ namespace module::purpose {
                     switch (game_state->data.mode.value) {
                         case GameMode::NORMAL:
                         case GameMode::OVERTIME: emit<Task>(std::make_unique<NormalDefender>()); break;
+                        case GameMode::DIRECT_FREEKICK: emit<Task>(std::make_unique<DirectFreeKickDefender>()); break;
+                        case GameMode::INDIRECT_FREEKICK:
+                            emit<Task>(std::make_unique<InDirectFreeKickDefender>());
+                            break;
+                        case GameMode::PENALTYKICK: emit<Task>(std::make_unique<PenaltyKickDefender>()); break;
+                        case GameMode::CORNER_KICK: emit<Task>(std::make_unique<CornerKickDefender>()); break;
+                        case GameMode::GOAL_KICK: emit<Task>(std::make_unique<GoalKickDefender>()); break;
+                        case GameMode::THROW_IN: emit<Task>(std::make_unique<ThrowInDefender>()); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
                 }
             });
+
 
         // Normal READY state
         on<Provide<NormalDefender>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
@@ -82,12 +98,31 @@ namespace module::purpose {
             log<NUClear::DEBUG>("INITIAL");
             emit<Task>(std::make_unique<StandStill>());
         });
+
+        // Direct free kick
+        on<Provide<DirectFreeKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Indirect free kick
+        on<Provide<InDirectFreeKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Penalty kick
+        on<Provide<PenaltyKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Corner kick
+        on<Provide<CornerKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Goal kick
+        on<Provide<GoalKickDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Throw in
+        on<Provide<ThrowInDefender>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
     void Defender::play() {
         // Walk to the ball and kick!
         // Second argument is priority - higher number means higher priority
-        emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
+        emit<Task>(std::make_unique<FindBall>(),
+                   1);                                  // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
         emit<Task>(std::make_unique<AlignBallToGoal>(), 4);       // Aligning ball to goal to aim kick
