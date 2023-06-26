@@ -3,7 +3,6 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/Limbs.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/skill/Look.hpp"
@@ -15,42 +14,45 @@
 namespace module::strategy {
 
     using extension::Configuration;
+
     using LocaliseTask = message::strategy::Localise;
-    using message::actuation::LimbsSequence;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
     using message::planning::LookAround;
-    using message::skill::Look;
     using message::strategy::StandStill;
-    using utility::skill::load_script;
 
     Localise::Localise(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Localise.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Localise.yaml
-            this->log_level           = config["log_level"].as<NUClear::LogLevel>();
-            cfg.uncertainty_threshold = config["uncertainty_threshold"].as<double>();
-            cfg.max_lost_time         = config["max_lost_time"].as<double>();
-            cfg.look_around           = config["look_around"].as<bool>();
+            this->log_level                  = config["log_level"].as<NUClear::LogLevel>();
+            cfg.start_uncertainty_threshold  = config["start_uncertainty_threshold"].as<double>();
+            cfg.resume_uncertainty_threshold = config["resume_uncertainty_threshold"].as<double>();
+            cfg.max_lost_time                = config["max_lost_time"].as<double>();
+            cfg.look_around_enabled          = config["look_around_enabled"].as<bool>();
         });
 
         on<Provide<LocaliseTask>, Trigger<Field>>().then([this](const Field& field) {
-            // Check if we are uncertain in our position and orientation on the field
-            if (field.covariance.trace() > cfg.uncertainty_threshold) {
-                log<NUClear::DEBUG>("Localisation uncertainty is too high, stand still.");
+            // Compute how uncertain in our position and orientation on the field
+            double uncertainty = field.covariance.trace();
 
+            // If we are too uncertain and not already "lost", stand still and look around
+            if ((!lost && uncertainty > cfg.start_uncertainty_threshold)) {
+                // We have just become lost, store the time point
+                lost            = true;
+                time_point_lost = NUClear::clock::now();
+            }
+
+            // If we are already lost, check if we are still lost
+            else if (lost && uncertainty > cfg.resume_uncertainty_threshold) {
+
+                log<NUClear::DEBUG>("Localisation uncertainty is too high, stand still.");
                 // Stop walking
                 emit<Task>(std::make_unique<StandStill>());
 
                 // Look around
-                if (cfg.look_around) {
+                if (cfg.look_around_enabled) {
                     emit<Task>(std::make_unique<LookAround>());
-                }
-
-                // If we have just become lost, store the time point
-                if (!just_lost) {
-                    time_point_lost = NUClear::clock::now();
-                    just_lost       = true;
                 }
 
                 // Compute how long we have been lost for
@@ -68,7 +70,9 @@ namespace module::strategy {
                 }
             }
             else {
-                just_lost = false;
+                // We are not or no longer lost
+                log<NUClear::DEBUG>("Localisation uncertainty is low enough.");
+                lost = false;
             }
         });
     }

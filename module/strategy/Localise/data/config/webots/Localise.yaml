@@ -11,4 +11,4 @@ resume_uncertainty_threshold: 0.4
 max_lost_time: 30
 
 # Whether or not to move head to look around when lost
-look_around_enabled: false
+look_around_enabled: true

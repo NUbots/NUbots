@@ -12,13 +12,16 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Uncertainty value field localisation needs to be above to localise.
-            double uncertainty_threshold = 0;
+            double start_uncertainty_threshold = 0;
+
+            /// @brief Uncertainty value field localisation needs to be below to stop localising.
+            double resume_uncertainty_threshold = 0;
 
             /// @brief Amount of time the robot can be lost before requesting localisation to reset.
             double max_lost_time = 0;
 
             /// @brief Whether or not to look around when lost.
-            bool look_around = false;
+            bool look_around_enabled = false;
         } cfg;
 
         /// @brief The time point at which the robot became lost.
@@ -26,6 +29,9 @@ namespace module::strategy {
 
         /// @brief Flag to indicate if the robot has just now become lost.
         bool just_lost = false;
+
+        /// @brief Flag to indicate if the robot is lost.
+        bool lost = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the Localise reactor.
