@@ -214,6 +214,15 @@ namespace module::platform::OpenCR {
         /// @brief clear all packet queues
         /// @returns the number of packets cleared
         int queue_clear_all();
+
+        struct PacketWatchdog {};
+        struct ModelWatchdog {};
+
+        /// @brief Handle for the watchdog timer for the model information
+        ReactionHandle model_watchdog;
+
+        /// @brief Handle for our watchdog timer for packet handling
+        ReactionHandle packet_watchdog;
     };
 
 }  // namespace module::platform::OpenCR
