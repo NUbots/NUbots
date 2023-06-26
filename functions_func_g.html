@@ -173,10 +173,13 @@ $(document).ready(function(){initNavTree('functions_func_g.html',''); initResiza
 : <a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html#a5954fe50d51adede30cc53119d6d4511">utility::math::filter::UKF&lt; Scalar, FilterModel &gt;</a>
 </li>
 <li>generate_swingfoot_trajectory()
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#ab9bd7dd59ebe111e653a96e77638de17">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a8d33da2622b3bf675f289631d1069b09">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>generate_torso_trajectory()
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#ab5e9ffb7e7290228a01dae52ce9b5ccd">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a7caa10a8327a0fc1aa2f33cc29058ef5">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+</li>
+<li>generate_trajectories()
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a207e0b4a5bc0e851d020d5de57bd04f4">utility::skill::KickGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get()
 : <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a0ef50b9c55ff7d57981905fe1ffe9a49">extension::behaviour::ProviderBase&lt; T, classification &gt;</a>
@@ -190,11 +193,15 @@ $(document).ready(function(){initNavTree('functions_func_g.html',''); initResiza
 : <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#ab51267cfb71e33a457ab08bff182fe23">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a32ed424e8cfa5d9b8c32fdbf4c47bfcb">utility::math::filter::ParticleFilter&lt; Scalar, FilterModel &gt;</a>
 </li>
+<li>get_duration()
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a847b6bd01e41984041e6ae1863bb5079">utility::skill::KickGenerator&lt; Scalar &gt;</a>
+</li>
 <li>get_foot_pose()
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a06e653d7b77ff6d2d73f6051e31e278f">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#acd19026ad0f8655722a4b6fdd59cc31a">utility::skill::KickGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a912962aa7e7a1e4d9f64784569eafb38">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_foot_width_offset()
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a16fc5273692d003cfd7f5247dfcd3444">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_footstep()
 : <a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html#a9fd5e9448b761bfbc304330616a0474a">utility::skill::QuinticWalkEngine</a>
@@ -229,16 +236,21 @@ $(document).ready(function(){initNavTree('functions_func_g.html',''); initResiza
 <li>get_state()
 : <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#a25a9f5c2a24da5aad77dc728769a0087">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a7b5d5b95d4c7884dd6801bb8e981d43a">utility::math::filter::ParticleFilter&lt; Scalar, FilterModel &gt;</a>
-, <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a200e95736cca76b9164809f21b8705aa">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a0a9662552bcfec8fc609503bd86f2942">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_swing_foot_pose()
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#af75e29cc03fc865782f1b53c91523f1b">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a9b45e1f0f5545062f80c3e83ff3795d9">utility::skill::KickGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a4680a334b76a7a0114f0903d886dae59">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_task_data()
 : <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">extension::behaviour::information::InformationSource</a>
 </li>
+<li>get_time()
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a9f2bafa831db292709df608b719e3b01">utility::skill::KickGenerator&lt; Scalar &gt;</a>
+</li>
 <li>get_torso_pose()
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#af0b6fd792b69f083c7246c41d2f2b64d">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a0ba6b4aacd0042eb4815b07721abb494">utility::skill::KickGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a59bd3e34eea270ebdf84baa12ca4b7f1">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>get_trajs_time()
 : <a class="el" href="classutility_1_1skill_1_1QuinticWalkEngine.html#a77370f29ea6bedde058e130a4054c89b">utility::skill::QuinticWalkEngine</a>
@@ -318,7 +330,7 @@ $(document).ready(function(){initNavTree('functions_func_g.html',''); initResiza
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jun 25 2023 01:32:56 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 26 2023 02:22:34 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

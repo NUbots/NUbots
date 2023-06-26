@@ -190,6 +190,7 @@ $(document).ready(function(){initNavTree('functions_a.html',''); initResizable()
 <li>acceleration
 : <a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a3cadd474fc5462ac44a470a52c14967d">module::planning::PlanWalkPath::Config</a>
 , <a class="el" href="classutility_1_1motion_1_1splines_1_1QuinticSpline.html#a359a9702c42d95889450ce35a997dd10">utility::motion::splines::QuinticSpline&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1motion_1_1splines_1_1Waypoint.html#a006278e7e33e92761d8acee23b8ae317">utility::motion::splines::Waypoint&lt; Scalar &gt;</a>
 </li>
 <li>ACCELEROMETER_CONVERSION_FACTOR
 : <a class="el" href="structmodule_1_1platform_1_1cm740_1_1Convert.html#ae18c2554fbe5ac3e2f7bb4ad1c50752d">module::platform::cm740::Convert</a>
@@ -227,6 +228,9 @@ $(document).ready(function(){initNavTree('functions_a.html',''); initResizable()
 <li>add_cross()
 : <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">module::localisation::OccupancyMap&lt; Scalar &gt;</a>
 </li>
+<li>add_foot_waypoint()
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#aa39b74f6d63abccb535877bf41d93d38">utility::skill::KickGenerator&lt; Scalar &gt;</a>
+</li>
 <li>add_group_provider()
 : <a class="el" href="classmodule_1_1actuation_1_1Servos.html#a1acee00644967211057ad0806fc08e36">module::actuation::Servos</a>
 </li>
@@ -243,13 +247,16 @@ $(document).ready(function(){initNavTree('functions_a.html',''); initResizable()
 : <a class="el" href="classmodule_1_1extension_1_1Director.html#a194487bb54ff0df9fb6dfd687b8f80f6">module::extension::Director</a>
 </li>
 <li>add_rectangle()
-: <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03">module::localisation::OccupancyMap&lt; Scalar &gt;</a>
+: <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#ac1f4588e0d084d046f81b5a9e246c610">module::localisation::OccupancyMap&lt; Scalar &gt;</a>
 </li>
 <li>add_sequence_provider()
 : <a class="el" href="classmodule_1_1actuation_1_1Servos.html#aa84a86c2c71713eca6159cc53da76fb1">module::actuation::Servos</a>
 </li>
 <li>add_servo_provider()
 : <a class="el" href="classmodule_1_1actuation_1_1Servos.html#a61f86f1c99146c863c5bf1db1dd899d8">module::actuation::Servos</a>
+</li>
+<li>add_torso_waypoint()
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a483ac63efd7c9ad01cdeed89c9738325">utility::skill::KickGenerator&lt; Scalar &gt;</a>
 </li>
 <li>add_vertical_line()
 : <a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html#aca1a52f02c6a66c9f4be1933bb5384bd">module::localisation::OccupancyMap&lt; Scalar &gt;</a>
@@ -303,11 +310,18 @@ $(document).ready(function(){initNavTree('functions_a.html',''); initResizable()
 <li>angleOrGain
 : <a class="el" href="classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a2c44719241502b24d60ece68b340890d">module::behaviour::tools::ScriptTuner</a>
 </li>
+<li>angular_acceleration
+: <a class="el" href="structutility_1_1motion_1_1splines_1_1Waypoint.html#a1c31d84dd342bcf793403e37f3ae1e66">utility::motion::splines::Waypoint&lt; Scalar &gt;</a>
+</li>
+<li>angular_velocity
+: <a class="el" href="structutility_1_1motion_1_1splines_1_1Waypoint.html#a79d2203528017f572e7f15dd025c4efd">utility::motion::splines::Waypoint&lt; Scalar &gt;</a>
+</li>
 <li>approach_radius
 : <a class="el" href="structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html#a0f520e173bd7f6a2d50fc930d0208f85">module::planning::PlanWalkPath::Config</a>
 </li>
 <li>arm_positions
-: <a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087">module::skill::Walk::Config</a>
+: <a class="el" href="structmodule_1_1skill_1_1SplineKick_1_1Config.html#af8010f448df5bdd61e1ed59d846e8289">module::skill::SplineKick::Config</a>
+, <a class="el" href="structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087">module::skill::Walk::Config</a>
 </li>
 </ul>
 </div><!-- contents -->
@@ -315,7 +329,7 @@ $(document).ready(function(){initNavTree('functions_a.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jun 25 2023 01:32:56 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 26 2023 02:22:34 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -1,5 +1,6 @@
 var classutility_1_1motion_1_1splines_1_1Trajectory =
 [
+    [ "add_waypoint", "classutility_1_1motion_1_1splines_1_1Trajectory.html#a89ab9e545789e00b945ac06b70e74d94", null ],
     [ "add_waypoint", "classutility_1_1motion_1_1splines_1_1Trajectory.html#a938a9ce6d614f97734af16731b6b39a9", null ],
     [ "build_splines_for_dimension", "classutility_1_1motion_1_1splines_1_1Trajectory.html#a755b8e91d86f28e98354135f3898ce95", null ],
     [ "clear", "classutility_1_1motion_1_1splines_1_1Trajectory.html#af2bf733f5c4a2fb0c90061054f2b4127", null ],

@@ -1,5 +1,5 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,767,347,808"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,792,347,833"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="439,5,587,47"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="439,71,587,112"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="439,136,587,177"/>
@@ -18,16 +18,17 @@
 <area shape="rect" id="node18" href="$classmodule_1_1skill_1_1Look.html" title=" " alt="" coords="441,825,586,851"/>
 <area shape="rect" id="node19" href="$classmodule_1_1skill_1_1QuinticWalk.html" title=" " alt="" coords="417,875,609,902"/>
 <area shape="rect" id="node20" href="$classmodule_1_1skill_1_1ScriptKick.html" title=" " alt="" coords="424,926,603,953"/>
-<area shape="rect" id="node21" href="$classmodule_1_1skill_1_1Walk.html" title=" " alt="" coords="440,977,587,1003"/>
-<area shape="rect" id="node22" href="$classmodule_1_1strategy_1_1AlignBallToGoal.html" title=" " alt="" coords="414,1028,613,1069"/>
-<area shape="rect" id="node23" href="$classmodule_1_1strategy_1_1DiveToBall.html" title=" " alt="" coords="409,1094,618,1121"/>
-<area shape="rect" id="node24" href="$classmodule_1_1strategy_1_1FallRecovery.html" title=" " alt="" coords="402,1145,625,1171"/>
-<area shape="rect" id="node25" href="$classmodule_1_1strategy_1_1FindObject.html" title=" " alt="" coords="409,1195,618,1222"/>
-<area shape="rect" id="node26" href="$classmodule_1_1strategy_1_1KickToGoal.html" title=" " alt="" coords="407,1246,619,1273"/>
-<area shape="rect" id="node27" href="$classmodule_1_1strategy_1_1Ready.html" title=" " alt="" coords="423,1297,604,1323"/>
-<area shape="rect" id="node28" href="$classmodule_1_1strategy_1_1StandStill.html" title=" " alt="" coords="412,1347,615,1374"/>
-<area shape="rect" id="node29" href="$classmodule_1_1strategy_1_1StrategiseLook.html" title=" " alt="" coords="395,1398,632,1425"/>
-<area shape="rect" id="node30" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,1449,619,1475"/>
-<area shape="rect" id="node31" href="$classmodule_1_1strategy_1_1WalkToFieldPosition.html" title=" " alt="" coords="420,1500,607,1541"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,774,140,801"/>
+<area shape="rect" id="node21" href="$classmodule_1_1skill_1_1SplineKick.html" title=" " alt="" coords="422,977,605,1003"/>
+<area shape="rect" id="node22" href="$classmodule_1_1skill_1_1Walk.html" title=" " alt="" coords="440,1027,587,1054"/>
+<area shape="rect" id="node23" href="$classmodule_1_1strategy_1_1AlignBallToGoal.html" title=" " alt="" coords="414,1079,613,1120"/>
+<area shape="rect" id="node24" href="$classmodule_1_1strategy_1_1DiveToBall.html" title=" " alt="" coords="409,1145,618,1171"/>
+<area shape="rect" id="node25" href="$classmodule_1_1strategy_1_1FallRecovery.html" title=" " alt="" coords="402,1195,625,1222"/>
+<area shape="rect" id="node26" href="$classmodule_1_1strategy_1_1FindObject.html" title=" " alt="" coords="409,1246,618,1273"/>
+<area shape="rect" id="node27" href="$classmodule_1_1strategy_1_1KickToGoal.html" title=" " alt="" coords="407,1297,619,1323"/>
+<area shape="rect" id="node28" href="$classmodule_1_1strategy_1_1Ready.html" title=" " alt="" coords="423,1347,604,1374"/>
+<area shape="rect" id="node29" href="$classmodule_1_1strategy_1_1StandStill.html" title=" " alt="" coords="412,1398,615,1425"/>
+<area shape="rect" id="node30" href="$classmodule_1_1strategy_1_1StrategiseLook.html" title=" " alt="" coords="395,1449,632,1475"/>
+<area shape="rect" id="node31" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,1499,619,1526"/>
+<area shape="rect" id="node32" href="$classmodule_1_1strategy_1_1WalkToFieldPosition.html" title=" " alt="" coords="420,1551,607,1592"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,799,140,826"/>
 </map>

@@ -1,11 +1,12 @@
 var namespaceutility_1_1skill =
 [
     [ "Frame", "structutility_1_1skill_1_1Frame.html", "structutility_1_1skill_1_1Frame" ],
-    [ "MotionGeneration", "classutility_1_1skill_1_1MotionGeneration.html", "classutility_1_1skill_1_1MotionGeneration" ],
-    [ "MotionGenerationOptions", "structutility_1_1skill_1_1MotionGenerationOptions.html", "structutility_1_1skill_1_1MotionGenerationOptions" ],
+    [ "KickGenerator", "classutility_1_1skill_1_1KickGenerator.html", "classutility_1_1skill_1_1KickGenerator" ],
     [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
     [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
     [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
+    [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ],
+    [ "WalkGeneratorOptions", "structutility_1_1skill_1_1WalkGeneratorOptions.html", "structutility_1_1skill_1_1WalkGeneratorOptions" ],
     [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ],
     [ "WalkEngineState", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357a", [
       [ "IDLE", "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aaa5daf7f2ebbba4975d61dab1c40188c7", null ],

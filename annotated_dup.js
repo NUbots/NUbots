@@ -292,6 +292,7 @@ var annotated_dup =
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
+        [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ]
       ] ],
       [ "strategy", null, [
@@ -439,7 +440,8 @@ var annotated_dup =
           [ "Spline", "classutility_1_1motion_1_1splines_1_1Spline.html", "classutility_1_1motion_1_1splines_1_1Spline" ],
           [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
           [ "Trajectory", "classutility_1_1motion_1_1splines_1_1Trajectory.html", "classutility_1_1motion_1_1splines_1_1Trajectory" ],
-          [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ]
+          [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ],
+          [ "Waypoint", "structutility_1_1motion_1_1splines_1_1Waypoint.html", "structutility_1_1motion_1_1splines_1_1Waypoint" ]
         ] ],
         [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ]
       ] ],
@@ -454,11 +456,12 @@ var annotated_dup =
       ] ],
       [ "skill", "namespaceutility_1_1skill.html", [
         [ "Frame", "structutility_1_1skill_1_1Frame.html", "structutility_1_1skill_1_1Frame" ],
-        [ "MotionGeneration", "classutility_1_1skill_1_1MotionGeneration.html", "classutility_1_1skill_1_1MotionGeneration" ],
-        [ "MotionGenerationOptions", "structutility_1_1skill_1_1MotionGenerationOptions.html", "structutility_1_1skill_1_1MotionGenerationOptions" ],
+        [ "KickGenerator", "classutility_1_1skill_1_1KickGenerator.html", "classutility_1_1skill_1_1KickGenerator" ],
         [ "QuinticWalkEngine", "classutility_1_1skill_1_1QuinticWalkEngine.html", "classutility_1_1skill_1_1QuinticWalkEngine" ],
         [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
         [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
+        [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ],
+        [ "WalkGeneratorOptions", "structutility_1_1skill_1_1WalkGeneratorOptions.html", "structutility_1_1skill_1_1WalkGeneratorOptions" ],
         [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", [

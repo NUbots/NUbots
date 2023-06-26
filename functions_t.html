@@ -170,7 +170,8 @@ $(document).ready(function(){initNavTree('functions_t.html',''); initResizable()
 
 <h3><a id="index_t"></a>- t -</h3><ul>
 <li>t
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a9df17984dbd494497b4a93c0420a8256">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a95ba1f61efde9b1d742ce8281cb9e59d">utility::skill::KickGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 </li>
 <li>table
 : <a class="el" href="classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75">utility::vision::Mosaic</a>
@@ -199,6 +200,9 @@ $(document).ready(function(){initNavTree('functions_t.html',''); initResizable()
 : <a class="el" href="classJoystickEvent.html#a6f030bc0996c43e8224fedae825e5967">JoystickEvent</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#ad63b75b44ce88f88b3e02eb17b02bc5a">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
 , <a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a7f783aa0df5b44f9ba9bf82ba3bd39ac">utility::math::filter::ParticleFilter&lt; Scalar, FilterModel &gt;</a>
+</li>
+<li>time_point
+: <a class="el" href="structutility_1_1motion_1_1splines_1_1Waypoint.html#a2ab3e11ff13892e217df40dcd0a26ae5">utility::motion::splines::Waypoint&lt; Scalar &gt;</a>
 </li>
 <li>time_since_message
 : <a class="el" href="classmodule_1_1behaviour_1_1skills_1_1KickScript.html#ad0b84075787a9216c46df6909ef705b5">module::behaviour::skills::KickScript</a>
@@ -234,24 +238,35 @@ $(document).ready(function(){initNavTree('functions_t.html',''); initResizable()
 <li>TORQUE_LIMIT_CONVERSION_FACTOR
 : <a class="el" href="structmodule_1_1platform_1_1cm740_1_1Convert.html#aaa1143ba0c6f8cbe1e5991160e99e00a">module::platform::cm740::Convert</a>
 </li>
+<li>torso_final_position_ratio
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a4a9b779b5d6d08b833d6799d5e4f5f6e">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html#abb4de897853b331ae8e72a4fb99729c3">utility::skill::WalkGeneratorOptions&lt; Scalar &gt;</a>
+</li>
 <li>torso_height
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#adb29d1f83554b892f65951612a6c3732">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
-, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#a5c761db0e18749db92f2e052972a4f5a">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#af1e8b298c244bf5710e4a53faeb94749">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html#a0eed5f81a3c129fb5584605cc364ebb1">utility::skill::WalkGeneratorOptions&lt; Scalar &gt;</a>
 </li>
 <li>torso_pitch
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#aeea04f4163bd9058afbce3c06e5f73bf">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
-, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#a7c380c3f9dabbf2f9456a831d5030d8d">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a468826eac375a5e94f6b8c6b3a882eda">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html#a3054b2ecdff0e82f8310e57a11839081">utility::skill::WalkGeneratorOptions&lt; Scalar &gt;</a>
+</li>
+<li>torso_position_offset
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ab9d5b4a4f249bde88349289d3e53b777">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html#a63bf0593bfbc99355962133d640c6723">utility::skill::WalkGeneratorOptions&lt; Scalar &gt;</a>
 </li>
 <li>torso_sway_offset
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#ad7b8de9df629f61767d54b2ae169a5dc">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
-, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#abd2a29c67defb157bba4d66ceb9cb782">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a851daf84b801e7794ae9f2aadbe62c09">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html#a0f5c82b2b050ec3c77bbc16e34d85901">utility::skill::WalkGeneratorOptions&lt; Scalar &gt;</a>
 </li>
 <li>torso_sway_ratio
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#ab68bccd6d8e5a53974214ddde7d94a65">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
-, <a class="el" href="structutility_1_1skill_1_1MotionGenerationOptions.html#ae941fd26b04eb16a4416c65887984f6f">utility::skill::MotionGenerationOptions&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#adab66fcd798c318b35cb9e933820eabd">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+, <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html#a053f5e46e55c026e676627633fd9f8e6">utility::skill::WalkGeneratorOptions&lt; Scalar &gt;</a>
 </li>
 <li>torso_trajectory
-: <a class="el" href="classutility_1_1skill_1_1MotionGeneration.html#a566775b79c3357143d593a52bdb4df51">utility::skill::MotionGeneration&lt; Scalar &gt;</a>
+: <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#af2d39521a2eb7b71ededc319f688f4fc">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
+</li>
+<li>torso_waypoints
+: <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#a6c5a751908d37515ada701d18083837e">utility::skill::KickGenerator&lt; Scalar &gt;</a>
 </li>
 <li>tr
 : <a class="el" href="classutility_1_1math_1_1geometry_1_1Quad.html#a4b008644d3503fc9dee54389b6697c1d">utility::math::geometry::Quad&lt; Scalar, R, C &gt;</a>
@@ -297,7 +312,7 @@ $(document).ready(function(){initNavTree('functions_t.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sun Jun 25 2023 01:32:56 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 26 2023 02:22:34 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

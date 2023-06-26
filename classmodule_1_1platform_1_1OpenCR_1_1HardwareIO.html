@@ -211,7 +211,11 @@ Collaboration diagram for module::platform::OpenCR::HardwareIO:</div>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html">Battery</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ModelWatchdog.html">ModelWatchdog</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html">OpenCRState</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1PacketWatchdog.html">PacketWatchdog</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html">ServoState</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -285,6 +289,10 @@ Private Attributes</h2></td></tr>
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2ebc4364306b682710d79eb336f031ef">byte_wait</a> = 0</td></tr>
 <tr class="memdesc:a2ebc4364306b682710d79eb336f031ef"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long we expect to wait per byte of data being sent. <br /></td></tr>
 <tr class="separator:a2ebc4364306b682710d79eb336f031ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8ea25319d77fd40ac8bba57a77f8cc8"><td class="memItemLeft" align="right" valign="top"><a id="ad8ea25319d77fd40ac8bba57a77f8cc8"></a>
+ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad8ea25319d77fd40ac8bba57a77f8cc8">model_watchdog</a></td></tr>
+<tr class="memdesc:ad8ea25319d77fd40ac8bba57a77f8cc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle for the watchdog timer for the model information. <br /></td></tr>
+<tr class="separator:ad8ea25319d77fd40ac8bba57a77f8cc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6540393b52b14f13229912638180c217"><td class="memItemLeft" align="right" valign="top"><a id="a6540393b52b14f13229912638180c217"></a>
 <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html">NUgus</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6540393b52b14f13229912638180c217">nugus</a> {}</td></tr>
 <tr class="memdesc:a6540393b52b14f13229912638180c217"><td class="mdescLeft">&#160;</td><td class="mdescRight">Contains device information specific to the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1NUgus.html">NUgus</a> robot. <br /></td></tr>
@@ -305,6 +313,10 @@ std::map&lt; NUgus::ID, std::vector&lt; <a class="el" href="classmodule_1_1platf
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58f19b0d15954f1f93f5b3ccd116cb3f">packet_wait</a> = 0</td></tr>
 <tr class="memdesc:a58f19b0d15954f1f93f5b3ccd116cb3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">How long we expect to wait for a packet. <br /></td></tr>
 <tr class="separator:a58f19b0d15954f1f93f5b3ccd116cb3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28d80e07d1cac02aa2b2d2fb4dbfd260"><td class="memItemLeft" align="right" valign="top"><a id="a28d80e07d1cac02aa2b2d2fb4dbfd260"></a>
+ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a28d80e07d1cac02aa2b2d2fb4dbfd260">packet_watchdog</a></td></tr>
+<tr class="memdesc:a28d80e07d1cac02aa2b2d2fb4dbfd260"><td class="mdescLeft">&#160;</td><td class="mdescRight">Handle for our watchdog timer for packet handling. <br /></td></tr>
+<tr class="separator:a28d80e07d1cac02aa2b2d2fb4dbfd260"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2a3e1105b9c360e50a9cbef51e063e6c"><td class="memItemLeft" align="right" valign="top"><a id="a2a3e1105b9c360e50a9cbef51e063e6c"></a>
 std::array&lt; <a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html">ServoState</a>, 20 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2a3e1105b9c360e50a9cbef51e063e6c">servo_states</a> {}</td></tr>
 <tr class="memdesc:a2a3e1105b9c360e50a9cbef51e063e6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The state of the servos, used to store read values and to store values to be written. <br /></td></tr>
@@ -608,7 +620,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a></li>
-    <li class="footer">Generated on Sun Jun 25 2023 01:32:56 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 26 2023 02:22:34 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

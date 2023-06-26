@@ -688,6 +688,7 @@ var namespaces_dup =
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
+        [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ],
         [ "DiveTask", "Dive_8cpp.html#aab4cff4ad6c87765b3bf727736fd547f", null ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
@@ -994,6 +995,7 @@ var namespaces_dup =
           [ "SplineContainer", "classutility_1_1motion_1_1splines_1_1SplineContainer.html", "classutility_1_1motion_1_1splines_1_1SplineContainer" ],
           [ "Trajectory", "classutility_1_1motion_1_1splines_1_1Trajectory.html", "classutility_1_1motion_1_1splines_1_1Trajectory" ],
           [ "TrajectoryTypes", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html", "structutility_1_1motion_1_1splines_1_1TrajectoryTypes" ],
+          [ "Waypoint", "structutility_1_1motion_1_1splines_1_1Waypoint.html", "structutility_1_1motion_1_1splines_1_1Waypoint" ],
           [ "Trajectories", "TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef", null ],
           [ "Vector3fQuadruple", "TrajectoryUtils_8hpp.html#ad58a6c7c26b143a78258289e67925f34", null ],
           [ "TrajectoryDimension", "Trajectory_8hpp.html#aac085329d0cdf2c63a2c66fa6c5497a4", [
