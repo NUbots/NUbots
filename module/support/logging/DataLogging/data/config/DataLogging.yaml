@@ -17,7 +17,6 @@ messages:
   message.vision.Goals: false
   message.vision.GreenHorizon: false
   message.vision.FieldLines: false
-  message.vision.Obstacles: false
   message.vision.VisualMesh: false
   message.localisation.Ball: false
   message.localisation.Field: false

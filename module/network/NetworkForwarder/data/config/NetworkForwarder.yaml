@@ -21,13 +21,11 @@ targets:
     # Vision messages
     message.input.Image: false # You probably don't want this unless you're testing something very weird
     message.output.CompressedImage: 10
-
     message.vision.Balls: true
     message.vision.Goals: true
     message.vision.GreenHorizon: true
     message.vision.FieldLines: true
-    message.vision.Obstacles: true
-    message.vision.VisualMesh: true
+    message.vision.VisualMesh: false
 
     # Localisation Messages
     message.localisation.Ball: true
