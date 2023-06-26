@@ -1,5 +1,8 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1input_1_1CameraContext.html#a34bafec2e7c319f42f527bb261291708":[2,0,4,3,4,7],
+"structmodule_1_1input_1_1CameraContext.html#a429966454ad18f1a37c1ebaabd921f94":[2,0,4,3,4,8],
+"structmodule_1_1input_1_1CameraContext.html#a96aec4886716a4886d0928c767301e92":[2,0,4,3,4,1],
 "structmodule_1_1input_1_1CameraContext.html#aa7e4194b5c2ae8b874107e2cf27d383b":[2,0,4,3,4,2],
 "structmodule_1_1input_1_1CameraContext.html#ac465e809b89e17006d12da153b1c3c6c":[2,0,4,3,4,3],
 "structmodule_1_1input_1_1CameraContext_1_1TimeCorrection.html":[2,0,4,3,4,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX13 =
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#afe43c4778c0b0537d5bb6216ed996c5e":[2,0,4,3,27,2,1],
 "structmodule_1_1input_1_1SettingsFunctions.html":[2,0,4,3,28],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html":[2,0,4,3,29],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a59a3f3a77c2d564d898386f0d56b170f":[2,0,4,3,29,3],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a6ddac61550fb83583267be431f80fc63":[2,0,4,3,29,1],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a7db602e5ffe547bab8cb8ebc9384ff91":[2,0,4,3,29,0],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a7e80a5e9928a980dee712a0ecbbc08e8":[2,0,4,3,29,2]
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a59a3f3a77c2d564d898386f0d56b170f":[2,0,4,3,29,3]
 };

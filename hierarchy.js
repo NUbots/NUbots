@@ -113,6 +113,7 @@ var hierarchy =
     [ "module::extension::component::ProviderGroup", "structmodule_1_1extension_1_1component_1_1ProviderGroup.html", null ],
     [ "module::extension::component::ProviderGroup::WatchHandle", "structmodule_1_1extension_1_1component_1_1ProviderGroup_1_1WatchHandle.html", null ],
     [ "module::extension::Director::OkSolution", "structmodule_1_1extension_1_1Director_1_1OkSolution.html", null ],
+    [ "module::extension::Director::RunResult", "structmodule_1_1extension_1_1Director_1_1RunResult.html", null ],
     [ "module::extension::Director::Solution", "structmodule_1_1extension_1_1Director_1_1Solution.html", null ],
     [ "module::extension::Director::Solution::Option", "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html", null ],
     [ "module::extension::FileWatcher::FileMap", "structmodule_1_1extension_1_1FileWatcher_1_1FileMap.html", null ],

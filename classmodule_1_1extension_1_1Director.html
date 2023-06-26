@@ -207,6 +207,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Represents a solution that we can run now, i.e.  <a href="structmodule_1_1extension_1_1Director_1_1OkSolution.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1Director_1_1RunResult.html">RunResult</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The result of running a set of tasks.  <a href="structmodule_1_1extension_1_1Director_1_1RunResult.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">An object which holds the possible solutions to running a task.  <a href="structmodule_1_1extension_1_1Director_1_1Solution.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -273,9 +276,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a90923156eb8865e70b76295c7f2925ac"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a90923156eb8865e70b76295c7f2925ac">find_ok_solution</a> (const <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html">Solution::Option</a> &amp;option, std::set&lt; std::type_index &gt; used_types)</td></tr>
 <tr class="memdesc:a90923156eb8865e70b76295c7f2925ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joins all of the requirements of an option into a single <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html" title="Represents a solution that we can run now, i.e.">OkSolution</a> instance.  <a href="classmodule_1_1extension_1_1Director.html#a90923156eb8865e70b76295c7f2925ac">More...</a><br /></td></tr>
 <tr class="separator:a90923156eb8865e70b76295c7f2925ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad55edf0f7508766222d56f3028bc5b7a"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ad55edf0f7508766222d56f3028bc5b7a">find_ok_solutions</a> (const std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a> &gt; &amp;solutions)</td></tr>
-<tr class="memdesc:ad55edf0f7508766222d56f3028bc5b7a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution that can execute, or a blocked solution if none of the solutions can execute.  <a href="classmodule_1_1extension_1_1Director.html#ad55edf0f7508766222d56f3028bc5b7a">More...</a><br /></td></tr>
-<tr class="separator:ad55edf0f7508766222d56f3028bc5b7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a064eb8cb122b43693170af234a60756b"><td class="memItemLeft" align="right" valign="top">std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">OkSolution</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a064eb8cb122b43693170af234a60756b">find_ok_solutions</a> (const std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a> &gt; &amp;solutions, const std::set&lt; std::type_index &gt; &amp;used_types)</td></tr>
+<tr class="memdesc:a064eb8cb122b43693170af234a60756b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution that can execute, or a blocked solution if none of the solutions can execute.  <a href="classmodule_1_1extension_1_1Director.html#a064eb8cb122b43693170af234a60756b">More...</a><br /></td></tr>
+<tr class="separator:a064eb8cb122b43693170af234a60756b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a553b675b4947fe028b198285a393d778"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1Provider.html">component::Provider</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778">get_root_provider</a> (const std::type_index &amp;root_type)</td></tr>
 <tr class="memdesc:a553b675b4947fe028b198285a393d778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds or creates a root provider for a task and returns it.  <a href="classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778">More...</a><br /></td></tr>
 <tr class="separator:a553b675b4947fe028b198285a393d778"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -300,9 +303,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a867e019bba1e28cf210a89d786452bf5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">run_task_pack</a> (const <a class="el" href="classmodule_1_1extension_1_1Director.html#a2ce3ff604f6ea87b215f803efb7b13e5">TaskPack</a> &amp;pack)</td></tr>
 <tr class="memdesc:a867e019bba1e28cf210a89d786452bf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.  <a href="classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5">More...</a><br /></td></tr>
 <tr class="separator:a867e019bba1e28cf210a89d786452bf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3669dac468866c9333fb4e1d9042b542"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a3669dac468866c9333fb4e1d9042b542">run_tasks</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> &amp;pack, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a> &amp;run_level)</td></tr>
-<tr class="memdesc:a3669dac468866c9333fb4e1d9042b542"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to execute tasks in the pack, but only up to the passed run level.  <a href="classmodule_1_1extension_1_1Director.html#a3669dac468866c9333fb4e1d9042b542">More...</a><br /></td></tr>
-<tr class="separator:a3669dac468866c9333fb4e1d9042b542"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af83cc11c92a845bfcd7810873b731dda"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1RunResult.html">RunResult</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#af83cc11c92a845bfcd7810873b731dda">run_tasks</a> (<a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;group, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb">TaskList</a> &amp;pack, const <a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a> &amp;run_level, const std::set&lt; std::type_index &gt; &amp;used)</td></tr>
+<tr class="memdesc:af83cc11c92a845bfcd7810873b731dda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to execute tasks in the pack, but only up to the passed run level.  <a href="classmodule_1_1extension_1_1Director.html#af83cc11c92a845bfcd7810873b731dda">More...</a><br /></td></tr>
+<tr class="separator:af83cc11c92a845bfcd7810873b731dda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afedb2bfa4e97b1c4ea03645541bb59f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#afedb2bfa4e97b1c4ea03645541bb59f7">solve_group</a> (const std::type_index &amp;type, const std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1component_1_1DirectorTask.html">component::DirectorTask</a> &gt; &amp;authority, const std::set&lt; std::type_index &gt; &amp;visited)</td></tr>
 <tr class="memdesc:afedb2bfa4e97b1c4ea03645541bb59f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates options for each provider in a provider group specified by the passed type.  <a href="classmodule_1_1extension_1_1Director.html#afedb2bfa4e97b1c4ea03645541bb59f7">More...</a><br /></td></tr>
 <tr class="separator:afedb2bfa4e97b1c4ea03645541bb59f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -908,8 +911,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="ad55edf0f7508766222d56f3028bc5b7a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad55edf0f7508766222d56f3028bc5b7a">&#9670;&nbsp;</a></span>find_ok_solutions()</h2>
+<a id="a064eb8cb122b43693170af234a60756b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a064eb8cb122b43693170af234a60756b">&#9670;&nbsp;</a></span>find_ok_solutions()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -921,8 +924,18 @@ false if the incumbent task has equal or higher priority</dd></dl>
           <td class="memname">std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html">Director::OkSolution</a> &gt; module::extension::Director::find_ok_solutions </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; <a class="el" href="structmodule_1_1extension_1_1Director_1_1Solution.html">Solution</a> &gt; &amp;&#160;</td>
-          <td class="paramname"><em>solutions</em></td><td>)</td>
+          <td class="paramname"><em>solutions</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const std::set&lt; std::type_index &gt; &amp;&#160;</td>
+          <td class="paramname"><em>used_types</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -935,7 +948,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <p>Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution that can execute, or a blocked solution if none of the solutions can execute. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">solutions</td><td>the set of solutions that we are trying to find an <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html" title="Represents a solution that we can run now, i.e.">OkSolution</a> for</td></tr>
+    <tr><td class="paramname">solutions</td><td>the set of solutions that we are trying to find an <a class="el" href="structmodule_1_1extension_1_1Director_1_1OkSolution.html" title="Represents a solution that we can run now, i.e.">OkSolution</a> for </td></tr>
+    <tr><td class="paramname">used_types</td><td>types that have already been used higher in the solution tree that are blocked to us</td></tr>
   </table>
   </dd>
 </dl>
@@ -1248,8 +1262,8 @@ false if the incumbent task has equal or higher priority</dd></dl>
 
 </div>
 </div>
-<a id="a3669dac468866c9333fb4e1d9042b542"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3669dac468866c9333fb4e1d9042b542">&#9670;&nbsp;</a></span>run_tasks()</h2>
+<a id="af83cc11c92a845bfcd7810873b731dda"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af83cc11c92a845bfcd7810873b731dda">&#9670;&nbsp;</a></span>run_tasks()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1258,7 +1272,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">Director::RunLevel</a> module::extension::Director::run_tasks </td>
+          <td class="memname"><a class="el" href="structmodule_1_1extension_1_1Director_1_1RunResult.html">Director::RunResult</a> module::extension::Director::run_tasks </td>
           <td>(</td>
           <td class="paramtype"><a class="el" href="structmodule_1_1extension_1_1component_1_1ProviderGroup.html">component::ProviderGroup</a> &amp;&#160;</td>
           <td class="paramname"><em>group</em>, </td>
@@ -1273,7 +1287,13 @@ false if the incumbent task has equal or higher priority</dd></dl>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="classmodule_1_1extension_1_1Director.html#a058f702f618f27cceb1ade5526ad2c77">RunLevel</a> &amp;&#160;</td>
-          <td class="paramname"><em>run_level</em>&#160;</td>
+          <td class="paramname"><em>run_level</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::set&lt; std::type_index &gt; &amp;&#160;</td>
+          <td class="paramname"><em>used</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1294,11 +1314,12 @@ false if the incumbent task has equal or higher priority</dd></dl>
   <table class="params">
     <tr><td class="paramname">group</td><td>the provider group that created this pack </td></tr>
     <tr><td class="paramname">pack</td><td>the pack of tasks that we are trying to execute </td></tr>
-    <tr><td class="paramname">run_level</td><td>the level of execution that we are allowed to do</td></tr>
+    <tr><td class="paramname">run_level</td><td>the level of execution that we are allowed to do </td></tr>
+    <tr><td class="paramname">used</td><td>the set of provider groups that are already used that we can't use again</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the run level that we were able to execute up to </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the run level that we were able to execute up to and the set of provider groups that we used </dd></dl>
 
 </div>
 </div>
@@ -1522,7 +1543,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a></li>
-    <li class="footer">Generated on Mon Jun 26 2023 22:01:38 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Jun 26 2023 23:49:53 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

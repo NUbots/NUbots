@@ -1,6 +1,7 @@
 var classmodule_1_1extension_1_1Director =
 [
     [ "OkSolution", "structmodule_1_1extension_1_1Director_1_1OkSolution.html", "structmodule_1_1extension_1_1Director_1_1OkSolution" ],
+    [ "RunResult", "structmodule_1_1extension_1_1Director_1_1RunResult.html", "structmodule_1_1extension_1_1Director_1_1RunResult" ],
     [ "Solution", "structmodule_1_1extension_1_1Director_1_1Solution.html", "structmodule_1_1extension_1_1Director_1_1Solution" ],
     [ "RunReasonLock", "classmodule_1_1extension_1_1Director.html#afa5a1b8dd16d408ba29eb454ec86f438", null ],
     [ "TaskList", "classmodule_1_1extension_1_1Director.html#a7021252f80d525cec056bec1adfa81eb", null ],
@@ -23,7 +24,7 @@ var classmodule_1_1extension_1_1Director =
     [ "direct_priority", "classmodule_1_1extension_1_1Director.html#aadabed75b770382026823c49eba00812", null ],
     [ "find_ok_solution", "classmodule_1_1extension_1_1Director.html#a53c31913830e62fdc1b7c49c9a259191", null ],
     [ "find_ok_solution", "classmodule_1_1extension_1_1Director.html#a90923156eb8865e70b76295c7f2925ac", null ],
-    [ "find_ok_solutions", "classmodule_1_1extension_1_1Director.html#ad55edf0f7508766222d56f3028bc5b7a", null ],
+    [ "find_ok_solutions", "classmodule_1_1extension_1_1Director.html#a064eb8cb122b43693170af234a60756b", null ],
     [ "get_root_provider", "classmodule_1_1extension_1_1Director.html#a553b675b4947fe028b198285a393d778", null ],
     [ "hold_run_reason", "classmodule_1_1extension_1_1Director.html#a4d47a23014bcaeeac4df16728128b9af", null ],
     [ "reevaluate_children", "classmodule_1_1extension_1_1Director.html#aa2525565f36ac81678c9987d70bfa35e", null ],
@@ -32,7 +33,7 @@ var classmodule_1_1extension_1_1Director =
     [ "remove_task", "classmodule_1_1extension_1_1Director.html#a310d77d2ee390e96e2e35db3d3a45a73", null ],
     [ "run_task_on_provider", "classmodule_1_1extension_1_1Director.html#a7bd00630d43e26bcc654b131a9f9724a", null ],
     [ "run_task_pack", "classmodule_1_1extension_1_1Director.html#a867e019bba1e28cf210a89d786452bf5", null ],
-    [ "run_tasks", "classmodule_1_1extension_1_1Director.html#a3669dac468866c9333fb4e1d9042b542", null ],
+    [ "run_tasks", "classmodule_1_1extension_1_1Director.html#af83cc11c92a845bfcd7810873b731dda", null ],
     [ "solve_group", "classmodule_1_1extension_1_1Director.html#afedb2bfa4e97b1c4ea03645541bb59f7", null ],
     [ "solve_provider", "classmodule_1_1extension_1_1Director.html#a6441c5661adb6df1a67bc76571e2aea0", null ],
     [ "solve_task", "classmodule_1_1extension_1_1Director.html#addeec0f3be82e2b190be9af57edfb40d", null ],
