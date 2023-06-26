@@ -10,5 +10,5 @@ bounded_region_x_max: 3.8
 # Bounded area on field y min
 bounded_region_y_min: 0.0
 
-# Bounded area on field y min
-bounded_region_y_max: -3.0
+# Bounded area on field y max
+bounded_region_y_max: 3.0

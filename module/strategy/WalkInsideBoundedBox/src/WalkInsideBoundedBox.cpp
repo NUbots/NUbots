@@ -40,7 +40,7 @@ namespace module::strategy {
 
                 // Check if the ball is in the bounding box
                 if (rBFf.x() > cfg.bounded_region_x_min && rBFf.x() < cfg.bounded_region_x_max
-                    && rBFf.y() > cfg.bounded_region_y_max && rBFf.y() < cfg.bounded_region_y_min) {
+                    && rBFf.y() > cfg.bounded_region_y_min && rBFf.y() < cfg.bounded_region_y_max) {
                     // Do nothing as ball is inside of defending region, play normally
                     log<NUClear::DEBUG>("Ball is inside of bounding box");
                 }
@@ -51,13 +51,13 @@ namespace module::strategy {
                         log<NUClear::DEBUG>("Ball is in own half and outside bounding box");
                         // Clamp desired position to bounding box and try stay 1m behind ball
                         rDFf.x() = std::clamp(rBFf.x() + 1.0, cfg.bounded_region_x_min, cfg.bounded_region_x_max);
-                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_max, cfg.bounded_region_y_min);
+                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
                     }
                     else {
                         log<NUClear::DEBUG>("Ball is in opponents half and outside bounding box");
                         // Clamp desired position to bounding box
                         rDFf.x() = std::clamp(rBFf.x(), cfg.bounded_region_x_min, cfg.bounded_region_x_max);
-                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_max, cfg.bounded_region_y_min);
+                        rDFf.y() = std::clamp(rBFf.y(), cfg.bounded_region_y_min, cfg.bounded_region_y_max);
                     }
 
                     // Emit task to walk to desired position with heading facing opponents side of field

@@ -2,4 +2,4 @@
 log_level: INFO
 
 # Position on field to walk to (x,y,theta)
-ready_position: [2, 1.5, -3.14]
+ready_position: [2, -1.5, -3.14]
