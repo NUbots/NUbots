@@ -42,6 +42,6 @@ arms:
   left_shoulder_roll: 0.45
   right_elbow: -0.9
   left_elbow: -0.9
-  # Ossicalting pitch min and max positions
-  max_pitch: 2.3
-  min_pitch: 1.1
+  # Oscillating pitch min and max positions
+  max_pitch: 1.9
+  min_pitch: 1.5
