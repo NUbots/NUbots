@@ -45,6 +45,27 @@ namespace module::platform::OpenCR {
         opencr.write(
             dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::RETURN_DELAY_TIME), data));
 
+        // Set the maximum voltage for the servos to 16 volts, so that they will not error on battery
+        // For 16 volts, we need to write a value of 160 to the max voltage limit registers
+        uint8_t max_voltage_limit_l = 160 & 0xFF;
+        uint8_t max_voltage_limit_h = (160 >> 8) & 0xFF;
+
+        // Set the lower byte of the max voltage limit
+        for (int i = 0; i < 20; ++i) {
+            // ensure write command targets the ID (ID != i)
+            data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], max_voltage_limit_l);
+        }
+        opencr.write(
+            dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::MAX_VOLTAGE_LIMIT_L), data));
+
+        // Set the upper byte of the max voltage limit
+        for (int i = 0; i < 20; ++i) {
+            // ensure write command targets the ID (ID != i)
+            data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], max_voltage_limit_h);
+        }
+        opencr.write(
+            dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::MAX_VOLTAGE_LIMIT_H), data));
+
         // Set up the dynamixels to use time-based profile velocity control
         for (int i = 0; i < 20; ++i) {
             // ensure write command targets the ID (ID != i)
