@@ -336,7 +336,7 @@ namespace module::extension {
         });
 
         // We have a new task pack to run
-        on<Trigger<TaskPack>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
+        on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
             std::lock_guard<std::recursive_mutex> lock(director_mutex);
             run_task_pack(pack);
         });
