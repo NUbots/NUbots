@@ -665,6 +665,7 @@ var namespaces_dup =
         [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
         [ "Striker", "classmodule_1_1purpose_1_1Striker.html", "classmodule_1_1purpose_1_1Striker" ],
+        [ "Tester", "classmodule_1_1purpose_1_1Tester.html", "classmodule_1_1purpose_1_1Tester" ],
         [ "GameMode", "Goalie_8cpp.html#a2a5932ecf6b4477c7ba24d1de6dafb43", null ],
         [ "GoalieTask", "Goalie_8cpp.html#a0ad4596d701cecf7cd4cc55d022ed6ad", null ],
         [ "LimbID", "purpose_2ScriptTuner_2src_2ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268", null ],
