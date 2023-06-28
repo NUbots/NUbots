@@ -1,2 +1,27 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
+
+# Tasks to emit on startup
+tasks:
+  # Strategies
+  align_ball_to_goal: false
+  align_ball_to_goal_priority: 1
+  find_ball: false
+  find_ball_priority: 1
+  look_at_ball: false
+  look_at_ball_priority: 1
+  walk_to_ball: false
+  walk_to_ball_priority: 1
+  walk_to_field_position: false
+  walk_to_field_position_priority: 1
+  kick_to_goal: false
+  kick_to_goal_priority: 1
+
+  # Planners
+  kick_to: false
+  kick_to_priority: 1
+  look_around: false
+  look_around_priority: 1
+
+# Position to walk to when emitting WalkToFieldPosition [x, y, theta]
+walk_to_field_position_position: [0, 0, 0]
