@@ -143,10 +143,20 @@ TEST_CASE("Test that the order of tasks is stable even with multiple threads", "
     powerplant.start();
 
     std::vector<std::string> expected = {};
+    for (int loop_id = 0; loop_id <= MAX_LOOPS; ++loop_id) {
+        expected.push_back(fmt::format("loop {}: initiating", loop_id));
+        expected.push_back(fmt::format("loop {}: start", loop_id));
+        expected.push_back(fmt::format("loop {}: emitting task 1", loop_id));
+        expected.push_back(fmt::format("loop {}: emitting task 2", loop_id));
+        expected.push_back(fmt::format("loop {}: subtask 1 executed", loop_id));
+        expected.push_back(fmt::format("loop {}: emitting dependency from subtask 1", loop_id));
+        expected.push_back(fmt::format("loop {}: dependency from subtask 1", loop_id));
+    }
 
     // Make an info print the diff in an easy to read way if we fail
     INFO(util::diff_string(expected, events));
 
     // Check the events fired in order and only those events
+    REQUIRE(events.size() == 7 * (MAX_LOOPS + 1));
     REQUIRE(events == expected);
 }
