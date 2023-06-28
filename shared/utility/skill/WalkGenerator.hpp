@@ -156,6 +156,9 @@ namespace utility::skill {
             // Start time at end of step period to avoid taking a step when starting.
             t = step_period;
 
+            // Generate trajectories for swing foot and torso with zero velocity target
+            generate_walking_trajectories(Eigen::Matrix<Scalar, 3, 1>::Zero());
+
             // Set engine state to stopped
             engine_state = WalkState::State::STOPPED;
         }
