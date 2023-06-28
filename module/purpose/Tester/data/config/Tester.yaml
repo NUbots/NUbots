@@ -16,6 +16,8 @@ tasks:
   walk_to_field_position_priority: 1
   kick_to_goal: false
   kick_to_goal_priority: 1
+  stand_still: false
+  stand_still_priority: 1
 
   # Planners
   kick_to: false

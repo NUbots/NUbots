@@ -55,6 +55,8 @@ namespace module::purpose {
             cfg.kick_to_priority                = config["tasks"]["kick_to_priority"].as<int>();
             cfg.look_around                     = config["tasks"]["look_around"].as<bool>();
             cfg.look_around_priority            = config["tasks"]["look_around_priority"].as<int>();
+            cfg.stand_still                     = config["tasks"]["stand_still"].as<bool>();
+            cfg.stand_still_priority            = config["tasks"]["stand_still_priority"].as<int>();
             cfg.walk_to_field_position_position = config["walk_to_field_position_position"].as<Expression>();
         });
 
@@ -88,6 +90,9 @@ namespace module::purpose {
             }
             if (cfg.look_around) {
                 emit<Task>(std::make_unique<LookAround>(), cfg.look_around_priority);
+            }
+            if (cfg.stand_still) {
+                emit<Task>(std::make_unique<StandStill>(), cfg.stand_still_priority);
             }
         });
     }

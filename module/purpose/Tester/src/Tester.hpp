@@ -44,6 +44,10 @@ namespace module::purpose {
             bool look_around = false;
             /// @brief Priority of LookAround task
             int look_around_priority = 1;
+            /// Whether to emit StandStill task
+            bool stand_still = false;
+            /// @brief Priority of StandStill task
+            int stand_still_priority = 1;
 
             /// @brief Position to walk to when emitting WalkToFieldPosition task
             Eigen::Vector3f walk_to_field_position_position = Eigen::Vector3f::Zero();
