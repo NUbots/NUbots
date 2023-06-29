@@ -25,7 +25,6 @@ message Defender {
 }
 
 message NormalDefender {}
-message PenaltyShootoutDefender {}
 message DirectFreeKickDefender {}
 message InDirectFreeKickDefender {}
 message PenaltyKickDefender {}
