@@ -92,5 +92,5 @@ servos:
     simulated: false
   - # [19] HEAD_PITCH
     direction: 1
-    offset: 0.17
+    offset: 0.0
     simulated: false
