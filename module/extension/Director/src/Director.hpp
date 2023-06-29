@@ -43,6 +43,7 @@ namespace module::extension {
         using TaskPack = std::pair<std::shared_ptr<component::Provider>, TaskList>;
 
     private:
+        /// A mutex to protect the director from multithreaded access
         std::recursive_mutex director_mutex{};
 
         /**
