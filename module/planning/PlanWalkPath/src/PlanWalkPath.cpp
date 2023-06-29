@@ -31,6 +31,7 @@ namespace module::planning {
             cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
             cfg.acceleration                         = config["acceleration"].as<double>();
             cfg.approach_radius                      = config["approach_radius"].as<double>();
+            cfg.y_velocity_enabled                   = config["y_velocity_enabled"].as<bool>();
 
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
             cfg.min_angular_velocity = config["min_angular_velocity"].as<double>();
@@ -64,7 +65,14 @@ namespace module::planning {
             }
 
             // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+            Eigen::Vector3d velocity_target = Eigen::Vector3d::Zero();
+
+            if (cfg.y_velocity_enabled) {
+                velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+            }
+            else {
+                velocity_target = Eigen::Vector3d::UnitX() * velocity_magnitude;
+            }
 
             // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
             // value cfg.max_angular_velocity
