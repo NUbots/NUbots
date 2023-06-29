@@ -28,7 +28,6 @@ namespace module::purpose {
     using message::purpose::InDirectFreeKickDefender;
     using message::purpose::NormalDefender;
     using message::purpose::PenaltyKickDefender;
-    using message::purpose::PenaltyShootoutDefender;
     using message::purpose::ThrowInDefender;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
