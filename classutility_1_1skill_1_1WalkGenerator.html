@@ -204,7 +204,7 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a4e46446b6c0398a0be01a53da023882a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad8ad2da1eeeae5b00f87eb1b3b06a641"><td class="memItemLeft" align="right" valign="top"><a id="ad8ad2da1eeeae5b00f87eb1b3b06a641"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ad8ad2da1eeeae5b00f87eb1b3b06a641">reset</a> ()</td></tr>
-<tr class="memdesc:ad8ad2da1eeeae5b00f87eb1b3b06a641"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset walk engine. <br /></td></tr>
+<tr class="memdesc:ad8ad2da1eeeae5b00f87eb1b3b06a641"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset walk engine time and initial poses. <br /></td></tr>
 <tr class="separator:ad8ad2da1eeeae5b00f87eb1b3b06a641"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac8faeae1a9af29ff6a6f41e971d89bd9"><td class="memItemLeft" align="right" valign="top">WalkState::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ac8faeae1a9af29ff6a6f41e971d89bd9">update</a> (const Scalar &amp;dt, const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;velocity_target)</td></tr>
 <tr class="memdesc:ac8faeae1a9af29ff6a6f41e971d89bd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run an update of the walk engine, updating the time and engine state and trajectories.  <a href="classutility_1_1skill_1_1WalkGenerator.html#ac8faeae1a9af29ff6a6f41e971d89bd9">More...</a><br /></td></tr>
@@ -212,15 +212,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a1e40fed9149b66d921ade4b706a73c7d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a1e40fed9149b66d921ade4b706a73c7d">compute_step_placement</a> (const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;velocity_target)</td></tr>
-<tr class="memdesc:a1e40fed9149b66d921ade4b706a73c7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute the next foot step placement, with limits.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a1e40fed9149b66d921ade4b706a73c7d">More...</a><br /></td></tr>
-<tr class="separator:a1e40fed9149b66d921ade4b706a73c7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8d33da2622b3bf675f289631d1069b09"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a8d33da2622b3bf675f289631d1069b09">generate_swingfoot_trajectory</a> (const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;velocity_target)</td></tr>
-<tr class="memdesc:a8d33da2622b3bf675f289631d1069b09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate swing foot trajectory.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a8d33da2622b3bf675f289631d1069b09">More...</a><br /></td></tr>
-<tr class="separator:a8d33da2622b3bf675f289631d1069b09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7caa10a8327a0fc1aa2f33cc29058ef5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a7caa10a8327a0fc1aa2f33cc29058ef5">generate_torso_trajectory</a> (const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;velocity_target)</td></tr>
-<tr class="memdesc:a7caa10a8327a0fc1aa2f33cc29058ef5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate torso trajectory.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a7caa10a8327a0fc1aa2f33cc29058ef5">More...</a><br /></td></tr>
-<tr class="separator:a7caa10a8327a0fc1aa2f33cc29058ef5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a95923ba2ff3676ad3fdb275f93a0e0ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a95923ba2ff3676ad3fdb275f93a0e0ae">generate_walking_trajectories</a> (const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;velocity_target)</td></tr>
+<tr class="memdesc:a95923ba2ff3676ad3fdb275f93a0e0ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate walking trajectories for the torso and swing foot.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a95923ba2ff3676ad3fdb275f93a0e0ae">More...</a><br /></td></tr>
+<tr class="separator:a95923ba2ff3676ad3fdb275f93a0e0ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0cfb789b00c4546d9561ca3f5e1d476"><td class="memItemLeft" align="right" valign="top">Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476">get_foot_width_offset</a> () const</td></tr>
 <tr class="memdesc:aa0cfb789b00c4546d9561ca3f5e1d476"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lateral distance between feet in current planted foot frame.  <a href="classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476">More...</a><br /></td></tr>
 <tr class="separator:aa0cfb789b00c4546d9561ca3f5e1d476"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -263,10 +257,6 @@ Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="b
 Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a66d2d2857dc063fcdfe28a09ed683ea8">step_period</a> = 0.0</td></tr>
 <tr class="memdesc:a66d2d2857dc063fcdfe28a09ed683ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step period (in seconds). Time for one complete step. <br /></td></tr>
 <tr class="separator:a66d2d2857dc063fcdfe28a09ed683ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6aa9aeb4ecdfc3ee3d78dae30a2f152"><td class="memItemLeft" align="right" valign="top"><a id="ab6aa9aeb4ecdfc3ee3d78dae30a2f152"></a>
-Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ab6aa9aeb4ecdfc3ee3d78dae30a2f152">step_placement</a> = Eigen::Matrix&lt;Scalar, 3, 1&gt;::Zero()</td></tr>
-<tr class="memdesc:ab6aa9aeb4ecdfc3ee3d78dae30a2f152"><td class="mdescLeft">&#160;</td><td class="mdescRight">Next step placement in the planted foot frame. <br /></td></tr>
-<tr class="separator:ab6aa9aeb4ecdfc3ee3d78dae30a2f152"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a690826b0069c8ee72ad9ad78ca9352ed"><td class="memItemLeft" align="right" valign="top"><a id="a690826b0069c8ee72ad9ad78ca9352ed"></a>
 Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a690826b0069c8ee72ad9ad78ca9352ed">step_width</a> = 0.0</td></tr>
 <tr class="memdesc:a690826b0069c8ee72ad9ad78ca9352ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lateral distance between feet. (how spread apart the feet should be) <br /></td></tr>
@@ -309,42 +299,6 @@ Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 <tr class="separator:af2d39521a2eb7b71ededc319f688f4fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a1e40fed9149b66d921ade4b706a73c7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1e40fed9149b66d921ade4b706a73c7d">&#9670;&nbsp;</a></span>compute_step_placement()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Scalar &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::compute_step_placement </td>
-          <td>(</td>
-          <td class="paramtype">const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;&#160;</td>
-          <td class="paramname"><em>velocity_target</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Compute the next foot step placement, with limits. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">velocity_target</td><td>Requested velocity target (dx, dy, dtheta). </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="aa72d43e542afe7e211f5ad0d1f0ccad3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aa72d43e542afe7e211f5ad0d1f0ccad3">&#9670;&nbsp;</a></span>configure()</h2>
 
@@ -381,8 +335,8 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
-<a id="a8d33da2622b3bf675f289631d1069b09"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8d33da2622b3bf675f289631d1069b09">&#9670;&nbsp;</a></span>generate_swingfoot_trajectory()</h2>
+<a id="a95923ba2ff3676ad3fdb275f93a0e0ae"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a95923ba2ff3676ad3fdb275f93a0e0ae">&#9670;&nbsp;</a></span>generate_walking_trajectories()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -393,7 +347,7 @@ template&lt;typename Scalar &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::generate_swingfoot_trajectory </td>
+          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::generate_walking_trajectories </td>
           <td>(</td>
           <td class="paramtype">const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;&#160;</td>
           <td class="paramname"><em>velocity_target</em></td><td>)</td>
@@ -407,53 +361,13 @@ template&lt;typename Scalar &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Generate swing foot trajectory. </p>
+<p>Generate walking trajectories for the torso and swing foot. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">velocity_target</td><td>Requested velocity target (dx, dy, dtheta). </td></tr>
-    <tr><td class="paramname">Hps_end</td><td>Next foot placement. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Trajectory of swing foot to follow to reach next foot placement. </dd></dl>
-
-</div>
-</div>
-<a id="a7caa10a8327a0fc1aa2f33cc29058ef5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7caa10a8327a0fc1aa2f33cc29058ef5">&#9670;&nbsp;</a></span>generate_torso_trajectory()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Scalar &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::generate_torso_trajectory </td>
-          <td>(</td>
-          <td class="paramtype">const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;&#160;</td>
-          <td class="paramname"><em>velocity_target</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Generate torso trajectory. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">velocity_target</td><td>Requested velocity target (dx, dy, dtheta). </td></tr>
-    <tr><td class="paramname">Hps_end</td><td>Next foot placement. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Trajectory of torso to follow to reach next torso placement. </dd></dl>
 
 </div>
 </div>
@@ -899,7 +813,7 @@ template&lt;typename Scalar &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1skill.html">skill</a></li><li class="navelem"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">WalkGenerator</a></li>
-    <li class="footer">Generated on Wed Jun 28 2023 05:31:00 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Jun 29 2023 01:59:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

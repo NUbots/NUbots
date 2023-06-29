@@ -1,9 +1,7 @@
 var classutility_1_1skill_1_1WalkGenerator =
 [
-    [ "compute_step_placement", "classutility_1_1skill_1_1WalkGenerator.html#a1e40fed9149b66d921ade4b706a73c7d", null ],
     [ "configure", "classutility_1_1skill_1_1WalkGenerator.html#aa72d43e542afe7e211f5ad0d1f0ccad3", null ],
-    [ "generate_swingfoot_trajectory", "classutility_1_1skill_1_1WalkGenerator.html#a8d33da2622b3bf675f289631d1069b09", null ],
-    [ "generate_torso_trajectory", "classutility_1_1skill_1_1WalkGenerator.html#a7caa10a8327a0fc1aa2f33cc29058ef5", null ],
+    [ "generate_walking_trajectories", "classutility_1_1skill_1_1WalkGenerator.html#a95923ba2ff3676ad3fdb275f93a0e0ae", null ],
     [ "get_foot_pose", "classutility_1_1skill_1_1WalkGenerator.html#a912962aa7e7a1e4d9f64784569eafb38", null ],
     [ "get_foot_width_offset", "classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476", null ],
     [ "get_state", "classutility_1_1skill_1_1WalkGenerator.html#a0a9662552bcfec8fc609503bd86f2942", null ],
@@ -24,7 +22,6 @@ var classutility_1_1skill_1_1WalkGenerator =
     [ "step_height", "classutility_1_1skill_1_1WalkGenerator.html#a293910dbbf5f59ec845e8b238ba77a3c", null ],
     [ "step_limits", "classutility_1_1skill_1_1WalkGenerator.html#a2cddea1ab51177e503ab4d134d01e3d3", null ],
     [ "step_period", "classutility_1_1skill_1_1WalkGenerator.html#a66d2d2857dc063fcdfe28a09ed683ea8", null ],
-    [ "step_placement", "classutility_1_1skill_1_1WalkGenerator.html#ab6aa9aeb4ecdfc3ee3d78dae30a2f152", null ],
     [ "step_width", "classutility_1_1skill_1_1WalkGenerator.html#a690826b0069c8ee72ad9ad78ca9352ed", null ],
     [ "swingfoot_trajectory", "classutility_1_1skill_1_1WalkGenerator.html#a7c0d17a50ab3b598c2a8b43db7701098", null ],
     [ "t", "classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410", null ],
