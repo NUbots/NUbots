@@ -30,7 +30,7 @@ namespace module::strategy {
             cfg.bounded_region_y_max = config["bounded_region_y_max"].as<Expression>();
         });
         on<Provide<WalkInsideBoundedBoxTask>, Trigger<Ball>, With<Field>>().then(
-            [this](const WalkInsideBoundedBoxTask& walk_inside_bounded_box_task, const Ball& ball, const Field& field) {
+            [this](const Ball& ball, const Field& field) {
                 // Get the current position of the ball on the field
                 Eigen::Isometry3d Hfw = field.Hfw;
                 Eigen::Vector3d rBFf  = Hfw * ball.rBWw;

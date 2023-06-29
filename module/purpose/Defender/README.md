@@ -24,7 +24,7 @@ Add this module to play as a defender in soccer!
 
 ## Emits
 
-- `message::strategy::WalkInsideBoundedBox` a Task requesting to play as a defender in the normal game state clamped to bounded box
+- `message::strategy::WalkInsideBoundedBox` a Task requesting to stay within a bounded area on the field.
 - `message::strategy::StandStill` a Task requesting to stand still and not move
 - `message::strategy::FindBall` a Task requesting to look and move around to find the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball
