@@ -88,9 +88,9 @@ servos:
     simulated: false
   - # [18] HEAD_YAW
     direction: 1
-    offset: 0.0
+    offset: -4 * pi / 180
     simulated: false
   - # [19] HEAD_PITCH
     direction: 1
-    offset: 0.0
+    offset: -9 * pi / 180
     simulated: false
