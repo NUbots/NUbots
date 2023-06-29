@@ -71,37 +71,21 @@ namespace {
 
                 // Emit optional tasks so they can all run in parallel if possible
                 log_event(fmt::format("loop {}: emitting task 1", t.loop_id));
-                emit<Task>(std::make_unique<SubTask<1>>(t.loop_id),
-                           0,
-                           true,
-                           fmt::format("Loop {}: SubTask1", t.loop_id));
+                emit<Task>(std::make_unique<SubTask<1>>(t.loop_id), 0, true);
                 log_event(fmt::format("loop {}: emitting task 2", t.loop_id));
-                emit<Task>(std::make_unique<SubTask<2>>(t.loop_id),
-                           0,
-                           true,
-                           fmt::format("Loop {}: SubTask2", t.loop_id));
+                emit<Task>(std::make_unique<SubTask<2>>(t.loop_id), 0, true);
             });
 
             on<Provide<SubTask<1>>, Needs<Dependency>>().then("SubTask1", [this](const SubTask<1>& t) {
-                log_event(fmt::format("loop {}: subtask {} executed", t.loop_id, t.subtask_id));
-
                 // Emit the dependency task
                 log_event(fmt::format("loop {}: emitting dependency from subtask {}", t.loop_id, t.subtask_id));
-                emit<Task>(std::make_unique<Dependency>(t.loop_id, t.subtask_id),
-                           0,
-                           false,
-                           fmt::format("Loop {}: SubTask1: Dependency", t.loop_id));
+                emit<Task>(std::make_unique<Dependency>(t.loop_id, t.subtask_id));
             });
 
             on<Provide<SubTask<2>>, Needs<Dependency>>().then("SubTask2", [this](const SubTask<2>& t) {
-                log_event(fmt::format("loop {}: subtask {} executed", t.loop_id, t.subtask_id));
-
                 // Emit the dependency task
                 log_event(fmt::format("loop {}: emitting dependency from subtask {}", t.loop_id, t.subtask_id));
-                emit<Task>(std::make_unique<Dependency>(t.loop_id, t.subtask_id),
-                           0,
-                           false,
-                           fmt::format("Loop {}: SubTask2: Dependency", t.loop_id));
+                emit<Task>(std::make_unique<Dependency>(t.loop_id, t.subtask_id));
             });
 
             on<Provide<Dependency>>().then("Dependency", [this](const Dependency& t) {
@@ -119,11 +103,8 @@ namespace {
             on<Trigger<TriggerMainTask>>().then("TriggerMainTask", [this](const TriggerMainTask& t) {
                 // Start of this main task loop
                 log_event(fmt::format("loop {}: initiating", t.loop_id));
-                emit<Task>(std::unique_ptr<MainTask>(), 0, false, "EndTask");
-                emit<Task>(std::make_unique<MainTask>(t.loop_id),
-                           0,
-                           false,
-                           fmt::format("Begin Task: Loop {}", t.loop_id));
+                emit<Task>(std::unique_ptr<MainTask>(nullptr));
+                emit<Task>(std::make_unique<MainTask>(t.loop_id));
             });
 
             on<Startup>().then("Startup", [this] { emit(std::make_unique<TriggerMainTask>(0)); });
