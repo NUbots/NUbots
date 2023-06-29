@@ -17,12 +17,3 @@ cameras:
       height: [0.5, 1.0]
       max_distance: 15
       intersection_tolerance: 0.25
-  Right:
-    concurrent: 1
-    network: config/networks/LabNetwork.yaml
-    engine: opencl
-    cache_directory: "./vision_cache/"
-    classifier:
-      height: [0.5, 1.0]
-      max_distance: 15
-      intersection_tolerance: 0.25
