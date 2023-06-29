@@ -1,55 +1,38 @@
+import React from "react";
 import { computed } from "mobx";
-import { createTransformer } from "mobx-utils";
-import { PlaneBufferGeometry, PlaneGeometry, RingBufferGeometry } from "three";
+import { observer } from "mobx-react";
+import * as THREE from "three";
 import { Matrix4 } from "three";
-import { MeshBasicMaterial } from "three";
-import { Object3D } from "three";
-import { Mesh } from "three";
-import { BufferGeometry } from "three";
 import * as BufferGeometryUtils from "three/examples/jsm/utils/BufferGeometryUtils";
 
 import { FieldModel } from "./model";
 
-export class FieldViewModel {
-  constructor(private model: FieldModel) {}
-
-  static of = createTransformer((model: FieldModel): FieldViewModel => {
-    return new FieldViewModel(model);
-  });
-
-  @computed
-  get field() {
-    const field = new Object3D();
-    field.add(this.ground);
-    field.add(this.fieldLines);
-    return field;
+@observer
+export class FieldView extends React.Component<{
+  model: FieldModel;
+}> {
+  private get model() {
+    return this.props.model;
   }
 
-  @computed
-  private get ground() {
-    return new Mesh(this.groundGeometry, this.groundMaterial);
-  }
-
-  @computed
-  private get groundGeometry(): BufferGeometry {
-    const dimensions = this.model.dimensions;
-    const { fieldLength, fieldWidth, borderStripMinWidth, goalDepth } = dimensions;
-    return new PlaneBufferGeometry(
-      fieldLength + goalDepth * 2 + borderStripMinWidth * 2,
-      fieldWidth + borderStripMinWidth * 2,
+  render() {
+    const dim = this.model.dimensions;
+    return (
+      <object3D>
+        <mesh>
+          <planeBufferGeometry
+            args={[
+              dim.fieldLength + dim.goalDepth * 2 + dim.borderStripMinWidth * 2,
+              dim.fieldWidth + dim.borderStripMinWidth * 2,
+            ]}
+          />
+          <meshBasicMaterial color={this.model.fieldColor} />
+        </mesh>
+        <mesh geometry={this.fieldLinesGeometry} position={[0, 0, 0.001]}>
+          <meshBasicMaterial color={this.model.lineColor} />
+        </mesh>
+      </object3D>
     );
-  }
-
-  @computed
-  private get groundMaterial() {
-    return new MeshBasicMaterial({ color: this.model.fieldColor });
-  }
-
-  @computed
-  private get fieldLines() {
-    const fieldLines = new Mesh(this.fieldLinesGeometry, this.fieldLinesMaterial);
-    fieldLines.position.z = 0.001;
-    return fieldLines;
   }
 
   @computed
@@ -107,16 +90,11 @@ export class FieldViewModel {
 
   @computed
   private get centerCircle() {
-    return new RingBufferGeometry(
+    return new THREE.RingBufferGeometry(
       (this.model.dimensions.centerCircleDiameter - this.model.dimensions.lineWidth) * 0.5,
       (this.model.dimensions.centerCircleDiameter + this.model.dimensions.lineWidth) * 0.5,
       128,
     );
-  }
-
-  @computed
-  private get fieldLinesMaterial() {
-    return new MeshBasicMaterial({ color: this.model.lineColor });
   }
 
   private buildRectangle(x: number, y: number, w: number, h: number, lw: number) {
@@ -134,14 +112,14 @@ export class FieldViewModel {
 
   private buildHorizontalLine(x1: number, x2: number, y: number, width: number) {
     const length = x2 - x1;
-    const hLine = new PlaneGeometry(length, width);
+    const hLine = new THREE.PlaneGeometry(length, width);
     hLine.applyMatrix4(new Matrix4().makeTranslation(x1 + length * 0.5, y, 0));
     return hLine;
   }
 
   private buildVerticalLine(y1: number, y2: number, x: number, width: number) {
     const length = y2 - y1;
-    const vLine = new PlaneGeometry(width, length);
+    const vLine = new THREE.PlaneGeometry(width, length);
     vLine.applyMatrix4(new Matrix4().makeTranslation(x, y1 + length * 0.5, 0));
     return vLine;
   }

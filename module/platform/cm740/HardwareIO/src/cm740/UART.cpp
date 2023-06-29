@@ -287,7 +287,7 @@ namespace CM740 {
             return result;
         }
 
-        // Return the packet we recieved
+        // Return the packet we received
         return result;
     }
 

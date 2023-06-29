@@ -1,0 +1,53 @@
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher
+  support::SignalCatcher
+  support::logging::ConsoleLogHandler
+  # Config
+  support::configuration::SoccerConfig
+  actuation::KinematicsConfiguration
+  support::configuration::GlobalConfig
+  # Sensors
+  platform::${SUBCONTROLLER}::HardwareIO
+  input::SensorFilter
+  input::Camera
+  input::GameController
+  # Vision
+  vision::VisualMesh
+  vision::GreenHorizonDetector
+  vision::BallDetector
+  vision::FieldLineDetector
+  # Localisation
+  localisation::FieldLocalisation
+  localisation::BallLocalisation
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  skill::SplineKick
+  skill::GetUp
+  skill::Look
+  skill::Dive
+  # Planners
+  planning::PlanWalkPath
+  planning::PlanLook
+  planning::PlanKick
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+  strategy::WalkToFieldPosition
+  strategy::StrategiseLook
+  strategy::WalkToBall
+  strategy::FindObject
+  strategy::KickToGoal
+  strategy::AlignBallToGoal
+  strategy::DiveToBall
+  # Purposes
+  purpose::Tester
+)

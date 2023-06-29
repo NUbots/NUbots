@@ -1,13 +1,9 @@
-/*
-This code is based on the original code by Quentin "Leph" Rouxel and Team Rhoban.
-The original files can be found at:
-https://github.com/Rhoban/model/
-*/
-#ifndef MODULE_MOTION_MOTIONGENERATION_HPP
-#define MODULE_MOTION_MOTIONGENERATION_HPP
+#ifndef MODULE_MOTION_WALKGENERATOR_HPP
+#define MODULE_MOTION_WALKGENERATOR_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <nuclear>
 
 #include "message/behaviour/state/WalkState.hpp"
 
@@ -21,16 +17,11 @@ namespace utility::skill {
     using utility::input::LimbID;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::splines::Trajectory;
-    using utility::motion::splines::TrajectoryDimension::PITCH;
-    using utility::motion::splines::TrajectoryDimension::ROLL;
-    using utility::motion::splines::TrajectoryDimension::X;
-    using utility::motion::splines::TrajectoryDimension::Y;
-    using utility::motion::splines::TrajectoryDimension::YAW;
-    using utility::motion::splines::TrajectoryDimension::Z;
+    using utility::motion::splines::Waypoint;
 
     /// @brief Motion generation options.
     template <typename Scalar>
-    struct MotionGenerationOptions {
+    struct WalkGeneratorOptions {
         /// @brief Maximum step limits in x, y, and theta.
         Eigen::Matrix<Scalar, 3, 1> step_limits = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
@@ -52,31 +43,38 @@ namespace utility::skill {
         /// @brief Torso pitch (in radians)
         Scalar torso_pitch = 0.0;
 
+        /// @brief Torso constant position offset [x,y,z] (in meters)
+        Eigen::Matrix<Scalar, 3, 1> torso_position_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
         /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
         Scalar torso_sway_ratio = 0.0;
 
         /// @brief Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
         Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Ratio of where to position the torso relative to the next step position [x,y] (in meters)
+        Eigen::Matrix<Scalar, 3, 1> torso_final_position_ratio = Eigen::Matrix<Scalar, 3, 1>::Zero();
     };
 
     template <typename Scalar>
-    class MotionGeneration {
+    class WalkGenerator {
     public:
         /**
          * @brief Configure motion generation options.
          * @param options Motion generation options.
          */
-        void configure(const MotionGenerationOptions<Scalar>& options) {
-            step_limits       = options.step_limits;
-            step_height       = options.step_height;
-            step_period       = options.step_period;
-            half_step_period  = step_period / 2.0;
-            step_width        = options.step_width;
-            step_apex_ratio   = options.step_apex_ratio;
-            torso_height      = options.torso_height;
-            torso_pitch       = options.torso_pitch;
-            torso_sway_offset = options.torso_sway_offset;
-            torso_sway_ratio  = options.torso_sway_ratio;
+        void configure(const WalkGeneratorOptions<Scalar>& options) {
+            step_limits                = options.step_limits;
+            step_height                = options.step_height;
+            step_period                = options.step_period;
+            step_width                 = options.step_width;
+            step_apex_ratio            = options.step_apex_ratio;
+            torso_height               = options.torso_height;
+            torso_pitch                = options.torso_pitch;
+            torso_position_offset      = options.torso_position_offset;
+            torso_sway_ratio           = options.torso_sway_ratio;
+            torso_sway_offset          = options.torso_sway_offset;
+            torso_final_position_ratio = options.torso_final_position_ratio;
         }
 
         /**
@@ -143,7 +141,7 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Reset walk engine.
+         * @brief Reset walk engine time and initial poses.
          */
         void reset() {
             // Initialize swing foot pose
@@ -151,16 +149,15 @@ namespace utility::skill {
             Hps_start.linear().setIdentity();
 
             // Initialize torso pose
-            Hpt_start.translation() = Eigen::Matrix<Scalar, 3, 1>(0.0, get_foot_width_offset() / 2, torso_height);
+            Hpt_start.translation() = torso_sway_offset + torso_position_offset;
             Hpt_start.linear() =
                 Eigen::AngleAxis<Scalar>(torso_pitch, Eigen::Matrix<Scalar, 3, 1>::UnitY()).toRotationMatrix();
 
-            // Initialize swing foot and torso trajectories
-            generate_swingfoot_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
-            generate_torso_trajectory(Eigen::Matrix<Scalar, 3, 1>::Zero());
-
             // Start time at end of step period to avoid taking a step when starting.
             t = step_period;
+
+            // Generate trajectories for swing foot and torso with zero velocity target
+            generate_walking_trajectories(Eigen::Matrix<Scalar, 3, 1>::Zero());
 
             // Set engine state to stopped
             engine_state = WalkState::State::STOPPED;
@@ -204,9 +201,8 @@ namespace utility::skill {
                 default: NUClear::log<NUClear::WARN>("Unknown state"); break;
             }
 
-            // Generate the torso and swing foot trajectories
-            generate_swingfoot_trajectory(velocity_target);
-            generate_torso_trajectory(velocity_target);
+            // Generate the torso and swing foot trajectories to reach the next foot step location
+            generate_walking_trajectories(velocity_target);
 
             return engine_state;
         }
@@ -231,9 +227,6 @@ namespace utility::skill {
         /// @brief Step period (in seconds). Time for one complete step.
         Scalar step_period = 0.0;
 
-        /// @brief Half of step period (in seconds).
-        Scalar half_step_period = 0.0;
-
         /// @brief Ratio of the step_period where the swing foot should be at its maximum height, between [0 1].
         Scalar step_apex_ratio = 0.0;
 
@@ -246,11 +239,17 @@ namespace utility::skill {
         /// @brief Torso pitch.
         Scalar torso_pitch = 0.0;
 
-        /// @brief Torso offset at half step period from the planted foot.
+        /// @brief Torso constant position offset [x,y,z] (in meters)
+        Eigen::Matrix<Scalar, 3, 1> torso_position_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
+
+        /// @brief Torso offset at half step period from the planted foot, at time = step_apex_ratio * step_period
         Eigen::Matrix<Scalar, 3, 1> torso_sway_offset = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
         /// @brief Ratio of the step_period where the torso should be at its maximum sway, between [0 1].
         Scalar torso_sway_ratio = 0.0;
+
+        /// @brief Ratio of where to position the torso relative to the next step position [x,y] (in meters)
+        Eigen::Matrix<Scalar, 3, 1> torso_final_position_ratio = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
         // ******************************** State ********************************
 
@@ -274,122 +273,96 @@ namespace utility::skill {
         // ******************************** Trajectories ********************************
 
         /// @brief 6D piecewise polynomial trajectory for swing foot.
-        Trajectory<Scalar> swingfoot_trajectory;
+        Trajectory<Scalar> swingfoot_trajectory{};
 
         /// @brief 6D piecewise polynomial trajectory for torso.
-        Trajectory<Scalar> torso_trajectory;
+        Trajectory<Scalar> torso_trajectory{};
 
-        /// @brief Get the lateral distance between feet in current planted foot frame.
-        /// @return Lateral distance between feet.
+        /**
+         * @brief Get the lateral distance between feet in current planted foot frame.
+         * @return Lateral distance between feet.
+         */
         Scalar get_foot_width_offset() const {
             return left_foot_is_planted ? -step_width : step_width;
         }
 
         /**
-         * @brief Generate swing foot trajectory.
+         * @brief Generate walking trajectories for the torso and swing foot.
          * @param velocity_target Requested velocity target (dx, dy, dtheta).
-         * @param Hps_end Next foot placement.
-         * @return Trajectory of swing foot to follow to reach next foot placement.
          */
-        void generate_swingfoot_trajectory(const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
-            // Clear current trajectory
+        void generate_walking_trajectories(const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
+            // Compute the next step placement in the planted foot frame based on the requested velocity target
+            Eigen::Matrix<Scalar, 3, 1> step = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            step.x() = std::max(std::min(velocity_target.x() * step_period, step_limits.x()), -step_limits.x());
+            step.y() = std::max(std::min(velocity_target.y() * step_period, step_limits.y()), -step_limits.y());
+            step.z() = std::max(std::min(velocity_target.z() * step_period, step_limits.z()), -step_limits.z());
+
+            // Create a waypoint variable to use for all waypoints
+            Waypoint<Scalar> waypoint;
+
+            // ******************************** Swing Foot Trajectory ********************************
             swingfoot_trajectory.clear();
 
-            // Compute next foot placement and clamp with step limits
-            Eigen::Matrix<Scalar, 3, 1> step_placement;
-            step_placement.x() =
-                std::max(std::min(velocity_target.x() * step_period, step_limits.x()), -step_limits.x());
-            step_placement.y() =
-                std::max(std::min(velocity_target.y() * step_period, step_limits.y()), -step_limits.y());
-            step_placement.z() =
-                std::max(std::min(velocity_target.z() * step_period, step_limits.z()), -step_limits.z());
+            // Start waypoint: Start from the current swing foot position at time = 0
+            waypoint.time_point       = 0.0;
+            waypoint.position         = Hps_start.translation();
+            waypoint.velocity         = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            waypoint.orientation      = MatrixToEulerIntrinsic(Hps_start.rotation());
+            waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            swingfoot_trajectory.add_waypoint(waypoint);
 
-            // X position trajectory
-            swingfoot_trajectory.add_waypoint(X, 0, Hps_start.translation().x(), 0);
-            swingfoot_trajectory.add_waypoint(X, step_apex_ratio * step_period, 0, velocity_target.x());
-            swingfoot_trajectory.add_waypoint(X, step_period, step_placement.x(), 0);
+            // Middle waypoint: Raise foot to step height at time = step_apex_ratio * step_period
+            waypoint.time_point = step_apex_ratio * step_period;
+            waypoint.position   = Eigen::Matrix<Scalar, 3, 1>(0, get_foot_width_offset(), step_height);
+            waypoint.velocity   = Eigen::Matrix<Scalar, 3, 1>(velocity_target.x(), velocity_target.y(), 0);
+            waypoint.orientation =
+                Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, velocity_target.z() * step_apex_ratio * step_period);
+            waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, velocity_target.z());
+            swingfoot_trajectory.add_waypoint(waypoint);
 
-            // Y position trajectory
-            swingfoot_trajectory.add_waypoint(Y, 0, Hps_start.translation().y(), 0);
-            swingfoot_trajectory.add_waypoint(Y,
-                                              step_apex_ratio * step_period,
-                                              get_foot_width_offset(),
-                                              velocity_target.y());
-            swingfoot_trajectory.add_waypoint(Y, step_period, get_foot_width_offset() + step_placement.y(), 0);
+            // End waypoint: End at next foot placement on ground at time = step_period
+            waypoint.time_point       = step_period;
+            waypoint.position         = Eigen::Matrix<Scalar, 3, 1>(step.x(), get_foot_width_offset() + step.y(), 0);
+            waypoint.velocity         = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            waypoint.orientation      = Eigen::Matrix<Scalar, 3, 1>(0, 0, step.z());
+            waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            swingfoot_trajectory.add_waypoint(waypoint);
 
-            // Z position trajectory
-            swingfoot_trajectory.add_waypoint(Z, 0, Hps_start.translation().z(), 0);
-            swingfoot_trajectory.add_waypoint(Z, step_apex_ratio * step_period, step_height, 0);
-            swingfoot_trajectory.add_waypoint(Z, step_period, 0, 0);
-
-            // Roll trajectory
-            swingfoot_trajectory.add_waypoint(ROLL, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(ROLL, step_apex_ratio * step_period, 0, 0);
-            swingfoot_trajectory.add_waypoint(ROLL, step_period, 0, 0);
-
-            // Pitch trajectory
-            swingfoot_trajectory.add_waypoint(PITCH, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(PITCH, step_apex_ratio * step_period, 0, 0);
-            swingfoot_trajectory.add_waypoint(PITCH, step_period, 0, 0);
-
-            // Yaw trajectory
-            swingfoot_trajectory.add_waypoint(YAW, 0, 0, 0);
-            swingfoot_trajectory.add_waypoint(YAW,
-                                              step_apex_ratio * step_period,
-                                              velocity_target.z() * step_apex_ratio * step_period,
-                                              0);
-            swingfoot_trajectory.add_waypoint(YAW, step_period, step_placement.z(), 0);
-        }
-
-        /**
-         * @brief Generate torso trajectory.
-         * @param velocity_target Requested velocity target (dx, dy, dtheta).
-         * @param Hps_end Next foot placement.
-         * @return Trajectory of torso to follow to reach next torso placement.
-         */
-        void generate_torso_trajectory(const Eigen::Matrix<Scalar, 3, 1>& velocity_target) {
-            // Clear current trajectory
+            //  ******************************** Torso Trajectory ********************************
             torso_trajectory.clear();
 
-            // X position trajectory
-            torso_trajectory.add_waypoint(X, 0, Hpt_start.translation().x(), 0);
-            torso_trajectory.add_waypoint(X,
-                                          torso_sway_ratio * step_period,
-                                          torso_sway_offset.x(),
-                                          velocity_target.x());
-            torso_trajectory.add_waypoint(X, step_period, velocity_target.x() * half_step_period, 0);
+            // Start waypoint: Start from the current torso position at time = 0
+            waypoint.time_point       = 0.0;
+            waypoint.position         = Hpt_start.translation();
+            waypoint.velocity         = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            waypoint.orientation      = MatrixToEulerIntrinsic(Hpt_start.rotation());
+            waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            torso_trajectory.add_waypoint(waypoint);
 
-            // Y position trajectory
-            torso_trajectory.add_waypoint(Y, 0, Hpt_start.translation().y(), 0);
+            // Middle waypoint: Shift torso to the torso_sway_offset at time = torso_sway_ratio * step_period
+            waypoint.time_point   = torso_sway_ratio * step_period;
             Scalar torso_offset_y = left_foot_is_planted ? -torso_sway_offset.y() : torso_sway_offset.y();
-            torso_trajectory.add_waypoint(Y, torso_sway_ratio * step_period, torso_offset_y, velocity_target.y());
-            torso_trajectory.add_waypoint(Y,
-                                          step_period,
-                                          get_foot_width_offset() / 2 + velocity_target.y() * half_step_period,
-                                          0);
+            waypoint.position =
+                Eigen::Matrix<Scalar, 3, 1>(torso_sway_offset.x(), torso_offset_y, torso_height + torso_sway_offset.z())
+                + torso_position_offset;
+            waypoint.velocity = Eigen::Matrix<Scalar, 3, 1>(velocity_target.x(), velocity_target.y(), 0);
+            waypoint.orientation =
+                Eigen::Matrix<Scalar, 3, 1>(0.0, torso_pitch, velocity_target.z() * torso_sway_ratio * step_period);
+            waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, velocity_target.z());
+            torso_trajectory.add_waypoint(waypoint);
 
-            // Z position trajectory
-            torso_trajectory.add_waypoint(Z, 0, Hpt_start.translation().z(), 0);
-            torso_trajectory.add_waypoint(Z, torso_sway_ratio * step_period, torso_height + torso_sway_offset.z(), 0);
-            torso_trajectory.add_waypoint(Z, step_period, torso_height, 0);
-
-            // Roll trajectory
-            torso_trajectory.add_waypoint(ROLL, 0, 0, 0);
-            torso_trajectory.add_waypoint(ROLL, torso_sway_ratio * step_period, 0, 0);
-            torso_trajectory.add_waypoint(ROLL, step_period, 0, 0);
-
-            // Pitch trajectory
-            torso_trajectory.add_waypoint(PITCH, 0, torso_pitch, 0);
-            torso_trajectory.add_waypoint(PITCH, torso_sway_ratio * step_period, torso_pitch, 0);
-            torso_trajectory.add_waypoint(PITCH, step_period, torso_pitch, 0);
-
-            // Yaw trajectory
-            torso_trajectory.add_waypoint(YAW, 0, MatrixToEulerIntrinsic(Hpt_start.linear()).z(), 0);
-            torso_trajectory.add_waypoint(YAW,
-                                          torso_sway_ratio * step_period,
-                                          velocity_target.z() * torso_sway_ratio * step_period,
-                                          0);
-            torso_trajectory.add_waypoint(YAW, step_period, velocity_target.z() * step_period, 0);
+            // End waypoint: Shift torso back to the final torso position at time = step_period
+            waypoint.time_point = step_period;
+            waypoint.position =
+                Eigen::Matrix<Scalar, 3, 1>(torso_final_position_ratio.x() * step.x(),
+                                            get_foot_width_offset() / 2 + torso_final_position_ratio.y() * step.y(),
+                                            torso_height)
+                + torso_position_offset;
+            waypoint.velocity         = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
+            waypoint.orientation =
+                Eigen::Matrix<Scalar, 3, 1>(0.0, torso_pitch, torso_final_position_ratio.z() * step.z());
+            torso_trajectory.add_waypoint(waypoint);
         }
 
         /**
