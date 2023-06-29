@@ -81,6 +81,9 @@ namespace module::planning {
             // Turn on the spot
             emit<Task>(std::make_unique<Walk>(
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
+
+            // Reset WalkTo velocity magnitude. TODO:Use director for this
+            velocity_magnitude = cfg.min_translational_velocity_magnitude;
         });
 
         on<Provide<TurnAroundBall>>().then([this](const TurnAroundBall& turn_around_ball) {
