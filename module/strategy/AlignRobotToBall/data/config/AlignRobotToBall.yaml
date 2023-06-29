@@ -1,6 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
-
 start_rotating_angle_threshold: 0.2
 stop_rotating_angle_threshold: 0.1
