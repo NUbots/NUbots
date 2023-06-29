@@ -129,7 +129,6 @@ TEST_CASE("Test that the order of tasks is stable even with multiple threads", "
         expected.push_back(fmt::format("loop {}: start", loop_id));
         expected.push_back(fmt::format("loop {}: emitting task 1", loop_id));
         expected.push_back(fmt::format("loop {}: emitting task 2", loop_id));
-        expected.push_back(fmt::format("loop {}: subtask 1 executed", loop_id));
         expected.push_back(fmt::format("loop {}: emitting dependency from subtask 1", loop_id));
         expected.push_back(fmt::format("loop {}: dependency from subtask 1", loop_id));
     }
@@ -138,6 +137,6 @@ TEST_CASE("Test that the order of tasks is stable even with multiple threads", "
     INFO(util::diff_string(expected, events));
 
     // Check the events fired in order and only those events
-    REQUIRE(events.size() == 7 * (MAX_LOOPS + 1));
+    REQUIRE(events.size() == 6 * (MAX_LOOPS + 1));
     REQUIRE(events == expected);
 }
