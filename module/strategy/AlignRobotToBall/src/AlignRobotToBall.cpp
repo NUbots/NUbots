@@ -28,8 +28,12 @@ namespace module::strategy {
             cfg.stop_rotating_angle_threshold  = config["stop_rotating_angle_threshold"].as<double>();
         });
 
-        on<Provide<AlignRobotToBallTask>, With<Ball>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
-            [this](const Ball& ball, const Sensors& sensors) {
+        on<Provide<AlignRobotToBallTask>,
+           Uses<TurnOnSpot>,
+           With<Ball>,
+           With<Sensors>,
+           Every<30, Per<std::chrono::seconds>>>()
+            .then([this](const Uses<TurnOnSpot>& turn, const Ball& ball, const Sensors& sensors) {
                 // Transform the ball into robot {r} space
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
 
@@ -49,7 +53,7 @@ namespace module::strategy {
                 }
 
                 // If the angle to the ball is greater than maximum threshold, rotate to face the ball
-                if (rotate) {
+                if (rotate && turn.run_state == GroupInfo::RunState::NO_TASK) {
                     // Check if we need to rotate clockwise or anti-clockwise
                     if (rBRr.y() < 0) {
                         emit<Task>(std::make_unique<TurnOnSpot>(true));
@@ -57,6 +61,9 @@ namespace module::strategy {
                     else {
                         emit<Task>(std::make_unique<TurnOnSpot>(false));
                     }
+                }
+                else if (rotate) {  // already rotating and still rotating
+                    emit<Task>(std::make_unique<Idle>());
                 }
             });
     }
