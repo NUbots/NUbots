@@ -26,6 +26,7 @@ namespace module::strategy {
             this->log_level                    = config["log_level"].as<NUClear::LogLevel>();
             cfg.start_rotating_angle_threshold = config["start_rotating_angle_threshold"].as<double>();
             cfg.stop_rotating_angle_threshold  = config["stop_rotating_angle_threshold"].as<double>();
+            cfg.ball_distance_threshold        = config["ball_distance_threshold"].as<double>();
         });
 
         on<Provide<AlignRobotToBallTask>,
@@ -38,17 +39,20 @@ namespace module::strategy {
                 Eigen::Vector3d rBRr = sensors.Hrw * ball.rBWw;
 
                 // Get the angle to the ball
-                double ball_angle = std::abs(std::atan2(rBRr.y(), rBRr.x()));
+                double ball_distance = rBRr.head(2).norm();
+                double ball_angle    = std::abs(std::atan2(rBRr.y(), rBRr.x()));
                 log<NUClear::DEBUG>("Ball angle: {}", ball_angle);
 
                 // If the angle to the ball is greater than maximum threshold, and we are not already rotating, rotate
-                if (ball_angle > cfg.start_rotating_angle_threshold && !rotate) {
+                if (ball_angle > cfg.start_rotating_angle_threshold && ball_distance > cfg.ball_distance_threshold
+                    && !rotate) {
                     rotate = true;
                 }
 
                 // If the angle to the ball is less than minimum threshold to stop, and we are currently rotating, stop
                 // rotating
-                if (ball_angle < cfg.stop_rotating_angle_threshold && rotate) {
+                if ((ball_angle < cfg.stop_rotating_angle_threshold || ball_distance < cfg.ball_distance_threshold)
+                    && rotate) {
                     rotate = false;
                 }
 

@@ -45,13 +45,8 @@ namespace module::planning {
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
         });
 
-        on<Start<WalkTo>>().then([this]() {
-            // Reset the velocity magnitude to minimum when starting
-            velocity_magnitude = cfg.min_translational_velocity_magnitude;
-        });
-
         // Path to walk to a particular point
-        on<Provide<WalkTo>, Needs<Walk>>().then([this](const WalkTo& walk_to) {
+        on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
             // If robot getting close to the point, begin to decelerate to minimum velocity
             if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
                 velocity_magnitude -= cfg.acceleration;
@@ -82,22 +77,26 @@ namespace module::planning {
             emit<Task>(std::make_unique<Walk>(velocity_target));
         });
 
-        on<Provide<TurnOnSpot>, Needs<Walk>>().then([this](const TurnOnSpot& turn_on_spot) {
+        on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
             // Determine the direction of rotation
             int sign = turn_on_spot.clockwise ? -1 : 1;
 
             // Turn on the spot
             emit<Task>(std::make_unique<Walk>(
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
+
+            velocity_magnitude = cfg.min_translational_velocity_magnitude;
         });
 
-        on<Provide<TurnAroundBall>, Needs<Walk>>().then([this](const TurnAroundBall& turn_around_ball) {
+        on<Provide<TurnAroundBall>>().then([this](const TurnAroundBall& turn_around_ball) {
             // Determine the direction of rotation
             int sign = turn_around_ball.clockwise ? -1 : 1;
             // Turn around the ball
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
                                                               sign * cfg.pivot_ball_velocity_y,
                                                               sign * cfg.pivot_ball_velocity)));
+
+            velocity_magnitude = cfg.min_translational_velocity_magnitude;
         });
     }
 }  // namespace module::planning

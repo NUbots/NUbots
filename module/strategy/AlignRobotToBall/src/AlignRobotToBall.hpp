@@ -15,6 +15,8 @@ namespace module::strategy {
             double start_rotating_angle_threshold = 0.0;
             /// @brief Angle threshold to stop rotating to face the ball
             double stop_rotating_angle_threshold = 0.0;
+            /// @brief How far away the ball needs to be to align
+            double ball_distance_threshold = 0.0;
         } cfg;
 
         /// @brief Whether the robot is currently rotating to face the ball
