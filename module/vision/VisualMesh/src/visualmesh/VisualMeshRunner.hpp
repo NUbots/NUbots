@@ -37,7 +37,7 @@ namespace module::vision::visualmesh {
                          const std::string& cache_directory);
         VisualMeshResults operator()(const message::input::Image& image, const Eigen::Isometry3f& Htc);
 
-        std::unique_ptr<std::atomic<bool>> active;
+        /// Map of class names to class indices
         std::map<std::string, uint32_t> class_map;
     };
 
