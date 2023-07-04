@@ -167,6 +167,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1vision_1_1VisualMesh.ht
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1vision_1_1VisualMesh-members.html">List of all members</a>  </div>
@@ -193,6 +194,11 @@ Collaboration diagram for module::vision::VisualMesh:</div>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html">EngineContext</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a943a1ba3251329653f204e9402419eae"><td class="memItemLeft" align="right" valign="top"><a id="a943a1ba3251329653f204e9402419eae"></a>
@@ -202,9 +208,22 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a3181d12f27a4037b0395edce9525ce51"><td class="memItemLeft" align="right" valign="top"><a id="a3181d12f27a4037b0395edce9525ce51"></a>
-std::map&lt; std::string, std::vector&lt; <a class="el" href="classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html">visualmesh::VisualMeshRunner</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>engines</b></td></tr>
-<tr class="separator:a3181d12f27a4037b0395edce9525ce51"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9736218788eb3a7cad03068e81ea5b0b"><td class="memItemLeft" align="right" valign="top"><a id="a9736218788eb3a7cad03068e81ea5b0b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1VisualMesh.html#a9736218788eb3a7cad03068e81ea5b0b">dropped</a> = 0</td></tr>
+<tr class="memdesc:a9736218788eb3a7cad03068e81ea5b0b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of images that have been dropped since this was last reset. <br /></td></tr>
+<tr class="separator:a9736218788eb3a7cad03068e81ea5b0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc5ba8529498ec4d556ef07da34860ba"><td class="memItemLeft" align="right" valign="top"><a id="adc5ba8529498ec4d556ef07da34860ba"></a>
+std::map&lt; std::string, std::shared_ptr&lt; <a class="el" href="structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html">EngineContext</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1VisualMesh.html#adc5ba8529498ec4d556ef07da34860ba">engines</a></td></tr>
+<tr class="memdesc:adc5ba8529498ec4d556ef07da34860ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">The engines that are available for use. <br /></td></tr>
+<tr class="separator:adc5ba8529498ec4d556ef07da34860ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8c344ab52cbc5f051d3c165661266392"><td class="memItemLeft" align="right" valign="top"><a id="a8c344ab52cbc5f051d3c165661266392"></a>
+std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1VisualMesh.html#a8c344ab52cbc5f051d3c165661266392">engines_mutex</a></td></tr>
+<tr class="memdesc:a8c344ab52cbc5f051d3c165661266392"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex to protect access to the engines map. <br /></td></tr>
+<tr class="separator:a8c344ab52cbc5f051d3c165661266392"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b7f5004aa21b93143fb21f4d6d1a928"><td class="memItemLeft" align="right" valign="top"><a id="a3b7f5004aa21b93143fb21f4d6d1a928"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1VisualMesh.html#a3b7f5004aa21b93143fb21f4d6d1a928">processed</a> = 0</td></tr>
+<tr class="memdesc:a3b7f5004aa21b93143fb21f4d6d1a928"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of images that have been processed since this was last reset. <br /></td></tr>
+<tr class="separator:a3b7f5004aa21b93143fb21f4d6d1a928"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/vision/VisualMesh/src/<a class="el" href="module_2vision_2VisualMesh_2src_2VisualMesh_8hpp_source.html">VisualMesh.hpp</a></li>
@@ -216,7 +235,7 @@ std::map&lt; std::string, std::vector&lt; <a class="el" href="classmodule_1_1vis
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>vision</b></li><li class="navelem"><a class="el" href="classmodule_1_1vision_1_1VisualMesh.html">VisualMesh</a></li>
-    <li class="footer">Generated on Thu Jun 29 2023 06:36:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jul 4 2023 16:52:00 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

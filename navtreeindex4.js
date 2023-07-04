@@ -1,5 +1,8 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1input_1_1MotionModel.html#a3a1ecf97be0ff233677eab9c3a9542a2":[2,0,4,3,8,1],
+"classmodule_1_1input_1_1MotionModel.html#a40e8f360d78292ed7365bd1fa45b3703":[2,0,4,3,8,5],
+"classmodule_1_1input_1_1MotionModel.html#a4eae6bd5fd0455f15c10ddb4f8c5deeb":[2,0,4,3,8,3],
 "classmodule_1_1input_1_1MotionModel.html#a53a53c6e11eb49bba32115f873c35591":[2,0,4,3,8,7],
 "classmodule_1_1input_1_1MotionModel.html#a57d477eafcb1032d2fa81497aad9de14":[2,0,4,3,8,11],
 "classmodule_1_1input_1_1MotionModel.html#a7d57e4ddd6f7b5ebbdabef5c2119e1da":[2,0,4,3,8,10],
@@ -246,8 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1motion_1_1Kicker.html#aece8d1c9e961e045802211f1521c4575":[2,0,4,5,7,2],
 "classmodule_1_1motion_1_1Kicker.html#afdd481eb1b0e6986c13da4ceb1099215":[2,0,4,5,7,9],
 "classmodule_1_1motion_1_1QuinticWalk.html":[2,0,4,5,8],
-"classmodule_1_1motion_1_1QuinticWalk.html#a02de60c6425ea1bff949800ea6d1d0eb":[2,0,4,5,8,7],
-"classmodule_1_1motion_1_1QuinticWalk.html#a0f1bc9e1a94e15f158b68b288d7777ea":[2,0,4,5,8,12],
-"classmodule_1_1motion_1_1QuinticWalk.html#a20ccab9156762e4060022a5eadb831f8":[2,0,4,5,8,19],
-"classmodule_1_1motion_1_1QuinticWalk.html#a2b122b948b51333281bb48b682632352":[2,0,4,5,8,2]
+"classmodule_1_1motion_1_1QuinticWalk.html#a02de60c6425ea1bff949800ea6d1d0eb":[2,0,4,5,8,7]
 };

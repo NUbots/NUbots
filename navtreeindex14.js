@@ -1,5 +1,17 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a04b7d0caa19c049b9a772b2f65eb5bc7ad306f235d2651f0334197c7ae7145b71":[2,0,4,3,27,2,0,3],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a04b7d0caa19c049b9a772b2f65eb5bc7afb32f6b9fdcd4d907ac92aa8a7c5aa4b":[2,0,4,3,27,2,0,1],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a178aaf225e5734e416d7c7346282f333":[2,0,4,3,27,2,4],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a2e4dfb7197ddfa1fb7066ab618a45cee":[2,0,4,3,27,2,6],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a99054fb36cb1e19e3a375950b8b53583":[2,0,4,3,27,2,7],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#aa59b6fbc5dd2100ee1b5abf524caafcb":[2,0,4,3,27,2,5],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#abbad14abbd63780fa3e66612d342a2be":[2,0,4,3,27,2,2],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#acaed200486d29177ff925a7a2853924d":[2,0,4,3,27,2,3],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#afe43c4778c0b0537d5bb6216ed996c5e":[2,0,4,3,27,2,1],
+"structmodule_1_1input_1_1SettingsFunctions.html":[2,0,4,3,28],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html":[2,0,4,3,29],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a59a3f3a77c2d564d898386f0d56b170f":[2,0,4,3,29,3],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a6ddac61550fb83583267be431f80fc63":[2,0,4,3,29,1],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a7db602e5ffe547bab8cb8ebc9384ff91":[2,0,4,3,29,0],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a7e80a5e9928a980dee712a0ecbbc08e8":[2,0,4,3,29,2],
@@ -237,17 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#aa02bf4bece75d8395e44d1fd6af3c0f6":[2,0,4,7,0,1,1,0,4,6],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#ac333cba627c2b60cd3d623ee1ff4e3ac":[2,0,4,7,0,1,1,0,4,7],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#ae93fce094f83e2e2fc8b76b107b56707":[2,0,4,7,0,1,1,0,4,10],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#aed6b7beda35cf2dd8be5840c0594e2f8":[2,0,4,7,0,1,1,0,4,4],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html":[2,0,4,7,0,1,1,0,5],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html#a3869a9792c120f7afc921ec62ff2ce97":[2,0,4,7,0,1,1,0,5,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html#a6e469010cb2f768d90ddbf64df3b88ce":[2,0,4,7,0,1,1,0,5,1],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html":[2,0,4,7,0,1,1,0,6],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a1c0155eee15dc1ce48d67d7ab4d6db41":[2,0,4,7,0,1,1,0,6,12],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a1fb2f3e8d1873b9f2a87c33ef35835b7":[2,0,4,7,0,1,1,0,6,1],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a292244234a93b1db7f39c7199e712b24":[2,0,4,7,0,1,1,0,6,5],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a5334ae274a6a66182e6009cf5bb5d77f":[2,0,4,7,0,1,1,0,6,9],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a593894b9b1273206736f8cd246fe2326":[2,0,4,7,0,1,1,0,6,6],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a66093d64a2f4ec744ff4d1a5c8782f7c":[2,0,4,7,0,1,1,0,6,2],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a68e65dd8dc8175eaa7722e326d0dbb2f":[2,0,4,7,0,1,1,0,6,7],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a793a91472184a50dfcbee230e74ae540":[2,0,4,7,0,1,1,0,6,0]
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#aed6b7beda35cf2dd8be5840c0594e2f8":[2,0,4,7,0,1,1,0,4,4]
 };

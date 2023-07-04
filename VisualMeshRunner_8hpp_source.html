@@ -208,15 +208,16 @@ $(document).ready(function(){initNavTree('VisualMeshRunner_8hpp_source.html','')
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                         <span class="keyword">const</span> std::string&amp; path,</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;                         <span class="keyword">const</span> std::string&amp; cache_directory);</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <a class="code" href="structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html">VisualMeshResults</a> operator()(<span class="keyword">const</span> message::input::Image&amp; image, <span class="keyword">const</span> Eigen::Isometry3f&amp; Htc);</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        std::unique_ptr&lt;std::atomic&lt;bool&gt;&gt; active;</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        std::map&lt;std::string, uint32_t&gt; class_map;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">        /// Map of class names to class indices</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a2ead30148ec73da15ac6c1874c010686">   41</a></span>&#160;<span class="comment"></span>        std::map&lt;std::string, uint32_t&gt; <a class="code" href="classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a2ead30148ec73da15ac6c1874c010686">class_map</a>;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    };</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;}  <span class="comment">// namespace module::vision::visualmesh</span></div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_VISION_VISUALMESH_VISUALMESHRUNNER_HPP</span></div>
 <div class="ttc" id="aclassmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner_html"><div class="ttname"><a href="classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html">module::vision::visualmesh::VisualMeshRunner</a></div><div class="ttdef"><b>Definition:</b> VisualMeshRunner.hpp:25</div></div>
+<div class="ttc" id="aclassmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner_html_a2ead30148ec73da15ac6c1874c010686"><div class="ttname"><a href="classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a2ead30148ec73da15ac6c1874c010686">module::vision::visualmesh::VisualMeshRunner::class_map</a></div><div class="ttdeci">std::map&lt; std::string, uint32_t &gt; class_map</div><div class="ttdoc">Map of class names to class indices.</div><div class="ttdef"><b>Definition:</b> VisualMeshRunner.hpp:41</div></div>
 <div class="ttc" id="astructmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults_html"><div class="ttname"><a href="structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html">module::vision::visualmesh::VisualMeshResults</a></div><div class="ttdef"><b>Definition:</b> VisualMeshRunner.hpp:17</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -224,7 +225,7 @@ $(document).ready(function(){initNavTree('VisualMeshRunner_8hpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_82d602288a07dc2e458933cf1709fafe.html">vision</a></li><li class="navelem"><a class="el" href="dir_d949539f8e430734b29a9751b80e8e1a.html">VisualMesh</a></li><li class="navelem"><a class="el" href="dir_80594c2239c049f6de32bf623cf2d695.html">src</a></li><li class="navelem"><a class="el" href="dir_b48a2b602516de287a81ff86dd20489f.html">visualmesh</a></li><li class="navelem"><b>VisualMeshRunner.hpp</b></li>
-    <li class="footer">Generated on Thu Jun 29 2023 06:36:10 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jul 4 2023 16:52:00 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
