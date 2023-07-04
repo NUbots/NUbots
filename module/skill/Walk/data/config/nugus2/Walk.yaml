@@ -1,5 +1,4 @@
 log_level: INFO
-
 walk:
   # Time for one complete step (in seconds).
   period: 0.39
@@ -18,7 +17,7 @@ walk:
     # Torso pitch (in radians)
     pitch: 18 * pi / 180
     # Torso constant position offset
-    position_offset: [0.06, 0, 0]
+    position_offset: [0.05, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
     sway_offset: [0, 0.05, 0]
     # Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
@@ -30,7 +29,6 @@ walk:
 
 gains:
   arms: 1
-
 # Fixed position of the arm joints during walking
 arms:
   right_shoulder_pitch: 1.7
