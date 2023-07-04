@@ -32,3 +32,8 @@ gains:
 # Fixed position of the arm joints during walking
 arms:
   right_shoulder_pitch: 1.7
+  left_shoulder_pitch: 1.7
+  right_shoulder_roll: -0.4
+  left_shoulder_roll: 0.35
+  right_elbow: -0.7
+  left_elbow: -0.7
