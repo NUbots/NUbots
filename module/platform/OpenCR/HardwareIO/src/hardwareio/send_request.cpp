@@ -88,7 +88,18 @@ namespace module::platform::OpenCR {
             data.rgb_led = (uint8_t(0x000000FF & opencr_state.head_led.RGB) & 0x1F) << 10;         // R
             data.rgb_led |= ((uint8_t(0x0000FF00 & opencr_state.head_led.RGB) >> 8) & 0x1F) << 5;  // G
             data.rgb_led |= (uint8_t(0x00FF0000 & opencr_state.head_led.RGB) >> 16) & 0x1F;        // B
-            data.buzzer = opencr_state.buzzer;
+
+            // Rewrite this in a cleaner way
+            // Run through all of the servo states and if even one motor is above the temeperature
+            // threshold, fill the buzzer field
+            data.buzzer = std::any_of(
+                servo_states.begin(),
+                servo_states.cend(),
+                [](const ServoState& servo) -> bool { return servo.temperature > 70.0; }
+            ) ? 880u : 0u;
+
+            // This line serves as a naive test
+            data.buzzer = 880u;
 
             // Write our data
             opencr.write(dynamixel::v2::WriteCommand<OpenCRWriteData>(uint8_t(NUgus::ID::OPENCR),
