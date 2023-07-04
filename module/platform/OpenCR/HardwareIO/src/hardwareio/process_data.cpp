@@ -4,11 +4,13 @@
 #include "HardwareIO.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "message/output/Buzzer.hpp"
 
 namespace module::platform::OpenCR {
 
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using message::output::Buzzer;
 
     /*
         Process the status return packet data
@@ -127,6 +129,20 @@ namespace module::platform::OpenCR {
             convert::position(servo_index, data.present_position, nugus.servo_direction, nugus.servo_offset);
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
+
+        // If any servo exceeds the tolerable temperature in the config we emit a buzzer message
+        // so we know that we might be about to burn a servo
+        // const bool any_servo_hot = std::any_of(
+        //         servo_states.cbegin(),
+        //         servo_states.cend(),
+        //         [](const ServoState& servo) -> bool { return ;});
+        for(const auto& servo : servo_states ) {
+            if (servo.temperature > cfg.max_tol_temp){
+                emit(std::make_unique<Buzzer>());
+                break;
+            }
+        }
+
 
         // If this servo has not been initialised yet, set the goal states to the current states
         if (!servo_states[servo_index].initialised) {
