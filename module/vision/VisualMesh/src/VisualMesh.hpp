@@ -32,7 +32,7 @@ namespace module::vision {
         /// Mutex to protect access to the engines map
         std::mutex engines_mutex;
         /// The engines that are available for use
-        std::map<uint32_t, std::shared_ptr<EngineContext>> engines;
+        std::map<std::string, std::shared_ptr<EngineContext>> engines;
 
         /// Number of images that have been processed since this was last reset
         int processed = 0;

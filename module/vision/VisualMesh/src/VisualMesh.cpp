@@ -35,16 +35,18 @@ namespace module::vision {
                 auto tolerance    = camera.second["classifier"]["intersection_tolerance"].as<double>();
 
                 // Create a network runner for each concurrent system
-                auto& runners = engines[name];
+                auto ctx = std::make_shared<EngineContext>();
                 for (int i = 0; i < concurrent; ++i) {
-                    runners.emplace_back(engine_type,
-                                         min_height,
-                                         max_height,
-                                         max_distance,
-                                         tolerance,
-                                         network,
-                                         cache_directory);
+                    ctx->runners.emplace_back(std::make_unique<std::mutex>(),
+                                              visualmesh::VisualMeshRunner{engine_type,
+                                                                           min_height,
+                                                                           max_height,
+                                                                           max_distance,
+                                                                           tolerance,
+                                                                           network,
+                                                                           cache_directory});
                 }
+                engines[name] = ctx;
             }
         });
 
@@ -54,7 +56,7 @@ namespace module::vision {
 
             /* Mutex Scope */ {
                 std::lock_guard<std::mutex> lock(engines_mutex);
-                auto it = engines.find(image.id);
+                auto it = engines.find(image.name);
                 if (it != engines.end()) {
                     ctx = it->second;
                 }
@@ -68,11 +70,13 @@ namespace module::vision {
                     std::unique_lock lock(*ctx.mutex, std::try_to_lock);
                     if (lock) {
 
+                        auto& runner = ctx.runner;
+
                         // Extract the camera position now that we need it
                         Eigen::Isometry3d Hcw(image.Hcw);
 
                         // Run the inference
-                        auto result = ctx->runner(image, Hcw.cast<float>());
+                        auto result = runner(image, Hcw.cast<float>());
 
                         if (result.indices.empty()) {
                             log<NUClear::WARN>("Hcw resulted in no mesh points being on-screen.");
