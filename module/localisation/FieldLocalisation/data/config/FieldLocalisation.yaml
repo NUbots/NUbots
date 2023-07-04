@@ -11,7 +11,7 @@ n_particles: 1000
 use_hardcoded_initial_state: true
 
 # Initial state (x,y,theta)
-initial_state: [2.17, -3.2, 1.571]
+initial_state: [2.25, -3, 1.571]
 
 # Our confidence in the initial guess of where the robot starts (x is overwritten by field length / 2)
 initial_covariance: [1.0, 0.25, 0.5]
