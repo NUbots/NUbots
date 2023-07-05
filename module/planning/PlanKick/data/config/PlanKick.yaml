@@ -14,4 +14,4 @@ target_angle_threshold: 23 * pi / 180
 
 # Is a LimbID - UNKNOWN, LEFT_LEG, RIGHT_LEG are valid options
 # Left will only kick with the left leg, right only with the right, and unknown will determine the leg from the ball position
-kick_leg: UNKNOWN
+kick_leg: RIGHT_LEG
