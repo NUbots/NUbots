@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # Uncertainty value field localisation needs to be above to attempt to localise
 start_uncertainty_threshold: 0.5
