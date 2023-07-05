@@ -32,4 +32,4 @@ save_map: false
 min_observations: 100
 
 # Penalty factor for observations being outside map
-outside_map_penalty_factor: 1
+outside_map_penalty_factor: 0.99
