@@ -20,6 +20,8 @@ namespace module::purpose {
             int walk_to_ball_priority = 0;
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
+            /// @brief Priority of AlignRobotToBall task
+            int align_robot_to_ball_priority = 0;
             /// @brief Priority of KickToGoal task
             int kick_to_goal_priority = 0;
             /// @brief Priority of WalkToFieldPosition task

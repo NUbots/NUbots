@@ -47,6 +47,7 @@ nuclear_role(
   strategy::FindObject
   strategy::KickToGoal
   strategy::AlignBallToGoal
+  strategy::AlignRobotToBall
   strategy::DiveToBall
   # Purposes
   purpose::Tester

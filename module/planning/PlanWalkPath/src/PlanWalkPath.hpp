@@ -23,6 +23,8 @@ namespace module::planning {
             double max_angular_velocity = 0;
             /// @brief Minimum angular velocity command for walking to ball
             double min_angular_velocity = 0;
+            /// @brief Whether or not to use y velocity when walking to ball
+            bool y_velocity_enabled = false;
             /// @brief Rotate on spot walk command angular velocity
             double rotate_velocity = 0;
             /// @brief Rotate on spot walk command forward velocity
