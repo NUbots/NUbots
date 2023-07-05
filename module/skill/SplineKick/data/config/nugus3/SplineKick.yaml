@@ -17,11 +17,11 @@ foot_waypoints:
 # Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
 torso_waypoints:
   - [0.02, 0.1, 0.47, 0] # Start
-  - [0.02, 0.02, 0.47, 1.5] # Lean over
-  - [0.02, 0.02, 0.47, 0.5] # Raise foot
-  - [0.02, 0.02, 0.47, 0.075] # Kick !
-  - [0.02, 0.02, 0.47, 0.05] # Kick !
-  - [0.02, 0.02, 0.47, 0.1] # Bring foot back
+  - [0.02, 0.025, 0.47, 1.5] # Lean over
+  - [0.02, 0.025, 0.47, 0.5] # Raise foot
+  - [0.02, 0.025, 0.47, 0.075] # Kick !
+  - [0.02, 0.025, 0.47, 0.05] # Kick !
+  - [0.02, 0.025, 0.47, 0.1] # Bring foot back
   - [0.02, 0.1, 0.47, 0.5] # Place foot down
   - [0.02, 0.1, 0.47, 0.5] # Delay
 
