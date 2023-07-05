@@ -143,7 +143,10 @@ namespace module::extension {
 
         // We are able to push others
         if (run_level <= RunLevel::PUSH) {
-            // TODO Queue everywhere, setup push providers
+
+            // Try to find an ok solution for the pack
+            auto pushing_solutions = find_pushing_solutions(solutions);
+
         }
 
         // If we reach here, we have already queued into everything that could possibly change our state

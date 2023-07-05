@@ -45,8 +45,9 @@ namespace module::extension {
         std::vector<PushedSolution> push;
         int shallowest = std::numeric_limits<int>::max();
         for (const auto& option : requirement.options) {
+
             // See if this option needs to be pushed to work
-            auto s = find_pushing_solution(option, pushing_depth + 1);
+            auto s = find_pushing_solution(option, pushing_depth + requirement.pushed ? 1 : 0);
 
             // Only add non blocked options to the list
             if (!s.blocked) {
@@ -56,7 +57,7 @@ namespace module::extension {
                     shallowest = std::min(shallowest, s.level);
                 }
                 // If we are a pushed solution, then each of our options are pushed options
-                if (requirement.pushed) {
+                else if (requirement.pushed) {
                     push.push_back(PushedSolution{false, pushing_depth, {option.provider}});
                     shallowest = std::min(shallowest, pushing_depth);
                 }
@@ -116,7 +117,7 @@ namespace module::extension {
 
     Director::PushedSolution Director::find_pushing_solutions(const std::vector<Solution>& solutions) {
 
-        // Find each one individually but pass through the used types
+        // Get pushing solutions for each solution
         std::vector<PushedSolution> pushed_solutions;
         for (const auto& solution : solutions) {
             // Choose an option
