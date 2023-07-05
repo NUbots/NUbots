@@ -43,7 +43,7 @@ namespace module::extension {
             solutions.push_back(solve_task(task));
         }
 
-        if (run_level >= RunLevel::OK) {
+        if (run_level <= RunLevel::OK) {
             // Try to find an ok solution for the pack
             auto ok_solutions = find_ok_solutions(solutions, used);
 
@@ -142,7 +142,7 @@ namespace module::extension {
         }
 
         // We are able to push others
-        if (run_level >= RunLevel::PUSH) {
+        if (run_level <= RunLevel::PUSH) {
             // TODO Queue everywhere, setup push providers
         }
 
