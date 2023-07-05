@@ -135,7 +135,7 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<AlignRobotToBall>(), 4);  // try to track the ball
+        emit<Task>(std::make_unique<AlignRobotToBall>(), 4);  // Align robot to ball
         emit<Task>(std::make_unique<AlignBallToGoal>(), 5);   // try to walk to the ball
         emit<Task>(std::make_unique<KickToGoal>(), 6);        // kick the ball if possible
     }

@@ -6,6 +6,7 @@
 #include "message/input/GameState.hpp"
 #include "message/purpose/Defender.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
+#include "message/strategy/AlignRobotToBall.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
@@ -30,6 +31,7 @@ namespace module::purpose {
     using message::purpose::PenaltyKickDefender;
     using message::purpose::ThrowInDefender;
     using message::strategy::AlignBallToGoal;
+    using message::strategy::AlignRobotToBall;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
@@ -124,9 +126,10 @@ namespace module::purpose {
                    1);                                  // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);       // Aligning ball to goal to aim kick
-        emit<Task>(std::make_unique<KickToGoal>(), 5);            // kick the ball if possible
-        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 6);  // Patrol bounded box region
+        emit<Task>(std::make_unique<AlignRobotToBall>(), 4);      // Align robot to ball
+        emit<Task>(std::make_unique<AlignBallToGoal>(), 5);       // Aligning ball to goal to aim kick
+        emit<Task>(std::make_unique<KickToGoal>(), 6);            // kick the ball if possible
+        emit<Task>(std::make_unique<WalkInsideBoundedBox>(), 7);  // Patrol bounded box region
     }
 
 }  // namespace module::purpose
