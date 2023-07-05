@@ -138,8 +138,8 @@ namespace module::purpose {
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
         emit<Task>(std::make_unique<AlignBallToGoal>(), 4);  // try to walk to the ball
-        emit<Task>(std::make_unique<Localise>(), 5);         // localise if necessary
-        emit<Task>(std::make_unique<KickToGoal>(), 6);       // kick the ball if possible
+        // emit<Task>(std::make_unique<Localise>(), 5);         // localise if necessary
+        emit<Task>(std::make_unique<KickToGoal>(), 6);  // kick the ball if possible
     }
 
 }  // namespace module::purpose
