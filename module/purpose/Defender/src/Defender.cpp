@@ -9,6 +9,7 @@
 #include "message/strategy/AlignRobotToBall.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
+#include "message/strategy/Localise.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkInsideBoundedBox.hpp"
@@ -34,6 +35,7 @@ namespace module::purpose {
     using message::strategy::AlignRobotToBall;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
+    using message::strategy::Localise;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using message::strategy::WalkInsideBoundedBox;
@@ -85,6 +87,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<WalkToFieldPosition>(
                 Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                 cfg.ready_position.z()));
+            emit<Task>(std::make_unique<Localise>(), 2);
         });
 
         // Normal PLAYING state

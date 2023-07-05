@@ -7,6 +7,7 @@
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/strategy/DiveToBall.hpp"
+#include "message/strategy/Localise.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
@@ -19,6 +20,7 @@ namespace module::purpose {
     using GameMode = message::input::GameState::Data::Mode;
     using message::planning::LookAround;
     using message::strategy::DiveToBall;
+    using message::strategy::Localise;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using GoalieTask = message::purpose::Goalie;
@@ -74,6 +76,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<WalkToFieldPosition>(
                 Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                 cfg.ready_position.z()));
+            emit<Task>(std::make_unique<Localise>(), 2);
         });
 
         // Normal PLAYING state
