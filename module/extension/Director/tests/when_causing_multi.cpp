@@ -113,7 +113,8 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that if multiple things that are needed have when+causings all will run", "[director][!mayfail]") {
+TEST_CASE("Test that if multiple things that are needed have when+causings all will run",
+          "[director][when][causing][multiple][!mayfail]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
