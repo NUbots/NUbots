@@ -62,8 +62,9 @@ kalman:
   # Measurement model noise
   R: [0.000011025, 0.000011025, 0.0018284176, 0.0018284176]
   # Kalman Filter initial deadreckoned position and height
-  initial_rTWw: [0, 0, 0.49]
-   # Kalman Filter initial orientation roll, pitch, yaw
+  initial_rTWw:
+    [0, 0, 0.49]
+    # Kalman Filter initial orientation roll, pitch, yaw
   initial_rpy: [0, 0.3839, 0]
 
 mahony:

@@ -24,7 +24,7 @@ lens:
   fov: 180 * pi / 180
   # The homogenous transform from the rigid platform this camera is attached to to its optical location
   Hpc:
-    - [1,0,0, 0.08893612063588988]
-    - [0,1,0, 0.03529909622045881]
-    - [0,0,1, 0.0713674563254241]
+    - [1, 0, 0, 0.08893612063588988]
+    - [0, 1, 0, 0.03529909622045881]
+    - [0, 0, 1, 0.0713674563254241]
     - [0.0, 0.0, 0.0, 1.0]
