@@ -16,18 +16,10 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
+
 syntax = "proto3";
 
-package message.purpose;
+package message.strategy;
 
-message Defender {
-    bool force_playing = 1;
-}
-
-message NormalDefender {}
-message DirectFreeKickDefender {}
-message InDirectFreeKickDefender {}
-message PenaltyKickDefender {}
-message CornerKickDefender {}
-message GoalKickDefender {}
-message ThrowInDefender {}
+/// A task that will tell robot to walk to its position if the ball is not in its bounded box region
+message WalkInsideBoundedBox {}
