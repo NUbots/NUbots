@@ -3,14 +3,15 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
-#include "utility/math/comparison.hpp"
 #include "message/output/Buzzer.hpp"
+
+#include "utility/math/comparison.hpp"
 
 namespace module::platform::OpenCR {
 
+    using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
-    using message::output::Buzzer;
 
     /*
         Process the status return packet data
@@ -130,8 +131,8 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
-        for(const auto& servo : servo_states ) {
-            if (servo.temperature > cfg.max_tol_temp){
+        for (const auto& servo : servo_states) {
+            if (servo.temperature > cfg.max_tol_temp) {
                 emit(std::make_unique<Buzzer>());
                 break;
             }
