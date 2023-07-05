@@ -2,5 +2,4 @@ syntax = "proto3";
 
 package message.output;
 
-message Buzzer {
-}
+message Buzzer {}

@@ -1,13 +1,14 @@
 #include "HardwareIO.hpp"
 
 #include <fmt/format.h>
-#include "message/output/Buzzer.hpp"
+
 #include "Convert.hpp"
 #include "dynamixel/v2/Dynamixel.hpp"
 
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+#include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -109,7 +110,7 @@ namespace module::platform::OpenCR {
             }
 
             cfg.max_tol_temp = config["servo"]["temp_tol"].as<float>();
-            cfg.buzzer_freq = config["buzzer"]["freq"].as<float>();
+            cfg.buzzer_freq  = config["buzzer"]["freq"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -297,7 +298,6 @@ namespace module::platform::OpenCR {
             // Fill the necessary field within the opencr_state struct
             opencr_state.buzzer = cfg.buzzer_freq;
         });
-
     }
 
 }  // namespace module::platform::OpenCR
