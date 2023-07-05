@@ -8,7 +8,7 @@ grid_size: 0.01
 n_particles: 1000
 
 # Use hardcoded initial state
-use_hardcoded_initial_state: true
+use_hardcoded_initial_state: false
 
 # Initial state (x,y,theta)
 initial_state: [2.25, -3, 1.571]
