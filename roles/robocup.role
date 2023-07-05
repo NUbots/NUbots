@@ -48,6 +48,7 @@ nuclear_role(
   strategy::KickToGoal
   strategy::AlignBallToGoal
   strategy::DiveToBall
+  strategy::Localise
   strategy::AlignRobotToBall
   strategy::WalkInsideBoundedBox
   # Purposes
