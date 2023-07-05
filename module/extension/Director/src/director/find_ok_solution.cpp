@@ -23,7 +23,7 @@ namespace module::extension {
 
     using component::Provider;
 
-    Director::OkSolution Director::find_ok_solution(const Solution& solution,
+    Director::OkSolution Director::find_ok_solution(const Solution& requirement,
                                                     const std::set<std::type_index>& used_types) {
 
         // We need to accumulate blocked types for options we didn't use
@@ -31,7 +31,7 @@ namespace module::extension {
         std::set<std::type_index> blocking_groups;
 
         // Look at all the options and build up the SelectedOptions we have
-        for (const auto& option : solution.options) {
+        for (const auto& option : requirement.options) {
 
             auto o = find_ok_solution(option, used_types);
 
@@ -67,31 +67,25 @@ namespace module::extension {
         std::vector<std::shared_ptr<Provider>> requirement_providers;
 
         // If we have requirements we need to combine their output as our solution
+        // Any when based requirements would have set our state to BLOCKED_WHEN already
         bool blocked = false;
         std::set<std::type_index> blocking_groups;
         for (const auto& r : option.requirements) {
 
-            // If this is a pushed requirement we need to watch it
-            if (r.pushed) {
-                blocked = true;
-                blocking_groups.insert(option.provider->type);
-            }
-            else {
-                // Choose the best option for this requirement
-                auto s = find_ok_solution(r, used_types);
+            // Choose the best option for this requirement
+            auto s = find_ok_solution(r, used_types);
 
-                blocked = blocked || s.blocked;
+            blocked = blocked || s.blocked;
 
-                // Add the blocked types to our blocked set
-                blocking_groups.insert(s.blocking_groups.begin(), s.blocking_groups.end());
+            // Add the blocked types to our blocked set
+            blocking_groups.insert(s.blocking_groups.begin(), s.blocking_groups.end());
 
-                // Condense the providers in this requirement into a single list
-                requirement_providers.push_back({s.provider});
-                requirement_providers.insert(requirement_providers.end(), s.requirements.begin(), s.requirements.end());
+            // Condense the providers in this requirement into a single list
+            requirement_providers.push_back({s.provider});
+            requirement_providers.insert(requirement_providers.end(), s.requirements.begin(), s.requirements.end());
 
-                // Add the used types to our list
-                used_types.insert(s.used.begin(), s.used.end());
-            }
+            // Add the used types to our list
+            used_types.insert(s.used.begin(), s.used.end());
         }
 
         return OkSolution(blocked,

@@ -332,6 +332,57 @@ namespace module::extension {
                                                   const std::set<std::type_index>& used_types);
 
         /**
+         * Represents a series of providers that we can push to make a solution viable.
+         */
+        struct PushedSolution {
+            /// If this solution is blocked
+            bool blocked;
+            /// How deep this pushing option is
+            int level;
+            /// The providers to push to make this option viable
+            /// This set will be empty if no pushing is required
+            std::set<std::shared_ptr<component::Provider>> providers;
+        };
+
+        /**
+         * Filters a list of PushedSolutions to only the deepest level of pushing and merges them together.
+         *
+         * @param sols the list of PushedSolutions to filter
+         *
+         * @return the PushedSolution that represents the deepest level of pushing
+         */
+        PushedSolution filter_deepest(const std::vector<Director::PushedSolution>& sols);
+
+        /**
+         * Finds the best option for pushing to make a solution viable.
+         *
+         * @param requirement   the requirement that we are searching for options we can execute
+         * @param pushing_depth the level of pushing that we are currently at
+         *
+         * @return the PushedSolution that represents the best option for pushing to make a solution viable
+         */
+        PushedSolution find_pushing_solution(const Solution& requirement, const int& pushing_depth);
+
+        /**
+         * Finds what needs to be pushed for this option to be viable.
+         *
+         * @param option        the option that we are trying to find a pushing solution for
+         * @param pushing_depth the level of pushing that we are currently at
+         *
+         * @return the PushedSolution that represents the best option for pushing to make a solution viable
+         */
+        PushedSolution find_pushing_solution(const Solution::Option& option, const int& pushing_depth);
+
+        /**
+         * Finds the best option for pushing to make a solution viable.
+         *
+         * @param solutions the set of solutions that we are trying to find an PushedSolution for
+         *
+         * @return the PushedSolution that represents the best option for pushing to make a solution viable
+         */
+        PushedSolution find_pushing_solutions(const std::vector<Solution>& solutions);
+
+        /**
          * Runs the passed task on the passed provider.
          *
          * @param task          the task we are running
