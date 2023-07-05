@@ -31,6 +31,7 @@ namespace module::planning {
             cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
             cfg.acceleration                         = config["acceleration"].as<double>();
             cfg.approach_radius                      = config["approach_radius"].as<double>();
+            cfg.y_velocity_enabled                   = config["y_velocity_enabled"].as<bool>();
 
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
             cfg.min_angular_velocity = config["min_angular_velocity"].as<double>();
@@ -45,12 +46,7 @@ namespace module::planning {
         });
 
         // Path to walk to a particular point
-        on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
-            // If we haven't got an active walk task, then reset the velocity to minimum velocity
-            if (walk.run_state == GroupInfo::RunState::NO_TASK) {
-                velocity_magnitude = cfg.min_translational_velocity_magnitude;
-            }
-
+        on<Provide<WalkTo>>().then([this](const WalkTo& walk_to) {
             // If robot getting close to the point, begin to decelerate to minimum velocity
             if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
                 velocity_magnitude -= cfg.acceleration;
@@ -64,7 +60,14 @@ namespace module::planning {
             }
 
             // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+            Eigen::Vector3d velocity_target = Eigen::Vector3d::Zero();
+
+            if (cfg.y_velocity_enabled) {
+                velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+            }
+            else {
+                velocity_target = Eigen::Vector3d::UnitX() * velocity_magnitude;
+            }
 
             // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
             // value cfg.max_angular_velocity
@@ -81,6 +84,8 @@ namespace module::planning {
             // Turn on the spot
             emit<Task>(std::make_unique<Walk>(
                 Eigen::Vector3d(cfg.rotate_velocity_x, cfg.rotate_velocity_y, sign * cfg.rotate_velocity)));
+
+            velocity_magnitude = cfg.min_translational_velocity_magnitude;
         });
 
         on<Provide<TurnAroundBall>>().then([this](const TurnAroundBall& turn_around_ball) {
@@ -90,6 +95,8 @@ namespace module::planning {
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(cfg.pivot_ball_velocity_x,
                                                               sign * cfg.pivot_ball_velocity_y,
                                                               sign * cfg.pivot_ball_velocity)));
+
+            velocity_magnitude = cfg.min_translational_velocity_magnitude;
         });
     }
 }  // namespace module::planning
