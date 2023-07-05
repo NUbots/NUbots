@@ -1,0 +1,42 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# Waypoints for kick foot relative to planted foot [x, y, z, time]
+# Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
+foot_waypoints:
+  - [0, 0.2, 0, 0] # Start
+  - [0, 0.2, 0, 1.5] # Lean over
+  - [-0.075, 0.2, 0.1, 0.5] # Raise foot
+  - [0.1, 0.2, 0.1, 0.075] # Kick !
+  - [0.1, 0.2, 0.1, 0.05] # Kick !
+  - [0, 0.2, 0.1, 0.1] # Bring foot back
+  - [0, 0.2, 0, 0.25] # Place foot down
+  - [0, 0.2, 0, 0.5] # Delay
+
+# Waypoints for torso relative to planted foot [x, y, z, time]
+# Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
+torso_waypoints:
+  - [0.05, 0.1, 0.47, 0] # Start
+  - [0.05, -0.015, 0.47, 1.5] # Lean over
+  - [0.05, -0.015, 0.47, 0.5] # Raise foot
+  - [0.05, -0.015, 0.47, 0.075] # Kick !
+  - [0.05, -0.015, 0.47, 0.05] # Kick !
+  - [0.05, -0.015, 0.47, 0.1] # Bring foot back
+  - [0.05, 0.1, 0.47, 0.5] # Place foot down
+  - [0.05, 0.1, 0.47, 0.5] # Delay
+
+
+# Torso pitch (in radians)
+torso_pitch: 16 * pi / 180
+
+gains:
+  arms: 1
+
+# Fixed position of the arm joints during kicking
+arms:
+  right_shoulder_pitch: 1.7
+  left_shoulder_pitch: 1.7
+  right_shoulder_roll: -0.2
+  left_shoulder_roll: 0.2
+  right_elbow: -2.4
+  left_elbow: -2.4
