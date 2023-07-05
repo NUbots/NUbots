@@ -223,6 +223,17 @@ namespace module::platform::OpenCR {
 
         /// @brief Handle for our watchdog timer for packet handling
         ReactionHandle packet_watchdog;
+
+        /// @brief Stores configuration values
+        struct Config {
+
+            /// @brief Container for the max tolerable temp for all servos
+            float max_tol_temp = 0.0;
+
+            /// @brief Container for the buzzer frequency, used if a Buzzer message is emitted
+            float buzzer_freq = 0.0;
+
+        } cfg;
     };
 
 }  // namespace module::platform::OpenCR

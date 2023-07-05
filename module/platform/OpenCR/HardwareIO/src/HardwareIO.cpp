@@ -8,6 +8,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+#include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -23,6 +24,8 @@ namespace module::platform::OpenCR {
     using utility::support::Expression;
 
     using message::platform::ButtonMiddleDown;
+
+    using message::output::Buzzer;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
@@ -105,6 +108,9 @@ namespace module::platform::OpenCR {
                 nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
+
+            cfg.max_tol_temp = config["servo"]["temp_tol"].as<float>();
+            cfg.buzzer_freq  = config["buzzer"]["freq"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -286,6 +292,11 @@ namespace module::platform::OpenCR {
             opencr_state.led_panel.led3 = led.led3;
             opencr_state.led_panel.led4 = led.led4;
             opencr_state.dirty          = true;
+        });
+
+        on<Trigger<Buzzer>>().then([this]() {
+            // Fill the necessary field within the opencr_state struct
+            opencr_state.buzzer = cfg.buzzer_freq;
         });
     }
 
