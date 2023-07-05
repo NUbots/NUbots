@@ -25,7 +25,10 @@ namespace utility::skill {
          * @return Trajectory of torso.
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_swing_foot_pose() const {
-            return swingfoot_trajectory.pose(t);
+
+            // Clamp time
+            Scalar time = std::min(t, swing_foot_trajectory_duration);
+            return swingfoot_trajectory.pose(time);
         }
 
         /**
@@ -33,7 +36,10 @@ namespace utility::skill {
          * @return Pose of torso.
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose() const {
-            return torso_trajectory.pose(t);
+
+            // Clamp time
+            Scalar time = std::min(t, swing_foot_trajectory_duration);
+            return torso_trajectory.pose(time);
         }
 
         /**
@@ -153,6 +159,12 @@ namespace utility::skill {
         /// @brief Duration of complete kick.
         Scalar kick_duration = 0.0;
 
+        /// @brief Swing foot trajectory duration
+        Scalar swing_foot_trajectory_duration = 0.0;
+
+        /// @brief Torso trajectory duration
+        Scalar torso_trajectory_duration = 0.0;
+
         /// @brief Current time in the step cycle.
         Scalar t = 0.0;
 
@@ -188,24 +200,19 @@ namespace utility::skill {
                 waypoint.position.y() *= left_foot_is_planted ? -1.0 : 1.0;
                 swingfoot_trajectory.add_waypoint(waypoint);
             }
+            swing_foot_trajectory_duration = foot_waypoints.back().time_point;
 
             for (auto waypoint : torso_waypoints) {
                 // Flip y position sign based on which foot is planted
                 waypoint.position.y() *= left_foot_is_planted ? -1.0 : 1.0;
                 torso_trajectory.add_waypoint(waypoint);
             }
-
-            kick_duration = foot_waypoints.back().time_point;
+            torso_trajectory_duration = torso_waypoints.back().time_point;
+            kick_duration             = std::max(swing_foot_trajectory_duration, torso_trajectory_duration);
 
             // Assert that the first timepoint of both trajectories is 0
             if (foot_waypoints.front().time_point != 0.0 || torso_waypoints.front().time_point != 0.0) {
                 throw std::runtime_error("The first waypoint of the foot and torso trajectories must start at time 0.");
-            }
-
-            // Assert that the length of the foot waypoints is the same as the length of the torso waypoints
-            if (foot_waypoints.back().time_point != torso_waypoints.back().time_point) {
-                throw std::runtime_error(
-                    "The last waypoint of the foot and torso trajectories must have the same time point.");
             }
         }
     };

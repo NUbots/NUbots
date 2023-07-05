@@ -39,19 +39,24 @@ namespace module::skill {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Add kick motion waypoints
+            double duration = 0.0;
             for (const auto& foot_waypoint : config["foot_waypoints"].config) {
                 Waypoint<double> waypoint;
                 Eigen::Vector4d frame = foot_waypoint.as<Expression>();
-                waypoint.time_point   = frame(3);
-                waypoint.position     = frame.head<3>();
+                duration += frame(3);
+                waypoint.time_point = duration;
+
+                waypoint.position = frame.head<3>();
                 kick_generator.add_foot_waypoint(waypoint);
             }
+            duration = 0.0;
             for (const auto& torso_waypoint : config["torso_waypoints"].config) {
                 Waypoint<double> waypoint;
                 Eigen::Vector4d frame = torso_waypoint.as<Expression>();
-                waypoint.time_point   = frame(3);
-                waypoint.position     = frame.head<3>();
-                waypoint.orientation  = Eigen::Vector3d(0, config["torso_pitch"].as<Expression>(), 0);
+                duration += frame(3);
+                waypoint.time_point += duration;
+                waypoint.position    = frame.head<3>();
+                waypoint.orientation = Eigen::Vector3d(0, config["torso_pitch"].as<Expression>(), 0);
                 kick_generator.add_torso_waypoint(waypoint);
             }
 
