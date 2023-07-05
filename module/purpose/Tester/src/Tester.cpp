@@ -6,6 +6,7 @@
 #include "message/planning/KickTo.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
+#include "message/strategy/AlignRobotToBall.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
@@ -23,6 +24,7 @@ namespace module::purpose {
     using message::planning::KickTo;
     using message::planning::LookAround;
     using message::strategy::AlignBallToGoal;
+    using message::strategy::AlignRobotToBall;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
@@ -42,6 +44,7 @@ namespace module::purpose {
             cfg.look_at_ball_priority           = config["tasks"]["look_at_ball_priority"].as<int>();
             cfg.walk_to_ball_priority           = config["tasks"]["walk_to_ball_priority"].as<int>();
             cfg.align_ball_to_goal_priority     = config["tasks"]["align_ball_to_goal_priority"].as<int>();
+            cfg.align_robot_to_ball_priority    = config["tasks"]["align_robot_to_ball_priority"].as<int>();
             cfg.kick_to_goal_priority           = config["tasks"]["kick_to_goal_priority"].as<int>();
             cfg.walk_to_field_position_priority = config["tasks"]["walk_to_field_position_priority"].as<int>();
             cfg.kick_to_priority                = config["tasks"]["kick_to_priority"].as<int>();
@@ -63,6 +66,9 @@ namespace module::purpose {
             }
             if (cfg.align_ball_to_goal_priority > 0) {
                 emit<Task>(std::make_unique<AlignBallToGoal>(), cfg.align_ball_to_goal_priority);
+            }
+            if (cfg.align_robot_to_ball_priority > 0) {
+                emit<Task>(std::make_unique<AlignRobotToBall>(), cfg.align_robot_to_ball_priority);
             }
             if (cfg.kick_to_goal_priority > 0) {
                 emit<Task>(std::make_unique<KickToGoal>(), cfg.kick_to_goal_priority);

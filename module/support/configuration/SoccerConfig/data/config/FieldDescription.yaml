@@ -1,19 +1,18 @@
 log_level: INFO
 
-# LAB FIELD
 Units: m
 BallRadius: 0.07
-LineWidth: 0.07
+LineWidth: 0.05
 
-FieldLength: 6.4
-FieldWidth: 3.55
-GoalDepth: 0.4
+FieldLength: 9
+FieldWidth: 6
+GoalDepth: 0.6
 # Distance between inner edges of goal posts.
-GoalWidth: 1.65
-GoalAreaLength: 0.72
-GoalAreaWidth: 2.3
+GoalWidth: 2.6
+GoalAreaLength: 1
+GoalAreaWidth: 3
 # Height to the bottom of the crossbar.
-GoalCrossbarHeight: 0.55 # from top of wood to ground
+GoalCrossbarHeight: 1.25 # from top of wood to ground
 # What shape the goal is (RECTANGLE,CIRCLE)
 GoalpostType: CIRCLE
 # The crossbar diameter and the goalpost diameter are (supposed to be) equal.
@@ -23,11 +22,11 @@ GoalCrossbarWidth: 0.10
 GoalCrossbarDepth: 0.10
 GoalNetHeight: 1.0
 # Measured from the goal line.
-PenaltyMarkDistance: 0 # to the middle of the penalty mark
-CenterCircleDiameter: 1.2
-BorderStripMinWidth: 0.5
+PenaltyMarkDistance: 1.5 # to the middle of the penalty mark
+CenterCircleDiameter: 1.5
+BorderStripMinWidth: 1.0
 PenaltyRobotStart: 1.0
 
 # New field markings
-PenaltyAreaLength: 0
-PenaltyAreaWidth: 0
+PenaltyAreaLength: 2
+PenaltyAreaWidth: 5

@@ -52,7 +52,10 @@ nuclear_role(
   strategy::DiveToBall
   strategy::KickToGoal
   strategy::AlignBallToGoal
+  strategy::AlignRobotToBall
+  strategy::WalkInsideBoundedBox
   # Purposes
+  purpose::Defender
   purpose::Striker
   purpose::Soccer
   purpose::Goalie

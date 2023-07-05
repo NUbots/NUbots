@@ -207,8 +207,7 @@ namespace module::vision::visualmesh {
                                        const double& max_distance,
                                        const double& intersection_tolerance,
                                        const std::string& path,
-                                       const std::string& cache_directory)
-        : active(std::make_unique<std::atomic<bool>>()) {
+                                       const std::string& cache_directory) {
 
         // Add the configuration properties we were passed
         VisualMeshModelConfig cfg;

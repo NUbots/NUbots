@@ -5,6 +5,7 @@ log_level: INFO
 tasks:
   # Strategies
   align_ball_to_goal_priority: 0
+  align_robot_to_ball_priority: 0
   find_ball_priority: 0
   look_at_ball_priority: 0
   walk_to_ball_priority: 0
