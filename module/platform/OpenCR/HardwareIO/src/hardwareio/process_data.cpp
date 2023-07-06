@@ -50,6 +50,11 @@ namespace module::platform::OpenCR {
         // Button Left = 0x04
         opencr_state.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
+        // If the left (black) button is pressed trigger field localisation reset
+        if (opencr_state.buttons[0]) {
+            emit(std::make_unique<ButtonLeftDown>());
+        }
+
         opencr_state.gyro = Eigen::Vector3f(convert::gyro(data.gyro[0]),    // X
                                             -convert::gyro(data.gyro[1]),   // Y
                                             -convert::gyro(data.gyro[2]));  // Z
