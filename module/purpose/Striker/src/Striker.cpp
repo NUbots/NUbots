@@ -6,6 +6,7 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/skill/Look.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/AlignRobotToBall.hpp"
 #include "message/strategy/FindFeature.hpp"
@@ -34,6 +35,7 @@ namespace module::purpose {
     using message::purpose::PenaltyKickStriker;
     using message::purpose::PenaltyShootoutStriker;
     using message::purpose::ThrowInStriker;
+    using message::skill::Look;
     using message::strategy::AlignBallToGoal;
     using message::strategy::AlignRobotToBall;
     using message::strategy::FindBall;
@@ -91,7 +93,8 @@ namespace module::purpose {
                            Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                            cfg.ready_position.z()),
                        1);
-            emit<Task>(std::make_unique<Localise>(), 2);  // localise if necessary
+            emit<Task>(std::make_unique<Localise>(), 2);                      // localise if necessary
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
         });
 
         // Normal PLAYING state
@@ -102,7 +105,10 @@ namespace module::purpose {
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<NormalStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<NormalStriker>>().then([this] {
+            emit<Task>(std::make_unique<StandStill>());
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
+        });
 
         // Penalty shootout PLAYING state
         on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
