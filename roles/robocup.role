@@ -12,6 +12,10 @@ nuclear_role(
   input::SensorFilter
   input::Camera
   input::GameController
+  # NUsight
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
