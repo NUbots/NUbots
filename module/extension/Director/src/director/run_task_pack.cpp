@@ -82,7 +82,7 @@ namespace module::extension {
                     auto& current_task           = main_group.active_task;
 
                     // If this is the same task we are already running we skip it
-                    if (new_task != current_task) {
+                    if (new_task != current_task || main_provider != main_group.active_provider) {
 
                         // If we emitted the last task that went here we can just run and do a replacement
                         // No need to check any lower down providers as they'll already be handled from last time
