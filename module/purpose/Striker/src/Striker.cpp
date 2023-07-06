@@ -93,7 +93,7 @@ namespace module::purpose {
                            Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                            cfg.ready_position.z()),
                        1);
-            emit<Task>(std::make_unique<Localise>(), 2);                      // localise if necessary
+            // emit<Task>(std::make_unique<Localise>(), 2);                      // localise if necessary
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
         });
 
