@@ -144,9 +144,80 @@ namespace module::extension {
         // We are able to push others
         if (run_level <= RunLevel::PUSH) {
 
-            // Try to find an ok solution for the pack
-            auto pushing_solutions = find_pushing_solutions(solutions);
+            // Find providers we should push in order to run
+            std::vector<PushedSolution> pushed_solutions;
+            for (const auto& solution : solutions) {
+                pushed_solutions.push_back(find_pushing_solution(solution));
+            }
 
+            auto merged                                 = filter_deepest_and_merge(pushed_solutions);
+            std::set<std::shared_ptr<Provider>> pushers = merged.providers;
+
+            // Filter down the merged providers to only a single provider per group
+            // When there are multiple always choose the first provider in the list
+            std::map<std::type_index, std::shared_ptr<Provider>> merged_groups;
+            for (const auto& p : pushers) {
+                const auto& group = p->group;
+                const auto& ps    = group.providers;
+
+                if (merged_groups.count(p->type) == 0) {
+                    merged_groups[p->type] = p;
+                }
+                else {
+                    if (std::distance(ps.begin(), std::find(ps.begin(), ps.end(), p))
+                        < std::distance(ps.begin(), std::find(ps.begin(), ps.end(), merged_groups[p->type]))) {
+                        merged_groups[p->type] = p;
+                    }
+                }
+            }
+
+            // Reflatten
+            pushers.clear();
+            for (const auto& [type, provider] : merged_groups) {
+                pushers.insert(provider);
+            }
+
+            // Apply all the pushing solutions that we can and once we have
+            // get the providers to reevaluate their groups
+            // Each task will push as many of the providers as it can based on what it needs, this way since the tasks
+            // are sorted in priority order the highest priority pusher
+            std::vector<std::shared_ptr<DirectorTask>> reevaluation;
+            for (int i = 0; i < int(tasks.size()); ++i) {
+                const auto& push_solution = pushed_solutions[i];
+                const auto& task          = tasks[i];
+
+                // Pull from the merged pushers all the providers that this task is interested in
+                // intersect pushers and push_solution.providers
+                std::set<std::shared_ptr<Provider>> providers;
+                std::set_intersection(pushers.begin(),
+                                      pushers.end(),
+                                      push_solution.providers.begin(),
+                                      push_solution.providers.end(),
+                                      std::inserter(providers, providers.begin()));
+
+                // Remove these from the pushers
+                for (const auto& p : providers) {
+                    auto& group = p->group;
+                    // If we have the priority to beat the current pusher, we can push
+                    if (challenge_priority(group.pushing_task, task)) {
+                        group.pushing_task    = task;
+                        group.pushed_provider = p;
+
+                        reevaluation.push_back(group.active_task);
+                    }
+
+                    pushers.erase(p);
+                }
+            }
+
+            // Reevaluate all the groups that we pushed
+            std::stable_sort(reevaluation.begin(), reevaluation.end(), [this](const auto& a, const auto& b) {
+                // If b wins against a, then we swap
+                return challenge_priority(b, a);
+            });
+            for (const auto& t : reevaluation) {
+                reevaluate_group(providers.at(t->requester_id)->group);
+            }
         }
 
         // If we reach here, we have already queued into everything that could possibly change our state

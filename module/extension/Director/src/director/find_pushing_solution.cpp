@@ -150,23 +150,4 @@ namespace module::extension {
         return PushedSolution{true, pushing_depth, {}};
     }
 
-    Director::PushedSolution Director::find_pushing_solutions(const std::vector<Solution>& solutions) {
-
-        // Get pushing solutions for each solution
-        std::vector<PushedSolution> pushed_solutions;
-        for (const auto& solution : solutions) {
-            // Choose an option
-            auto s = find_pushing_solution(solution, 0);
-
-            // If any of the solutions is blocked, then return no solutions
-            if (s.blocked) {
-                return PushedSolution{true, 0, {}};
-            }
-
-            pushed_solutions.push_back(s);
-        }
-
-        return filter_deepest_and_merge(pushed_solutions);
-    }
-
 }  // namespace module::extension

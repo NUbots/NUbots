@@ -375,15 +375,6 @@ namespace module::extension {
         PushedSolution find_pushing_solution(const Solution::Option& option, const int& pushing_depth = 0);
 
         /**
-         * Finds the best option for pushing to make a solution viable.
-         *
-         * @param solutions the set of solutions that we are trying to find an PushedSolution for
-         *
-         * @return the PushedSolution that represents the best option for pushing to make a solution viable
-         */
-        PushedSolution find_pushing_solutions(const std::vector<Solution>& solutions);
-
-        /**
          * Runs the passed task on the passed provider.
          *
          * @param task          the task we are running
