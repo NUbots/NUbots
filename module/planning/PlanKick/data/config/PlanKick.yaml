@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # How long since the last ball measurement before ignoring it and assuming the ball is lost, in milliseconds
 ball_timeout_threshold: 1000
