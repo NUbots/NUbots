@@ -27,7 +27,7 @@ namespace module::extension {
 
         // Only the solutions at the deepest level matter
         int deepest = std::max_element(sols.begin(), sols.end(), [](const auto& a, const auto& b) {
-                          a.providers.empty() ? true : b.providers.empty() ? false : a.level < b.level;
+                          return a.providers.empty() ? true : b.providers.empty() ? false : a.level < b.level;
                       })->level;
 
         // Make a per solution per group list of providers for the deepest level
