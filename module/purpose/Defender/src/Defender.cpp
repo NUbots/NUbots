@@ -89,7 +89,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<WalkToFieldPosition>(
                 Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                 cfg.ready_position.z()));
-            emit<Task>(std::make_unique<Localise>(), 2);
+            // emit<Task>(std::make_unique<Localise>(), 2);
             emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
         });
 
