@@ -362,7 +362,7 @@ namespace module::extension {
          *
          * @return the PushedSolution that represents the best option for pushing to make a solution viable
          */
-        PushedSolution find_pushing_solution(const Solution& requirement, const int& pushing_depth);
+        PushedSolution find_pushing_solution(const Solution& requirement, const int& pushing_depth = 0);
 
         /**
          * Finds what needs to be pushed for this option to be viable.
@@ -372,7 +372,7 @@ namespace module::extension {
          *
          * @return the PushedSolution that represents the best option for pushing to make a solution viable
          */
-        PushedSolution find_pushing_solution(const Solution::Option& option, const int& pushing_depth);
+        PushedSolution find_pushing_solution(const Solution::Option& option, const int& pushing_depth = 0);
 
         /**
          * Finds the best option for pushing to make a solution viable.
