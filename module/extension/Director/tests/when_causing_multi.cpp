@@ -62,7 +62,7 @@ namespace {
                 events.push_back("subtask 1 executed");
             });
             on<Provide<Subtask<2>>, When<Condition<2>, std::equal_to, Condition<2>::ALLOW>>().then([this] {  //
-                events.push_back("subtask 1 executed");
+                events.push_back("subtask 2 executed");
             });
 
 
