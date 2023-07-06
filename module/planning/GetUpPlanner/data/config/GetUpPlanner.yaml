@@ -4,7 +4,7 @@ log_level: INFO
 # How many consecutive frames we have to be at recovery levels before triggering a getup
 count: 30
 # The angle from standing upright to trigger a getup (e.g. lying down would be 90 degrees)
-angle: 60.0 * pi / 180.0
+angle: 1.2
 # In order to trigger a getup the total rotation rate from the gyro must be less than this value
 gyro: 1.0
 # The mean value of the accelerometer at rest (should be acceleration due to gravity)

@@ -20,6 +20,7 @@ namespace module::purpose {
     using Phase    = message::input::GameState::Data::Phase;
     using GameMode = message::input::GameState::Data::Mode;
     using message::planning::LookAround;
+    using message::skill::Look;
     using message::strategy::DiveToBall;
     using message::strategy::Localise;
     using message::strategy::LookAtBall;

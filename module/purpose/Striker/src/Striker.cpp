@@ -106,8 +106,8 @@ namespace module::purpose {
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
         on<Provide<NormalStriker>>().then([this] {
-            emit<Task>(std::make_unique<StandStill>());
-            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
+            emit<Task>(std::make_unique<StandStill>(), 1);
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 2);  // Look straight ahead
         });
 
         // Penalty shootout PLAYING state
