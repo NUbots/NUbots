@@ -346,12 +346,13 @@ namespace module::extension {
 
         /**
          * Filters a list of PushedSolutions to only the deepest level of pushing and merges them together.
+         * The merge will make sure that only the intersection of providers within a group are kept.
          *
          * @param sols the list of PushedSolutions to filter
          *
          * @return the PushedSolution that represents the deepest level of pushing
          */
-        PushedSolution filter_deepest(const std::vector<Director::PushedSolution>& sols);
+        PushedSolution filter_deepest_and_merge(const std::vector<Director::PushedSolution>& sols);
 
         /**
          * Finds the best option for pushing to make a solution viable.

@@ -23,18 +23,53 @@ namespace module::extension {
 
     using component::Provider;
 
-    Director::PushedSolution Director::filter_deepest(const std::vector<Director::PushedSolution>& sols) {
+    Director::PushedSolution Director::filter_deepest_and_merge(const std::vector<Director::PushedSolution>& sols) {
 
-        // We push at the deepest level of our requirements
-        int deepest = std::min_element(sols.begin(), sols.end(), [](const auto& a, const auto& b) {
-                          return a.level < b.level;
+        // Only the solutions at the deepest level matter
+        int deepest = std::max_element(sols.begin(), sols.end(), [](const auto& a, const auto& b) {
+                          a.providers.empty() ? true : b.providers.empty() ? false : a.level < b.level;
                       })->level;
 
-        PushedSolution result{false, deepest, {}};
+        // Make a per solution per group list of providers for the deepest level
+        std::vector<std::map<std::type_index, std::set<std::shared_ptr<Provider>>>> split_groups;
         for (const auto& s : sols) {
+            split_groups.emplace_back();
+            auto& groups = split_groups.back();
             if (s.level == deepest) {
-                result.providers.insert(s.providers.begin(), s.providers.end());
+                for (const auto& p : s.providers) {
+                    groups[p->type].insert(p);
+                }
             }
+        }
+
+        // Merge the providers for each group by taking the intersection of all the providers as our final solution
+        // Taking the intersection ensures that any of the group providers left in the intersection will work for all of
+        // providers requirements
+        std::map<std::type_index, std::set<std::shared_ptr<Provider>>> merged_groups;
+        for (const auto& groups : split_groups) {
+            for (const auto& [type, providers] : groups) {
+                if (merged_groups.count(type) == 0) {
+                    merged_groups[type] = providers;
+                }
+                else {
+                    std::set<std::shared_ptr<Provider>> intersection;
+                    std::set_intersection(merged_groups[type].begin(),
+                                          merged_groups[type].end(),
+                                          providers.begin(),
+                                          providers.end(),
+                                          std::inserter(intersection, intersection.begin()));
+                    if (intersection.empty()) {
+                        return PushedSolution{true, deepest, {}};
+                    }
+                    merged_groups[type] = intersection;
+                }
+            }
+        }
+
+        // Merge the groups into a single set of providers
+        PushedSolution result{false, deepest, {}};
+        for (const auto& [type, providers] : merged_groups) {
+            result.providers.insert(providers.begin(), providers.end());
         }
         return result;
     }
@@ -108,7 +143,7 @@ namespace module::extension {
                 return PushedSolution{false, pushing_depth, {}};
             }
 
-            return filter_deepest(requirements);
+            return filter_deepest_and_merge(requirements);
         }
 
         // We are blocked for some other reason so we can't be a pushing solution
@@ -123,7 +158,7 @@ namespace module::extension {
             // Choose an option
             auto s = find_pushing_solution(solution, 0);
 
-            // If any option is blocked, everything is blocked
+            // If any of the solutions is blocked, then return no solutions
             if (s.blocked) {
                 return PushedSolution{true, 0, {}};
             }
@@ -131,7 +166,7 @@ namespace module::extension {
             pushed_solutions.push_back(s);
         }
 
-        return filter_deepest(pushed_solutions);
+        return filter_deepest_and_merge(pushed_solutions);
     }
 
 }  // namespace module::extension
