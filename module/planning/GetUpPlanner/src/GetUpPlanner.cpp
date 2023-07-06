@@ -31,7 +31,7 @@ namespace module::planning {
         });
 
         on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
-            [this](const RunInfo& info, const Uses<GetUp>& getup, const Sensors& sensors) {
+            [this](const Uses<GetUp>& getup, const Sensors& sensors) {
                 if (getup.run_state == GroupInfo::RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Idle>());
                     log<NUClear::DEBUG>("Executing getup");
