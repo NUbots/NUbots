@@ -6,6 +6,8 @@ extern "C" {
 
 #include <cmath>
 #include <fmt/format.h>
+#include <libusb-1.0/libusb.h>
+#include <memory>
 
 #include "aravis_wrap.hpp"
 #include "description_to_fourcc.hpp"
@@ -28,6 +30,60 @@ namespace module::input {
     using utility::input::ServoID;
     using utility::support::Expression;
 
+    /**
+     * Gets a map of bus/port to serial number for all connected USB devices
+     *
+     * @return A map of bus/port to serial number
+     */
+    std::map<std::string, std::string> bus_to_serial() {
+        std::map<std::string, std::string> results;
+        int r;
+
+        // Make a libusb context and wrap it in a unique_ptr so that it is automatically cleaned up
+        libusb_context* raw_ctx = nullptr;
+        r                       = libusb_init(&raw_ctx);
+        if (r < 0) {
+            throw std::runtime_error(fmt::format("Error: initialization failed: {}", r));
+        }
+        std::shared_ptr<libusb_context> ctx(raw_ctx, libusb_exit);
+
+        // get a list of all found USB devices
+        libusb_device** raw_devs = nullptr;
+        ssize_t cnt              = libusb_get_device_list(ctx.get(), &raw_devs);
+        if (cnt < 0) {
+            throw std::runtime_error("Error: USB device list not received.");
+        }
+        std::shared_ptr<libusb_device*> devs(raw_devs, [](libusb_device** ptr) { libusb_free_device_list(ptr, 1); });
+
+        for (int i = 0; i < cnt; i++) {
+            // Get the bus and address of this device
+            auto bus     = libusb_get_bus_number(devs.get()[i]);
+            auto address = libusb_get_device_address(devs.get()[i]);
+
+            std::array<uint8_t, 255> data{};
+
+            libusb_device_descriptor desc{};
+            r = libusb_get_device_descriptor(devs.get()[i], &desc);
+            if (r < 0) {
+                throw std::runtime_error(fmt::format("Error: Device handle not received, code: {}", r));
+            }
+
+            libusb_device_handle* raw_handle = nullptr;
+            r                                = libusb_open(devs.get()[i], &raw_handle);
+            if (r == 0 && raw_handle != nullptr) {
+                std::shared_ptr<libusb_device_handle> handle(raw_handle, libusb_close);
+
+                if (libusb_get_string_descriptor_ascii(handle.get(), desc.iSerialNumber, data.data(), data.size() - 1)
+                    >= 0) {
+                    results[fmt::format("{:03d}-{:03d}", bus, address)] =
+                        std::string(reinterpret_cast<char*>(data.data()));
+                }
+            }
+        }
+
+        return results;
+    }
+
     /// The amount of time to observe after recalibrating to work out how long image transfer takes (nanoseconds)
     constexpr int64_t TRANSFER_OFFSET_OBSERVE_TIME = 1e9;
     /// The amount of time on top of the transfer time that would be considered a drifting clock (nanoseconds)
@@ -38,7 +94,37 @@ namespace module::input {
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Cameras").then("Configuration", [this](const Configuration& config) {
-            auto serial_number = config["serial_number"].as<std::string>();
+            // Work out which method we are using to find the cameras
+            std::string serial_number;
+
+            // If the serial number is provided directly load it
+            if (config.config["serial_number"]) {
+                serial_number = config["serial_number"].as<std::string>();
+            }
+            // If they provide a physical id, search through devices to find the one with the correct physical id
+            // Then get the serial number from that
+            else if (config.config["physical"]) {
+                // Search through the devices to find the one with the correct physical id
+                std::string physical_id = config["physical"].as<std::string>();
+
+                const auto map = bus_to_serial();
+                std::cout << map.size() << std::endl;
+                if (map.count(physical_id) == 0) {
+                    std::stringstream options;
+                    for (const auto& [k, v] : map) {
+                        options << std::endl << k << " with serial " << v;
+                    }
+                    throw std::runtime_error(
+                        fmt::format("Camera with physical connection {} not found\nOptions were:{}",
+                                    physical_id,
+                                    options.str()));
+                }
+                serial_number = map.at(physical_id);
+            }
+            else {
+                log<NUClear::WARN>("Camera configuration", config.fileName.stem(), "has no identifier provided");
+                return;
+            }
 
             // Find the camera if it has already been loaded
             auto it = cameras.find(serial_number);
@@ -111,7 +197,7 @@ namespace module::input {
                                                     CameraContext{
                                                         *this,
                                                         name,
-                                                        0,  // fourcc is set later
+                                                        0,                    // fourcc is set later
                                                         num_cameras++,
                                                         Image::Lens(),        // Lens is constructed in settings
                                                         Eigen::Isometry3d(),  // Hpc is set in settings
