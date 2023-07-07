@@ -48,6 +48,10 @@ namespace module::localisation {
             size_t min_observations = 0;
             /// @brief Penalty factor for observations being outside map
             double outside_map_penalty_factor = 0.0;
+            /// @brief Container for the buzzer frequency when localisation is reset
+            float localisation_reset_freq = 0.0;
+            /// @brief Container for the buzzer duration (milliseconds)
+            int buzzer_duration = 0;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;

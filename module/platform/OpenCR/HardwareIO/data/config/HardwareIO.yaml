@@ -97,8 +97,3 @@ servos:
 
 servo:
   temp_tol: 60.0
-
-buzzer:
-  freq: 880
-  localisation_reset_freq: 1280
-  duration: 300 # Milliseconds

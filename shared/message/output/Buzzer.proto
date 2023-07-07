@@ -25,4 +25,6 @@ package message.output;
 * @author Johanne Montano
 */
 
-message Buzzer {}
+message Buzzer {
+    int32 buzzer_frequency = 1;
+}

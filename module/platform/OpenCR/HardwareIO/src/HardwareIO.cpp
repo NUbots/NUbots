@@ -115,8 +115,6 @@ namespace module::platform::OpenCR {
 
             cfg.max_tol_temp = config["servo"]["temp_tol"].as<float>();
             cfg.buzzer_freq  = config["buzzer"]["freq"].as<float>();
-            cfg.localisation_reset_freq = config["buzzer"]["localisation_reset_freq"].as<float>();
-            cfg.buzzer_duration = config["buzzer"]["duration"].as<int>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -300,25 +298,9 @@ namespace module::platform::OpenCR {
             opencr_state.dirty          = true;
         });
 
-        on<Trigger<Buzzer>>().then([this]() {
+        on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
             // Fill the necessary field within the opencr_state struct
             opencr_state.buzzer = cfg.buzzer_freq;
-        });
-
-        // When the left (black) button is pressed, reset localisation and ring the buzzer after
-        on<Trigger<ButtonLeftDown>>().then([this](){
-            // Reset localisation and ring the buzzer
-            emit(std::make_unique<ResetFieldLocalisation>());
-            opencr_state.buzzer = cfg.localisation_reset_freq;
-
-            // Use the ButtonLeftUp message to silence the buzzer after a busy wait
-            emit<Scope::DELAY>(std::make_unique<ButtonLeftUp>(), std::chrono::milliseconds(cfg.buzzer_duration));
-
-        });
-
-        // Silence the buzzer after the user lets go of the left (black) pin
-        on<Trigger<ButtonLeftUp>>().then([this](){
-            opencr_state.buzzer = 0.0;
         });
     }
 

@@ -232,13 +232,6 @@ namespace module::platform::OpenCR {
 
             /// @brief Container for the buzzer frequency, used if a Buzzer message is emitted
             float buzzer_freq = 0.0;
-
-            /// @brief Container for the buzzer frequency when localisation is reset
-            float localisation_reset_freq = 0.0;
-
-            /// @brief Container for the buzzer duration (milliseconds)
-            int buzzer_duration = 0;
-
         } cfg;
     };
 

@@ -27,3 +27,7 @@ min_observations: 100
 
 # Penalty factor for observations being outside map
 outside_map_penalty_factor: 0.9
+
+buzzer:
+  localisation_reset_freq: 1280
+  duration: 300 # Milliseconds

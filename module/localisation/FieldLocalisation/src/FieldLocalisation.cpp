@@ -9,6 +9,9 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/localisation/Field.hpp"
 
+#include "message/input/Buttons.hpp"
+#include "message/output/Buzzer.hpp"
+
 namespace module::localisation {
 
     using extension::Configuration;
@@ -23,6 +26,10 @@ namespace module::localisation {
     using message::motion::WalkCommand;
     using message::support::FieldDescription;
     using message::vision::FieldLines;
+
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonLeftDown;
+    using message::output::Buzzer;
     using message::localisation::ResetFieldLocalisation;
 
     using utility::math::stats::MultivariateNormal;
@@ -45,6 +52,28 @@ namespace module::localisation {
             cfg.max_range                     = config["max_range"].as<double>();
             cfg.min_observations              = config["min_observations"].as<size_t>();
             cfg.outside_map_penalty_factor    = config["outside_map_penalty_factor"].as<double>();
+
+            cfg.localisation_reset_freq = config["buzzer"]["localisation_reset_freq"].as<float>();
+            cfg.buzzer_duration = config["buzzer"]["duration"].as<int>();
+        });
+
+        // When the left (black) button is pressed, reset localisation and ring the buzzer after
+        on<Trigger<ButtonLeftDown>>().then([this](){
+            // Reset localisation and ring the buzzer
+            emit(std::make_unique<ResetFieldLocalisation>());
+            auto buzzer_msg = std::make_unique<Buzzer>();
+            buzzer_msg->buzzer_frequency = cfg.localisation_reset_freq;
+            emit(buzzer_msg);
+
+            // Use the ButtonLeftUp message to silence the buzzer after a busy wait
+            emit<Scope::DELAY>(std::make_unique<ButtonLeftUp>(), std::chrono::milliseconds(cfg.buzzer_duration));
+        });
+
+        // Silence the buzzer after the user lets go of the left (black) pin
+        on<Trigger<ButtonLeftUp>>().then([this](){
+            auto buzzer_msg = std::make_unique<Buzzer>();
+            buzzer_msg->buzzer_frequency = 0;
+            emit(buzzer_msg);
         });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
