@@ -111,7 +111,7 @@ export class VisionSimulator extends Simulator {
     const time = periodic(10);
     const t = time / 10;
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t);
-    const { goalCrossbarHeight } = FieldDimensions.postYear2017();
+    const { goalCrossbarHeight } = FieldDimensions.of();
     return {
       messageType: "message.vision.Goals",
       buffer: Goals.encode({
