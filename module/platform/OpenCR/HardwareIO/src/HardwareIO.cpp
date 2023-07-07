@@ -8,7 +8,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+
+#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
+#include "message/localisation/Field.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -23,10 +26,10 @@ namespace module::platform::OpenCR {
     using message::platform::StatusReturn;
     using utility::support::Expression;
 
-    using message::platform::ButtonLeftUp;
-    using message::platform::ButtonLeftDown;
-
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonLeftDown;
     using message::output::Buzzer;
+    using message::localisation::ResetFieldLocalisation;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
@@ -113,7 +116,7 @@ namespace module::platform::OpenCR {
             cfg.max_tol_temp = config["servo"]["temp_tol"].as<float>();
             cfg.buzzer_freq  = config["buzzer"]["freq"].as<float>();
             cfg.localisation_reset_freq = config["buzzer"]["localisation_reset_freq"].as<float>();
-            cfg.buzzer_duration = config["buzzer"]["duration"];
+            cfg.buzzer_duration = config["buzzer"]["duration"].as<int>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -303,7 +306,7 @@ namespace module::platform::OpenCR {
         });
 
         // When the left (black) button is pressed, reset localisation and ring the buzzer after
-        on<Trigger<ButtonLeftDown>>().then([this]{
+        on<Trigger<ButtonLeftDown>>().then([this](){
             // Reset localisation and ring the buzzer
             emit(std::make_unique<ResetFieldLocalisation>());
             opencr_state.buzzer = cfg.localisation_reset_freq;
@@ -314,7 +317,7 @@ namespace module::platform::OpenCR {
         });
 
         // Silence the buzzer after the user lets go of the left (black) pin
-        on<Trigger<ButtonLeftUp>>().then([this]{
+        on<Trigger<ButtonLeftUp>>().then([this](){
             opencr_state.buzzer = 0.0;
         });
     }

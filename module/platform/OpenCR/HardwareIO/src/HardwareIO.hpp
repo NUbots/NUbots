@@ -237,7 +237,7 @@ namespace module::platform::OpenCR {
             float localisation_reset_freq = 0.0;
 
             /// @brief Container for the buzzer duration (milliseconds)
-            float buzzer_duration = 0.0;
+            int buzzer_duration = 0;
 
         } cfg;
     };

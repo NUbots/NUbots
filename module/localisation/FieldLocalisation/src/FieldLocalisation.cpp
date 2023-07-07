@@ -7,6 +7,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/localisation/Field.hpp"
 
 namespace module::localisation {
 
@@ -14,7 +15,6 @@ namespace module::localisation {
 
     using message::behaviour::state::Stability;
     using message::localisation::Field;
-    using message::localisation::ResetFieldLocalisation;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
@@ -23,6 +23,7 @@ namespace module::localisation {
     using message::motion::WalkCommand;
     using message::support::FieldDescription;
     using message::vision::FieldLines;
+    using message::localisation::ResetFieldLocalisation;
 
     using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;

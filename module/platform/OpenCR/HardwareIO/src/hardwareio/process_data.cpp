@@ -3,6 +3,7 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
+#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/comparison.hpp"
@@ -10,6 +11,8 @@
 namespace module::platform::OpenCR {
 
     using message::output::Buzzer;
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonLeftDown;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
 
@@ -51,7 +54,7 @@ namespace module::platform::OpenCR {
         opencr_state.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
         // If the left (black) button is pressed trigger field localisation reset
-        if (opencr_state.buttons[0]) {
+        if (opencr_state.buttons.left) {
             emit(std::make_unique<ButtonLeftDown>());
         }
 

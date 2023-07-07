@@ -16,13 +16,19 @@
 *
 * Copyright 2013 NUbots <nubots@nubots.net>
 */
-
 syntax = "proto3";
 
-package message.output;
+package message.input;
 
 /**
 * @author Johanne Montano
 */
 
-message Buzzer {}
+message ButtonLeftDown {}
+message ButtonLeftUp {}
+
+message ButtonMiddleDown {}
+message ButtonMiddleUp {}
+
+message ButtonRightDown {}
+message ButtonRightUp{}
