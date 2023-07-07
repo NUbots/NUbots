@@ -51,7 +51,7 @@ export class GoalsViewModel {
         bottom
           .clone()
           .applyMatrix4(Hwc)
-          .add(new THREE.Vector3(0, 0, FieldDimensions.postYear2017().goalCrossbarHeight))
+          .add(new THREE.Vector3(0, 0, FieldDimensions.of().goalCrossbarHeight))
           .applyMatrix4(this.params.Hcw.toThree())
           .normalize(),
       ),
