@@ -6,18 +6,12 @@ scripts:
     - "Stand.yaml"
   getup_front:
     - "StandUpFront.yaml"
-    - "Stand.yaml"
   getup_back:
     - "StandUpBack.yaml"
-    - "Stand.yaml"
   getup_left:
-    - "RollLeft.yaml"
     - "StandUpFront.yaml"
-    - "Stand.yaml"
   getup_right:
-    - "RollRight.yaml"
     - "StandUpFront.yaml"
-    - "Stand.yaml"
   # We run relax when we are upside down
   # The logic for this is if the robot is upside down the most likely scenario is someone picked it up by the legs
   # If this is the case, the safest thing we can do is to relax all the servos to avoid injuring someone.
