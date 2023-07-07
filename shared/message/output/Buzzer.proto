@@ -2,4 +2,6 @@ syntax = "proto3";
 
 package message.output;
 
-message Buzzer {}
+message Buzzer {
+    int32 buzzer_frequency = 1;
+}
