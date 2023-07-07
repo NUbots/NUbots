@@ -49,7 +49,7 @@ namespace module::extension::component {
                 return *this;
             }
 
-            WatchHandle(const WatchHandle&) = delete;
+            WatchHandle(const WatchHandle&)            = delete;
             WatchHandle& operator=(const WatchHandle&) = delete;
             ~WatchHandle() {
                 if (deleter) {

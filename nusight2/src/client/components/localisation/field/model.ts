@@ -16,7 +16,7 @@ export class FieldModel {
   static of() {
     return new FieldModel({
       dimensions: FieldDimensions.of(),
-      fieldColor: "#009900",
+      fieldColor: "#00cc00",
       lineColor: "#ffffff",
     });
   }

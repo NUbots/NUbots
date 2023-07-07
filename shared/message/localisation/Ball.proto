@@ -22,10 +22,10 @@ package message.localisation;
 
 import "Vector.proto";
 import "Matrix.proto";
+import "Transform.proto";
 import "google/protobuf/timestamp.proto";
 
 message Ball {
-
     /// Ball's filtered cartesian position measured in world space {w} from the world {W}
     vec3 rBWw = 1;
 
@@ -39,5 +39,5 @@ message Ball {
     google.protobuf.Timestamp time_of_measurement = 4;
 
     /// Homogeneous transformation matrix from world to camera space
-    mat4 Hcw = 5;
+    iso3 Hcw = 5;
 }
