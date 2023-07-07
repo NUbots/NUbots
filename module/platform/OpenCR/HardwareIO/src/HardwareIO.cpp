@@ -26,6 +26,7 @@ namespace module::platform::OpenCR {
     using message::platform::StatusReturn;
     using utility::support::Expression;
 
+
     using message::output::Buzzer;
     using message::localisation::ResetFieldLocalisation;
 
@@ -296,9 +297,9 @@ namespace module::platform::OpenCR {
             opencr_state.dirty          = true;
         });
 
-        on<Trigger<Buzzer>>().then([this]() {
+        on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
             // Fill the necessary field within the opencr_state struct
-            opencr_state.buzzer = cfg.buzzer_freq;
+            opencr_state.buzzer = buzzer_msg.buzzer_frequency;
         });
     }
 
