@@ -25,7 +25,6 @@ torso_waypoints:
   - [0.02, 0.1, 0.47, 0.5] # Place foot down
   - [0.02, 0.1, 0.47, 0.5] # Delay
 
-
 # Torso pitch (in radians)
 torso_pitch: 16 * pi / 180
 
