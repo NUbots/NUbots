@@ -61,6 +61,8 @@ export class FieldViewModel {
     const lineWidth = this.model.dimensions.lineWidth;
     const goalAreaWidth = this.model.dimensions.goalAreaWidth;
     const goalAreaLength = this.model.dimensions.goalAreaLength;
+    const penaltyAreaWidth = this.model.dimensions.penaltyAreaWidth;
+    const penaltyAreaLength = this.model.dimensions.penaltyAreaLength;
     const goalDepth = this.model.dimensions.goalDepth;
     const goalWidth = this.model.dimensions.goalWidth;
     const penaltyMarkDistance = this.model.dimensions.penaltyMarkDistance;
@@ -68,9 +70,17 @@ export class FieldViewModel {
     const halfLength = fieldLength * 0.5;
     const halfWidth = fieldWidth * 0.5;
     const halfGoalAreaWidth = goalAreaWidth * 0.5;
+    const halfPenaltyAreaWidth = penaltyAreaWidth * 0.5;
     const halfGoalWidth = goalWidth * 0.5;
 
     const blueHalf = this.buildRectangle(-halfLength, -halfWidth, halfLength, fieldWidth, lineWidth);
+    const blueHalfPenaltyArea = this.buildRectangle(
+      -halfLength,
+      -halfPenaltyAreaWidth,
+      penaltyAreaLength,
+      penaltyAreaWidth,
+      lineWidth,
+    );
     const blueHalfGoalArea = this.buildRectangle(
       -halfLength,
       -halfGoalAreaWidth,
@@ -82,6 +92,13 @@ export class FieldViewModel {
     const blueHalfPenaltyMark = this.buildRectangle(-halfLength + penaltyMarkDistance, 0, 0, 0, lineWidth);
 
     const yellowHalf = this.buildRectangle(0, -halfWidth, halfLength, fieldWidth, lineWidth);
+    const yellowHalfPenaltyArea = this.buildRectangle(
+      halfLength - penaltyAreaLength,
+      -halfPenaltyAreaWidth,
+      penaltyAreaLength,
+      penaltyAreaWidth,
+      lineWidth,
+    );
     const yellowHalfGoalArea = this.buildRectangle(
       halfLength - goalAreaLength,
       -halfGoalAreaWidth,
@@ -95,10 +112,12 @@ export class FieldViewModel {
     return BufferGeometryUtils.mergeBufferGeometries([
       centerCircle,
       blueHalf,
+      blueHalfPenaltyArea,
       blueHalfGoalArea,
       blueHalfGoal,
       blueHalfPenaltyMark,
       yellowHalf,
+      yellowHalfPenaltyArea,
       yellowHalfGoalArea,
       yellowHalfGoal,
       yellowHalfPenaltyMark,

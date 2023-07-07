@@ -41,7 +41,7 @@ export class OverviewSimulator extends Simulator {
       nuclearnetClient,
       robotIndex,
       numRobots,
-      FieldDimensions.postYear2017(),
+      FieldDimensions.of(),
       SeededRandom.of("overview_simulator"),
     );
   }
