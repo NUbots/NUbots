@@ -28,8 +28,6 @@ message Field {
     iso3 Hfw = 1;
     /// Covariance of (x, y, theta)
     mat3 covariance = 2;
-    /// Sum of the covariance matrix diagonals to quantify the filters uncertainty as a single value
-    double uncertainty = 3;
 }
 
 message ResetFieldLocalisation {}

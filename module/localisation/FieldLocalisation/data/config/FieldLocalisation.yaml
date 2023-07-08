@@ -7,8 +7,14 @@ grid_size: 0.01
 # Number of particles
 n_particles: 1000
 
+# Use hardcoded initial state
+use_hardcoded_initial_state: false
+
+# Initial state (x,y,theta)
+initial_state: [2.25, -3, 1.571]
+
 # Our confidence in the initial guess of where the robot starts (x is overwritten by field length / 2)
-initial_covariance: [3.0, 0.5, 0.5]
+initial_covariance: [1.0, 0.25, 0.5]
 
 # Amount of noise added to the particles (how much world can move to adjust for drift) at each time update
 process_noise: [0.005, 0.005, 0.001]
