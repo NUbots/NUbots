@@ -6,10 +6,12 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/skill/Look.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/AlignRobotToBall.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
+#include "message/strategy/Localise.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -33,10 +35,12 @@ namespace module::purpose {
     using message::purpose::PenaltyKickStriker;
     using message::purpose::PenaltyShootoutStriker;
     using message::purpose::ThrowInStriker;
+    using message::skill::Look;
     using message::strategy::AlignBallToGoal;
     using message::strategy::AlignRobotToBall;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
+    using message::strategy::Localise;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
@@ -84,10 +88,13 @@ namespace module::purpose {
 
         // Normal READY state
         on<Provide<NormalStriker>, When<Phase, std::equal_to, Phase::READY>>().then([this] {
-            // If we are stable, walk to the ready field position
+            // If we are stable and localised, walk to the ready field position
             emit<Task>(std::make_unique<WalkToFieldPosition>(
-                Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
-                cfg.ready_position.z()));
+                           Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
+                           cfg.ready_position.z()),
+                       1);
+            // emit<Task>(std::make_unique<Localise>(), 2);                      // localise if necessary
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
         });
 
         // Normal PLAYING state
@@ -98,7 +105,10 @@ namespace module::purpose {
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<NormalStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<NormalStriker>>().then([this] {
+            emit<Task>(std::make_unique<StandStill>(), 1);
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 2);  // Look straight ahead
+        });
 
         // Penalty shootout PLAYING state
         on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
@@ -137,7 +147,7 @@ namespace module::purpose {
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
         emit<Task>(std::make_unique<AlignRobotToBall>(), 4);  // Align robot to ball
         emit<Task>(std::make_unique<AlignBallToGoal>(), 5);   // try to walk to the ball
-        emit<Task>(std::make_unique<KickToGoal>(), 6);        // kick the ball if possible
+        // emit<Task>(std::make_unique<KickToGoal>(), 6);        // kick the ball if possible
     }
 
 }  // namespace module::purpose

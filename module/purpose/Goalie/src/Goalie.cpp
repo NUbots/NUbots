@@ -6,7 +6,9 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
+#include "message/skill/Look.hpp"
 #include "message/strategy/DiveToBall.hpp"
+#include "message/strategy/Localise.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
@@ -18,7 +20,9 @@ namespace module::purpose {
     using Phase    = message::input::GameState::Data::Phase;
     using GameMode = message::input::GameState::Data::Mode;
     using message::planning::LookAround;
+    using message::skill::Look;
     using message::strategy::DiveToBall;
+    using message::strategy::Localise;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using GoalieTask = message::purpose::Goalie;
@@ -30,6 +34,7 @@ namespace module::purpose {
     using message::purpose::PenaltyKickGoalie;
     using message::purpose::PenaltyShootoutGoalie;
     using message::purpose::ThrowInGoalie;
+    using message::skill::Look;
     using message::strategy::WalkToFieldPosition;
 
     using extension::Configuration;
@@ -74,6 +79,8 @@ namespace module::purpose {
             emit<Task>(std::make_unique<WalkToFieldPosition>(
                 Eigen::Vector3f(cfg.ready_position.x(), cfg.ready_position.y(), 0),
                 cfg.ready_position.z()));
+            // emit<Task>(std::make_unique<Localise>(), 2);
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
         });
 
         // Normal PLAYING state
@@ -84,7 +91,10 @@ namespace module::purpose {
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<NormalGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<NormalGoalie>>().then([this] {
+            emit<Task>(std::make_unique<StandStill>());
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX()), 3);  // Look straight ahead
+        });
 
         // Penalty shootout PLAYING state
         on<Provide<PenaltyShootoutGoalie>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });

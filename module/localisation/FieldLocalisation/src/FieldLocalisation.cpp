@@ -56,8 +56,10 @@ namespace module::localisation {
             if (cfg.use_hardcoded_initial_state) {
                 cfg.initial_state.push_back(Eigen::Vector3d(config["initial_state"].as<Expression>()));
             }
+
             cfg.localisation_reset_freq = config["buzzer"]["localisation_reset_freq"].as<float>();
             cfg.buzzer_duration = config["buzzer"]["duration"].as<int>();
+
         });
 
         // When the left (black) button is pressed, reset localisation and ring the buzzer after

@@ -7,8 +7,8 @@ min_translational_velocity_magnitude: 0.2
 max_angular_velocity: 0.4
 min_angular_velocity: -0.4
 acceleration: 0.005 # maximum increment in walk command velocity
-approach_radius: 1 # region around ball to begin decelerating
-y_velocity_enabled: false
+approach_radius: 0.0 # region around ball to begin decelerating
+y_velocity_enabled: true
 
 # Rotate on the spot tuning values
 rotate_velocity: 0.25

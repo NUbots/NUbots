@@ -56,7 +56,6 @@ namespace module::localisation {
             float localisation_reset_freq = 0.0;
             /// @brief Container for the buzzer duration (milliseconds)
             int buzzer_duration = 0;
-
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
