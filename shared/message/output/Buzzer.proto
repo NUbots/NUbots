@@ -14,7 +14,7 @@
 * You should have received a copy of the GNU General Public License
 * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
 *
-* Copyright 2017 NUbots <nubots@nubots.net>
+* Copyright 2023 NUbots <nubots@nubots.net>
 */
 
 syntax = "proto3";
@@ -26,5 +26,5 @@ package message.output;
 // Setting the frequency to 0 silences the buzzer
 
 message Buzzer {
-    int32 buzzer_frequency = 1;
+    int32 frequency = 1;
 }

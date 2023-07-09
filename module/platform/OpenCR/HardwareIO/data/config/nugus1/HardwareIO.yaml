@@ -94,9 +94,3 @@ servos:
     direction: 1
     offset: -9 * pi / 180
     simulated: false
-
-servo:
-  temp_tol: 50.0
-
-buzzer:
-  freq: 880

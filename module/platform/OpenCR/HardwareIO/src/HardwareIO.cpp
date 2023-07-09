@@ -107,8 +107,8 @@ namespace module::platform::OpenCR {
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
 
-            cfg.max_tol_temp = config["servo"]["temp_tol"].as<float>();
-            cfg.buzzer_freq  = config["buzzer"]["freq"].as<float>();
+            cfg.max_tol_temp = config["alarms"]["temperature"]["level"].as<float>();
+            cfg.buzzer_freq  = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -294,7 +294,7 @@ namespace module::platform::OpenCR {
 
         on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
             // Fill the necessary field within the opencr_state struct
-            opencr_state.buzzer = buzzer_msg.buzzer_frequency;
+            opencr_state.buzzer = buzzer_msg.frequency;
         });
     }
 
