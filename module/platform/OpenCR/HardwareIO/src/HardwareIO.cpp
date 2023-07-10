@@ -107,8 +107,8 @@ namespace module::platform::OpenCR {
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
 
-            cfg.max_tol_temp = config["alarms"]["temperature"]["level"].as<float>();
-            cfg.buzzer_freq  = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
+            cfg.alarms.temperature.level = config["alarms"]["temperature"]["level"].as<float>();
+            cfg.alarms.temperature.buzzer_frequency  = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {

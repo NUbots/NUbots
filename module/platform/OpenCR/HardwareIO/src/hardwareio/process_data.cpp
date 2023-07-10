@@ -132,8 +132,8 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
         for (const auto& servo : servo_states) {
-            if (servo.temperature > cfg.max_tol_temp) {
-                emit(std::make_unique<Buzzer>(cfg.buzzer_freq));
+            if (servo.temperature > cfg.alarms.temperature.level) {
+                emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
         }
