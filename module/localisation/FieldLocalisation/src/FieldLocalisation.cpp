@@ -57,8 +57,8 @@ namespace module::localisation {
                 cfg.initial_state.push_back(Eigen::Vector3d(config["initial_state"].as<Expression>()));
             }
 
-            cfg.localisation_reset_freq = config["buzzer"]["localisation_reset_freq"].as<float>();
-            cfg.buzzer_duration = config["buzzer"]["duration"].as<int>();
+            cfg.buzzer.localisation_reset_frequency = config["buzzer"]["localisation_reset_freq"].as<float>();
+            cfg.buzzer.duration = config["buzzer"]["duration"].as<int>();
 
         });
 
@@ -66,19 +66,15 @@ namespace module::localisation {
         on<Trigger<ButtonLeftDown>>().then([this](){
             // Reset localisation and ring the buzzer
             emit(std::make_unique<ResetFieldLocalisation>());
-            auto buzzer_msg = std::make_unique<Buzzer>();
-            buzzer_msg->buzzer_frequency = cfg.localisation_reset_freq;
-            emit(buzzer_msg);
+            emit(std::make_unique<Buzzer>(cfg.buzzer.localisation_reset_frequency));
 
             // Use the ButtonLeftUp message to silence the buzzer after a busy wait
-            emit<Scope::DELAY>(std::make_unique<ButtonLeftUp>(), std::chrono::milliseconds(cfg.buzzer_duration));
+            emit<Scope::DELAY>(std::make_unique<ButtonLeftUp>(), std::chrono::milliseconds(cfg.buzzer.duration));
         });
 
         // Silence the buzzer after the user lets go of the left (black) pin
         on<Trigger<ButtonLeftUp>>().then([this](){
-            auto buzzer_msg = std::make_unique<Buzzer>();
-            buzzer_msg->buzzer_frequency = 0;
-            emit(buzzer_msg);
+            emit(std::make_unique<Buzzer>(0));
         });
 
 

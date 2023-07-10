@@ -14,15 +14,13 @@
 * You should have received a copy of the GNU General Public License
 * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
 *
-* Copyright 2013 NUbots <nubots@nubots.net>
+* Copyright 2023 NUbots <nubots@nubots.net>
 */
 syntax = "proto3";
 
 package message.input;
 
-/**
-* @author Johanne Montano
-*/
+/// @author Johanne Montano
 
 message ButtonLeftDown {}
 message ButtonLeftUp {}

@@ -37,4 +37,3 @@ outside_map_penalty_factor: 1
 buzzer:
   localisation_reset_freq: 1280
   duration: 300 # Milliseconds
-

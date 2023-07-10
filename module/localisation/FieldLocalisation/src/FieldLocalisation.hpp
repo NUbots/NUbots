@@ -52,10 +52,13 @@ namespace module::localisation {
             double outside_map_penalty_factor = 0.0;
             /// @brief Whether to use the hardcoded initial state or not
             bool use_hardcoded_initial_state = false;
-            /// @brief Container for the buzzer frequency when localisation is reset
-            float localisation_reset_freq = 0.0;
-            /// @brief Container for the buzzer duration (milliseconds)
-            int buzzer_duration = 0;
+            /// @brief Struct to store buzzer fields
+            struct {
+                /// @brief Container for the buzzer frequency when localisation is reset
+                float localisation_reset_frequency = 0.0;
+                /// @brief Container for the buzzer duration (milliseconds)
+                int duration = 0;
+            } buzzer;
         } cfg;
 
         NUClear::clock::time_point last_time_update_time;
