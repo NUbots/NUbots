@@ -3,10 +3,16 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
+#include "message/input/Buttons.hpp"
+#include "message/output/Buzzer.hpp"
+
 #include "utility/math/comparison.hpp"
 
 namespace module::platform::OpenCR {
 
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonLeftDown;
+    using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
 
@@ -46,6 +52,11 @@ namespace module::platform::OpenCR {
         // Button Middle = 0x02
         // Button Left = 0x04
         opencr_state.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
+
+        // If the left (black) button is pressed trigger field localisation reset
+        if (opencr_state.buttons.left) {
+            emit(std::make_unique<ButtonLeftDown>());
+        }
 
         opencr_state.gyro = Eigen::Vector3f(convert::gyro(data.gyro[0]),    // X
                                             -convert::gyro(data.gyro[1]),   // Y
@@ -127,6 +138,13 @@ namespace module::platform::OpenCR {
             convert::position(servo_index, data.present_position, nugus.servo_direction, nugus.servo_offset);
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
+
+        for (const auto& servo : servo_states) {
+            if (servo.temperature > cfg.alarms.temperature.level) {
+                emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
+                break;
+            }
+        }
 
         // If this servo has not been initialised yet, set the goal states to the current states
         if (!servo_states[servo_index].initialised) {

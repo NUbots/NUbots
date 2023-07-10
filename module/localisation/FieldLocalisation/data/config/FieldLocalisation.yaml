@@ -27,3 +27,8 @@ min_observations: 100
 
 # Penalty factor for observations being outside map
 outside_map_penalty_factor: 0.9
+
+# Buzzer fields for when the left (black) button is pressed
+buzzer:
+  localisation_reset_frequency: 1280
+  duration: 300 # Milliseconds
