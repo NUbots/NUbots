@@ -86,6 +86,7 @@ export class VisualMeshViewModel {
     depthTest: false,
     depthWrite: false,
     transparent: true,
+    wireframe: true,
   }));
 
   private static readonly shader = rawShader(() => ({ vertexShader, fragmentShader }));
