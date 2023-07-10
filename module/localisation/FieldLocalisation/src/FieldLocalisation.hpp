@@ -20,9 +20,7 @@ namespace module::localisation {
 
     // Particle struct
     struct Particle {
-        /// @brief State of the particle (x, y, theta) of world in field space
-        Eigen::Vector3d state = Eigen::Vector3d::Zero();
-        /// @brief Weight of the particle
+        Eigen::Vector3d state = Eigen::Vector3d::Zero(); // (x, y, theta) of world space in field space
         double weight = 1.0;
     };
 
@@ -37,9 +35,9 @@ namespace module::localisation {
             /// @brief Uncertainty in the process model
             Eigen::Matrix3d process_noise = Eigen::Matrix3d::Zero();
             /// @brief Uncertainty in the measurement model
-            double measurement_noise = 0.0;
+            double measurement_noise = 0;
             /// @brief Maximum distance a field line can be from a particle to be considered an observation [m]
-            double max_range = 0.0;
+            double max_range = 0;
             /// @brief Initial state (x,y,theta) of the robot, saved for resetting
             std::vector<Eigen::Vector3d> initial_state{};
             /// @brief Initial covariance matrix of the robot's state, saved for resetting
@@ -50,8 +48,6 @@ namespace module::localisation {
             size_t min_observations = 0;
             /// @brief Penalty factor for observations being outside map
             double outside_map_penalty_factor = 0.0;
-            /// @brief Whether to use the hardcoded initial state or not
-            bool use_hardcoded_initial_state = false;
             /// @brief Struct to store buzzer fields
             struct {
                 /// @brief Container for the buzzer frequency when localisation is reset
@@ -71,6 +67,9 @@ namespace module::localisation {
 
         /// @brief Covariance matrix of the robot's state
         Eigen::Matrix3d covariance = Eigen::Matrix3d::Identity();
+
+        /// @brif Status of if the robot is falling
+        bool falling = false;
 
         /// @brief Particles used in the particle filter
         std::vector<Particle> particles{};
