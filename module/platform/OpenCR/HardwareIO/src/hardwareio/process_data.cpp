@@ -10,7 +10,6 @@
 
 namespace module::platform::OpenCR {
 
-    using message::input::ButtonLeftUp;
     using message::input::ButtonLeftDown;
     using message::output::Buzzer;
     using message::platform::RawSensors;
