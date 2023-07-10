@@ -68,7 +68,7 @@ namespace module::localisation {
         /// @brief Covariance matrix of the robot's state
         Eigen::Matrix3d covariance = Eigen::Matrix3d::Identity();
 
-        /// @brif Status of if the robot is falling
+        /// @brief Status of if the robot is falling
         bool falling = false;
 
         /// @brief Particles used in the particle filter
