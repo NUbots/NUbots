@@ -45,13 +45,13 @@ export class VisualMeshViewModel {
     for (let i = 0; i < nElem; i++) {
       const ni = i * 6;
 
-      if(neighbours[ni + 0] < nElem && neighbours[ni + 1] < nElem) {
+      if (neighbours[ni + 0] < nElem && neighbours[ni + 1] < nElem) {
         triangles.push(i, neighbours[ni + 0], neighbours[ni + 1]);
-        triangles.push(i, neighbours[ni + 1], neighbours[ni + 0])
+        triangles.push(i, neighbours[ni + 1], neighbours[ni + 0]);
       }
-      if(neighbours[ni + 1] < nElem && neighbours[ni + 2] < nElem) {
+      if (neighbours[ni + 1] < nElem && neighbours[ni + 2] < nElem) {
         triangles.push(i, neighbours[ni + 1], neighbours[ni + 2]);
-        triangles.push(i, neighbours[ni + 2], neighbours[ni + 1])
+        triangles.push(i, neighbours[ni + 2], neighbours[ni + 1]);
       }
     }
     const buffer = new THREE.InterleavedBuffer(
