@@ -99,8 +99,9 @@ def _get_args(path):
     return {"years": f"{added}" if modified == added else f"{added}-{modified}"}
 
 
+# Format or check the file
 def _do_format(path, verbose, check=True):
-    text = "" if not verbose else f"Skipping {path} as it does not match any of the formatters\n"
+    text = ""
     success = True
     output_path = None
     try:
@@ -111,45 +112,50 @@ def _do_format(path, verbose, check=True):
             if (any(fnmatch(path, pattern) for pattern in fmt["include"])) and (
                 all(not fnmatch(path, pattern) for pattern in fmt["exclude"])
             ):
-                text = f"Formatting {path} with {name}\n"
+                formatter_names.append(name)
                 formatter.extend(fmt["format"])
 
-        # Apply the args to the formatter
-        if len(formatter) > 0:
-            tmp_dir = tempfile.TemporaryDirectory(dir=os.path.dirname(path))
+        # If we don't have a formatter then skip this file
+        if len(formatter) == 0:
+            return f"Skipping {path} as it does not match any of the formatters\n" if verbose >= 1 else "", True
 
-            # Make a copy of the file to do the formatting on
-            output_path = os.path.join(tmp_dir.name, os.path.basename(path))
+        text = f"Formatting {path} with {', '.join(formatter_names)}\n"
+
+        tmp_dir = tempfile.TemporaryDirectory(dir=os.path.dirname(path))
+
+        # Make a copy of the file to do the formatting on
+        output_path = os.path.join(tmp_dir.name, os.path.basename(path))
+        shutil.copyfile(path, output_path)
+
+        # Apply our arguments to the formatter command
+        args = {"path": output_path, **_get_args(path)}
+        formatter = [[arg.format(**args) for arg in tool] for tool in formatter]
+
+        # Format the code
+        tool_text = ""
+        run_args = {"stderr": STDOUT, "stdout": PIPE, "check": True}
+        for c in formatter:
+            # Print the command being executed
+            if verbose >= 2:
+                text += f"\t$ {' '.join(c)}\n"
+            cmd = sp_run(c, **run_args)
+            tool_text = tool_text + cmd.stdout.decode("utf-8")
+
+        if verbose >= 1 and tool_text:
+            text = text + tool_text
+
+        if check:
+            # Run the diff command
+            cmd = sp_run(["colordiff", "--color=yes", "--unified", path, output_path], **run_args)
+        else:
+            # Check if the file has changed and if so replace the original using python
             with open(path, "rb") as f:
-                with open(output_path, "wb") as g:
-                    g.write(f.read())
-
-            # Apply our arguments to the formatter command
-            args = {"path": output_path, **_get_args(path)}
-            formatter = [[arg.format(**args) for arg in tool] for tool in formatter]
-
-            # Format the code
-            tool_text = ""
-            run_args = {"stderr": STDOUT, "stdout": PIPE, "check": True}
-            for c in formatter:
-                cmd = sp_run(c, **run_args)
-                tool_text = tool_text + cmd.stdout.decode("utf-8")
-
-            text = text + tool_text if tool_text or verbose else ""
-
-            if check:
-                # Run the diff command
-                cmd = sp_run(["colordiff", "--color=yes", "-u", path, output_path], input=cmd.stdout, **run_args)
-                tool_text = cmd.stdout.decode("utf-8").strip()
-            else:
-                # Check if the file has changed and if so replace the original using python
-                with open(path, "rb") as f:
-                    with open(output_path, "rb") as g:
-                        if f.read() != g.read():
-                            os.rename(output_path, path)
+                with open(output_path, "rb") as g:
+                    if f.read() != g.read():
+                        os.rename(output_path, path)
 
     except CalledProcessError as e:
-        text = text + e.output.decode("utf-8")
+        text = text + e.output.decode("utf-8").strip()
         success = False
 
     return text, success
