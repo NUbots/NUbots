@@ -21,7 +21,7 @@
 
 namespace module::extension {
 
-    using provider::Provider;
+    using component::Provider;
 
     Director::OkSolution Director::find_ok_solution(const Solution& solution,
                                                     const std::set<std::type_index>& used_types) {
@@ -101,11 +101,12 @@ namespace module::extension {
                           std::move(blocking_groups));
     }
 
-    std::vector<Director::OkSolution> Director::find_ok_solutions(const std::vector<Solution>& solutions) {
+    std::vector<Director::OkSolution> Director::find_ok_solutions(const std::vector<Solution>& solutions,
+                                                                  const std::set<std::type_index>& used) {
 
         // Find each one individually but pass through the used types
         std::vector<OkSolution> ok_solutions;
-        std::set<std::type_index> used_types;
+        std::set<std::type_index> used_types = used;
         for (const auto& solution : solutions) {
 
             // Choose an option

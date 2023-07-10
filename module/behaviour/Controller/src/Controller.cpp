@@ -19,13 +19,13 @@
 
 #include "Controller.hpp"
 
-#include "message/motion/ServoTarget.hpp"
+#include "message/actuation/ServoTarget.hpp"
 
 namespace module::behaviour {
 
+    using message::actuation::ServoTargets;
     using message::behaviour::ServoCommand;
     using message::behaviour::ServoCommands;
-    using message::motion::ServoTargets;
 
     using utility::behaviour::ActionKill;
     using utility::behaviour::ActionPriorities;
@@ -137,7 +137,7 @@ namespace module::behaviour {
             for (const auto& command : commands.commands) {
 
                 // Check if we have access
-                if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1] == command.source) {
+                if (this->limbAccess[uint(utility::input::LimbID::limb_for_servo(command.id)) - 1] == command.source) {
 
                     // Get our queue
                     auto& queue = commandQueues[uint(command.id)];
@@ -225,7 +225,7 @@ namespace module::behaviour {
                     for (auto& servo : emptiedQueues) {
 
                         // Get the lease holder on the limb this servo belongs to
-                        auto id = limbAccess[uint(utility::input::LimbID::limbForServo(servo)) - 1];
+                        auto id = limbAccess[uint(utility::input::LimbID::limb_for_servo(servo)) - 1];
                         completeMap[id].insert(servo);
                     }
 
@@ -420,7 +420,7 @@ namespace module::behaviour {
 
             // Clear our queues for this limb
             for (const auto& limb : k.second) {
-                for (const auto& servo : utility::input::LimbID::servosForLimb(limb)) {
+                for (const auto& servo : utility::input::LimbID::servos_for_limb(limb)) {
                     commandQueues[uint(servo)].clear();
                 }
             }

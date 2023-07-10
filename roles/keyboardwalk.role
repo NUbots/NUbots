@@ -3,7 +3,7 @@ nuclear_role(
   # and without it many roles do not run
   extension::FileWatcher
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
@@ -11,7 +11,7 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   # Hardware Interface
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   # Motion
   motion::QuinticWalk

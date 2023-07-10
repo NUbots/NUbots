@@ -1,0 +1,6 @@
+[Match]
+Name=enp86s0
+
+[Network]
+Bond=bond0
+PrimarySlave=true

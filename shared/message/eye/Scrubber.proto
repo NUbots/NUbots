@@ -1,0 +1,196 @@
+syntax = "proto3";
+
+package message.eye;
+
+import "google/protobuf/timestamp.proto";
+
+message ScrubberState {
+    enum State {
+        UNKNOWN = 0;
+        PAUSED  = 1;
+        PLAYING = 2;
+        ENDED   = 3;
+    }
+
+    /// The ID of the scrubber, unique across all scrubbers in a session
+    uint32 id = 1;
+    /// The name of the scrubber, used as the scrubber's peer name
+    string name = 2;
+    /// The current timestamp of the scrubber
+    google.protobuf.Timestamp timestamp = 3;
+    /// The earliest timestamp across all files in the scrubber
+    google.protobuf.Timestamp start = 4;
+    /// The latest timestamp across all files in the scrubber
+    google.protobuf.Timestamp end = 5;
+    /// The current playback state of the scrubber
+    State playback_state = 6;
+    /// The playback speed of the scrubber. Used as a power of 2, so 0 is 1x, 1 is 2x, -1 is 0.5x, etc.
+    int32 playback_speed = 7;
+    /// Whether the scrubber restarts when it reaches the end of playback
+    bool playback_repeat = 8;
+}
+
+message ScrubberLoadRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// What to call the loaded scrubber
+    string name = 2;
+    /// The files to load into the scrubber. Must be a list of absolute paths to NBS files.
+    repeated string files = 3;
+}
+
+message ScrubberPlayRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// The ID of the scrubber to play
+    uint32 id = 2;
+}
+
+message ScrubberPauseRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// The ID of the scrubber to pause
+    uint32 id = 2;
+}
+
+message ScrubberSetPlaybackSpeedRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// The ID of the scrubber to set the playback speed of
+    uint32 id = 2;
+    /// The playback speed to set. Used as a power of 2, so 0 is 1x, 1 is 2x, -1 is 0.5x, etc.
+    int32 playback_speed = 3;
+}
+
+message ScrubberSetRepeatRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// The ID of the scrubber to set the repeat state of
+    uint32 id = 2;
+    /// The repeat state to set
+    bool repeat = 3;
+}
+
+message ScrubberSeekRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// The ID of the scrubber to seek
+    uint32 id = 2;
+    /// The timestamp to seek to
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+message ScrubberCloseRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// The ID of the scrubber to close
+    uint32 id = 2;
+}
+
+message ScrubberClosed {
+    /// The ID of the scrubber that was closed
+    uint32 id = 1;
+}
+
+message ScrubberFileEntry {
+    enum Type {
+        UNKNOWN   = 0;
+        DIRECTORY = 1;
+        FILE      = 2;
+    }
+
+    /// The entry type: directory or file
+    Type type = 1;
+    /// The name of the entry
+    string name = 2;
+    /// The absolute path of the entry
+    string path = 3;
+    /// The size of the entry in bytes
+    uint64 size = 4;
+    /// The last modified time of the entry
+    google.protobuf.Timestamp date_modified = 5;
+}
+
+message ScrubberListFilesRequest {
+    message Response {
+        /// The token of the RPC request this response is for
+        uint32 rpc_token = 1;
+        /// Whether the request was successful
+        bool ok = 2;
+        /// An error message if the request was not successful
+        string error = 3;
+
+        /// The absolute path of the directory
+        string directory = 4;
+        /// The entries in the directory
+        repeated ScrubberFileEntry entries = 5;
+    }
+
+    /// The token of the RPC request
+    uint32 rpc_token = 1;
+    /// The absolute path of the directory to list
+    string directory = 2;
+}

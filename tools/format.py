@@ -3,6 +3,7 @@
 import datetime
 import multiprocessing
 import os
+import shutil
 import sys
 import tempfile
 from collections import OrderedDict
@@ -48,7 +49,6 @@ formatters["licence"] = {
 }
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
-    "check": [["clang-format", "-style=file"]],
     "include": ["*.h", "*.c", "*.cc", "*.cxx", "*.cpp", "*.hpp", "*.ipp", "*.frag", "*.glsl", "*.vert", "*.proto"],
     "exclude": [],
 }
@@ -57,10 +57,20 @@ formatters["cmake-format"] = {
     "include": ["*.cmake", "*.role", "CMakeLists.txt", "**/CMakeLists.txt"],
     "exclude": [],
 }
-formatters["isort and black"] = {
-    "format": [["isort", "--quiet", "{path}"], ["black", "--quiet", "{path}"]],
+formatters["isort"] = {
+    "format": [["isort", "--quiet", "{path}"]],
     "include": ["*.py"],
     "exclude": [],
+}
+formatters["black"] = {
+    "format": [["black", "--quiet", "{path}"]],
+    "include": ["*.py"],
+    "exclude": [],
+}
+formatters["eslint"] = {
+    "format": [["eslint", "--color", "--fix", "{path}"]],
+    "include": ["*.js", "*.jsx", "*.ts", "*.tsx"],
+    "exclude": ["*.min.*", "doc/**"],
 }
 formatters["prettier"] = {
     "format": [["prettier", "--write", "{path}"]],
@@ -69,6 +79,8 @@ formatters["prettier"] = {
 }
 
 
+# This function is used to get details of a file that might be needed in the arguments of a formatter
+# For example the year the file was added and the year it was last modified for a licence header
 def _get_args(path):
     dates = (
         sp_run(["git", "log", "--follow", "--format=%ad", "--date=short", path], stdout=PIPE)
@@ -88,13 +100,13 @@ def _get_args(path):
 
 
 def _do_format(path, verbose, check=True):
-
     text = "" if not verbose else f"Skipping {path} as it does not match any of the formatters\n"
     success = True
     output_path = None
     try:
         # Find the correct formatter and format the file
         formatter = []
+        formatter_names = []
         for name, fmt in formatters.items():
             if (any(fnmatch(path, pattern) for pattern in fmt["include"])) and (
                 all(not fnmatch(path, pattern) for pattern in fmt["exclude"])
@@ -104,7 +116,6 @@ def _do_format(path, verbose, check=True):
 
         # Apply the args to the formatter
         if len(formatter) > 0:
-
             tmp_dir = tempfile.TemporaryDirectory(dir=os.path.dirname(path))
 
             # Make a copy of the file to do the formatting on
@@ -151,8 +162,8 @@ def register(command):
     command.add_argument(
         "-v",
         "--verbose",
-        action="store_true",
-        default=False,
+        action="count",
+        default=0,
         help="Print the output of the formatters",
     )
     command.add_argument(
@@ -180,7 +191,6 @@ def register(command):
 
 @run_on_docker
 def run(verbose, check, format_all, globs, **kwargs):
-
     # Change into the project directory
     os.chdir(b.project_dir)
 
@@ -189,7 +199,9 @@ def run(verbose, check, format_all, globs, **kwargs):
         files = sp_run(["git", "ls-files"], stdout=PIPE, check=True).stdout.decode("utf-8").splitlines()
     else:
         files = (
-            sp_run(["git", "diff", "--name-only", "main"], stdout=PIPE, check=True).stdout.decode("utf-8").splitlines()
+            sp_run(["git", "diff", "--name-only", "origin/main"], stdout=PIPE, check=True)
+            .stdout.decode("utf-8")
+            .splitlines()
         )
 
     # Filter to a list containing only existing files (git diff can return deleted files)

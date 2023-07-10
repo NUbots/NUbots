@@ -21,17 +21,17 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/motion/HeadCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
+#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/coordinates.hpp"
-#include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -40,13 +40,13 @@ namespace module::motion {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using extension::Configuration;
+    using message::actuation::KinematicsModel;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::HeadCommand;
-    using message::motion::KinematicsModel;
+    using utility::actuation::kinematics::calculateHeadJoints;
     using utility::behaviour::RegisterAction;
     using utility::math::coordinates::sphericalToCartesian;
-    using utility::motion::kinematics::calculateHeadJoints;
 
     // internal only callback messages to start and stop our action
     struct ExecuteHeadController {};
@@ -101,9 +101,8 @@ namespace module::motion {
                     sphericalToCartesian(Eigen::Vector3f(1, current_angles.x(), current_angles.y()));
                 // Convert to robot space if requested angle is in world space
                 Eigen::Vector3f head_unit_vector =
-                    goal_robot_space
-                        ? goal_head_unit_vector_world
-                        : Eigen::Isometry3d(sensors.Htw).rotation().cast<float>() * goal_head_unit_vector_world;
+                    goal_robot_space ? goal_head_unit_vector_world
+                                     : sensors.Htw.rotation().cast<float>() * goal_head_unit_vector_world;
 
                 // Compute inverse kinematics for head
                 // TODO(MotionTeam): MAKE THIS NOT FAIL FOR ANGLES OVER 90deg

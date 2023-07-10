@@ -1,7 +1,6 @@
 #ifndef MODULE_INPUT_IMAGEDECOMPRESSOR_HPP
 #define MODULE_INPUT_IMAGEDECOMPRESSOR_HPP
 
-#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -15,8 +14,8 @@ namespace module::input {
     private:
         struct DecompressorContext {
             struct Decompressor {
-                /// This atomic bool gets turned on/off depending on if it is in use
-                std::unique_ptr<std::atomic<bool>> active;
+                /// Mutex controlling access to this decompressor instance
+                std::unique_ptr<std::mutex> mutex;
                 /// The actual decompressor that will convert the image to jpeg format
                 std::shared_ptr<decompressor::Decompressor> decompressor;
             };

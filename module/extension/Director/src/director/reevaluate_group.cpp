@@ -21,9 +21,10 @@
 
 namespace module::extension {
 
-    using provider::Provider;
+    using component::DirectorTask;
+    using component::Provider;
 
-    bool Director::reevaluate_group(provider::ProviderGroup& group) {
+    bool Director::reevaluate_group(component::ProviderGroup& group) {
 
         // If we have traversed all the way up to a root provider we just run it again
         if (group.active_provider != nullptr
@@ -33,11 +34,12 @@ namespace module::extension {
         }
 
         // We need to take a copy of the watchers before we start as reevaluting the group will alter this order
-        std::vector<std::shared_ptr<BehaviourTask>> watchers = group.watchers;
+        std::vector<std::shared_ptr<DirectorTask>> watchers = group.watchers;
 
         // Sort the interested parties by priority with highest first
-        std::sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
-            return !challenge_priority(a, b);
+        std::stable_sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
+            // If b wins against a, then we swap
+            return challenge_priority(b, a);
         });
 
         // Store our initial task to see if it changed later
@@ -75,7 +77,7 @@ namespace module::extension {
         return group.active_task != initial_task;
     }
 
-    void Director::reevaluate_children(provider::ProviderGroup& group) {
+    void Director::reevaluate_children(component::ProviderGroup& group) {
         // Reevaluate this group
         bool changed = reevaluate_group(group);
 

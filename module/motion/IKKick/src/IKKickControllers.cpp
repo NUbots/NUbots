@@ -19,7 +19,7 @@
 
 #include "IKKickControllers.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
 namespace module::motion {
 
@@ -28,7 +28,7 @@ namespace module::motion {
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using message::motion::KinematicsModel;
+    using message::actuation::KinematicsModel;
 
     void KickBalancer::configure(const Configuration& config) {
         servo_angle_threshold = config["balancer"]["servo_angle_threshold"].as<float>();

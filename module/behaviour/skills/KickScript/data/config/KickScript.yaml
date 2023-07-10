@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 # Priority in subsumption system when a kick is requested
 kick_priority: 4

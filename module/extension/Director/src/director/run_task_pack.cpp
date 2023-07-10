@@ -21,15 +21,19 @@
 
 namespace module::extension {
 
+    using component::DirectorTask;
+    using component::Provider;
+    using component::ProviderGroup;
     using ::extension::behaviour::RunInfo;
-    using provider::Provider;
-    using provider::ProviderGroup;
 
-    Director::RunLevel Director::run_tasks(ProviderGroup& our_group, const TaskList& tasks, const RunLevel& run_level) {
+    Director::RunResult Director::run_tasks(ProviderGroup& our_group,
+                                            const TaskList& tasks,
+                                            const RunLevel& run_level,
+                                            const std::set<std::type_index>& used) {
 
         // This might happen if only optional tasks are emitted, in that case we successfully run nothing here
         if (tasks.empty()) {
-            return RunLevel::OK;
+            return RunResult{RunLevel::OK, {}};
         }
 
         // Create the solution tree for each of the tasks in the pack
@@ -41,7 +45,7 @@ namespace module::extension {
 
         if (run_level >= RunLevel::OK) {
             // Try to find an ok solution for the pack
-            auto ok_solutions = find_ok_solutions(solutions);
+            auto ok_solutions = find_ok_solutions(solutions, used);
 
             // Loop through the solutions and add watches for the things we want
             for (int i = 0; i < int(tasks.size()); ++i) {
@@ -128,7 +132,12 @@ namespace module::extension {
                     reevaluate_group(providers.at(t->requester_id)->group);
                 }
 
-                return RunLevel::OK;
+                // Accumulate all the used types
+                std::set<std::type_index> used_types;
+                for (const auto& s : ok_solutions) {
+                    used_types.insert(s.used.begin(), s.used.end());
+                }
+                return {RunLevel::OK, used_types};
             }
         }
 
@@ -138,7 +147,7 @@ namespace module::extension {
         }
 
         // If we reach here, we have already queued into everything that could possibly change our state
-        return RunLevel::BLOCKED;
+        return RunResult{RunLevel::BLOCKED, {}};
     }
 
     void Director::run_task_pack(const TaskPack& pack) {
@@ -217,7 +226,7 @@ namespace module::extension {
         TaskList lowered_tasks;
         for (auto& subtask : group.subtasks) {
             // See if we have a matching task
-            auto it = std::find_if(tasks.begin(), tasks.end(), [&](const std::shared_ptr<BehaviourTask>& t) {
+            auto it = std::find_if(tasks.begin(), tasks.end(), [&](const std::shared_ptr<DirectorTask>& t) {
                 return subtask->type == t->type;
             });
 
@@ -240,23 +249,45 @@ namespace module::extension {
         // Clear all the queue handles so their destructors remove us from all of the watchers we were in
         group.watch_handles.clear();
 
+        // This new task pack we are trying to run might be different from the task pack previously ran.
+        // There might be some tasks that weren't emitted in the new task pack.
+        // These tasks need to be removed from the places they were running.
+        // Set them as dying so that they are removed at the end of this function.
+        // The dying state stops the task being run again when it shouldn't before it is removed.
+        for (const auto& t : group.subtasks) {
+            // Search the new tasks for an equivalent task and if we can't find it set it as dying
+            auto f = [t](const auto& t2) { return t->type == t2->type; };
+            if (std::find_if(tasks.begin(), tasks.end(), f) == tasks.end()) {
+                t->dying = true;
+            }
+        }
+
+        // Once we start running tasks we need to keep track of providers that we are using
+        // Future optional tasks might try to run and because priority says that you can replace existing tasks from
+        // your current provider they would be allowed (incorrectly) to take over. We can't change this behaviour as
+        // this would be correct behaviour if we emitted a new task. We should be able to replace our old tasks.
+        std::set<std::type_index> used;
+
         // Run the first task pack segment as all tasks that are not optional
         auto first_optional = std::find_if(tasks.begin(), tasks.end(), [](const auto& t) { return t->optional; });
-        auto run_level      = run_tasks(group, TaskList(tasks.begin(), first_optional), RunLevel::OK);
+        auto result         = run_tasks(group, TaskList(tasks.begin(), first_optional), RunLevel::OK, used);
+        used.insert(result.used.begin(), result.used.end());
 
         // If we are not running normally now and were previously we might still have active tasks that need removing
-        if (run_level != RunLevel::OK) {
+        if (result.run_level != RunLevel::OK) {
             for (auto& t : group.subtasks) {
                 remove_task(t);
             }
         }
 
         // Run each of the optional tasks but only to the level the main task ran or pushed
-        if (run_level <= RunLevel::PUSH) {
+        if (result.run_level <= RunLevel::PUSH) {
             for (auto it = first_optional; it != tasks.end(); ++it) {
                 // Run each optional task in turn as its own pack
                 // but if the main group was pushed, we can at most push in optional
-                if (run_tasks(group, TaskList({*it}), run_level) != RunLevel::OK) {
+                auto optional_result = run_tasks(group, TaskList({*it}), result.run_level, used);
+                used.insert(optional_result.used.begin(), optional_result.used.end());
+                if (optional_result.run_level != RunLevel::OK) {
                     // If we can't run this optional task, remove it in case we were previously running it
                     auto original = std::find_if(group.subtasks.begin(), group.subtasks.end(), [&](const auto& t) {
                         return t->type == (*it)->type;
@@ -268,20 +299,20 @@ namespace module::extension {
             }
         }
 
-        // This new task pack we are trying to run might be different from the task pack previously ran.
-        // There might be some tasks that weren't emitted in the new task pack.
-        // These tasks need to be removed from the places they were running.
-        for (const auto& t : group.subtasks) {
 
-            // Search the new tasks for an equivalent task and if we can't find it remove
-            auto f = [t](const auto& t2) { return t->type == t2->type; };
-            if (std::find_if(tasks.begin(), tasks.end(), f) == tasks.end()) {
+        // Make a copy of group.subtasks so we can remove tasks from it with updated subtasks
+        auto old_subtasks = group.subtasks;
+        // Update the group's subtasks to the new subtasks
+        group.subtasks = tasks;
+
+        // Remove any tasks that were marked as dying earlier
+        // This is at the end, so that if one of our new tasks uses something the old tasks did then we won't run other
+        // tasks with lower priority for a single cycle until this one runs
+        for (const auto& t : old_subtasks) {
+            if (t->dying) {
                 remove_task(t);
             }
         }
-
-        // Update the new subtasks
-        group.subtasks = tasks;
     }
 
 }  // namespace module::extension

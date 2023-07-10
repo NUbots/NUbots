@@ -26,8 +26,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -130,11 +130,11 @@ namespace module::motion {
             , motionStartTime() {}
         virtual ~SixDOFFootController() = default;
 
-        virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel,
+        virtual void computeStartMotion(const message::actuation::KinematicsModel& kinematicsModel,
                                         const message::input::Sensors& sensors) = 0;
         virtual void computeStopMotion(const message::input::Sensors& sensors)  = 0;
 
-        void start(const message::motion::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) {
+        void start(const message::actuation::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) {
             if (stage == MotionStage::READY) {
                 anim.reset();
                 stage           = MotionStage::RUNNING;
@@ -237,7 +237,7 @@ namespace module::motion {
 
     public:
         virtual void configure(const ::extension::Configuration& config);
-        virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel,
+        virtual void computeStartMotion(const message::actuation::KinematicsModel& kinematicsModel,
                                         const message::input::Sensors& sensors);
         virtual void computeStopMotion(const message::input::Sensors& sensors);
     };
@@ -271,7 +271,7 @@ namespace module::motion {
             , lift_before_windup_duration(0.0f) {}
 
         virtual void configure(const ::extension::Configuration& config);
-        virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel,
+        virtual void computeStartMotion(const message::actuation::KinematicsModel& kinematicsModel,
                                         const message::input::Sensors& sensors);
         virtual void computeStopMotion(const message::input::Sensors& sensors);
     };

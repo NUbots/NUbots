@@ -26,8 +26,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/ServoTarget.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -40,9 +40,9 @@ namespace module::platform::cm740 {
 
     using extension::Configuration;
 
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::input::Sensors;
-    using message::motion::ServoTarget;
-    using message::motion::ServoTargets;
     using message::platform::RawSensors;
 
     using utility::input::ServoID;
@@ -71,9 +71,6 @@ namespace module::platform::cm740 {
         // Buttons
         sensors.buttons.left   = false;
         sensors.buttons.middle = false;
-
-        // Voltage (in volts)
-        sensors.voltage = 0;
 
         // Gyroscope (in radians/second)
         sensors.gyroscope = Eigen::Vector3f::Zero();
@@ -125,21 +122,20 @@ namespace module::platform::cm740 {
             servo.torque_enabled = true;
 
             // Gain
-            servo.d_gain = 0;
-            servo.i_gain = 0;
-            servo.p_gain = 0;
-
-            // Torque
-            servo.torque = 0;
+            servo.position_d_gain = 0;
+            servo.position_i_gain = 0;
+            servo.position_p_gain = 0;
+            servo.velocity_i_gain = 0;
+            servo.velocity_p_gain = 0;
 
             // Targets
-            servo.goal_position = 0;
-            servo.moving_speed  = M_PI_4;
+            servo.goal_position    = 0;
+            servo.profile_velocity = M_PI_4;
 
             // Present Data
             servo.present_position = 0;
-            servo.present_speed    = 0;
-            servo.load             = 0;
+            servo.present_velocity = 0;
+            servo.present_current  = 0;
 
             // Diagnostic Information
             servo.voltage     = 0;
@@ -178,7 +174,7 @@ namespace module::platform::cm740 {
 
                 for (int i = 0; i < 20; ++i) {
                     auto& servo       = utility::platform::getRawServo(i, sensors);
-                    float movingSpeed = servo.moving_speed == 0 ? 0.1 : servo.moving_speed / UPDATE_FREQUENCY;
+                    float movingSpeed = servo.profile_velocity == 0 ? 0.1 : servo.profile_velocity / UPDATE_FREQUENCY;
                     movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
 
@@ -231,9 +227,9 @@ namespace module::platform::cm740 {
                 }
 
                 // Set our variables
-                auto& servo         = utility::platform::getRawServo(command.id, sensors);
-                servo.moving_speed  = speed;
-                servo.goal_position = utility::math::angle::normalizeAngle(command.position);
+                auto& servo            = utility::platform::getRawServo(command.id, sensors);
+                servo.profile_velocity = speed;
+                servo.goal_position    = utility::math::angle::normalizeAngle(command.position);
             }
         });
 
@@ -263,9 +259,6 @@ namespace module::platform::cm740 {
         sensors.fsr.right.fsr3 = down ? 1 : 0;
         sensors.fsr.right.fsr4 = down ? 1 : 0;
 
-        // Set the knee loads to something huge to be foot down
-        utility::platform::getRawServo(ServoID::R_KNEE, sensors).load = down ? 1.0 : -1.0;
-
         // Centre
         sensors.fsr.right.centre_x = down ? 1 : std::numeric_limits<double>::quiet_NaN();
         sensors.fsr.right.centre_y = down ? 1 : std::numeric_limits<double>::quiet_NaN();
@@ -277,9 +270,6 @@ namespace module::platform::cm740 {
         sensors.fsr.left.fsr2 = down ? 1 : 0;
         sensors.fsr.left.fsr3 = down ? 1 : 0;
         sensors.fsr.left.fsr4 = down ? 1 : 0;
-
-        // Set the knee loads to something huge to be foot down
-        utility::platform::getRawServo(ServoID::L_KNEE, sensors).load = down ? 1.0 : -1.0;
 
         // Centre
         sensors.fsr.left.centre_x = down ? 1 : std::numeric_limits<double>::quiet_NaN();

@@ -52,7 +52,7 @@ namespace module::localisation {
             state.linear() = localisationOffset.rotation() * Hwr.rotation();
 
             auto field        = std::make_unique<Field>();
-            field->position   = state.matrix();
+            field->Hfw        = state.matrix();
             field->covariance = Eigen::Matrix3d::Identity();
 
             emit(std::make_unique<std::vector<Field>>(1, *field));

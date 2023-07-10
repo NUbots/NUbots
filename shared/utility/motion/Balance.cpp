@@ -18,14 +18,14 @@
  */
 #include "Balance.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
 namespace utility::motion {
 
     using LimbID = utility::input::LimbID;
     // using ServoID = utility::input::ServoID;
+    using message::actuation::KinematicsModel;
     using message::input::Sensors;
-    using message::motion::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();
@@ -61,7 +61,7 @@ namespace utility::motion {
         //------------------------------------
 
         // Robot coords in world (:Robot -> World)
-        Eigen::Isometry3f Htw         = Eigen::Isometry3d(sensors.Htw).cast<float>();
+        Eigen::Isometry3f Htw         = sensors.Htw.cast<float>();
         Eigen::AngleAxisf orientation = Eigen::AngleAxisf(Htw.rotation().inverse());
 
         // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}

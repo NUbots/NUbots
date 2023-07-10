@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 
 # Priority in subsumption system
 head_controller_priority: 5

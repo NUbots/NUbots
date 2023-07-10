@@ -54,6 +54,9 @@ namespace module::behaviour::skills {
             log_level          = config["log_level"].as<NUClear::LogLevel>();
             cfg.fallen_angle   = config["fallen_angle"].as<float>();
             cfg.getup_priority = config["getup_priority"].as<float>();
+
+            cfg.getup_front = config["getup_front"].as<std::vector<std::string>>();
+            cfg.getup_back  = config["getup_back"].as<std::vector<std::string>>();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
@@ -68,7 +71,7 @@ namespace module::behaviour::skills {
 
         on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
             // Transform to torso {t} from world {w} space
-            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
             // Basis Z vector of torso {t} in world {w} space
             Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
             // Basis X vector of torso {t} in world {w} space
@@ -88,14 +91,10 @@ namespace module::behaviour::skills {
 
             // Check with side we're getting up from
             if (is_front) {
-                emit(std::make_unique<ExecuteScriptByName>(
-                    subsumption_id,
-                    std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, std::vector<std::string>(cfg.getup_front)));
             }
             else {
-                emit(std::make_unique<ExecuteScriptByName>(
-                    subsumption_id,
-                    std::vector<std::string>({"RollOverBack.yaml", "StandUpFront.yaml", "Stand.yaml"})));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, std::vector<std::string>(cfg.getup_back)));
             }
         });
 

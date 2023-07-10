@@ -5,11 +5,11 @@ nuclear_role(
   # support::SignalCatcher
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
   network::NUClearNet
   network::NetworkForwarder
-  platform::cm740::HardwareIO
+  platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::NatNet
   support::logging::DataLogging

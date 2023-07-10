@@ -18,6 +18,12 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+// Make a formatter for Eigen::Matrix type so fmt::format know how to deal with it
+template <>
+struct fmt::formatter<Eigen::Matrix4d> : fmt::ostream_formatter {};
+template <typename Derived>
+struct fmt::formatter<Eigen::Transpose<Derived>> : fmt::ostream_formatter {};
+
 namespace module::localisation {
 
     using extension::Configuration;
@@ -51,16 +57,17 @@ namespace module::localisation {
                 filter.time(seconds);
 
                 // Get filter state and transform
-                Eigen::Vector3d state(filter.getMean());
+                Eigen::Vector3d state(filter.get_state());
                 emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
                 auto field(std::make_unique<Field>());
-                Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
-                position.translation() = Eigen::Vector2d(state[RobotModel<double>::kX], state[RobotModel<double>::kY]);
-                position.linear()      = Eigen::Rotation2Dd(state[RobotModel<double>::kAngle]).toRotationMatrix();
-                field->position        = position.matrix();
-                field->covariance      = filter.getCovariance();
+                Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+                Hfw.translation() = Eigen::Vector3d(state[RobotModel<double>::kX], state[RobotModel<double>::kY], 0);
+                Hfw.linear() =
+                    Eigen::AngleAxisd(state[RobotModel<double>::kAngle], Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                field->Hfw        = Hfw.matrix();
+                field->covariance = filter.get_covariance();
 
                 log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
                                                 state[RobotModel<double>::kX],
@@ -110,14 +117,14 @@ namespace module::localisation {
                                     // Run a measurement for the opposition goal post and store how likely the filter
                                     // thinks this is a real measurement
                                     auto opp_filter = filter;
-                                    const auto opp_logits =
+                                    const double opp_logits =
                                         opp_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post.side, fd, false),
                                                            goals.Hcw);
 
                                     if (log_level <= NUClear::DEBUG) {
-                                        const Eigen::Vector3d state(filter.getMean());
+                                        const Eigen::Vector3d state(filter.get_state());
                                         Eigen::Isometry3d Hfw;
                                         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
                                         Hfw.linear() =

@@ -1,0 +1,36 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Checks based on the sum of rotation rate for all the axes
+gyroscope_magnitude:
+  # The smoothing factor for the exponential filter
+  smoothing: 0.9
+  # The mean value to subtract from the raw reading
+  mean: 0.0
+  # The value in radians/second to consider the robot unstable
+  unstable: 3.0
+  # The value in radians/second to consider the robot falling
+  falling: 4.0
+
+# Checks based on the magnitude of the acceleration
+accelerometer_magnitude:
+  # The smoothing factor for the exponential filter
+  smoothing: 0.9
+  # The mean value to subtract from the raw reading
+  # Use g to make it the value of acceleration due to gravity
+  mean: 9.8
+  # The magnitude of the accelerometer at which the robot is considered unstable
+  unstable: 4.0
+  # The magnitude of the accelerometer at which the robot is considered falling
+  falling: 6.0
+accelerometer_angle:
+  # The smoothing factor for the exponential filter
+  smoothing: 0.9
+  # The mean value to subtract from the raw reading
+  mean: 0.0
+  # The angle of the accelerometer (from upright 0) at which the robot is considered unstable
+  unstable: 45 * pi / 180.0
+  # The angle of the accelerometer (from upright 0) at which the robot is considered falling
+  falling: 45 * pi / 180.0
+
+fall_script: Relax.yaml
