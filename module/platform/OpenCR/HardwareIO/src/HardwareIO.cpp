@@ -26,9 +26,7 @@ namespace module::platform::OpenCR {
     using message::platform::StatusReturn;
     using utility::support::Expression;
 
-
     using message::output::Buzzer;
-    using message::localisation::ResetFieldLocalisation;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
@@ -112,8 +110,8 @@ namespace module::platform::OpenCR {
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
 
-            cfg.max_tol_temp = config["servo"]["temp_tol"].as<float>();
-            cfg.buzzer_freq  = config["buzzer"]["freq"].as<float>();
+            cfg.alarms.temperature.level = config["alarms"]["temperature"]["level"].as<float>();
+            cfg.alarms.temperature.buzzer_frequency  = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -299,7 +297,7 @@ namespace module::platform::OpenCR {
 
         on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
             // Fill the necessary field within the opencr_state struct
-            opencr_state.buzzer = buzzer_msg.buzzer_frequency;
+            opencr_state.buzzer = buzzer_msg.frequency;
         });
     }
 

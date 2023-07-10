@@ -14,17 +14,16 @@
 * You should have received a copy of the GNU General Public License
 * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
 *
-* Copyright 2013 NUbots <nubots@nubots.net>
+* Copyright 2023 NUbots <nubots@nubots.net>
 */
 
 syntax = "proto3";
 
 package message.output;
 
-/**
-* @author Johanne Montano
-*/
 
+/// @brief Buzzer message for the OpenCR subcontroller
 message Buzzer {
-    int32 buzzer_frequency = 1;
+    /// Setting the frequency to 0 silences the buzzer
+    int32 frequency = 1;
 }

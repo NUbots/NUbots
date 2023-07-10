@@ -3,7 +3,6 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
-#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/comparison.hpp"
@@ -11,8 +10,6 @@
 namespace module::platform::OpenCR {
 
     using message::output::Buzzer;
-    using message::input::ButtonLeftUp;
-    using message::input::ButtonLeftDown;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
 
@@ -140,8 +137,8 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
         for (const auto& servo : servo_states) {
-            if (servo.temperature > cfg.max_tol_temp) {
-                emit(std::make_unique<Buzzer>());
+            if (servo.temperature > cfg.alarms.temperature.level) {
+                emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
         }

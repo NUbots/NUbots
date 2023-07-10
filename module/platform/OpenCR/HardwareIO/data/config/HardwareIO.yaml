@@ -95,5 +95,7 @@ servos:
     offset: 0.0
     simulated: false
 
-servo:
-  temp_tol: 60.0
+alarms:
+  temperature:
+    level: 60
+    buzzer_frequency: 880 # Hz
