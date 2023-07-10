@@ -21,10 +21,9 @@ syntax = "proto3";
 
 package message.output;
 
-// Buzzer message for the OpenCR subcontroller
-// This message takes an int32 as a value for  the buzzer frequency
-// Setting the frequency to 0 silences the buzzer
 
+/// @brief Buzzer message for the OpenCR subcontroller
 message Buzzer {
+    /// Setting the frequency to 0 silences the buzzer
     int32 frequency = 1;
 }
