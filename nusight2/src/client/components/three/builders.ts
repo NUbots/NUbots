@@ -181,6 +181,7 @@ type MaterialOpts = {
   depthTest?: boolean;
   depthWrite?: boolean;
   transparent?: boolean;
+  wireframe?: boolean;
 };
 
 type MeshBasicMaterialOpts = MaterialOpts & {
@@ -268,6 +269,7 @@ function updateMaterial(object: Material, opts: MaterialOpts) {
   object.depthTest = opts.depthTest != null ? opts.depthTest : true;
   object.depthWrite = opts.depthWrite != null ? opts.depthWrite : true;
   object.transparent = opts.transparent != null ? opts.transparent : false;
+  (object as any).wireframe = opts.wireframe != null ? opts.wireframe : false;
 }
 
 type TypedArray =
