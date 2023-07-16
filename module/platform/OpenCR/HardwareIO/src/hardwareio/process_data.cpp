@@ -132,16 +132,16 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
         // Buzz if any servo is hot, use the boolean flag to turn the buzzer off once the servo is no longer hot
-        bool servo_hot = false;
+        bool any_servo_hot = false;
         for (const auto& servo : servo_states) {
             if (servo.temperature > cfg.alarms.temperature.level) {
-                servo_hot = true;
+                any_servo_hot = true;
                 emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
         }
 
-        if (!servo_hot) {
+        if (!any_servo_hot) {
             emit(std::make_unique<Buzzer>(0));
         }
 
