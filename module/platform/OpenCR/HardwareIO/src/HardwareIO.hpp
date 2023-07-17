@@ -235,7 +235,6 @@ namespace module::platform::OpenCR {
                 } temperature;
             } alarms;
         } cfg;
-
     };
 
 }  // namespace module::platform::OpenCR
