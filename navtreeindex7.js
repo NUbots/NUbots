@@ -3,6 +3,7 @@ var NAVTREEINDEX7 =
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#a0e8855e59122c098ddc8fdb5e22c1cc8":[2,0,4,15,4,1],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#a63d9242f60a730b536c79118e3a6953d":[2,0,4,15,4,4],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#a7f233d6fe13f912945e0d690eb4e4f64":[2,0,4,15,4,0],
+"classmodule_1_1vision_1_1GreenHorizonDetector.html#ad0ea142c77272415529c033c82711b68":[2,0,4,15,4,3],
 "classmodule_1_1vision_1_1GreenHorizonDetector.html#ae06a7e45e66da2973f04ca90bf9017ce":[2,0,4,15,4,2],
 "classmodule_1_1vision_1_1VisualMesh.html":[2,0,4,15,5],
 "classmodule_1_1vision_1_1VisualMesh.html#a3b7f5004aa21b93143fb21f4d6d1a928":[2,0,4,15,5,5],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "classutility_1_1motion_1_1splines_1_1SmoothSpline.html#a89896e4c47834688d00ac8869a85dfb9":[2,0,7,6,0,4,4],
 "classutility_1_1motion_1_1splines_1_1SmoothSpline.html#aa31bc6e6407d536e4bdcc1b2e955454a":[2,0,7,6,0,4,6],
 "classutility_1_1motion_1_1splines_1_1SmoothSpline.html#aa4cd598ff213310551bb3981ba137edf":[2,0,7,6,0,4,8],
-"classutility_1_1motion_1_1splines_1_1SmoothSpline.html#ab86a4c9d098ed9e13d286a44b324b2db":[2,0,7,6,0,4,1],
-"classutility_1_1motion_1_1splines_1_1SmoothSpline.html#af749a9ba597038404d694e45656aa036":[2,0,7,6,0,4,7]
+"classutility_1_1motion_1_1splines_1_1SmoothSpline.html#ab86a4c9d098ed9e13d286a44b324b2db":[2,0,7,6,0,4,1]
 };

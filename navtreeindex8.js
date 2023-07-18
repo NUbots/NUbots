@@ -1,5 +1,6 @@
 var NAVTREEINDEX8 =
 {
+"classutility_1_1motion_1_1splines_1_1SmoothSpline.html#af749a9ba597038404d694e45656aa036":[2,0,7,6,0,4,7],
 "classutility_1_1motion_1_1splines_1_1Spline.html":[2,0,7,6,0,5],
 "classutility_1_1motion_1_1splines_1_1Spline.html#a0ce4964194da90299dbe47e6e1950fe6":[2,0,7,6,0,5,14],
 "classutility_1_1motion_1_1splines_1_1Spline.html#a24347dad845b5af05044aa765724f3a3":[2,0,7,6,0,5,17],
@@ -248,6 +249,5 @@ var NAVTREEINDEX8 =
 "functions_func_d.html":[2,3,1,4],
 "functions_func_e.html":[2,3,1,5],
 "functions_func_f.html":[2,3,1,6],
-"functions_func_g.html":[2,3,1,7],
-"functions_func_h.html":[2,3,1,8]
+"functions_func_g.html":[2,3,1,7]
 };

@@ -1,6 +1,7 @@
 var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
 [
     [ "Battery", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery" ],
+    [ "Config", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config" ],
     [ "ModelWatchdog", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ModelWatchdog.html", null ],
     [ "OpenCRState", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState" ],
     [ "PacketWatchdog", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1PacketWatchdog.html", null ],
@@ -26,6 +27,7 @@ var classmodule_1_1platform_1_1OpenCR_1_1HardwareIO =
     [ "startup", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a58412c43be7c2197ce8a595596f2a650", null ],
     [ "battery_state", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a8672cf92d6e9ee88186ac42699bf3a46", null ],
     [ "byte_wait", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2ebc4364306b682710d79eb336f031ef", null ],
+    [ "cfg", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2d37e6b4a076a7803e680c222fa6aecb", null ],
     [ "model_watchdog", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#ad8ea25319d77fd40ac8bba57a77f8cc8", null ],
     [ "nugus", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6540393b52b14f13229912638180c217", null ],
     [ "opencr", "classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a7e620f883e4f08dd9a3c1a6a1c0f84eb", null ],

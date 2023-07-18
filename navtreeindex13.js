@@ -1,5 +1,6 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#aa9c79de395d98d920b5296555580f0cf":[2,0,4,3,9,2,1],
 "structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#ac64c0140f7bdd59013d193976170452c":[2,0,4,3,9,2,0],
 "structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#acf8a301553c5fab7bfff16a7968f6b8e":[2,0,4,3,9,2,6],
 "structmodule_1_1input_1_1NatNet_1_1DeviceModel.html#ada61384e49c2536411433562f7d36afb":[2,0,4,3,9,2,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX13 =
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial.html":[2,0,4,4,1,0,0,0],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial.html#a3c636bc4e2901211d88af0784908d62b":[2,0,4,4,1,0,0,0,4],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial.html#a3d165b6adb1d1e2ee0125a0c1de80a0d":[2,0,4,4,1,0,0,0,2],
-"structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial.html#a6e45e53f852186624e7df6e974f62815":[2,0,4,4,1,0,0,0,3],
-"structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Covariance.html":[2,0,4,4,1,0,0,0,0]
+"structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial.html#a6e45e53f852186624e7df6e974f62815":[2,0,4,4,1,0,0,0,3]
 };

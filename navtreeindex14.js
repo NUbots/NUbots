@@ -1,5 +1,6 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Covariance.html":[2,0,4,4,1,0,0,0,0],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Covariance.html#a8b9fbbe428f85bb993edc45511ce5d52":[2,0,4,4,1,0,0,0,0,1],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Covariance.html#acb860699ba0d480bce3c2e6094915f14":[2,0,4,4,1,0,0,0,0,0],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config_1_1UKF_1_1Initial_1_1Mean.html":[2,0,4,4,1,0,0,0,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da07eaadbac259be39229ca47c8859f7fb":[2,0,4,9,1,1,0,166],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da0825341a85e8e4b03be245354f202e69":[2,0,4,9,1,1,0,22],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da09601d88e7488a24c637728c568f953a":[2,0,4,9,1,1,0,249],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da09a75e3e0e9a4b7df286d85e11114ba4":[2,0,4,9,1,1,0,281],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da0adc1432b3eb4ff12aa3ddea8b4e4ddc":[2,0,4,9,1,1,0,199]
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da09a75e3e0e9a4b7df286d85e11114ba4":[2,0,4,9,1,1,0,281]
 };

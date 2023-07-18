@@ -258,6 +258,7 @@ var hierarchy =
     [ "module::platform::OpenCR::DynamixelServoWriteDataPart1", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart1.html", null ],
     [ "module::platform::OpenCR::DynamixelServoWriteDataPart2", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServoWriteDataPart2.html", null ],
     [ "module::platform::OpenCR::HardwareIO::Battery", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html", null ],
+    [ "module::platform::OpenCR::HardwareIO::Config", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html", null ],
     [ "module::platform::OpenCR::HardwareIO::ModelWatchdog", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ModelWatchdog.html", null ],
     [ "module::platform::OpenCR::HardwareIO::OpenCRState", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html", null ],
     [ "module::platform::OpenCR::HardwareIO::PacketWatchdog", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1PacketWatchdog.html", null ],

@@ -48,6 +48,7 @@ var searchData=
   ['button_120',['Button',['../structmodule_1_1input_1_1SensorFilter_1_1Config_1_1Button.html',1,'module::input::SensorFilter::Config']]],
   ['buttons_121',['buttons',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a7a13a8057ee6f3aae47238eb9f686b4c',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]],
   ['buzzer_122',['buzzer',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a43238189263de8350aa91aa3e93dff09',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]],
-  ['byte_5fwait_123',['byte_wait',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2ebc4364306b682710d79eb336f031ef',1,'module::platform::OpenCR::HardwareIO']]],
-  ['bytes_5fwritten_124',['bytes_written',['../classutility_1_1nbs_1_1Encoder.html#a6dc18d96400ed6f4c0b3fbdee0bb3a3c',1,'utility::nbs::Encoder']]]
+  ['buzzer_5ffrequency_123',['buzzer_frequency',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Config.html#a0f02400323e93ce3a4de429bfc6f81df',1,'module::platform::OpenCR::HardwareIO::Config']]],
+  ['byte_5fwait_124',['byte_wait',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2ebc4364306b682710d79eb336f031ef',1,'module::platform::OpenCR::HardwareIO']]],
+  ['bytes_5fwritten_125',['bytes_written',['../classutility_1_1nbs_1_1Encoder.html#a6dc18d96400ed6f4c0b3fbdee0bb3a3c',1,'utility::nbs::Encoder']]]
 ];
