@@ -1,22 +1,22 @@
-import { observable } from 'mobx'
+import { observable } from "mobx";
 
-import { Vector2 } from '../../math/vector2'
+import { Vector2 } from "../../../shared/math/vector2";
 
 export class ArrowGeometry {
-  @observable direction: Vector2
-  @observable headLength: number
-  @observable headWidth: number
-  @observable length: number
-  @observable origin: Vector2
-  @observable width: number
+  @observable direction: Vector2;
+  @observable headLength: number;
+  @observable headWidth: number;
+  @observable length: number;
+  @observable origin: Vector2;
+  @observable width: number;
 
   constructor(opts: ArrowGeometry) {
-    this.direction = opts.direction
-    this.headLength = opts.headLength
-    this.headWidth = opts.headWidth
-    this.length = opts.length
-    this.origin = opts.origin
-    this.width = opts.width
+    this.direction = opts.direction;
+    this.headLength = opts.headLength;
+    this.headWidth = opts.headWidth;
+    this.length = opts.length;
+    this.origin = opts.origin;
+    this.width = opts.width;
   }
 
   static of({
@@ -34,6 +34,6 @@ export class ArrowGeometry {
       length,
       origin,
       width,
-    })
+    });
   }
 }

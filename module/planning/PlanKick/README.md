@@ -24,7 +24,7 @@ Emit a KickTo Task with the position to kick to. The contents of the message (po
 ## Consumes
 
 - `message::planning::KickTo` a signal to kick the ball when conditions are met, with the location to kick the ball to in the message.
-- `message::localisation::FilteredBall` for information on where the ball is.
+- `message::localisation::Ball` for information on where the ball is.
 
 ## Emits
 

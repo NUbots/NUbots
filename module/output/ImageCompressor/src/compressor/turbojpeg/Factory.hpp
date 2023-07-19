@@ -8,12 +8,7 @@ namespace module::output::compressor::turbojpeg {
 
     class Factory : public CompressorFactory {
     public:
-        Factory(const int& quality);
-        Factory(const Factory&) = default;
-        Factory(Factory&&)      = default;
-        Factory& operator=(const Factory&) = default;
-        Factory& operator=(Factory&&) = default;
-        virtual ~Factory();
+        Factory(const int& quality) : quality(quality){};
 
         std::shared_ptr<compressor::Compressor> make_compressor(const uint32_t& width,
                                                                 const uint32_t& height,
@@ -21,7 +16,7 @@ namespace module::output::compressor::turbojpeg {
 
     private:
         /// The quality that this compressor is configured for
-        int quality;
+        int quality{0};
     };
 
 }  // namespace module::output::compressor::turbojpeg

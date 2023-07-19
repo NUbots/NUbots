@@ -1,7 +1,7 @@
 interface Element {
-  requestPointerLock(): void
+  requestPointerLock(): void;
 }
 
 interface Document {
-  pointerLockElement: Element
+  pointerLockElement: Element;
 }

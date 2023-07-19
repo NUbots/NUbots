@@ -23,5 +23,5 @@ package message.skill;
 import "Vector.proto";
 
 message Walk {
-    fvec3 velocity_target = 1;
+    vec3 velocity_target = 1;
 }

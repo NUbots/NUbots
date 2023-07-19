@@ -6,9 +6,9 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/Behaviour.hpp"
+#include "message/eye/DataPoint.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"
@@ -104,8 +104,7 @@ namespace module::motion {
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            Eigen::Vector3f RPY =
-                utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.topLeftCorner<3, 3>().cast<float>());
+            Eigen::Vector3f RPY = utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.rotation().cast<float>());
 
             // compute the pitch offset to the currently wanted pitch of the engine
             float wanted_pitch =

@@ -23,17 +23,20 @@ class Message:
                 Field.map_types["{}.{}".format(self.fqn, n.name)] = (Field(n.field[0], self), Field(n.field[1], self))
 
         self.fields = []
+        FIELD_ONEOF_INDEX = "oneof_index"
         for f in m.field:
-            # All fields that are not a part of oneof
-            if not f.HasField("oneof_index"):
+            # Field is not a oneof
+            if not f.HasField(FIELD_ONEOF_INDEX):
                 self.fields.append(Field(f, self))
+            else:
+                # Field is part of a oneof. Find all fields that are part of the same oneof
+                oneof_fields = [v for v in m.field if v.HasField(FIELD_ONEOF_INDEX) and v.oneof_index == f.oneof_index]
 
-            # Fields that are a part of oneof
-            elif [v for v in m.field if v.oneof_index == f.oneof_index].index(f) == 0:
-                oneof_fields = [v for v in m.field if v.oneof_index == f.oneof_index]
-                oneof_name = m.oneof_decl[f.oneof_index].name
-                self.fields.append(OneOfField(oneof_name, oneof_fields, self))
-                self.submessages.append(OneOfType(oneof_name, oneof_fields, self))
+                # Create and add the oneof but only once when the first field is encountered for this oneof
+                if oneof_fields.index(f) == 0:
+                    oneof_name = m.oneof_decl[f.oneof_index].name
+                    self.fields.append(OneOfField(oneof_name, oneof_fields, self))
+                    self.submessages.append(OneOfType(oneof_name, oneof_fields, self))
 
     def generate_default_constructor(self):
 
@@ -42,14 +45,14 @@ class Message:
 
         # If we are empty it's easy
         if not self.fields:
-            return ("{}();".format(self.name), "{}::{}() {{}}".format(cpp_fqn, self.name))
+            return ("{}();".format(self.name), "{}::{}() = default;".format(cpp_fqn, self.name))
         else:
             # Basic types are const reference and others are copy/moved
             field_list = []
             default_field_list = []
             field_set = []
             for v in self.fields:
-                # Work out if we should be copying a trivial type from a const reference or moving a more complicated type
+                # Work out if we should be copying a const reference or moving a trivial type
                 if v.trivially_copyable:
                     field_list.append("{} const& {}".format(v.cpp_type, v.name))
                     field_set.append("{0}({0})".format(v.name))
@@ -77,8 +80,8 @@ class Message:
         # If we are empty it's easy
         if not self.fields:
             return (
-                "bool operator== (const {}&) const;".format(self.name),
-                "bool {}::operator== (const {}&) const {{ return true; }}".format(cpp_fqn, self.name),
+                "bool operator== (const {}& /*other*/) const;".format(self.name),
+                "bool {}::operator== (const {}& /*other*/) const {{ return true; }}".format(cpp_fqn, self.name),
             )
         else:
             equality_test = " && ".join(["{0} == other.{0}".format(v.name) for v in self.fields])
@@ -120,14 +123,16 @@ class Message:
         # If we are empty it's easy
         if not self.fields:
             return (
-                "{}(const {}&);".format(self.name, protobuf_name),
-                "{}::{}(const {}&) {{}}".format(cpp_fqn, self.name, protobuf_name),
+                "{}(const {}& /*proto*/);".format(self.name, protobuf_name),
+                "{}::{}(const {}& /*proto*/) {{}}".format(cpp_fqn, self.name, protobuf_name),
             )
         else:
-            lines = ["{}::{}(const {}& proto) {{".format(cpp_fqn, self.name, protobuf_name)]
+            lines = ["{cpp_fqn}::{cpp_name}(const {proto_name}& proto) {member_init} {{"]
 
+            member_inits = []
             for v in self.fields:
                 if v.pointer:
+                    member_inits.append("{}(nullptr)".format(v.name))
                     print("TODO HANDLE POINTER CASES")
 
                 elif v.map_type:
@@ -223,10 +228,8 @@ class Message:
                             lines.append(indent("{0}[i] = proto.{1}(i);".format(v.name, v.name.lower()), 8))
                             lines.append(indent("}"))
                         else:
-                            lines.append(
-                                "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
-                                    v.name, v.name.lower()
-                                )
+                            member_inits.append(
+                                "{0}(std::begin(proto.{1}()), std::end(proto.{1}()))".format(v.name, v.name.lower())
                             )
 
                 elif v.one_of:
@@ -283,25 +286,33 @@ class Message:
 
                 else:
                     if v.bytes_type:
-                        lines.append(
-                            "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
-                                v.name, v.name.lower()
-                            )
+                        member_inits.append(
+                            "{0}(std::begin(proto.{1}()), std::end(proto.{1}()))".format(v.name, v.name.lower())
                         )
 
                     elif v.special_cpp_type:
-                        lines.append(
-                            "{0} = message::conversion::convert<{1}>(proto.{2}());".format(
+                        member_inits.append(
+                            "{0}(message::conversion::convert<{1}>(proto.{2}()))".format(
                                 v.name, v.cpp_type, v.name.lower()
                             )
                         )
 
                     else:  # Basic and other types are handled the same
-                        lines.append(indent("{} = proto.{}();".format(v.name, v.name.lower())))
+                        member_inits.append("{}(proto.{}())".format(v.name, v.name.lower()))
 
             lines.append("}")
 
-            return ("{}(const {}& proto);".format(self.name, protobuf_name), "\n".join(lines))
+            lines[0] = lines[0].format(
+                cpp_fqn=cpp_fqn,
+                cpp_name=self.name,
+                proto_name=protobuf_name,
+                member_init=": {}".format(", ".join(member_inits)) if len(member_inits) > 0 else "",
+            )
+
+            return (
+                "{}(const {}& proto);".format(self.name, protobuf_name),
+                "\n".join(lines),
+            )
 
     def generate_protobuf_converter(self):
 
@@ -315,7 +326,7 @@ class Message:
         if not self.fields:
             return (
                 "operator {0}() const;".format(protobuf_name),
-                "{0}::operator {1}() const {{\n return {1}();\n}}".format(cpp_fqn, protobuf_name),
+                "{0}::operator {1}() const {{\n    return {{}};\n}}".format(cpp_fqn, protobuf_name),
             )
         else:
             lines = [

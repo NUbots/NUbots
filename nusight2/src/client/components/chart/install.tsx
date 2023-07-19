@@ -1,11 +1,10 @@
-import React from 'react'
-import { ComponentType } from 'react'
+import React, { ComponentType } from "react";
 
-import { NavigationConfiguration } from '../../navigation'
-import { NUsightNetwork } from '../../network/nusight_network'
-import { AppModel } from '../app/model'
+import { NavigationConfiguration } from "../../navigation";
+import { NUsightNetwork } from "../../network/nusight_network";
+import { AppModel } from "../app/model";
 
-import Icon from './icon.svg'
+import IconChart from "./icon";
 
 export function installChart({
   nav,
@@ -13,20 +12,20 @@ export function installChart({
   nusightNetwork,
   Menu,
 }: {
-  nav: NavigationConfiguration
-  appModel: AppModel
-  nusightNetwork: NUsightNetwork
-  Menu: ComponentType
+  nav: NavigationConfiguration;
+  appModel: AppModel;
+  nusightNetwork: NUsightNetwork;
+  Menu: ComponentType;
 }) {
   nav.addRoute({
-    path: '/chart',
-    Icon,
-    label: 'Chart',
+    path: "/chart",
+    Icon: IconChart,
+    label: "Chart",
     Content: React.lazy(async () => {
-      const { createChartView } = await import('./create')
+      const { createChartView } = await import("./create");
       return {
         default: createChartView({ appModel, nusightNetwork, Menu }),
-      }
+      };
     }),
-  })
+  });
 }

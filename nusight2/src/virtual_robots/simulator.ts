@@ -1,9 +1,9 @@
-import { NUClearNetClient } from '../shared/nuclearnet/nuclearnet_client'
+import { NUClearNetClient } from "../shared/nuclearnet/nuclearnet_client";
 
 export interface Message {
-  messageType: string
-  buffer: Uint8Array
-  reliable?: boolean
+  messageType: string;
+  buffer: Uint8Array;
+  reliable?: boolean;
 }
 
 export abstract class Simulator {
@@ -13,10 +13,10 @@ export abstract class Simulator {
     this.nuclearnetClient.send({
       type: message.messageType,
       payload: Buffer.from(message.buffer),
-      target: 'nusight',
+      target: "nusight",
       reliable: message.reliable,
-    })
+    });
   }
 
-  abstract start(): () => void
+  abstract start(): () => void;
 }

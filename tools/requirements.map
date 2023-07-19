@@ -1,0 +1,13 @@
+# Map of import names to packages used by all ./b commands
+PIL             Pillow
+google.protobuf protobuf
+pybind11        pybind11
+stringcase      stringcase
+numpy           numpy
+ruamel          ruamel.yaml
+cv2             opencv-contrib-python-headless
+termcolor       termcolor
+tqdm            tqdm
+xxhash          xxhash
+si_prefix       si-prefix
+pytimeparse     pytimeparse

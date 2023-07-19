@@ -98,8 +98,8 @@ namespace module::vision::visualmesh {
                 lens.fov          = img.lens.fov;
                 lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
                 lens.k            = std::array<float, 2>{
-                    float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
-                    float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
+                               float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
+                               float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
                 };
                 switch (img.lens.projection.value) {
                     case Image::Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;
@@ -207,8 +207,7 @@ namespace module::vision::visualmesh {
                                        const double& max_distance,
                                        const double& intersection_tolerance,
                                        const std::string& path,
-                                       const std::string& cache_directory)
-        : active(std::make_unique<std::atomic<bool>>()) {
+                                       const std::string& cache_directory) {
 
         // Add the configuration properties we were passed
         VisualMeshModelConfig cfg;

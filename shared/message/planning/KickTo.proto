@@ -23,6 +23,6 @@ package message.planning;
 import "Vector.proto";
 
 message KickTo {
-    /// Torso to point to kick to in torso space
-    fvec3 rPTt = 1;
+    /// Point {P} to kick to from the robot {R} in robot space {r}
+    vec3 rPRr = 1;
 }
