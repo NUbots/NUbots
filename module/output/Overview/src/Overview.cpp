@@ -5,7 +5,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/KickPlan.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Image.hpp"
@@ -21,7 +20,6 @@
 namespace module::output {
 
     using extension::Configuration;
-    using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
     using message::input::GameState;
     using message::input::Image;
@@ -57,7 +55,6 @@ namespace module::output {
            Optional<With<GlobalConfig>>,
            Optional<With<CommandLineArguments>>,
            Optional<With<Sensors>>,
-           Optional<With<Behaviour::State>>,
            Optional<With<Field>>,
            Optional<With<LocalisationBall>>,
            Optional<With<KickPlan>>,
@@ -68,7 +65,6 @@ namespace module::output {
             .then([this](const std::shared_ptr<const GlobalConfig>& global,
                          const std::shared_ptr<const CommandLineArguments>& cli,
                          const std::shared_ptr<const Sensors>& sensors,
-                         const std::shared_ptr<const Behaviour::State>& behaviour_state,
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const LocalisationBall>& loc_ball,
                          const std::shared_ptr<const KickPlan>& kick_plan,
@@ -77,12 +73,11 @@ namespace module::output {
                 auto msg = std::make_unique<OverviewMsg>();
 
                 // Set properties
-                msg->timestamp       = NUClear::clock::now();
-                msg->robot_id        = global ? global->player_id : 0;
-                msg->role_name       = cli ? cli->at(0) : "";
-                msg->battery         = sensors ? sensors->battery : 0;
-                msg->voltage         = sensors ? sensors->voltage : 0;
-                msg->behaviour_state = behaviour_state ? msg->behaviour_state : Behaviour::State(0);
+                msg->timestamp = NUClear::clock::now();
+                msg->robot_id  = global ? global->player_id : 0;
+                msg->role_name = cli ? cli->at(0) : "";
+                msg->battery   = sensors ? sensors->battery : 0;
+                msg->voltage   = sensors ? sensors->voltage : 0;
 
                 if (sensors) {
                     // Get our world transform

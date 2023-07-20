@@ -1,4 +1,4 @@
-# CM740 Hardware Simulator
+# Hardware Simulator
 
 ## Description
 
