@@ -26,7 +26,7 @@
 
 #include "message/platform/RawSensors.hpp"
 
-namespace module::platform::cm740 {
+namespace module::platform {
 
     /**
      * This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to
@@ -55,5 +55,5 @@ namespace module::platform::cm740 {
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace module::platform::cm740
+}  // namespace module::platform
 #endif

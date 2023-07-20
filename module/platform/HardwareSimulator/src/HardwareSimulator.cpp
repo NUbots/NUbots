@@ -1,3 +1,4 @@
+
 /*
  * This file is part of the NUbots Codebase.
  *
@@ -36,7 +37,7 @@
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module::platform::cm740 {
+namespace module::platform {
 
     using extension::Configuration;
 
@@ -275,4 +276,4 @@ namespace module::platform::cm740 {
         sensors.fsr.left.centre_x = down ? 1 : std::numeric_limits<double>::quiet_NaN();
         sensors.fsr.left.centre_y = down ? 1 : std::numeric_limits<double>::quiet_NaN();
     }
-}  // namespace module::platform::cm740
+}  // namespace module::platform
