@@ -25,13 +25,13 @@ extern "C" {
 }
 
 #include <cstdio>
+#include <filesystem>
 #include <sstream>
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
-#include "utility/file/fileutil.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
@@ -72,7 +72,7 @@ namespace module::behaviour::tools {
                 scriptPath = args[1];
 
                 // Check if the script exists and load it if it does.
-                if (utility::file::exists(scriptPath)) {
+                if (std::filesystem::is_regular_file(scriptPath)) {
                     NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                     loadScript(scriptPath);
                     // Build our initial gui with context from loaded script
@@ -427,7 +427,10 @@ namespace module::behaviour::tools {
 
     void ScriptTuner::saveScript() {
         YAML::Node n(script);
-        utility::file::writeToFile(scriptPath, n);
+        // Overwrites the file located at scriptPath with the info from n as above
+        std::ofstream file(scriptPath, std::ios::out | std::ios::trunc);
+        file << n;
+        file.close();
     }
 
     void ScriptTuner::editDuration() {
@@ -718,7 +721,7 @@ namespace module::behaviour::tools {
         move(5, 2);
         curs_set(1);
         std::string saveScriptAs = userInput();
-        if (utility::file::exists(saveScriptAs)) {
+        if (std::filesystem::is_regular_file(saveScriptAs)) {
             bool print = true;
             while (print) {
                 mvprintw(6, 2, "This file already exists.");

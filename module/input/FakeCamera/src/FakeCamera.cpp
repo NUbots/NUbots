@@ -23,6 +23,28 @@ namespace module::input {
 
     using utility::support::Expression;
 
+    std::vector<uint8_t> FakeCamera::read_file(const std::filesystem::path& path) {
+        std::ifstream data(path, std::ios::binary);
+
+        // Stop eating new lines in binary mode
+        data.unsetf(std::ios::skipws);
+
+        // Get number of bytes in the file
+        std::streampos num_bytes;
+        data.seekg(0, std::ios::end);
+        num_bytes = data.tellg();
+        data.seekg(0, std::ios::beg);
+
+        // Reserve capacity
+        std::vector<uint8_t> vec;
+        vec.reserve(num_bytes);
+
+        // Read the data
+        vec.insert(vec.begin(), std::istream_iterator<uint8_t>(data), std::istream_iterator<uint8_t>());
+
+        return vec;
+    }
+
     FakeCamera::FakeCamera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
 
@@ -108,7 +130,7 @@ namespace module::input {
                     msg->timestamp = NUClear::clock::now();
 
                     // Load image file into vector
-                    msg->data = utility::file::readFile(images[image_index].first);
+                    msg->data = readFile(images[image_index].first);
 
                     // Extract file dimensions from file data
                     std::array<int, 2> dimensions{};

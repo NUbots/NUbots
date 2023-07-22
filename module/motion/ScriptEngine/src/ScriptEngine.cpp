@@ -23,8 +23,6 @@
 
 #include "message/behaviour/ServoCommand.hpp"
 
-#include "utility/file/fileutil.hpp"
-
 namespace module::motion {
 
     using extension::ExecuteScript;
@@ -39,7 +37,7 @@ namespace module::motion {
         on<Script>("").then([this](const Script& script) {
             // Add this script to our list of scripts
             try {
-                scripts.insert(std::pair(utility::file::pathSplit(script.fileName).second, script));
+                scripts.insert(std::pair(pathSplit(script.fileName).second, script));
             }
             catch (const std::exception& e) {
                 log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
@@ -91,4 +89,26 @@ namespace module::motion {
             emit(std::move(waypoints));
         });
     }
+
+    std::pair<std::string, std::string> ScriptEngine::path_split(const std::string& input) {
+
+        size_t lastSlash = input.rfind('/');
+
+        // There was no slash
+        if (lastSlash == std::string::npos) {
+            return {".", input};
+        }
+        // The slash was the last character
+        if (lastSlash + 1 == input.size()) {
+            // If all we had was a slash
+            if (input.size() == 1) {
+                return {"/", "/"};
+            }
+            // Otherwise remove the slash and call recursively
+            return path_split(input.substr(0, input.size() - 1));
+        }
+        // Else, the slash was not the last character
+        return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
+    }
+
 }  // namespace module::motion

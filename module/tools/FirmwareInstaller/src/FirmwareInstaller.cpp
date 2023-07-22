@@ -1,13 +1,13 @@
 #include "FirmwareInstaller.hpp"
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <numeric>
 
 #include "extension/Configuration.hpp"
 
-#include "utility/file/fileutil.hpp"
 #include "utility/io/uart.hpp"
 #include "utility/strutil/strutil.hpp"
 
@@ -36,7 +36,7 @@ namespace module::tools {
 
                 Firmware fw;
 
-                if (utility::file::exists(path)) {
+                if (std::filesystem::exists(path)) {
                     auto ifs = std::ifstream(path, std::ios::in | std::ios::binary);
 
                     fw.firmware =

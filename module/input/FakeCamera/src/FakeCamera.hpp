@@ -1,6 +1,8 @@
 #ifndef MODULE_INPUT_FAKECAMERA_HPP
 #define MODULE_INPUT_FAKECAMERA_HPP
 
+
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <nuclear>
@@ -33,6 +35,11 @@ namespace module::input {
                 tjDestroy(handle);
             }
         });
+
+        /// @brief Read binary data from a file
+        /// @param path Path to the file to read
+        /// @return Vector of binary data
+        std::vector<uint8_t> read_file(const std::filesystem::path& path);
 
     public:
         /// @brief Called by the powerplant to build and setup the FakeCamera reactor.

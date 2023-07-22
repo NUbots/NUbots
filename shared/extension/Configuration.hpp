@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <nuclear>
 #include <regex>
 #include <utility>
@@ -27,7 +28,6 @@
 
 #include "FileWatch.hpp"
 
-#include "utility/file/fileutil.hpp"
 #include "utility/strutil/strutil.hpp"
 #include "utility/support/hostname.hpp"
 #include "utility/support/yaml_log_level.hpp"
@@ -76,7 +76,7 @@ namespace extension {
             bool loaded = false;
 
             // Load the default config file.
-            if (fs::exists(fs::path("config") / fileName)) {
+            if (fs::is_regular_file(fs::path("config") / fileName)) {
                 config = YAML::LoadFile(fs::path("config") / fileName);
                 loaded = true;
             }
@@ -94,7 +94,7 @@ namespace extension {
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
-            if (fs::exists(fs::path("config") / hostname / fileName)) {
+            if (fs::is_regular_file(fs::path("config") / hostname / fileName)) {
                 if (loaded) {
                     config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / hostname / fileName));
                 }
@@ -106,7 +106,7 @@ namespace extension {
             }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
-            if (fs::exists(fs::path("config") / binary / fileName)) {
+            if (fs::is_regular_file(fs::path("config") / binary / fileName)) {
                 if (loaded) {
                     config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / binary / fileName));
                 }
@@ -299,7 +299,7 @@ namespace NUClear::dsl {
 
                 // Check if there is a default config. If there isn't, try to make one
                 const fs::path defaultConfig = fs::path("config") / filename;
-                if (!fs::exists(defaultConfig)) {
+                if (!fs::is_regular_file(defaultConfig)) {
                     NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig.string()
                                                 + "' does not exist. Creating it.");
 
@@ -322,7 +322,7 @@ namespace NUClear::dsl {
 
                 // Bind our robot specific config file if it exists
                 const fs::path robotConfig = fs::path("config") / hostname / filename;
-                if (fs::exists(robotConfig)) {
+                if (fs::is_regular_file(robotConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
                 }
 
@@ -338,7 +338,7 @@ namespace NUClear::dsl {
                 if (!binaryName.empty()) {
                     fs::path binaryConfig = fs::path("config") / binaryName / filename;
                     // Bind our binary specific config file if it exists
-                    if (fs::exists(binaryConfig)) {
+                    if (fs::is_regular_file(binaryConfig)) {
                         DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
                     }
                 }
