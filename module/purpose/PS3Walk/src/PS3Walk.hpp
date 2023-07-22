@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_STRATEGY_PS3WALK_HPP
-#define MODULES_BEHAVIOUR_STRATEGY_PS3WALK_HPP
+#ifndef MODULES_PURPOSE_PS3WALK_HPP
+#define MODULES_PURPOSE_PS3WALK_HPP
 
 
 #include <Eigen/Core>
@@ -26,9 +26,11 @@
 
 #include "Joystick.hpp"
 
-namespace module::behaviour::strategy {
+#include "extension/Behaviour.hpp"
 
-    class PS3Walk : public NUClear::Reactor {
+namespace module::purpose {
+
+    class PS3Walk : public ::extension::behaviour::BehaviourReactor {
     public:
         // axes
         static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
@@ -71,7 +73,7 @@ namespace module::behaviour::strategy {
         float headPitch        = 0.0f;
         float headYaw          = 0.0f;
     };
-}  // namespace module::behaviour::strategy
+}  // namespace module::purpose
 
 
-#endif
+#endif  // MODULE_PURPOSE_PS3WALK_HPP
