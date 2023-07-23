@@ -17,11 +17,11 @@
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
- syntax = "proto3";
+syntax = "proto3";
 
- package message.support.nusight;
+package message.support.nusight;
 
- /// This is used as a basic message that NUsight can use to test its network functionality
- message Test {
+/// This is used as a basic message that NUsight can use to test its network functionality
+message Test {
     string message = 1;
- }
+}
