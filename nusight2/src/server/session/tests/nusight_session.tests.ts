@@ -13,7 +13,7 @@ import { NUsightSession } from "../session";
 
 import { createMockNUClearNetClient, createMockWebSocket, createPacketFromServer } from "./test_utils";
 
-import Say = message.output.Say;
+import Test = message.support.nusight.Test;
 import ScrubberFileEntry = message.eye.ScrubberFileEntry;
 import ScrubberListFilesRequest = message.eye.ScrubberListFilesRequest;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
@@ -21,13 +21,13 @@ import ScrubberCloseRequest = message.eye.ScrubberCloseRequest;
 import ScrubberSeekRequest = message.eye.ScrubberSeekRequest;
 import ScrubberClosed = message.eye.ScrubberClosed;
 
-const sayPacketType = "message.output.Say";
+const testPacketType = "message.support.nusight.Test";
 
-function createSayPacket(opts: { reliable?: boolean } = {}) {
-  const payload = Say.encode({ message: "Test" }).finish();
+function createTestPacket(opts: { reliable?: boolean } = {}) {
+  const payload = Test.encode({ message: "Test" }).finish();
 
   const packet: NUClearNetPacket = {
-    hash: hashType(sayPacketType),
+    hash: hashType(testPacketType),
     payload: Buffer.from(payload),
     reliable: opts.reliable ?? false,
     peer: {
@@ -55,7 +55,7 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.addClient(mockSocket.connection);
 
     // when the client sends a packet to the server, ...
-    const packetFromClient = { type: "message.output.Say" };
+    const packetFromClient = { type: "message.support.nusight.Test" };
     mockSocket.emit("packet", packetFromClient);
 
     // the server should forward the packet to NUClearNet.
@@ -72,14 +72,14 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.addClient(mockSocket.connection);
 
     // and the client starts listening for a given packet type, ...
-    mockSocket.emit("listen", sayPacketType, "some-listen-token");
+    mockSocket.emit("listen", testPacketType, "some-listen-token");
 
     // when a packet of that type is received from NUClearNet, ...
-    const packet = createSayPacket();
-    nuclearnetMockEmit(sayPacketType, packet);
+    const packet = createTestPacket();
+    nuclearnetMockEmit(testPacketType, packet);
 
     // the packet should be forwarded to the client.
-    expect(mockSocket.connection.send).toHaveBeenCalledWith(sayPacketType, packet, expect.any(Function));
+    expect(mockSocket.connection.send).toHaveBeenCalledWith(testPacketType, packet, expect.any(Function));
 
     // Ack the send to clear the timeout and end the test
     mockSocket.connection.send.mock.calls[0][2]();
@@ -95,13 +95,13 @@ describe("NUsightSession and NUsightSessionClient", () => {
     session.addClient(mockSocket.connection);
 
     // if the client starts listening for a given packet type ...
-    mockSocket.emit("listen", sayPacketType, "some-listen-token");
+    mockSocket.emit("listen", testPacketType, "some-listen-token");
 
     // and then stops listening for that packet type, ...
     mockSocket.emit("unlisten", "some-listen-token");
 
-    const packet = createSayPacket();
-    nuclearnetMockEmit("message.output.Say", packet);
+    const packet = createTestPacket();
+    nuclearnetMockEmit("message.support.nusight.Test", packet);
 
     // the packet should not be forwarded to the client since it's no longer listening
     expect(mockSocket.connection.send).not.toHaveBeenCalled();
