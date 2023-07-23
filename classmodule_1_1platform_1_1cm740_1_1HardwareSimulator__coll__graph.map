@@ -1,6 +1,0 @@
-<map id="module::platform::cm740::HardwareSimulator" name="module::platform::cm740::HardwareSimulator">
-<area shape="rect" id="node1" title="This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to..." alt="" coords="351,57,537,98"/>
-<area shape="rect" id="node2" title=" " alt="" coords="59,5,194,32"/>
-<area shape="rect" id="node3" href="$structmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig.html" title=" " alt="" coords="5,57,248,98"/>
-<area shape="rect" id="node4" title=" " alt="" coords="76,123,177,149"/>
-</map>

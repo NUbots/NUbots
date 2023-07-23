@@ -1,4 +1,0 @@
-<map id="module::output::eSpeak" name="module::output::eSpeak">
-<area shape="rect" id="node1" title="Takes strings given to it and plays them using text to speech." alt="" coords="5,80,183,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="27,5,161,32"/>
-</map>

@@ -1,0 +1,348 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module/purpose/KeyboardWalk/src/KeyboardWalk.hpp Source File</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('KeyboardWalk_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">KeyboardWalk.hpp</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef MODULE_PURPOSE_KEYBOARDWALK_HPP</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define MODULE_PURPOSE_KEYBOARDWALK_HPP</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;Eigen/Core&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;mutex&gt;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment">// clang-format off</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment">// This include needs to come immediately before the OK undef</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &lt;ncurses.h&gt;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment">// because ncurses defines OK. We don&#39;t need (or want) it.</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#undef OK</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment">// clang-format on</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160; </div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="preprocessor">#include &quot;extension/Behaviour.hpp&quot;</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160; </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="keyword">namespace </span>module::purpose {</div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment">    /// @brief Enum for log colours</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"></span>    <span class="keyword">enum class</span> LogColours : short {</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        TRACE_COLOURS = 1,</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;        DEBUG_COLOURS = 2,</div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        INFO_COLOURS  = 3,</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        WARN_COLOURS  = 4,</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        ERROR_COLOURS = 5,</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        FATAL_COLOURS = 6</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    };</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
+<div class="line"><a name="l00032"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html">   32</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html">KeyboardWalk</a> : <span class="keyword">public</span> <a class="code" href="classextension_1_1behaviour_1_1BehaviourReactor.html">::extension::behaviour::BehaviourReactor</a> {</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">        /// @brief Increments the value of walk command (dx, dy) by this amount when a key is pressed</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#afc6fa8ab7e793c3cc4302cc87094ad59">   35</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#afc6fa8ab7e793c3cc4302cc87094ad59">DIFF</a> = 0.01f;</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">        /// @brief Increments the value of walk command (dtheta) by this amount when a key is pressed</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a02cbec0396b1c4f5450291b2137d4056">   38</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a02cbec0396b1c4f5450291b2137d4056">ROT_DIFF</a> = 0.1f;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">        /// @brief Increments the value of head yaw/pitch by this amount when a key is pressed</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#aef15ca0fcc6fb5bdd7defafeb53a21ae">   41</a></span>&#160;<span class="comment"></span>        <span class="keyword">static</span> constexpr <span class="keyword">const</span> <span class="keywordtype">double</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#aef15ca0fcc6fb5bdd7defafeb53a21ae">HEAD_DIFF</a> = 1.0f * double(M_PI) / 180.0f;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">        /// @brief Whether or not the walk is enabled</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#acd420e3f3dc12b167cd82ef5bf077803">   44</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#acd420e3f3dc12b167cd82ef5bf077803">walk_enabled</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">        /// @brief Walk command (dx, dy, dtheta)</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#af58cc551eae4403722ccc51020d2d89d">   47</a></span>&#160;<span class="comment"></span>        Eigen::Vector3d <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#af58cc551eae4403722ccc51020d2d89d">walk_command</a> = Eigen::Vector3d::Zero();</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">        /// @brief Desired head yaw</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a2c57738a50a5cb8f7c884efe43f60606">   50</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">double</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a2c57738a50a5cb8f7c884efe43f60606">head_yaw</a> = 0.0f;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">        /// @brief Desired head pitch</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a6559da7b05fee32a84dfd98c85e392a4">   53</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">double</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a6559da7b05fee32a84dfd98c85e392a4">head_pitch</a> = 0.0f;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">        /// @brief Command window</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a25c01f8f70f249f5c79e5ea6faf67aa7">   56</a></span>&#160;<span class="comment"></span>        std::shared_ptr&lt;WINDOW&gt; <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a25c01f8f70f249f5c79e5ea6faf67aa7">command_window</a>;</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">        /// @brief Log window</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a14473a7814876bb532a5408f71ae3995">   59</a></span>&#160;<span class="comment"></span>        std::shared_ptr&lt;WINDOW&gt; <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a14473a7814876bb532a5408f71ae3995">log_window</a>;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">        /// @brief Whether or not colours are enabled</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad4777b1d3d82f26e2d1c835dc4022e68">   62</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad4777b1d3d82f26e2d1c835dc4022e68">colours_enabled</a>;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">        /// @brief Mutex to ensure that only one thread is writing to the log window at a time</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a4ebe9834663afea49ee4c0c52c3ff87b">   65</a></span>&#160;<span class="comment"></span>        std::mutex <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a4ebe9834663afea49ee4c0c52c3ff87b">mutex</a>;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">        /// @brief Creates windows for the command and log</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ab38ef90c692e2898b1c6d666cc000330">create_windows</a>();</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment">        /// @brief Increments the value of walk command (dx) by DIFF</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a3122d1fc5501a50e4290466e03404926">forward</a>();</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">        /// @brief Increments the value of walk command (dy) by DIFF</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ac298d2e96a75b6985b037240ced23f41">left</a>();</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">        /// @brief Increments the value of walk command (dx) by -DIFF</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ae51528edde1dfe10f6ebc3e560d60234">back</a>();</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">        /// @brief Increments the value of walk command (dy) by -DIFF</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad9970c386b529f62d6f9f0bff4632a1b">right</a>();</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">        /// @brief  Increments the value of walk command (dtheta) by ROT_DIFF</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#adffa08f1ae3aeaf0b4bfac95f47a54b2">turn_left</a>();</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">        /// @brief  Increments the value of walk command (dtheta) by -ROT_DIFF</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a1c05b483da67885d055e4bff80054246">turn_right</a>();</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">        /// @brief Resets the walk command to zero</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a0fb72688886d8030ddeaa63d68e128be">reset</a>();</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment">        /// @brief Quits the program</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a33f084842b41c692a5f7f38e4a93d5ac">quit</a>();</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">        /// @brief Emits task to kick with specified leg</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">        /// @param l Leg to kick with (LEFT or RIGHT)</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#ac6ca8b7308870251bfff33d9ce1ed8c6">kick</a>(utility::input::LimbID::Value l);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="comment">        /// @brief Increments the value of head yaw by HEAD_DIFF</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#acf135b9cf37686cc6ab3d3ed05377220">look_left</a>();</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="comment">        /// @brief Increments the value of head yaw by -HEAD_DIFF</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a9b826382d8823c8512341d28f7eed460">look_right</a>();</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="comment">        /// @brief Increments the value of head pitch by HEAD_DIFF</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#aa24b63e670d072063ca831c2c8e5cb04">look_up</a>();</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="comment">        /// @brief Increments the value of head pitch by -HEAD_DIFF</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#acb7f58f760d723e227547af2e71b477f">look_down</a>();</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="comment">        /// @brief Toggles the walk on/off</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a59890bcf3c94a08498020a3ef22e57c6">walk_toggle</a>();</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="comment">        /// @brief Emits task to walk with current walk command</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a23945f468a263094ae42e9b90ec9334d">update_command</a>();</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="comment">        /// @brief Prints the current status of the walk command</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a7ae6faa9c4517123f68315062e64a623">print_status</a>();</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;<span class="comment">        /// @brief Updates the window with the specified message</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a43219beea928ee1a9bedcb1155283278">update_window</a>(<span class="keyword">const</span> std::shared_ptr&lt;WINDOW&gt;&amp; window,</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                           <span class="keyword">const</span> LogColours&amp; colours,</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;                           <span class="keyword">const</span> std::string&amp; source,</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;                           <span class="keyword">const</span> std::string&amp; message,</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                           <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; print_level);</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1purpose_1_1KeyboardWalk.html#a87bbd04ba1339edbe4382e94bbeaa345">KeyboardWalk</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    };</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;}  <span class="comment">// namespace module::purpose</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160; </div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_PURPOSE_KEYBOARDWALK_HPP</span></div>
+<div class="ttc" id="aclassextension_1_1behaviour_1_1BehaviourReactor_html"><div class="ttname"><a href="classextension_1_1behaviour_1_1BehaviourReactor.html">extension::behaviour::BehaviourReactor</a></div><div class="ttdoc">A reactor subtype that can be used when making a behaviour reactor.</div><div class="ttdef"><b>Definition:</b> Behaviour.hpp:349</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html">module::purpose::KeyboardWalk</a></div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:32</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a02cbec0396b1c4f5450291b2137d4056"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a02cbec0396b1c4f5450291b2137d4056">module::purpose::KeyboardWalk::ROT_DIFF</a></div><div class="ttdeci">static constexpr const double ROT_DIFF</div><div class="ttdoc">Increments the value of walk command (dtheta) by this amount when a key is pressed.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:38</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a0fb72688886d8030ddeaa63d68e128be"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a0fb72688886d8030ddeaa63d68e128be">module::purpose::KeyboardWalk::reset</a></div><div class="ttdeci">void reset()</div><div class="ttdoc">Resets the walk command to zero.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:321</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a14473a7814876bb532a5408f71ae3995"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a14473a7814876bb532a5408f71ae3995">module::purpose::KeyboardWalk::log_window</a></div><div class="ttdeci">std::shared_ptr&lt; WINDOW &gt; log_window</div><div class="ttdoc">Log window.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:59</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a1c05b483da67885d055e4bff80054246"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a1c05b483da67885d055e4bff80054246">module::purpose::KeyboardWalk::turn_right</a></div><div class="ttdeci">void turn_right()</div><div class="ttdoc">Increments the value of walk command (dtheta) by -ROT_DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:265</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a23945f468a263094ae42e9b90ec9334d"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a23945f468a263094ae42e9b90ec9334d">module::purpose::KeyboardWalk::update_command</a></div><div class="ttdeci">void update_command()</div><div class="ttdoc">Emits task to walk with current walk command.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:335</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a25c01f8f70f249f5c79e5ea6faf67aa7"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a25c01f8f70f249f5c79e5ea6faf67aa7">module::purpose::KeyboardWalk::command_window</a></div><div class="ttdeci">std::shared_ptr&lt; WINDOW &gt; command_window</div><div class="ttdoc">Command window.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:56</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a2c57738a50a5cb8f7c884efe43f60606"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a2c57738a50a5cb8f7c884efe43f60606">module::purpose::KeyboardWalk::head_yaw</a></div><div class="ttdeci">double head_yaw</div><div class="ttdoc">Desired head yaw.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:50</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a3122d1fc5501a50e4290466e03404926"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a3122d1fc5501a50e4290466e03404926">module::purpose::KeyboardWalk::forward</a></div><div class="ttdeci">void forward()</div><div class="ttdoc">Increments the value of walk command (dx) by DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:230</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a33f084842b41c692a5f7f38e4a93d5ac"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a33f084842b41c692a5f7f38e4a93d5ac">module::purpose::KeyboardWalk::quit</a></div><div class="ttdeci">void quit()</div><div class="ttdoc">Quits the program.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:330</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a43219beea928ee1a9bedcb1155283278"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a43219beea928ee1a9bedcb1155283278">module::purpose::KeyboardWalk::update_window</a></div><div class="ttdeci">void update_window(const std::shared_ptr&lt; WINDOW &gt; &amp;window, const LogColours &amp;colours, const std::string &amp;source, const std::string &amp;message, const bool &amp;print_level)</div><div class="ttdoc">Updates the window with the specified message.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:196</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a4ebe9834663afea49ee4c0c52c3ff87b"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a4ebe9834663afea49ee4c0c52c3ff87b">module::purpose::KeyboardWalk::mutex</a></div><div class="ttdeci">std::mutex mutex</div><div class="ttdoc">Mutex to ensure that only one thread is writing to the log window at a time.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:65</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a59890bcf3c94a08498020a3ef22e57c6"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a59890bcf3c94a08498020a3ef22e57c6">module::purpose::KeyboardWalk::walk_toggle</a></div><div class="ttdeci">void walk_toggle()</div><div class="ttdoc">Toggles the walk on/off.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:309</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a6559da7b05fee32a84dfd98c85e392a4"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a6559da7b05fee32a84dfd98c85e392a4">module::purpose::KeyboardWalk::head_pitch</a></div><div class="ttdeci">double head_pitch</div><div class="ttdoc">Desired head pitch.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:53</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a7ae6faa9c4517123f68315062e64a623"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a7ae6faa9c4517123f68315062e64a623">module::purpose::KeyboardWalk::print_status</a></div><div class="ttdeci">void print_status()</div><div class="ttdoc">Prints the current status of the walk command.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:350</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a87bbd04ba1339edbe4382e94bbeaa345"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a87bbd04ba1339edbe4382e94bbeaa345">module::purpose::KeyboardWalk::KeyboardWalk</a></div><div class="ttdeci">KeyboardWalk(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the KeyboardWalk reactor.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:34</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_a9b826382d8823c8512341d28f7eed460"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#a9b826382d8823c8512341d28f7eed460">module::purpose::KeyboardWalk::look_right</a></div><div class="ttdeci">void look_right()</div><div class="ttdoc">Increments the value of head yaw by -HEAD_DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:288</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_aa24b63e670d072063ca831c2c8e5cb04"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#aa24b63e670d072063ca831c2c8e5cb04">module::purpose::KeyboardWalk::look_up</a></div><div class="ttdeci">void look_up()</div><div class="ttdoc">Increments the value of head pitch by HEAD_DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:295</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_ab38ef90c692e2898b1c6d666cc000330"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#ab38ef90c692e2898b1c6d666cc000330">module::purpose::KeyboardWalk::create_windows</a></div><div class="ttdeci">void create_windows()</div><div class="ttdoc">Creates windows for the command and log.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:149</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_ac298d2e96a75b6985b037240ced23f41"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#ac298d2e96a75b6985b037240ced23f41">module::purpose::KeyboardWalk::left</a></div><div class="ttdeci">void left()</div><div class="ttdoc">Increments the value of walk command (dy) by DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:237</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_ac6ca8b7308870251bfff33d9ce1ed8c6"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#ac6ca8b7308870251bfff33d9ce1ed8c6">module::purpose::KeyboardWalk::kick</a></div><div class="ttdeci">void kick(utility::input::LimbID::Value l)</div><div class="ttdoc">Emits task to kick with specified leg.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:272</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_acb7f58f760d723e227547af2e71b477f"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#acb7f58f760d723e227547af2e71b477f">module::purpose::KeyboardWalk::look_down</a></div><div class="ttdeci">void look_down()</div><div class="ttdoc">Increments the value of head pitch by -HEAD_DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:302</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_acd420e3f3dc12b167cd82ef5bf077803"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#acd420e3f3dc12b167cd82ef5bf077803">module::purpose::KeyboardWalk::walk_enabled</a></div><div class="ttdeci">bool walk_enabled</div><div class="ttdoc">Whether or not the walk is enabled.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:44</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_acf135b9cf37686cc6ab3d3ed05377220"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#acf135b9cf37686cc6ab3d3ed05377220">module::purpose::KeyboardWalk::look_left</a></div><div class="ttdeci">void look_left()</div><div class="ttdoc">Increments the value of head yaw by HEAD_DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:281</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_ad4777b1d3d82f26e2d1c835dc4022e68"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad4777b1d3d82f26e2d1c835dc4022e68">module::purpose::KeyboardWalk::colours_enabled</a></div><div class="ttdeci">bool colours_enabled</div><div class="ttdoc">Whether or not colours are enabled.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:62</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_ad9970c386b529f62d6f9f0bff4632a1b"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#ad9970c386b529f62d6f9f0bff4632a1b">module::purpose::KeyboardWalk::right</a></div><div class="ttdeci">void right()</div><div class="ttdoc">Increments the value of walk command (dy) by -DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:251</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_adffa08f1ae3aeaf0b4bfac95f47a54b2"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#adffa08f1ae3aeaf0b4bfac95f47a54b2">module::purpose::KeyboardWalk::turn_left</a></div><div class="ttdeci">void turn_left()</div><div class="ttdoc">Increments the value of walk command (dtheta) by ROT_DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:258</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_ae51528edde1dfe10f6ebc3e560d60234"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#ae51528edde1dfe10f6ebc3e560d60234">module::purpose::KeyboardWalk::back</a></div><div class="ttdeci">void back()</div><div class="ttdoc">Increments the value of walk command (dx) by -DIFF.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.cpp:244</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_aef15ca0fcc6fb5bdd7defafeb53a21ae"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#aef15ca0fcc6fb5bdd7defafeb53a21ae">module::purpose::KeyboardWalk::HEAD_DIFF</a></div><div class="ttdeci">static constexpr const double HEAD_DIFF</div><div class="ttdoc">Increments the value of head yaw/pitch by this amount when a key is pressed.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:41</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_af58cc551eae4403722ccc51020d2d89d"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#af58cc551eae4403722ccc51020d2d89d">module::purpose::KeyboardWalk::walk_command</a></div><div class="ttdeci">Eigen::Vector3d walk_command</div><div class="ttdoc">Walk command (dx, dy, dtheta)</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:47</div></div>
+<div class="ttc" id="aclassmodule_1_1purpose_1_1KeyboardWalk_html_afc6fa8ab7e793c3cc4302cc87094ad59"><div class="ttname"><a href="classmodule_1_1purpose_1_1KeyboardWalk.html#afc6fa8ab7e793c3cc4302cc87094ad59">module::purpose::KeyboardWalk::DIFF</a></div><div class="ttdeci">static constexpr const double DIFF</div><div class="ttdoc">Increments the value of walk command (dx, dy) by this amount when a key is pressed.</div><div class="ttdef"><b>Definition:</b> KeyboardWalk.hpp:35</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_ca62360815607caf127c3f6a9db8d977.html">purpose</a></li><li class="navelem"><a class="el" href="dir_a0cb976a834f4ec6feb82828394cfb67.html">KeyboardWalk</a></li><li class="navelem"><a class="el" href="dir_a74a7f516b8fe1db15e89d26ed9ec70c.html">src</a></li><li class="navelem"><b>KeyboardWalk.hpp</b></li>
+    <li class="footer">Generated on Sun Jul 23 2023 03:00:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

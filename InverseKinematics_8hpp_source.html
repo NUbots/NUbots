@@ -204,200 +204,199 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &quot;message/input/Sensors.hpp&quot;</span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &quot;utility/actuation/ForwardKinematics.hpp&quot;</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;utility/behaviour/Action.hpp&quot;</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/input/ServoID.hpp&quot;</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/math/angle.hpp&quot;</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#include &quot;utility/math/coordinates.hpp&quot;</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">namespace </span>utility::actuation::kinematics {</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a>;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">    /*! @brief Calculates the leg joints for a given input ankle position.</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">            The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">       of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">       to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">       left, z is normal to the plane of the foot</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment">        @param target The target 4x4 basis matrix for the ankle</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">        @param isLeft Request for left leg motors or right leg motors?</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">        @param RobotKinematicsModel The class containing the leg model of the robot.</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">    */</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">const</span> message::actuation::KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; target_,</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keyword">const</span> LimbID&amp; limb) {</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">const</span> Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keyword">const</span> Scalar DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keyword">const</span> Scalar HIP_OFFSET_X                    = model.leg.HIP_OFFSET_X;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keyword">const</span> Scalar UPPER_LEG_LENGTH                = model.leg.UPPER_LEG_LENGTH;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keyword">const</span> Scalar LOWER_LEG_LENGTH                = model.leg.LOWER_LEG_LENGTH;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; positions;</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        Scalar hipYaw     = 0;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        Scalar hipRoll    = 0;</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        Scalar hipPitch   = 0;</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        Scalar knee       = 0;</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        Scalar anklePitch = 0;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        Scalar ankleRoll  = 0;</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="comment">// Correct for input referencing the bottom of the foot</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; target(target_);</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        target = target.translate(Eigen::Matrix&lt;Scalar, 3, 1&gt;(0.0, 0.0, model.leg.FOOT_HEIGHT));</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="comment">// Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="comment">// TODO remove this. It was due to wrong convention use</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        Eigen::Matrix&lt;Scalar, 4, 4&gt; Tci;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="comment">// clang-format off</span></div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;            Tci &lt;&lt; 0.0, 1.0,  0.0, 0.0,</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                   1.0, 0.0,  0.0, 0.0,</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                   0.0, 0.0, -1.0, 0.0,</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                   0.0, 0.0,  0.0, 1.0;</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="comment">// clang-format on</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        <span class="comment">// Rotate input position from standard robot coords to foot coords</span></div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; translation = (Tci * target.matrix().template rightCols&lt;1&gt;()).<span class="keyword">template</span> head&lt;3&gt;();</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        target                                  = Tci * target * Tci.transpose();</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        target.translation()                    = translation;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160; </div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="comment">// swap legs if needed</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="keywordflow">if</span> (limb != LimbID::LEFT_LEG) {</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            target(0, 1)             = -target(0, 1);</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            target(0, 2)             = -target(0, 2);</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            target(1, 0)             = -target(1, 0);</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            target(2, 0)             = -target(2, 0);</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            target.translation().x() = -target.translation().x();</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        }</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; ankleX   = target.matrix().template leftCols&lt;1&gt;().template head&lt;3&gt;();</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; ankleY   = target.matrix().template middleCols&lt;1&gt;(1).template head&lt;3&gt;();</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; anklePos = target.translation();</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; hipOffset(LENGTH_BETWEEN_LEGS * 0.5,</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                                                    HIP_OFFSET_X,</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                                                    DISTANCE_FROM_BODY_TO_HIP_JOINT);</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160; </div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; targetLeg = anklePos - hipOffset;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        <span class="keyword">const</span> Scalar maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        Scalar length             = targetLeg.norm();</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        <span class="keywordflow">if</span> (length &gt; maxLegLength) {</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;            targetLeg = targetLeg * maxLegLength / length;</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;            length    = targetLeg.norm();</div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        }</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="keyword">const</span> Scalar sqrLength   = length * length;</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keyword">const</span> Scalar sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        <span class="keyword">const</span> Scalar sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        <span class="keyword">const</span> Scalar cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        knee                 = std::acos(std::max(std::min(cosKnee, Scalar(1.0)), Scalar(-1.0)));</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        <span class="keyword">const</span> Scalar cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        <span class="keyword">const</span> Scalar lowerLeg    = std::acos(std::max(std::min(cosLowerLeg, Scalar(1.0)), Scalar(-1.0)));</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;        <span class="keyword">const</span> Scalar phi2 = std::acos(targetLeg.dot(ankleY) / length);</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160; </div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;        anklePitch = lowerLeg + phi2 - M_PI_2;</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160; </div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; unitTargetLeg = targetLeg / length;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; hipX = ankleY.cross(unitTargetLeg);</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        Scalar hipXLength                = hipX.norm();</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        <span class="keywordflow">if</span> (hipXLength &gt; 0) {</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;            hipX /= hipXLength;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        }</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;            NUClear::log&lt;NUClear::DEBUG&gt;(</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;                <span class="stringliteral">&quot;InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at &quot;</span></div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                <span class="stringliteral">&quot;the moment. requested pose = \n&quot;</span>,</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                target.matrix());</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;            <span class="keywordflow">return</span> positions;</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        }</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        <span class="comment">// Will be unit as ankleY and hipX are normal and unit</span></div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; legPlaneTangent = ankleY.cross(hipX);</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        ankleRoll = std::atan2(ankleX.dot(legPlaneTangent), ankleX.dot(hipX));</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160; </div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> isAnkleAboveWaist = unitTargetLeg.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ()) &lt; 0;</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        <span class="keyword">const</span> Scalar cosZandHipX   = Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ().dot(hipX);</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> hipRollPositive = cosZandHipX &lt;= 0;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; legPlaneGlobalZ =</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;            (isAnkleAboveWaist ? -1 : 1) * (Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ() - (cosZandHipX * hipX));</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;        <span class="keyword">const</span> Scalar legPlaneGlobalZLength = legPlaneGlobalZ.norm();</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        <span class="keywordflow">if</span> (legPlaneGlobalZLength &gt; 0) {</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;            legPlaneGlobalZ /= legPlaneGlobalZLength;</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;        }</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160; </div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;        <span class="keyword">const</span> Scalar cosHipRoll = legPlaneGlobalZ.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;        hipRoll = (hipRollPositive ? 1 : -1) * std::acos(std::max(std::min(cosHipRoll, Scalar(1)), Scalar(-1)));</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160; </div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;        <span class="keyword">const</span> Scalar phi4 = M_PI - knee - lowerLeg;</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;        <span class="comment">// Superposition values:</span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        <span class="keyword">const</span> Scalar sinPIminusPhi2 = std::sin(M_PI - phi2);</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; unitUpperLeg =</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;            unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> isHipPitchPositive = hipX.dot(unitUpperLeg.cross(legPlaneGlobalZ)) &gt;= 0;</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160; </div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;        hipPitch = (isHipPitchPositive ? 1 : -1)</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;                   * std::acos(std::max(std::min(legPlaneGlobalZ.dot(unitUpperLeg), Scalar(1)), Scalar(-1)));</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160; </div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        <span class="comment">// If leg is above waist then hipX is pointing in the wrong direction in the xy plane</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        hipXProjected.z()                         = 0;</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;        hipXProjected.normalize();</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> isHipYawPositive = hipXProjected.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY()) &gt;= 0;</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;        hipYaw                      = (isHipYawPositive ? 1 : -1)</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;                 * std::acos(std::max(std::min(hipXProjected.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX()), Scalar(1)),</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;                                      Scalar(-1)));</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160; </div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;        <span class="keywordflow">if</span> (limb == LimbID::LEFT_LEG) {</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hipRoll));</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hipPitch));</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));</div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));</div>
-<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        }</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        <span class="keywordflow">else</span> {</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;            positions.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee)));</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;            positions.push_back(</div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;                std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;            positions.push_back(</div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;                std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));</div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;        }</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;        <span class="keywordflow">return</span> positions;</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    }</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160; </div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        <span class="keyword">const</span> message::actuation::KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; leftTarget,</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; rightTarget) {</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keyword">auto</span> joints  = calculateLegJoints&lt;Scalar&gt;(model, leftTarget, LimbID::LEFT_LEG);</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        <span class="keyword">auto</span> joints2 = calculateLegJoints&lt;Scalar&gt;(model, rightTarget, LimbID::RIGHT_LEG);</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        joints.insert(joints.end(), joints2.begin(), joints2.end());</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;        <span class="keywordflow">return</span> joints;</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;    }</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160; </div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateHeadJoints(</div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt;&amp; cameraUnitVector) {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;        <span class="keywordflow">return</span> {std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())),</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;                std::make_pair(ServoID::HEAD_PITCH,</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;                               std::atan2(-cameraUnitVector.z(),</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                                                    + cameraUnitVector.y() * cameraUnitVector.y())))};</div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    }</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;}  <span class="comment">// namespace utility::actuation::kinematics</span></div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_ACTUATION_INVERSEKINEMATICS_HPP</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;utility/input/ServoID.hpp&quot;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/math/angle.hpp&quot;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/math/coordinates.hpp&quot;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">namespace </span>utility::actuation::kinematics {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a>;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">    /*! @brief Calculates the leg joints for a given input ankle position.</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">            The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">       of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">       to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">       left, z is normal to the plane of the foot</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">        @param target The target 4x4 basis matrix for the ankle</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment">        @param isLeft Request for left leg motors or right leg motors?</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">        @param RobotKinematicsModel The class containing the leg model of the robot.</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">    */</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keyword">const</span> message::actuation::KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; target_,</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">const</span> LimbID&amp; limb) {</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keyword">const</span> Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">const</span> Scalar DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keyword">const</span> Scalar HIP_OFFSET_X                    = model.leg.HIP_OFFSET_X;</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        <span class="keyword">const</span> Scalar UPPER_LEG_LENGTH                = model.leg.UPPER_LEG_LENGTH;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        <span class="keyword">const</span> Scalar LOWER_LEG_LENGTH                = model.leg.LOWER_LEG_LENGTH;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160; </div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; positions;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        Scalar hipYaw     = 0;</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        Scalar hipRoll    = 0;</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        Scalar hipPitch   = 0;</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        Scalar knee       = 0;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        Scalar anklePitch = 0;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        Scalar ankleRoll  = 0;</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="comment">// Correct for input referencing the bottom of the foot</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; target(target_);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        target = target.translate(Eigen::Matrix&lt;Scalar, 3, 1&gt;(0.0, 0.0, model.leg.FOOT_HEIGHT));</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        <span class="comment">// Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="comment">// TODO remove this. It was due to wrong convention use</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        Eigen::Matrix&lt;Scalar, 4, 4&gt; Tci;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        <span class="comment">// clang-format off</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;            Tci &lt;&lt; 0.0, 1.0,  0.0, 0.0,</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;                   1.0, 0.0,  0.0, 0.0,</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                   0.0, 0.0, -1.0, 0.0,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                   0.0, 0.0,  0.0, 1.0;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        <span class="comment">// clang-format on</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="comment">// Rotate input position from standard robot coords to foot coords</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; translation = (Tci * target.matrix().template rightCols&lt;1&gt;()).<span class="keyword">template</span> head&lt;3&gt;();</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        target                                  = Tci * target * Tci.transpose();</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        target.translation()                    = translation;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        <span class="comment">// swap legs if needed</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="keywordflow">if</span> (limb != LimbID::LEFT_LEG) {</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;            target(0, 1)             = -target(0, 1);</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;            target(0, 2)             = -target(0, 2);</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;            target(1, 0)             = -target(1, 0);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            target(2, 0)             = -target(2, 0);</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            target.translation().x() = -target.translation().x();</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        }</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; ankleX   = target.matrix().template leftCols&lt;1&gt;().template head&lt;3&gt;();</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; ankleY   = target.matrix().template middleCols&lt;1&gt;(1).template head&lt;3&gt;();</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; anklePos = target.translation();</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; hipOffset(LENGTH_BETWEEN_LEGS * 0.5,</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                                                    HIP_OFFSET_X,</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                                                    DISTANCE_FROM_BODY_TO_HIP_JOINT);</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; targetLeg = anklePos - hipOffset;</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        <span class="keyword">const</span> Scalar maxLegLength = UPPER_LEG_LENGTH + LOWER_LEG_LENGTH;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        Scalar length             = targetLeg.norm();</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        <span class="keywordflow">if</span> (length &gt; maxLegLength) {</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;            targetLeg = targetLeg * maxLegLength / length;</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;            length    = targetLeg.norm();</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        }</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keyword">const</span> Scalar sqrLength   = length * length;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="keyword">const</span> Scalar sqrUpperLeg = UPPER_LEG_LENGTH * UPPER_LEG_LENGTH;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keyword">const</span> Scalar sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160; </div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        <span class="keyword">const</span> Scalar cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        knee                 = std::acos(std::max(std::min(cosKnee, Scalar(1.0)), Scalar(-1.0)));</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        <span class="keyword">const</span> Scalar cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        <span class="keyword">const</span> Scalar lowerLeg    = std::acos(std::max(std::min(cosLowerLeg, Scalar(1.0)), Scalar(-1.0)));</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160; </div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        <span class="keyword">const</span> Scalar phi2 = std::acos(targetLeg.dot(ankleY) / length);</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160; </div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;        anklePitch = lowerLeg + phi2 - M_PI_2;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; unitTargetLeg = targetLeg / length;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160; </div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; hipX = ankleY.cross(unitTargetLeg);</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        Scalar hipXLength                = hipX.norm();</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        <span class="keywordflow">if</span> (hipXLength &gt; 0) {</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;            hipX /= hipXLength;</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        }</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;            NUClear::log&lt;NUClear::DEBUG&gt;(</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                <span class="stringliteral">&quot;InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at &quot;</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;                <span class="stringliteral">&quot;the moment. requested pose = \n&quot;</span>,</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                target.matrix());</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;            <span class="keywordflow">return</span> positions;</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;        }</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;        <span class="comment">// Will be unit as ankleY and hipX are normal and unit</span></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; legPlaneTangent = ankleY.cross(hipX);</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160; </div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;        ankleRoll = std::atan2(ankleX.dot(legPlaneTangent), ankleX.dot(hipX));</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160; </div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> isAnkleAboveWaist = unitTargetLeg.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ()) &lt; 0;</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160; </div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        <span class="keyword">const</span> Scalar cosZandHipX   = Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ().dot(hipX);</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> hipRollPositive = cosZandHipX &lt;= 0;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; legPlaneGlobalZ =</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;            (isAnkleAboveWaist ? -1 : 1) * (Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ() - (cosZandHipX * hipX));</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;        <span class="keyword">const</span> Scalar legPlaneGlobalZLength = legPlaneGlobalZ.norm();</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;        <span class="keywordflow">if</span> (legPlaneGlobalZLength &gt; 0) {</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;            legPlaneGlobalZ /= legPlaneGlobalZLength;</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;        }</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160; </div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;        <span class="keyword">const</span> Scalar cosHipRoll = legPlaneGlobalZ.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;        hipRoll = (hipRollPositive ? 1 : -1) * std::acos(std::max(std::min(cosHipRoll, Scalar(1)), Scalar(-1)));</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160; </div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;        <span class="keyword">const</span> Scalar phi4 = M_PI - knee - lowerLeg;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;        <span class="comment">// Superposition values:</span></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;        <span class="keyword">const</span> Scalar sinPIminusPhi2 = std::sin(M_PI - phi2);</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; unitUpperLeg =</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;            unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> isHipPitchPositive = hipX.dot(unitUpperLeg.cross(legPlaneGlobalZ)) &gt;= 0;</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;        hipPitch = (isHipPitchPositive ? 1 : -1)</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;                   * std::acos(std::max(std::min(legPlaneGlobalZ.dot(unitUpperLeg), Scalar(1)), Scalar(-1)));</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160; </div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;        <span class="comment">// If leg is above waist then hipX is pointing in the wrong direction in the xy plane</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;        hipXProjected.z()                         = 0;</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        hipXProjected.normalize();</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">bool</span> isHipYawPositive = hipXProjected.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY()) &gt;= 0;</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;        hipYaw                      = (isHipYawPositive ? 1 : -1)</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;                 * std::acos(std::max(std::min(hipXProjected.dot(Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX()), Scalar(1)),</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;                                      Scalar(-1)));</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160; </div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        <span class="keywordflow">if</span> (limb == LimbID::LEFT_LEG) {</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hipRoll));</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hipPitch));</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;            positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;        }</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;            positions.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee)));</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;            positions.push_back(</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;                std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;            positions.push_back(</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;                std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;        }</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160; </div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;        <span class="keywordflow">return</span> positions;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;    }</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160; </div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;        <span class="keyword">const</span> message::actuation::KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; leftTarget,</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; rightTarget) {</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        <span class="keyword">auto</span> joints  = calculateLegJoints&lt;Scalar&gt;(model, leftTarget, LimbID::LEFT_LEG);</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keyword">auto</span> joints2 = calculateLegJoints&lt;Scalar&gt;(model, rightTarget, LimbID::RIGHT_LEG);</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        joints.insert(joints.end(), joints2.begin(), joints2.end());</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        <span class="keywordflow">return</span> joints;</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;    }</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160; </div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateHeadJoints(</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;Scalar, 3, 1&gt;&amp; cameraUnitVector) {</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;        <span class="keywordflow">return</span> {std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())),</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;                std::make_pair(ServoID::HEAD_PITCH,</div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;                               std::atan2(-cameraUnitVector.z(),</div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;                                                    + cameraUnitVector.y() * cameraUnitVector.y())))};</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;    }</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;}  <span class="comment">// namespace utility::actuation::kinematics</span></div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160; </div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_ACTUATION_INVERSEKINEMATICS_HPP</span></div>
 <div class="ttc" id="astructutility_1_1input_1_1LimbID_html"><div class="ttname"><a href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a></div><div class="ttdef"><b>Definition:</b> LimbID.hpp:32</div></div>
 <div class="ttc" id="astructutility_1_1input_1_1ServoID_html"><div class="ttname"><a href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a></div><div class="ttdef"><b>Definition:</b> ServoID.hpp:28</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -406,7 +405,7 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_ebe4d294e48fe1f1cf6641e795602b38.html">actuation</a></li><li class="navelem"><b>InverseKinematics.hpp</b></li>
-    <li class="footer">Generated on Tue Jul 18 2023 23:37:50 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Jul 23 2023 03:00:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

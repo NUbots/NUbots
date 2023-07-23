@@ -1,0 +1,271 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::platform::HardwareSimulator Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1platform_1_1HardwareSimulator.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
+<a href="classmodule_1_1platform_1_1HardwareSimulator-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::platform::HardwareSimulator Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to the rest of the system.  
+ <a href="classmodule_1_1platform_1_1HardwareSimulator.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="HardwareSimulator_8hpp_source.html">HardwareSimulator.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Inheritance diagram for module::platform::HardwareSimulator:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1platform_1_1HardwareSimulator__inherit__graph.png" border="0" usemap="#amodule_1_1platform_1_1HardwareSimulator_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1platform_1_1HardwareSimulator_inherit__map" id="amodule_1_1platform_1_1HardwareSimulator_inherit__map">
+<area shape="rect" title="This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to..." alt="" coords="5,80,212,121"/>
+<area shape="rect" title=" " alt="" coords="41,5,176,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::platform::HardwareSimulator:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1platform_1_1HardwareSimulator__coll__graph.png" border="0" usemap="#amodule_1_1platform_1_1HardwareSimulator_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1platform_1_1HardwareSimulator_coll__map" id="amodule_1_1platform_1_1HardwareSimulator_coll__map">
+<area shape="rect" title="This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to..." alt="" coords="164,109,371,151"/>
+<area shape="rect" title=" " alt="" coords="5,13,140,39"/>
+<area shape="rect" href="structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html" title=" " alt="" coords="164,5,371,47"/>
+<area shape="rect" title=" " alt="" coords="395,13,497,39"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html">NoiseConfig</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a33cf0af89391473206d8ce2578b93d2d"><td class="memItemLeft" align="right" valign="top"><a id="a33cf0af89391473206d8ce2578b93d2d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1HardwareSimulator.html#a33cf0af89391473206d8ce2578b93d2d">HardwareSimulator</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+<tr class="memdesc:a33cf0af89391473206d8ce2578b93d2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">called by a Powerplant to construct this reactor <br /></td></tr>
+<tr class="separator:a33cf0af89391473206d8ce2578b93d2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:ac7e5d234451fccb135191f2ba9456f2e"><td class="memItemLeft" align="right" valign="top"><a id="ac7e5d234451fccb135191f2ba9456f2e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addNoise</b> (std::unique_ptr&lt; message::platform::RawSensors &gt; &amp;sensors) const</td></tr>
+<tr class="separator:ac7e5d234451fccb135191f2ba9456f2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa60ee1dbe6db2f42b9924a2ea6022651"><td class="memItemLeft" align="right" valign="top"><a id="aa60ee1dbe6db2f42b9924a2ea6022651"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setLeftFootDown</b> (bool down)</td></tr>
+<tr class="separator:aa60ee1dbe6db2f42b9924a2ea6022651"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec186f556a351f61e2cc273b468e53aa"><td class="memItemLeft" align="right" valign="top"><a id="aec186f556a351f61e2cc273b468e53aa"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setRightFootDown</b> (bool down)</td></tr>
+<tr class="separator:aec186f556a351f61e2cc273b468e53aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ac2cdbab011d114817ffa3e145ac9825a"><td class="memItemLeft" align="right" valign="top"><a id="ac2cdbab011d114817ffa3e145ac9825a"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>bodyTilt</b> = 0</td></tr>
+<tr class="separator:ac2cdbab011d114817ffa3e145ac9825a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dd5b1882e7ecb7a4bc2b1062b0161a0"><td class="memItemLeft" align="right" valign="top"><a id="a7dd5b1882e7ecb7a4bc2b1062b0161a0"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>imu_drift_rate</b> = 0.0f</td></tr>
+<tr class="separator:a7dd5b1882e7ecb7a4bc2b1062b0161a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30848646e41af0d44cbdee2adb26d200"><td class="memItemLeft" align="right" valign="top"><a id="a30848646e41af0d44cbdee2adb26d200"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><b>integrated_gyroscope</b> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="separator:a30848646e41af0d44cbdee2adb26d200"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a087ece300ab68ac34c494a869f3365ec"><td class="memItemLeft" align="right" valign="top"><a id="a087ece300ab68ac34c494a869f3365ec"></a>
+struct <a class="el" href="structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html">module::platform::HardwareSimulator::NoiseConfig</a>&#160;</td><td class="memItemRight" valign="bottom"><b>noise</b></td></tr>
+<tr class="separator:a087ece300ab68ac34c494a869f3365ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbd63a4c90c3b560815d3dc4932ff23d"><td class="memItemLeft" align="right" valign="top"><a id="afbd63a4c90c3b560815d3dc4932ff23d"></a>
+message::platform::RawSensors&#160;</td><td class="memItemRight" valign="bottom"><b>sensors</b></td></tr>
+<tr class="separator:afbd63a4c90c3b560815d3dc4932ff23d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:ae4049f7d5ef1b1d00d86a5d2bd575c7a"><td class="memItemLeft" align="right" valign="top"><a id="ae4049f7d5ef1b1d00d86a5d2bd575c7a"></a>
+static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>UPDATE_FREQUENCY</b> = 90</td></tr>
+<tr class="separator:ae4049f7d5ef1b1d00d86a5d2bd575c7a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to the rest of the system. </p>
+<dl class="section author"><dt>Author</dt><dd>Jade Fountain </dd></dl>
+</div><hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/platform/HardwareSimulator/src/<a class="el" href="HardwareSimulator_8hpp_source.html">HardwareSimulator.hpp</a></li>
+<li>module/platform/HardwareSimulator/src/HardwareSimulator.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1HardwareSimulator.html">HardwareSimulator</a></li>
+    <li class="footer">Generated on Sun Jul 23 2023 03:00:21 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

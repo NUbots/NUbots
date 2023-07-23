@@ -1,8 +1,0 @@
-<map id="CM740::BulkReadResults" name="CM740::BulkReadResults">
-<area shape="rect" id="node1" title="This represents the bulk read results we get when we do one." alt="" coords="212,184,397,211"/>
-<area shape="rect" id="node2" href="$structCM740_1_1Types_1_1ServoData.html" title="This represents the data that comes from one of the Servo motors." alt="" coords="5,95,193,121"/>
-<area shape="rect" id="node3" href="$structCM740_1_1Types_1_1FSRData.html" title="This represents data that comes from the Force Sensitive Resistors." alt="" coords="217,95,392,121"/>
-<area shape="rect" id="node4" href="$structCM740_1_1Types_1_1CM740Data.html" title="This represents data that comes from the CM740." alt="" coords="416,95,612,121"/>
-<area shape="rect" id="node5" href="$structCM740_1_1Types_1_1Accelerometer.html" title="This represents the raw accelerometer values from the CM740." alt="" coords="303,5,517,32"/>
-<area shape="rect" id="node6" href="$structCM740_1_1Types_1_1Gyro.html" title="This represents the raw gyro values from the CM740 (they are read from the board in ZYX)" alt="" coords="541,5,692,32"/>
-</map>

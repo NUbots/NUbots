@@ -1,5 +1,0 @@
-<map id="CM740::Types::CM740Data" name="CM740::Types::CM740Data">
-<area shape="rect" id="node1" title="This represents data that comes from the CM740." alt="" coords="117,95,313,121"/>
-<area shape="rect" id="node2" href="$structCM740_1_1Types_1_1Accelerometer.html" title="This represents the raw accelerometer values from the CM740." alt="" coords="5,5,220,32"/>
-<area shape="rect" id="node3" href="$structCM740_1_1Types_1_1Gyro.html" title="This represents the raw gyro values from the CM740 (they are read from the board in ZYX)" alt="" coords="244,5,395,32"/>
-</map>

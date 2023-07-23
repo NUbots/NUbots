@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: module/platform/cm740/HardwareSimulator/src/HardwareSimulator.hpp Source File</title>
+    <title>NUbots: module/platform/HardwareSimulator/src/HardwareSimulator.hpp Source File</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -198,7 +198,7 @@ $(document).ready(function(){initNavTree('HardwareSimulator_8hpp_source.html',''
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &quot;message/platform/RawSensors.hpp&quot;</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">namespace </span>module::platform::cm740 {</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="keyword">namespace </span>module::platform {</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment">    /**</span></div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment">     * This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to</span></div>
@@ -206,15 +206,15 @@ $(document).ready(function(){initNavTree('HardwareSimulator_8hpp_source.html',''
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment">     *</span></div>
 <div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="comment">     * @author Jade Fountain</span></div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html">   37</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html">HardwareSimulator</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="classmodule_1_1platform_1_1HardwareSimulator.html">   37</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1platform_1_1HardwareSimulator.html">HardwareSimulator</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keyword">private</span>:</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        message::platform::RawSensors sensors;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keywordtype">float</span> imu_drift_rate                     = 0.0f;</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keyword">static</span> constexpr <span class="keywordtype">size_t</span> UPDATE_FREQUENCY = 90;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        <span class="keywordtype">void</span> addNoise(std::unique_ptr&lt;message::platform::RawSensors&gt;&amp; sensors) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="structmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig.html">   44</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig.html">NoiseConfig</a> {</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            <a class="code" href="structmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig.html">NoiseConfig</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html">   44</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html">NoiseConfig</a> {</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            <a class="code" href="structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html">NoiseConfig</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            Eigen::Vector3f accelerometer{0.001, 0.001, 0.001};</div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            Eigen::Vector3f gyroscope{0.001, 0.001, 0.001};</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        } noise;</div>
@@ -225,20 +225,20 @@ $(document).ready(function(){initNavTree('HardwareSimulator_8hpp_source.html',''
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">        /// @brief called by a Powerplant to construct this reactor</span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html#a811732169a17eadbea1a17109f4037ed">HardwareSimulator</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1platform_1_1HardwareSimulator.html#a33cf0af89391473206d8ce2578b93d2d">HardwareSimulator</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    };</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;}  <span class="comment">// namespace module::platform::cm740</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;}  <span class="comment">// namespace module::platform</span></div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="aclassmodule_1_1platform_1_1cm740_1_1HardwareSimulator_html"><div class="ttname"><a href="classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html">module::platform::cm740::HardwareSimulator</a></div><div class="ttdoc">This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to...</div><div class="ttdef"><b>Definition:</b> HardwareSimulator.hpp:37</div></div>
-<div class="ttc" id="aclassmodule_1_1platform_1_1cm740_1_1HardwareSimulator_html_a811732169a17eadbea1a17109f4037ed"><div class="ttname"><a href="classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html#a811732169a17eadbea1a17109f4037ed">module::platform::cm740::HardwareSimulator::HardwareSimulator</a></div><div class="ttdeci">HardwareSimulator(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">called by a Powerplant to construct this reactor</div><div class="ttdef"><b>Definition:</b> HardwareSimulator.cpp:51</div></div>
-<div class="ttc" id="astructmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig_html"><div class="ttname"><a href="structmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig.html">module::platform::cm740::HardwareSimulator::NoiseConfig</a></div><div class="ttdef"><b>Definition:</b> HardwareSimulator.hpp:44</div></div>
+<div class="ttc" id="aclassmodule_1_1platform_1_1HardwareSimulator_html"><div class="ttname"><a href="classmodule_1_1platform_1_1HardwareSimulator.html">module::platform::HardwareSimulator</a></div><div class="ttdoc">This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to...</div><div class="ttdef"><b>Definition:</b> HardwareSimulator.hpp:37</div></div>
+<div class="ttc" id="aclassmodule_1_1platform_1_1HardwareSimulator_html_a33cf0af89391473206d8ce2578b93d2d"><div class="ttname"><a href="classmodule_1_1platform_1_1HardwareSimulator.html#a33cf0af89391473206d8ce2578b93d2d">module::platform::HardwareSimulator::HardwareSimulator</a></div><div class="ttdeci">HardwareSimulator(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">called by a Powerplant to construct this reactor</div><div class="ttdef"><b>Definition:</b> HardwareSimulator.cpp:52</div></div>
+<div class="ttc" id="astructmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig_html"><div class="ttname"><a href="structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html">module::platform::HardwareSimulator::NoiseConfig</a></div><div class="ttdef"><b>Definition:</b> HardwareSimulator.hpp:44</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_ed63217b7bb49170c8e57a244b73c2e6.html">platform</a></li><li class="navelem"><a class="el" href="dir_c9e73b35311fa466f58911a42b317cb4.html">cm740</a></li><li class="navelem"><a class="el" href="dir_fb5442aa9c6f631ff6cb89d4118ac1a6.html">HardwareSimulator</a></li><li class="navelem"><a class="el" href="dir_c4d11d4e2b50e7b667099e0f30493323.html">src</a></li><li class="navelem"><b>HardwareSimulator.hpp</b></li>
-    <li class="footer">Generated on Tue Jul 18 2023 23:37:50 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_ed63217b7bb49170c8e57a244b73c2e6.html">platform</a></li><li class="navelem"><a class="el" href="dir_210ea719dd3f11fbe64a9ee11c245579.html">HardwareSimulator</a></li><li class="navelem"><a class="el" href="dir_e2a35d500c273b5c548a8727ed4cc3ea.html">src</a></li><li class="navelem"><b>HardwareSimulator.hpp</b></li>
+    <li class="footer">Generated on Sun Jul 23 2023 03:00:20 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

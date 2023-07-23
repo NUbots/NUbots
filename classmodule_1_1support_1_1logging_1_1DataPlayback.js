@@ -10,7 +10,7 @@ var classmodule_1_1support_1_1logging_1_1DataPlayback =
     [ "first_timecode", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a9e126a889034fc2b4b3739a8fac96d8e", null ],
     [ "input_file", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a07cc49737c4046d6574234f7495d4224", null ],
     [ "last_emit_time", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a5e0b3acfa6c101fef6d3ce079ae6c9ad", null ],
-    [ "on_end", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a7680fce2104dfe98efe7ded69a9fe910", null ],
+    [ "on_end", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#ae5c4d819d12a50f8ec1ce7705833d321", null ],
     [ "playback_handle", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a7bbf2cd4894e4fd9f569ebf07139a1d5", null ],
     [ "players", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a315581fe1c78f26a8704dbf21b5837c5", null ],
     [ "start_time", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a8f8d5fb502e9dfeb749e02fb0b98924f", null ]

@@ -4,7 +4,7 @@ var classmodule_1_1skill_1_1QuinticWalk =
     [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html#a5e403379da78245a6af52d7626c4fbe3", null ],
     [ "calculate_joint_goals", "classmodule_1_1skill_1_1QuinticWalk.html#add5a62ac7c0f22006bb3305c619531cc", null ],
     [ "get_time_delta", "classmodule_1_1skill_1_1QuinticWalk.html#a29da0cf89065e78629f6db44534a7f02", null ],
-    [ "load_quintic_walk", "classmodule_1_1skill_1_1QuinticWalk.html#a91ccf68e31bfab8e300f2570475f4cab", null ],
+    [ "load_quintic_walk", "classmodule_1_1skill_1_1QuinticWalk.html#ac18654b75a1933b92dd0c67a8130de97", null ],
     [ "current_cfg", "classmodule_1_1skill_1_1QuinticWalk.html#a8bcb1808d5007e0fd9733cace2dca523", null ],
     [ "current_orders", "classmodule_1_1skill_1_1QuinticWalk.html#acdc65aba78326fa0043ab896c4b74aea", null ],
     [ "first_cfg", "classmodule_1_1skill_1_1QuinticWalk.html#aac93a3b146aebc490ee6e79732d9f2a7", null ],

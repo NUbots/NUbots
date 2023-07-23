@@ -1,48 +1,5 @@
 var namespaces_dup =
 [
-    [ "CM740", null, [
-      [ "ID", "namespaceCM740_1_1ID.html", [
-        [ "ID", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0e", [
-          [ "CM740", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea56addfde9176598043e8ed59a22ec120", null ],
-          [ "R_SHOULDER_PITCH", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eaffef632a7f253d21ff92ecad513eff40", null ],
-          [ "L_SHOULDER_PITCH", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eafa54b52229a4c96aee2e29d54fc0de30", null ],
-          [ "R_SHOULDER_ROLL", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea9bdcd32106593fb15c7a045e2847e20c", null ],
-          [ "L_SHOULDER_ROLL", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea34e9af2293c18d6907abbb995444f0f4", null ],
-          [ "R_ELBOW", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea7290b928cb0551e427fbc9e9e47c2f4c", null ],
-          [ "L_ELBOW", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eafb7215bb1646ebb223706a66f1c76af0", null ],
-          [ "R_HIP_YAW", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea01816368680a5e69bf111ad56458b642", null ],
-          [ "L_HIP_YAW", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea4d067910f6dbeb3fe424812db679e73e", null ],
-          [ "R_HIP_ROLL", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea258fa674a65c2a3fb7ffa70bef1bfd97", null ],
-          [ "L_HIP_ROLL", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea21f1f31b1a3e28d750d8e2d8cf488881", null ],
-          [ "R_HIP_PITCH", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea74806fb66f4c5fd52093dc398d17ced2", null ],
-          [ "L_HIP_PITCH", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea888f4db3db5d4629300f926f22b6add8", null ],
-          [ "R_KNEE", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eaacffb32cce452a61e034ec58f08a807e", null ],
-          [ "L_KNEE", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea17a94d1077112e3be1e6d8e7876d2838", null ],
-          [ "R_ANKLE_PITCH", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eaef51a498c2498930498c52a6483e401d", null ],
-          [ "L_ANKLE_PITCH", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eac504e909867d54017447e20c25574867", null ],
-          [ "R_ANKLE_ROLL", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea3dc655c5ae87a122a57ba21cb995dbe9", null ],
-          [ "L_ANKLE_ROLL", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eafcdd7cb5f4d79162793e1e9a9af9d595", null ],
-          [ "HEAD_YAW", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ead96699130e0c383f71f911e89d540a9c", null ],
-          [ "HEAD_PITCH", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea796ab84c632de120c3d2b701950acc26", null ],
-          [ "R_FSR", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea8c09ebcfccad3eaa69d5549928f7d257", null ],
-          [ "L_FSR", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0eaa9fd1897de8fbbf9ccef64b6f624cb92", null ],
-          [ "BROADCAST", "namespaceCM740_1_1ID.html#a0886d73507dd578f2028421d76692d0ea8e0bec87fd3d68faed121ab4be3333ca", null ]
-        ] ]
-      ] ],
-      [ "Types", "namespaceCM740_1_1Types.html", "namespaceCM740_1_1Types" ],
-      [ "BulkReadResults", "structCM740_1_1BulkReadResults.html", "structCM740_1_1BulkReadResults" ],
-      [ "CM740", "classCM740_1_1CM740.html", "classCM740_1_1CM740" ],
-      [ "CM740Data", "classCM740_1_1CM740Data.html", "classCM740_1_1CM740Data" ],
-      [ "CM740Interface", "classCM740_1_1CM740Interface.html", "classCM740_1_1CM740Interface" ],
-      [ "CommandResult", "structCM740_1_1CommandResult.html", "structCM740_1_1CommandResult" ],
-      [ "FSR", "classCM740_1_1FSR.html", "classCM740_1_1FSR" ],
-      [ "Header", "structCM740_1_1Header.html", "structCM740_1_1Header" ],
-      [ "Servo", "classCM740_1_1Servo.html", "classCM740_1_1Servo" ],
-      [ "UART", "classCM740_1_1UART.html", "classCM740_1_1UART" ],
-      [ "ServoID", "CM740_8cpp.html#aa4a6391af58f24ca8332ed4e2a2f22e3", null ],
-      [ "calculateChecksum", "UART_8cpp.html#a87051e79be4cf051a9481ef3e881c9be", null ],
-      [ "calculateChecksum", "UART_8cpp.html#a92808ba5e8f839a4d595ad774f568e35", null ]
-    ] ],
     [ "dynamixel", null, [
       [ "v2", null, [
         [ "ActionCommand", "structdynamixel_1_1v2_1_1ActionCommand.html", "structdynamixel_1_1v2_1_1ActionCommand" ],
@@ -84,7 +41,7 @@ var namespaces_dup =
           [ "BULK_READ", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea3308f69d6704569138f46a23d2de21fa", null ],
           [ "BULK_WRITE", "Dynamixel_8hpp.html#a25d7a74b906478a8e6d2f7e22fcada6ea5b92ca22c3ff8b084e79d6f3c9e48a16", null ]
         ] ],
-        [ "__attribute__", "module_2platform_2OpenCR_2HardwareIO_2src_2dynamixel_2v2_2Action_8hpp.html#a9db884af178deddd2b44de7ab12d738b", null ],
+        [ "__attribute__", "Action_8hpp.html#a9db884af178deddd2b44de7ab12d738b", null ],
         [ "calculate_checksum", "Dynamixel_8hpp.html#a99e3fa93953f0ecb734e831ccb18f0f3", null ],
         [ "calculate_checksum", "Dynamixel_8hpp.html#adc31a80bc5bc9881bae3297d3d18b0f8", null ]
       ] ]
@@ -111,17 +68,11 @@ var namespaces_dup =
         [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ]
       ] ],
       [ "Configuration", "structextension_1_1Configuration.html", "structextension_1_1Configuration" ],
-      [ "ExecuteScript", "structextension_1_1ExecuteScript.html", "structextension_1_1ExecuteScript" ],
-      [ "ExecuteScriptByName", "structextension_1_1ExecuteScriptByName.html", "structextension_1_1ExecuteScriptByName" ],
       [ "FileWatch", "structextension_1_1FileWatch.html", "structextension_1_1FileWatch" ],
       [ "FileWatcherReady", "structextension_1_1FileWatcherReady.html", null ],
-      [ "FileWatchRequest", "structextension_1_1FileWatchRequest.html", "structextension_1_1FileWatchRequest" ],
-      [ "Script", "structextension_1_1Script.html", "structextension_1_1Script" ],
-      [ "ServoID", "extension_2Script_8hpp.html#a4aa852c55712c180ac0fbfbd21460690", null ],
-      [ "operator+", "extension_2Script_8hpp.html#a16765e7ef6a14c78ee0b454ddd05be0f", null ]
+      [ "FileWatchRequest", "structextension_1_1FileWatchRequest.html", "structextension_1_1FileWatchRequest" ]
     ] ],
     [ "fmt", null, [
-      [ "formatter< Eigen::Matrix4d >", "structfmt_1_1formatter_3_01Eigen_1_1Matrix4d_01_4.html", null ],
       [ "formatter< Eigen::Transpose< Derived > >", "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html", null ]
     ] ],
     [ "module", null, [
@@ -130,52 +81,6 @@ var namespaces_dup =
         [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
         [ "KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", "classmodule_1_1actuation_1_1KinematicsConfiguration" ],
         [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
-      ] ],
-      [ "behaviour", null, [
-        [ "skills", null, [
-          [ "DirectWalkController", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController" ],
-          [ "ExecuteKick", "structmodule_1_1behaviour_1_1skills_1_1ExecuteKick.html", null ],
-          [ "ExecuteNod", "structmodule_1_1behaviour_1_1skills_1_1ExecuteNod.html", null ],
-          [ "ExecuteStand", "structmodule_1_1behaviour_1_1skills_1_1ExecuteStand.html", null ],
-          [ "Falling", "structmodule_1_1behaviour_1_1skills_1_1Falling.html", null ],
-          [ "FallingRelax", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax.html", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax" ],
-          [ "FinishKick", "structmodule_1_1behaviour_1_1skills_1_1FinishKick.html", null ],
-          [ "Getup", "classmodule_1_1behaviour_1_1skills_1_1Getup.html", "classmodule_1_1behaviour_1_1skills_1_1Getup" ],
-          [ "KickScript", "classmodule_1_1behaviour_1_1skills_1_1KickScript.html", "classmodule_1_1behaviour_1_1skills_1_1KickScript" ],
-          [ "KillFalling", "structmodule_1_1behaviour_1_1skills_1_1KillFalling.html", null ],
-          [ "Nod", "classmodule_1_1behaviour_1_1skills_1_1Nod.html", "classmodule_1_1behaviour_1_1skills_1_1Nod" ],
-          [ "Stand", "classmodule_1_1behaviour_1_1skills_1_1Stand.html", "classmodule_1_1behaviour_1_1skills_1_1Stand" ],
-          [ "LimbID", "DirectWalkController_8cpp.html#a4b39d1fbd3ce1cdf8d80f5e8f10e7710", null ],
-          [ "ServoID", "DirectWalkController_8cpp.html#a3e2e3b6303ff82786fac995c78cd1a9e", null ]
-        ] ],
-        [ "strategy", null, [
-          [ "KeyboardWalk", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk" ],
-          [ "PS3Walk", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk" ],
-          [ "LimbID", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8cpp.html#a1f4a6735ee336fba86afb929b7af0934", null ],
-          [ "LogColours", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9", [
-            [ "TRACE_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a03edadf0bc773fb94b4f5301fb3586b6", null ],
-            [ "DEBUG_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aabaeda8c8c137f659606924c7e40f2d5", null ],
-            [ "INFO_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a6923640867193c8fae67219aba2791d6", null ],
-            [ "WARN_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aa5a10ff337eea6adaa1db6393b3e3b26", null ],
-            [ "ERROR_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aa8d1b69a587431c229b8ccdabd630a3f", null ],
-            [ "FATAL_COLOURS", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a2b531f77b861aff440ebbbe673eb4ad4", null ]
-          ] ],
-          [ "quit", "behaviour_2strategy_2KeyboardWalk_2src_2KeyboardWalk_8cpp.html#af762514b48cdf7039e58a0ac8896f40f", null ]
-        ] ],
-        [ "tools", null, [
-          [ "ExecuteNextScript", "structmodule_1_1behaviour_1_1tools_1_1ExecuteNextScript.html", null ],
-          [ "LockServo", "structmodule_1_1behaviour_1_1tools_1_1LockServo.html", null ],
-          [ "ScriptRunner", "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html", "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner" ],
-          [ "ScriptTuner", "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html", "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner" ],
-          [ "SpeakTest", "classmodule_1_1behaviour_1_1tools_1_1SpeakTest.html", "classmodule_1_1behaviour_1_1tools_1_1SpeakTest" ],
-          [ "LimbID", "behaviour_2tools_2ScriptRunner_2src_2ScriptRunner_8cpp.html#ae48948b22587fc92330708238823b701", null ],
-          [ "ServoID", "behaviour_2tools_2ScriptRunner_2src_2ScriptRunner_8cpp.html#a1dc0a64fc9ccd09606e8468329b82216", null ]
-        ] ],
-        [ "Controller", "classmodule_1_1behaviour_1_1Controller.html", "classmodule_1_1behaviour_1_1Controller" ],
-        [ "Request", "structmodule_1_1behaviour_1_1Request.html", "structmodule_1_1behaviour_1_1Request" ],
-        [ "RequestItem", "structmodule_1_1behaviour_1_1RequestItem.html", "structmodule_1_1behaviour_1_1RequestItem" ],
-        [ "iterators", "Controller_8cpp.html#a1ea699de55c563a7d30b8badc54e1d09", null ],
-        [ "hasLimbs", "Controller_8cpp.html#a05990f6e6595b71ed659909fe9e98db2", null ]
       ] ],
       [ "extension", null, [
         [ "component", null, [
@@ -355,32 +260,23 @@ var namespaces_dup =
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
         [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
-        [ "OdometryLocalisation", "classmodule_1_1localisation_1_1OdometryLocalisation.html", "classmodule_1_1localisation_1_1OdometryLocalisation" ],
         [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ],
-        [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
-        [ "RobotParticleLocalisation", "classmodule_1_1localisation_1_1RobotParticleLocalisation.html", "classmodule_1_1localisation_1_1RobotParticleLocalisation" ],
         [ "Ball", "BallLocalisation_8cpp.html#a166ffc812dedb579bbb1dcbf0c921d8a", null ],
         [ "VisionBall", "BallLocalisation_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
-        [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ],
-        [ "VisionGoal", "RobotParticleLocalisation_8cpp.html#a555e4584b906d95add31b8b4f7e0b068", null ],
-        [ "VisionGoals", "RobotParticleLocalisation_8cpp.html#aad0bb3dc95ad54474ec44e2ee759aa03", null ]
+        [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ]
       ] ],
       [ "motion", null, [
         [ "Animator", "classmodule_1_1motion_1_1Animator.html", "classmodule_1_1motion_1_1Animator" ],
-        [ "ExecuteHeadController", "structmodule_1_1motion_1_1ExecuteHeadController.html", null ],
         [ "ExecuteKick", "structmodule_1_1motion_1_1ExecuteKick.html", null ],
         [ "FinishKick", "structmodule_1_1motion_1_1FinishKick.html", null ],
-        [ "HeadController", "classmodule_1_1motion_1_1HeadController.html", "classmodule_1_1motion_1_1HeadController" ],
         [ "IKKick", "classmodule_1_1motion_1_1IKKick.html", "classmodule_1_1motion_1_1IKKick" ],
         [ "KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", "classmodule_1_1motion_1_1KickBalancer" ],
         [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
-        [ "QuinticWalk", "classmodule_1_1motion_1_1QuinticWalk.html", "classmodule_1_1motion_1_1QuinticWalk" ],
-        [ "ScriptEngine", "classmodule_1_1motion_1_1ScriptEngine.html", "classmodule_1_1motion_1_1ScriptEngine" ],
         [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
         [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ],
         [ "KickType", "IKKick_8cpp.html#ab3ad9a0901a7cc87c7cccec9aab52bf3", null ],
-        [ "LimbID", "HeadController_8cpp.html#a61a4760eed3f929d1ae7176e5dd793dc", null ],
-        [ "ServoID", "HeadController_8cpp.html#ab2b0df2c19654efc0988e3603f0aa227", null ],
+        [ "LimbID", "IKKick_8cpp.html#a61a4760eed3f929d1ae7176e5dd793dc", null ],
+        [ "ServoID", "IKKick_8cpp.html#ab2b0df2c19654efc0988e3603f0aa227", null ],
         [ "MotionStage", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216", [
           [ "READY", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a1593adc78b7217602beca561b59cd68c", null ],
           [ "RUNNING", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a8df1ef7d10b5c28ebb2fb0ed83973980", null ],
@@ -561,7 +457,6 @@ var namespaces_dup =
           [ "Compressor", "classmodule_1_1output_1_1compressor_1_1Compressor.html", "classmodule_1_1output_1_1compressor_1_1Compressor" ],
           [ "CompressorFactory", "classmodule_1_1output_1_1compressor_1_1CompressorFactory.html", "classmodule_1_1output_1_1compressor_1_1CompressorFactory" ]
         ] ],
-        [ "eSpeak", "classmodule_1_1output_1_1eSpeak.html", "classmodule_1_1output_1_1eSpeak" ],
         [ "ImageCompressor", "classmodule_1_1output_1_1ImageCompressor.html", "classmodule_1_1output_1_1ImageCompressor" ],
         [ "Overview", "classmodule_1_1output_1_1Overview.html", "classmodule_1_1output_1_1Overview" ],
         [ "LocalisationBall", "Overview_8cpp.html#a8408302fa5270d6a27f5b7f6492a28be", null ],
@@ -584,39 +479,33 @@ var namespaces_dup =
         [ "smooth", "FallingRelaxPlanner_8cpp.html#a4c6f0a0466f10006eeb81ee3a9759002", null ]
       ] ],
       [ "platform", null, [
-        [ "cm740", null, [
-          [ "Convert", "structmodule_1_1platform_1_1cm740_1_1Convert.html", "structmodule_1_1platform_1_1cm740_1_1Convert" ],
-          [ "HardwareIO", "classmodule_1_1platform_1_1cm740_1_1HardwareIO.html", "classmodule_1_1platform_1_1cm740_1_1HardwareIO" ],
-          [ "HardwareSimulator", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator" ],
-          [ "centered_noise", "HardwareSimulator_8cpp.html#a5ba92877e707edd3336893ca27a73698", null ]
-        ] ],
         [ "OpenCR", null, [
           [ "convert", null, [
-            [ "acc", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#af1f2486f3da6dd44e291db3e305b8d49", null ],
-            [ "acc", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a9aacef8de84208ee24b641cbdc74b8fd", null ],
-            [ "current", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a84708b45bbfccb2e865fee093cc85eb9", null ],
-            [ "current", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a8b36ea35d38b70cb77fc415587febd12", null ],
-            [ "d_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#ad339f686f999c1f5f9ce5b0d2701ec53", null ],
-            [ "d_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a059350cf9bbf73ee78f375e5f5bb88a0", null ],
-            [ "ff_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a4bda00f24f37354215fd5b8e478850b2", null ],
-            [ "ff_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a2c9362fa08bfb9eb100f3b8727385870", null ],
-            [ "gyro", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a71fcae94012cd821b7a19fdd97e96e51", null ],
-            [ "gyro", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a3e755bd4e1b1752c4ff3acfdd83092b1", null ],
-            [ "i_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a6a1cff31fbe9da7dafd52549ca49c94d", null ],
-            [ "i_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a776367b1bf01c5bc3fdf79aa9974cd6a", null ],
-            [ "p_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a987bf2406856cff58710fb0484af2152", null ],
-            [ "p_gain", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#ad64e075a2d608b04877d3876c9d3f653", null ],
-            [ "position", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a331b52b30254067c1c84ca82e749ec91", null ],
-            [ "position", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a0fd7f0f4d115e94e2745564e448a8d30", null ],
-            [ "profile_velocity", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a2c259c120f23fcedb4fe385ba98c4370", null ],
-            [ "PWM", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a0df1198182ac8a145b01ffc6137ef38f", null ],
-            [ "temperature", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a07395c0ca1da53593af92347d292c1d3", null ],
-            [ "temperature", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a928f5adad1d849326afe9047e2d5d9d6", null ],
-            [ "velocity", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a1f675769f291641a705a3cfa492989dd", null ],
-            [ "velocity", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a4f6ed000aeda09aaee11f6d01b83d564", null ],
-            [ "voltage", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a0e7a9ea085a0ae649665ea5b036a4f34", null ],
-            [ "voltage", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#a74ca9dd073087942e2c2b417587dd6ed", null ],
-            [ "voltage", "OpenCR_2HardwareIO_2src_2Convert_8cpp.html#ad77bbb436b1925610a42cd3406c66f0b", null ]
+            [ "acc", "Convert_8cpp.html#af1f2486f3da6dd44e291db3e305b8d49", null ],
+            [ "acc", "Convert_8cpp.html#a9aacef8de84208ee24b641cbdc74b8fd", null ],
+            [ "current", "Convert_8cpp.html#a84708b45bbfccb2e865fee093cc85eb9", null ],
+            [ "current", "Convert_8cpp.html#a8b36ea35d38b70cb77fc415587febd12", null ],
+            [ "d_gain", "Convert_8cpp.html#ad339f686f999c1f5f9ce5b0d2701ec53", null ],
+            [ "d_gain", "Convert_8cpp.html#a059350cf9bbf73ee78f375e5f5bb88a0", null ],
+            [ "ff_gain", "Convert_8cpp.html#a4bda00f24f37354215fd5b8e478850b2", null ],
+            [ "ff_gain", "Convert_8cpp.html#a2c9362fa08bfb9eb100f3b8727385870", null ],
+            [ "gyro", "Convert_8cpp.html#a71fcae94012cd821b7a19fdd97e96e51", null ],
+            [ "gyro", "Convert_8cpp.html#a3e755bd4e1b1752c4ff3acfdd83092b1", null ],
+            [ "i_gain", "Convert_8cpp.html#a6a1cff31fbe9da7dafd52549ca49c94d", null ],
+            [ "i_gain", "Convert_8cpp.html#a776367b1bf01c5bc3fdf79aa9974cd6a", null ],
+            [ "p_gain", "Convert_8cpp.html#a987bf2406856cff58710fb0484af2152", null ],
+            [ "p_gain", "Convert_8cpp.html#ad64e075a2d608b04877d3876c9d3f653", null ],
+            [ "position", "Convert_8cpp.html#a331b52b30254067c1c84ca82e749ec91", null ],
+            [ "position", "Convert_8cpp.html#a0fd7f0f4d115e94e2745564e448a8d30", null ],
+            [ "profile_velocity", "Convert_8cpp.html#a2c259c120f23fcedb4fe385ba98c4370", null ],
+            [ "PWM", "Convert_8cpp.html#a0df1198182ac8a145b01ffc6137ef38f", null ],
+            [ "temperature", "Convert_8cpp.html#a07395c0ca1da53593af92347d292c1d3", null ],
+            [ "temperature", "Convert_8cpp.html#a928f5adad1d849326afe9047e2d5d9d6", null ],
+            [ "velocity", "Convert_8cpp.html#a1f675769f291641a705a3cfa492989dd", null ],
+            [ "velocity", "Convert_8cpp.html#a4f6ed000aeda09aaee11f6d01b83d564", null ],
+            [ "voltage", "Convert_8cpp.html#a0e7a9ea085a0ae649665ea5b036a4f34", null ],
+            [ "voltage", "Convert_8cpp.html#a74ca9dd073087942e2c2b417587dd6ed", null ],
+            [ "voltage", "Convert_8cpp.html#ad77bbb436b1925610a42cd3406c66f0b", null ]
           ] ],
           [ "DynamixelDevice", "classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html", null ],
           [ "DynamixelServo", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo" ],
@@ -652,7 +541,9 @@ var namespaces_dup =
           [ "__attribute__", "NUgus_8hpp.html#ae7c66eb22e53a1985a8f1c0980ee41ce", null ],
           [ "__attribute__", "NUgus_8hpp.html#af1e3b905f110d64f603a22e62320282f", null ]
         ] ],
+        [ "HardwareSimulator", "classmodule_1_1platform_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1HardwareSimulator" ],
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ],
+        [ "centered_noise", "HardwareSimulator_8cpp.html#a2a90ad87152ba961b598132ed6dcf323", null ],
         [ "create_sensor_time_steps", "Webots_8cpp.html#aa06422bdf1cbba3ecfa22842768ccae4", null ],
         [ "translate_id_servo", "Webots_8cpp.html#a81eded8b344d72482e2c16f89c1d4a34", null ],
         [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ]
@@ -662,6 +553,7 @@ var namespaces_dup =
         [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
         [ "LockServo", "structmodule_1_1purpose_1_1LockServo.html", null ],
+        [ "PS3Walk", "classmodule_1_1purpose_1_1PS3Walk.html", "classmodule_1_1purpose_1_1PS3Walk" ],
         [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
         [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
@@ -670,19 +562,19 @@ var namespaces_dup =
         [ "DefenderTask", "Defender_8cpp.html#a9e1ada0b8d36136bf59c5c65d675c46c", null ],
         [ "GameMode", "Defender_8cpp.html#a2a5932ecf6b4477c7ba24d1de6dafb43", null ],
         [ "GoalieTask", "Goalie_8cpp.html#a0ad4596d701cecf7cd4cc55d022ed6ad", null ],
-        [ "LimbID", "purpose_2ScriptTuner_2src_2ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268", null ],
+        [ "LimbID", "ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268", null ],
         [ "Penalisation", "Soccer_8cpp.html#adb9657a03ec22981ba93101d5858e758", null ],
         [ "Phase", "Defender_8cpp.html#a19ac08a0be5f41ccc26e7b0186c14e68", null ],
-        [ "ServoID", "purpose_2ScriptTuner_2src_2ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
+        [ "ServoID", "ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc", null ],
         [ "StrikerTask", "Striker_8cpp.html#a7b4822878a7e4899d1161458d98254e3", null ],
         [ "Unpenalisation", "Soccer_8cpp.html#ac65ce84afe05b09b49870aa9ca4d3c12", null ],
-        [ "LogColours", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [
-          [ "TRACE_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a03edadf0bc773fb94b4f5301fb3586b6", null ],
-          [ "DEBUG_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aabaeda8c8c137f659606924c7e40f2d5", null ],
-          [ "INFO_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a6923640867193c8fae67219aba2791d6", null ],
-          [ "WARN_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aa5a10ff337eea6adaa1db6393b3e3b26", null ],
-          [ "ERROR_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aa8d1b69a587431c229b8ccdabd630a3f", null ],
-          [ "FATAL_COLOURS", "purpose_2KeyboardWalk_2src_2KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a2b531f77b861aff440ebbbe673eb4ad4", null ]
+        [ "LogColours", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41", [
+          [ "TRACE_COLOURS", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a03edadf0bc773fb94b4f5301fb3586b6", null ],
+          [ "DEBUG_COLOURS", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aabaeda8c8c137f659606924c7e40f2d5", null ],
+          [ "INFO_COLOURS", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a6923640867193c8fae67219aba2791d6", null ],
+          [ "WARN_COLOURS", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aa5a10ff337eea6adaa1db6393b3e3b26", null ],
+          [ "ERROR_COLOURS", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41aa8d1b69a587431c229b8ccdabd630a3f", null ],
+          [ "FATAL_COLOURS", "KeyboardWalk_8hpp.html#a20fb947f965dd7d5cd6c0852383c7b41a2b531f77b861aff440ebbbe673eb4ad4", null ]
         ] ]
       ] ],
       [ "skill", null, [
@@ -789,12 +681,10 @@ var namespaces_dup =
         [ "operation", null, [
           [ "DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4" ],
           [ "DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4" ],
-          [ "DSLProxy<::extension::Script >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4" ],
           [ "get_first_command_line_arg", "Configuration_8hpp.html#a6800b2e4fd4666da559233ceeb8f3958", null ]
         ] ],
         [ "trait", null, [
           [ "is_transient< std::shared_ptr<::extension::Configuration > >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Configuration_01_4_01_4.html", null ],
-          [ "is_transient< std::shared_ptr<::extension::Script > >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Script_01_4_01_4.html", null ],
           [ "is_transient<::extension::FileWatch >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_1_1extension_1_1FileWatch_01_4.html", null ]
         ] ]
       ] ]
@@ -841,21 +731,6 @@ var namespaces_dup =
         [ "ServoMap< RightKnee >", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4" ],
         [ "ServoMap< RightShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4" ],
         [ "ServoMap< RightShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4" ]
-      ] ],
-      [ "behaviour", null, [
-        [ "ActionKill", "structutility_1_1behaviour_1_1ActionKill.html", "structutility_1_1behaviour_1_1ActionKill" ],
-        [ "ActionPriorities", "structutility_1_1behaviour_1_1ActionPriorities.html", "structutility_1_1behaviour_1_1ActionPriorities" ],
-        [ "ActionStart", "structutility_1_1behaviour_1_1ActionStart.html", "structutility_1_1behaviour_1_1ActionStart" ],
-        [ "RegisterAction", "structutility_1_1behaviour_1_1RegisterAction.html", "structutility_1_1behaviour_1_1RegisterAction" ],
-        [ "LimbID", "shared_2utility_2behaviour_2Action_8hpp.html#ac679ce55897954cb2e800bad7c07a644", null ],
-        [ "ServoID", "shared_2utility_2behaviour_2Action_8hpp.html#aa2c2b0b91b7e566e5acd49bdaee5cb92", null ],
-        [ "BallApproach", "MotionCommand_8hpp.html#af94157544a37827f215160c7da31de01", null ],
-        [ "DirectCommand", "MotionCommand_8hpp.html#af3b996a8915abc56a23cb48166adb35b", null ],
-        [ "RotateAroundBall", "MotionCommand_8hpp.html#afb264826c35af8f259d1e858182f89b2", null ],
-        [ "RotateOnSpot", "MotionCommand_8hpp.html#acf6be81e6b742a2d1ce292aae86aac6e", null ],
-        [ "StandStill", "MotionCommand_8hpp.html#a30f5e54a1fc9d8b87f1133b16ad36b3d", null ],
-        [ "WalkToReady", "MotionCommand_8hpp.html#acbc11eafcab111be58b08247f0d82c76", null ],
-        [ "WalkToState", "MotionCommand_8hpp.html#aa604d9051589dd2894a481050073e413", null ]
       ] ],
       [ "clock", null, [
         [ "ClockData", "structutility_1_1clock_1_1ClockData.html", "structutility_1_1clock_1_1ClockData" ],
@@ -1044,12 +919,12 @@ var namespaces_dup =
         [ "graph", "NUhelpers_8hpp.html#aac2d4f8c0c2aa3defb6820b2bdef61b0", null ]
       ] ],
       [ "platform", null, [
-        [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
-        [ "getRawServo", "shared_2utility_2platform_2RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ],
-        [ "make_error_string_v1", "shared_2utility_2platform_2RawSensors_8hpp.html#a7632c53b6a9fdc88115294b268a7c4fe", null ],
-        [ "make_packet_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
-        [ "make_servo_error_string_v1", "shared_2utility_2platform_2RawSensors_8hpp.html#acf66ddef285ab82abef2d5a9afdbc9ec", null ],
-        [ "make_servo_hardware_error_string", "shared_2utility_2platform_2RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
+        [ "getRawServo", "RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
+        [ "getRawServo", "RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ],
+        [ "make_error_string_v1", "RawSensors_8hpp.html#a7632c53b6a9fdc88115294b268a7c4fe", null ],
+        [ "make_packet_error_string", "RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
+        [ "make_servo_error_string_v1", "RawSensors_8hpp.html#acf66ddef285ab82abef2d5a9afdbc9ec", null ],
+        [ "make_servo_hardware_error_string", "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
       ] ],
       [ "reflection", null, [
         [ "unknown_message", "structutility_1_1reflection_1_1unknown__message.html", "structutility_1_1reflection_1_1unknown__message" ]
@@ -1184,9 +1059,6 @@ var namespaces_dup =
     ] ],
     [ "YAML", null, [
       [ "convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4" ],
-      [ "convert<::extension::Script >", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4" ],
-      [ "convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4" ],
-      [ "convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4" ],
       [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
       [ "convert<::utility::skill::Frame >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4" ],
       [ "convert<::utility::skill::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4" ],

@@ -1,7 +1,7 @@
 var structmodule_1_1vision_1_1visualmesh_1_1LoadedModel =
 [
     [ "class_map", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#acd9cd3879e38580cf64a5f48773c3f01", null ],
-    [ "geometry", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#a8a43f88d6298e0d187469ec04762fc6b", null ],
+    [ "geometry", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#ac9a0e275a43132403a456c0823c74100", null ],
     [ "intersections", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#a42200f6c17723b80e4561de032776243", null ],
     [ "mesh_model", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#ad61ae4cdac5de781047d7211c9d466be", null ],
     [ "model", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html#af2126979dc9a5855e66c03043f6581fd", null ],

@@ -1,5 +1,0 @@
-<map id="module::behaviour::skills::Nod" name="module::behaviour::skills::Nod">
-<area shape="rect" id="node1" title=" " alt="" coords="81,109,233,151"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,13,140,39"/>
-<area shape="rect" id="node3" href="$structmodule_1_1behaviour_1_1skills_1_1Nod_1_1Config.html" title="Stores configuration values." alt="" coords="165,5,317,47"/>
-</map>

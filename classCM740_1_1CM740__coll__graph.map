@@ -1,8 +1,0 @@
-<map id="CM740::CM740" name="CM740::CM740">
-<area shape="rect" id="node1" title="The main class that others will use to interact with the CM740 and attached devices." alt="" coords="130,420,250,447"/>
-<area shape="rect" id="node2" href="$classCM740_1_1FSR.html" title="This represents, and gives access to the Force Sensitive Resistor boards." alt="" coords="77,184,175,211"/>
-<area shape="rect" id="node3" href="$classCM740_1_1CM740Interface.html" title="The cm740 device is a device on the serial port that will respond to the command types." alt="" coords="121,95,299,121"/>
-<area shape="rect" id="node5" href="$classCM740_1_1Servo.html" title="This represents, and gives access to the servo motors." alt="" coords="199,184,311,211"/>
-<area shape="rect" id="node6" href="$classCM740_1_1CM740Data.html" title="This represents, and gives access to the CM740 subboard." alt="" coords="336,184,487,211"/>
-<area shape="rect" id="node4" href="$classCM740_1_1UART.html" title="Communicates with the components via the UART (through a USB TTY device)" alt="" coords="5,5,116,32"/>
-</map>

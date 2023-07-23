@@ -1,24 +1,5 @@
 var annotated_dup =
 [
-    [ "CM740", null, [
-      [ "Types", "namespaceCM740_1_1Types.html", [
-        [ "Accelerometer", "structCM740_1_1Types_1_1Accelerometer.html", "structCM740_1_1Types_1_1Accelerometer" ],
-        [ "CM740Data", "structCM740_1_1Types_1_1CM740Data.html", "structCM740_1_1Types_1_1CM740Data" ],
-        [ "FSRData", "structCM740_1_1Types_1_1FSRData.html", "structCM740_1_1Types_1_1FSRData" ],
-        [ "Gyro", "structCM740_1_1Types_1_1Gyro.html", "structCM740_1_1Types_1_1Gyro" ],
-        [ "ServoData", "structCM740_1_1Types_1_1ServoData.html", "structCM740_1_1Types_1_1ServoData" ],
-        [ "ServoValues", "structCM740_1_1Types_1_1ServoValues.html", "structCM740_1_1Types_1_1ServoValues" ]
-      ] ],
-      [ "BulkReadResults", "structCM740_1_1BulkReadResults.html", "structCM740_1_1BulkReadResults" ],
-      [ "CM740", "classCM740_1_1CM740.html", "classCM740_1_1CM740" ],
-      [ "CM740Data", "classCM740_1_1CM740Data.html", "classCM740_1_1CM740Data" ],
-      [ "CM740Interface", "classCM740_1_1CM740Interface.html", "classCM740_1_1CM740Interface" ],
-      [ "CommandResult", "structCM740_1_1CommandResult.html", "structCM740_1_1CommandResult" ],
-      [ "FSR", "classCM740_1_1FSR.html", "classCM740_1_1FSR" ],
-      [ "Header", "structCM740_1_1Header.html", "structCM740_1_1Header" ],
-      [ "Servo", "classCM740_1_1Servo.html", "classCM740_1_1Servo" ],
-      [ "UART", "classCM740_1_1UART.html", "classCM740_1_1UART" ]
-    ] ],
     [ "dynamixel", null, [
       [ "v2", null, [
         [ "ActionCommand", "structdynamixel_1_1v2_1_1ActionCommand.html", "structdynamixel_1_1v2_1_1ActionCommand" ],
@@ -68,15 +49,11 @@ var annotated_dup =
         [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ]
       ] ],
       [ "Configuration", "structextension_1_1Configuration.html", "structextension_1_1Configuration" ],
-      [ "ExecuteScript", "structextension_1_1ExecuteScript.html", "structextension_1_1ExecuteScript" ],
-      [ "ExecuteScriptByName", "structextension_1_1ExecuteScriptByName.html", "structextension_1_1ExecuteScriptByName" ],
       [ "FileWatch", "structextension_1_1FileWatch.html", "structextension_1_1FileWatch" ],
       [ "FileWatcherReady", "structextension_1_1FileWatcherReady.html", null ],
-      [ "FileWatchRequest", "structextension_1_1FileWatchRequest.html", "structextension_1_1FileWatchRequest" ],
-      [ "Script", "structextension_1_1Script.html", "structextension_1_1Script" ]
+      [ "FileWatchRequest", "structextension_1_1FileWatchRequest.html", "structextension_1_1FileWatchRequest" ]
     ] ],
     [ "fmt", null, [
-      [ "formatter< Eigen::Matrix4d >", "structfmt_1_1formatter_3_01Eigen_1_1Matrix4d_01_4.html", null ],
       [ "formatter< Eigen::Transpose< Derived > >", "structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html", null ]
     ] ],
     [ "module", null, [
@@ -85,36 +62,6 @@ var annotated_dup =
         [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
         [ "KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", "classmodule_1_1actuation_1_1KinematicsConfiguration" ],
         [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
-      ] ],
-      [ "behaviour", null, [
-        [ "skills", null, [
-          [ "DirectWalkController", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController" ],
-          [ "ExecuteKick", "structmodule_1_1behaviour_1_1skills_1_1ExecuteKick.html", null ],
-          [ "ExecuteNod", "structmodule_1_1behaviour_1_1skills_1_1ExecuteNod.html", null ],
-          [ "ExecuteStand", "structmodule_1_1behaviour_1_1skills_1_1ExecuteStand.html", null ],
-          [ "Falling", "structmodule_1_1behaviour_1_1skills_1_1Falling.html", null ],
-          [ "FallingRelax", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax.html", "classmodule_1_1behaviour_1_1skills_1_1FallingRelax" ],
-          [ "FinishKick", "structmodule_1_1behaviour_1_1skills_1_1FinishKick.html", null ],
-          [ "Getup", "classmodule_1_1behaviour_1_1skills_1_1Getup.html", "classmodule_1_1behaviour_1_1skills_1_1Getup" ],
-          [ "KickScript", "classmodule_1_1behaviour_1_1skills_1_1KickScript.html", "classmodule_1_1behaviour_1_1skills_1_1KickScript" ],
-          [ "KillFalling", "structmodule_1_1behaviour_1_1skills_1_1KillFalling.html", null ],
-          [ "Nod", "classmodule_1_1behaviour_1_1skills_1_1Nod.html", "classmodule_1_1behaviour_1_1skills_1_1Nod" ],
-          [ "Stand", "classmodule_1_1behaviour_1_1skills_1_1Stand.html", "classmodule_1_1behaviour_1_1skills_1_1Stand" ]
-        ] ],
-        [ "strategy", null, [
-          [ "KeyboardWalk", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk" ],
-          [ "PS3Walk", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk" ]
-        ] ],
-        [ "tools", null, [
-          [ "ExecuteNextScript", "structmodule_1_1behaviour_1_1tools_1_1ExecuteNextScript.html", null ],
-          [ "LockServo", "structmodule_1_1behaviour_1_1tools_1_1LockServo.html", null ],
-          [ "ScriptRunner", "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html", "classmodule_1_1behaviour_1_1tools_1_1ScriptRunner" ],
-          [ "ScriptTuner", "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html", "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner" ],
-          [ "SpeakTest", "classmodule_1_1behaviour_1_1tools_1_1SpeakTest.html", "classmodule_1_1behaviour_1_1tools_1_1SpeakTest" ]
-        ] ],
-        [ "Controller", "classmodule_1_1behaviour_1_1Controller.html", "classmodule_1_1behaviour_1_1Controller" ],
-        [ "Request", "structmodule_1_1behaviour_1_1Request.html", "structmodule_1_1behaviour_1_1Request" ],
-        [ "RequestItem", "structmodule_1_1behaviour_1_1RequestItem.html", "structmodule_1_1behaviour_1_1RequestItem" ]
       ] ],
       [ "extension", null, [
         [ "component", null, [
@@ -187,22 +134,15 @@ var annotated_dup =
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
         [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
-        [ "OdometryLocalisation", "classmodule_1_1localisation_1_1OdometryLocalisation.html", "classmodule_1_1localisation_1_1OdometryLocalisation" ],
-        [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ],
-        [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
-        [ "RobotParticleLocalisation", "classmodule_1_1localisation_1_1RobotParticleLocalisation.html", "classmodule_1_1localisation_1_1RobotParticleLocalisation" ]
+        [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ]
       ] ],
       [ "motion", null, [
         [ "Animator", "classmodule_1_1motion_1_1Animator.html", "classmodule_1_1motion_1_1Animator" ],
-        [ "ExecuteHeadController", "structmodule_1_1motion_1_1ExecuteHeadController.html", null ],
         [ "ExecuteKick", "structmodule_1_1motion_1_1ExecuteKick.html", null ],
         [ "FinishKick", "structmodule_1_1motion_1_1FinishKick.html", null ],
-        [ "HeadController", "classmodule_1_1motion_1_1HeadController.html", "classmodule_1_1motion_1_1HeadController" ],
         [ "IKKick", "classmodule_1_1motion_1_1IKKick.html", "classmodule_1_1motion_1_1IKKick" ],
         [ "KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", "classmodule_1_1motion_1_1KickBalancer" ],
         [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
-        [ "QuinticWalk", "classmodule_1_1motion_1_1QuinticWalk.html", "classmodule_1_1motion_1_1QuinticWalk" ],
-        [ "ScriptEngine", "classmodule_1_1motion_1_1ScriptEngine.html", "classmodule_1_1motion_1_1ScriptEngine" ],
         [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
         [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ]
       ] ],
@@ -242,7 +182,6 @@ var annotated_dup =
           [ "Compressor", "classmodule_1_1output_1_1compressor_1_1Compressor.html", "classmodule_1_1output_1_1compressor_1_1Compressor" ],
           [ "CompressorFactory", "classmodule_1_1output_1_1compressor_1_1CompressorFactory.html", "classmodule_1_1output_1_1compressor_1_1CompressorFactory" ]
         ] ],
-        [ "eSpeak", "classmodule_1_1output_1_1eSpeak.html", "classmodule_1_1output_1_1eSpeak" ],
         [ "ImageCompressor", "classmodule_1_1output_1_1ImageCompressor.html", "classmodule_1_1output_1_1ImageCompressor" ],
         [ "Overview", "classmodule_1_1output_1_1Overview.html", "classmodule_1_1output_1_1Overview" ]
       ] ],
@@ -254,11 +193,6 @@ var annotated_dup =
         [ "PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", "classmodule_1_1planning_1_1PlanWalkPath" ]
       ] ],
       [ "platform", null, [
-        [ "cm740", null, [
-          [ "Convert", "structmodule_1_1platform_1_1cm740_1_1Convert.html", "structmodule_1_1platform_1_1cm740_1_1Convert" ],
-          [ "HardwareIO", "classmodule_1_1platform_1_1cm740_1_1HardwareIO.html", "classmodule_1_1platform_1_1cm740_1_1HardwareIO" ],
-          [ "HardwareSimulator", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator" ]
-        ] ],
         [ "OpenCR", null, [
           [ "DynamixelDevice", "classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html", null ],
           [ "DynamixelServo", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo" ],
@@ -275,6 +209,7 @@ var annotated_dup =
           [ "OpenCRWriteData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData" ],
           [ "XH540_W270", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270" ]
         ] ],
+        [ "HardwareSimulator", "classmodule_1_1platform_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1HardwareSimulator" ],
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ]
       ] ],
       [ "purpose", null, [
@@ -282,6 +217,7 @@ var annotated_dup =
         [ "Goalie", "classmodule_1_1purpose_1_1Goalie.html", "classmodule_1_1purpose_1_1Goalie" ],
         [ "KeyboardWalk", "classmodule_1_1purpose_1_1KeyboardWalk.html", "classmodule_1_1purpose_1_1KeyboardWalk" ],
         [ "LockServo", "structmodule_1_1purpose_1_1LockServo.html", null ],
+        [ "PS3Walk", "classmodule_1_1purpose_1_1PS3Walk.html", "classmodule_1_1purpose_1_1PS3Walk" ],
         [ "ScriptRunner", "classmodule_1_1purpose_1_1ScriptRunner.html", "classmodule_1_1purpose_1_1ScriptRunner" ],
         [ "ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", "classmodule_1_1purpose_1_1ScriptTuner" ],
         [ "Soccer", "classmodule_1_1purpose_1_1Soccer.html", "classmodule_1_1purpose_1_1Soccer" ],
@@ -356,12 +292,10 @@ var annotated_dup =
       [ "dsl", null, [
         [ "operation", null, [
           [ "DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4" ],
-          [ "DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4" ],
-          [ "DSLProxy<::extension::Script >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4" ]
+          [ "DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4" ]
         ] ],
         [ "trait", null, [
           [ "is_transient< std::shared_ptr<::extension::Configuration > >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Configuration_01_4_01_4.html", null ],
-          [ "is_transient< std::shared_ptr<::extension::Script > >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Script_01_4_01_4.html", null ],
           [ "is_transient<::extension::FileWatch >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_1_1extension_1_1FileWatch_01_4.html", null ]
         ] ]
       ] ]
@@ -393,12 +327,6 @@ var annotated_dup =
         [ "ServoMap< RightKnee >", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4" ],
         [ "ServoMap< RightShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4" ],
         [ "ServoMap< RightShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4" ]
-      ] ],
-      [ "behaviour", null, [
-        [ "ActionKill", "structutility_1_1behaviour_1_1ActionKill.html", "structutility_1_1behaviour_1_1ActionKill" ],
-        [ "ActionPriorities", "structutility_1_1behaviour_1_1ActionPriorities.html", "structutility_1_1behaviour_1_1ActionPriorities" ],
-        [ "ActionStart", "structutility_1_1behaviour_1_1ActionStart.html", "structutility_1_1behaviour_1_1ActionStart" ],
-        [ "RegisterAction", "structutility_1_1behaviour_1_1RegisterAction.html", "structutility_1_1behaviour_1_1RegisterAction" ]
       ] ],
       [ "clock", null, [
         [ "ClockData", "structutility_1_1clock_1_1ClockData.html", "structutility_1_1clock_1_1ClockData" ]
@@ -494,9 +422,6 @@ var annotated_dup =
     ] ],
     [ "YAML", null, [
       [ "convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4" ],
-      [ "convert<::extension::Script >", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4" ],
-      [ "convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4" ],
-      [ "convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4" ],
       [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
       [ "convert<::utility::skill::Frame >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4" ],
       [ "convert<::utility::skill::Frame::Target >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_1_1Target_01_4" ],

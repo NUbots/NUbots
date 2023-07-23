@@ -1,5 +1,0 @@
-<map id="CM740::Servo" name="CM740::Servo">
-<area shape="rect" id="node1" title="This represents, and gives access to the servo motors." alt="" coords="39,171,151,197"/>
-<area shape="rect" id="node2" href="$classCM740_1_1CM740Interface.html" title="The cm740 device is a device on the serial port that will respond to the command types." alt="" coords="5,95,184,121"/>
-<area shape="rect" id="node3" href="$classCM740_1_1UART.html" title="Communicates with the components via the UART (through a USB TTY device)" alt="" coords="39,5,150,32"/>
-</map>

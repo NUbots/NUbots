@@ -1,4 +1,0 @@
-<map id="CM740::CM740Data" name="CM740::CM740Data">
-<area shape="rect" id="node1" title="This represents, and gives access to the CM740 subboard." alt="" coords="19,80,170,107"/>
-<area shape="rect" id="node2" href="$classCM740_1_1CM740Interface.html" title="The cm740 device is a device on the serial port that will respond to the command types." alt="" coords="5,5,184,32"/>
-</map>

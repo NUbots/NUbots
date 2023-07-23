@@ -1,0 +1,6 @@
+<map id="module::purpose::PS3Walk" name="module::purpose::PS3Walk">
+<area shape="rect" id="node1" title=" " alt="" coords="91,185,286,212"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="5,81,164,123"/>
+<area shape="rect" id="node3" title=" " alt="" coords="17,5,152,32"/>
+<area shape="rect" id="node4" href="$classJoystick.html" title="Represents a joystick device." alt="" coords="188,89,261,115"/>
+</map>
