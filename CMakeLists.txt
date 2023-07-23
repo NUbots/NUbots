@@ -52,7 +52,7 @@ if(NOT SUBCONTROLLER)
       CACHE STRING "Choose the subcontroller to build for." FORCE
   )
   # Set the possible values of subcontroller for cmake-gui
-  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR" "cm740")
+  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR")
 endif()
 
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
