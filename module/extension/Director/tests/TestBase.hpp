@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 #define MODULE_EXTENSION_DIRECTOR_TESTBASE_HPP
 

@@ -18,6 +18,7 @@ namespace module::vision {
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
+            std::lock_guard<std::mutex> lock(engines_mutex);
             // Delete all the old engines
             engines.clear();
 
@@ -34,80 +35,96 @@ namespace module::vision {
                 auto tolerance    = camera.second["classifier"]["intersection_tolerance"].as<double>();
 
                 // Create a network runner for each concurrent system
-                auto& runners = engines[name];
+                auto ctx = std::make_shared<EngineContext>();
                 for (int i = 0; i < concurrent; ++i) {
-                    runners.emplace_back(engine_type,
-                                         min_height,
-                                         max_height,
-                                         max_distance,
-                                         tolerance,
-                                         network,
-                                         cache_directory);
+                    ctx->runners.emplace_back(std::make_unique<std::mutex>(),
+                                              visualmesh::VisualMeshRunner{engine_type,
+                                                                           min_height,
+                                                                           max_height,
+                                                                           max_distance,
+                                                                           tolerance,
+                                                                           network,
+                                                                           cache_directory});
                 }
+                engines[name] = ctx;
             }
         });
 
         on<Trigger<Image>>().then([this](const Image& image) {
-            // Check we have a network for this camera
-            auto it = engines.find(image.name);
-            if (it != engines.end()) {
-                auto& engine = it->second;
+            // Find the engine for this camera
+            std::shared_ptr<EngineContext> ctx;
 
-                // Look through our engines and try to find the first free one
-                for (auto& runner : engine) {
-                    // We swap in true to the atomic and if we got false back then it wasn't active previously
-                    if (!runner.active->exchange(true)) {
+            /* Mutex Scope */ {
+                std::lock_guard<std::mutex> lock(engines_mutex);
+                auto it = engines.find(image.name);
+                if (it != engines.end()) {
+                    ctx = it->second;
+                }
+            }
+
+            if (ctx != nullptr) {
+
+                // Look through our runners and try to find the first free one
+                for (auto& ctx : ctx->runners) {
+                    // Attempt to acquire a lock on the mutex, if this succeeds then the context wasn't being used
+                    std::unique_lock lock(*ctx.mutex, std::try_to_lock);
+                    if (lock) {
+
+                        auto& runner = ctx.runner;
 
                         // Extract the camera position now that we need it
-                        Eigen::Affine3d Hcw(image.Hcw);
+                        Eigen::Isometry3d Hcw(image.Hcw);
 
-                        std::exception_ptr eptr;
-                        try {
+                        // Run the inference
+                        auto result = runner(image, Hcw.cast<float>());
 
-                            // Run the inference
-                            auto result = runner(image, Hcw.cast<float>());
+                        if (result.indices.empty()) {
+                            log<NUClear::WARN>("Hcw resulted in no mesh points being on-screen.");
+                        }
+                        else {
+                            // Move stuff into the emit message
+                            auto msg             = std::make_unique<message::vision::VisualMesh>();
+                            msg->timestamp       = image.timestamp;
+                            msg->id              = image.id;
+                            msg->name            = image.name;
+                            msg->Hcw             = image.Hcw;
+                            msg->rays            = result.rays;
+                            msg->coordinates     = result.coordinates;
+                            msg->neighbourhood   = std::move(result.neighbourhood);
+                            msg->indices         = std::move(result.indices);
+                            msg->classifications = std::move(result.classifications);
+                            msg->class_map       = runner.class_map;
 
-                            if (result.indices.empty()) {
-                                log<NUClear::WARN>("Hcw resulted in no mesh points being on-screen.");
+                            if (image.vision_ground_truth.exists) {
+                                msg->vision_ground_truth = image.vision_ground_truth;
                             }
-                            else {
-                                // Move stuff into the emit message
-                                auto msg             = std::make_unique<message::vision::VisualMesh>();
-                                msg->timestamp       = image.timestamp;
-                                msg->id              = image.id;
-                                msg->name            = image.name;
-                                msg->Hcw             = image.Hcw;
-                                msg->rays            = result.rays;
-                                msg->coordinates     = result.coordinates;
-                                msg->neighbourhood   = std::move(result.neighbourhood);
-                                msg->indices         = std::move(result.indices);
-                                msg->classifications = std::move(result.classifications);
-                                msg->class_map       = runner.class_map;
 
-                                // Emit the inference
-                                emit(msg);
-                            }
+                            // Emit the inference
+                            emit(msg);
+
+                            // Successful processing
+                            ++processed;
+                            return;
                         }
-                        catch (...) {
-                            eptr = std::current_exception();
-                        }
-
-                        // This sets the atomic integer back to false so another thread can use this engine
-                        runner.active->store(false);
-
-                        if (eptr) {
-                            // Exception :(
-                            std::rethrow_exception(eptr);
-                        }
-
-                        // Finish processing
-                        break;
                     }
                 }
             }
             else {
                 log<NUClear::TRACE>("There is no network loaded for", image.name);
             }
+
+            // We failed to process this image
+            ++dropped;
+        });
+
+        on<Every<1, std::chrono::seconds>>().then("Stats", [this] {
+            log<NUClear::DEBUG>(fmt::format("Receiving {}/s, Processing {}/s,  Dropping {}/s ({}%)",
+                                            processed + dropped,
+                                            processed,
+                                            dropped,
+                                            100 * double(processed) / double(processed + dropped)));
+            processed = 0;
+            dropped   = 0;
         });
     }
 }  // namespace module::vision

@@ -1,14 +1,9 @@
-ReactionTimer
-=============
+# ReactionTimer
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

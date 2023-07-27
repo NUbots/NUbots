@@ -51,6 +51,7 @@ with open(role_name, "w", encoding="utf-8") as role_file:
     # Add our main function and include headers
     main = textwrap.dedent(
         """\
+        // NOLINTNEXTLINE(bugprone-exception-escape) who cares
         int main(int argc, char** argv) {"""
     )
     role_file.write(main)
@@ -66,7 +67,7 @@ with open(role_name, "w", encoding="utf-8") as role_file:
     role_file.write("\n    // Print the name of the role in big letters\n")
 
     # Insert banner for the name of the executing role
-    role_banner_lines = bigtext(os.path.splitext(os.path.basename(role_name))[0]).split("\n")[:-1]
+    role_banner_lines = bigtext(os.path.splitext(os.path.basename(role_name).split("-")[-1])[0]).split("\n")[:-1]
     for l in role_banner_lines:
         role_file.write('    std::cerr << R"({})" << std::endl;\n'.format(l))
 

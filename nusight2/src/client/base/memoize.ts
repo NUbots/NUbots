@@ -16,11 +16,11 @@
  * memoizedFn(a) // { name: `FooBar` }
  */
 export function memoize<A extends object, B>(fn: (a: A) => B): (a: A) => B {
-  const map = new WeakMap<A, B>()
+  const map = new WeakMap<A, B>();
   return (a: A) => {
     if (!map.has(a)) {
-      map.set(a, fn(a))
+      map.set(a, fn(a));
     }
-    return map.get(a)!
-  }
+    return map.get(a)!;
+  };
 }

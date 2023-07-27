@@ -19,7 +19,7 @@ for gpu in gpus:
 
 
 def register(command):
-    command.help = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
+    command.description = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
 
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to extract the videos from")
@@ -38,7 +38,6 @@ def process_frame(item):
     data = decode_image(item["data"], item["format"])
 
     return {
-        "bytes_read": item["bytes_read"],
         "timestamp": item["timestamp"],
         "data": [
             {"image": d["image"].numpy(), "name": "{}{}".format(item["camera_name"], d["name"]), "fourcc": d["fourcc"]}
@@ -48,10 +47,9 @@ def process_frame(item):
 
 
 def packetise_stream(decoder):
-
     for packet in decoder:
         # Check for compressed images
-        if packet.type in ("message.output.CompressedImage", "message.input.Image"):
+        if packet.type.name in ("message.output.CompressedImage", "message.input.Image"):
             # Get some useful info into a pickleable format
             yield {
                 "camera_name": packet.msg.name,
@@ -62,7 +60,6 @@ def packetise_stream(decoder):
 
 
 def run(files, output, encoder, quality, **kwargs):
-
     os.makedirs(output, exist_ok=True)
 
     recorders = {}
@@ -86,7 +83,12 @@ def run(files, output, encoder, quality, **kwargs):
 
         results = []
         for msg in packetise_stream(
-            tqdm(LinearDecoder(*files, show_progress=True), unit="packet", unit_scale=True, dynamic_ncols=True)
+            tqdm(
+                LinearDecoder(*files, show_progress=True),
+                unit="packet",
+                unit_scale=True,
+                dynamic_ncols=True,
+            )
         ):
             # Add a task to the pool to process
             results.append(pool.apply_async(process_frame, (msg,)))

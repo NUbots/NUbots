@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 
 import os
+import shutil
 import subprocess
+
+from configure import run as configure
+from termcolor import cprint
 
 import b
 from utility.dockerise import run_on_docker
@@ -10,24 +14,26 @@ from utility.dockerise import run_on_docker
 @run_on_docker
 def register(command):
     # Install help
-    command.help = "build the codebase"
+    command.description = "build the codebase"
 
     command.add_argument("args", nargs="...", help="the arguments to pass through to ninja")
     command.add_argument("-j", help="number of jobs to spawn")
+    command.add_argument("-m", "--purge-messages", action="store_true", help="Delete all compiled proto messages files")
 
 
 @run_on_docker
-def run(j, args, **kwargs):
+def run(j, args, purge_messages, **kwargs):
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
     # Run cmake if we don't have a ninja build file
     if not os.path.isfile("build.ninja"):
-        exitcode = os.system("cmake {} -GNinja".format(b.project_dir)) >> 8
+        configure(interactive=False, args=[])
 
-        # If cmake errors return with its status
-        if exitcode != 0:
-            exit(exitcode)
+    # Purge compiled messages
+    if purge_messages:
+        cprint("Purging all compiled messages from build folder", "red", attrs=["bold"])
+        shutil.rmtree(os.path.join("nuclear", "message"))
 
     # To pass arguments to the ninja command you put them after "--"
     # but "--"  isn't a valid argument for ninja, so we remove it here
@@ -40,4 +46,4 @@ def run(j, args, **kwargs):
         command.insert(1, "-j{}".format(j))
 
     # Return the exit code of ninja
-    exit(subprocess.run(command).returncode)
+    exit(subprocess.call(command))

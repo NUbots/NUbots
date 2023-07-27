@@ -19,7 +19,7 @@
 }
 
 .button[disabled] {
-  opacity: 0.65
+  opacity: 0.65;
 }
 
 .alignLeft {
@@ -46,6 +46,11 @@
   margin-left: auto;
 }
 
+.iconBefore,
+.iconAfter {
+  line-height: 0;
+}
+
 .iconBefore svg,
 .iconAfter svg {
   height: 20px;
@@ -57,15 +62,15 @@
 
 .buttonNormal {
   background-color: #eee;
-  border-color: #CCC;
+  border-color: #ccc;
 }
 
 .buttonNormal:hover:not([disabled]) {
-  border-color: #AAA;
+  border-color: #aaa;
 }
 
 .buttonNormal:active:not([disabled]) {
-  background-color: #DDD;
+  background-color: #ddd;
 }
 
 .buttonNormal .iconBefore {

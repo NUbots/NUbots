@@ -19,11 +19,13 @@
 
 #include <Eigen/Core>
 #include <array>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <utility>
 
 #include "utility/math/quaternion.hpp"
 
+using Catch::Matchers::WithinAbs;
 
 static const std::array<Eigen::Quaterniond, 200> Q = {
     Eigen::Quaterniond(0.812886533020004, -0.185088524394760, -0.548059268662397, -0.0677403912398385),
@@ -232,7 +234,7 @@ static const Eigen::Quaterniond Qavg_true(-0.614272845931959, 0.779235109150709,
 
 TEST_CASE("Test Quaternion", "[utility][math][Quaternion]") {
 
-    INFO("Calculating average quaternion")
+    INFO("Calculating average quaternion");
     Eigen::Quaterniond Qavg = utility::math::quaternion::mean(Q.begin(), Q.end());
 
     Eigen::Quaterniond diff_f = utility::math::quaternion::difference(Qavg, Qavg_true);
@@ -245,8 +247,8 @@ TEST_CASE("Test Quaternion", "[utility][math][Quaternion]") {
     INFO("The norm of the imaginary part of the backward difference: " << diff_b.vec().norm()
                                                                        << ". This should be small.");
 
-    REQUIRE(diff_f.w() == Approx(1.0).margin(1e-6));
-    REQUIRE(diff_b.w() == Approx(1.0).margin(1e-6));
+    REQUIRE_THAT(diff_f.w(), WithinAbs(1.0, 1e-6));
+    REQUIRE_THAT(diff_b.w(), WithinAbs(1.0, 1e-6));
     REQUIRE(diff_f.vec().norm() <= 1e-6);
     REQUIRE(diff_b.vec().norm() <= 1e-6);
 }

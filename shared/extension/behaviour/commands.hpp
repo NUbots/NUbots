@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef EXTENSION_BEHAVIOUR_COMMANDS_HPP
 #define EXTENSION_BEHAVIOUR_COMMANDS_HPP
 
@@ -41,6 +42,11 @@ namespace extension::behaviour::commands {
         START,
         /// Stop providers run once there are no tasks running for any provider of this group
         STOP
+    };
+
+    template <typename T>
+    struct RootType {
+        RootType() = delete;
     };
 
     /**
@@ -178,6 +184,7 @@ namespace extension::behaviour::commands {
          * Construct a new Task object to send to the behaviour system
          *
          * @param type_                 the type that this task is for
+         * @param root_type_            a secondary type to use if this is a root task
          * @param requester_id_         the id of the reaction that emitted this task
          * @param requester_task_id_    the task_id of the reaction task that emitted this
          * @param data_                 the task data to be sent to the provider
@@ -186,6 +193,7 @@ namespace extension::behaviour::commands {
          * @param optional_             whether this task is optional or not
          */
         BehaviourTask(const std::type_index& type_,
+                      const std::type_index& root_type_,
                       const uint64_t& requester_id_,
                       const uint64_t& requester_task_id_,
                       std::shared_ptr<void> data_,
@@ -193,6 +201,7 @@ namespace extension::behaviour::commands {
                       const int& priority_,
                       const bool& optional_)
             : type(type_)
+            , root_type(root_type_)
             , requester_id(requester_id_)
             , requester_task_id(requester_task_id_)
             , data(std::move(data_))
@@ -202,11 +211,13 @@ namespace extension::behaviour::commands {
 
         /// The Provider type this task is for
         std::type_index type;
+        /// A secondary provider type to use if this is a root task
+        std::type_index root_type;
         /// The reaction id of the requester (could be the id of a Provider)
         uint64_t requester_id;
         /// The reaction task id of the requester (if it is a Provider later a ProviderDone will be emitted)
         uint64_t requester_task_id;
-        /// The data for the command, (the data that will be given to the Provider)
+        /// The data for the command, (the data that will be given to the Provider) if null counts as no task
         std::shared_ptr<void> data;
         /// A name for this task to be shown in debugging systems
         std::string name;

@@ -1,12 +1,9 @@
 #ifndef MODULE_INPUT_CAMERA_HPP
 #define MODULE_INPUT_CAMERA_HPP
 
-extern "C" {
-#include <aravis-0.8/arv.h>
-}
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <aravis-0.8/arv.h>
 #include <mutex>
 
 #include "CameraContext.hpp"
@@ -26,7 +23,7 @@ namespace module::input {
         static void control_lost(ArvGvDevice* device, CameraContext* context);
 
         std::mutex sensors_mutex;
-        std::vector<std::pair<NUClear::clock::time_point, Eigen::Affine3d>> Hwps;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Isometry3d>> Hwps;
         std::map<std::string, CameraContext> cameras;
         uint32_t num_cameras = 0;
     };

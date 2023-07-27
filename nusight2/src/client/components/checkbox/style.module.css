@@ -25,9 +25,7 @@
   padding: 0.5px;
   position: absolute;
   width: 100%;
-  transition:
-    background-color 0.1s ease-out,
-    border-color 0.1s cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: background-color 0.1s ease-out, border-color 0.1s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 .checked {

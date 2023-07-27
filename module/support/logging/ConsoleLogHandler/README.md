@@ -1,5 +1,4 @@
-Console Log Handler
-===================
+# Console Log Handler
 
 ## Description
 
@@ -11,5 +10,4 @@ Once installed, this module will echo all NUClear log messages to standard outpu
 
 ## Consumes
 
-* `NUClear::message::LogMessage` containing a message to be logged
-
+- `NUClear::message::LogMessage` containing a message to be logged

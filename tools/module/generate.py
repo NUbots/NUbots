@@ -10,21 +10,20 @@ import b
 def register(command):
 
     # Module help
-    command.help = "Generate a new NUClear Roles module at the provided location"
+    command.description = "Generate a new NUClear Roles module at the provided location"
 
     # Module subcommands
     command.add_argument("path", metavar="path", help="a path to the new module (from the module directory)")
+    command.add_argument("--director", action="store_true", help="generates a module as a Director behaviour module")
 
 
-def run(path, **kwargs):
-
+def run(path, director, **kwargs):
     # We use the default "module" directory for modules
     module_path = "module"
 
     # Calculate all of our file paths
     path = os.path.join(module_path, path)
     src_path = os.path.join(path, "src")
-    tests_path = os.path.join(path, "tests")
     config_path = os.path.join(path, "data", "config")
     module_name = os.path.split(path)[-1]
 
@@ -42,8 +41,6 @@ def run(path, **kwargs):
     print("\t", path)
     os.makedirs(src_path)
     print("\t", src_path)
-    os.makedirs(tests_path)
-    print("\t", tests_path)
     os.makedirs(config_path)
     print("\t", config_path)
 
@@ -62,20 +59,16 @@ def run(path, **kwargs):
         print("\t", os.path.join(src_path, "README.md"))
 
     with open(os.path.join(src_path, "{}.hpp".format(module_name)), "w") as output:
-        output.write(generate_header(parts))
+        output.write(generate_header(parts, director))
         print("\t", os.path.join(src_path, "{}.hpp".format(module_name)))
 
     with open(os.path.join(src_path, "{}.cpp".format(module_name)), "w") as output:
-        output.write(generate_cpp(parts))
+        output.write(generate_cpp(parts, director))
         print("\t", os.path.join(src_path, "{}.cpp".format(module_name)))
-
-    with open(os.path.join(tests_path, "{}.cpp".format(module_name)), "w") as output:
-        output.write(generate_test(parts))
-        print("\t", os.path.join(tests_path, "{}.cpp".format(module_name)))
 
     with open(os.path.join(config_path, "{}.yaml".format(module_name)), "a") as output:
         output.write("# Controls the minimum log level that NUClear log will display\n")
-        output.write("log_level: DEBUG\n")
+        output.write("log_level: INFO\n")
         print("\t", os.path.join(config_path, "{}.yaml".format(module_name)))
 
 
@@ -88,21 +81,23 @@ def generate_cmake(parts):
     )
 
 
-def generate_header(parts):
-    template = textwrap.dedent(
+def generate_header(parts, director):
+    director_template = textwrap.dedent(
         """\
         #ifndef {define}
         #define {define}
 
         #include <nuclear>
 
+        #include "extension/Behaviour.hpp"
+
         namespace {namespace} {{
 
-        class {className} : public NUClear::Reactor {{
+        class {className} : public ::extension::behaviour::BehaviourReactor {{
         private:
-            /// The configuration variables for this reactor
-            struct {{
-            }} config;
+            /// @brief Stores configuration values
+            struct Config {{
+            }} cfg;
 
         public:
             /// @brief Called by the powerplant to build and setup the {className} reactor.
@@ -115,6 +110,37 @@ def generate_header(parts):
         """
     )
 
+    normal_template = textwrap.dedent(
+        """\
+        #ifndef {define}
+        #define {define}
+
+        #include <nuclear>
+
+        namespace {namespace} {{
+
+        class {className} : public NUClear::Reactor {{
+        private:
+            /// @brief Stores configuration values
+            struct Config {{
+            }} cfg;
+
+        public:
+            /// @brief Called by the powerplant to build and setup the {className} reactor.
+            explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+        }};
+
+        }}  // namespace {namespace}
+
+        #endif  // {define}
+        """
+    )
+
+    if director:
+        template = director_template
+    else:
+        template = normal_template
+
     return template.format(
         define="{}_HPP".format("_".join([p.upper() for p in parts])),
         className=parts[-1],
@@ -122,8 +148,30 @@ def generate_header(parts):
     )
 
 
-def generate_cpp(parts):
-    template = textwrap.dedent(
+def generate_cpp(parts, director):
+    director_template = textwrap.dedent(
+        """\
+        #include "{className}.hpp"
+
+        #include "extension/Behaviour.hpp"
+        #include "extension/Configuration.hpp"
+
+        namespace {namespace} {{
+
+        using extension::Configuration;
+
+        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {{
+
+            on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
+                // Use configuration here from file {className}.yaml
+                this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            }});
+        }}
+
+        }}  // namespace {namespace}
+        """
+    )
+    normal_template = textwrap.dedent(
         """\
         #include "{className}.hpp"
 
@@ -133,11 +181,11 @@ def generate_cpp(parts):
 
         using extension::Configuration;
 
-        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{{}} {{
+        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {{
 
-            on<Configuration>("{className}.yaml").then([this](const Configuration& cfg) {{
+            on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
                 // Use configuration here from file {className}.yaml
-                this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+                this->log_level = config["log_level"].as<NUClear::LogLevel>();
             }});
         }}
 
@@ -145,19 +193,26 @@ def generate_cpp(parts):
         """
     )
 
+    if director:
+        template = director_template
+    else:
+        template = normal_template
+
     return template.format(className=parts[-1], namespace="::".join([x for x in parts[:-1]]))
 
 
 def generate_readme(parts):
     template = textwrap.dedent(
         """\
-        {className}
-        {classNameTitle}
+        # {className}
 
         ## Description
 
 
         ## Usage
+
+
+        ## Consumes
 
 
         ## Emits
@@ -168,23 +223,4 @@ def generate_readme(parts):
         """
     )
 
-    return template.format(
-        className=parts[-1], classNameTitle=len(parts[-1]) * "=", closeNamespace="\n".join(["}" for x in parts[:-1]])
-    )
-
-
-def generate_test(parts):
-    template = textwrap.dedent(
-        """\
-        // Uncomment this line when other test files are added
-        //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-        //#include <catch.hpp>
-
-        // Remove this line when test files are added
-        int main() {{
-            return 0;
-        }}
-        """
-    )
-
-    return template.format()
+    return template.format(className=parts[-1])

@@ -1,17 +1,15 @@
 #include "BallLocalisation.hpp"
 
+#include <Eigen/Geometry>
 #include <chrono>
 
 #include "extension/Configuration.hpp"
 
-#include "message/input/Sensors.hpp"
+#include "message/eye/DataPoint.hpp"
 #include "message/localisation/Ball.hpp"
-#include "message/localisation/Field.hpp"
-#include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -19,125 +17,112 @@
 namespace module::localisation {
 
     using extension::Configuration;
-    using message::localisation::Ball;
-    using message::localisation::Field;
-    using message::localisation::ResetBallHypotheses;
+    using Ball        = message::localisation::Ball;
+    using VisionBalls = message::vision::Balls;
+    using VisionBall  = message::vision::Ball;
     using message::support::FieldDescription;
 
-    using ServoID = utility::input::ServoID;
+    using message::eye::DataPoint;
+
+    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::nusight::graph;
     using utility::support::Expression;
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Startup>().then([this] {
-            last_measurement_update_time = NUClear::clock::now();
-            last_time_update_time        = NUClear::clock::now();
-        });
+        using message::localisation::Ball;
+        using utility::math::coordinates::reciprocalSphericalToCartesian;
 
-        on<Configuration, Sync<BallLocalisation>>("BallLocalisation.yaml").then([this](const Configuration& cfg) {
-            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+        on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
+            // Set our measurement noise
+            cfg.ukf.noise.measurement.position =
+                Eigen::Vector2d(config["ukf"]["noise"]["measurement"]["ball_position"].as<Expression>()).asDiagonal();
 
-            auto message = std::make_unique<std::vector<Ball>>();
-            emit(message);
-            emit(std::make_unique<Ball>());
+            // Set our process noises
+            cfg.ukf.noise.process.position = config["ukf"]["noise"]["process"]["position"].as<Expression>();
+            cfg.ukf.noise.process.velocity = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
 
-            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            // Set our motion model's process noise
+            BallModel<double>::StateVec process_noise;
+            process_noise.rBWw      = cfg.ukf.noise.process.position;
+            process_noise.vBw       = cfg.ukf.noise.process.velocity;
+            ukf.model.process_noise = process_noise;
 
-            ball_pos_log = cfg["ball_pos_log"].as<bool>();
-            // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.n_rogues    = cfg["n_rogues"].as<int>();
-            filter.model.resetRange  = cfg["reset_range"].as<Expression>();
-            filter.model.n_particles = cfg["n_particles"].as<int>();
+            // Set our initial mean
+            cfg.ukf.initial.mean.position = config["ukf"]["initial"]["mean"]["position"].as<Expression>();
+            cfg.ukf.initial.mean.velocity = config["ukf"]["initial"]["mean"]["velocity"].as<Expression>();
 
-            config.start_variance = cfg["start_variance"].as<Expression>();
-        });
+            // Set out initial covariance
+            cfg.ukf.initial.covariance.position = config["ukf"]["initial"]["covariance"]["position"].as<Expression>();
+            cfg.ukf.initial.covariance.velocity = config["ukf"]["initial"]["covariance"]["velocity"].as<Expression>();
 
-        on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
-            // On Startup World to Torso is 0, such that config.start_state is rBWw
-            // Left side penalty mark
-            config.start_state.emplace_back((fd.dimensions.field_width / 2.0),
-                                            (fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance);
+            // Set our initial state with the config means and covariances, flagging the filter to reset it
+            cfg.initial_mean.rBWw = cfg.ukf.initial.mean.position;
+            cfg.initial_mean.vBw  = cfg.ukf.initial.mean.velocity;
 
-            // Right side penalty mark
-            config.start_state.emplace_back((fd.dimensions.field_width / 2.0),
-                                            -(fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance);
+            cfg.initial_covariance.rBWw = cfg.ukf.initial.covariance.position;
+            cfg.initial_covariance.vBw  = cfg.ukf.initial.covariance.velocity;
+            ukf.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
 
-            // Infront of our feet (Penalty shootout)
-            config.start_state.emplace_back(0.2, 0);
-
-            std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
-            for (const auto& state : config.start_state) {
-                hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
-            }
-            filter.set_state(hypotheses);
-        });
-
-        /* Run Time Update */
-        on<Every<15, Per<std::chrono::seconds>>, Sync<BallLocalisation>>().then("BallLocalisation Time", [this] {
-            /* Perform time update */
-            using namespace std::chrono;
-            const auto curr_time  = NUClear::clock::now();
-            const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
-            last_time_update_time = curr_time;
-            filter.time(seconds);
-
-            /* Creating ball state vector and covariance matrix for emission */
-            auto ball        = std::make_unique<Ball>();
-            ball->position   = filter.getMean();
-            ball->covariance = filter.getCovariance();
-
-            if (ball_pos_log) {
-                emit(graph("localisation ball pos", filter.getMean()[0], filter.getMean()[1]));
-                log("localisation ball pos = ", filter.getMean()[0], filter.getMean()[1]);
-                log("localisation seconds elapsed = ", seconds);
-            }
-            emit(ball);
+            last_time_update = NUClear::clock::now();
         });
 
         /* To run whenever a ball has been detected */
-        on<Trigger<message::vision::Balls>, With<FieldDescription>>().then(
-            [this](const message::vision::Balls& balls, const FieldDescription& field) {
-                // Call Time Update first
-                using namespace std::chrono;
-                const auto curr_time  = NUClear::clock::now();
-                const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
-                last_time_update_time = curr_time;
-                filter.time(seconds);
+        on<Trigger<VisionBalls>, With<FieldDescription>>().then([this](const VisionBalls& balls,
+                                                                       const FieldDescription& fd) {
+            if (!balls.balls.empty()) {
+                Eigen::Isometry3d Hwc = Eigen::Isometry3d(balls.Hcw.cast<double>()).inverse();
+                auto state            = BallModel<double>::StateVec(ukf.get_state());
+
+
+                // Data association: find the ball closest to our current estimate
+                Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
+                double lowest_distance = std::numeric_limits<double>::max();
                 for (const auto& ball : balls.balls) {
-                    if (!ball.measurements.empty()) {
-
-                        // Now call Measurement Update. Supports multiple measurement methods and will treat them as
-                        // separate measurements
-                        for (const auto& measurement : ball.measurements) {
-                            filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
-                                           Eigen::Matrix3d(measurement.covariance.cast<double>()),
-                                           field,
-                                           balls.Hcw);
-                        }
-                        last_measurement_update_time = curr_time;
+                    Eigen::Vector3d current_rBWw =
+                        Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<double>());
+                    double current_distance = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
+                    if (current_distance < lowest_distance) {
+                        lowest_distance = current_distance;
+                        rBWw            = current_rBWw;
                     }
                 }
-            });
 
-        on<Trigger<ResetBallHypotheses>, With<Field>, Sync<BallLocalisation>>().then(
-            "Reset Ball Hypotheses",
-            [this](const ResetBallHypotheses& locReset, const Field& field) {
-                // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
-                // starting position
-                if (locReset.self_reset) {
-                    std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
-                    for (const auto& state : config.start_state) {
-                        hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
-                    }
-                    filter.set_state(hypotheses);
+                // Compute the time since the last update (in seconds)
+                const auto dt =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_time_update)
+                        .count();
+                last_time_update = NUClear::clock::now();
+
+                // Time update
+                ukf.time(dt);
+
+                // Measurement update
+                ukf.measure(Eigen::Vector2d(rBWw.head<2>()),
+                            cfg.ukf.noise.measurement.position,
+                            MeasurementType::BALL_POSITION());
+
+                // Get the new state, here we are assuming ball is on the ground
+                state = BallModel<double>::StateVec(ukf.get_state());
+
+                // Generate and emit message
+                auto ball                 = std::make_unique<Ball>();
+                ball->rBWw                = Eigen::Vector3d(state.rBWw.x(), state.rBWw.y(), fd.ball_radius);
+                ball->vBw                 = Eigen::Vector3d(state.vBw.x(), state.vBw.y(), 0);
+                ball->time_of_measurement = last_time_update;
+                ball->Hcw                 = balls.Hcw;
+                if (log_level <= NUClear::DEBUG) {
+                    log<NUClear::DEBUG>("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z());
+                    log<NUClear::DEBUG>("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z());
+                    emit(graph("rBWw: ", ball->rBWw.x(), ball->rBWw.y(), ball->rBWw.z()));
+                    emit(graph("vBw: ", ball->vBw.x(), ball->vBw.y(), ball->vBw.z()));
                 }
-                // Otherwise reset balls to the [0, 0] field position
-                else {
-                    // Set the filter state to the field origin relative to us
-                    filter.set_state(Eigen::Affine2d(field.position).translation(), config.start_variance.asDiagonal());
-                }
-            });
+
+                emit(ball);
+            }
+        });
     }
+
 }  // namespace module::localisation

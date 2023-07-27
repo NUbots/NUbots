@@ -31,8 +31,13 @@
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/coordinates.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
+
+// Make a formatter for Eigen::Transpose type so fmt::format know how to deal with it
+template <typename Derived>
+struct fmt::formatter<Eigen::Transpose<Derived>> : fmt::ostream_formatter {};
 
 namespace module::vision {
 
@@ -45,6 +50,7 @@ namespace module::vision {
 
     using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -140,7 +146,7 @@ namespace module::vision {
                 balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
 
                 // World to camera transform, to be used in for loop below
-                const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+                const Eigen::Isometry3f Hcw(horizon.Hcw.cast<float>());
 
                 // CHECK EACH CLUSTER FOR VALID BALL
                 for (auto& cluster : clusters) {
@@ -323,6 +329,29 @@ namespace module::vision {
                     // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
                     if (keep || log_level <= NUClear::DEBUG) {
                         balls->balls.push_back(std::move(b));
+                    }
+
+                    if (horizon.vision_ground_truth.exists) {
+                        Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+
+                        const Eigen::Vector3f rBCc = Hcw * horizon.vision_ground_truth.rBWw;
+                        const Eigen::Vector3f rBWw = horizon.vision_ground_truth.rBWw;
+
+                        Eigen::Vector3f ball_position_projection = uBCw * projection_distance;
+                        Eigen::Vector3f ball_position_angular    = uBCw * angular_distance;
+                        Eigen::Vector3f ball_error_projection    = (ball_position_projection - rBCc).cwiseAbs();
+                        Eigen::Vector3f ball_error_angular       = (ball_position_angular - rBCc).cwiseAbs();
+
+                        emit(graph("True rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
+                        emit(graph("True rBWw", rBWw.x(), rBWw.y(), rBWw.z()));
+                        emit(graph("Angular Distance Ball error",
+                                   ball_error_projection.x(),
+                                   ball_error_projection.y(),
+                                   ball_error_projection.z()));
+                        emit(graph("Projection Distance Ball error",
+                                   ball_error_angular.x(),
+                                   ball_error_angular.y(),
+                                   ball_error_angular.z()));
                     }
                 }
 

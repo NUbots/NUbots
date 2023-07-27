@@ -1,5 +1,4 @@
-VisualMesh
-==========
+# VisualMesh
 
 ## Description
 
@@ -8,6 +7,7 @@ Runs a Visual Mesh over a given image and emits the result.
 ## Usage
 
 This module requires the following configuration files to be set:
+
 - `data/config/networks` should include a `yaml` file with Visual Mesh network configuration, which can be obtained from tools in the [Visual Mesh](https://github.com/Fastcode/VisualMesh) repository after training. A guide on updating this can be found on [NUbook](https://nubook.nubots.net/guides/main/maintaining-subsystems#vision).
 - `data/config/VisualMesh.yaml` should include information on what cameras and network configuration to use.
 

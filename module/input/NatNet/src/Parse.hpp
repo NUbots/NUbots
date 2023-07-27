@@ -34,6 +34,7 @@ namespace module::input {
     using Skeleton      = message::input::MotionCapture::Skeleton;
     using LabeledMarker = message::input::MotionCapture::LabeledMarker;
     using ForcePlate    = message::input::MotionCapture::ForcePlate;
+    using Device        = message::input::MotionCapture::Device;
 
     // Read plain old datatypes
     template <typename T>
@@ -127,12 +128,12 @@ namespace module::input {
 
             MarkerSet set;
 
-            set.name              = ReadData<std::string>::read(ptr, version);
-            auto markersPositions = ReadData<std::vector<Eigen::Matrix<float, 3, 1>>>::read(ptr, version);
-            set.markers.reserve(markersPositions.size());
+            set.name               = ReadData<std::string>::read(ptr, version);
+            auto markers_positions = ReadData<std::vector<Eigen::Matrix<float, 3, 1>>>::read(ptr, version);
+            set.markers.reserve(markers_positions.size());
 
             // Build markers
-            for (const auto& position : markersPositions) {
+            for (const auto& position : markers_positions) {
                 Marker marker;
                 marker.position = position;
                 marker.id       = -1;
@@ -149,19 +150,21 @@ namespace module::input {
     struct ReadData<RigidBody> {
         static inline RigidBody read(const char*& ptr, const uint32_t version) {
 
-            RigidBody rigidBody;
+            RigidBody rigid_body;
 
-            rigidBody.id       = ReadData<uint32_t>::read(ptr, version);
-            rigidBody.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
-            rigidBody.rotation = ReadData<Eigen::Matrix<float, 4, 1>>::read(ptr, version);
-            rigidBody.markers  = ReadData<std::vector<Marker>>::read(ptr, version);
+            rigid_body.id       = ReadData<uint32_t>::read(ptr, version);
+            rigid_body.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            rigid_body.rotation = ReadData<Eigen::Matrix<float, 4, 1>>::read(ptr, version);
 
             // Version specific information
-            rigidBody.error = version >= 0x02000000 ? ReadData<float>::read(ptr, version) : -1;
-            rigidBody.tracking_valid =
+            if (version < 0x03000000) {
+                rigid_body.markers = ReadData<std::vector<Marker>>::read(ptr, version);
+            }
+            rigid_body.error = version >= 0x02000000 ? ReadData<float>::read(ptr, version) : -1;
+            rigid_body.tracking_valid =
                 version >= 0x02060000 ? (ReadData<short>::read(ptr, version) & 0x01) == 0x01 : true;
 
-            return rigidBody;
+            return rigid_body;
         }
     };
 
@@ -195,6 +198,12 @@ namespace module::input {
                 marker.occluded           = (params & 0x01) == 0x01;
                 marker.point_cloud_solved = (params & 0x02) == 0x02;
                 marker.model_solved       = (params & 0x04) == 0x04;
+                if (version >= 0x03000000) {
+                    marker.has_model     = (params & 0x08) == 0x08;
+                    marker.unlabeled     = (params & 0x10) == 0x10;
+                    marker.active_marker = (params & 0x20) == 0x20;
+                    marker.err           = ReadData<uint32_t>::read(ptr, version);
+                }
             }
             else {
                 marker.occluded           = false;
@@ -211,16 +220,33 @@ namespace module::input {
     struct ReadData<ForcePlate> {
         static inline ForcePlate read(const char*& ptr, const uint32_t version) {
 
-            ForcePlate forcePlate;
+            ForcePlate force_plate;
 
-            forcePlate.id = ReadData<uint32_t>::read(ptr, version);
-            auto channels = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
-            forcePlate.channels.reserve(channels.size());
+            force_plate.id = ReadData<uint32_t>::read(ptr, version);
+            auto channels  = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
+            force_plate.channels.reserve(channels.size());
             for (uint channel = 0; channel < channels.size(); channel++) {
-                forcePlate.channels[channel].channel = std::move(channels[channel]);
+                force_plate.channels[channel].channel = std::move(channels[channel]);
             }
 
-            return forcePlate;
+            return force_plate;
+        }
+    };
+
+    // Read Device Models
+    template <>
+    struct ReadData<Device> {
+        static inline Device read(const char*& ptr, const uint32_t version) {
+            Device device;
+
+            device.id     = ReadData<uint32_t>::read(ptr, version);
+            auto channels = ReadData<std::vector<std::vector<float>>>::read(ptr, version);
+            device.channels.reserve(channels.size());
+            for (uint channel = 0; channel < channels.size(); channel++) {
+                device.channels[channel].channel = std::move(channels[channel]);
+            }
+
+            return device;
         }
     };
 
@@ -230,8 +256,8 @@ namespace module::input {
         static inline NatNet::MarkerSetModel read(const char*& ptr, const uint32_t version) {
 
             NatNet::MarkerSetModel m;
-            m.name        = ReadData<std::string>::read(ptr, version);
-            m.markerNames = ReadData<std::vector<std::string>>::read(ptr, version);
+            m.name         = ReadData<std::string>::read(ptr, version);
+            m.marker_names = ReadData<std::vector<std::string>>::read(ptr, version);
             return m;
         }
     };
@@ -242,10 +268,33 @@ namespace module::input {
         static inline NatNet::RigidBodyModel read(const char*& ptr, const uint32_t version) {
 
             NatNet::RigidBodyModel m;
-            m.name     = version >= 0x02000000 ? ReadData<std::string>::read(ptr, version) : "";
-            m.id       = ReadData<uint32_t>::read(ptr, version);
-            m.parentId = ReadData<uint32_t>::read(ptr, version);
-            m.offset   = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            m.name      = version >= 0x02000000 ? ReadData<std::string>::read(ptr, version) : "";
+            m.id        = ReadData<uint32_t>::read(ptr, version);
+            m.parent_id = ReadData<uint32_t>::read(ptr, version);
+            m.offset    = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+
+            uint32_t n_markers = ReadData<uint32_t>::read(ptr, version);
+            const char* ptr2   = ptr + (n_markers * 3 * sizeof(float));
+            const char* ptr3   = ptr2 + (n_markers * (sizeof(int)));
+
+            if (version >= 0x03000000) {
+
+                std::vector<NatNet::RigidBodyMarker> data(n_markers);
+
+                for (NatNet::RigidBodyMarker& model : data) {
+                    // Marker position
+                    model.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+                    // Marker Required Active Labels
+                    model.active_label = ReadData<uint32_t>::read(ptr2, version);
+
+                    if (version >= 0x04000000) {
+                        // Marker Name
+                        model.marker_name = ReadData<std::string>::read(ptr3, version);
+                    }
+                    m.rigid_body_markers[model.active_label] = model;
+                }
+            }
+            ptr = ptr3;
             return m;
         }
     };
@@ -260,9 +309,73 @@ namespace module::input {
             m.id   = ReadData<uint32_t>::read(ptr, version);
 
             // Convert our bone models into a map
-            auto boneModels = ReadData<std::vector<NatNet::RigidBodyModel>>::read(ptr, version);
-            for (auto& model : boneModels) {
-                m.boneModels[model.id] = model;
+            auto bone_models = ReadData<std::vector<NatNet::RigidBodyModel>>::read(ptr, version);
+            for (auto& model : bone_models) {
+                m.bone_models[model.id] = model;
+            }
+
+            return m;
+        }
+    };
+
+    // Read ForcePlate Models
+    template <>
+    struct ReadData<NatNet::ForcePlateModel> {
+        static inline NatNet::ForcePlateModel read(const char*& ptr, const uint32_t version) {
+
+            NatNet::ForcePlateModel m;
+            if (version >= 0x03000000) {
+                m.id                 = ReadData<uint32_t>::read(ptr, version);
+                m.name               = ReadData<std::string>::read(ptr, version);
+                m.width              = ReadData<uint32_t>::read(ptr, version);
+                m.length             = ReadData<uint32_t>::read(ptr, version);
+                m.origin             = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+                m.calibration_matrix = ReadData<Eigen::Matrix<uint32_t, 12, 12>>::read(ptr, version);
+                m.corners            = ReadData<Eigen::Matrix<uint32_t, 4, 3>>::read(ptr, version);
+                m.plate_type         = ReadData<uint32_t>::read(ptr, version);
+                m.channel_type       = ReadData<uint32_t>::read(ptr, version);
+                m.channels           = ReadData<uint32_t>::read(ptr, version);
+                for (uint32_t n = 1; n < m.channels; n++) {
+                    ReadData<std::string>::read(ptr, version);
+                }
+            }
+
+            return m;
+        }
+    };
+
+    // Read Device Models
+    template <>
+    struct ReadData<NatNet::DeviceModel> {
+        static inline NatNet::DeviceModel read(const char*& ptr, const uint32_t version) {
+
+            NatNet::DeviceModel m;
+            if (version >= 0x03000000) {
+                m.id                = ReadData<uint32_t>::read(ptr, version);
+                m.name              = ReadData<std::string>::read(ptr, version);
+                m.serial_no         = ReadData<std::string>::read(ptr, version);
+                m.device_type       = ReadData<uint32_t>::read(ptr, version);
+                m.channel_data_type = ReadData<uint32_t>::read(ptr, version);
+                m.channels          = ReadData<uint32_t>::read(ptr, version);
+                for (uint32_t n = 1; n < m.channels; n++) {
+                    ReadData<std::string>::read(ptr, version);
+                }
+            }
+
+            return m;
+        }
+    };
+
+    // Read Camera Models
+    template <>
+    struct ReadData<NatNet::CameraModel> {
+        static inline NatNet::CameraModel read(const char*& ptr, const uint32_t version) {
+
+            NatNet::CameraModel m;
+            if (version >= 0x03000000) {
+                m.name        = ReadData<std::string>::read(ptr, version);
+                m.position    = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+                m.orientation = ReadData<Eigen::Matrix<float, 4, 1>>::read(ptr, version);
             }
 
             return m;

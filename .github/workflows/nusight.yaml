@@ -7,6 +7,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Trigger for merge queue
+  merge_group:
+    types: [checks_requested]
 
 # Ensure that only one instance of the workflow is run at a time for each branch/tag.
 # Jobs currently running on the branch/tag will be cancelled when new commits are pushed.
@@ -26,7 +29,7 @@ jobs:
   # Detects changes to NUsight related files, for conditionally running other jobs
   check_for_changes:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Output the detected changes for conditionally running other jobs
     outputs:
@@ -49,53 +52,6 @@ jobs:
               - 'shared/message/**/*.proto'
               - 'nuclear/message/proto/**/*.proto'
 
-  # Validate the NUsight code style and formatting are correct according to eslint and prettier
-  nusight-format:
-    name: NUsight Formatting
-    needs: check_for_changes
-
-    # Run only if the workflow or NUsight related files have changed
-    if: >
-      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
-      needs.check_for_changes.outputs.has_nusight_changes == 'true'
-
-    # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
-
-    # Run on the Node 14 (LTS) container
-    container:
-      image: node:lts-fermium
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      # Get our yarn cache if it exists
-      # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      # Check if the yarn cache directory is valid
-      - uses: actions/cache@v3
-        id: yarn-cache # use this to check for `cache-hit`
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-
-      # Check dependencies from cache and install any which weren't cached or were corrupted
-      - name: Install Dependencies
-        working-directory: nusight2
-        run: yarn --prefer-offline
-
-      - name: Run eslint
-        working-directory: nusight2
-        run: yarn eslint
-
   # Build the NUsight code
   build-nusight:
     name: Build NUsight
@@ -107,11 +63,11 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
-    # Run on the Node 14 (LTS) container
+    # Run on the Node container
     container:
-      image: node:lts-fermium
+      image: node:18
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -138,6 +94,10 @@ jobs:
       - name: Install Dependencies
         working-directory: nusight2
         run: yarn --prefer-offline
+
+      - name: Type Check NUsight
+        working-directory: nusight2
+        run: yarn tscheck
 
       - name: Build NUsight
         working-directory: nusight2
@@ -154,11 +114,11 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
-    # Run on the Node 14 (LTS) container
+    # Run on the Node container
     container:
-      image: node:lts-fermium
+      image: node:18
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -201,11 +161,11 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
-    # Run on the Node 14 (LTS) container
+    # Run on the Node container
     container:
-      image: node:lts-fermium
+      image: node:18
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:

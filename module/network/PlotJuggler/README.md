@@ -56,11 +56,11 @@ To plot data from a role you're working on using PlotJuggler, do the following.
 
 ## Consumes
 
-- `message::support::nusight::DataPoint` - listens for these from the rest of the codebase, transforming and forwarding them to PlotJuggler
+- `message::eye::DataPoint` - listens for these from the rest of the codebase, transforming and forwarding them to PlotJuggler
 
 ## Emits
 
-- `message::support::nusight::DataPoint` - when debug waves are enabled for testing the connection to PlotJuggler
+- `message::eye::DataPoint` - when debug waves are enabled for testing the connection to PlotJuggler
 - JSON-formatted packets to PlotJuggler via UDP
 
 ## Dependencies

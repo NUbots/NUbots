@@ -18,14 +18,14 @@
  */
 #include "Balance.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
 namespace utility::motion {
 
     using LimbID = utility::input::LimbID;
     // using ServoID = utility::input::ServoID;
+    using message::actuation::KinematicsModel;
     using message::input::Sensors;
-    using message::motion::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();
@@ -49,7 +49,7 @@ namespace utility::motion {
 
 
     void Balancer::balance(const KinematicsModel& model,
-                           Eigen::Affine3f& footToTorso,
+                           Eigen::Isometry3f& footToTorso,
                            const LimbID& leg,
                            const Sensors& sensors) {
 
@@ -61,7 +61,7 @@ namespace utility::motion {
         //------------------------------------
 
         // Robot coords in world (:Robot -> World)
-        Eigen::Affine3f Htw           = Eigen::Affine3d(sensors.Htw).cast<float>();
+        Eigen::Isometry3f Htw         = sensors.Htw.cast<float>();
         Eigen::AngleAxisf orientation = Eigen::AngleAxisf(Htw.rotation().inverse());
 
         // .eulerAngles(0, 1, 2) returns {roll, pitch, yaw}
@@ -108,8 +108,8 @@ namespace utility::motion {
         footToTorso.linear() = ankleRotation.toRotationMatrix() * footToTorso.rotation();
 
         // Get the position of our hip to rotate around
-        Eigen::Affine3f hip = Eigen::Affine3f::Identity();
-        hip.translation()   = Eigen::Vector3f(model.leg.HIP_OFFSET_X,
+        Eigen::Isometry3f hip = Eigen::Isometry3f::Identity();
+        hip.translation()     = Eigen::Vector3f(model.leg.HIP_OFFSET_X,
                                             model.leg.HIP_OFFSET_Y * (leg == LimbID::RIGHT_LEG ? -1 : 1),
                                             -model.leg.HIP_OFFSET_Z);
 

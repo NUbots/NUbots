@@ -82,7 +82,7 @@ namespace module::input {
                 // Open the camera: Store as shared pointer
                 std::string device_description = arv_get_device_id(device_no);
                 auto camera =
-                    std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
+                    std::shared_ptr<ArvCamera>(arv::camera_new(device_description.c_str()), [](ArvCamera* ptr) {
                         if (ptr) {
                             g_object_unref(ptr);
                         }
@@ -93,7 +93,7 @@ namespace module::input {
                 }
                 else {
                     // Create a new stream object: Store as shared pointer
-                    auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
+                    auto stream = std::shared_ptr<ArvStream>(arv::camera_create_stream(camera.get(), nullptr, nullptr),
                                                              [](ArvStream* ptr) {
                                                                  if (ptr) {
                                                                      g_object_unref(ptr);
@@ -113,8 +113,8 @@ namespace module::input {
                                                         name,
                                                         0,  // fourcc is set later
                                                         num_cameras++,
-                                                        Image::Lens(),      // Lens is constructed in settings
-                                                        Eigen::Affine3d(),  // Hpc is set in settings
+                                                        Image::Lens(),        // Lens is constructed in settings
+                                                        Eigen::Isometry3d(),  // Hpc is set in settings
                                                         camera,
                                                         stream,
                                                         CameraContext::TimeCorrection(),
@@ -143,7 +143,7 @@ namespace module::input {
 
             // Stop the video stream so we can apply the settings
             arv::camera_stop_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), 0);
+            arv::stream_set_emit_signals(stream.get(), 0);
 
             // Synchronise the clocks
             context.time = sync_clocks(device);
@@ -285,7 +285,7 @@ namespace module::input {
                              &it->second);
             // Start aquisition
             arv::camera_start_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), 1);
+            arv::stream_set_emit_signals(stream.get(), 1);
         });
 
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
@@ -296,9 +296,9 @@ namespace module::input {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
-            Eigen::Affine3d Htw(sensors.Htw);
-            Eigen::Affine3d Hwp = Htw.inverse() * Htp;
+            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htw(sensors.Htw);
+            Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
             Hwps.emplace_back(sensors.timestamp, Hwp);
         });
@@ -307,7 +307,7 @@ namespace module::input {
             for (auto& camera : cameras) {
                 // Stop the video stream.
                 arv::camera_stop_acquisition(camera.second.camera.get());
-                arv_stream_set_emit_signals(camera.second.stream.get(), 0);
+                arv::stream_set_emit_signals(camera.second.stream.get(), 0);
             }
             arv_shutdown();
             cameras.clear();
@@ -381,9 +381,9 @@ namespace module::input {
                                 timesync.drift.max_clock_drift / 1e6));
 
                             arv::camera_stop_acquisition(context->camera.get());
-                            arv_stream_set_emit_signals(context->stream.get(), 0);
+                            arv::stream_set_emit_signals(context->stream.get(), 0);
                             context->time = sync_clocks(arv_camera_get_device(context->camera.get()));
-                            arv_stream_set_emit_signals(context->stream.get(), 1);
+                            arv::stream_set_emit_signals(context->stream.get(), 1);
                             arv::camera_start_acquisition(context->camera.get());
                         }
                     }
@@ -401,21 +401,21 @@ namespace module::input {
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
 
-                Eigen::Affine3d Hcw;
+                Eigen::Isometry3d Hcw;
 
                 /* Mutex Scope */ {
                     std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
 
-                    Eigen::Affine3d Hpc = context->Hpc;
-                    Eigen::Affine3d Hwp;
+                    Eigen::Isometry3d Hpc = context->Hpc;
+                    Eigen::Isometry3d Hwp;
                     if (reactor.Hwps.empty()) {
-                        Hwp = Eigen::Affine3d::Identity();
+                        Hwp = Eigen::Isometry3d::Identity();
                     }
                     else {
                         // Find the first time that is not less than the target time
                         auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
                                                        reactor.Hwps.end(),
-                                                       std::make_pair(msg->timestamp, Eigen::Affine3d::Identity()),
+                                                       std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
                                                        [](const auto& a, const auto& b) { return a.first < b.first; });
 
                         if (Hwp_it == reactor.Hwps.end()) {
@@ -435,11 +435,11 @@ namespace module::input {
                         }
                     }
 
-                    Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
+                    Hcw = Eigen::Isometry3d(Hwp * Hpc).inverse();
                 }
 
                 msg->lens = context->lens;
-                msg->Hcw  = Hcw.matrix();
+                msg->Hcw  = Hcw;
 
                 reactor.emit(msg);
 

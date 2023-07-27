@@ -1,0 +1,62 @@
+- targets:
+    - id: R_SHOULDER_PITCH
+      position: 0
+      gain: 30
+    - gain: 30
+      position: 0
+      id: L_SHOULDER_PITCH
+    - id: R_SHOULDER_ROLL
+      gain: 30
+      position: 0
+    - position: 0
+      id: L_SHOULDER_ROLL
+      gain: 30
+    - position: 0
+      gain: 30
+      id: R_ELBOW
+    - position: 0
+      id: L_ELBOW
+      gain: 30
+    - id: R_HIP_YAW
+      gain: 30
+      position: 0
+    - gain: 30
+      position: 0
+      id: L_HIP_YAW
+    - position: 0
+      gain: 30
+      id: R_HIP_ROLL
+    - position: 0
+      id: L_HIP_ROLL
+      gain: 30
+    - gain: 30
+      id: R_HIP_PITCH
+      position: 0
+    - id: L_HIP_PITCH
+      gain: 30
+      position: 0
+    - id: R_KNEE
+      gain: 30
+      position: 0
+    - id: L_KNEE
+      gain: 30
+      position: 0
+    - gain: 30
+      position: 0
+      id: R_ANKLE_PITCH
+    - id: L_ANKLE_PITCH
+      position: 0
+      gain: 30
+    - gain: 30
+      position: 0
+      id: R_ANKLE_ROLL
+    - id: L_ANKLE_ROLL
+      gain: 30
+      position: 0
+    - id: HEAD_PITCH
+      gain: 30
+      position: 0
+    - id: HEAD_YAW
+      position: 0
+      gain: 30
+  duration: 1000
