@@ -9,7 +9,6 @@
 
 #include "message/actuation/ServoTarget.hpp"
 
-#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
 #include "message/localisation/Field.hpp"
 

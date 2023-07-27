@@ -22,6 +22,7 @@
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
+#include "message/input/Buttons.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
@@ -37,7 +38,7 @@ namespace module::behaviour::tools {
 
     using NUClear::message::CommandLineArguments;
 
-    using message::platform::ButtonMiddleDown;
+    using message::input::ButtonMiddleDown;
 
     using utility::behaviour::RegisterAction;
     using LimbID  = utility::input::LimbID;

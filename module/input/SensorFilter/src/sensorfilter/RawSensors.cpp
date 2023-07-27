@@ -18,6 +18,7 @@
  */
 
 #include "utility/platform/RawSensors.hpp"
+#include "message/input/Buttons.hpp"
 
 #include "SensorFilter.hpp"
 
@@ -30,10 +31,10 @@ namespace module::input {
     using utility::platform::make_error_string_v1;
     using utility::platform::make_servo_error_string_v1;
 
-    using message::platform::ButtonLeftDown;
-    using message::platform::ButtonLeftUp;
-    using message::platform::ButtonMiddleDown;
-    using message::platform::ButtonMiddleUp;
+    using message::input::ButtonLeftDown;
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
 
     void SensorFilter::update_raw_sensors(std::unique_ptr<Sensors>& sensors,
                                           const std::shared_ptr<const Sensors>& previous_sensors,
