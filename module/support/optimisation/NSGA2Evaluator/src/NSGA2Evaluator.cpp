@@ -37,14 +37,14 @@ namespace module::support::optimisation {
     using message::platform::RawSensors;
     using message::platform::webots::OptimisationCommand;
     using message::platform::webots::OptimisationRobotPosition;
-    using message::support::optimisation::OptimisationResetDone;
-    using message::support::optimisation::OptimisationTimeUpdate;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
     using message::support::optimisation::NSGA2EvaluatorReady;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2Terminate;
     using message::support::optimisation::NSGA2TrialExpired;
+    using message::support::optimisation::OptimisationResetDone;
+    using message::support::optimisation::OptimisationTimeUpdate;
 
     using utility::behaviour::RegisterAction;
     using utility::input::LimbID;

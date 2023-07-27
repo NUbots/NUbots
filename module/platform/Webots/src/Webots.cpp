@@ -33,7 +33,6 @@
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
-
 #include "message/support/optimisation/OptimisationResetDone.hpp"
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
