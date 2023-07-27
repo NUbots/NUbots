@@ -138,11 +138,19 @@ namespace module::platform::OpenCR {
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
 
+        // Buzz if any servo is hot, use the boolean flag to turn the buzzer off once the servo is no longer hot
+        // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
+        bool any_servo_hot = false;
         for (const auto& servo : servo_states) {
             if (servo.temperature > cfg.alarms.temperature.level) {
+                any_servo_hot = true;
                 emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
                 break;
             }
+        }
+
+        if (!any_servo_hot) {
+            emit(std::make_unique<Buzzer>(0));
         }
 
         // If this servo has not been initialised yet, set the goal states to the current states
