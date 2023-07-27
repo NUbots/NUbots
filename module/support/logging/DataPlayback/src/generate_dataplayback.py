@@ -27,7 +27,11 @@ if __name__ == "__main__":
                     includes.append(include)
 
                 # Load our protobuf module
-                loader.find_module(module_name).load_module(module_name)
+                fqdn = os.path.normpath(os.path.join(os.path.relpath(dir_name, shared_folder), module_name)).replace(
+                    os.sep, "."
+                )
+                if fqdn not in sys.modules:
+                    loader.find_module(fqdn).load_module(fqdn)
 
     # Now that we've imported them all get all the subclasses of protobuf message
     messages = set()
@@ -62,7 +66,7 @@ if __name__ == "__main__":
 
     # Work out our includes and players
     includes = ['#include "{}"'.format(i) for i in includes]
-    players = ["            add_player<{}>();".format(m.replace(".", "::")) for m in messages]
+    players = ["        add_player<{}>();".format(m.replace(".", "::")) for m in messages]
 
     with open(cpp_file, "w") as f:
         f.write(source.format(includes="\n".join(includes), players="\n".join(players)))

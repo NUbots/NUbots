@@ -95,9 +95,9 @@ public:
     Joystick();
 
     // Delete the move and copy constructors and operators to maintain file descriptor sanitation
-    Joystick(Joystick& other)  = delete;
-    Joystick(Joystick&& other) = delete;
-    Joystick& operator=(Joystick& other) = delete;
+    Joystick(Joystick& other)             = delete;
+    Joystick(Joystick&& other)            = delete;
+    Joystick& operator=(Joystick& other)  = delete;
     Joystick& operator=(Joystick&& other) = delete;
 
     /**

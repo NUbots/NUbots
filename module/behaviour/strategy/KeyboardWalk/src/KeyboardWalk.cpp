@@ -23,7 +23,6 @@
 #include <csignal>
 #include <cstdio>
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/HeadCommand.hpp"

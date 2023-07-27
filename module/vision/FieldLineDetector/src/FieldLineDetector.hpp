@@ -9,9 +9,9 @@ namespace module::vision {
     private:
         /// The configuration variables for this reactor
         struct {
-            float cluster_points       = 0.0f;
-            float confidence_threshold = 0.0f;
-        } config;
+            double cluster_points       = 0.0;
+            double confidence_threshold = 0.0;
+        } cfg;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLineDetector reactor.

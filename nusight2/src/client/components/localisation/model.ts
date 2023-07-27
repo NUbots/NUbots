@@ -42,7 +42,7 @@ class CameraModel {
   @observable pitch: number;
   @observable distance: number;
 
-  constructor({ position, yaw, pitch, distance }: CameraModel) {
+  constructor({ position, yaw, pitch, distance }: { position: Vector3; yaw: number; pitch: number; distance: number }) {
     this.position = position;
     this.yaw = yaw;
     this.pitch = pitch;

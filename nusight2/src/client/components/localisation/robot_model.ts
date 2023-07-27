@@ -1,6 +1,7 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
 
+import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
@@ -114,44 +115,64 @@ export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
   @observable color?: string;
-  @observable rWTt: Vector3; // Torso to world translation in torso space.
+  @observable Htw: Matrix4; // World to torso
+  @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
+  @observable fieldLinesDots: { rPWw: Vector3[] };
 
   constructor({
     model,
     name,
     color,
-    rWTt,
+    Htw,
+    Hfw,
     Rwt,
     motors,
+    fieldLinesDots,
   }: {
     model: RobotModel;
     name: string;
     color?: string;
-    rWTt: Vector3;
+    Htw: Matrix4;
+    Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
+    fieldLinesDots: { rPWw: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
     this.color = color;
-    this.rWTt = rWTt;
+    this.Htw = Htw;
+    this.Hfw = Hfw;
     this.Rwt = Rwt;
     this.motors = motors;
+    this.fieldLinesDots = fieldLinesDots;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
     return new LocalisationRobotModel({
       model,
       name: model.name,
-      rWTt: Vector3.of(),
+      Htw: Matrix4.of(),
+      Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
+      fieldLinesDots: { rPWw: [] },
     });
   });
 
+  @computed get id() {
+    return this.model.id;
+  }
+
   @computed get visible() {
     return this.model.enabled;
+  }
+
+  /** Torso to field transformation */
+  @computed
+  get Hft(): Matrix4 {
+    return this.Hfw.multiply(this.Htw.invert());
   }
 }

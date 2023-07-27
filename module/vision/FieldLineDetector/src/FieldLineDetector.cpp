@@ -23,14 +23,14 @@ namespace module::vision {
     using message::vision::GreenHorizon;
 
     FieldLineDetector::FieldLineDetector(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), config{} {
+        : Reactor(std::move(environment)) {
 
-        on<Configuration>("FieldLineDetector.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("FieldLineDetector.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FieldLineDetector.yaml
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            this->config.confidence_threshold = cfg["confidence_threshold"].as<float>();
-            this->config.cluster_points       = cfg["cluster_points"].as<int>();
+            cfg.confidence_threshold = config["confidence_threshold"].as<double>();
+            cfg.cluster_points       = config["cluster_points"].as<int>();
         });
 
         on<Trigger<GreenHorizon>, Buffer<2>>().then("Field Line Detector", [this](const GreenHorizon& horizon) {
@@ -38,8 +38,8 @@ namespace module::vision {
             const auto& cls        = horizon.mesh->classifications;
             const auto& neighbours = horizon.mesh->neighbourhood;
             // Unit vectors from camera to a point in the mesh, in world space
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays;
-            const int LINE_INDEX                                = horizon.class_map.at("line");
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays.cast<double>();
+            const int LINE_INDEX                                 = horizon.class_map.at("line");
             // PARTITION INDICES AND CLUSTER
             // Get some indices to partition
             std::vector<int> indices(horizon.mesh->indices.size());
@@ -51,7 +51,7 @@ namespace module::vision {
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return idx == int(indices.size()) || (cls(LINE_INDEX, idx) >= config.confidence_threshold);
+                    return idx == int(indices.size()) || (cls(LINE_INDEX, idx) >= cfg.confidence_threshold);
                 });
             indices.resize(std::distance(indices.begin(), boundary));
             log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
@@ -59,7 +59,7 @@ namespace module::vision {
             utility::vision::visualmesh::cluster_points(indices.begin(),
                                                         indices.end(),
                                                         neighbours,
-                                                        config.cluster_points,
+                                                        cfg.cluster_points,
                                                         clusters);
             log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
             // Partition the clusters such that clusters above the green horizons are removed,
@@ -68,22 +68,27 @@ namespace module::vision {
                                                                                         clusters.end(),
                                                                                         horizon.horizon.begin(),
                                                                                         horizon.horizon.end(),
-                                                                                        uPCw,
+                                                                                        uPCw.cast<float>(),
                                                                                         false,
                                                                                         true);
             clusters.resize(std::distance(clusters.begin(), green_boundary));
             log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+
+
             // Create the FieldLines message, which will contain a FieldLine for every cluster that is a valid field
             // line
-            auto lines = std::make_unique<FieldLines>();
-
-            lines->id        = horizon.id;         // camera id
-            lines->timestamp = horizon.timestamp;  // time when the image was taken
-            lines->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
-
+            auto lines            = std::make_unique<FieldLines>();
+            lines->id             = horizon.id;         // camera id
+            lines->timestamp      = horizon.timestamp;  // time when the image was taken
+            lines->Hcw            = horizon.Hcw;        // world to camera transform at the time the image was taken
+            Eigen::Isometry3d Hwc = horizon.Hcw.inverse();
             for (auto& cluster : clusters) {
                 for (const auto& idx : cluster) {
                     lines->points.push_back(uPCw.col(idx));
+                    // Project the field line point onto the field plane
+                    Eigen::Vector3d rPWw =
+                        uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + Hwc.translation();
+                    lines->rPWw.push_back(rPWw);
                 }
             }
 

@@ -15,7 +15,6 @@ namespace module::output::compressor::turbojpeg {
             mosaic = utility::vision::Mosaic(width, height, format);
         }
     }
-    Compressor::~Compressor() = default;
 
     std::vector<uint8_t> Compressor::compress(const std::vector<uint8_t>& data) {
         TJSAMP tj_sampling = TJSAMP_444;
@@ -82,9 +81,9 @@ namespace module::output::compressor::turbojpeg {
 
             tjCompress2(compressor.get(),
                         cast.data(),
-                        width,
+                        int(width),
                         0,
-                        height,
+                        int(height),
                         tj_format,
                         &compressed,
                         &jpeg_size,
@@ -99,9 +98,9 @@ namespace module::output::compressor::turbojpeg {
 
             tjCompress2(compressor.get(),
                         permuted.data(),
-                        width,
+                        int(width),
                         0,
-                        height,
+                        int(height),
                         tj_format,
                         &compressed,
                         &jpeg_size,
@@ -112,9 +111,9 @@ namespace module::output::compressor::turbojpeg {
         else {
             tjCompress2(compressor.get(),
                         data.data(),
-                        width,
+                        int(width),
                         0,
-                        height,
+                        int(height),
                         tj_format,
                         &compressed,
                         &jpeg_size,

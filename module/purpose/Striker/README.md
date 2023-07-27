@@ -31,6 +31,7 @@ Add this module to play as a striker in soccer!
 - `message::strategy::FindBall` a Task requesting to look and move around to find the ball
 - `message::strategy::LookAtBall` a Task requesting to look at a known ball
 - `message::strategy::WalkToBall` a Task requesting to walk to a known ball
-- `message::planning::KickTo` a Task requesting to kick the ball
+- `message::strategy::AlignBallToGoal` a Task requesting to align the robot to face the goal with the ball infront of it
+- `message::planning::KickToGoal` a Task requesting to kick the ball towards the goal
 
 ## Dependencies

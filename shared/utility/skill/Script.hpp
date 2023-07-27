@@ -92,12 +92,12 @@ namespace utility::skill {
 
         // Try getting the robot-specific script first
         if (utility::file::exists(robot_path)) {
-            NUClear::log<NUClear::DEBUG>("Parsing robot specific script:", script);
+            NUClear::log<NUClear::INFO>("Parsing robot specific script:", script);
             return YAML::LoadFile(robot_path);
         }
         // If there was no robot-specific script, then get the platform-specific script
         else if (utility::file::exists(platform_path)) {
-            NUClear::log<NUClear::DEBUG>("Parsing default platform script:", script);
+            NUClear::log<NUClear::INFO>("Parsing default platform script:", script);
             return YAML::LoadFile(platform_path);
         }
         // The script doesn't exist, tell the user
@@ -186,6 +186,41 @@ namespace utility::skill {
         return load_script<Sequence>(std::vector{ScriptRequest(script)}, start);
     }
 
+    /// @brief Creates sequences of servos from the Script given
+    /// @param script Script to load
+    /// @param start When the first script should start executing. Default is now.
+    /// @return Sequence message which will be filled with sequences of servos and can then be emitted as a
+    /// Task.
+    template <typename Sequence>
+    static std::unique_ptr<Sequence> load_script(const Script<Sequence>& script,
+                                                 NUClear::clock::time_point start = NUClear::clock::now()) {
+        // Create sequence message
+        auto msg = std::make_unique<Sequence>();
+
+        // First script begins at start time
+        auto time = start;
+
+        // Time will be incremented through each frame
+        // Loop over the frames and add them as sequences of servos into the Sequence message
+        for (const auto& frame : script.frames) {
+            // This frame should finish after frame.duration time has passed
+            time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(frame.duration);
+
+            // Add the servos in the frame to a map
+            std::map<uint32_t, ServoCommand> servos{};
+            for (const auto& target : frame.targets) {
+                servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+            }
+
+            // Add the map to the pack. This represents one sequence of servos.
+            msg->frames.emplace_back(servos);
+        }
+
+        // Return the message which can then be emitted as a Task
+        return msg;
+    }
+
+
 }  // namespace utility::skill
 
 // Functionality for reading in scripts
@@ -212,10 +247,10 @@ namespace YAML {
         static inline bool decode(const Node& node, ::utility::skill::Frame::Target& rhs) {
             // Try to read and save the target information
             try {
-                rhs = {node["id"].as<std::string>(),
-                       node["position"].as<float>(),
-                       node["gain"].as<float>(),
-                       node["torque"] != nullptr ? node["torque"].as<float>() : 100};
+                rhs = ::utility::skill::Frame::Target{node["id"].as<std::string>(),
+                                                      node["position"].as<float>(),
+                                                      node["gain"].as<float>(),
+                                                      node["torque"].IsDefined() ? node["torque"].as<float>() : 100.0f};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",

@@ -13,10 +13,10 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            float ball_timeout_threshold  = 0.0;
-            float ball_distance_threshold = 0.0;
-            float ball_angle_threshold    = 0.0;
-            float target_angle_threshold  = 0.0;
+            double ball_timeout_threshold  = 0.0;
+            double ball_distance_threshold = 0.0;
+            double ball_angle_threshold    = 0.0;
+            double target_angle_threshold  = 0.0;
             utility::input::LimbID kick_leg{};
         } cfg;
 

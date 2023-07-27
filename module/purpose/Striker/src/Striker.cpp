@@ -6,7 +6,9 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
+#include "message/strategy/KickToGoal.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/Ready.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -22,14 +24,23 @@ namespace module::purpose {
     using GameMode = message::input::GameState::Data::Mode;
     using message::input::GameState;
     using message::planning::KickTo;
+    using message::purpose::CornerKickStriker;
+    using message::purpose::DirectFreeKickStriker;
+    using message::purpose::GoalKickStriker;
+    using message::purpose::InDirectFreeKickStriker;
     using message::purpose::NormalStriker;
+    using message::purpose::PenaltyKickStriker;
     using message::purpose::PenaltyShootoutStriker;
+    using message::purpose::ThrowInStriker;
+    using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
+    using message::strategy::KickToGoal;
     using message::strategy::LookAtBall;
     using message::strategy::Ready;
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
+
 
     using StrikerTask = message::purpose::Striker;
     using utility::support::Expression;
@@ -56,6 +67,14 @@ namespace module::purpose {
                         case GameMode::PENALTY_SHOOTOUT: emit<Task>(std::make_unique<PenaltyShootoutStriker>()); break;
                         case GameMode::NORMAL:
                         case GameMode::OVERTIME: emit<Task>(std::make_unique<NormalStriker>()); break;
+                        case GameMode::DIRECT_FREEKICK: emit<Task>(std::make_unique<DirectFreeKickStriker>()); break;
+                        case GameMode::INDIRECT_FREEKICK:
+                            emit<Task>(std::make_unique<InDirectFreeKickStriker>());
+                            break;
+                        case GameMode::PENALTYKICK: emit<Task>(std::make_unique<PenaltyKickStriker>()); break;
+                        case GameMode::CORNER_KICK: emit<Task>(std::make_unique<CornerKickStriker>()); break;
+                        case GameMode::GOAL_KICK: emit<Task>(std::make_unique<GoalKickStriker>()); break;
+                        case GameMode::THROW_IN: emit<Task>(std::make_unique<ThrowInStriker>()); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
                 }
@@ -88,6 +107,24 @@ namespace module::purpose {
 
         // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
         on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Direct free kick
+        on<Provide<DirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Indirect free kick
+        on<Provide<InDirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Penalty kick
+        on<Provide<PenaltyKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Corner kick
+        on<Provide<CornerKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Goal kick
+        on<Provide<GoalKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Throw in
+        on<Provide<ThrowInStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
     void Striker::play() {
@@ -96,7 +133,8 @@ namespace module::purpose {
         emit<Task>(std::make_unique<FindBall>(), 1);    // if the look/walk to ball tasks are not running, find the ball
         emit<Task>(std::make_unique<LookAtBall>(), 2);  // try to track the ball
         emit<Task>(std::make_unique<WalkToBall>(), 3);  // try to walk to the ball
-        emit<Task>(std::make_unique<KickTo>(Eigen::Vector3f::Zero()), 4);  // kick the ball if possible
+        emit<Task>(std::make_unique<AlignBallToGoal>(), 4);  // try to walk to the ball
+        emit<Task>(std::make_unique<KickToGoal>(), 5);       // kick the ball if possible
     }
 
 }  // namespace module::purpose
