@@ -8,7 +8,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/webots/WebotsReady.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
@@ -20,7 +19,6 @@ namespace module::support::optimisation {
     using extension::Configuration;
 
     using message::platform::webots::OptimisationCommand;
-    using message::platform::webots::WebotsReady;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReady;
     using message::support::optimisation::NSGA2FitnessScores;
