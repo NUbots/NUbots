@@ -15,11 +15,11 @@
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/platform/webots/WebotsResetDone.hpp"
-#include "message/platform/webots/WebotsTimeUpdate.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
+#include "message/support/optimisation/OptimisationResetDone.hpp"
+#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
@@ -37,8 +37,8 @@ namespace module::support::optimisation {
     using message::platform::RawSensors;
     using message::platform::webots::OptimisationCommand;
     using message::platform::webots::OptimisationRobotPosition;
-    using message::platform::webots::WebotsResetDone;
-    using message::platform::webots::WebotsTimeUpdate;
+    using message::support::optimisation::OptimisationResetDone;
+    using message::support::optimisation::OptimisationTimeUpdate;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
     using message::support::optimisation::NSGA2EvaluatorReady;
@@ -134,13 +134,13 @@ namespace module::support::optimisation {
             }
         });
 
-        on<Trigger<WebotsResetDone>, Single>().then([this](const WebotsResetDone&) {
+        on<Trigger<OptimisationResetDone>, Single>().then([this](const OptimisationResetDone&) {
             log<NUClear::INFO>("Reset done");
             emit(std::make_unique<Event>(Event::RESET_DONE));
         });
 
-        on<Trigger<WebotsTimeUpdate>, Single>().then(
-            [this](const WebotsTimeUpdate& update) { sim_time = update.sim_time; });
+        on<Trigger<OptimisationTimeUpdate>, Single>().then(
+            [this](const OptimisationTimeUpdate& update) { sim_time = update.sim_time; });
 
         on<Trigger<NSGA2Terminate>, Single>().then([this]() {
             // NSGA2Terminate is emitted when we've finished all generations and all individuals

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package message.platform.webots;
+package message.support.optimisation;
 
-message WebotsTimeUpdate {
+message OptimisationTimeUpdate {
     double sim_time   = 1;
     double real_time  = 2;
     double sim_delta  = 3;

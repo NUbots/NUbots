@@ -32,9 +32,10 @@
 #include "message/input/Sensors.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/platform/webots/WebotsResetDone.hpp"
-#include "message/platform/webots/WebotsTimeUpdate.hpp"
 #include "message/platform/webots/messages.hpp"
+
+#include "message/support/optimisation/OptimisationResetDone.hpp"
+#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
@@ -74,8 +75,8 @@ namespace module::platform {
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
-    using message::platform::webots::WebotsResetDone;
-    using message::platform::webots::WebotsTimeUpdate;
+    using message::support::optimisation::OptimisationResetDone;
+    using message::support::optimisation::OptimisationTimeUpdate;
 
     using utility::input::ServoID;
     using utility::platform::getRawServo;
@@ -687,7 +688,7 @@ namespace module::platform {
         current_real_time = sensor_measurements.real_time;
 
         // Emit the webots time update
-        auto time_update_msg        = std::make_unique<WebotsTimeUpdate>();
+        auto time_update_msg        = std::make_unique<OptimisationTimeUpdate>();
         time_update_msg->sim_time   = current_sim_time;
         time_update_msg->real_time  = current_real_time;
         time_update_msg->sim_delta  = sim_delta;
@@ -927,9 +928,9 @@ namespace module::platform {
         robot_position->value = sensor_measurements.robot_position.value;
         emit(robot_position);
 
-        // Create and emit the WebotsResetDone message used by the walk optimiser
+        // Create and emit the OptimisationResetDone message used by the walk optimiser
         if (sensor_measurements.reset_done) {
-            emit(std::make_unique<WebotsResetDone>());
+            emit(std::make_unique<OptimisationResetDone>());
         }
     }
 }  // namespace module::platform

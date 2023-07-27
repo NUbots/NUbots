@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-package message.platform.webots;
-
-message WebotsResetDone {}
