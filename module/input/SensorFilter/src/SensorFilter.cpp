@@ -108,16 +108,16 @@ namespace module::input {
             on<Trigger<RawSensors>,
                Optional<With<Sensors>>,
                With<KinematicsModel>,
-               With<Stability>,
-               With<WalkState>,
+               Optional<With<Stability>>,
+               Optional<With<WalkState>>,
                Single,
                Priority::HIGH>()
                 .then("Main Sensors Loop",
                       [this](const RawSensors& raw_sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const KinematicsModel& kinematics_model,
-                             const Stability& stability,
-                             const WalkState& walk_state) {
+                             const std::shared_ptr<const Stability>& stability,
+                             const std::shared_ptr<const WalkState>& walk_state) {
                           auto sensors = std::make_unique<Sensors>();
 
                           // Updates message with raw sensor data
@@ -151,6 +151,19 @@ namespace module::input {
                           emit(std::move(sensors));
                       })
                 .disable();
+    }
+
+    void SensorFilter::integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state) {
+        // Check if we are not currently falling and walking
+        if (stability == Stability::DYNAMIC && walk_state.state == WalkState::State::WALKING) {
+            // Integrate the walk command to estimate the change in position and yaw orientation
+            double dx = walk_state.velocity_target.x() * dt * cfg.deadreckoning_scale.x();
+            double dy = walk_state.velocity_target.y() * dt * cfg.deadreckoning_scale.y();
+            yaw += walk_state.velocity_target.z() * dt * cfg.deadreckoning_scale.z();
+            // Rotate the change in position into world coordinates before adding it to the current position
+            Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
+            Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
+        }
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
