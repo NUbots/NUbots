@@ -132,6 +132,27 @@ namespace module::purpose {
                                 head_locked = !head_locked;
                             }
                             break;
+                            // dance moves here:
+                        case BUTTON_DPAD_UP:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance move");
+                            }
+                            break;
+                        case BUTTON_DPAD_DOWN:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance move2");
+                            }
+                            break;
+                        case BUTTON_DPAD_LEFT:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance move3");
+                            }
+                            break;
+                        case BUTTON_DPAD_RIGHT:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance move4");
+                            }
+                            break;
                             // case BUTTON_L1:
                             //     if (event.value > 0) {  // button down
                             //         NUClear::log("Requesting Left Front Kick");
