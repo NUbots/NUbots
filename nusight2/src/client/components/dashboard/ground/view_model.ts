@@ -72,6 +72,7 @@ export class GroundViewModel {
         this.halfwayLine,
         this.fieldBorder,
         this.goalAreas,
+        this.penaltyAreas,
         this.penaltyMarkers,
       ],
     });
@@ -163,6 +164,27 @@ export class GroundViewModel {
       });
     return Group.of({
       children: [goalArea(fieldLength * 0.5 - height), goalArea(-fieldLength * 0.5)],
+    });
+  }
+
+  @computed
+  private get penaltyAreas() {
+    const fieldLength = this.model.dimensions.fieldLength;
+    const height = this.model.dimensions.penaltyAreaLength;
+    const width = this.model.dimensions.penaltyAreaWidth;
+    const y = -width * 0.5;
+    const penaltyArea = (x: number) =>
+      Shape.of({
+        geometry: this.getRectanglePolygon({ x, y, width, height }),
+        appearance: BasicAppearance.of({
+          stroke: {
+            width: this.model.dimensions.lineWidth,
+            color: this.model.lineColor,
+          },
+        }),
+      });
+    return Group.of({
+      children: [penaltyArea(fieldLength * 0.5 - height), penaltyArea(-fieldLength * 0.5)],
     });
   }
 

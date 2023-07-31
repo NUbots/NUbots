@@ -418,7 +418,7 @@ namespace module::input {
                         auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
                                                        reactor.Hwps.end(),
                                                        std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
-                                                       [](const auto& a, const auto& b) { return a.first > b.first; });
+                                                       [](const auto& a, const auto& b) { return a.first < b.first; });
 
                         if (Hwp_it == reactor.Hwps.end()) {
                             // Image is newer than most recent sensors
