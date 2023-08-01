@@ -46,6 +46,8 @@ namespace utility::input {
         else if (str == "HEAD_PITCH")       { value = Value::HEAD_PITCH; }
         else if (str == "L_FOOT_BASE")      { value = Value::L_FOOT_BASE; }
         else if (str == "R_FOOT_BASE")      { value = Value::R_FOOT_BASE; }
+        else if (str == "L_CAMERA")      { value = Value::L_CAMERA; }
+        else if (str == "R_CAMERA")      { value = Value::R_CAMERA; }
         else {
             throw std::runtime_error("String " + str + " did not match any enum for LinkID");
         }
@@ -76,6 +78,8 @@ namespace utility::input {
             case Value::HEAD_PITCH: return "HEAD_PITCH";
             case Value::L_FOOT_BASE: return "L_FOOT_BASE";
             case Value::R_FOOT_BASE: return "R_FOOT_BASE";
+            case Value::L_CAMERA: return "L_CAMERA";
+            case Value::R_CAMERA: return "R_CAMERA";
             case Value::NUMBER_OF_LINKS:
             default: throw std::runtime_error("enum LinkID's value is corrupt, unknown value stored");
         }

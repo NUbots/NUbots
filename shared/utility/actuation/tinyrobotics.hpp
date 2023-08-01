@@ -97,12 +97,14 @@ namespace utility::actuation::tinyrobotics {
                                                       {14, LinkID::R_FOOT_BASE},
                                                       {15, LinkID::HEAD_YAW},
                                                       {16, LinkID::HEAD_PITCH},
-                                                      {17, LinkID::L_SHOULDER_PITCH},
-                                                      {18, LinkID::L_SHOULDER_ROLL},
-                                                      {19, LinkID::L_ELBOW},
-                                                      {20, LinkID::R_SHOULDER_PITCH},
-                                                      {21, LinkID::R_SHOULDER_ROLL},
-                                                      {22, LinkID::R_ELBOW}};
+                                                      {17, LinkID::L_CAMERA},
+                                                      {18, LinkID::R_CAMERA},
+                                                      {19, LinkID::L_SHOULDER_PITCH},
+                                                      {20, LinkID::L_SHOULDER_ROLL},
+                                                      {21, LinkID::L_ELBOW},
+                                                      {22, LinkID::R_SHOULDER_PITCH},
+                                                      {23, LinkID::R_SHOULDER_ROLL},
+                                                      {24, LinkID::R_ELBOW}};
     // clang-format on
 
     /**

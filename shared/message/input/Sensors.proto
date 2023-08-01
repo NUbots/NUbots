@@ -137,7 +137,7 @@ message Sensors {
     mat3 inertia_tensor = 11;
 
     /// A set of transforms; one for each servo
-    repeated mat4 Htx = 12 [(array_size) = 20];
+    repeated mat4 Htx = 12 [(array_size) = 24];
 
     /// Homogeneous transform: torso {t} from ground {g}
     iso3 Hgt = 13;

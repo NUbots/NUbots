@@ -49,7 +49,9 @@ namespace utility::input {
             HEAD_PITCH       = 19,
             L_FOOT_BASE      = 20,
             R_FOOT_BASE      = 21,
-            NUMBER_OF_LINKS  = 22
+            L_CAMERA         = 22,
+            R_CAMERA         = 23,
+            NUMBER_OF_LINKS  = 24
         };
         Value value = Value::R_SHOULDER_PITCH;
 
