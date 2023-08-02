@@ -18,9 +18,10 @@
  */
 
 #include "utility/platform/RawSensors.hpp"
-#include "message/input/Buttons.hpp"
 
 #include "SensorFilter.hpp"
+
+#include "message/input/Buttons.hpp"
 
 namespace module::input {
 

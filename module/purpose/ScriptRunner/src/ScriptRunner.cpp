@@ -3,8 +3,8 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/input/Buttons.hpp"
 #include "message/actuation/Limbs.hpp"
+#include "message/input/Buttons.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/skill/Script.hpp"

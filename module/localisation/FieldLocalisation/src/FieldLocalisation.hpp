@@ -20,8 +20,8 @@ namespace module::localisation {
 
     // Particle struct
     struct Particle {
-        Eigen::Vector3d state = Eigen::Vector3d::Zero(); // (x, y, theta) of world space in field space
-        double weight = 1.0;
+        Eigen::Vector3d state = Eigen::Vector3d::Zero();  // (x, y, theta) of world space in field space
+        double weight         = 1.0;
     };
 
     class FieldLocalisation : public NUClear::Reactor {

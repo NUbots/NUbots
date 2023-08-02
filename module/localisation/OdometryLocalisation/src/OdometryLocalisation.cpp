@@ -3,8 +3,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/Nod.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/input/Buttons.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 
@@ -16,9 +16,9 @@ namespace module::localisation {
 
     using extension::Configuration;
     using message::behaviour::Nod;
+    using message::input::ButtonLeftDown;
     using message::input::Sensors;
     using message::localisation::Field;
-    using message::input::ButtonLeftDown;
     using utility::localisation::projectTo2D;
     using utility::nusight::graph;
     using utility::support::Expression;

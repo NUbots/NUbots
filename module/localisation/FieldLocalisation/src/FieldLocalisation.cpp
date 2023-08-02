@@ -6,11 +6,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
-#include "message/support/FieldDescription.hpp"
-#include "message/localisation/Field.hpp"
-
 #include "message/input/Buttons.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/output/Buzzer.hpp"
+#include "message/support/FieldDescription.hpp"
 
 namespace module::localisation {
 
@@ -27,10 +26,10 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using message::vision::FieldLines;
 
-    using message::input::ButtonLeftUp;
     using message::input::ButtonLeftDown;
-    using message::output::Buzzer;
+    using message::input::ButtonLeftUp;
     using message::localisation::ResetFieldLocalisation;
+    using message::output::Buzzer;
 
     using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
@@ -54,12 +53,11 @@ namespace module::localisation {
             cfg.outside_map_penalty_factor    = config["outside_map_penalty_factor"].as<double>();
 
             cfg.buzzer.localisation_reset_frequency = config["buzzer"]["localisation_reset_frequency"].as<float>();
-            cfg.buzzer.duration = config["buzzer"]["duration"].as<int>();
-
+            cfg.buzzer.duration                     = config["buzzer"]["duration"].as<int>();
         });
 
         // When the left (black) button is pressed, reset localisation and ring the buzzer after
-        on<Trigger<ButtonLeftDown>>().then([this](){
+        on<Trigger<ButtonLeftDown>>().then([this]() {
             // Reset localisation and ring the buzzer
             emit(std::make_unique<ResetFieldLocalisation>());
             emit(std::make_unique<Buzzer>(cfg.buzzer.localisation_reset_frequency));
@@ -69,9 +67,7 @@ namespace module::localisation {
         });
 
         // Silence the buzzer after the user lets go of the left (black) pin
-        on<Trigger<ButtonLeftUp>>().then([this](){
-            emit(std::make_unique<Buzzer>(0));
-        });
+        on<Trigger<ButtonLeftUp>>().then([this]() { emit(std::make_unique<Buzzer>(0)); });
 
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
@@ -331,7 +327,6 @@ namespace module::localisation {
             field->uncertainty = covariance.trace();
             emit(field);
         });
-
     }
 
     Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d particle, const Eigen::Vector3d rPWw) {

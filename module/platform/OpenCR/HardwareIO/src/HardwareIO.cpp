@@ -8,8 +8,8 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
-#include "message/output/Buzzer.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -108,8 +108,8 @@ namespace module::platform::OpenCR {
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
 
-            cfg.alarms.temperature.level = config["alarms"]["temperature"]["level"].as<float>();
-            cfg.alarms.temperature.buzzer_frequency  = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
+            cfg.alarms.temperature.level            = config["alarms"]["temperature"]["level"].as<float>();
+            cfg.alarms.temperature.buzzer_frequency = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {

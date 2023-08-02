@@ -25,9 +25,9 @@ namespace module::purpose {
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::input::ButtonMiddleDown;
     using message::input::GameEvents;
     using message::localisation::ResetFieldLocalisation;
-    using message::input::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
     using message::purpose::Defender;
     using message::purpose::FindPurpose;
