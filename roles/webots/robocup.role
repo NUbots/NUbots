@@ -9,6 +9,8 @@ nuclear_role(
   support::configuration::GlobalConfig
   # Network
   network::PlotJuggler
+  network::NUClearNet
+  network::NetworkForwarder
   # Sensors
   input::GameController
   input::SensorFilter
@@ -29,7 +31,7 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
-  skill::ScriptKick
+  skill::SplineKick
   skill::GetUp
   skill::Look
   skill::Dive
@@ -50,7 +52,9 @@ nuclear_role(
   strategy::DiveToBall
   strategy::KickToGoal
   strategy::AlignBallToGoal
+  strategy::WalkInsideBoundedBox
   # Purposes
+  purpose::Defender
   purpose::Striker
   purpose::Soccer
   purpose::Goalie

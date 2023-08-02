@@ -1,4 +1,4 @@
-serial_number: 01188483
+serial_number: 011885A9
 
 lens:
   # Lens: Lensagon BF10M19828S118C
@@ -15,11 +15,11 @@ lens:
   # Lens projection type
   projection: EQUIDISTANT
   # Normalised focal length: focal length in pixels / image width
-  focal_length: 0.3379603020878361
+  focal_length: 0.34690945742400775
   # Normalised image centre offset: pixels from centre to optical axis / image width
-  centre: [-0.014463461390834174, -0.024161253939202938]
+  centre: [0.02072339174622414, -0.0011612242293956145]
   # The polynomial distortion coefficients for the lens
-  k: [0.5008855578146484, 0.25712627828352613]
+  k: [0.38553542593448015, 0.1498415334589703]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
   fov: 180 * pi / 180
   # The homogenous transform from the rigid platform this camera is attached to to its optical location

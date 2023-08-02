@@ -1,4 +1,0 @@
-log_level: INFO
-
-# Priority in subsumption system
-direct_walk_priority: 3

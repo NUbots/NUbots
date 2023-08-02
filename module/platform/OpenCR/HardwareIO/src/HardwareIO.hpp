@@ -102,7 +102,7 @@ namespace module::platform::OpenCR {
             /// @note different to the dynamixel packet error status
             uint8_t hardware_error = 0;
 
-            /// @brief Most recent packet error recieved, to cache before RawSensors is emitted
+            /// @brief Most recent packet error received, to cache before RawSensors is emitted
             uint8_t packet_error = 0;
 
             /// @brief True if we simulate where we think the servos should be
@@ -214,6 +214,27 @@ namespace module::platform::OpenCR {
         /// @brief clear all packet queues
         /// @returns the number of packets cleared
         int queue_clear_all();
+
+        struct PacketWatchdog {};
+        struct ModelWatchdog {};
+
+        /// @brief Handle for the watchdog timer for the model information
+        ReactionHandle model_watchdog;
+
+        /// @brief Handle for our watchdog timer for packet handling
+        ReactionHandle packet_watchdog;
+
+        /// @brief Stores configuration values
+        struct Config {
+            struct {
+                struct {
+                    /// @brief Container for the max tolerable temp for all servos
+                    float level = 0.0;
+                    /// @brief Container for the buzzer frequency, used if a Buzzer message is emitted
+                    float buzzer_frequency = 0.0;
+                } temperature;
+            } alarms;
+        } cfg;
     };
 
 }  // namespace module::platform::OpenCR

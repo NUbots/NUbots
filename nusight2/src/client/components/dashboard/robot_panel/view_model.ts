@@ -7,7 +7,6 @@ import { DashboardRobotModel } from "../dashboard_robot/model";
 
 import { LastStatus } from "./view";
 
-const State = message.behaviour.Behaviour.State;
 const Mode = message.input.GameState.Data.Mode;
 const PenaltyReason = message.input.GameState.Data.PenaltyReason;
 const Phase = message.input.GameState.Data.Phase;
@@ -27,11 +26,6 @@ export class RobotPanelViewModel {
   get batteryValue(): string {
     const battery = this.model.battery;
     return battery === -1 ? "" : `${Math.round(battery * 100)}%`;
-  }
-
-  @computed
-  get behaviour(): string {
-    return State[this.model.behaviourState] || State[State.UNKNOWN];
   }
 
   @computed
