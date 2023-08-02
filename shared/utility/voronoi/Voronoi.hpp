@@ -7,53 +7,52 @@
 #include <queue>
 #include <vector>
 
- namespace utility::voronoi {
+namespace utility::voronoi {
 
-    struct Site {
-        double x, y;
-    };
+    // struct Site {
+    //     double x, y;
+    // };
 
-    struct CircleEvent {
-        double x, y, r;
-        bool valid;
-    };
+    // struct CircleEvent {
+    //     double x, y, r;
+    //     bool valid;
+    // };
 
-    struct Event {
-        double x, y;
-        Site* site;
-        CircleEvent* circleEvent;
+    // struct Event {
+    //     double x, y;
+    //     Site* site;
+    //     CircleEvent* circleEvent;
 
-        bool operator<(const Event& other) const {
-            if (y != other.y) {
-                return y > other.y;
-            }
+    //     bool operator<(const Event& other) const {
+    //         if (y != other.y) {
+    //             return y > other.y;
+    //         }
 
-            return x > other.x;
-        }
-    };
+    //         return x > other.x;
+    //     }
+    // };
 
-    struct Edge {
-        Site* left, *right;
-        Site* start, *end;
-        double m, b;
-    };
+    // struct Edge {
+    //     Site *left, *right;
+    //     Site *start, *end;
+    //     double m, b;
+    // };
 
-    class Voronoi {
+    // class Voronoi {
 
-        private:
-            void computeEdges(std::vector<Site*>& sites);
-            bool done_all_edges = false;
+    // private:
+    //     void computeEdges(std::vector<Site*>& sites);
+    //     bool done_all_edges = false;
 
-            std::vector<Site*> sites;
-            std::vector<Edge> edges;
-            std::vector<CircleEvent*> circleEvents;
+    //     std::vector<Site*> sites;
+    //     std::vector<Edge> edges;
+    //     std::vector<CircleEvent*> circleEvents;
 
-        public:
-            void computeVoronoi(std::vector<Site*>& sites);
-            std::vector<Edge> get_edges();
-            bool has_made_all_edges();
-
-    };
-}   // namespace utility::voronoi
+    // public:
+    //     void computeVoronoi(std::vector<Site*>& sites);
+    //     std::vector<Edge> get_edges();
+    //     bool has_made_all_edges();
+    // };
+}  // namespace utility::voronoi
 
 #endif  // UTILITY_VORONOI_VORONOI_H

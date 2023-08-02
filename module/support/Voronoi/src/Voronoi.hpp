@@ -1,10 +1,9 @@
 #ifndef MODULE_SUPPORT_VORONOI_HPP
 #define MODULE_SUPPORT_VORONOI_HPP
 
-#include <nuclear>
-
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <nuclear>
 
 #include "utility/voronoi/Voronoi.hpp"
 
@@ -17,7 +16,7 @@ namespace module::support {
             size_t robots_each_side = 0;
         } cfg;
 
-        utility::voronoi::Voronoi vd;
+        // utility::voronoi::Voronoi vd;
 
     public:
         /// @brief Called by the powerplant to build and setup the Voronoi reactor.
