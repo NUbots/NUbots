@@ -17,12 +17,7 @@ namespace module::localisation {
 
     using message::behaviour::state::Stability;
     using message::localisation::Field;
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::ExecuteGetup;
-    using message::motion::KillGetup;
-    using message::motion::StopCommand;
-    using message::motion::WalkCommand;
+    using message::localisation::ResetFieldLocalisation;
     using message::support::FieldDescription;
     using message::vision::FieldLines;
 
@@ -253,10 +248,6 @@ namespace module::localisation {
             // Set the time update time to now
             last_time_update_time = NUClear::clock::now();
         });
-
-        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
-
-        on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
         on<Trigger<Stability>>().then([this](const Stability& stability) {
             if (stability == Stability::FALLEN) {

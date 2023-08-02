@@ -11,7 +11,6 @@ import { Message, Simulator } from "../simulator";
 
 import { periodic } from "./periodic";
 
-import State = message.behaviour.Behaviour.State;
 import Mode = message.input.GameState.Data.Mode;
 import PenaltyReason = message.input.GameState.Data.PenaltyReason;
 import Phase = message.input.GameState.Data.Phase;
@@ -68,7 +67,6 @@ export class OverviewSimulator extends Simulator {
     // TODO (Annable): Add helper for getting the angle for a unit vector.
     const robotAngle = Math.atan2(robotHeading.y, robotHeading.x);
 
-    const states = getEnumValues<State>(State);
     const modes = getEnumValues<Mode>(Mode);
     const phases = getEnumValues<Phase>(Phase);
     const penaltyReasons = getEnumValues<PenaltyReason>(PenaltyReason);
@@ -79,7 +77,6 @@ export class OverviewSimulator extends Simulator {
       roleName: "Overview Simulator",
       battery: this.random.float(),
       voltage: this.randomFloat(10, 13),
-      behaviourState: this.random.choice(states),
       robotPosition: new Vector3(robotPosition.x, robotPosition.y, robotAngle),
       robotPositionCovariance: {
         x: { x: this.random.float(), y: this.random.float(), z: this.random.float() },

@@ -12,10 +12,10 @@ import {
   createPacketFromServer,
 } from "./test_utils";
 
-import Say = message.output.Say;
+import Test = message.support.nusight.Test;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 
-const sayPacketType = messageTypeToName(Say);
+const testPacketType = messageTypeToName(Test);
 
 describe("NUsightSessionNetwork", () => {
   let nuclearnetClient: ReturnType<typeof createMockNUClearNetClient>["nuclearnetClient"];
@@ -40,12 +40,12 @@ describe("NUsightSessionNetwork", () => {
     const mockSocketB = createMockWebSocket();
     session.addClient(mockSocketB.connection);
 
-    const packet = new Say({ message: "hello world" });
+    const packet = new Test({ message: "hello world" });
     network.emit(packet);
 
     const expectedPacket = createPacketFromServer(packet);
-    expect(mockSocketA.connection.send).toHaveBeenCalledWith(sayPacketType, expectedPacket);
-    expect(mockSocketB.connection.send).toHaveBeenCalledWith(sayPacketType, expectedPacket);
+    expect(mockSocketA.connection.send).toHaveBeenCalledWith(testPacketType, expectedPacket);
+    expect(mockSocketB.connection.send).toHaveBeenCalledWith(testPacketType, expectedPacket);
   });
 
   it("emit() sends to all clients in the session when target is `nusight`", () => {
@@ -55,19 +55,19 @@ describe("NUsightSessionNetwork", () => {
     const mockSocketB = createMockWebSocket();
     session.addClient(mockSocketB.connection);
 
-    const packet = new Say({ message: "hello world" });
+    const packet = new Test({ message: "hello world" });
     network.emit(packet, { target: "nusight" });
 
     const expectedPacket = createPacketFromServer(packet);
-    expect(mockSocketA.connection.send).toHaveBeenCalledWith(sayPacketType, expectedPacket);
-    expect(mockSocketB.connection.send).toHaveBeenCalledWith(sayPacketType, expectedPacket);
+    expect(mockSocketA.connection.send).toHaveBeenCalledWith(testPacketType, expectedPacket);
+    expect(mockSocketB.connection.send).toHaveBeenCalledWith(testPacketType, expectedPacket);
   });
 
   it("emit() throws if target refers to a client that doesn't exist in the session", () => {
     const unknownClientId = 999;
 
     expect(() => {
-      network.emit(new Say({ message: "hello world" }), { target: `nusight#${unknownClientId}` });
+      network.emit(new Test({ message: "hello world" }), { target: `nusight#${unknownClientId}` });
     }).toThrowError("no such client");
   });
 
@@ -78,11 +78,11 @@ describe("NUsightSessionNetwork", () => {
     const mockSocketB = createMockWebSocket();
     session.addClient(mockSocketB.connection);
 
-    const packet = new Say({ message: "hello world" });
+    const packet = new Test({ message: "hello world" });
     network.emit(packet, { target: `nusight#${clientA.id}` });
 
     const expectedPacket = createPacketFromServer(packet);
-    expect(mockSocketA.connection.send).toHaveBeenCalledWith(sayPacketType, expectedPacket);
+    expect(mockSocketA.connection.send).toHaveBeenCalledWith(testPacketType, expectedPacket);
 
     expect(mockSocketB.connection.send).not.toHaveBeenCalled();
   });
@@ -94,12 +94,12 @@ describe("NUsightSessionNetwork", () => {
     const mockSocketB = createMockWebSocket();
     session.addClient(mockSocketB.connection);
 
-    const packet = new Say({ message: "hello world" });
+    const packet = new Test({ message: "hello world" });
     network.emit(packet, { target: "*" });
 
     const expectedPacket = createPacketFromServer(packet);
-    expect(mockSocketA.connection.send).toHaveBeenCalledWith(sayPacketType, expectedPacket);
-    expect(mockSocketB.connection.send).toHaveBeenCalledWith(sayPacketType, expectedPacket);
+    expect(mockSocketA.connection.send).toHaveBeenCalledWith(testPacketType, expectedPacket);
+    expect(mockSocketB.connection.send).toHaveBeenCalledWith(testPacketType, expectedPacket);
     expect(nuclearnetClient.send).toHaveBeenCalledWith({
       type: expectedPacket.hash,
       payload: expectedPacket.payload,
@@ -108,7 +108,7 @@ describe("NUsightSessionNetwork", () => {
   });
 
   it("emit() sends to NUClearNet when target is the empty string", () => {
-    const packet = new Say({ message: "hello world" });
+    const packet = new Test({ message: "hello world" });
     network.emit(packet, { target: "" });
 
     const expectedPacket = createPacketFromServer(packet);
@@ -121,7 +121,7 @@ describe("NUsightSessionNetwork", () => {
   });
 
   it("emit() sends to NUClearNet when target is a string without a special meaning", () => {
-    const packet = new Say({ message: "hello world" });
+    const packet = new Test({ message: "hello world" });
     network.emit(packet, { target: "nuclearnet_client_4" });
 
     const expectedPacket = createPacketFromServer(packet);
@@ -135,28 +135,28 @@ describe("NUsightSessionNetwork", () => {
 
   it("onNUClearMessage() listens for incoming messages from NUClearNet", () => {
     // Add a NUClearNet listener and check that it returns a function to remove the listener
-    const onSay = jest.fn();
-    const off = network.onNUClearMessage({ type: Say }, onSay);
+    const onTest = jest.fn();
+    const off = network.onNUClearMessage({ type: Test }, onTest);
     expect(typeof off).toBe("function");
 
     // Emit a packet from NUClearNet and make sure the listener is called
-    const packet: NUClearNetPacket = createPacketFromNUClearNet(new Say({ message: "hello world" }));
-    nuclearnetMockEmit(sayPacketType, packet);
-    expect(onSay).toHaveBeenCalledWith(packet.peer, { message: "hello world" });
+    const packet: NUClearNetPacket = createPacketFromNUClearNet(new Test({ message: "hello world" }));
+    nuclearnetMockEmit(testPacketType, packet);
+    expect(onTest).toHaveBeenCalledWith(packet.peer, { message: "hello world" });
 
     // Remove the listener
     off();
 
     // Emit a packet from NUClearNet again and make sure the listener
     // that was removed is not called again
-    nuclearnetMockEmit(sayPacketType, packet);
-    expect(onSay).toHaveBeenCalledTimes(1);
+    nuclearnetMockEmit(testPacketType, packet);
+    expect(onTest).toHaveBeenCalledTimes(1);
   });
 
   it("onClientMessage() listens for incoming messages from a client in the session", () => {
     // Add a client listener and check that it returns a function to remove the listener
-    const onSay = jest.fn();
-    const off = network.onClientMessage({ type: Say }, onSay);
+    const onTest = jest.fn();
+    const off = network.onClientMessage({ type: Test }, onTest);
     expect(typeof off).toBe("function");
 
     // Create a client and add it to the session
@@ -165,13 +165,13 @@ describe("NUsightSessionNetwork", () => {
 
     // Emit a packet from the client and make sure the listener is called
     const clientSend: NUClearNetSend = {
-      type: sayPacketType,
-      payload: Say.encode({ message: "hello world" }).finish() as Buffer,
+      type: testPacketType,
+      payload: Test.encode({ message: "hello world" }).finish() as Buffer,
       // Target the packet to the NUsight server, so it's not sent to NUclearNet
       target: "nusight",
     };
     mockSocket.emit("packet", clientSend);
-    expect(onSay).toHaveBeenCalledWith(client, { message: "hello world" });
+    expect(onTest).toHaveBeenCalledWith(client, { message: "hello world" });
 
     // Remove the listener
     off();
@@ -179,7 +179,7 @@ describe("NUsightSessionNetwork", () => {
     // Emit a packet from the client again and make sure the listener
     // that was removed is not called again
     mockSocket.emit("packet", clientSend);
-    expect(onSay).toHaveBeenCalledTimes(1);
+    expect(onTest).toHaveBeenCalledTimes(1);
   });
 
   it("onClientRpc() listens for incoming RPC requests from a client and sends a response on success", async () => {

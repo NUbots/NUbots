@@ -5,7 +5,7 @@ import { decodePacketId } from "../decode_packet_id";
 import { hashType } from "../hash_type";
 
 const DataPoint = message.eye.DataPoint;
-const Say = message.output.Say;
+const Test = message.support.nusight.Test;
 
 function makePacket(typeName: string, payload: Uint8Array): NUClearNetPacket {
   return {
@@ -30,10 +30,10 @@ describe("decodePacketId()", () => {
   });
 
   it("returns a default id of 0 for messages without an id field", () => {
-    const payload = Say.encode({ message: "This is a test" }).finish();
+    const payload = Test.encode({ message: "This is a test" }).finish();
 
-    const packet = makePacket("message.output.Say", payload);
+    const packet = makePacket("message.support.nusight.Test", payload);
 
-    expect(decodePacketId("message.output.Say", packet)).toBe(0);
+    expect(decodePacketId("message.support.nusight.Test", packet)).toBe(0);
   });
 });
