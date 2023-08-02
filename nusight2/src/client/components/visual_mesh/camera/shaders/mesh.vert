@@ -9,6 +9,7 @@ attribute float ball;
 attribute float goal;
 attribute float field;
 attribute float fieldLine;
+attribute float robot;
 attribute float environment;
 attribute vec2 uv;
 
@@ -30,6 +31,7 @@ void main() {
     vGoal        = goal;
     vFieldLine   = fieldLine;
     vField       = field;
+    vRobot   = robot;
     vEnvironment = environment;
 
     // Calculate our position in the mesh
