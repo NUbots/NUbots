@@ -22,7 +22,6 @@ syntax = "proto3";
 package message.support.nusight;
 
 import "google/protobuf/timestamp.proto";
-import "message/behaviour/Behaviour.proto";
 import "message/input/GameState.proto";
 import "Vector.proto";
 import "Matrix.proto";
@@ -42,9 +41,6 @@ message Overview {
     /// The current voltage of the battery.
     /// @see message::input::Sensors::voltage
     float voltage = 5;
-
-    /// The current behaviour state. List of possible states in message::behaviour::Behaviour
-    behaviour.Behaviour.State behaviour_state = 6;
 
     /// Localisation measured in field space
     fvec3 robot_position            = 7;

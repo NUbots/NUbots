@@ -32,7 +32,6 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/actuation/ForwardKinematics.hpp"
-#include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
