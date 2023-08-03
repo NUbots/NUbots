@@ -35,6 +35,10 @@
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
+// Make a formatter for Eigen::Transpose type so fmt::format know how to deal with it
+template <typename Derived>
+struct fmt::formatter<Eigen::Transpose<Derived>> : fmt::ostream_formatter {};
+
 namespace module::vision {
 
     using extension::Configuration;

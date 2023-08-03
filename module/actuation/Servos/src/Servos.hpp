@@ -10,11 +10,13 @@
 
 #include "utility/actuation/ServoMap.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::actuation {
     using message::actuation::ServoTarget;
     using message::input::Sensors;
     using utility::input::ServoID;
+    using utility::nusight::graph;
 
     class Servos : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -25,6 +27,12 @@ namespace module::actuation {
         void add_servo_provider() {
             on<Provide<Servo>, Trigger<Sensors>>().then([this](const Servo& servo, const RunInfo& info) {
                 if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                    if (log_level <= NUClear::DEBUG) {
+                        emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
+                                   servo.command.position,
+                                   servo.command.state.gain,
+                                   servo.command.state.torque));
+                    }
                     emit(std::make_unique<ServoTarget>(servo.command.time,
                                                        ID,
                                                        servo.command.position,

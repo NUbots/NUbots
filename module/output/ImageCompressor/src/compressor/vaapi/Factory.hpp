@@ -10,11 +10,11 @@ namespace module::output::compressor::vaapi {
     class Factory : public CompressorFactory {
     public:
         Factory(const std::string& device, const std::string& driver, const int& quality);
-        Factory(const Factory&) = default;
-        Factory(Factory&&)      = default;
-        Factory& operator=(const Factory&) = default;
-        Factory& operator=(Factory&&) = default;
-        virtual ~Factory();
+        Factory(const Factory&)                = default;
+        Factory(Factory&&) noexcept            = default;
+        Factory& operator=(const Factory&)     = default;
+        Factory& operator=(Factory&&) noexcept = default;
+        ~Factory() override;
 
         std::shared_ptr<compressor::Compressor> make_compressor(const uint32_t& width,
                                                                 const uint32_t& height,
@@ -22,11 +22,11 @@ namespace module::output::compressor::vaapi {
 
     private:
         /// The file descriptor we opened for the DRM device
-        int fd;
+        int fd{-1};
         /// The compression context that we are using, contains information about the compressor and OpenCL contexts
-        CompressionContext cctx;
+        CompressionContext cctx{};
         /// The quality that this compressor is configured for
-        int quality;
+        int quality{0};
     };
 
 }  // namespace module::output::compressor::vaapi

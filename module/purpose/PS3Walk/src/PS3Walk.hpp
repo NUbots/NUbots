@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_STRATEGY_PS3WALK_HPP
-#define MODULES_BEHAVIOUR_STRATEGY_PS3WALK_HPP
+#ifndef MODULE_PURPOSE_PS3WALK_HPP
+#define MODULE_PURPOSE_PS3WALK_HPP
 
 
 #include <Eigen/Core>
@@ -26,13 +26,13 @@
 
 #include "Joystick.hpp"
 
-namespace module::behaviour::strategy {
+namespace module::purpose {
 
     class PS3Walk : public NUClear::Reactor {
     public:
         // axes
-        static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
-        static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
+        static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 0;
+        static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 1;
         static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 2;
         static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 3;
         static constexpr uint AXIS_L2                        = 12;
@@ -42,36 +42,53 @@ namespace module::behaviour::strategy {
         static constexpr uint AXIS_ACCEL_Z                   = 25;
 
         // buttons
-        static constexpr uint BUTTON_SELECT         = 0;
-        static constexpr uint BUTTON_LEFT_JOYSTICK  = 1;
-        static constexpr uint BUTTON_RIGHT_JOYSTICK = 2;
-        static constexpr uint BUTTON_START          = 3;
-        static constexpr uint BUTTON_DPAD_UP        = 4;
-        static constexpr uint BUTTON_DPAD_RIGHT     = 5;
-        static constexpr uint BUTTON_DPAD_DOWN      = 6;
-        static constexpr uint BUTTON_DPAD_LEFT      = 7;
-        static constexpr uint BUTTON_L2             = 8;
-        static constexpr uint BUTTON_R2             = 9;
-        static constexpr uint BUTTON_L1             = 10;
-        static constexpr uint BUTTON_R1             = 11;
-        static constexpr uint BUTTON_TRIANGLE       = 12;
-        static constexpr uint BUTTON_CIRCLE         = 13;
-        static constexpr uint BUTTON_CROSS          = 14;
-        static constexpr uint BUTTON_SQUARE         = 15;
+        static constexpr uint BUTTON_SELECT         = 8;
+        static constexpr uint BUTTON_LEFT_JOYSTICK  = 11;
+        static constexpr uint BUTTON_RIGHT_JOYSTICK = 12;
+        static constexpr uint BUTTON_START          = 9;
+        static constexpr uint BUTTON_DPAD_UP        = 13;
+        static constexpr uint BUTTON_DPAD_RIGHT     = 16;
+        static constexpr uint BUTTON_DPAD_DOWN      = 14;
+        static constexpr uint BUTTON_DPAD_LEFT      = 15;
+        static constexpr uint BUTTON_L2             = 6;
+        static constexpr uint BUTTON_R2             = 7;
+        static constexpr uint BUTTON_L1             = 4;
+        static constexpr uint BUTTON_R1             = 5;
+        static constexpr uint BUTTON_TRIANGLE       = 2;
+        static constexpr uint BUTTON_CIRCLE         = 1;
+        static constexpr uint BUTTON_CROSS          = 0;
+        static constexpr uint BUTTON_SQUARE         = 3;
+        static constexpr uint BUTTON_HOME           = 10;
 
         /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        /// @brief Stores configuration values
+        struct Config {
+            float maximum_forward_velocity    = 0;
+            float maximum_rotational_velocity = 0;
+        } cfg;
+
+        /// @brief
         Joystick joystick;
-        Eigen::Vector2d strafe = Eigen::Vector2d::Zero();
-        float rotationalSpeed  = 0.0f;
-        bool moving            = false;
-        bool headLocked        = false;
-        float headPitch        = 0.0f;
-        float headYaw          = 0.0f;
+
+        /// @brief
+        Eigen::Vector3f walk_command = Eigen::Vector3f::Zero();
+
+        /// @brief
+        bool moving = false;
+
+        /// @brief
+        bool head_locked = false;
+
+        /// @brief
+        float head_pitch = 0.0f;
+
+        /// @brief
+        float head_yaw = 0.0f;
     };
-}  // namespace module::behaviour::strategy
+}  // namespace module::purpose
 
 
 #endif
