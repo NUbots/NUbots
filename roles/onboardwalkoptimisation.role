@@ -3,5 +3,15 @@ nuclear_role(
   extension::FileWatcher
   support::SignalCatcher
   support::logging::ConsoleLogHandler
+  # Config
+  actuation::KinematicsConfiguration
+  support::configuration::GlobalConfig
+  # Sensors
+  platform::${SUBCONTROLLER}::HardwareIO
+  behaviour::Controller
+  # motion::QuinticWalk
+  # Optimisation
+  support::optimisation::NSGA2Evaluator
+  support::optimisation::NSGA2Optimiser
   support::optimisation::OnboardWalkOptimisation
 )
