@@ -5,6 +5,8 @@
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
 
 namespace module::support::optimisation {
 
@@ -13,6 +15,9 @@ using extension::Configuration;
     using message::support::optimisation::OptimisationTimeUpdate;
     using message::platform::RawSensors;
     using message::platform::webots::OptimisationCommand;
+    using message::input::Sensors;
+    using message::platform::ButtonMiddleDown;
+    using message::platform::ButtonLeftDown;
     // using message::platform::webots::OptimisationRobotPosition;
     // using message::support::optimisation::NSGA2EvaluationRequest;
     // using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
@@ -33,6 +38,11 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
     on<Configuration>("OnboardWalkOptimisation.yaml").then([this](const Configuration& config) {
         // Use configuration here from file OnboardWalkOptimisation.yaml
         this->log_level = config["log_level"].as<NUClear::LogLevel>();
+
+        cfg.fallen_angle = config["fallen_angle"].as<float>();
+
+        gravity_max = config["gravity"]["max"].as<float>();
+        gravity_min = config["gravity"]["min"].as<float>();
     });
 
     on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
@@ -59,12 +69,36 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
         }
     });
 
-    on<Startup>().then([this]() {
-
-    });
-
     on<Every<10, std::chrono::seconds>>().then([this]() {
         emit(std::make_unique<OptimisationResetDone>());
+    });
+
+    on<Trigger<RawSensors>>().then("Optimisation Fallen Check", [this](const RawSensors& sensors) {
+        auto accelerometer = sensors.accelerometer;
+
+        // // Transform to torso {t} from world {w} space
+        // Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // // Basis Z vector of torso {t} in world {w} space
+        // Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+        // // Basis X vector of torso {t} in world {w} space
+        // // Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
+
+
+
+        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+        if ((std::fabs(accelerometer.x()) > gravity_max || std::fabs(accelerometer.z()) > gravity_max)
+            && std::fabs(accelerometer.y()) < gravity_min) {
+            NUClear::log<NUClear::DEBUG>("FALLEN!");
+            NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
+                            std::fabs(accelerometer.x()),
+                            std::fabs(accelerometer.y()),
+                            std::fabs(accelerometer.z()));
+            // evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
+        }
+    });
+
+    on<Trigger<ButtonLeftDown>, Single>().then([this] {
+        NUClear::log<NUClear::DEBUG>("Left Button Pressed");
     });
 }
 

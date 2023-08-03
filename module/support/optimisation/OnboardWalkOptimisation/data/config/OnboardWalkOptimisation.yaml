@@ -1,2 +1,8 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
+
+fallen_angle: 0.95 # ~55 degrees
+
+gravity:
+  min: 0.5
+  max: 9.2

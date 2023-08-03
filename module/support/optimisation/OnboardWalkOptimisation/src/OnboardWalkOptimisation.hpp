@@ -9,6 +9,8 @@ class OnboardWalkOptimisation : public NUClear::Reactor {
 private:
     /// @brief Stores configuration values
     struct Config {
+        /// @brief Threshold angle for executing getup, between torso z axis and world z axis
+        float fallen_angle = 0.0f;
     } cfg;
 
     /// @brief When set, the next ActuatorRequests will set the reset world command to end the simulation.
@@ -19,6 +21,10 @@ private:
 
     /// @brief When set, the next ActuatorRequests will set the terminate command to end the simulation.
     bool terminate_simulation = false;
+
+    /// @brief Configuration Min and Max values
+    float gravity_max = 0.0;
+    float gravity_min = 0.0;
 
 public:
     /// @brief Called by the powerplant to build and setup the OnboardWalkOptimisation reactor.
