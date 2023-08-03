@@ -29,6 +29,12 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/motion/HeadCommand.hpp"
 #include "message/motion/KickCommand.hpp"
+#include "message/actuation/Limbs.hpp"
+
+#include "message/strategy/FallRecovery.hpp"
+#include "message/strategy/StandStill.hpp"
+#include "utility/skill/Script.hpp"
+#include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
@@ -36,6 +42,7 @@
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/skill/Script.hpp"
 
@@ -48,12 +55,19 @@ namespace module::purpose {
     using message::behaviour::MotionCommand;
     using message::behaviour::state::Stability;
     using message::motion::HeadCommand;
+    using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
     using utility::skill::load_script;
 
+    using extension::Configuration;
+    using message::behaviour::state::Stability;
+    using message::strategy::FallRecovery;
+    using message::strategy::StandStill;
+    using NUClear::message::LogMessage;
+    using utility::input::LimbID;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -106,10 +120,27 @@ namespace module::purpose {
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL: head_yaw = static_cast<float>(-event.value); break;
                     }
                 }
+                //control scheme:
+                //BUTTON_SELECT         = toggles head lock;
+                //BUTTON_LEFT_JOYSTICK  = controls the walking;
+                //BUTTON_RIGHT_JOYSTICK = controls the head yaw and pitch;
+                //BUTTON_START          = toggles walk lock;
+                //BUTTON_DPAD_UP        = ;
+                //BUTTON_DPAD_RIGHT     = ;
+                //BUTTON_DPAD_DOWN      = ;
+                //BUTTON_DPAD_LEFT      = ;
+                //BUTTON_L2             = left side kick (not active);
+                //BUTTON_R2             = right side kick (not active);
+                //BUTTON_L1             = left front kick (not active);
+                //BUTTON_R1             = right front kick (not active);
+                //BUTTON_TRIANGLE       = ;
+                //BUTTON_CIRCLE         = ;
+                //BUTTON_CROSS          = ;
+                //BUTTON_SQUARE         = ;
                 else if (event.isButton()) {
                     // event was a button event
                     switch (event.number) {
-                        case BUTTON_TRIANGLE:
+                        case BUTTON_START:
                             if (event.value > 0) {  // button down
                                 if (moving) {
                                     log<NUClear::DEBUG>("Stop walking");
@@ -121,7 +152,7 @@ namespace module::purpose {
                                 moving = !moving;
                             }
                             break;
-                        case BUTTON_SQUARE:
+                        case BUTTON_SELECT:
                             if (event.value > 0) {  // button down
                                 if (head_locked) {
                                     NUClear::log("Head unlocked");
@@ -135,22 +166,50 @@ namespace module::purpose {
                             // dance moves here:
                         case BUTTON_DPAD_UP:
                             if (event.value > 0) {
-                                NUClear::log("Do a dance move");
+                                NUClear::log("Do a dance move Dpad up");
+                                emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_DOWN:
                             if (event.value > 0) {
-                                NUClear::log("Do a dance move2");
+                                NUClear::log("Do a dance Dpad down");
+                                emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_LEFT:
                             if (event.value > 0) {
-                                NUClear::log("Do a dance move3");
+                                NUClear::log("Do a dance Dpad left");
+                                emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_RIGHT:
                             if (event.value > 0) {
-                                NUClear::log("Do a dance move4");
+                                NUClear::log("Do a dance Dpad right");
+                                emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
+                            }
+                            break;
+                        case BUTTON_TRIANGLE:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance triangle");
+                                emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
+                            }
+                            break;
+                        case BUTTON_CIRCLE:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance circle");
+                                emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
+                            }
+                            break;
+                        case BUTTON_CROSS:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance cross");
+                                emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
+                            }
+                            break;
+                        case BUTTON_SQUARE:
+                            if (event.value > 0) {
+                                NUClear::log("Do a dance square");
+                                emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);
                             }
                             break;
                             // case BUTTON_L1:
