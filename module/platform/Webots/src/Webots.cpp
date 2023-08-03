@@ -262,7 +262,14 @@ namespace module::platform {
             CameraContext context;
             context.name = name;
             context.id   = num_cameras++;
-            context.Hpc  = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());  // Load Hpc from configuration
+
+            // Compute Hpc, the transform from the camera to the pitch space
+            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
+            auto Hpc         = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
+                                                                    nugus_model.home_configuration(),
+                                                                    std::string("left_camera"),
+                                                                    std::string("head"));
+            context.Hpc      = Hpc;
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
