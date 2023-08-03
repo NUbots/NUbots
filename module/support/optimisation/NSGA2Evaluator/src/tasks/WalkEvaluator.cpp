@@ -121,6 +121,7 @@ namespace module::support::optimisation {
                                                  walk_command_velocity.y(),
                                                  walk_command_rotation));
 
+        NUClear::log<NUClear::DEBUG>("Walk started");
         evaluator->emit(std::make_unique<WalkCommand>(
             subsumption_id,
             Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));

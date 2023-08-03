@@ -81,7 +81,7 @@ namespace module::support::optimisation {
             log<NUClear::INFO>("Starting up in 4 seconds");
             std::this_thread::sleep_for(std::chrono::seconds(4));
 
-            log<NUClear::INFO>("Webots ready, starting first evaluation");
+            log<NUClear::INFO>("Optimiser ready, starting first evaluation");
 
             // If initialisation succeeded, evaluate the first individual of the first generation
             // Subsequent individuals will be evaluated after we get the evaluation scores for this
