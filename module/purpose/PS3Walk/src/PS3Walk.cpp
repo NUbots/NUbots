@@ -223,7 +223,7 @@ namespace module::purpose {
                                 NUClear::log("Requesting Right Front Kick");
                                 emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG));
                             }
-                        break;
+                            break;
                             // case BUTTON_L2:
                             //     if (event.value > 0) {  // button down
                             //         NUClear::log("Requesting Left Side Kick");
