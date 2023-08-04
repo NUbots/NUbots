@@ -49,7 +49,7 @@ namespace module::input {
         }
 
         // **************** Centre of Mass and Inertia Tensor ****************
-        sensors->rMTt = tinyrobotics::centre_of_mass(nugus_model, q);
+        sensors->rMTt = tinyrobotics::center_of_mass(nugus_model, q);
 
         // **************** Foot Down Information ****************
         sensors->feet[BodySide::RIGHT].down = true;
