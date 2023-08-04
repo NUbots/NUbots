@@ -97,10 +97,10 @@ namespace module::purpose {
             // read from joystick
             if (joystick.sample(&event)) {
 
-                log<NUClear::DEBUG>("Event number: ", float(event.number));
-                log<NUClear::DEBUG>("Event value: ", event.value);
-                log<NUClear::DEBUG>("Event isAxis: ", event.isAxis());
-                log<NUClear::DEBUG>("Event isButton: ", event.isButton());
+                //log<NUClear::DEBUG>("Event number: ", float(event.number));
+                //log<NUClear::DEBUG>("Event value: ", event.value);
+                //log<NUClear::DEBUG>("Event isAxis: ", event.isAxis());
+                //log<NUClear::DEBUG>("Event isButton: ", event.isButton());
 
                 if (event.isAxis()) {
                     // event was an axis event
