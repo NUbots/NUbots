@@ -1,0 +1,8 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+confidence_threshold: 0.8
+cluster_points: 10
+minimum_robot_distance: 0.5
+minimum_robot_height: 0.5
+maximum_robot_height: 1.4
