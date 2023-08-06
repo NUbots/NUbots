@@ -16,7 +16,7 @@ void main() {
                   + vGoal * vec3(1.0, 1.0, 0.0)         // Yellow
                   + vFieldLine * vec3(0.2, 0.2, 1.0)    // Light Blue
                   + vField * vec3(0.0, 1.0, 0.0)        // Green
-                  + vRobot * vec3(0.4, 0.0, 0.4)        // Dark Magenta
+                  + vRobot * vec3(1.0, 0.0, 1.0)        // Magenta
                   + vEnvironment * vec3(0.0, 0.0, 0.0); // Black
 
     gl_FragColor = vec4(colour, 0.5 * (1.0 - vEnvironment));
