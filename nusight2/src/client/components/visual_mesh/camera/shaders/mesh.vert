@@ -31,7 +31,7 @@ void main() {
     vGoal        = goal;
     vFieldLine   = fieldLine;
     vField       = field;
-    vRobot   = robot;
+    vRobot       = robot;
     vEnvironment = environment;
 
     // Calculate our position in the mesh
