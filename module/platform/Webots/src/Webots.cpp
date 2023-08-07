@@ -269,7 +269,12 @@ namespace module::platform {
                                                                     nugus_model.home_configuration(),
                                                                     std::string("left_camera"),
                                                                     std::string("head"));
-            context.Hpc      = Hpc;
+
+            // Apply roll and pitch offsets
+            double roll_offset  = config["roll_offset"].as<Expression>();
+            double pitch_offset = config["pitch_offset"].as<Expression>();
+            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
