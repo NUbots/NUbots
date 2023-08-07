@@ -73,61 +73,33 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
         emit(std::make_unique<OptimisationResetDone>());
     });
 
-    on<Trigger<RawSensors>>().then("Optimisation Fallen Check", [this](const RawSensors& sensors) {
-        auto accelerometer = sensors.accelerometer;
+    on<Trigger<Sensors>>().then("Optimisation Fallen Check", [this](const Sensors& sensors) {
+        // auto accelerometer = sensors.accelerometer;
 
-        // // Transform to torso {t} from world {w} space
-        // Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
-        // // Basis Z vector of torso {t} in world {w} space
-        // Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-        // // Basis X vector of torso {t} in world {w} space
-        // // Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
-
-
+        // Transform to torso {t} from world {w} space
+        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // Basis Z vector of torso {t} in world {w} space
+        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+        // Basis X vector of torso {t} in world {w} space
+        // Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
 
         // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-        if ((std::fabs(accelerometer.x()) > gravity_max || std::fabs(accelerometer.z()) > gravity_max)
-            && std::fabs(accelerometer.y()) < gravity_min) {
+        if (std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
             NUClear::log<NUClear::DEBUG>("FALLEN!");
-            NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
-                            std::fabs(accelerometer.x()),
-                            std::fabs(accelerometer.y()),
-                            std::fabs(accelerometer.z()));
             // evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
         }
     });
 
+    // Reset for next run or terminate when paused
     on<Trigger<ButtonLeftDown>, Single>().then([this] {
         NUClear::log<NUClear::DEBUG>("Left Button Pressed");
+        if ()
+            emit(std::make_unique<OptimisationResetDone>());
+    });
+
+    // Pause optimisation
+    on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+
     });
 }
-
-    // void OnboardWalkOptimisation::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
-    //     // ****************************** TIME **************************************
-    //     // Deal with time first
-
-    //     // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
-    //     // (which is something we do for the walk optimisation), so reset our local times
-    //     if (sim_delta > 0 && sensor_measurements.time == 0) {
-    //         log<NUClear::DEBUG>("Webots sim time reset to zero, resetting local sim_time. time before reset:",
-    //                             current_sim_time);
-    //         sim_delta         = 0;
-    //         real_delta        = 0;
-    //         current_sim_time  = 0;
-    //         current_real_time = 0;
-
-    //         // Reset the local raw sensors buffer
-    //         emit(std::make_unique<ResetWebotsServos>());
-    //     }
-
-    //     // Create and emit the OptimisationRobotPosition message used by the walk optimiser
-    //     auto robot_position   = std::make_unique<OptimisationRobotPosition>();
-    //     robot_position->value = sensor_measurements.robot_position.value;
-    //     emit(robot_position);
-
-    //     // Create and emit the OptimisationResetDone message used by the walk optimiser
-    //     if (sensor_measurements.reset_done) {
-    //         emit(std::make_unique<OptimisationResetDone>());
-    //     }
-    // }
 }  // namespace module::support::optimisation

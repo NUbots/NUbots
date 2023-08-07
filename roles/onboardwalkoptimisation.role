@@ -9,6 +9,7 @@ nuclear_role(
   # Sensors
   platform::${SUBCONTROLLER}::HardwareIO
   behaviour::Controller
+  input::SensorFilter
   # motion::QuinticWalk
   # Optimisation
   support::optimisation::NSGA2Evaluator
