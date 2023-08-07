@@ -6,6 +6,8 @@ extern "C" {
 
 #include <cmath>
 #include <fmt/format.h>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "aravis_wrap.hpp"
 #include "description_to_fourcc.hpp"
@@ -153,8 +155,22 @@ namespace module::input {
             // Get the fourcc code from the pixel format
             context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
 
-            // Load Hpc from configuration
-            context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
+            // Compute Hpc, the transform from the camera to the head pitch space
+            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
+
+            auto camera_frame =
+                config["is_left_camera"].as<bool>() ? std::string("left_camera") : std::string("right_camera");
+
+            auto Hpc = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
+                                                                    nugus_model.home_configuration(),
+                                                                    camera_frame,
+                                                                    std::string("head"));
+
+            // Apply roll and pitch offsets
+            double roll_offset  = config["roll_offset"].as<Expression>();
+            double pitch_offset = config["pitch_offset"].as<Expression>();
+            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             // Apply image offsets to lens_centre, optical axis:
             int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
