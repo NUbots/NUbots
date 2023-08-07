@@ -38,5 +38,4 @@ settings:
   # GainAuto: Continuous
   # BalanceWhiteAuto: Contsinuous
 
-
 urdf_path: "/home/nubots/NUbots/module/actuation/Kinematics/data/nugus.urdf"
