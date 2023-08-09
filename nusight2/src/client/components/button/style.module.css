@@ -74,27 +74,27 @@
 }
 
 .buttonNormal .iconBefore {
-  color: #1197d3;
+  color: #F9A50D;
 }
 
 .buttonNormal .iconAfter {
-  color: #777;
+  color: white;
 }
 
 /* Type: primary ================================= */
 
 .buttonPrimary {
-  background-color: #1197d3;
-  border-color: #0f86bd;
+  background-color: #F9A50D;
+  border-color: #F9A50D;
   color: #fff;
 }
 
 .buttonPrimary:hover:not([disabled]) {
-  border-color: #0f86bd;
+  border-color: #F9A50D;
 }
 
 .buttonPrimary:active:not([disabled]) {
-  background-color: #108cc6;
+  background-color: #F9A50D;
 }
 
 .buttonPrimary .iconBefore,

@@ -22,8 +22,8 @@
 }
 
 .localisation__menuButton {
+  color: white;
   background-color: transparent;
-  color: #000;
   padding: 16px;
   font-size: 0.8rem;
   border: 1px solid transparent;

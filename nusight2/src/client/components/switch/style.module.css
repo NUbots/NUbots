@@ -31,7 +31,7 @@
 }
 
 .thumbOn {
-  background-color: #1197d3;
+  background-color: #F9A50D;
   transform: translateX(1.3em);
 }
 
@@ -47,6 +47,6 @@
 }
 
 .trackOn {
-  background-color: #1197d3;
+  background-color: #F9A50D;
   opacity: 0.5;
 }

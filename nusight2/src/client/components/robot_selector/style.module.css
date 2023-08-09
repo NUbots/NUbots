@@ -11,6 +11,7 @@
   outline: 0;
   padding: 0 1em;
   transition: background-color 0.3s ease;
+  color: white;
 }
 
 .button:hover {
@@ -18,7 +19,7 @@
 }
 
 .button > svg {
-  fill: #1197d3;
+  fill: #F9A50D;
   height: 2.85em;
   margin: 0 auto;
   padding: 0.25em;
@@ -60,7 +61,8 @@
 }
 
 .robots {
-  background-color: white;
+  color: white;
+  background-color: #212121;
   border-bottom-left-radius: 2px;
   border-bottom-right-radius: 2px;
   box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.15), 0px 3px 8px 0px rgba(0, 0, 0, 0.15);

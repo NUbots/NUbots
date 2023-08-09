@@ -119,7 +119,8 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
         ) : (
           <IconNbs className="w-7 h-7 mt-1 -ml-[20px]" />
         )}
-        <span className="text-[0.7rem]">Scrub NBS</span>
+        <span className="text-[0.7rem] text-white">
+          Scrub NBS</span>
       </button>
       <button className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:bg-gray-200 h-8 rounded" onClick={onToggle}>
         <svg

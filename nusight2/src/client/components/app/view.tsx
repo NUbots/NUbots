@@ -12,7 +12,7 @@ export class AppView extends Component<{ nav: NavigationConfiguration }> {
   render() {
     return (
       <BrowserRouter>
-        <div className="min-h-screen flex items-stretch bg-white text-sm text-[#4d4d4d]">
+        <div className="min-h-screen flex items-stretch bg-nusight-1000 text-sm text-[#4d4d4d]">
           <NavigationView nav={this.props.nav} />
           <div className="flex flex-grow flex-col">
             <div className="flex flex-grow">

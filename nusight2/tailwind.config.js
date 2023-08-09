@@ -19,9 +19,14 @@ const config = {
 
         nusight: {
           400: "#2bb1ee",
-          500: "#1197d3",
+          500: "#F9A50D",
           600: "#0d76a6",
           700: "#004363",
+          800: "#F9A50D", // Yellow orange
+          1000: "#111111", // Black
+          1100: "#212121", // Dark grey
+          1200: "#383838", // Lighter dark grey
+          1300: "#424242", // Even Lighter dark grey
         },
 
         fontFamily: {
