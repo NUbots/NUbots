@@ -29,7 +29,7 @@ namespace module::motion {
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using FrameID  = utility::input::FrameID;
+    using FrameID = utility::input::FrameID;
     using message::actuation::KinematicsModel;
 
     void KickBalancer::configure(const Configuration& config) {

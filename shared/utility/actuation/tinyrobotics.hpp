@@ -30,8 +30,8 @@
 #include "message/actuation/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
 
-#include "utility/input/LimbID.hpp"
 #include "utility/input/FrameID.hpp"
+#include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 
@@ -39,8 +39,8 @@ namespace utility::actuation::tinyrobotics {
 
     using message::actuation::BodySide;
     using message::actuation::ServoCommand;
-    using utility::input::LimbID;
     using utility::input::FrameID;
+    using utility::input::LimbID;
     using utility::input::ServoID;
 
     using message::input::Sensors;
