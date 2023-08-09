@@ -32,7 +32,7 @@
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/input/LinkID.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
@@ -42,7 +42,7 @@ namespace module::motion {
 
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
-    using LinkID  = utility::input::LinkID;
+    using FrameID  = utility::input::FrameID;
     using ServoID = utility::input::ServoID;
     using message::behaviour::KickPlan;
     using message::behaviour::ServoCommands;
@@ -119,8 +119,8 @@ namespace module::motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Eigen::Isometry3d leftFoot(sensors.Htx[LinkID::L_ANKLE_ROLL]);
-                Eigen::Isometry3d rightFoot(sensors.Htx[LinkID::R_ANKLE_ROLL]);
+                Eigen::Isometry3d leftFoot(sensors.Htx[FrameID::L_ANKLE_ROLL]);
+                Eigen::Isometry3d rightFoot(sensors.Htx[FrameID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot

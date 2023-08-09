@@ -17,15 +17,15 @@
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_INPUT_LINKID_HPP
-#define UTILITY_INPUT_LINKID_HPP
+#ifndef UTILITY_INPUT_FRAMEID_HPP
+#define UTILITY_INPUT_FRAMEID_HPP
 
 #include <set>
 #include <string>
 
 namespace utility::input {
 
-    struct LinkID {
+    struct FrameID {
         enum Value {
             R_SHOULDER_PITCH = 0,
             L_SHOULDER_PITCH = 1,
@@ -56,49 +56,49 @@ namespace utility::input {
         Value value = Value::R_SHOULDER_PITCH;
 
         // Constructors
-        LinkID() = default;
-        LinkID(uint8_t const& v) : value(static_cast<Value>(v)) {}
-        LinkID(uint32_t const& v) : value(static_cast<Value>(v)) {}
-        LinkID(uint64_t const& v) : value(static_cast<Value>(v)) {}
-        LinkID(int const& v) : value(static_cast<Value>(v)) {}
-        LinkID(Value const& v) : value(v) {}
-        LinkID(std::string const& str);
+        FrameID() = default;
+        FrameID(uint8_t const& v) : value(static_cast<Value>(v)) {}
+        FrameID(uint32_t const& v) : value(static_cast<Value>(v)) {}
+        FrameID(uint64_t const& v) : value(static_cast<Value>(v)) {}
+        FrameID(int const& v) : value(static_cast<Value>(v)) {}
+        FrameID(Value const& v) : value(v) {}
+        FrameID(std::string const& str);
 
         // Operators
-        bool operator<(LinkID const& other) const {
+        bool operator<(FrameID const& other) const {
             return value < other.value;
         }
-        bool operator>(LinkID const& other) const {
+        bool operator>(FrameID const& other) const {
             return value > other.value;
         }
-        bool operator<=(LinkID const& other) const {
+        bool operator<=(FrameID const& other) const {
             return value <= other.value;
         }
-        bool operator>=(LinkID const& other) const {
+        bool operator>=(FrameID const& other) const {
             return value >= other.value;
         }
-        bool operator==(LinkID const& other) const {
+        bool operator==(FrameID const& other) const {
             return value == other.value;
         }
-        bool operator!=(LinkID const& other) const {
+        bool operator!=(FrameID const& other) const {
             return value != other.value;
         }
-        bool operator<(LinkID::Value const& other) const {
+        bool operator<(FrameID::Value const& other) const {
             return value < other;
         }
-        bool operator>(LinkID::Value const& other) const {
+        bool operator>(FrameID::Value const& other) const {
             return value > other;
         }
-        bool operator<=(LinkID::Value const& other) const {
+        bool operator<=(FrameID::Value const& other) const {
             return value <= other;
         }
-        bool operator>=(LinkID::Value const& other) const {
+        bool operator>=(FrameID::Value const& other) const {
             return value >= other;
         }
-        bool operator==(LinkID::Value const& other) const {
+        bool operator==(FrameID::Value const& other) const {
             return value == other;
         }
-        bool operator!=(LinkID::Value const& other) const {
+        bool operator!=(FrameID::Value const& other) const {
             return value != other;
         }
 
@@ -120,11 +120,11 @@ namespace utility::input {
         }
         operator std::string() const;
 
-        friend std::ostream& operator<<(std::ostream& out, const LinkID& val);
+        friend std::ostream& operator<<(std::ostream& out, const FrameID& val);
 
     private:
-        static const std::set<LinkID> values;
+        static const std::set<FrameID> values;
     };
 }  // namespace utility::input
 
-#endif  // UTILITY_INPUT_LINKID_HPP
+#endif  // UTILITY_INPUT_FRAMEID_HPP

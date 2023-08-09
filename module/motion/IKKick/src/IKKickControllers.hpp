@@ -30,7 +30,7 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/input/LinkID.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/matrix/transform.hpp"
 #include "utility/support/yaml_expression.hpp"

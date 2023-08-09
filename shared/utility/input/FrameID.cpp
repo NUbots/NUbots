@@ -16,13 +16,13 @@
  *
  * Copyright 2023 NUbots <nubots@nubots.net>
  */
-#include "LinkID.hpp"
+#include "FrameID.hpp"
 
 #include <stdexcept>
 
 namespace utility::input {
 
-    LinkID::LinkID(std::string const& str) {
+    FrameID::FrameID(std::string const& str) {
         // clang-format off
         if      (str == "R_SHOULDER_PITCH") { value = Value::R_SHOULDER_PITCH; }
         else if (str == "L_SHOULDER_PITCH") { value = Value::L_SHOULDER_PITCH; }
@@ -49,12 +49,12 @@ namespace utility::input {
         else if (str == "L_CAMERA")      { value = Value::L_CAMERA; }
         else if (str == "R_CAMERA")      { value = Value::R_CAMERA; }
         else {
-            throw std::runtime_error("String " + str + " did not match any enum for LinkID");
+            throw std::runtime_error("String " + str + " did not match any enum for FrameID");
         }
         // clang-format on
     }
 
-    LinkID::operator std::string() const {
+    FrameID::operator std::string() const {
         switch (value) {
             case Value::R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
             case Value::L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
@@ -81,11 +81,11 @@ namespace utility::input {
             case Value::L_CAMERA: return "L_CAMERA";
             case Value::R_CAMERA: return "R_CAMERA";
             case Value::NUMBER_OF_LINKS:
-            default: throw std::runtime_error("enum LinkID's value is corrupt, unknown value stored");
+            default: throw std::runtime_error("enum FrameID's value is corrupt, unknown value stored");
         }
     }
 
-    std::ostream& operator<<(std::ostream& out, const LinkID& val) {
+    std::ostream& operator<<(std::ostream& out, const FrameID& val) {
         return out << static_cast<std::string>(val);
     }
 }  // namespace utility::input

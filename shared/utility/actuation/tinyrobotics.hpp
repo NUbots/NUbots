@@ -31,7 +31,7 @@
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/input/LinkID.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 
@@ -40,7 +40,7 @@ namespace utility::actuation::tinyrobotics {
     using message::actuation::BodySide;
     using message::actuation::ServoCommand;
     using utility::input::LimbID;
-    using utility::input::LinkID;
+    using utility::input::FrameID;
     using utility::input::ServoID;
 
     using message::input::Sensors;
@@ -79,32 +79,32 @@ namespace utility::actuation::tinyrobotics {
                                                       {18, ServoID::R_SHOULDER_ROLL},
                                                       {19, ServoID::R_SHOULDER_PITCH}};
 
-    /// @brief Maps the LinkID to the associated link index in the tinyrobotics model
-    inline std::vector<std::pair<int, LinkID>> link_map = {
-                                                      {1, LinkID::L_HIP_YAW},
-                                                      {2, LinkID::L_HIP_ROLL},
-                                                      {3, LinkID::L_HIP_PITCH},
-                                                      {4, LinkID::L_KNEE},
-                                                      {5, LinkID::L_ANKLE_PITCH},
-                                                      {6, LinkID::L_ANKLE_ROLL},
-                                                      {7, LinkID::L_FOOT_BASE},
-                                                      {8, LinkID::R_HIP_YAW},
-                                                      {9, LinkID::R_HIP_ROLL},
-                                                      {10, LinkID::R_HIP_PITCH},
-                                                      {11, LinkID::R_KNEE},
-                                                      {12, LinkID::R_ANKLE_PITCH},
-                                                      {13, LinkID::R_ANKLE_ROLL},
-                                                      {14, LinkID::R_FOOT_BASE},
-                                                      {15, LinkID::HEAD_YAW},
-                                                      {16, LinkID::HEAD_PITCH},
-                                                      {17, LinkID::L_CAMERA},
-                                                      {18, LinkID::R_CAMERA},
-                                                      {19, LinkID::L_SHOULDER_PITCH},
-                                                      {20, LinkID::L_SHOULDER_ROLL},
-                                                      {21, LinkID::L_ELBOW},
-                                                      {22, LinkID::R_SHOULDER_PITCH},
-                                                      {23, LinkID::R_SHOULDER_ROLL},
-                                                      {24, LinkID::R_ELBOW}};
+    /// @brief Maps the FrameID to the associated link index in the tinyrobotics model
+    inline std::vector<std::pair<int, FrameID>> link_map = {
+                                                      {1, FrameID::L_HIP_YAW},
+                                                      {2, FrameID::L_HIP_ROLL},
+                                                      {3, FrameID::L_HIP_PITCH},
+                                                      {4, FrameID::L_KNEE},
+                                                      {5, FrameID::L_ANKLE_PITCH},
+                                                      {6, FrameID::L_ANKLE_ROLL},
+                                                      {7, FrameID::L_FOOT_BASE},
+                                                      {8, FrameID::R_HIP_YAW},
+                                                      {9, FrameID::R_HIP_ROLL},
+                                                      {10, FrameID::R_HIP_PITCH},
+                                                      {11, FrameID::R_KNEE},
+                                                      {12, FrameID::R_ANKLE_PITCH},
+                                                      {13, FrameID::R_ANKLE_ROLL},
+                                                      {14, FrameID::R_FOOT_BASE},
+                                                      {15, FrameID::HEAD_YAW},
+                                                      {16, FrameID::HEAD_PITCH},
+                                                      {17, FrameID::L_CAMERA},
+                                                      {18, FrameID::R_CAMERA},
+                                                      {19, FrameID::L_SHOULDER_PITCH},
+                                                      {20, FrameID::L_SHOULDER_ROLL},
+                                                      {21, FrameID::L_ELBOW},
+                                                      {22, FrameID::R_SHOULDER_PITCH},
+                                                      {23, FrameID::R_SHOULDER_ROLL},
+                                                      {24, FrameID::R_ELBOW}};
     // clang-format on
 
     /**
@@ -155,14 +155,14 @@ namespace utility::actuation::tinyrobotics {
     }
 
     /**
-     * @brief Converts forward kinematics result to a map of LinkID to the associated forward kinematics transform
+     * @brief Converts forward kinematics result to a map of FrameID to the associated forward kinematics transform
      * @param transforms vector of forward kinematics transforms with index corresponding to the tinyrobotics link index
-     * @return map of LinkID to the associated forward kinematics transform
+     * @return map of FrameID to the associated forward kinematics transform
      */
     template <typename Scalar>
-    inline std::map<LinkID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> forward_kinematics_to_servo_map(
+    inline std::map<FrameID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> forward_kinematics_to_servo_map(
         const std::vector<Eigen::Transform<Scalar, 3, Eigen::Isometry>>& transforms) {
-        std::map<LinkID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> servo_map{};
+        std::map<FrameID, Eigen::Transform<Scalar, 3, Eigen::Isometry>> servo_map{};
         for (const auto& [link_index, servo_id] : link_map) {
             servo_map[servo_id] = transforms[link_index];
         }

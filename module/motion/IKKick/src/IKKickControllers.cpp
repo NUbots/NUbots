@@ -29,7 +29,7 @@ namespace module::motion {
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
-    using LinkID  = utility::input::LinkID;
+    using FrameID  = utility::input::FrameID;
     using message::actuation::KinematicsModel;
 
     void KickBalancer::configure(const Configuration& config) {
@@ -90,8 +90,8 @@ namespace module::motion {
         Eigen::Isometry3d currentTorso = getTorsoPose(sensors);
         // Convert kick foot to torso
         Eigen::Isometry3d currentKickFoot = (supportFoot == LimbID::LEFT_LEG)
-                                                ? Eigen::Isometry3d(sensors.Htx[LinkID::L_ANKLE_ROLL])
-                                                : Eigen::Isometry3d(sensors.Htx[LinkID::R_ANKLE_ROLL]);
+                                                ? Eigen::Isometry3d(sensors.Htx[FrameID::L_ANKLE_ROLL])
+                                                : Eigen::Isometry3d(sensors.Htx[FrameID::R_ANKLE_ROLL]);
 
         // Convert support foot to kick foot coordinates = convert torso to kick foot * convert support foot to
         // torso

@@ -34,7 +34,7 @@
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
 
-#include "utility/input/LinkID.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -72,7 +72,7 @@ namespace module::platform {
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
 
-    using utility::input::LinkID;
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::platform::getRawServo;
     using utility::support::Expression;
@@ -320,7 +320,7 @@ namespace module::platform {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Isometry3d Htp(sensors.Htx[LinkID::HEAD_PITCH]);
+            Eigen::Isometry3d Htp(sensors.Htx[FrameID::HEAD_PITCH]);
             Eigen::Isometry3d Htw(sensors.Htw);
             Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
