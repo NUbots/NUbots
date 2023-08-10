@@ -18,20 +18,6 @@ using extension::Configuration;
     using message::input::Sensors;
     using message::platform::ButtonMiddleDown;
     using message::platform::ButtonLeftDown;
-    // using message::platform::webots::OptimisationRobotPosition;
-    // using message::support::optimisation::NSGA2EvaluationRequest;
-    // using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
-    // using message::support::optimisation::NSGA2EvaluatorReady;
-    // using message::support::optimisation::NSGA2FitnessScores;
-    // using message::support::optimisation::NSGA2Terminate;
-    // using message::support::optimisation::NSGA2TrialExpired;
-    // using message::support::optimisation::OptimisationResetDone;
-    // using message::support::optimisation::OptimisationTimeUpdate;
-
-    // using utility::behaviour::RegisterAction;
-    // using utility::input::LimbID;
-    // using utility::input::ServoID;
-    // using utility::support::Expression;
 
 OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -93,8 +79,9 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
     // Reset for next run or terminate when paused
     on<Trigger<ButtonLeftDown>, Single>().then([this] {
         NUClear::log<NUClear::DEBUG>("Left Button Pressed");
-        if ()
+        if (false) {
             emit(std::make_unique<OptimisationResetDone>());
+        }
     });
 
     // Pause optimisation
