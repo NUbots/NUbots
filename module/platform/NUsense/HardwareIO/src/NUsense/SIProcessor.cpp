@@ -2,8 +2,8 @@
 
 #include <vector>
 
-namespace NUsense {
-    std::string msg_to_nbs(message::platform::RawSensorsV2& msg) {
+namespace module::platform::NUsense {
+    std::vector<char> msg_to_nbs(const RawSensorsV2& msg) {
 
         // Use a vector to preprocess the packet then once it is filled,
         // We insert everything to a string stream
@@ -15,8 +15,7 @@ namespace NUsense {
         packet_data.push_back(0xA2);
 
         // Serialise protobuf message to string then add everything to our vector
-        std::string protobuf_bytes = msg.SerializeToString();
-
+        std::vector<char> protobuf_bytes = NUClear::util::serialse(msg);
         for (const auto& byte : protobuf_bytes) {
             packet_data.push_back(static_cast<uint8_t>(byte));
         }
@@ -30,7 +29,7 @@ namespace NUsense {
         return nbs_msg.str();
     }
 
-    message::platform::RawSensorsV2 nbs_to_msg(std::string nbs_packet) {
+    const RawSensors& nbs_to_msg(std::vector<char> nbs_packet) {
 
         // Create a stream from the packet
         std::stringstream packet_stream(packet_data_str);
@@ -51,9 +50,9 @@ namespace NUsense {
 
         std::string protobuf_packet(packet_data.begin() + 3, packet_data.end());
 
-        message::platform::RawSensorsV2 protobuf_msg;
+        RawSensors protobuf_msg;
         protobuf_msg.ParseFromString(&protobuf_packet);
 
         return protobuf_msg;
     }
-}  // namespace NUsense
+}  // namespace module::platform::NUsense

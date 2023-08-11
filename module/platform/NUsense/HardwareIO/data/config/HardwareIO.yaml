@@ -1,2 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
+
+# Port to send our data to
+port: "/dev/ttyACM0"

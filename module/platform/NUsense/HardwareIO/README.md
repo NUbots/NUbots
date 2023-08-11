@@ -1,14 +1,9 @@
-HardwareIO
-==========
+# HardwareIO
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

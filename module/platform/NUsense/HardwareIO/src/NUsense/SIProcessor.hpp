@@ -20,19 +20,18 @@
 #ifndef NUSENSE_SIPROCESSOR_HPP
 #define NUSENSE_SIPROCESSOR_HPP
 
-#include <sstream>
+#include "message/platform/RawSensors.hpp"
 
-#include "message/platform/RawSensorsv2.hpp"
+namespace module::platform::NUsense {
+    using message::platform::RawSensors;
 
-
-namespace NUsense {
     class SIProcessor {
     public:
         // Protobuf msg to nbs packet
-        std::string msg_to_nbs(message::platform::RawSensorsV2& msg);
+        std::vector<char> msg_to_nbs(const RawSensors& msg);
 
-        // Nbs pacekt to protobuf msg
-        message::platform::RawSensorsV2 nbs_to_msg(std::string nbs_packet);
+        // Nbs packet to protobuf msg
+        const RawSensors& nbs_to_msg(std::vector<char> nbs_packet);
     };
-}  // namespace NUsense
+}  // namespace module::platform::NUsense
 #endif
