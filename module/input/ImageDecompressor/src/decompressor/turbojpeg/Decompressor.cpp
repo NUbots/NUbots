@@ -37,7 +37,6 @@ namespace module::input::decompressor::turbojpeg {
             mosaic = utility::vision::Mosaic(width, height, output_fourcc);
         }
     }
-    Decompressor::~Decompressor() = default;
 
     std::pair<std::vector<uint8_t>, int> Decompressor::decompress(const std::vector<uint8_t>& data) {
 
@@ -54,10 +53,10 @@ namespace module::input::decompressor::turbojpeg {
         tjDecompressHeader2(decompressor, const_cast<uint8_t*>(data.data()), data.size(), &width, &height, &subsamp);
 
         // Work out what we decode as
-        TJPF code = mosaic || subsamp == TJSAMP::TJSAMP_GRAY ? TJPF::TJPF_GRAY : TJPF::TJPF_RGBA;
+        TJPF code = mosaic || subsamp == TJSAMP::TJSAMP_GRAY ? TJPF::TJPF_GRAY : TJPF::TJPF_RGB;
 
         // Decode the image
-        std::vector<uint8_t> output(width * height * (code == TJPF::TJPF_GRAY ? 1 : 4));
+        std::vector<uint8_t> output(width * height * (code == TJPF::TJPF_GRAY ? 1 : 3));
         tjDecompress2(decompressor,
                       data.data(),
                       data.size(),
@@ -76,7 +75,7 @@ namespace module::input::decompressor::turbojpeg {
         // Work out what the fourcc of the image should be
         uint32_t fourcc =
             output_fourcc == utility::vision::fourcc("JPEG")
-                ? subsamp == TJSAMP::TJSAMP_GRAY ? utility::vision::fourcc("GREY") : utility::vision::fourcc("RGBA")
+                ? subsamp == TJSAMP::TJSAMP_GRAY ? utility::vision::fourcc("GREY") : utility::vision::fourcc("RGB3")
                 : output_fourcc;
 
         return std::make_pair(output, fourcc);

@@ -24,6 +24,7 @@ package message.vision;
 import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 import "message/platform/webots/messages.proto";
+import "Transform.proto";
 
 message VisualMesh {
     /// Time this message was created
@@ -33,7 +34,7 @@ message VisualMesh {
     /// name of the camera that this mesh was constructed from
     string name = 3;
     /// World to camera transform that this mesh was constructed with
-    mat4 Hcw = 4;
+    iso3 Hcw = 4;
     /// Pixel coordinates projected from the rays
     fmat coordinates = 5;
     /// Neighbours of each node in the mesh. Each row corresponds to a node and the columns are the neighbours

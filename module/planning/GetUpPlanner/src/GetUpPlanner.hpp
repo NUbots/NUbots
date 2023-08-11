@@ -30,9 +30,6 @@ namespace module::planning {
     private:
         /// @brief The number of consecutive frames we have been at recovery levels
         int recovery_frames = 0;
-
-        /// @brief Whether we are currently getting up
-        bool getting_up = false;
     };
 
 

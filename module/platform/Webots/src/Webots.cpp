@@ -224,8 +224,8 @@ namespace module::platform {
     }
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Configuration>("webots.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file webots.yaml
+        on<Configuration>("Webots.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file Webots.yaml
             time_step            = config["time_step"].as<int>();
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
@@ -805,7 +805,7 @@ namespace module::platform {
             image->data           = camera.image;
 
             image->id        = camera_context[camera.name].id;
-            image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
+            image->timestamp = NUClear::clock::now();
 
             Eigen::Isometry3d Hcw;
 
@@ -842,7 +842,7 @@ namespace module::platform {
             }
 
             image->lens = camera_context[camera.name].lens;
-            image->Hcw  = Hcw.matrix();
+            image->Hcw  = Hcw;
 
             // If we got ground truth data, send it through with the image
             if (sensor_measurements.vision_ground_truth.exists) {

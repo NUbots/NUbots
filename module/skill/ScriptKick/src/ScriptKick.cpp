@@ -7,7 +7,7 @@
 #include "message/skill/Kick.hpp"
 
 #include "utility/input/LimbID.hpp"
-#include "utility/motion/Script.hpp"
+#include "utility/skill/Script.hpp"
 
 namespace module::skill {
 
@@ -15,7 +15,7 @@ namespace module::skill {
     using message::actuation::LimbsSequence;
     using message::skill::Kick;
     using utility::input::LimbID;
-    using utility::motion::load_script;
+    using utility::skill::load_script;
 
     ScriptKick::ScriptKick(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {

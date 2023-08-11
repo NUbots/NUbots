@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 scripts:
   getup_upright:
@@ -11,11 +11,9 @@ scripts:
     - "StandUpBack.yaml"
     - "Stand.yaml"
   getup_left:
-    - "RollLeft.yaml"
     - "StandUpFront.yaml"
     - "Stand.yaml"
   getup_right:
-    - "RollRight.yaml"
     - "StandUpFront.yaml"
     - "Stand.yaml"
   # We run relax when we are upside down

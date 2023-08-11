@@ -19,11 +19,10 @@
 namespace module::output::compressor::vaapi {
 
     Factory::Factory(const std::string& device, const std::string& driver, const int& quality)
-        : fd(-1), quality(quality) {
+        : fd(open(device.c_str(), O_RDWR)), quality(quality) {
         VAStatus va_status = 0;
 
         // Open the render device
-        fd = open(device.c_str(), O_RDWR);
         if (fd < 0) {
             throw std::system_error(errno, std::system_category(), "Error when opening the GPU rendering device");
         }

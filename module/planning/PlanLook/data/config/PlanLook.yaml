@@ -1,15 +1,8 @@
 # Controls the minimum log level that NUClear log will display
-log_level: TRACE
-
-# How long to wait until looking for the ball again (seconds)
-ball_search_timeout: 2
-# How long to wait until looking for the goals again (seconds)
-goal_search_timeout: 3
-# How long to wait until looking over the field again (seconds)
-field_search_timeout: 5
+log_level: INFO
 
 # Time lingering at each position in search (seconds)
-search_fixation_time: 2
+search_fixation_time: 0.5
 
 # List of positions for search
 min_yaw: &min_yaw -0.7

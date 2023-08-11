@@ -1,7 +1,6 @@
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_HPP
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_HPP
 
-#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <mutex>
@@ -15,8 +14,8 @@ namespace module::output {
     private:
         struct CompressorContext {
             struct Compressor {
-                /// This atomic bool gets turned on/off depending on if it is in use
-                std::unique_ptr<std::atomic<bool>> active;
+                /// Mutex controlling access to this compressor instance
+                std::unique_ptr<std::mutex> mutex;
                 /// The actual compressor that will convert the image to jpeg format
                 std::shared_ptr<compressor::Compressor> compressor;
             };

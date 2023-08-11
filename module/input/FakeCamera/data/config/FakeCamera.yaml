@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 image_folder: "images"
 image_prefix: "image"

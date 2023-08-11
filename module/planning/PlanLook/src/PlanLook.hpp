@@ -12,9 +12,9 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            NUClear::clock::duration ball_search_timeout{};
-            NUClear::clock::duration goal_search_timeout{};
+            /// @brief How long to look at each search position
             float search_fixation_time = 0.0f;
+            /// @brief List of search positions for the search pattern
             std::vector<Eigen::Vector2d> search_positions{};
         } cfg;
 

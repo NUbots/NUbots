@@ -23,16 +23,16 @@
 #include <nuclear>
 #include <utility>
 
-#include "message/support/nusight/DataPoint.hpp"
+#include "message/eye/DataPoint.hpp"
 
 #include "utility/type_traits/is_iterable.hpp"
 
 namespace utility::nusight {
 
-    using message::support::nusight::DataPoint;
+    using message::eye::DataPoint;
 
     namespace helpers {
-        using message::support::nusight::DataPoint;
+        using message::eye::DataPoint;
         using utility::type_traits::is_iterable;
 
         inline void buildGraph(DataPoint& /*dataPoint*/) {}
@@ -57,7 +57,7 @@ namespace utility::nusight {
     }  // namespace helpers
 
     template <typename... Values>
-    inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
+    inline std::unique_ptr<message::eye::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint   = std::make_unique<DataPoint>();
         dataPoint->label = std::move(label);
         helpers::buildGraph(*dataPoint, values...);

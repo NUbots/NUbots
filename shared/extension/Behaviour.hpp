@@ -212,17 +212,20 @@ namespace extension::behaviour {
      */
     template <typename Provider>
     struct Uses {
-
+        GroupInfo::RunState run_state;
         bool done;
 
         template <typename DSL>
         static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::Reaction& r) {
 
-            auto group_info = information::InformationSource::get_group_info(r.id, typeid(Provider));
+            auto group_info = information::InformationSource::get_group_info(r.id,
+                                                                             typeid(Provider),
+                                                                             typeid(commands::RootType<Provider>));
 
             auto data = std::make_shared<Uses<Provider>>();
 
-            data->done = group_info.done;
+            data->run_state = group_info.run_state;
+            data->done      = group_info.done;
 
             return data;
         }
@@ -363,10 +366,11 @@ namespace extension::behaviour {
         template <typename T>
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
-        using Task    = ::extension::behaviour::Task<T>;
-        using RunInfo = ::extension::behaviour::RunInfo;
-        using Done    = ::extension::behaviour::Done;
-        using Idle    = ::extension::behaviour::Idle;
+        using Task      = ::extension::behaviour::Task<T>;
+        using RunInfo   = ::extension::behaviour::RunInfo;
+        using GroupInfo = ::extension::behaviour::GroupInfo;
+        using Done      = ::extension::behaviour::Done;
+        using Idle      = ::extension::behaviour::Idle;
     };
 
 }  // namespace extension::behaviour

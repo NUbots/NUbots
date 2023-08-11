@@ -25,10 +25,10 @@
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::BehaviourTask;
+    using component::DirectorTask;
 
-    bool Director::direct_priority(const std::shared_ptr<BehaviourTask>& incumbent,
-                                   const std::shared_ptr<BehaviourTask>& challenger) {
+    bool Director::direct_priority(const std::shared_ptr<DirectorTask>& incumbent,
+                                   const std::shared_ptr<DirectorTask>& challenger) {
         return incumbent->optional == challenger->optional ? incumbent->priority < challenger->priority
                                                            : incumbent->optional;
     }
