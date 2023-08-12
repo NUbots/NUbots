@@ -2,20 +2,19 @@ import * as React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { observable } from "mobx";
 import { Observer } from "mobx-react";
-import { range } from "../../../../../../shared/base/range";
 
+import { range } from "../../../../../../shared/base/range";
 import { Vector2 } from "../../../../../../shared/math/vector2";
 import { Vector4 } from "../../../../../../shared/math/vector4";
-import { OrthographicCamera } from '../../../../three/three_fiber'
+import { OrthographicCamera } from "../../../../three/three_fiber";
 import { ThreeFiber } from "../../../../three/three_fiber";
-import { ImageView } from '../../../image_view/view'
-import { CameraModel } from '../../../model'
-import { fakeCameraModel } from '../../../stories/fake_camera_model'
+import { CameraModel } from "../../../model";
+import { fakeCameraModel } from "../../../stories/fake_camera_model";
 import { Polylines } from "../../polylines/polylines";
 import { PolylinesView } from "../../polylines/polylines";
 
 const meta: Meta<typeof PolylinesView> = {
-  title: "components/Camera/objects/Straight Line Renderer",
+  title: "components/Camera/objects/Polylines",
   parameters: {
     layout: "fullscreen",
   },
@@ -26,8 +25,7 @@ export default meta;
 
 type Story = StoryObj<typeof PolylinesView>;
 
-export const PolylinesStory: Story = {
-  name: "Polylines",
+export const PolylinesCamera: Story = {
   render: () => {
     const box = observable<{ camera: CameraModel | undefined; polylines: Polylines[] | undefined }>({
       camera: undefined,
@@ -88,6 +86,7 @@ export const PolylinesStory: Story = {
             <div className="w-full h-full">
               <ThreeFiber>
                 <OrthographicCamera args={[-1, 1, 1, -1, 0, 1]} manual />
+                {/* TODO(Annable): Add back in once vision is R3F */}
                 {/*<ImageView image={box.camera.image} />*/}
                 <PolylinesView polylines={box.polylines} camera={box.camera} />
               </ThreeFiber>

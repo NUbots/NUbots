@@ -5,13 +5,13 @@ import { observer } from "mobx-react";
 import { Vector2 } from "../../../../../shared/math/vector2";
 import { Vector3 } from "../../../../../shared/math/vector3";
 import { Vector4 } from "../../../../../shared/math/vector4";
-import { RawShaderMaterial } from '../../../three/three_fiber'
+import { RawShaderMaterial } from "../../../three/three_fiber";
+import { CameraModel } from "../../model";
 
 import joinFragmentShader from "./shaders/join.frag";
 import joinVertexShader from "./shaders/join.vert";
 import segmentFragmentShader from "./shaders/segment.frag";
 import segmentVertexShader from "./shaders/segment.vert";
-import { CameraModel } from "../../model";
 
 export type Polylines = {
   points: PolylinePoint[];
