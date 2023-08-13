@@ -8,12 +8,11 @@ from utility.dockerise import run_on_docker
 from utility.roles import all_role_names, dir_role_names, role_folders
 from utility.shell import WrapPty
 
-ROLE_GROUPS = {
-    "all" : all_role_names()
-}
+ROLE_GROUPS = {"all": all_role_names()}
 
 for r in role_folders():
     ROLE_GROUPS[r] = dir_role_names(r)
+
 
 class ExtendConstAction(argparse._AppendConstAction):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -21,6 +20,7 @@ class ExtendConstAction(argparse._AppendConstAction):
         items = argparse._copy_items(items)
         items.extend(self.const)
         setattr(namespace, self.dest, items)
+
 
 @run_on_docker
 def register(command):
@@ -42,7 +42,7 @@ def register(command):
         default=[],
         choices=all_role_names(),
         nargs="*",
-        help="Unset roles via command line"
+        help="Unset roles via command line",
     )
     for group in ROLE_GROUPS.keys():
         command.add_argument(
@@ -58,7 +58,7 @@ def register(command):
         default=[],
         choices=all_role_names(),
         nargs="+",
-        help="Set roles via command line"
+        help="Set roles via command line",
     )
     for group in ROLE_GROUPS.keys():
         command.add_argument(
