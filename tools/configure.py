@@ -5,7 +5,7 @@ import os
 
 import b
 from utility.dockerise import run_on_docker
-from utility.roles import all_role_names, role_folders, dir_role_names
+from utility.roles import all_role_names, dir_role_names, role_folders
 from utility.shell import WrapPty
 
 ROLE_GROUPS = {
@@ -88,12 +88,12 @@ def run(interactive, set_roles, unset_roles, args, **kwargs):
         args.remove("--")
 
     for role in unset_roles:
-        role = role.replace("/","-")
+        # role = role.replace("/","-")
         args.append(f"-DROLE_{role}:BOOL=OFF")
     for role in set_roles:
-        role = role.replace("/","-")
+        # role = role.replace("/","-")
         args.append(f"-DROLE_{role}:BOOL=ON")
-        
+
     # If interactive then run ccmake else just run cmake
     os.chdir(os.path.join(b.project_dir, "..", "build"))
     if interactive:
