@@ -9,9 +9,7 @@ from utility.roles import all_role_names, dir_role_names, role_folders
 from utility.shell import WrapPty
 
 ROLE_GROUPS = {
-    "all" : all_role_names(),
-    "cool" : ["robocup", "test/camera"],
-    "nice" : ["scripttuner", "natnet"],
+    "all" : all_role_names()
 }
 
 for r in role_folders():
@@ -88,10 +86,8 @@ def run(interactive, set_roles, unset_roles, args, **kwargs):
         args.remove("--")
 
     for role in unset_roles:
-        # role = role.replace("/","-")
         args.append(f"-DROLE_{role}:BOOL=OFF")
     for role in set_roles:
-        # role = role.replace("/","-")
         args.append(f"-DROLE_{role}:BOOL=ON")
 
     # If interactive then run ccmake else just run cmake
