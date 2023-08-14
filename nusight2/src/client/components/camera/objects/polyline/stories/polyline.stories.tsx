@@ -10,6 +10,7 @@ import { OrthographicCamera } from "../../../../three/three_fiber";
 import { ThreeFiber } from "../../../../three/three_fiber";
 import { CameraModel } from "../../../model";
 import { fakeCameraModel } from "../../../stories/fake_camera_model";
+import { PolylineView } from "../polyline";
 import { Polyline } from "../polyline";
 import { PolylinesView } from "../polyline";
 
@@ -24,6 +25,54 @@ const meta: Meta<typeof PolylinesView> = {
 export default meta;
 
 type Story = StoryObj<typeof PolylinesView>;
+
+export const SinglePolyline: Story = {
+  render: () => {
+    const box = observable<{ camera: CameraModel | undefined; polyline: Polyline | undefined }>({
+      camera: undefined,
+      polyline: undefined,
+    });
+
+    // Create line data from random pixel positions
+    fakeCameraModel().then((camera) => {
+      box.camera = camera;
+      box.polyline = {
+        points: [
+          [40, 280],
+          [70, 225],
+          [240, 140],
+          [380, 150],
+          [530, 220],
+          [530, 390],
+          [330, 460],
+          [230, 430],
+        ].map(([x, y]) => {
+          const color = new Vector4(0, y / camera.image.height, x / camera.image.width, 1);
+          return { pixel: new Vector2(x, y), color, size: 10 };
+        }),
+        autoClose: true,
+        width: 5,
+      };
+    });
+
+    return (
+      <Observer>
+        {() =>
+          box.polyline && box.camera ? (
+            <div className="w-full h-full">
+              <ThreeFiber>
+                <OrthographicCamera args={[-1, 1, 1, -1, 0, 1]} manual />
+                {/* TODO(Annable): Add back in once vision is R3F */}
+                {/*<ImageView image={box.camera.image} />*/}
+                <PolylineView polyline={box.polyline} camera={box.camera} />
+              </ThreeFiber>
+            </div>
+          ) : null
+        }
+      </Observer>
+    );
+  },
+};
 
 export const MultiPolyline: Story = {
   render: () => {

@@ -25,8 +25,8 @@ export interface PolylinePoint {
   size?: number;
 }
 
-export const PolylineView = observer(({ polyline, camera }: { polyline: Polyline; camera: CameraModel }) => (
-  <PolylinesView polylines={[polyline]} camera={camera}/>
+export const PolylineView = React.memo(({ polyline, camera }: { polyline: Polyline; camera: CameraModel }) => (
+  <PolylinesView polylines={[polyline]} camera={camera} />
 ));
 
 export const PolylinesView = observer(({ polylines, camera }: { polylines: Polyline[]; camera: CameraModel }) => (

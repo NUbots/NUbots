@@ -1,5 +1,5 @@
 import React from "react";
-import { Canvas, CanvasProps,useThree } from "@react-three/fiber";
+import { Canvas, CanvasProps, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 import { Vector3 } from "../../../shared/math/vector3";
