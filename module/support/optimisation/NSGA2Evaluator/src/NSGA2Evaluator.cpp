@@ -79,8 +79,9 @@ namespace module::support::optimisation {
         on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
             State old_state = current_state;
             State new_state = handle_transition(current_state, event);
-
-            log<NUClear::DEBUG>("Transitioning on", event, ", from state", old_state, "to state", new_state);
+            const char* state_string[] = { "UNKNOWN", "WAITING_FOR_REQUEST", "SETTING_UP_TRIAL", "RESETTING_SIMULATION", "EVALUATING", "TERMINATING_EARLY", "TERMINATING_GRACEFULLY", "FINISHED" };
+            const char* event_string[] = { "RESET_DONE", "CHECK_READY", "EVALUATE_REQUEST", "TERMINATE_EVALUATION", "TRIAL_SETUP_DONE", "TERMINATE_EARLY", "TRIAL_COMPLETED", "FITNESS_SCORES_SENT" };
+            log<NUClear::DEBUG>("Transitioning on", event_string[event], ", from state", state_string[old_state], "to state", state_string[new_state]);
 
             switch (new_state) {
                 case State::WAITING_FOR_REQUEST:
