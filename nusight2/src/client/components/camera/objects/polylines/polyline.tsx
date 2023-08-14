@@ -13,7 +13,7 @@ import joinVertexShader from "./shaders/join.vert";
 import segmentFragmentShader from "./shaders/segment.frag";
 import segmentVertexShader from "./shaders/segment.vert";
 
-export type Polylines = {
+export type Polyline = {
   points: PolylinePoint[];
   autoClose?: boolean;
   width?: number;
@@ -25,7 +25,7 @@ export interface PolylinePoint {
   size?: number;
 }
 
-export const PolylinesView = observer(({ polylines, camera }: { polylines: Polylines[]; camera: CameraModel }) => (
+export const PolylinesView = observer(({ polylines, camera }: { polylines: Polyline[]; camera: CameraModel }) => (
   <object3D>
     <Segments polylines={polylines} camera={camera} />
     <Joins polylines={polylines} camera={camera} />
@@ -36,14 +36,14 @@ const segmentPosition = [[0, -0.5], [1, -0.5], [1, 0.5], [0, 0.5]].flat(); // pr
 const segmentUv = [[0, 0], [1, 0], [1, 1], [0, 1]].flat(); // prettier-ignore
 const index = [0, 1, 2, 0, 2, 3];
 
-const Segments = observer(({ polylines, camera }: { polylines: Polylines[]; camera: CameraModel }) => {
-  const lineColors = ({ points, autoClose }: Polylines) =>
+const Segments = observer(({ polylines, camera }: { polylines: Polyline[]; camera: CameraModel }) => {
+  const lineColors = ({ points, autoClose }: Polyline) =>
     points.concat(autoClose ? points[0] : []).flatMap((join) => join.color.toArray());
 
-  const lineWidths = ({ points, width = 5, autoClose }: Polylines) =>
+  const lineWidths = ({ points, width = 5, autoClose }: Polyline) =>
     new Array(autoClose ? points.length : points.length - 1).fill(width);
 
-  const linePositions = ({ points, autoClose }: Polylines) =>
+  const linePositions = ({ points, autoClose }: Polyline) =>
     points
       .flatMap((join) => Vector3.from(join.pixel).toArray())
       .concat(autoClose ? Vector3.from(points[0].pixel).toArray() : []);
@@ -83,7 +83,7 @@ const Segments = observer(({ polylines, camera }: { polylines: Polylines[]; came
   );
 });
 
-const Joins = observer(({ polylines, camera }: { polylines: Polylines[]; camera: CameraModel }) => {
+const Joins = observer(({ polylines, camera }: { polylines: Polyline[]; camera: CameraModel }) => {
   const joins = polylines.flatMap((line) => line.points);
   const colors = new Float32Array(joins.flatMap((join) => join.color.toArray()));
   const radii = new Float32Array(joins.flatMap((join) => join.size ?? 10));

@@ -10,8 +10,8 @@ import { OrthographicCamera } from "../../../../three/three_fiber";
 import { ThreeFiber } from "../../../../three/three_fiber";
 import { CameraModel } from "../../../model";
 import { fakeCameraModel } from "../../../stories/fake_camera_model";
-import { Polylines } from "../../polylines/polylines";
-import { PolylinesView } from "../../polylines/polylines";
+import { Polyline } from "../polyline";
+import { PolylinesView } from "../polyline";
 
 const meta: Meta<typeof PolylinesView> = {
   title: "components/Camera/objects/Polylines",
@@ -27,7 +27,7 @@ type Story = StoryObj<typeof PolylinesView>;
 
 export const PolylinesCamera: Story = {
   render: () => {
-    const box = observable<{ camera: CameraModel | undefined; polylines: Polylines[] | undefined }>({
+    const box = observable<{ camera: CameraModel | undefined; polylines: Polyline[] | undefined }>({
       camera: undefined,
       polylines: undefined,
     });
