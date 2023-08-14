@@ -36,9 +36,9 @@ export const PolylinesView = observer(({ polylines, camera }: { polylines: Polyl
   </object3D>
 ));
 
-const segmentPosition = [[0, -0.5], [1, -0.5], [1, 0.5], [0, 0.5]].flat(); // prettier-ignore
-const segmentUv = [[0, 0], [1, 0], [1, 1], [0, 1]].flat(); // prettier-ignore
-const index = [0, 1, 2, 0, 2, 3];
+const SEGMENT_VERTICES = [[0, -0.5], [1, -0.5], [1, 0.5], [0, 0.5]].flat(); // prettier-ignore
+const SEGMENT_UVS = [[0, 0], [1, 0], [1, 1], [0, 1]].flat(); // prettier-ignore
+const INDEX = [0, 1, 2, 0, 2, 3];
 
 const Segments = observer(({ polylines, camera }: { polylines: Polyline[]; camera: CameraModel }) => {
   const lineColors = ({ points, autoClose }: Polyline) =>
@@ -62,9 +62,9 @@ const Segments = observer(({ polylines, camera }: { polylines: Polyline[]; camer
   return (
     <mesh frustumCulled={false}>
       <instancedBufferGeometry>
-        <uint16BufferAttribute attach="index" args={[index, 1]} />
-        <float32BufferAttribute attach="attributes-position" args={[segmentPosition, 2]} />
-        <float32BufferAttribute attach="attributes-uv" args={[segmentUv, 2]} />
+        <uint16BufferAttribute attach="index" args={[INDEX, 1]} />
+        <float32BufferAttribute attach="attributes-position" args={[SEGMENT_VERTICES, 2]} />
+        <float32BufferAttribute attach="attributes-uv" args={[SEGMENT_UVS, 2]} />
         <instancedBufferAttribute attach="attributes-startPoint" args={[start, 3]} />
         <instancedBufferAttribute attach="attributes-endPoint" args={[end, 3]} />
         <instancedBufferAttribute attach="attributes-startColor" args={[colorStart, 4]} />
