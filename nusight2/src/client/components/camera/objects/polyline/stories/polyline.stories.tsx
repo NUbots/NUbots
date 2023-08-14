@@ -14,7 +14,7 @@ import { Polyline } from "../polyline";
 import { PolylinesView } from "../polyline";
 
 const meta: Meta<typeof PolylinesView> = {
-  title: "components/Camera/objects/Polylines",
+  title: "components/Camera/objects/Polyline",
   parameters: {
     layout: "fullscreen",
   },
@@ -25,7 +25,7 @@ export default meta;
 
 type Story = StoryObj<typeof PolylinesView>;
 
-export const PolylinesCamera: Story = {
+export const MultiPolyline: Story = {
   render: () => {
     const box = observable<{ camera: CameraModel | undefined; polylines: Polyline[] | undefined }>({
       camera: undefined,

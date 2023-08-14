@@ -25,6 +25,10 @@ export interface PolylinePoint {
   size?: number;
 }
 
+export const PolylineView = observer(({ polyline, camera }: { polyline: Polyline; camera: CameraModel }) => (
+  <PolylinesView polylines={[polyline]} camera={camera}/>
+));
+
 export const PolylinesView = observer(({ polylines, camera }: { polylines: Polyline[]; camera: CameraModel }) => (
   <object3D>
     <Segments polylines={polylines} camera={camera} />
