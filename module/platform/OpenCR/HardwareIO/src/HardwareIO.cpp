@@ -57,9 +57,6 @@ namespace module::platform::OpenCR {
                 nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
-
-            // Whether or not to require servo communication to run HardwareIO main loop
-            cfg.require_servo_packets = config["require_servo_packets"].as<bool>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -91,27 +88,25 @@ namespace module::platform::OpenCR {
                 return;
             }
 
-            if (cfg.require_servo_packets) {
-                // Check what the hangup was
-                bool packet_dropped = false;
-                // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
-                // any packets, otherwise is the nonzero ID of the timed out device
-                for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
-                    // delete the packet we're waiting on
-                    packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                    log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
-                    // set flag
-                    packet_dropped = true;
-                }
+            // Check what the hangup was
+            bool packet_dropped = false;
+            // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
+            // any packets, otherwise is the nonzero ID of the timed out device
+            for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
+                // delete the packet we're waiting on
+                packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
+                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
+                // set flag
+                packet_dropped = true;
+            }
 
 
-                // Send a request for all servo packets, only if there were packets dropped
-                // In case the system stops for some other reason, we don't want the watchdog
-                // to make it automatically restart
-                if (packet_dropped) {
-                    log<NUClear::WARN>("Requesting servo packets to restart system");
-                    send_servo_request();
-                }
+            // Send a request for all servo packets, only if there were packets dropped
+            // In case the system stops for some other reason, we don't want the watchdog
+            // to make it automatically restart
+            if (packet_dropped) {
+                log<NUClear::WARN>("Requesting servo packets to restart system");
+                send_servo_request();
             }
         });
 
@@ -162,7 +157,7 @@ namespace module::platform::OpenCR {
                     process_model_information(packet);
 
                     // check if we received the final packet we are expecting
-                    if (queue_item_waiting() == NUgus::ID::NO_ID && cfg.require_servo_packets) {
+                    if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
 
                         // At the start, we want to query the motors so we can store their state internally
@@ -174,9 +169,7 @@ namespace module::platform::OpenCR {
                                                                         sizeof(DynamixelServoReadData),
                                                                         nugus.servo_ids()));
                     }
-                    if (!cfg.require_servo_packets) {
-                        send_opencr_request();
-                    }
+
                     break;
 
                 // Handles OpenCR sensor data
@@ -185,11 +178,7 @@ namespace module::platform::OpenCR {
                     process_opencr_data(packet);
 
                     // check if we received the final packet we are expecting
-                    if (!cfg.require_servo_packets) {
-                        send_opencr_request();
-                        emit(std::make_unique<RawSensors>(construct_sensors()));
-                    }
-                    else if (queue_item_waiting() == NUgus::ID::NO_ID) {
+                    if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
                     }

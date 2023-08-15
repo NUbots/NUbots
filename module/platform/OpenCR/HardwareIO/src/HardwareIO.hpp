@@ -214,12 +214,6 @@ namespace module::platform::OpenCR {
         /// @brief clear all packet queues
         /// @returns the number of packets cleared
         int queue_clear_all();
-
-        /// @brief Stores configuration values
-        struct Config {
-            /// @brief Whether or not to require servo packets to be received to communicate with IMU
-            bool require_servo_packets = true;
-        } cfg;
     };
 
 }  // namespace module::platform::OpenCR

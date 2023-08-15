@@ -94,6 +94,3 @@ servos:
     direction: 1
     offset: 0.0
     simulated: false
-
-# Whether or not to require servo packets to be received to communicate with IMU
-require_servo_packets: true
