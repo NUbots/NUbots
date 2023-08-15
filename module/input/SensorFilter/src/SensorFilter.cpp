@@ -20,8 +20,7 @@
 #include "SensorFilter.hpp"
 
 #include "message/actuation/BodySide.hpp"
-#include "message/motion/GetupCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
+#include "message/localisation/Field.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
@@ -38,12 +37,7 @@ namespace module::input {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::ExecuteGetup;
-    using message::motion::KillGetup;
-    using message::motion::StopCommand;
-    using message::motion::WalkCommand;
+    using message::localisation::ResetFieldLocalisation;
 
     using extension::Configuration;
 
@@ -154,6 +148,13 @@ namespace module::input {
                           emit(std::move(sensors));
                       })
                 .disable();
+
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
+            // Reset the translation and yaw of odometry
+            Hwt.translation().x() = 0;
+            Hwt.translation().y() = 0;
+            yaw                   = 0;
+        });
     }
 
     void SensorFilter::integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state) {

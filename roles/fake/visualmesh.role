@@ -9,7 +9,6 @@ nuclear_role(
   # Support
   network::NUClearNet
   network::NetworkForwarder
-  # support::VirtualCamera
   support::configuration::SoccerConfig
   # Sensors
   input::FakeCamera

@@ -23,3 +23,11 @@ package message.purpose;
 message Defender {
     bool force_playing = 1;
 }
+
+message NormalDefender {}
+message DirectFreeKickDefender {}
+message InDirectFreeKickDefender {}
+message PenaltyKickDefender {}
+message CornerKickDefender {}
+message GoalKickDefender {}
+message ThrowInDefender {}

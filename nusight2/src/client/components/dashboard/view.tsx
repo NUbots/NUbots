@@ -54,7 +54,6 @@ export class Dashboard extends Component<DashboardProps> {
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}
-                        behaviour={model.behaviour}
                         lastCameraImage={model.lastCameraImage}
                         lastSeenBall={model.lastSeenBall}
                         lastSeenGoal={model.lastSeenGoal}

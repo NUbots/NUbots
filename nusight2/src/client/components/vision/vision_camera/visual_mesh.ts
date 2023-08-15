@@ -44,13 +44,14 @@ export class VisualMeshViewModel {
     const triangles = [];
     for (let i = 0; i < nElem; i++) {
       const ni = i * 6;
-      if (neighbours[ni + 0] < nElem) {
-        if (neighbours[ni + 2] < nElem) {
-          triangles.push(i, neighbours[ni + 0], neighbours[ni + 2]);
-        }
-        if (neighbours[ni + 1] < nElem) {
-          triangles.push(i, neighbours[ni + 1], neighbours[ni + 0]);
-        }
+
+      if (neighbours[ni + 0] < nElem && neighbours[ni + 1] < nElem) {
+        triangles.push(i, neighbours[ni + 0], neighbours[ni + 1]);
+        triangles.push(i, neighbours[ni + 1], neighbours[ni + 0]);
+      }
+      if (neighbours[ni + 1] < nElem && neighbours[ni + 2] < nElem) {
+        triangles.push(i, neighbours[ni + 1], neighbours[ni + 2]);
+        triangles.push(i, neighbours[ni + 2], neighbours[ni + 1]);
       }
     }
     const buffer = new THREE.InterleavedBuffer(
@@ -66,7 +67,8 @@ export class VisualMeshViewModel {
         { name: "goal", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 1) },
         { name: "fieldLine", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 2) },
         { name: "field", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 3) },
-        { name: "environment", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 4) },
+        { name: "robot", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 4) },
+        { name: "environment", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 5) },
       ],
     };
   });
@@ -85,6 +87,7 @@ export class VisualMeshViewModel {
     depthTest: false,
     depthWrite: false,
     transparent: true,
+    wireframe: true,
   }));
 
   private static readonly shader = rawShader(() => ({ vertexShader, fragmentShader }));

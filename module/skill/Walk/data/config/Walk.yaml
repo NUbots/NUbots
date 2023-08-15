@@ -2,25 +2,31 @@ log_level: INFO
 
 walk:
   # Time for one complete step (in seconds).
-  period: 0.35
+  period: 0.39
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
-    limits: [0.5, 0.1, 0.4]
+    limits: [0.5, 0.2, 0.4]
     # Step height (in meters)
-    height: 0.055
+    height: 0.075
     # Lateral distance in meters between feet (how spread apart the feet should be)
-    width: 0.19
+    width: 0.235
     # Ratio of the step_period where the foot should be at its highest point, between [0 1].
-    apex_ratio: 0.5
+    apex_ratio: 0.4
   torso:
     # Torso height (in meters)
-    height: 0.45
+    height: 0.46
     # Torso pitch (in radians)
-    pitch: 22 * pi / 180
+    pitch: 23 * pi / 180
+    # Torso constant position offset
+    position_offset: [0.05, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
-    sway_offset: [0, 0.09, 0]
+    sway_offset: [0, 0.05, 0]
     # Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
-    sway_ratio: 0.1
+    sway_ratio: 0.5
+    # Determines where to position the torso at the end of the step using a ratio of the next step placement.
+    # For example, a value of [0.5, 0.5, 1] would position the torso halfway between the planted and swing foot and with
+    # torso yaw rotation equal to swing foot yaw
+    final_position_ratio: [0.5, 0.5, 1]
 
 gains:
   arms: 8
@@ -29,7 +35,7 @@ gains:
 arms:
   right_shoulder_pitch: 1.7
   left_shoulder_pitch: 1.7
-  right_shoulder_roll: -0.2
-  left_shoulder_roll: 0.2
-  right_elbow: -2.4
-  left_elbow: -2.4
+  right_shoulder_roll: -0.4
+  left_shoulder_roll: 0.35
+  right_elbow: -0.7
+  left_elbow: -0.7

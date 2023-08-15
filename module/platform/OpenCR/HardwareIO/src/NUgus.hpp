@@ -167,7 +167,7 @@ namespace module::platform::OpenCR {
     struct OpenCRWriteData {
         uint8_t led;
         uint16_t rgb_led;
-        uint8_t buzzer;
+        uint16_t buzzer;
     } __attribute__((packed));
 
     /// @brief The data to read from the OpenCR device
