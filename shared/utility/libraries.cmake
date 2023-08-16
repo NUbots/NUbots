@@ -19,6 +19,9 @@ target_link_libraries(nuclear_utility PUBLIC mio::mio)
 find_package(Aravis REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC Aravis::Aravis)
 
+find_package(CURL REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC CURL::libcurl)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})
