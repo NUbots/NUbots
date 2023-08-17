@@ -16,6 +16,7 @@
 #include "message/motion/WalkCommand.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
@@ -35,11 +36,13 @@ namespace module::support::optimisation {
     using message::motion::EnableWalkEngineCommand;
     using message::motion::WalkCommand;
     using message::platform::RawSensors;
+    using message::input::Sensors;
     using message::platform::webots::OptimisationCommand;
     using message::platform::webots::OptimisationRobotPosition;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
     using message::support::optimisation::NSGA2EvaluatorReady;
+    using message::support::optimisation::NSGA2Evaluating;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2Terminate;
     using message::support::optimisation::NSGA2TrialExpired;
@@ -129,9 +132,11 @@ namespace module::support::optimisation {
             }
         });
 
-        on<Trigger<RawSensors>, Single>().then([this](const RawSensors& sensors) {
+        on<Trigger<Sensors>, Single>().then([this](const Sensors& sensors) {
             if (current_state == State::EVALUATING) {
-                task->process_raw_sensor_msg(sensors, this);
+                if (task->has_fallen(sensors)) {
+                    emit(std::make_unique<Event>(Event::TERMINATE_EARLY));
+                }
             }
         });
 

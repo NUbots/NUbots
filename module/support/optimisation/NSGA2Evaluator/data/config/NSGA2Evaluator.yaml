@@ -1,3 +1,5 @@
 gravity:
   min: 0.5
   max: 9.2
+
+fallen_angle: 0.95 # ~55 degrees

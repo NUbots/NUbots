@@ -12,6 +12,7 @@ nuclear_role(
   behaviour::skills::Stand
   motion::ScriptEngine
   motion::QuinticWalk
+  input::SensorFilter
   support::optimisation::NSGA2Evaluator
   support::optimisation::NSGA2Optimiser
 )

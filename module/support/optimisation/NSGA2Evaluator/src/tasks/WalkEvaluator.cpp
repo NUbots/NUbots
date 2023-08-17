@@ -21,6 +21,7 @@ namespace module::support::optimisation {
     using message::motion::EnableWalkEngineCommand;
     using message::motion::WalkCommand;
     using message::platform::RawSensors;
+    // using message::input::Sensors;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2TrialExpired;
@@ -32,11 +33,9 @@ namespace module::support::optimisation {
 
     using extension::Configuration;
 
-    void WalkEvaluator::process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+    bool WalkEvaluator::has_fallen(const Sensors& sensors) {
         update_max_field_plane_sway(sensors);
-        if (check_for_fall(sensors)) {
-            evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
-        }
+        return check_for_fall(sensors);
     }
 
     void WalkEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
@@ -105,6 +104,8 @@ namespace module::support::optimisation {
 
         gravity_max = eval_config["gravity"]["max"].as<float>();
         gravity_min = eval_config["gravity"]["min"].as<float>();
+
+        fallen_angle = eval_config["fallen_angle"].as<float>();
     }
 
     void WalkEvaluator::reset_simulation() {
@@ -178,24 +179,21 @@ namespace module::support::optimisation {
         };
     }
 
+    bool WalkEvaluator::check_for_fall(const Sensors& sensors) {
+        // Transform to torso {t} from world {w} space
+        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // Basis Z vector of torso {t} in world {w} space
+        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
 
-    bool WalkEvaluator::check_for_fall(const RawSensors& sensors) {
-        bool fallen        = false;
-        auto accelerometer = sensors.accelerometer;
-
-        if ((std::fabs(accelerometer.x()) > gravity_max || std::fabs(accelerometer.y()) > gravity_max)
-            && std::fabs(accelerometer.z()) < gravity_min) {
+        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+        if (std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
             NUClear::log<NUClear::DEBUG>("Fallen!");
-            NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
-                                         std::fabs(accelerometer.x()),
-                                         std::fabs(accelerometer.y()),
-                                         std::fabs(accelerometer.z()));
-            fallen = true;
+            return true;
         }
-        return fallen;
+        return false;
     }
 
-    void WalkEvaluator::update_max_field_plane_sway(const RawSensors& sensors) {
+    void WalkEvaluator::update_max_field_plane_sway(const Sensors& sensors) {
         auto accelerometer = sensors.accelerometer;
 
         // Calculate the robot sway along the field plane (left/right, forward/backward)

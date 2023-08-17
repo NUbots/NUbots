@@ -40,3 +40,5 @@ message NSGA2FitnessScores {
 
 // Announce Evaluator is ready to go (not busy evaluating)
 message NSGA2EvaluatorReady {}
+
+message NSGA2Evaluating {}

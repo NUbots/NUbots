@@ -35,6 +35,10 @@ namespace module::support::optimisation {
         }
     }
 
+    bool StrafeEvaluator::has_fallen(const Sensors& sensors) {
+        return true;
+    }
+
     void StrafeEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
         if (!initial_position_set) {
             initial_position_set   = true;

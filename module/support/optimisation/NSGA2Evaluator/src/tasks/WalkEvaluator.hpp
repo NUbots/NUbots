@@ -8,18 +8,19 @@
 #include "EvaluatorTask.hpp"
 
 #include "message/platform/RawSensors.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module::support::optimisation {
     using message::platform::RawSensors;
+    using message::input::Sensors;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
 
     class WalkEvaluator : public EvaluatorTask {
     public:
         // Implementing the EvaluatorTask interface
-        void process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
         void set_up_trial(const NSGA2EvaluationRequest& request);
         void reset_simulation();
@@ -33,11 +34,15 @@ namespace module::support::optimisation {
         std::vector<double> calculate_scores();
         std::vector<double> calculate_constraints(double sim_time);
         std::vector<double> constraints_not_violated();
-        bool check_for_fall(const RawSensors& sensors);
-        void update_max_field_plane_sway(const RawSensors& sensors);
+        bool has_fallen(const Sensors& sensors);
+        bool check_for_fall(const Sensors& sensors);
+        void update_max_field_plane_sway(const Sensors& sensors);
         bool check_off_course();
 
     private:
+        /// @brief The NSGA2 Evaluator that is running this task
+        std::unique_ptr<NSGA2Evaluator> evaluator;
+
         /// @brief Robot state for this evaluation, used during fitness and constraint calculation
         bool initial_position_set              = false;
         Eigen::Vector3d initial_robot_position = Eigen::Vector3d::Zero();
@@ -59,6 +64,7 @@ namespace module::support::optimisation {
         /// @brief Configuration Min and Max values
         float gravity_max = 0.0;
         float gravity_min = 0.0;
+        float fallen_angle = 0.0;
     };
 
 }  // namespace module::support::optimisation

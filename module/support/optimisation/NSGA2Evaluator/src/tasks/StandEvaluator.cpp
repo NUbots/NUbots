@@ -28,12 +28,17 @@ namespace module::support::optimisation {
     using utility::input::ServoID;
     using utility::support::Expression;
 
-    void StandEvaluator::process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
-        double sim_time = evaluator->sim_time;
-        sim_time++;
+    // void StandEvaluator::process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+    //     double sim_time = evaluator->sim_time;
+    //     sim_time++;
 
+    //     update_max_field_plane_sway(sensors);
+    //     current_sensors = sensors;
+    // }
+
+    bool StandEvaluator::has_fallen(const Sensors& sensors) {
         update_max_field_plane_sway(sensors);
-        current_sensors = sensors;
+        return check_for_fall(sensors);
     }
 
     void StandEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
@@ -55,6 +60,11 @@ namespace module::support::optimisation {
 
         auto overhead = std::chrono::seconds(2);  // Overhead tacked on to give the robot time to fall over if unstable
         trial_duration_limit = std::chrono::duration_cast<std::chrono::seconds>(limit_ms) + overhead;
+
+        // Get constant variables
+        YAML::Node config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+
+        fallen_angle = config["fallen_angle"].as<float>();
     }
 
     void StandEvaluator::reset_simulation() {
@@ -71,13 +81,13 @@ namespace module::support::optimisation {
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
     }
 
-    std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculate_fitness_scores(bool /* early_termination */,
+    std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculate_fitness_scores(bool early_termination,
                                                                                  double sim_time,
                                                                                  int generation,
                                                                                  int individual) {
         double trial_duration = sim_time - trial_start_time;
         auto scores           = calculate_scores(trial_duration);
-        auto constraints      = calculate_constraints();
+        auto constraints      = calculate_constraints(early_termination);
 
         NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
         NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
@@ -98,24 +108,26 @@ namespace module::support::optimisation {
                 trial_duration};
     }
 
-    std::vector<double> StandEvaluator::calculate_constraints() {
-        bool fallen              = check_for_fall(current_sensors);
-        double fallen_constraint = fallen ? -1.0 : 0;
+    std::vector<double> StandEvaluator::calculate_constraints(bool early_termination) {
+        double fallen_constraint = early_termination ? -1.0 : 0;
         return {
             fallen_constraint,
             0  // Second constraint unused, fixed to 0
         };
     }
 
-    bool StandEvaluator::check_for_fall(const RawSensors& sensors) {
-        bool fallen        = false;
-        auto accelerometer = sensors.accelerometer;
+    bool StandEvaluator::check_for_fall(const Sensors& sensors) {
+        // Transform to torso {t} from world {w} space
+        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // Basis Z vector of torso {t} in world {w} space
+        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
 
-        if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
-            && std::fabs(accelerometer.z()) < 0.5) {
-            fallen = true;
+        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+        if (std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
+            NUClear::log<NUClear::DEBUG>("Fallen!");
+            return true;
         }
-        return fallen;
+        return false;
     }
 
 
@@ -139,7 +151,7 @@ namespace module::support::optimisation {
         evaluator->emit(std::make_unique<extension::ExecuteScript>(subsumption_id, script, NUClear::clock::now()));
     }
 
-    void StandEvaluator::update_max_field_plane_sway(const RawSensors& sensors) {
+    void StandEvaluator::update_max_field_plane_sway(const Sensors& sensors) {
         auto accelerometer = sensors.accelerometer;
 
         // Calculate the robot sway along the field plane (left/right, forward/backward)

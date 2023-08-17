@@ -20,6 +20,7 @@ namespace module::support::optimisation {
     public:
         // Implementing the EvaluatorTask interface
         void process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
+        bool has_fallen(const Sensors& sensors);
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
         void set_up_trial(const NSGA2EvaluationRequest& request);
         void reset_simulation();

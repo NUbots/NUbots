@@ -7,12 +7,14 @@
 #include "NSGA2Evaluator.hpp"
 
 #include "message/platform/RawSensors.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module::support::optimisation {
     using message::platform::RawSensors;
+    using message::input::Sensors;
     using message::platform::webots::OptimisationRobotPosition;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
@@ -21,7 +23,7 @@ namespace module::support::optimisation {
 
     class EvaluatorTask {
     public:
-        virtual void process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator)   = 0;
+        virtual bool has_fallen(const Sensors& sensors)                                             = 0;
         virtual void process_optimisation_robot_position(const OptimisationRobotPosition& position) = 0;
         virtual void set_up_trial(const NSGA2EvaluationRequest& request)                            = 0;
         virtual void reset_simulation()                                                             = 0;
