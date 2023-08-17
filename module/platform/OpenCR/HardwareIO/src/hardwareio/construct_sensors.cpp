@@ -91,8 +91,12 @@ namespace module::platform::OpenCR {
                 servo.voltage     = servo_states[i].voltage;
                 servo.temperature = servo_states[i].temperature;
 
-                /* Note: removed input voltage bit clear here as it wasn't clear how it fits into the refactor. If there
-                 * are problems with input voltage errors coming up too frequently then this is likely the culprit */
+                // Clear Overvoltage flag if the voltage error is only due to the high battery voltage, as this isn't
+                // dangerous, and will otherwise impede odometery (since RawSensors.cpp will discard sensor data from a
+                // servo reporting an error state)
+                if (servo.voltage <= battery_state.charged_voltage) {
+                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
+                }
             }
         }
 
