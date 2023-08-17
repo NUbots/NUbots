@@ -42,49 +42,49 @@ namespace module::input {
 
         // **************** Servos ****************
         for (uint32_t id = 0; id < 20; ++id) {
-            const auto& original        = getRawServo(id, raw_sensors);
-            const auto& hardware_status = original.hardware_error;
+            const auto& raw_servo        = getRawServo(id, raw_sensors);
+            const auto& hardware_status = raw_servo.hardware_error;
 
             // Check for an error on the servo and report it
             if (hardware_status != RawSensors::HardwareError::HARDWARE_OK) {
-                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(original, id));
+                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(raw_servo, id));
             }
 
-            // If current Sensors message for this servo has an error and we have a previous sensors
-            // message available, then we use our previous sensor values with some updates
-            if ((hardware_status != RawSensors::HardwareError::HARDWARE_OK) && previous_sensors) {
-                // Add the sensor values to the system properly
-                sensors->servo.emplace_back(hardware_status,
-                                            id,
-                                            original.torque_enabled,
-                                            original.position_p_gain,
-                                            original.position_i_gain,
-                                            original.position_d_gain,
-                                            original.goal_position,
-                                            original.profile_velocity,
-                                            previous_sensors->servo[id].present_position,
-                                            previous_sensors->servo[id].present_velocity,
-                                            previous_sensors->servo[id].load,
-                                            previous_sensors->servo[id].voltage,
-                                            previous_sensors->servo[id].temperature);
-            }
-            // Otherwise we can just use the new values as is
-            else {
-                // Add the sensor values to the system properly
-                sensors->servo.emplace_back(hardware_status,
-                                            id,
-                                            original.torque_enabled,
-                                            original.position_p_gain,
-                                            original.position_i_gain,
-                                            original.position_d_gain,
-                                            original.goal_position,
-                                            original.profile_velocity,
-                                            original.present_position,
-                                            original.present_velocity,
-                                            original.present_current,
-                                            original.voltage,
-                                            static_cast<float>(original.temperature));
-            }
+            // If the RawSensors message for this servo has an error, but we have a previous Sensors message available,
+            // then for some fields we will want to selectively use the old Sensors value, otherwise we just use the new
+            // values as is
+            sensors->servo.emplace_back(
+                hardware_status,
+                id,
+                raw_servo.torque_enabled,
+                raw_servo.position_p_gain,
+                raw_servo.position_i_gain,
+                raw_servo.position_d_gain,
+                raw_servo.goal_position,
+                raw_servo.profile_velocity,
+                /* If there is an encoder error, then use the last known good position */
+                ((hardware_status == RawSensors::HardwareError::MOTOR_ENCODER) && previous_sensors)
+                    ? previous_sensors->servo[id].present_position
+                    : raw_servo.present_position,
+                /* If there is an encoder error, then use the last known good velocity */
+                ((hardware_status == RawSensors::HardwareError::MOTOR_ENCODER) && previous_sensors)
+                    ? previous_sensors->servo[id].present_velocity
+                    : raw_servo.present_velocity,
+                /* I'm unsure about this one, it's here because that's how it previously was, but i'm not sure if it
+                   makes sense to use the last known "good" load value if the servo is overloaded - because that gives
+                   us no useful information. Surely if the servo is overloaded we still want to know the true load */
+                ((hardware_status == RawSensors::HardwareError::OVERLOAD) && previous_sensors)
+                    ? previous_sensors->servo[id].load
+                    : raw_servo.present_current,
+                /* Same argument here... Seems dubious to have the system be fed a fake last known "safe" voltage if
+                   there is an input voltage error. What do we stand to gain from that? */
+                ((hardware_status == RawSensors::HardwareError::INPUT_VOLTAGE) && previous_sensors)
+                    ? previous_sensors->servo[id].voltage
+                    : raw_servo.voltage,
+                /* And again for the temperature, I don't think it makes sense here either */
+                ((hardware_status == RawSensors::HardwareError::OVERHEATING) && previous_sensors)
+                    ? previous_sensors->servo[id].temperature
+                    : static_cast<float>(raw_servo.temperature));
         }
 
         // **************** Accelerometer and Gyroscope ****************
