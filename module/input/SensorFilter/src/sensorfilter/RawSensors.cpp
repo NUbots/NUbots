@@ -111,28 +111,30 @@ namespace module::input {
                                             original.voltage,
                                             static_cast<float>(original.temperature));
             }
+        }
 
-            // **************** Accelerometer and Gyroscope ****************
-            // If we have a previous Sensors and our platform has errors then reuse our last sensor value of the
-            // accelerometer
-            if (message_error && previous_sensors) {
-                sensors->accelerometer = previous_sensors->accelerometer;
-            }
-            else {
-                sensors->accelerometer = raw_sensors.accelerometer.cast<double>();
-            }
+        // **************** Accelerometer and Gyroscope ****************
+        // If we have a previous Sensors and our platform has errors then reuse our last sensor value of the
+        // accelerometer
+        if ((raw_sensors.subcontroller_error != RawSensors::PacketError::PACKET_OK) && previous_sensors) {
+            sensors->accelerometer = previous_sensors->accelerometer;
+        }
+        else {
+            sensors->accelerometer = raw_sensors.accelerometer.cast<double>();
+        }
 
-            // If we have a previous Sensors message, our platform has errors, and the gyro is spinning too fast then
-            // reuse our last sensor value of the gyroscope. Note: One of the gyros would occasionally
-            // throw massive numbers without an error flag and if our hardware is working as intended, it should never
-            // read that we're spinning at 2 revs/s
-            if (previous_sensors && (message_error || raw_sensors.gyroscope.norm() > 4.0 * M_PI)) {
-                NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
-                sensors->gyroscope = previous_sensors->gyroscope;
-            }
-            else {
-                sensors->gyroscope = raw_sensors.gyroscope.cast<double>();
-            }
+        // If we have a previous Sensors message, our platform has errors, and the gyro is spinning too fast then
+        // reuse our last sensor value of the gyroscope. Note: One of the gyros would occasionally
+        // throw massive numbers without an error flag and if our hardware is working as intended, it should never
+        // read that we're spinning at 2 revs/s
+        if (previous_sensors
+            && ((raw_sensors.subcontroller_error != RawSensors::PacketError::PACKET_OK)
+                || raw_sensors.gyroscope.norm() > 4.0 * M_PI)) {
+            NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
+            sensors->gyroscope = previous_sensors->gyroscope;
+        }
+        else {
+            sensors->gyroscope = raw_sensors.gyroscope.cast<double>();
         }
 
         // **************** Timestamp ****************
