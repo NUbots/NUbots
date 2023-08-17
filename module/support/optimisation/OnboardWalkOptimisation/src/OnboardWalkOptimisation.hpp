@@ -22,9 +22,7 @@ private:
     /// @brief When set, the next ActuatorRequests will set the terminate command to end the simulation.
     bool terminate_simulation = false;
 
-    /// @brief Configuration Min and Max values
-    float gravity_max = 0.0;
-    float gravity_min = 0.0;
+    bool check_for_fall = false;
 
 public:
     /// @brief Called by the powerplant to build and setup the OnboardWalkOptimisation reactor.
