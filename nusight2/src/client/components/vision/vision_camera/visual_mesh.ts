@@ -67,7 +67,8 @@ export class VisualMeshViewModel {
         { name: "goal", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 1) },
         { name: "fieldLine", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 2) },
         { name: "field", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 3) },
-        { name: "environment", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 4) },
+        { name: "robot", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 4) },
+        { name: "environment", buffer: new THREE.InterleavedBufferAttribute(buffer, 1, 5) },
       ],
     };
   });
