@@ -93,7 +93,6 @@ def run(interactive, set_roles, unset_roles, args, **kwargs):
             if glob.fnmatch.fnmatch(role, pattern):
                 args.append(f"-DROLE_{role}:BOOL=off")
                 role_found = True
-                break
         if not role_found:
             raise RuntimeError(f"No roles matching {pattern}")
 
@@ -103,7 +102,6 @@ def run(interactive, set_roles, unset_roles, args, **kwargs):
             if glob.fnmatch.fnmatch(role, pattern):
                 args.append(f"-DROLE_{role}:BOOL=on")
                 role_found = True
-                break
         if not role_found:
             raise RuntimeError(f"No roles matching {pattern}")
 
