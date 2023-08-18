@@ -41,7 +41,7 @@ namespace module::platform::NUsense {
         // TODO create a message tailored for NUsense and emit it
         on<Trigger<RawSensors>>().then([this](const RawSensors& msg){
             std::vector<char> serialsed_msg = msg_to_nbs(msg);
-            nusense.write(serialised_msg, serialised_msg.size());
+            nusense.write(&serialised_msg[0], serialised_msg.size());
         });
     }
 
