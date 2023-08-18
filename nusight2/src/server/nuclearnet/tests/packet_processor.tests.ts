@@ -8,7 +8,7 @@ import { LruPriorityQueue } from "../lru_priority_queue";
 import { NUClearNetPacketProcessor } from "../packet_processor";
 
 const DataPoint = message.eye.DataPoint;
-const Say = message.output.Say;
+const Test = message.support.nusight.Test;
 
 function makePacket(typeName: string, opts: { payload: Uint8Array; reliable?: boolean }): NUClearNetPacket {
   return {
@@ -27,8 +27,8 @@ type SendArgs = [event: string, packet: NUClearNetPacket, ack: () => void | unde
 
 describe("NUClearNetPacketProcessor", () => {
   it("sends reliable packets through immediately without queuing or dropping when queue capacity is exceeded", () => {
-    const typeName = "message.output.Say";
-    const payload = Say.encode({ message: "Test" }).finish();
+    const typeName = "message.support.nusight.Test";
+    const payload = Test.encode({ message: "Test" }).finish();
     const packet = makePacket(typeName, { payload, reliable: true });
 
     const send = jest.fn();
@@ -55,13 +55,13 @@ describe("NUClearNetPacketProcessor", () => {
   });
 
   it("sends unreliable packets immediately through the queue if the outgoing packet limit is not yet exceeded", () => {
-    const typeName = "message.output.Say";
+    const typeName = "message.support.nusight.Test";
     const packetA = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet A" }).finish(),
+      payload: Test.encode({ message: "Packet A" }).finish(),
       reliable: false,
     });
     const packetB = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet B" }).finish(),
+      payload: Test.encode({ message: "Packet B" }).finish(),
       reliable: false,
     });
 
@@ -91,17 +91,17 @@ describe("NUClearNetPacketProcessor", () => {
   });
 
   it("queues unreliable packets and waits for ack before sending more if the outgoing packet limit is exceeded", () => {
-    const typeName = "message.output.Say";
+    const typeName = "message.support.nusight.Test";
     const packetA = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet A" }).finish(),
+      payload: Test.encode({ message: "Packet A" }).finish(),
       reliable: false,
     });
     const packetB = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet B" }).finish(),
+      payload: Test.encode({ message: "Packet B" }).finish(),
       reliable: false,
     });
     const packetC = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet C" }).finish(),
+      payload: Test.encode({ message: "Packet C" }).finish(),
       reliable: false,
     });
 
@@ -139,17 +139,17 @@ describe("NUClearNetPacketProcessor", () => {
   });
 
   it("gives up on waiting for ack after the configured timeout", () => {
-    const typeName = "message.output.Say";
+    const typeName = "message.support.nusight.Test";
     const packetA = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet A" }).finish(),
+      payload: Test.encode({ message: "Packet A" }).finish(),
       reliable: false,
     });
     const packetB = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet B" }).finish(),
+      payload: Test.encode({ message: "Packet B" }).finish(),
       reliable: false,
     });
     const packetC = makePacket(typeName, {
-      payload: Say.encode({ message: "Packet C" }).finish(),
+      payload: Test.encode({ message: "Packet C" }).finish(),
       reliable: false,
     });
 
@@ -185,7 +185,7 @@ describe("NUClearNetPacketProcessor", () => {
 
   it("uses an LRU queue to ensure high frequency packets don't dominate low frequency packets", () => {
     const dataPointType = "message.eye.DataPoint";
-    const sayType = "message.output.Say";
+    const testType = "message.support.nusight.Test";
 
     const dataPointA = makePacket(dataPointType, {
       payload: DataPoint.encode({ label: "DataPoint A" }).finish(),
@@ -204,12 +204,12 @@ describe("NUClearNetPacketProcessor", () => {
       reliable: false,
     });
 
-    const sayA = makePacket(sayType, {
-      payload: Say.encode({ message: "Say A" }).finish(),
+    const testA = makePacket(testType, {
+      payload: Test.encode({ message: "Test A" }).finish(),
       reliable: false,
     });
-    const sayB = makePacket(sayType, {
-      payload: Say.encode({ message: "Say B" }).finish(),
+    const testB = makePacket(testType, {
+      payload: Test.encode({ message: "Test B" }).finish(),
       reliable: false,
     });
 
@@ -227,8 +227,8 @@ describe("NUClearNetPacketProcessor", () => {
     processor.onPacket(dataPointType, dataPointB);
     processor.onPacket(dataPointType, dataPointC);
     processor.onPacket(dataPointType, dataPointD);
-    processor.onPacket(sayType, sayA);
-    processor.onPacket(sayType, sayB);
+    processor.onPacket(testType, testA);
+    processor.onPacket(testType, testB);
 
     // Ack all the sends except the last one which won't need an ack,
     // since by the time the last send is done the queue will be empty
@@ -250,13 +250,13 @@ describe("NUClearNetPacketProcessor", () => {
     // starting with a DataPoint packet ...
     expect(send).toHaveBeenNthCalledWith(3, dataPointType, dataPointC, expect.any(Function));
 
-    // ... then a Say packet ...
-    expect(send).toHaveBeenNthCalledWith(4, sayType, sayA, expect.any(Function));
+    // ... then a Test packet ...
+    expect(send).toHaveBeenNthCalledWith(4, testType, testA, expect.any(Function));
 
     // ... then another DataPoint packet ...
     expect(send).toHaveBeenNthCalledWith(5, dataPointType, dataPointD, expect.any(Function));
 
-    // ... then the last Say packet
-    expect(send).toHaveBeenNthCalledWith(6, sayType, sayB, expect.any(Function));
+    // ... then the last Test packet
+    expect(send).toHaveBeenNthCalledWith(6, testType, testB, expect.any(Function));
   });
 });

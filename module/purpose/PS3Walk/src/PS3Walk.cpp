@@ -24,25 +24,13 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/Limbs.hpp"
-#include "message/behaviour/MotionCommand.hpp"
-#include "message/behaviour/ServoCommand.hpp"
 #include "message/behaviour/state/Stability.hpp"
-#include "message/motion/HeadCommand.hpp"
-#include "message/motion/KickCommand.hpp"
-#include "message/actuation/Limbs.hpp"
-
-#include "message/strategy/FallRecovery.hpp"
-#include "message/strategy/StandStill.hpp"
-#include "utility/skill/Script.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 
-#include "utility/behaviour/Action.hpp"
-#include "utility/behaviour/MotionCommand.hpp"
-#include "message/behaviour/state/Stability.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/skill/Script.hpp"
 
@@ -52,9 +40,7 @@ namespace module::purpose {
     using extension::Configuration;
     using extension::behaviour::Task;
     using message::actuation::BodySequence;
-    using message::behaviour::MotionCommand;
     using message::behaviour::state::Stability;
-    using message::motion::HeadCommand;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
@@ -97,10 +83,10 @@ namespace module::purpose {
             // read from joystick
             if (joystick.sample(&event)) {
 
-                //log<NUClear::DEBUG>("Event number: ", float(event.number));
-                //log<NUClear::DEBUG>("Event value: ", event.value);
-                //log<NUClear::DEBUG>("Event isAxis: ", event.isAxis());
-                //log<NUClear::DEBUG>("Event isButton: ", event.isButton());
+                // log<NUClear::DEBUG>("Event number: ", float(event.number));
+                // log<NUClear::DEBUG>("Event value: ", event.value);
+                // log<NUClear::DEBUG>("Event isAxis: ", event.isAxis());
+                // log<NUClear::DEBUG>("Event isButton: ", event.isButton());
 
                 if (event.isAxis()) {
                     // event was an axis event
@@ -120,23 +106,23 @@ namespace module::purpose {
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL: head_yaw = static_cast<float>(-event.value); break;
                     }
                 }
-                //control scheme:
-                //BUTTON_SELECT         = toggles head lock;
-                //BUTTON_LEFT_JOYSTICK  = controls the walking;
-                //BUTTON_RIGHT_JOYSTICK = controls the head yaw and pitch;
-                //BUTTON_START          = toggles walk lock;
-                //BUTTON_DPAD_UP        = ;
-                //BUTTON_DPAD_RIGHT     = ;
-                //BUTTON_DPAD_DOWN      = ;
-                //BUTTON_DPAD_LEFT      = ;
-                //BUTTON_L2             = left side kick (not active);
-                //BUTTON_R2             = right side kick (not active);
-                //BUTTON_L1             = left front kick (not active);
-                //BUTTON_R1             = right front kick (not active);
-                //BUTTON_TRIANGLE       = ;
-                //BUTTON_CIRCLE         = ;
-                //BUTTON_CROSS          = ;
-                //BUTTON_SQUARE         = ;
+                // control scheme:
+                // BUTTON_SELECT         = toggles head lock;
+                // BUTTON_LEFT_JOYSTICK  = controls the walking;
+                // BUTTON_RIGHT_JOYSTICK = controls the head yaw and pitch;
+                // BUTTON_START          = toggles walk lock;
+                // BUTTON_DPAD_UP        = ;
+                // BUTTON_DPAD_RIGHT     = ;
+                // BUTTON_DPAD_DOWN      = ;
+                // BUTTON_DPAD_LEFT      = ;
+                // BUTTON_L2             = left side kick (not active);
+                // BUTTON_R2             = right side kick (not active);
+                // BUTTON_L1             = left front kick (not active);
+                // BUTTON_R1             = right front kick (not active);
+                // BUTTON_TRIANGLE       = ;
+                // BUTTON_CIRCLE         = ;
+                // BUTTON_CROSS          = ;
+                // BUTTON_SQUARE         = ;
                 else if (event.isButton()) {
                     // event was a button event
                     switch (event.number) {
@@ -164,49 +150,49 @@ namespace module::purpose {
                             }
                             break;
                             // dance moves here:
-                        case BUTTON_DPAD_UP: //doesnt look smooth/natural. also doesnt return to default position.
+                        case BUTTON_DPAD_UP:  // doesnt look smooth/natural. also doesnt return to default position.
                             if (event.value > 0) {
                                 NUClear::log("Do a dance move Dpad up");
                                 emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
                             }
                             break;
-                        case BUTTON_DPAD_DOWN: //doesnt look smooth/natural. also doesnt return to default position.
+                        case BUTTON_DPAD_DOWN:  // doesnt look smooth/natural. also doesnt return to default position.
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad down");
                                 emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
                             }
                             break;
-                        case BUTTON_DPAD_LEFT: //causes seg fault
+                        case BUTTON_DPAD_LEFT:  // causes seg fault
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad left");
                                 emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
                             }
                             break;
-                        case BUTTON_DPAD_RIGHT: //causes seg fault
+                        case BUTTON_DPAD_RIGHT:  // causes seg fault
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad right");
                                 emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
                             }
                             break;
-                        case BUTTON_TRIANGLE: //causes seg fault
+                        case BUTTON_TRIANGLE:  // causes seg fault
                             if (event.value > 0) {
                                 NUClear::log("Do a dance triangle");
                                 emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
                             }
                             break;
-                        case BUTTON_CIRCLE: //terminate call recursively
+                        case BUTTON_CIRCLE:  // terminate call recursively
                             if (event.value > 0) {
                                 NUClear::log("Do a dance circle");
                                 emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
                             }
                             break;
-                        case BUTTON_CROSS: //terminate call recursively
+                        case BUTTON_CROSS:  // terminate call recursively
                             if (event.value > 0) {
                                 NUClear::log("Do a dance cross");
                                 emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
                             }
                             break;
-                        case BUTTON_SQUARE: //end transition is a bit rough. also throws errors.
+                        case BUTTON_SQUARE:  // end transition is a bit rough. also throws errors.
                             if (event.value > 0) {
                                 NUClear::log("Do a dance square");
                                 emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);

@@ -5,8 +5,6 @@
 
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/motion/GetupCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
 

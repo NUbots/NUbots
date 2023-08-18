@@ -47,9 +47,6 @@ export class DashboardNetwork {
     // Voltage (in volts!)
     robot.voltage = overview.voltage;
 
-    // The current behaviour state as an enum
-    robot.behaviourState = overview.behaviourState;
-
     // The position of the robot on the field in field coordinates
     // overview.robotPosition is a 3 sized vector (x,y,heading)
     robot.robotPosition = Vector3.from(overview.robotPosition);

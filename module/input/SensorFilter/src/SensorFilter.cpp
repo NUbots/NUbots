@@ -20,8 +20,6 @@
 #include "SensorFilter.hpp"
 
 #include "message/actuation/BodySide.hpp"
-#include "message/motion/GetupCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
@@ -38,12 +36,6 @@ namespace module::input {
 
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::ExecuteGetup;
-    using message::motion::KillGetup;
-    using message::motion::StopCommand;
-    using message::motion::WalkCommand;
 
     using extension::Configuration;
 

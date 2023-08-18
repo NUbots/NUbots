@@ -11,8 +11,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-#ifndef MODULE_BEHAVIOUR_STRATEGY_PS3WALK_JOYSTICK_HPP
-#define MODULE_BEHAVIOUR_STRATEGY_PS3WALK_JOYSTICK_HPP
+#ifndef MODULE_PURPOSE_PS3WALK_JOYSTICK_HPP
+#define MODULE_PURPOSE_PS3WALK_JOYSTICK_HPP
 
 #include <string>
 
@@ -95,9 +95,9 @@ public:
     Joystick();
 
     // Delete the move and copy constructors and operators to maintain file descriptor sanitation
-    Joystick(Joystick& other)  = delete;
-    Joystick(Joystick&& other) = delete;
-    Joystick& operator=(Joystick& other) = delete;
+    Joystick(Joystick& other)             = delete;
+    Joystick(Joystick&& other)            = delete;
+    Joystick& operator=(Joystick& other)  = delete;
     Joystick& operator=(Joystick&& other) = delete;
 
     /**
@@ -133,4 +133,4 @@ public:
     bool sample(JoystickEvent* event) const;
 };
 
-#endif  // MODULE_BEHAVIOUR_STRATEGY_PS3WALK_JOYSTICK_HPP
+#endif  // MODULE_PURPOSE_PS3WALK_JOYSTICK_HPP
