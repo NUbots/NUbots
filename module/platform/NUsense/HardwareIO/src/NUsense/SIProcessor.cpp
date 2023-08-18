@@ -3,32 +3,22 @@
 #include <vector>
 
 namespace module::platform::NUsense {
-    std::vector<char> msg_to_nbs(const RawSensorsV2& msg) {
+    std::vector<char> msg_to_nbs(const RawSensors& msg) {
 
-        // Use a vector to preprocess the packet then once it is filled,
-        // We insert everything to a string stream
-        std::vector<uint8_t> packets;
+        // Use a vector to preprocess the packet then once it is filled, we insert everything to a vector
+        std::vector<char> packet_data;
 
-        // Add header
-        packet_data.push_back(0xE2);
-        packet_data.push_back(0x98);
-        packet_data.push_back(0xA2);
+        // Add header - interpret the hex values below as type char
+        packet_data.emplace_back(0xE2, 0x98, 0xA2);
 
         // Serialise protobuf message to string then add everything to our vector
         std::vector<char> protobuf_bytes = NUClear::util::serialse(msg);
-        for (const auto& byte : protobuf_bytes) {
-            packet_data.push_back(static_cast<uint8_t>(byte));
-        }
+        packet_data.insert(packet_data.begin() + 3, protobuf_bytes.begin(), protobuf_bytes.end());
 
-        // Add packets to string stream then convert to string
-        std::stringstream nbs_msg;
-        for (const auto& byte : packet_data) {
-            nbs_msg << std::hex << static_cast<int>(byte);
-        }
-
-        return nbs_msg.str();
+        return packet_data;
     }
 
+    // TODO once NUC -> NUsense is finished do it properly
     const RawSensors& nbs_to_msg(std::vector<char> nbs_packet) {
 
         // Create a stream from the packet
