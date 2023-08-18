@@ -90,7 +90,7 @@ namespace module::input {
             sensors->accelerometer = raw_sensors.accelerometer.cast<double>();
         }
 
-        // If we have a previous Sensors message, our platform has errors, and the gyro is spinning too fast then
+        // If we have a previous Sensors message AND (our platform has errors OR the gyro is spinning too fast) then
         // reuse our last sensor value of the gyroscope. Note: One of the gyros would occasionally
         // throw massive numbers without an error flag and if our hardware is working as intended, it should never
         // read that we're spinning at 2 revs/s
