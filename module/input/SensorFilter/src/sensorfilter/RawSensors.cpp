@@ -70,21 +70,14 @@ namespace module::input {
                 ((hardware_status == RawSensors::HardwareError::MOTOR_ENCODER) && previous_sensors)
                     ? previous_sensors->servo[id].present_velocity
                     : raw_servo.present_velocity,
-                /* I'm unsure about this one, it's here because that's how it previously was, but i'm not sure if it
-                   makes sense to use the last known "good" load value if the servo is overloaded - because that gives
-                   us no useful information. Surely if the servo is overloaded we still want to know the true load */
-                ((hardware_status == RawSensors::HardwareError::OVERLOAD) && previous_sensors)
-                    ? previous_sensors->servo[id].load
-                    : raw_servo.present_current,
-                /* Same argument here... Seems dubious to have the system be fed a fake last known "safe" voltage if
-                   there is an input voltage error. What do we stand to gain from that? */
-                ((hardware_status == RawSensors::HardwareError::INPUT_VOLTAGE) && previous_sensors)
-                    ? previous_sensors->servo[id].voltage
-                    : raw_servo.voltage,
-                /* And again for the temperature, I don't think it makes sense here either */
-                ((hardware_status == RawSensors::HardwareError::OVERHEATING) && previous_sensors)
-                    ? previous_sensors->servo[id].temperature
-                    : static_cast<float>(raw_servo.temperature));
+                /* We may get a RawSensors::HardwareError::OVERLOAD error, but in this case the load value isn't *wrong*
+                   so it doesn't make sense to use the last "good" value */
+                raw_servo.present_current,
+                /* Similarly for a RawSensors::HardwareError::INPUT_VOLTAGE error, no special action is needed */
+                raw_servo.voltage,
+                /* And similarly here for a RawSensors::HardwareError::OVERHEATING error, we still pass the temperature
+                   no matter what */
+                static_cast<float>(raw_servo.temperature));
         }
 
         // **************** Accelerometer and Gyroscope ****************
