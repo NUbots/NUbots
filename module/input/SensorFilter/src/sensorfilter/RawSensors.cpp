@@ -42,7 +42,7 @@ namespace module::input {
 
         // **************** Servos ****************
         for (uint32_t id = 0; id < 20; ++id) {
-            const auto& raw_servo        = getRawServo(id, raw_sensors);
+            const auto& raw_servo       = getRawServo(id, raw_sensors);
             const auto& hardware_status = raw_servo.hardware_error;
 
             // Check for an error on the servo and report it

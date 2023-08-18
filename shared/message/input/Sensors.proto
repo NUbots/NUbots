@@ -35,7 +35,7 @@ message Sensors {
         /// Set of things which can or have gone wrong.
         /// https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#hardware-error-status70
         uint32 hardware_error = 1;
-        uint32 id          = 2;
+        uint32 id             = 2;
         /// Whether the torque is on or off
         bool enabled = 3;
         /// Proportional gain. In proportion to the servo's position error. Gain

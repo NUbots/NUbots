@@ -95,12 +95,12 @@ message RawSensors {
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
-        float  fsr1        = 1;
-        float  fsr2        = 2;
-        float  fsr3        = 3;
-        float  fsr4        = 4;
-        float  centre_x    = 5;
-        float  centre_y    = 6;
+        float  fsr1           = 1;
+        float  fsr2           = 2;
+        float  fsr3           = 3;
+        float  fsr4           = 4;
+        float  centre_x       = 5;
+        float  centre_y       = 6;
         uint32 hardware_error = 7;
     }
 
