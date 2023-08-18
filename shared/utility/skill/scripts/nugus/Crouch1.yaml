@@ -48,14 +48,6 @@
       position: 1.0755831
       gain: 10
       torque: 100
-    - id: HEAD_PITCH
-      position: -0.182588294
-      gain: 10
-      torque: 100
-    - id: HEAD_YAW
-      position: 0.190260068
-      gain: 10
-      torque: 100
     - id: R_HIP_PITCH
       position: -0.172421321
       gain: 15
@@ -105,14 +97,6 @@
     - id: R_HIP_YAW
       position: -0.00306871068
       gain: 15
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.182588294
-      gain: 10
-      torque: 100
-    - id: HEAD_YAW
-      position: 0.190260068
-      gain: 10
       torque: 100
     - id: R_HIP_PITCH
       position: -0.692567766
@@ -187,14 +171,6 @@
     - id: R_HIP_YAW
       position: -0.00306871068
       gain: 15
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.182588294
-      gain: 10
-      torque: 100
-    - id: HEAD_YAW
-      position: 0.190260068
-      gain: 10
       torque: 100
     - id: R_HIP_PITCH
       position: -0.692567766
@@ -292,14 +268,6 @@
       torque: 100
     - id: R_SHOULDER_PITCH
       position: 1.0755831
-      gain: 10
-      torque: 100
-    - id: HEAD_PITCH
-      position: -0.182588294
-      gain: 10
-      torque: 100
-    - id: HEAD_YAW
-      position: 0.190260068
       gain: 10
       torque: 100
     - id: R_HIP_PITCH

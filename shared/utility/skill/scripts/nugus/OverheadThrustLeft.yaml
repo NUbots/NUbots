@@ -60,14 +60,6 @@
       position: -0.224015892
       gain: 10
       torque: 100
-    - id: HEAD_YAW
-      position: -0.543161809
-      gain: 10
-      torque: 100
-    - id: HEAD_PITCH
-      position: 0.205603614
-      gain: 10
-      torque: 100
     - id: L_ELBOW
       position: -2.08365464
       gain: 10

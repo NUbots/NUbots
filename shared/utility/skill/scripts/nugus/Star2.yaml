@@ -1,9 +1,5 @@
 - duration: 500
   targets:
-    - id: HEAD_PITCH
-      position: -0.181053936
-      gain: 10
-      torque: 100
     - id: R_HIP_PITCH
       position: -0.167818248
       gain: 15
@@ -19,10 +15,6 @@
     - id: L_KNEE
       position: 0.473488927
       gain: 15
-      torque: 100
-    - id: HEAD_YAW
-      position: 0.18872571
-      gain: 10
       torque: 100
     - id: R_HIP_YAW
       position: 0.159572959

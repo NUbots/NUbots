@@ -39,7 +39,7 @@ namespace module::purpose {
 
     using extension::Configuration;
     using extension::behaviour::Task;
-    using message::actuation::BodySequence;
+    using message::actuation::LimbsSequence;
     using message::behaviour::state::Stability;
     using message::skill::Kick;
     using message::skill::Look;
@@ -153,49 +153,49 @@ namespace module::purpose {
                         case BUTTON_DPAD_UP:  // doesnt look smooth/natural. also doesnt return to default position.
                             if (event.value > 0) {
                                 NUClear::log("Do a dance move Dpad up");
-                                emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("StepClap1.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_DOWN:  // doesnt look smooth/natural. also doesnt return to default position.
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad down");
-                                emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("StepClap2.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_LEFT:  // causes seg fault
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad left");
-                                emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("OverheadThrustRight.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_RIGHT:  // causes seg fault
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad right");
-                                emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("OverheadThrustLeft.yaml"), 3);
                             }
                             break;
                         case BUTTON_TRIANGLE:  // causes seg fault
                             if (event.value > 0) {
                                 NUClear::log("Do a dance triangle");
-                                emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Star1.yaml"), 3);
                             }
                             break;
                         case BUTTON_CIRCLE:  // terminate call recursively
                             if (event.value > 0) {
                                 NUClear::log("Do a dance circle");
-                                emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Star2.yaml"), 3);
                             }
                             break;
                         case BUTTON_CROSS:  // terminate call recursively
                             if (event.value > 0) {
                                 NUClear::log("Do a dance cross");
-                                emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Crouch1.yaml"), 3);
                             }
                             break;
                         case BUTTON_SQUARE:  // end transition is a bit rough. also throws errors.
                             if (event.value > 0) {
                                 NUClear::log("Do a dance square");
-                                emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Crouch2.yaml"), 3);
                             }
                             break;
                         case BUTTON_L1:
