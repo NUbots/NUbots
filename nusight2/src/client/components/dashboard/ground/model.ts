@@ -20,7 +20,7 @@ export class GroundModel {
   static of() {
     return new GroundModel({
       bottomGoalColor: "#0000ff",
-      dimensions: FieldDimensions.postYear2017(),
+      dimensions: FieldDimensions.of(),
       fieldColor: "#009688",
       lineColor: "#ffffff",
       topGoalColor: "#ffff00",
