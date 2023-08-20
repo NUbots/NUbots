@@ -14,28 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2022 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 syntax = "proto3";
 
-package message.actuation;
+package message.output;
 
-import "google/protobuf/timestamp.proto";
 
-message ServoState {
-    /// Proportional gain. In proportion to the servo's position error. Gain
-    /// values are in range 0-100.
-    float gain = 1;
-    /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-    float torque = 2;
-}
-
-message ServoCommand {
-    /// The time that the servo should reach the given position
-    google.protobuf.Timestamp time = 1;
-    /// The position value of the destination in radians.
-    float position = 2;
-    /// Gain and torque of the servo
-    ServoState state = 3;
+/// @brief Enable the buzzer on the subcontroller at a given frequency
+message Buzzer {
+    /// Setting the frequency to 0 silences the buzzer
+    int32 frequency = 1;
 }

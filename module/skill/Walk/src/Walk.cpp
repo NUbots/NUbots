@@ -4,7 +4,6 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
-#include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
