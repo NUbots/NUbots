@@ -25,13 +25,11 @@
 namespace module::platform::NUsense {
     using message::platform::RawSensors;
 
-    class SIProcessor {
-    public:
-        // Protobuf msg to nbs packet
-        std::vector<char> msg_to_nbs(const RawSensors& msg);
+    // Protobuf msg to nbs packet
+    std::vector<char> msg_to_nbs(const RawSensors& msg);
 
-        // Nbs packet to protobuf msg
-        const RawSensors& nbs_to_msg(std::vector<char> nbs_packet);
-    };
+    // Nbs packet to protobuf msg
+    // const RawSensors& nbs_to_msg(std::vector<char> nbs_packet);
+
 }  // namespace module::platform::NUsense
 #endif
