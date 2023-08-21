@@ -16,7 +16,10 @@ namespace module::platform::NUsense {
     private:
         /// @brief  Configuration variables for this reactor
         struct Config {
-            std::string port = "";
+            struct {
+                std::string port = "";
+                int baud = 0;
+            } nusense;
         } cfg;
 
         /// @brief Manage desired port for NUSense
