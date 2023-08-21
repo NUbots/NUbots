@@ -3,5 +3,5 @@ log_level: DEBUG
 
 # Port to send our data to
 nusense:
-  port: "/dev/ttyUSB0"
+  port: "/dev/ttyACM0"
   baud: 1000000

@@ -1,13 +1,12 @@
+#include "extension/Configuration.hpp"
 #include "HardwareIO.hpp"
-
 #include "NUsense/SIProcessor.hpp"
 
-#include "extension/Configuration.hpp"
 
 namespace module::platform::NUsense {
 
     using extension::Configuration;
-    using message::platform::RawSensors;// This will most likely change
+    using message::platform::RawSensors;// This will most likely change to a more specific message for NUsense
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), nusense() {
 
@@ -24,7 +23,10 @@ namespace module::platform::NUsense {
                 nusense.close();
             }
 
+            // If /dev/ttyACM0 is acting up, follow the link below
+            // https://stackoverflow.com/questions/40951728/avrdude-ser-open-cant-open-device-dev-ttyacm0-device-or-resource-busy
             nusense.open(cfg.nusense.port, cfg.nusense.baud);
+            log<NUClear::INFO>("PORT OPENED");
         });
 
         on<Shutdown>().then("NUSense HardwareIO Shutdown", [this] {
@@ -35,13 +37,12 @@ namespace module::platform::NUsense {
         });
 
         // TODO add an on<IO> to handle messages coming from nusense
-
-        // State: TEST
-        // When a RawSensors message is detected, serialise it and send it to the port
         // TODO create a message tailored for NUsense and emit it
+
+        // When a message for NUsense is detected, serialise it and send it to the port
         on<Trigger<RawSensors>>().then([this](const RawSensors& msg){
-            std::vector<char> serialsed_msg = msg_to_nbs(msg);
-            nusense.write(&serialised_msg[0], serialised_msg.size());
+            std::vector<char> serialised_msg = msg_to_nbs(msg);
+            nusense.write(serialised_msg.data(), serialised_msg.size());
         });
     }
 
