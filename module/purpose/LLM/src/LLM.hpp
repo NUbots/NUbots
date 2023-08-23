@@ -34,6 +34,9 @@ namespace module::purpose {
             /// @brief Position to walk to when emitting WalkToFieldPosition task
             Eigen::Vector3f walk_to_field_position_position = Eigen::Vector3f::Zero();
 
+            /// @brief User request
+            std::string user_request = "";
+
             /// @brief OpenAI API key
             std::string openai_api_key = "";
 

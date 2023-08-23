@@ -19,4 +19,6 @@ tasks:
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
 walk_to_field_position_position: [0, 0, 0]
 
+user_request: "Kick the ball."
+
 openai_api_key: ""
