@@ -19,7 +19,6 @@ namespace module::support::optimisation {
     class StrafeEvaluator : public EvaluatorTask {
     public:
         // Implementing the EvaluatorTask interface
-        void process_raw_sensor_msg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
         bool has_fallen(const Sensors& sensors);
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
         void set_up_trial(const NSGA2EvaluationRequest& request);
@@ -34,8 +33,8 @@ namespace module::support::optimisation {
         std::vector<double> calculate_scores();
         std::vector<double> calculate_constraints(double simTime);
         std::vector<double> constraints_not_violated();
-        bool check_for_fall(const RawSensors& sensors);
-        void update_max_field_plane_sway(const RawSensors& sensors);
+        bool check_for_fall(const Sensors& sensors);
+        void update_max_field_plane_sway(const Sensors& sensors);
         bool check_off_course();
 
     private:
@@ -60,6 +59,7 @@ namespace module::support::optimisation {
         /// @brief Configuration Min and Max values
         float gravity_max = 0.0;
         float gravity_min = 0.0;
+        float fallen_angle = 0.0;
     };
 
 }  // namespace module::support::optimisation
