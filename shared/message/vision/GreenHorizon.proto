@@ -23,8 +23,8 @@ package message.vision;
 
 import "google/protobuf/timestamp.proto";
 import "Neutron.proto";
-import "Matrix.proto";
 import "Vector.proto";
+import "Transform.proto";
 
 import "message/vision/VisualMesh.proto";
 import "message/platform/webots/messages.proto";
@@ -33,7 +33,7 @@ message GreenHorizon {
     /// A set of rays in world space, projected to the ground. They comprise the points in the convex hull
     repeated fvec3 horizon = 1;
     /// Isometry3d transform from world space to camera space at the time that the image was taken
-    mat4 Hcw = 2;
+    iso3 Hcw = 2;
     /// ID of the camera that took the image containing the green horizon
     uint32 id = 3;
     /// The visual mesh that this green horizon was calculated from

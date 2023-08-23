@@ -44,6 +44,17 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+# Allow selection of subcontroller for conditional build
+if(NOT SUBCONTROLLER)
+  message(STATUS "Setting subcontroller to 'OpenCR' as none was specified.")
+  set(SUBCONTROLLER
+      OpenCR
+      CACHE STRING "Choose the subcontroller to build for." FORCE
+  )
+  # Set the possible values of subcontroller for cmake-gui
+  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR")
+endif()
+
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY) # Turn back on for CI_BUILD once we have fixed all the warnings

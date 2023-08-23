@@ -24,8 +24,11 @@
 namespace module::input {
 
     using utility::platform::getRawServo;
-    using utility::platform::make_error_string;
-    using utility::platform::make_servo_error_string;
+    using utility::platform::make_packet_error_string;
+    using utility::platform::make_servo_hardware_error_string;
+    /* compatibility with v1 protocol only */
+    using utility::platform::make_error_string_v1;
+    using utility::platform::make_servo_error_string_v1;
 
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonLeftUp;
@@ -36,36 +39,55 @@ namespace module::input {
                                           const std::shared_ptr<const Sensors>& previous_sensors,
                                           const RawSensors& raw_sensors) {
         // Check for errors on the platform and FSRs
-        if (raw_sensors.platform_error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(make_error_string("Platform", raw_sensors.platform_error_flags));
+        if (raw_sensors.subcontroller_error != RawSensors::PacketError::PACKET_OK) {
+            NUClear::log<NUClear::WARN>(make_packet_error_string("Platform", raw_sensors.subcontroller_error));
         }
-        if (raw_sensors.fsr.left.error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(make_error_string("Left FSR", raw_sensors.fsr.left.error_flags));
+        /* COMPATIBILITY WITH OLD PROTOCOL V1 STUFF */
+        if (raw_sensors.platform_error_flags != RawSensors::Error::OK_) {
+            NUClear::log<NUClear::WARN>(make_error_string_v1("Platform", raw_sensors.platform_error_flags));
         }
-        if (raw_sensors.fsr.right.error_flags != RawSensors::Error::OK) {
-            NUClear::log<NUClear::WARN>(make_error_string("Right FSR", raw_sensors.fsr.right.error_flags));
+        if (raw_sensors.fsr.left.error_flags != RawSensors::Error::OK_) {
+            NUClear::log<NUClear::WARN>(make_error_string_v1("Left FSR", raw_sensors.fsr.left.error_flags));
+        }
+        if (raw_sensors.fsr.right.error_flags != RawSensors::Error::OK_) {
+            NUClear::log<NUClear::WARN>(make_error_string_v1("Right FSR", raw_sensors.fsr.right.error_flags));
         }
 
         // **************** Servos ****************
         for (uint32_t id = 0; id < 20; ++id) {
-            const auto& original = getRawServo(id, raw_sensors);
-            const auto& error    = original.error_flags;
+            const auto& original        = getRawServo(id, raw_sensors);
+            const auto& hardware_status = original.hardware_error;
+
             // Check for an error on the servo and report it
-            if (error != RawSensors::Error::OK) {
-                NUClear::log<NUClear::WARN>(make_servo_error_string(original, id));
+            if (hardware_status != RawSensors::HardwareError::HARDWARE_OK) {
+                NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(original, id));
             }
+
+            /* COMPATIBILITY WITH OLD PROTOCOL V1 STUFF */
+            const auto& error = original.error_flags;
+            // Check for an error on the servo and report it
+            if (error != RawSensors::Error::OK_) {
+                NUClear::log<NUClear::WARN>(make_servo_error_string_v1(original, id));
+            }
+
+            // normally we would just check the error field here, but we need to be ready to accept one of both error
+            // fields as we don't know if we are working with protoco v1 or protocol v2. So set the field to whichever
+            // error is active, or zero if none.
+            const uint32_t message_error = (hardware_status != RawSensors::HardwareError::HARDWARE_OK) ? hardware_status
+                                           : (error != RawSensors::Error::OK_)                         ? error
+                                                                                                       : 0;
             // If current Sensors message for this servo has an error and we have a previous sensors
             // message available, then we use our previous sensor values with some updates
-            if (error != RawSensors::Error::OK && previous_sensors) {
+            if (message_error && previous_sensors) {
                 // Add the sensor values to the system properly
-                sensors->servo.emplace_back(error,
+                sensors->servo.emplace_back(message_error,
                                             id,
                                             original.torque_enabled,
-                                            original.p_gain,
-                                            original.i_gain,
-                                            original.d_gain,
+                                            original.position_p_gain,
+                                            original.position_i_gain,
+                                            original.position_d_gain,
                                             original.goal_position,
-                                            original.moving_speed,
+                                            original.profile_velocity,
                                             previous_sensors->servo[id].present_position,
                                             previous_sensors->servo[id].present_velocity,
                                             previous_sensors->servo[id].load,
@@ -75,17 +97,17 @@ namespace module::input {
             // Otherwise we can just use the new values as is
             else {
                 // Add the sensor values to the system properly
-                sensors->servo.emplace_back(error,
+                sensors->servo.emplace_back(message_error,
                                             id,
                                             original.torque_enabled,
-                                            original.p_gain,
-                                            original.i_gain,
-                                            original.d_gain,
+                                            original.position_p_gain,
+                                            original.position_i_gain,
+                                            original.position_d_gain,
                                             original.goal_position,
-                                            original.moving_speed,
+                                            original.profile_velocity,
                                             original.present_position,
-                                            original.present_speed,
-                                            original.load,
+                                            original.present_velocity,
+                                            original.present_current,
                                             original.voltage,
                                             static_cast<float>(original.temperature));
             }
@@ -93,7 +115,7 @@ namespace module::input {
             // **************** Accelerometer and Gyroscope ****************
             // If we have a previous Sensors and our platform has errors then reuse our last sensor value of the
             // accelerometer
-            if ((raw_sensors.platform_error_flags != 0u) && previous_sensors) {
+            if (message_error && previous_sensors) {
                 sensors->accelerometer = previous_sensors->accelerometer;
             }
             else {
@@ -104,8 +126,7 @@ namespace module::input {
             // reuse our last sensor value of the gyroscope. Note: One of the gyros would occasionally
             // throw massive numbers without an error flag and if our hardware is working as intended, it should never
             // read that we're spinning at 2 revs/s
-            if (previous_sensors
-                && ((raw_sensors.platform_error_flags != 0u) || raw_sensors.gyroscope.norm() > 4.0 * M_PI)) {
+            if (previous_sensors && (message_error || raw_sensors.gyroscope.norm() > 4.0 * M_PI)) {
                 NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
                 sensors->gyroscope = previous_sensors->gyroscope;
             }
@@ -119,7 +140,7 @@ namespace module::input {
 
         // **************** Battery Voltage  ****************
         // Update the current battery voltage of the whole robot
-        sensors->voltage = raw_sensors.voltage;
+        sensors->voltage = raw_sensors.battery;
 
         // **************** Buttons and LEDs ****************
         sensors->button.reserve(2);
@@ -138,10 +159,12 @@ namespace module::input {
         int middle_count = 0;
         // If we have any downs in the last 20 frames then we are button pushed
         for (const auto& s : sensors) {
-            if (s->buttons.left && (s->platform_error_flags == 0u)) {
+            /* note: platform_error_flags is included for v1 compatibility */
+            if (s->buttons.left && (s->platform_error_flags == 0u) && (s->subcontroller_error == 0u)) {
                 ++left_count;
             }
-            if (s->buttons.middle && (s->platform_error_flags == 0u)) {
+            /* note: platform_error_flags is included for v1 compatibility */
+            if (s->buttons.middle && (s->platform_error_flags == 0u) && (s->subcontroller_error == 0u)) {
                 ++middle_count;
             }
         }

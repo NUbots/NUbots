@@ -1,13 +1,15 @@
 import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { reaction } from "mobx";
+import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 
 import { Vector3 } from "../../../../../shared/math/vector3";
 import { RobotModel } from "../../../robot/model";
+import { fullscreen } from "../../../storybook/fullscreen";
 import { LocalisationRobotModel } from "../../robot_model";
-import { NUgusViewModel } from "../view_model";
+import { NUgusView } from "../view";
 
 import { ModelVisualiser } from "./model_visualizer";
 
@@ -16,6 +18,7 @@ interface StoryProps {}
 const meta: Meta<StoryProps> = {
   title: "components/localisation/NUgus Robot",
   parameters: { layout: "fullscreen" },
+  decorators: [fullscreen],
 };
 
 export default meta;
@@ -28,9 +31,28 @@ export const Animated: StoryObj<StoryProps> = {
   render: () => <NUgusVisualizer animate />,
 };
 
+@observer
 class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
+  private model = this.createModel();
+
+  componentDidMount() {
+    this.props.animate &&
+      disposeOnUnmount(
+        this,
+        reaction(
+          () => (2 * Math.PI * now("frame")) / 1000,
+          (t) => this.simulateWalk(this.model, t),
+          { fireImmediately: true },
+        ),
+      );
+  }
+
   render() {
-    return <ModelVisualiser model={this.createModel()} cameraPosition={new Vector3(0.5, 0.6, 0.5)} />;
+    return (
+      <ModelVisualiser cameraPosition={new Vector3(0.5, 0.6, 0.5)}>
+        <NUgusView model={this.model} />
+      </ModelVisualiser>
+    );
   }
 
   private createModel() {
@@ -42,17 +64,7 @@ class NUgusVisualizer extends React.Component<{ animate?: boolean }> {
       address: "127.0.0.1",
       port: 1234,
     });
-    const model = LocalisationRobotModel.of(robotModel);
-    this.props.animate &&
-      disposeOnUnmount(
-        this,
-        reaction(
-          () => (2 * Math.PI * now("frame")) / 1000,
-          (t) => this.simulateWalk(model, t),
-          { fireImmediately: true },
-        ),
-      );
-    return () => NUgusViewModel.of(model).robot;
+    return LocalisationRobotModel.of(robotModel);
   }
 
   simulateWalk(model: LocalisationRobotModel, t: number) {
