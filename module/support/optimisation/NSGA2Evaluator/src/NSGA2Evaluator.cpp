@@ -273,7 +273,7 @@ namespace module::support::optimisation {
         message->trial_stage                       = trial_stage;
 
         // Schedule the end of the walk trial after the duration limit
-        log<NUClear::DEBUG>("Scheduling expired message with time ", delay_time.count());
+        log<NUClear::DEBUG>("Scheduling expired message with time", delay_time.count());
         emit<Scope::DELAY>(message, delay_time);
     }
 
