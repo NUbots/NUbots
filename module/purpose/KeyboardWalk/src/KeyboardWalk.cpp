@@ -347,49 +347,49 @@ namespace module::purpose {
     
     void KeyboardWalk::clap_open() {
         reset();
-    	emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("StepClap1.yaml"), 3);
     	log<NUClear::INFO>("Clap Open Move");
     }
 
     void KeyboardWalk::clap_close() {
         reset();
-    	emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("StepClap2.yaml"), 3);
     	log<NUClear::INFO>("Clap Close Move");
     }
 
     void KeyboardWalk::OH_thrust_r() {
         reset();
-    	emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("OverheadThrustRight.yaml"), 3);
     	log<NUClear::INFO>("Overhead Thrust Right Move");
     }
 
     void KeyboardWalk::OH_thrust_l() {
         reset();
-    	emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("OverheadThrustLeft.yaml"), 3);
     	log<NUClear::INFO>("Overhead Thrust Left Move");
     }
 
     void KeyboardWalk::star_1() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("Star1.yaml"), 3);
     	log<NUClear::INFO>("Star 1 Move");
     }
 
     void KeyboardWalk::star_2() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("Star2.yaml"), 3);
     	log<NUClear::INFO>("Star 2 Move");
     }
 
     void KeyboardWalk::crouch_1() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("Crouch1.yaml"), 3);
     	log<NUClear::INFO>("Crouch 1 Move");
     }
 
     void KeyboardWalk::crouch_2() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);
+    	emit<Task>(load_script<LimbsSequence>("Crouch2.yaml"), 3);
     	log<NUClear::INFO>("Crouch 2./b Move");
     }
     void KeyboardWalk::update_command() {
