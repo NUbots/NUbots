@@ -1,4 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
-fallen_angle: 0.95 # ~55 degrees
+standing_angle: 0.1
+wait_time: 5.0

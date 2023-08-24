@@ -26,28 +26,40 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
         // Use configuration here from file OnboardWalkOptimisation.yaml
         this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-        cfg.fallen_angle = config["fallen_angle"].as<float>();
+        cfg.standing_angle = config["standing_angle"].as<float>();
+
+        cfg.wait_time = config["wait_time"].as<float>();
     });
 
-    on<Every<10, std::chrono::seconds>>().then([this]() {
-        NUClear::log<NUClear::DEBUG>("Onboard Resetting!");
-        emit(std::make_unique<OptimisationResetDone>());
+    on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
+        if (msg.command == OptimisationCommand::CommandType::RESET_WORLD) {
+            NUClear::log<NUClear::DEBUG>("Onboard Resetting!");
+            resetting = true;
+        }
     });
 
-    // on<Trigger<Sensors>>().then("Optimisation Fallen Check", [this](const Sensors& sensors) {
-    //     // Transform to torso {t} from world {w} space
-    //     Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
-    //     // Basis Z vector of torso {t} in world {w} space
-    //     Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-    //     // Basis X vector of torso {t} in world {w} space
-    //     // Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
+    on<Trigger<Sensors>>().then("Stability Reset Check", [this](const Sensors& sensors) {
+        if (resetting && is_upright && (now - start_time) > cfg.wait_time) {
+            NUClear::log<NUClear::DEBUG>("STABLE!");
+            resetting = false;
+            emit(std::make_unique<OptimisationResetDone>());
+        }
 
-    //     // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-    //     if (std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
-    //         NUClear::log<NUClear::DEBUG>("FALLEN!");
-    //         // evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TERMINATE_EARLY));
-    //     }
-    // });
+        // Transform to torso {t} from world {w} space
+        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // Basis Z vector of torso {t} in world {w} space
+        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+
+        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+        if (resetting && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) < cfg.standing_angle) {
+            // Start timer
+            is_upright = true;
+            start_time = NUClear::clock::now();
+        }
+        else if (resetting) {
+            is_upright = false;
+        }
+    });
 
     // Reset for next run or terminate when paused
     on<Trigger<ButtonLeftDown>, Single>().then([this] {
@@ -59,7 +71,6 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
 
     // Pause optimisation
     on<Trigger<ButtonMiddleDown>, Single>().then([this] {
-
     });
 }
 }  // namespace module::support::optimisation
