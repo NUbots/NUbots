@@ -5,7 +5,7 @@ max_generations: 5
 num_objectives: 1
 num_constraints: 2
 seed: 7777777
-trial_duration_limit: 65 # number of seconds to run a single trial for
+trial_duration_limit: 20 # number of seconds to run a single trial for
 probabilities:
   real:
     # Note that simulated binary crossover (SBX) does something like mutation as well
