@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ScrubberSet and Scrubber throttles emits separately by type and callback 1`] = `
+[
+  [
+    {
+      "hash": {
+        "data": [
+          140,
+          225,
+          88,
+          47,
+          160,
+          234,
+          220,
+          132,
+        ],
+        "type": "Buffer",
+      },
+      "payload": {
+        "data": [
+          112,
+          105,
+          110,
+          103,
+          46,
+          48,
+        ],
+        "type": "Buffer",
+      },
+      "peer": {
+        "address": "0.0.0.0",
+        "name": "myScrubber",
+        "port": 1,
+      },
+      "reliable": true,
+    },
+  ],
+  [
+    {
+      "hash": {
+        "data": [
+          140,
+          225,
+          88,
+          47,
+          160,
+          234,
+          220,
+          132,
+        ],
+        "type": "Buffer",
+      },
+      "payload": {
+        "data": [
+          112,
+          105,
+          110,
+          103,
+          46,
+          48,
+        ],
+        "type": "Buffer",
+      },
+      "peer": {
+        "address": "0.0.0.0",
+        "name": "myScrubber",
+        "port": 1,
+      },
+      "reliable": true,
+    },
+  ],
+  [
+    {
+      "hash": {
+        "data": [
+          140,
+          225,
+          88,
+          47,
+          160,
+          234,
+          220,
+          132,
+        ],
+        "type": "Buffer",
+      },
+      "payload": {
+        "data": [
+          112,
+          105,
+          110,
+          103,
+          46,
+          49,
+        ],
+        "type": "Buffer",
+      },
+      "peer": {
+        "address": "0.0.0.0",
+        "name": "myScrubber",
+        "port": 1,
+      },
+      "reliable": true,
+    },
+  ],
+]
+`;

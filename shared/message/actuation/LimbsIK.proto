@@ -22,15 +22,15 @@ package message.actuation;
 
 import "google/protobuf/timestamp.proto";
 import "message/actuation/ServoCommand.proto";
-import "Matrix.proto";
 import "Vector.proto";
+import "Transform.proto";
 
 /// Left leg motion information including target matrix, time and gain and torque for each servo
 message LeftLegIK {
     /// When the command should execute
     google.protobuf.Timestamp time = 1;
     /// Target left foot position to torso
-    mat4 Htl = 2;
+    iso3 Htl = 2;
     /// Gain and torque of each servo, with the key corresponding to ServoID
     map<uint32, ServoState> servos = 3;
 }
@@ -40,7 +40,7 @@ message RightLegIK {
     /// When the command should execute
     google.protobuf.Timestamp time = 1;
     /// Target right foot position to torso
-    mat4 Htr = 2;
+    iso3 Htr = 2;
     /// Gain and torque of each servo, with the key corresponding to ServoID
     map<uint32, ServoState> servos = 3;
 }

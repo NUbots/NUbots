@@ -1,29 +1,29 @@
-import { observable } from 'mobx'
+import { observable } from "mobx";
 
-import { FieldDimensions } from '../../../../shared/field/dimensions'
+import { FieldDimensions } from "../../../../shared/field/dimensions";
 
 export class FieldModel {
-  @observable dimensions: FieldDimensions
-  @observable fieldColor: string
-  @observable lineColor: string
+  @observable dimensions: FieldDimensions;
+  @observable fieldColor: string;
+  @observable lineColor: string;
 
   constructor({ dimensions, fieldColor, lineColor }: FieldModelOpts) {
-    this.dimensions = dimensions
-    this.fieldColor = fieldColor
-    this.lineColor = lineColor
+    this.dimensions = dimensions;
+    this.fieldColor = fieldColor;
+    this.lineColor = lineColor;
   }
 
   static of() {
     return new FieldModel({
-      dimensions: FieldDimensions.postYear2017(),
-      fieldColor: '#009900',
-      lineColor: '#ffffff',
-    })
+      dimensions: FieldDimensions.of(),
+      fieldColor: "#00cc00",
+      lineColor: "#ffffff",
+    });
   }
 }
 
 interface FieldModelOpts {
-  dimensions: FieldDimensions
-  fieldColor: string
-  lineColor: string
+  dimensions: FieldDimensions;
+  fieldColor: string;
+  lineColor: string;
 }

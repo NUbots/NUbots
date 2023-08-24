@@ -1,34 +1,34 @@
-import { observer } from 'mobx-react'
-import { PropsWithChildren } from 'react'
-import React from 'react'
-import { Component } from 'react'
-import { ComponentType } from 'react'
+import { PropsWithChildren } from "react";
+import React from "react";
+import { Component } from "react";
+import { ComponentType } from "react";
+import { observer } from "mobx-react";
 
-import { DashboardController } from './controller'
-import { DashboardModel } from './model'
-import { DashboardNetwork } from './network'
-import { RobotPanel } from './robot_panel/view'
-import { RobotPanelViewModel } from './robot_panel/view_model'
-import style from './style.module.css'
+import { DashboardController } from "./controller";
+import { DashboardModel } from "./model";
+import { DashboardNetwork } from "./network";
+import { RobotPanel } from "./robot_panel/view";
+import { RobotPanelViewModel } from "./robot_panel/view_model";
+import style from "./style.module.css";
 
 export type DashboardProps = {
-  controller: DashboardController
-  Field: ComponentType
-  Menu: ComponentType<PropsWithChildren>
-  model: DashboardModel
-  network: DashboardNetwork
-}
+  controller: DashboardController;
+  Field: ComponentType;
+  Menu: ComponentType<PropsWithChildren>;
+  model: DashboardModel;
+  network: DashboardNetwork;
+};
 
 @observer
 export class Dashboard extends Component<DashboardProps> {
   componentWillUnmount(): void {
-    this.props.network.destroy()
+    this.props.network.destroy();
   }
 
   render() {
-    const { Menu, model } = this.props
-    const showPanels = model.robots.some(robot => robot.enabled)
-    const Field = this.props.Field
+    const { Menu, model } = this.props;
+    const showPanels = model.robots.some((robot) => robot.enabled);
+    const Field = this.props.Field;
     return (
       <div className={style.page}>
         <Menu>
@@ -46,15 +46,14 @@ export class Dashboard extends Component<DashboardProps> {
           </div>
           {showPanels && (
             <div className={style.panels}>
-              {model.robots.map(robot => {
-                const model = RobotPanelViewModel.of(robot)
+              {model.robots.map((robot) => {
+                const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
                     <div className={style.panel} key={robot.id}>
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}
-                        behaviour={model.behaviour}
                         lastCameraImage={model.lastCameraImage}
                         lastSeenBall={model.lastSeenBall}
                         lastSeenGoal={model.lastSeenGoal}
@@ -67,17 +66,17 @@ export class Dashboard extends Component<DashboardProps> {
                       />
                     </div>
                   )
-                )
+                );
               })}
             </div>
           )}
         </div>
       </div>
-    )
+    );
   }
 
   private onToggleOrientationClick = () => {
-    const { controller, model } = this.props
-    controller.toggleOrientation(model)
-  }
+    const { controller, model } = this.props;
+    controller.toggleOrientation(model);
+  };
 }

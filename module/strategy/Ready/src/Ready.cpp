@@ -23,9 +23,9 @@ namespace module::strategy {
             this->log_level        = config["log_level"].as<NUClear::LogLevel>();
             cfg.walk_to_ready_time = std::chrono::duration_cast<NUClear::clock::duration>(
                 std::chrono::duration<double>(config["walk_to_ready_time"].as<double>()));
-            cfg.walk_to_ready_speed_x  = config["walk_to_ready_speed_x"].as<float>();
-            cfg.walk_to_ready_speed_y  = config["walk_to_ready_speed_y"].as<float>();
-            cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<float>();
+            cfg.walk_to_ready_speed_x  = config["walk_to_ready_speed_x"].as<double>();
+            cfg.walk_to_ready_speed_y  = config["walk_to_ready_speed_y"].as<double>();
+            cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<double>();
         });
 
         on<Provide<ReadyTask>, With<Stability>, Every<30, Per<std::chrono::seconds>>>().then(
@@ -33,7 +33,7 @@ namespace module::strategy {
                 if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
                     // Set the timer and emit a walk Task
                     start_ready_time = NUClear::clock::now();
-                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(cfg.walk_to_ready_speed_x,
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(cfg.walk_to_ready_speed_x,
                                                                       cfg.walk_to_ready_speed_y,
                                                                       cfg.walk_to_ready_rotation)));
                 }
@@ -41,7 +41,7 @@ namespace module::strategy {
                 // Don't emit another stand still task if we already did so
                 else if (NUClear::clock::now() - start_ready_time > cfg.walk_to_ready_time
                          && stability != Stability::STANDING) {
-                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()));
+                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                 }
                 else {  // Otherwise, emit the idle task to keep walking or standing still
                     emit<Task>(std::make_unique<Idle>());

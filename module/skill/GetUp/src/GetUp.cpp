@@ -42,7 +42,7 @@ namespace module::skill {
                         emit(std::make_unique<Stability>(Stability::FALLEN));
 
                         // Transform to torso {t} from world {w} space
-                        Eigen::Isometry3d Hwt = Eigen::Isometry3d(sensors.Htw).inverse();
+                        Eigen::Isometry3d Hwt = sensors.Htw.inverse();
 
                         // Decompose our basis axes of the torso {t} into world {w} space
                         Eigen::Vector3d uXTw = Hwt.rotation().col(0);

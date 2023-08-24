@@ -1,3 +1,4 @@
+
 #ifndef MODULE_LOCALISATION_BALLLOCALISATION_HPP
 #define MODULE_LOCALISATION_BALLLOCALISATION_HPP
 
@@ -5,22 +6,55 @@
 
 #include "BallModel.hpp"
 
-#include "utility/math/filter/ParticleFilter.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/vision/Ball.hpp"
+
 #include "utility/math/filter/UKF.hpp"
 
 namespace module::localisation {
 
     class BallLocalisation : public NUClear::Reactor {
     private:
-        utility::math::filter::ParticleFilter<double, BallModel> filter;
-        NUClear::clock::time_point last_time_update_time;
-        NUClear::clock::time_point last_measurement_update_time;
-        bool ball_pos_log;
+        struct Config {
+            Config() = default;
+            /// @brief UKF config
+            struct UKF {
+                struct Noise {
+                    Noise() = default;
+                    struct Measurement {
+                        Eigen::Matrix2d position = Eigen::Matrix2d::Zero();
+                    } measurement{};
+                    struct Process {
+                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
+                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
+                    } process{};
+                } noise{};
+                struct Initial {
+                    Initial() = default;
+                    struct Mean {
+                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
+                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
+                    } mean{};
+                    struct Covariance {
+                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
+                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
+                    } covariance{};
+                } initial{};
+            } ukf{};
 
-        struct {
-            std::vector<Eigen::Vector2d> start_state{};
-            Eigen::Vector2d start_variance = Eigen::Vector2d::Zero();
-        } config{};
+            /// @brief Initial state of the for the UKF filter
+            BallModel<double>::StateVec initial_mean;
+
+            /// @brief Initial covariance of the for the UKF filter
+            BallModel<double>::StateVec initial_covariance;
+
+        } cfg;
+
+        /// @brief The time of the last time update
+        NUClear::clock::time_point last_time_update;
+
+        /// @brief Unscented Kalman Filter for ball filtering
+        utility::math::filter::UKF<double, BallModel> ukf{};
 
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.

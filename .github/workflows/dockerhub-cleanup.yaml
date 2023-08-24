@@ -15,7 +15,7 @@ jobs:
     name: "Remove extra DockerHub container"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # We need `jq` for the script, so we run in a container with it installed
     container:
@@ -32,5 +32,5 @@ jobs:
         run: |
           DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
           DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
-          TAG=pull-request-${{ github.event.number }} \
+          TAG=PR-${{ github.event.number }} \
           .github/workflows/scripts/remove_dockerhub_tag.sh
