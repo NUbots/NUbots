@@ -54,9 +54,6 @@ namespace module::purpose {
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 4);
 
-            // Stand Still on startup
-            emit<Task>(std::make_unique<StandStill>());
-
             // Ensure UTF-8 is enabled
             std::setlocale(LC_ALL, "en_US.UTF-8");
 
@@ -332,6 +329,7 @@ namespace module::purpose {
     }
 
     void KeyboardWalk::reset() {
+        walk_enabled = false;
         walk_command = Eigen::Vector3d::Zero();
         head_yaw     = 0.0f;
         head_pitch   = 0.0f;
@@ -344,53 +342,61 @@ namespace module::purpose {
         endwin();
         std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
     }
-    
+
     void KeyboardWalk::clap_open() {
         reset();
-    	emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
-    	log<NUClear::INFO>("Clap Open Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
+        log<NUClear::INFO>("Clap Open Move");
     }
 
     void KeyboardWalk::clap_close() {
         reset();
-    	emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
-    	log<NUClear::INFO>("Clap Close Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
+        log<NUClear::INFO>("Clap Close Move");
     }
 
     void KeyboardWalk::OH_thrust_r() {
         reset();
-    	emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
-    	log<NUClear::INFO>("Overhead Thrust Right Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
+        log<NUClear::INFO>("Overhead Thrust Right Move");
     }
 
     void KeyboardWalk::OH_thrust_l() {
         reset();
-    	emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
-    	log<NUClear::INFO>("Overhead Thrust Left Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
+        log<NUClear::INFO>("Overhead Thrust Left Move");
     }
 
     void KeyboardWalk::star_1() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
-    	log<NUClear::INFO>("Star 1 Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
+        log<NUClear::INFO>("Star 1 Move");
     }
 
     void KeyboardWalk::star_2() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
-    	log<NUClear::INFO>("Star 2 Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
+        log<NUClear::INFO>("Star 2 Move");
     }
 
     void KeyboardWalk::crouch_1() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
-    	log<NUClear::INFO>("Crouch 1 Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
+        log<NUClear::INFO>("Crouch 1 Move");
     }
 
     void KeyboardWalk::crouch_2() {
         reset();
-    	emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);
-    	log<NUClear::INFO>("Crouch 2./b Move");
+        emit<Task>(std::unique_ptr<Walk>(nullptr));
+        emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);
+        log<NUClear::INFO>("Crouch 2./b Move");
     }
     void KeyboardWalk::update_command() {
         // If walking is enabled, update the walk command
