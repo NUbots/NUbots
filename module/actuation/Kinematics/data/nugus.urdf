@@ -10,9 +10,9 @@
 </material>
 </visual>
 <collision>
-<origin xyz="-0.0020010285079479218 -1.0497868061065674e-05 0.10815794300287962" rpy="0 -0 0" />
+<origin xyz="-0.0020010285079479218 -1.0497868061065674e-05 0.1085677845403552" rpy="0 -0 0" />
 <geometry>
-<box size="0.13950913399457932 0.1899828165769577 0.262624004855752" /></geometry>
+<box size="0.13950913399457932 0.1899828165769577 0.2618043217808008" /></geometry>
 <material name="torso_material">
 <color rgba="0.5 0.5 0.5 1.0" />
 </material>
@@ -536,17 +536,17 @@
 </material>
 </visual>
 <collision>
-<origin xyz="-0.06592875579372048 0.0043320730328559875 6.265565752983093e-05" rpy="0 -0 0" />
+<origin xyz="-0.06592875579372048 -0.0043320730328559875 -0.00020501762628555298" rpy="0 -0 0" />
 <geometry>
-<box size="0.16223767679184675 0.15564338862895966 0.1575121507048607" /></geometry>
+<box size="0.16223767679184675 0.15564338862895966 0.15779687464237213" /></geometry>
 <material name="head_material">
 <color rgba="0.5 0.5 0.5 1.0" />
 </material>
 </collision>
 <inertial>
-<origin xyz="-0.0665563 0.0103216 0.000100617" rpy="0 0 0" />
+<origin xyz="-0.0665563 -0.0103216 -0.000100617" rpy="0 0 0" />
 <mass value="0.473503" />
-<inertia ixx="0.0019685" ixy="-6.70055e-06" ixz="7.81948e-06" iyy="0.00145331" iyz="-5.39419e-07" izz="0.00107445" />
+<inertia ixx="0.0019685" ixy="6.68987e-06" ixz="8.0299e-06" iyy="0.0014533" iyz="-1.73055e-07" izz="0.00107445" />
 </inertial>
 </link>
 
@@ -576,7 +576,7 @@
 </link>
 
 <joint name="left_camera" type="fixed">
-<origin xyz="-0.0648803 0.0699522 -0.033795" rpy="-1.5708 1.63801e-13 1.53589" />
+<origin xyz="-0.0648803 -0.0699522 0.033795" rpy="1.5708 -1.63801e-13 -1.53589" />
 <parent link="head" />
 <child link="left_camera" />
 <axis xyz="0 0 1" />
@@ -610,7 +610,7 @@
 </link>
 
 <joint name="right_camera" type="fixed">
-<origin xyz="-0.0648803 0.0699522 0.034205" rpy="-1.5708 1.63801e-13 1.53589" />
+<origin xyz="-0.0648803 -0.0699522 -0.034205" rpy="1.5708 -1.63801e-13 -1.53589" />
 <parent link="head" />
 <child link="right_camera" />
 <axis xyz="0 0 1" />
@@ -619,7 +619,7 @@
 </joint>
 
 <joint name="head_pitch" type="revolute">
-<origin xyz="-0.00024471 -0.000255294 0.0481" rpy="-1.5708 1.5708 0" />
+<origin xyz="-0.00024471 -0.000255294 0.0481" rpy="1.5708 1.5708 0" />
 <parent link="neck" />
 <child link="head" />
 <axis xyz="0 0 1" />
@@ -697,9 +697,9 @@
 </material>
 </visual>
 <collision>
-<origin xyz="-0.0024787113070487976 -0.09564930573105812 -0.0024994947016239166" rpy="0 -0 0" />
+<origin xyz="-0.0024787113070487976 -0.09564930573105812 -0.0025215083733201027" rpy="0 -0 0" />
 <geometry>
-<box size="0.08257202059030533 0.25829844921827316 0.050877589732408524" /></geometry>
+<box size="0.08257202059030533 0.25829844921827316 0.050921617075800896" /></geometry>
 <material name="left_lower_arm_material">
 <color rgba="0.5 0.5 0.5 1.0" />
 </material>
@@ -774,9 +774,9 @@
 </material>
 </visual>
 <collision>
-<origin xyz="0.07301805168390274 1.4593824744224548e-05 0.010696200653910637" rpy="0 -0 0" />
+<origin xyz="0.07302819937467575 1.3921409845352173e-05 0.010696256533265114" rpy="0 -0 0" />
 <geometry>
-<box size="0.22480963170528412 0.079021405428648 0.08959505334496498" /></geometry>
+<box size="0.22482992708683014 0.07902275025844574 0.08959516510367393" /></geometry>
 <material name="right_upper_arm_material">
 <color rgba="0.5 0.5 0.5 1.0" />
 </material>
@@ -799,9 +799,9 @@
 </material>
 </visual>
 <collision>
-<origin xyz="-0.0024787113070487976 -0.0956590510904789 0.0025391122326254845" rpy="0 -0 0" />
+<origin xyz="-0.0024787113070487976 -0.0956590510904789 0.0025391047820448875" rpy="0 -0 0" />
 <geometry>
-<box size="0.08257202059030533 0.2583179399371147 0.05095679499208927" /></geometry>
+<box size="0.08257202059030533 0.2583179399371147 0.050956809893250465" /></geometry>
 <material name="right_lower_arm_material">
 <color rgba="0.5 0.5 0.5 1.0" />
 </material>
