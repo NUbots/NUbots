@@ -25,7 +25,7 @@ namespace module::actuation {
     using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
-    using utility::actuation::kinematics::calculateHeadJoints;
+    using utility::actuation::kinematics::calculate_head_joints;
     using utility::actuation::kinematics::calculateLegJoints;
     using utility::actuation::tinyrobotics::configuration_to_servos;
     using utility::actuation::tinyrobotics::servos_to_configuration;
@@ -155,14 +155,12 @@ namespace module::actuation {
 
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<Head>();
-                auto joints = calculateHeadJoints<double>(head_ik.uPCt);
-
+                auto joints = calculate_head_joints<double>(head_ik.uPCt);
                 // Get head kinematics limits
                 double max_yaw   = kinematics_model.head.MAX_YAW;
                 double min_yaw   = kinematics_model.head.MIN_YAW;
                 double max_pitch = kinematics_model.head.MAX_PITCH;
                 double min_pitch = kinematics_model.head.MIN_PITCH;
-
                 // Clamp head angles with max/min limits
                 for (auto& joint : joints) {
                     if (joint.first == ServoID::HEAD_PITCH) {
@@ -172,7 +170,6 @@ namespace module::actuation {
                         joint.second = utility::math::clamp(min_yaw, joint.second, max_yaw);
                     }
                 }
-
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
                         ServoCommand(head_ik.time, joint.second, head_ik.servos.at(joint.first));
