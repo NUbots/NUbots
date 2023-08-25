@@ -20,10 +20,6 @@
 #include "SensorFilter.hpp"
 
 #include "message/actuation/BodySide.hpp"
-#include "message/behaviour/state/Stability.hpp"
-#include "message/behaviour/state/WalkingState.hpp"
-#include "message/motion/GetupCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
@@ -39,13 +35,7 @@ namespace module::input {
     using utility::support::Expression;
 
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkingState;
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::ExecuteGetup;
-    using message::motion::KillGetup;
-    using message::motion::StopCommand;
-    using message::motion::WalkCommand;
+    using message::behaviour::state::WalkState;
 
     using extension::Configuration;
 
@@ -106,78 +96,66 @@ namespace module::input {
                 detect_button_press(sensors);
             });
 
-        on<Trigger<WalkingState>>().then([this](const WalkingState& walking_state) {
-            walk_command        = walking_state.walk_command.cast<double>();
-            walk_engine_enabled = walking_state.is_walking;
-        });
+        update_loop =
+            on<Trigger<RawSensors>,
+               Optional<With<Sensors>>,
+               With<KinematicsModel>,
+               Optional<With<Stability>>,
+               Optional<With<WalkState>>,
+               Single,
+               Priority::HIGH>()
+                .then("Main Sensors Loop",
+                      [this](const RawSensors& raw_sensors,
+                             const std::shared_ptr<const Sensors>& previous_sensors,
+                             const KinematicsModel& kinematics_model,
+                             const std::shared_ptr<const Stability>& stability,
+                             const std::shared_ptr<const WalkState>& walk_state) {
+                          auto sensors = std::make_unique<Sensors>();
 
-        on<Trigger<Stability>>().then([this](const Stability& stability) {
-            if (stability == Stability::FALLEN) {
-                falling = true;
-            }
-            else {
-                falling = false;
-            }
-        });
+                          // Updates message with raw sensor data
+                          update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
-        on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
-            if (!walk_engine_enabled) {
-                walk_engine_enabled = true;
-            }
-            walk_command = wc.command;
-        });
+                          // Updates the message with kinematics data
+                          update_kinematics(sensors, kinematics_model, raw_sensors);
 
-        on<Trigger<EnableWalkEngineCommand>>().then([this]() { walk_engine_enabled = true; });
+                          // Updates the Sensors message with odometry data filtered using specified filter
+                          switch (cfg.filtering_method.value) {
+                              case FilteringMethod::UKF:
+                                  update_odometry_ukf(sensors, previous_sensors, raw_sensors);
+                                  break;
+                              case FilteringMethod::KF:
+                                  update_odometry_kf(sensors, previous_sensors, raw_sensors, stability, walk_state);
+                                  break;
+                              case FilteringMethod::MAHONY:
+                                  update_odometry_mahony(sensors, previous_sensors, raw_sensors, stability, walk_state);
+                                  break;
+                              case FilteringMethod::GROUND_TRUTH:
+                                  update_odometry_ground_truth(sensors, raw_sensors);
+                                  break;
+                              default: log<NUClear::WARN>("Unknown Filtering Method"); break;
+                          }
 
-        on<Trigger<DisableWalkEngineCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
+                          // Graph debug information
+                          if (log_level <= NUClear::DEBUG) {
+                              debug_sensor_filter(sensors, raw_sensors);
+                          }
 
-        on<Trigger<StopCommand>>().then([this]() {
-            walk_command        = Eigen::Vector3d::Zero();
-            walk_engine_enabled = false;
-        });
+                          emit(std::move(sensors));
+                      })
+                .disable();
+    }
 
-        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
-
-        on<Trigger<KillGetup>>().then([this]() { falling = false; });
-
-        update_loop = on<Trigger<RawSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>()
-                          .then("Main Sensors Loop",
-                                [this](const RawSensors& raw_sensors,
-                                       const std::shared_ptr<const Sensors>& previous_sensors,
-                                       const KinematicsModel& kinematics_model) {
-                                    auto sensors = std::make_unique<Sensors>();
-
-                                    // Updates message with raw sensor data
-                                    update_raw_sensors(sensors, previous_sensors, raw_sensors);
-
-                                    // Updates the message with kinematics data
-                                    update_kinematics(sensors, kinematics_model, raw_sensors);
-
-                                    // Updates the Sensors message with odometry data filtered using specified filter
-                                    switch (cfg.filtering_method.value) {
-                                        case FilteringMethod::UKF:
-                                            update_odometry_ukf(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        case FilteringMethod::KF:
-                                            update_odometry_kf(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        case FilteringMethod::MAHONY:
-                                            update_odometry_mahony(sensors, previous_sensors, raw_sensors);
-                                            break;
-                                        default: log<NUClear::WARN>("Unknown Filtering Method"); break;
-                                    }
-
-                                    // Graph debug information
-                                    if (log_level <= NUClear::DEBUG) {
-                                        debug_sensor_filter(sensors, raw_sensors);
-                                    }
-
-                                    emit(std::move(sensors));
-                                })
-                          .disable();
+    void SensorFilter::integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state) {
+        // Check if we are not currently falling and walking
+        if (stability == Stability::DYNAMIC && walk_state.state == WalkState::State::WALKING) {
+            // Integrate the walk command to estimate the change in position and yaw orientation
+            double dx = walk_state.velocity_target.x() * dt * cfg.deadreckoning_scale.x();
+            double dy = walk_state.velocity_target.y() * dt * cfg.deadreckoning_scale.y();
+            yaw += walk_state.velocity_target.z() * dt * cfg.deadreckoning_scale.z();
+            // Rotate the change in position into world coordinates before adding it to the current position
+            Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
+            Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
+        }
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
@@ -203,6 +181,19 @@ namespace module::input {
         emit(graph("Left Foot Actual Orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
         emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
         emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
+        Eigen::Isometry3d Hpt = Eigen::Isometry3d::Identity();
+        if (sensors->feet[BodySide::LEFT].down) {
+            Hpt = Htl.inverse();
+        }
+        else {
+            Hpt = Htr.inverse();
+        }
+        Eigen::Vector3d thetaPT = MatrixToEulerIntrinsic(Hpt.linear());
+        emit(graph("Torso actual position (x,y,z)",
+                   Hpt.translation().x(),
+                   Hpt.translation().y(),
+                   Hpt.translation().z()));
+        emit(graph("Torso actual orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();

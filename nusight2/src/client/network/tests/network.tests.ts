@@ -1,37 +1,67 @@
-import { createMockInstance } from '../../../shared/base/testing/create_mock_instance'
-import { message } from '../../../shared/messages'
-import { Network } from '../network'
-import { NUsightNetwork } from '../nusight_network'
-import Mocked = jest.Mocked
-import Sensors = message.input.Sensors
+import { NUClearNetSend } from "nuclearnet.js";
 
-describe('Network', () => {
-  let nusightNetwork: Mocked<NUsightNetwork>
-  let network: Network
+import { createMockInstance } from "../../../shared/base/testing/create_mock_instance";
+import { message } from "../../../shared/messages";
+import { Network } from "../network";
+import { NUsightNetwork } from "../nusight_network";
 
-  beforeEach(() => {
-    nusightNetwork = createMockInstance(NUsightNetwork)
-    network = new Network(nusightNetwork)
-  })
+import Sensors = message.input.Sensors;
+import Test = message.support.nusight.Test;
 
-  it('off() automatically unregisters all callbacks', () => {
-    const cb1 = jest.fn()
-    const cb2 = jest.fn()
+describe("Network", () => {
+  it("off() unregisters all callbacks", () => {
+    const nusightNetwork = createMockInstance(NUsightNetwork);
+    const network = new Network(nusightNetwork);
 
-    const off1 = jest.fn()
-    nusightNetwork.onNUClearMessage.mockReturnValue(off1)
+    const cb1 = jest.fn();
+    const cb2 = jest.fn();
 
-    network.on(Sensors, cb1)
-    expect(nusightNetwork.onNUClearMessage).toHaveBeenCalledWith(Sensors, cb1)
+    const off1 = jest.fn();
+    nusightNetwork.onNUClearMessage.mockReturnValue(off1);
 
-    const off2 = jest.fn()
-    nusightNetwork.onNUClearMessage.mockReturnValue(off2)
+    network.on(Sensors, cb1);
+    expect(nusightNetwork.onNUClearMessage).toHaveBeenCalledWith(Sensors, cb1);
 
-    network.on(Sensors, cb2)
-    expect(nusightNetwork.onNUClearMessage).toHaveBeenCalledWith(Sensors, cb2)
+    const off2 = jest.fn();
+    nusightNetwork.onNUClearMessage.mockReturnValue(off2);
 
-    network.off()
-    expect(off1).toHaveBeenCalledTimes(1)
-    expect(off2).toHaveBeenCalledTimes(1)
-  })
-})
+    network.on(Sensors, cb2);
+    expect(nusightNetwork.onNUClearMessage).toHaveBeenCalledWith(Sensors, cb2);
+
+    network.off();
+    expect(off1).toHaveBeenCalledTimes(1);
+    expect(off2).toHaveBeenCalledTimes(1);
+  });
+
+  it("send() forwards the given message to NUsightNetwork", () => {
+    const nusightNetwork = createMockInstance(NUsightNetwork);
+    const network = new Network(nusightNetwork);
+
+    const payload = Test.encode({ message: "hello world" }).finish();
+    const packet: NUClearNetSend = {
+      type: "message.support.nusight.Test",
+      payload: payload as Buffer,
+      reliable: true,
+      target: "nusight",
+    };
+
+    network.send(packet);
+
+    expect(nusightNetwork.send).toHaveBeenCalledWith(packet);
+  });
+
+  it("emit() forwards the given message and options to NUsightNetwork", () => {
+    const nusightNetwork = Object.assign(createMockInstance(NUsightNetwork), {
+      emit: jest.fn(),
+    });
+    const network = new Network(nusightNetwork);
+
+    const data = { message: "hello world" };
+
+    network.emit(new Test(data));
+    expect(nusightNetwork.emit).toHaveBeenCalledWith(data, undefined);
+
+    network.emit(new Test(data), { reliable: true });
+    expect(nusightNetwork.emit).toHaveBeenCalledWith(data, { reliable: true });
+  });
+});

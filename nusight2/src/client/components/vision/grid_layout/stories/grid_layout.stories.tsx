@@ -1,66 +1,56 @@
-import { number } from '@storybook/addon-knobs'
-import { withKnobs } from '@storybook/addon-knobs'
-import { storiesOf } from '@storybook/react'
-import { observable } from 'mobx'
-import { observer } from 'mobx-react'
-import React from 'react'
-import { SeededRandom } from '../../../../../shared/base/random/seeded_random'
-import { range } from '../../../../../shared/base/range'
-import { fullscreen } from '../../../storybook/fullscreen'
-import images from '../../image_view/stories/images/image.jpg'
-import { GridLayout } from '../grid_layout'
-import styles from './style.module.css'
-import useInterval from '@use-it/interval'
+import React from "react";
+import { Meta, StoryObj } from "@storybook/react";
+import { observable } from "mobx";
+import { observer } from "mobx-react";
 
-const imageWidth = 600
-const imageHeight = 480
-const aspectRatio = imageHeight / imageWidth
+import { SeededRandom } from "../../../../../shared/base/random/seeded_random";
+import { range } from "../../../../../shared/base/range";
+import useInterval from "../../../../hooks/use-interval";
+import sampleImageUrl from "../../../camera/image_view/stories/images/image.jpg";
+import { GridLayout } from "../grid_layout";
 
-fullscreen(storiesOf('components.vision.grid_layout', module))
-  .addDecorator(withKnobs)
-  .add('Renders static', () => {
-    const numItems = number('Items', 2)
-    const subItems = number('Sub-items', 1)
+const imageWidth = 600;
+const imageHeight = 480;
+const aspectRatio = imageHeight / imageWidth;
+
+type StoryComponent = React.FunctionComponent<{ numItems: number; subItems: number }>;
+
+const meta: Meta<StoryComponent> = {
+  title: "components/GridLayout",
+  argTypes: {
+    numItems: {
+      control: { type: "range", min: 1, max: 10 },
+    },
+    subItems: {
+      control: { type: "range", min: 1, max: 10 },
+    },
+  },
+  args: {
+    numItems: 2,
+    subItems: 1,
+  },
+  parameters: {
+    layout: "fullscreen",
+  },
+  decorators: [(story) => <div className="flex flex-col w-screen h-screen">{story()}</div>],
+};
+
+export default meta;
+
+export const Static: StoryObj<StoryComponent> = {
+  name: "static",
+  render: ({ numItems, subItems }) => {
     return (
-      <GridLayout itemAspectRatio={aspectRatio}>
-        {range(numItems).map(i => (
-          <div key={i} className={styles.item} style={{ backgroundColor: 'red' }}>
-            <GridLayout itemAspectRatio={aspectRatio}>
-              {range(subItems).map(i => (
-                <div key={i} className={styles.item}>
-                  <img className={styles.image} src={images} style={{ objectFit: 'contain' }} />
-                </div>
-              ))}
-            </GridLayout>
-          </div>
-        ))}
-      </GridLayout>
-    )
-  })
-  .add('Renders animated', () => {
-    const numItems = number('Items', 2)
-    const subItems = number('Sub-items', 1)
-    const width = observable.box(1)
-    const random = SeededRandom.of('grid_layout')
-    const Component = observer(() => {
-      useInterval(() => width.set(random.float()), 1000)
-      return (
-        <div
-          style={{
-            height: '100%',
-            width: `${width.get() * 100}%`,
-            transition: 'width 500ms ease',
-            border: '1px solid black',
-            boxSizing: 'border-box',
-          }}
-        >
+      <>
+        <div className="py-2 text-center">Open Storybook Controls to adjust number of items and sub items.</div>
+        <div className="h-full">
           <GridLayout itemAspectRatio={aspectRatio}>
-            {range(numItems).map(i => (
-              <div key={i} className={styles.item} style={{ backgroundColor: 'red' }}>
+            {range(numItems).map((i) => (
+              <div key={i} className="relative w-full h-full" style={{ backgroundColor: "red" }}>
                 <GridLayout itemAspectRatio={aspectRatio}>
-                  {range(subItems).map(i => (
-                    <div key={i} className={styles.item}>
-                      <img className={styles.image} src={images} style={{ objectFit: 'contain' }} />
+                  {range(subItems).map((i) => (
+                    <div key={i} className="relative w-full h-full">
+                      <img className="absolute w-full h-full" src={sampleImageUrl} style={{ objectFit: "contain" }} />
                     </div>
                   ))}
                 </GridLayout>
@@ -68,7 +58,47 @@ fullscreen(storiesOf('components.vision.grid_layout', module))
             ))}
           </GridLayout>
         </div>
-      )
-    })
-    return <Component />
-  })
+      </>
+    );
+  },
+};
+
+export const Animated: StoryObj<StoryComponent> = {
+  name: "animated",
+  render({ numItems, subItems }) {
+    const width = observable.box(1);
+    const random = SeededRandom.of("grid_layout");
+
+    const Component = observer(() => {
+      useInterval(() => width.set(random.float()), 2000);
+      return (
+        <>
+          <div className="py-2 text-center">Open Storybook Controls to adjust number of items and sub items.</div>
+          <div
+            style={{
+              height: "100%",
+              width: `${width.get() * 100}%`,
+              transition: "width 500ms ease",
+            }}
+          >
+            <GridLayout itemAspectRatio={aspectRatio}>
+              {range(numItems).map((i) => (
+                <div key={i} className="relative w-full h-full" style={{ backgroundColor: "red" }}>
+                  <GridLayout itemAspectRatio={aspectRatio}>
+                    {range(subItems).map((i) => (
+                      <div key={i} className="relative w-full h-full">
+                        <img className="absolute w-full h-full" src={sampleImageUrl} style={{ objectFit: "contain" }} />
+                      </div>
+                    ))}
+                  </GridLayout>
+                </div>
+              ))}
+            </GridLayout>
+          </div>
+        </>
+      );
+    });
+
+    return <Component />;
+  },
+};

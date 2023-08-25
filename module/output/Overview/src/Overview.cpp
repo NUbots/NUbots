@@ -5,14 +5,13 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/Behaviour.hpp"
-#include "message/behaviour/KickPlan.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/motion/WalkCommand.hpp"
+#include "message/skill/Kick.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/support/GlobalConfig.hpp"
 #include "message/support/nusight/Overview.hpp"
 #include "message/vision/Ball.hpp"
@@ -21,13 +20,12 @@
 namespace module::output {
 
     using extension::Configuration;
-    using message::behaviour::Behaviour;
-    using message::behaviour::KickPlan;
     using message::input::GameState;
     using message::input::Image;
     using message::input::Sensors;
     using message::localisation::Field;
-    using message::motion::WalkCommand;
+    using message::skill::Kick;
+    using message::skill::Walk;
     using message::support::GlobalConfig;
     using NUClear::message::CommandLineArguments;
 
@@ -57,32 +55,29 @@ namespace module::output {
            Optional<With<GlobalConfig>>,
            Optional<With<CommandLineArguments>>,
            Optional<With<Sensors>>,
-           Optional<With<Behaviour::State>>,
            Optional<With<Field>>,
            Optional<With<LocalisationBall>>,
-           Optional<With<KickPlan>>,
+           Optional<With<Kick>>,
            Optional<With<GameState>>,
-           Optional<With<WalkCommand>>,
+           Optional<With<Walk>>,
            Single,
            Priority::LOW>()
             .then([this](const std::shared_ptr<const GlobalConfig>& global,
                          const std::shared_ptr<const CommandLineArguments>& cli,
                          const std::shared_ptr<const Sensors>& sensors,
-                         const std::shared_ptr<const Behaviour::State>& behaviour_state,
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const LocalisationBall>& loc_ball,
-                         const std::shared_ptr<const KickPlan>& kick_plan,
+                         const std::shared_ptr<const Kick>& kick,
                          const std::shared_ptr<const GameState>& game_state,
-                         const std::shared_ptr<const WalkCommand>& walk_command) {
+                         const std::shared_ptr<const Walk>& walk) {
                 auto msg = std::make_unique<OverviewMsg>();
 
                 // Set properties
-                msg->timestamp       = NUClear::clock::now();
-                msg->robot_id        = global ? global->player_id : 0;
-                msg->role_name       = cli ? cli->at(0) : "";
-                msg->battery         = sensors ? sensors->battery : 0;
-                msg->voltage         = sensors ? sensors->voltage : 0;
-                msg->behaviour_state = behaviour_state ? msg->behaviour_state : Behaviour::State(0);
+                msg->timestamp = NUClear::clock::now();
+                msg->robot_id  = global ? global->player_id : 0;
+                msg->role_name = cli ? cli->at(0) : "";
+                msg->battery   = sensors ? sensors->battery : 0;
+                msg->voltage   = sensors ? sensors->voltage : 0;
 
                 if (sensors) {
                     // Get our world transform
@@ -91,7 +86,7 @@ namespace module::output {
                     // If we have field information
                     if (field) {
                         // Transform the field state into Hfw
-                        Eigen::Isometry3d Hfw(field->Hfw);
+                        Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
 
                         // Get our torso in field space
                         Eigen::Isometry3d Hft = Hfw * Htw.inverse();
@@ -104,18 +99,18 @@ namespace module::output {
 
                         if (loc_ball) {
                             // Get our ball in field space
-                            Eigen::Vector4d rBWw(loc_ball->position.x(), loc_ball->position.y(), 0.0, 1.0);
-                            Eigen::Vector4d rBFf = Hfw * rBWw;
+                            Eigen::Vector3d rBWw = loc_ball->rBWw;
+                            Eigen::Vector3d rBFf = Hfw * rBWw;
 
                             // Store our position from field to ball
                             msg->ball_position            = Eigen::Vector2f(rBFf.x(), rBFf.y());
-                            msg->ball_position_covariance = loc_ball->covariance.cast<float>();
+                            msg->ball_position_covariance = loc_ball->covariance.block(0, 0, 2, 2).cast<float>();
                         }
                     }
                 }
 
-                if (kick_plan) {
-                    msg->kick_target = kick_plan->target.cast<float>();
+                if (kick) {
+                    msg->kick_target = kick->target.cast<float>().head<2>();
                 }
 
                 // Set our game mode properties
@@ -130,8 +125,8 @@ namespace module::output {
                 msg->last_camera_image = last_seen_goal;
 
                 // Set our walk command
-                if (walk_command) {
-                    msg->walk_command = walk_command->command.cast<float>();
+                if (walk) {
+                    msg->walk_command = walk->velocity_target.cast<float>();
                 }
                 else {
                     msg->walk_command = Eigen::Vector3f::Zero();

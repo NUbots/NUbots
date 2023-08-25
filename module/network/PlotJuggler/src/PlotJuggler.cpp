@@ -6,7 +6,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/support/nusight/DataPoint.hpp"
+#include "message/eye/DataPoint.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/hostname.hpp"
@@ -14,7 +14,7 @@
 namespace module::network {
 
     using extension::Configuration;
-    using message::support::nusight::DataPoint;
+    using message::eye::DataPoint;
     using utility::nusight::graph;
 
     PlotJuggler::PlotJuggler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {

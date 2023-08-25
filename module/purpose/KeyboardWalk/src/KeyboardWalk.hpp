@@ -33,25 +33,25 @@ namespace module::purpose {
     class KeyboardWalk : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Increments the value of walk command (dx, dy) by this amount when a key is pressed
-        static constexpr const float DIFF = 0.01f;
+        static constexpr const double DIFF = 0.01f;
 
         /// @brief Increments the value of walk command (dtheta) by this amount when a key is pressed
-        static constexpr const float ROT_DIFF = 0.1f;
+        static constexpr const double ROT_DIFF = 0.1f;
 
         /// @brief Increments the value of head yaw/pitch by this amount when a key is pressed
-        static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
+        static constexpr const double HEAD_DIFF = 1.0f * double(M_PI) / 180.0f;
 
         /// @brief Whether or not the walk is enabled
         bool walk_enabled = false;
 
         /// @brief Walk command (dx, dy, dtheta)
-        Eigen::Vector3f walk_command = Eigen::Vector3f::Zero();
+        Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Desired head yaw
-        float head_yaw = 0.0f;
+        double head_yaw = 0.0f;
 
         /// @brief Desired head pitch
-        float head_pitch = 0.0f;
+        double head_pitch = 0.0f;
 
         /// @brief Command window
         std::shared_ptr<WINDOW> command_window;

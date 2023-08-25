@@ -4,7 +4,6 @@
 #include <csignal>
 #include <cstdio>
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 #include <string>
 
 #include "extension/Behaviour.hpp"
@@ -12,6 +11,7 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -26,6 +26,7 @@ namespace module::purpose {
     using extension::behaviour::Task;
     using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
@@ -46,8 +47,9 @@ namespace module::purpose {
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without this emit, modules that need a Stability message may not run
+            // Without these emis, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 4);
@@ -320,7 +322,7 @@ namespace module::purpose {
     void KeyboardWalk::walk_toggle() {
         if (walk_enabled) {
             walk_enabled = false;
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f::Zero()), 2);
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 2);
         }
         else {
             walk_enabled = true;
@@ -330,7 +332,7 @@ namespace module::purpose {
     }
 
     void KeyboardWalk::reset() {
-        walk_command = Eigen::Vector3f::Zero();
+        walk_command = Eigen::Vector3d::Zero();
         head_yaw     = 0.0f;
         head_pitch   = 0.0f;
         update_command();
@@ -393,7 +395,7 @@ namespace module::purpose {
     void KeyboardWalk::update_command() {
         // If walking is enabled, update the walk command
         if (walk_enabled) {
-            emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(walk_command.x(), walk_command.y(), walk_command.z())),
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(walk_command.x(), walk_command.y(), walk_command.z())),
                        2);
         }
 

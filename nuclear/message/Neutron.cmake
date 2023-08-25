@@ -29,11 +29,10 @@ find_package(Eigen3 REQUIRED)
 # Build the builtin protocol buffers as normal
 foreach(proto ${builtin_protobufs})
 
-  # NAME_WE: File name with neither the directory nor the longest extension
   get_filename_component(file_we ${proto} NAME_WE)
 
   add_custom_command(
-    OUTPUT ${py_out}/${file_we}_pb2.py ${pb_out}/${file_we}.pb.cc ${pb_out}/${file_we}.pb.h ${dep_out}/${file_we}.d
+    OUTPUT ${pb_out}/${file_we}.pb.cc ${pb_out}/${file_we}.pb.h ${py_out}/${file_we}_pb2.py ${dep_out}/${file_we}.d
     COMMAND ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --cpp_out=lite:${pb_out} --python_out=${py_out}
             --dependency_out=${dep_out}/${file_we}.d -I${builtin_dir} ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto
@@ -57,8 +56,7 @@ foreach(proto ${message_protobufs})
     BUILTIN_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}"
   )
 
-  # * Compute the generated target name
-  # * NAME_WE: File name with neither the directory nor the longest extension
+  # Compute the generated target name
   file(RELATIVE_PATH output_path ${message_parent_dir} ${proto})
   get_filename_component(output_path ${output_path} DIRECTORY)
   get_filename_component(file_we ${proto} NAME_WE)

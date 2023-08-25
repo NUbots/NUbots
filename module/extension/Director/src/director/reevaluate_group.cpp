@@ -37,8 +37,9 @@ namespace module::extension {
         std::vector<std::shared_ptr<DirectorTask>> watchers = group.watchers;
 
         // Sort the interested parties by priority with highest first
-        std::sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
-            return !challenge_priority(a, b);
+        std::stable_sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
+            // If b wins against a, then we swap
+            return challenge_priority(b, a);
         });
 
         // Store our initial task to see if it changed later
