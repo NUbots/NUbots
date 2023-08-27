@@ -15,5 +15,5 @@ cameras:
     cache_directory: "" # unneeded for cpu engine
     classifier:
       height: [0.5, 1.0]
-      max_distance: 6
+      max_distance: 9
       intersection_tolerance: 0.05
