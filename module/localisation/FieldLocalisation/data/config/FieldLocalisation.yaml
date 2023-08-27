@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 0.01
@@ -26,4 +26,4 @@ save_map: false
 min_observations: 100
 
 # Penalty factor for observations being outside map
-outside_map_penalty_factor: 0.9
+outside_map_penalty_factor: 1

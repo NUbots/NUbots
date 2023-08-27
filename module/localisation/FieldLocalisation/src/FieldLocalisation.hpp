@@ -65,6 +65,7 @@ namespace module::localisation {
         /// @brief Particles used in the particle filter
         std::vector<Particle> particles{};
 
+        std::vector<Eigen::Vector3d> goal_posts{};
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
@@ -81,6 +82,8 @@ namespace module::localisation {
         /// @param observations The observations (x, y) in the robot's coordinate frame [m]
         /// @return The weight of the particle
         double calculate_weight(const Eigen::Vector3d particle, const std::vector<Eigen::Vector3d>& observations);
+
+        double calculate_goal_weight(const Eigen::Vector3d particle, const std::vector<Eigen::Vector3d>& observations);
 
         /// @brief Get the current mean (state) of the robot
         // @return The current mean (state) of the robot
