@@ -1,0 +1,10 @@
+{
+    "keys_to_extract": [
+        "timestamp",
+        "data.timestamp",
+        "data.ledPanel.led2",
+        "data.servo",
+        "data.gyroscope",
+        "data.odometryGroundTruth"
+    ]
+}
