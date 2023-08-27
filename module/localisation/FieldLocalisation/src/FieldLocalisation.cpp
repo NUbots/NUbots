@@ -7,6 +7,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
 
 namespace module::localisation {
 
@@ -17,6 +18,7 @@ namespace module::localisation {
     using message::localisation::ResetFieldLocalisation;
     using message::support::FieldDescription;
     using message::vision::FieldLines;
+    using Goals = message::vision::Goals;
 
     using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
@@ -233,7 +235,7 @@ namespace module::localisation {
             }
         });
 
-        on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
+        on<Trigger<FieldLines>>().then("Particle Filter Field Lines", [this](const FieldLines& field_lines) {
             Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
             if (!falling && field_lines.rPWw.size() > cfg.min_observations) {
                 // Add noise to the particles
@@ -292,6 +294,45 @@ namespace module::localisation {
             field->covariance  = covariance;
             field->uncertainty = covariance.trace();
             emit(field);
+        });
+
+        on<Trigger<Goals>>().then("Particle Filter Goal Posts", [this](const Goals& goals) {
+            Eigen::Isometry3d Hcw = Eigen::Isometry3d(goals.Hcw);
+            // if (!falling && field_lines.rPWw.size() > cfg.min_observations) {
+            //     // Add noise to the particles
+            //     add_noise();
+
+            //     // Calculate the weight of each particle based on the observations occupancy values
+            //     for (int i = 0; i < cfg.n_particles; i++) {
+            //         particles[i].weight = calculate_weight(particles[i].state, field_lines.rPWw);
+            //         if (log_level <= NUClear::DEBUG) {
+            //             auto particle_cell = position_in_map(particles[i].state, Eigen::Vector3d::Zero());
+            //             emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
+            //         }
+            //     }
+
+            //     // Resample the particles based on the weights
+            //     resample();
+            // }
+            // Compute the state (mean) and covariance of the particles
+            state      = compute_mean();
+            covariance = compute_covariance();
+            if (log_level <= NUClear::DEBUG) {
+
+                for (auto rPWw : goals.rPWw) {
+                    auto observation_cell = position_in_map(state, rPWw);
+                    emit(graph("Goal point", observation_cell.x(), observation_cell.y()));
+                }
+            }
+            // // Build and emit the field message
+            // auto field(std::make_unique<Field>());
+            // Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+            // Hfw.translation()  = Eigen::Vector3d(state.x(), state.y(), 0);
+            // Hfw.linear()       = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            // field->Hfw         = Hfw.matrix();
+            // field->covariance  = covariance;
+            // field->uncertainty = covariance.trace();
+            // emit(field);
         });
     }
 
