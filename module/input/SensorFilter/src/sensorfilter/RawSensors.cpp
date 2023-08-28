@@ -38,7 +38,7 @@ namespace module::input {
 
         // Mask to ignore the alert bit (because servo errors are handled separately)
         bool subcontroller_packet_error =
-            (raw_sensors.subcontroller_error & ~RawSensors::PacketError::ALERT) == RawSensors::PacketError::PACKET_OK;
+            (raw_sensors.subcontroller_error & ~RawSensors::PacketError::ALERT) != RawSensors::PacketError::PACKET_OK;
 
         // Check for errors on the platform and FSRs
         if (subcontroller_packet_error) {
