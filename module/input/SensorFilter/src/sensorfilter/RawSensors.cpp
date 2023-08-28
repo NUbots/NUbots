@@ -35,8 +35,13 @@ namespace module::input {
     void SensorFilter::update_raw_sensors(std::unique_ptr<Sensors>& sensors,
                                           const std::shared_ptr<const Sensors>& previous_sensors,
                                           const RawSensors& raw_sensors) {
+
+        // Mask to ignore the alert bit (because servo errors are handled separately)
+        RawSensors::PacketError subcontroller_packet_error =
+            raw_sensors.subcontroller_error & ~RawSensors::PacketError::ALERT;
+
         // Check for errors on the platform and FSRs
-        if (raw_sensors.subcontroller_error != RawSensors::PacketError::PACKET_OK) {
+        if (subcontroller_packet_error) {
             NUClear::log<NUClear::WARN>(make_packet_error_string("Platform", raw_sensors.subcontroller_error));
         }
 
@@ -83,7 +88,7 @@ namespace module::input {
         // **************** Accelerometer and Gyroscope ****************
         // If we have a previous Sensors and our platform has errors then reuse our last sensor value of the
         // accelerometer
-        if ((raw_sensors.subcontroller_error != RawSensors::PacketError::PACKET_OK) && previous_sensors) {
+        if (subcontroller_packet_error && previous_sensors) {
             sensors->accelerometer = previous_sensors->accelerometer;
             sensors->gyroscope     = previous_sensors->gyroscope;
         }
