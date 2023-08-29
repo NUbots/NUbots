@@ -30,27 +30,6 @@ mkdir -p /mnt/boot/efi
 mount ${BOOT} /mnt/boot/efi
 
 # Bootstrap Pacman, and trust everything to prevent pgp key errors
-cat << EOF > "/etc/pacman.conf"
-[options]
-HoldPkg      = pacman glibc
-Architecture = auto
-ParallelDownloads = 5
-CheckSpace
-Color
-ILoveCandy
-
-# Trust everything so we don't get signature errors
-SigLevel = Never TrustAll
-
-[core]
-Include = /etc/pacman.d/mirrorlist
-
-[extra]
-Include = /etc/pacman.d/mirrorlist
-
-[community]
-Include = /etc/pacman.d/mirrorlist
-EOF
 pacstrap /mnt base linux linux-firmware
 cp /etc/pacman.conf /mnt/etc/pacman.conf
 
