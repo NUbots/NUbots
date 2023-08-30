@@ -28,7 +28,7 @@ private:
 
     bool is_upright = false;
 
-    float start_time = 0.0f;
+    NUClear::clock::time_point start_time{NUClear::clock::now()};
 
 public:
     /// @brief Called by the powerplant to build and setup the OnboardWalkOptimisation reactor.
