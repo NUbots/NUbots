@@ -22,6 +22,7 @@
 #include "message/actuation/BodySide.hpp"
 #include "message/localisation/Field.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -30,6 +31,7 @@
 namespace module::input {
 
     using message::actuation::BodySide;
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
@@ -62,6 +64,10 @@ namespace module::input {
             configure_ukf(config);
             configure_kf(config);
             configure_mahony(config);
+
+            // ****************************************  Kinematics Model ****************************************
+            cfg.urdf_path = config["urdf_path"].as<std::string>();
+            nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
 
             // Deadreckoning
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
@@ -101,7 +107,6 @@ namespace module::input {
         update_loop =
             on<Trigger<RawSensors>,
                Optional<With<Sensors>>,
-               With<KinematicsModel>,
                Optional<With<Stability>>,
                Optional<With<WalkState>>,
                Single,
@@ -109,7 +114,6 @@ namespace module::input {
                 .then("Main Sensors Loop",
                       [this](const RawSensors& raw_sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
-                             const KinematicsModel& kinematics_model,
                              const std::shared_ptr<const Stability>& stability,
                              const std::shared_ptr<const WalkState>& walk_state) {
                           auto sensors = std::make_unique<Sensors>();
@@ -118,7 +122,7 @@ namespace module::input {
                           update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
                           // Updates the message with kinematics data
-                          update_kinematics(sensors, kinematics_model, raw_sensors);
+                          update_kinematics(sensors, raw_sensors);
 
                           // Updates the Sensors message with odometry data filtered using specified filter
                           switch (cfg.filtering_method.value) {
@@ -180,8 +184,8 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Kinematics information
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htr(sensors->Htx[FrameID::R_ANKLE_ROLL]);
         Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
         Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
         Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();

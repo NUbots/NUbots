@@ -131,13 +131,13 @@ message Sensors {
     float battery = 9;
 
     /// Cartesian position of the CoM {M} of the robot from the torso {T} in the torso space {t}
-    vec4 rMTt = 10;
+    vec3 rMTt = 10;
 
     /// Inertia tensor measured in particle space and relative to the CoM of the particle
     mat3 inertia_tensor = 11;
 
     /// A set of transforms; one for each servo
-    repeated mat4 Htx = 12 [(array_size) = 20];
+    repeated mat4 Htx = 12 [(array_size) = 24];
 
     /// Homogeneous transform: torso {t} from ground {g}
     iso3 Hgt = 13;

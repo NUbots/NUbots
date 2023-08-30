@@ -21,7 +21,8 @@
 
 #include "message/actuation/BodySide.hpp"
 
-#include "utility/actuation/ForwardKinematics.hpp"
+#include "utility/actuation/tinyrobotics.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 
@@ -29,31 +30,32 @@ namespace module::input {
 
     using message::actuation::BodySide;
 
-    using utility::actuation::kinematics::calculateAllPositions;
-    using utility::actuation::kinematics::calculateCentreOfMass;
-    using utility::actuation::kinematics::calculateInertialTensor;
+    using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
+    using utility::actuation::tinyrobotics::sensors_to_configuration;
+    using utility::input::FrameID;
     using utility::input::ServoID;
 
-    void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors,
-                                         const KinematicsModel& kinematics_model,
-                                         const RawSensors& raw_sensors) {
+    void SensorFilter::update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
+
+        // Convert the sensor joint angles to a configuration vector
+        Eigen::Matrix<double, n_joints, 1> q = sensors_to_configuration<double, n_joints>(sensors);
 
         // **************** Kinematics ****************
-        // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
-        std::map<ServoID, Eigen::Isometry3d> Htx = calculateAllPositions(kinematics_model, *sensors);
+        // Htx is a map from FrameID to homogeneous transforms from each frame to the torso
+        std::vector<Eigen::Isometry3d> fk = tinyrobotics::forward_kinematics(nugus_model, q);
+        auto Htx                          = forward_kinematics_to_servo_map(fk);
         for (const auto& entry : Htx) {
             sensors->Htx[entry.first] = entry.second.matrix();
         }
 
         // **************** Centre of Mass and Inertia Tensor ****************
-        sensors->rMTt           = calculateCentreOfMass(kinematics_model, sensors->Htx);
-        sensors->inertia_tensor = calculateInertialTensor(kinematics_model, sensors->Htx);
+        sensors->rMTt = tinyrobotics::center_of_mass(nugus_model, q);
 
         // **************** Foot Down Information ****************
         sensors->feet[BodySide::RIGHT].down = true;
         sensors->feet[BodySide::LEFT].down  = true;
-        const Eigen::Isometry3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htr(sensors->Htx[FrameID::R_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_ANKLE_ROLL]);
         const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
         const Eigen::Vector3d rRLl  = Hlr.translation();
         switch (cfg.footDown.method()) {
