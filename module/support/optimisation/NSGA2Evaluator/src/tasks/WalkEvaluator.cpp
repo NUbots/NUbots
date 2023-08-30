@@ -35,7 +35,19 @@ namespace module::support::optimisation {
 
     bool WalkEvaluator::has_fallen(const Sensors& sensors) {
         update_max_field_plane_sway(sensors);
-        return check_for_fall(sensors);
+
+        // Transform to torso {t} from world {w} space
+        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // Basis Z vector of torso {t} in world {w} space
+        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+
+        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+        if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
+            NUClear::log<NUClear::DEBUG>("Fallen!");
+            fallen = true;
+            return true;
+        }
+        return false;
     }
 
     void WalkEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
@@ -179,21 +191,6 @@ namespace module::support::optimisation {
             0.0,  // Robot didn't fall
             0.0   // Second constraint unused, fixed to 0
         };
-    }
-
-    bool WalkEvaluator::check_for_fall(const Sensors& sensors) {
-        // Transform to torso {t} from world {w} space
-        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
-        // Basis Z vector of torso {t} in world {w} space
-        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-
-        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-        if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
-            NUClear::log<NUClear::DEBUG>("Fallen!");
-            fallen = true;
-            return true;
-        }
-        return false;
     }
 
     void WalkEvaluator::update_max_field_plane_sway(const Sensors& sensors) {

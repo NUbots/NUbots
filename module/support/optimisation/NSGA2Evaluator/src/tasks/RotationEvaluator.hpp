@@ -35,7 +35,6 @@ namespace module::support::optimisation {
         std::vector<double> calculate_scores();
         std::vector<double> calculate_constraints(double simTime);
         std::vector<double> constraints_not_violated();
-        bool check_for_fall(const Sensors& sensors);
         bool has_fallen(const Sensors& sensors);
         void update_max_field_plane_sway(const Sensors& sensors);
 
