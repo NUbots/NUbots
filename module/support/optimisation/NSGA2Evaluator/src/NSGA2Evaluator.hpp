@@ -66,6 +66,9 @@ namespace module::support::optimisation {
         /// @brief The number of the current individual in the current generation
         int individual = 0;
 
+        /// @brief Enables fallover checking when an evaluation is actually running
+        bool evaluation_running = false;
+
         /// @brief Keeps track of the last messages we received
         NSGA2EvaluationRequest last_eval_request_msg;
 

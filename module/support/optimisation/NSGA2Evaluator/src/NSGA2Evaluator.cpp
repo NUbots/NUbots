@@ -133,7 +133,7 @@ namespace module::support::optimisation {
         });
 
         on<Trigger<Sensors>, Single>().then([this](const Sensors& sensors) {
-            if (current_state == State::EVALUATING) {
+            if (evaluation_running) {
                 if (task->has_fallen(sensors)) {
                     emit(std::make_unique<Event>(Event::TERMINATE_EARLY));
                 }
@@ -142,6 +142,8 @@ namespace module::support::optimisation {
 
         on<Trigger<OptimisationResetDone>, Single>().then([this](const OptimisationResetDone&) {
             log<NUClear::INFO>("Reset done");
+            // Send a zero walk command to stop walking
+            // emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
             emit(std::make_unique<Event>(Event::RESET_DONE));
         });
 
@@ -252,11 +254,13 @@ namespace module::support::optimisation {
     /// @brief Handle the EVALUATING state
     void NSGA2Evaluator::evaluating(NSGA2Evaluator::Event event) {
         log<NUClear::DEBUG>("Evaluating");
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         if (event == Event::RESET_DONE) {
             if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
                 || last_eval_request_msg.task == "strafe" || last_eval_request_msg.task == "rotation") {
                 task->evaluating_state(subsumption_id, this);
+                evaluation_running = true;
             }
             else {
                 log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
@@ -280,6 +284,8 @@ namespace module::support::optimisation {
     /// @brief Handle the TERMINATING_EARLY state
     void NSGA2Evaluator::terminating_early() {
         log<NUClear::DEBUG>("Terminating Early");
+
+        evaluation_running = false;
 
         // Send a zero walk command to stop walking
         emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));

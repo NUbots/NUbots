@@ -106,6 +106,8 @@ namespace module::support::optimisation {
         gravity_min = eval_config["gravity"]["min"].as<float>();
 
         fallen_angle = eval_config["fallen_angle"].as<float>();
+
+        fallen = false;
     }
 
     void WalkEvaluator::reset_simulation() {
@@ -186,8 +188,9 @@ namespace module::support::optimisation {
         Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
 
         // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-        if (std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
+        if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
             NUClear::log<NUClear::DEBUG>("Fallen!");
+            fallen = true;
             return true;
         }
         return false;

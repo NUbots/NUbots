@@ -65,6 +65,8 @@ namespace module::support::optimisation {
         float gravity_max = 0.0;
         float gravity_min = 0.0;
         float fallen_angle = 0.0;
+
+        bool fallen = false;
     };
 
 }  // namespace module::support::optimisation
