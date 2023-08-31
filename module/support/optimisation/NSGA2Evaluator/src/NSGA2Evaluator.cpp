@@ -266,7 +266,7 @@ namespace module::support::optimisation {
 
         // Tell Webots to reset the world
         std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
-        reset->command                             = OptimisationCommand::CommandType::RESET_WORLD;
+        reset->command                             = OptimisationCommand::CommandType::RESET_ROBOT;
         emit(reset);
     }
 

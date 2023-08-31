@@ -416,7 +416,7 @@ namespace module::platform {
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
             const int msg_command = msg.command;
             switch (msg_command) {
-                case OptimisationCommand::CommandType::RESET_WORLD:
+                case OptimisationCommand::CommandType::RESET_ROBOT:
                     // Set the reset world flag to send the reset command to webots with the next ActuatorRequests
                     reset_simulation_world = true;
                     break;
@@ -604,9 +604,9 @@ namespace module::platform {
 
                         // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
                         if (reset_simulation_world) {
-                            log<NUClear::DEBUG>("Sending RESET_WORLD to ActuatorRequests.");
+                            log<NUClear::DEBUG>("Sending RESET_ROBOT to ActuatorRequests.");
                             actuator_requests.optimisation_command.command =
-                                OptimisationCommand::CommandType::RESET_WORLD;
+                                OptimisationCommand::CommandType::RESET_ROBOT;
                             reset_simulation_world = false;
                         }
                         else if (reset_simulation_time) {

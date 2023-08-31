@@ -174,7 +174,7 @@ message CameraExposure {
 message OptimisationCommand {
     enum CommandType {
         NO_COMMAND  = 0;
-        RESET_WORLD = 1;
+        RESET_ROBOT = 1;
         RESET_TIME  = 2;
         TERMINATE   = 3;
     }
