@@ -1,4 +1,5 @@
 import React from "react";
+import { RawShaderMaterialProps } from "@react-three/fiber";
 import { Canvas, CanvasProps, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -62,14 +63,13 @@ export const OrthographicCamera = (
   return <orthographicCamera ref={ref} {...props} />;
 };
 
-export const RawShaderMaterial = (
-  props: JSX.IntrinsicElements["rawShaderMaterial"] & {
-    uniforms: { [k: string]: any };
-  },
-) => {
-  const uniforms = React.useMemo(() => props.uniforms, []);
-  for (const key in props.uniforms) {
-    uniforms[key].value = props.uniforms[key].value;
+export const RawShaderMaterial = (props: RawShaderMaterialProps) => {
+  // Maintain a constant uniforms object, as three.js does not handle it changing reference.
+  const uniforms = React.useMemo<NonNullable<RawShaderMaterialProps["uniforms"]>>(() => ({}), []);
+  if (props.uniforms) {
+    for (const key in props.uniforms) {
+      uniforms[key].value = props.uniforms[key].value;
+    }
   }
   return <rawShaderMaterial {...props} uniforms={uniforms} />;
 };
