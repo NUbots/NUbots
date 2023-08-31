@@ -150,63 +150,73 @@ namespace module::purpose {
                             }
                             break;
                             // dance moves here:
-                        case BUTTON_DPAD_UP:  // doesnt look smooth/natural. also doesnt return to default position.
+                        case BUTTON_DPAD_UP:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance move Dpad up");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("StepClap1.yaml"), 3);
                             }
                             break;
-                        case BUTTON_DPAD_DOWN:  // doesnt look smooth/natural. also doesnt return to default position.
+                        case BUTTON_DPAD_DOWN:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad down");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("StepClap2.yaml"), 3);
                             }
                             break;
-                        case BUTTON_DPAD_LEFT:  // causes seg fault
+                        case BUTTON_DPAD_LEFT:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad left");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("OverheadThrustRight.yaml"), 3);
                             }
                             break;
-                        case BUTTON_DPAD_RIGHT:  // causes seg fault
+                        case BUTTON_DPAD_RIGHT:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance Dpad right");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("OverheadThrustLeft.yaml"), 3);
                             }
                             break;
-                        case BUTTON_TRIANGLE:  // causes seg fault
+                        case BUTTON_TRIANGLE:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance triangle");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("Star1.yaml"), 3);
                             }
                             break;
-                        case BUTTON_CIRCLE:  // terminate call recursively
+                        case BUTTON_CIRCLE:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance circle");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("Star2.yaml"), 3);
                             }
                             break;
-                        case BUTTON_CROSS:  // terminate call recursively
+                        case BUTTON_CROSS:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance cross");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("Crouch1.yaml"), 3);
                             }
                             break;
-                        case BUTTON_SQUARE:  // end transition is a bit rough. also throws errors.
+                        case BUTTON_SQUARE: 
                             if (event.value > 0) {
                                 NUClear::log("Do a dance square");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("Crouch2.yaml"), 3);
                             }
                             break;
                         case BUTTON_L1:
-                            if (event.value > 0) {  // event detected. no kick happens
+                            if (event.value > 0) {  
                                 NUClear::log("Requesting Left Front Kick");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
                             }
                             break;
                         case BUTTON_R1:
-                            if (event.value > 0) {  // event detected. no kick happens
+                            if (event.value > 0) {  
                                 NUClear::log("Requesting Right Front Kick");
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
                             }
                             break;
