@@ -82,7 +82,6 @@ pacman -S --noconfirm --needed \
 	vim \
 	nano \
 	rsync \
-	zsh
 
 ##############
 # NETWORKING #
@@ -157,14 +156,6 @@ systemctl enable systemd-networkd.service
 systemctl enable systemd-resolved.service
 systemctl enable wpa_supplicant
 systemctl enable wpa_supplicant@${WIFI_INTERFACE}
-
-#############
-# ZSH SHELL #
-#############
-
-# Change user shell to zsh and create a blank config file to prevent user prompt
-chsh -s /usr/bin/zsh ${USER}
-touch ${HOME}/.zshrc
 
 #############
 # LIBRARIES #
