@@ -28,22 +28,6 @@ namespace module::support::optimisation {
     using utility::input::ServoID;
     using utility::support::Expression;
 
-    bool StrafeEvaluator::has_fallen(const Sensors& sensors) {
-        update_max_field_plane_sway(sensors);
-
-        // Transform to torso {t} from world {w} space
-        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
-        // Basis Z vector of torso {t} in world {w} space
-        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-
-        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-        if (std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
-            NUClear::log<NUClear::DEBUG>("Fallen!");
-            return true;
-        }
-        return false;
-    }
-
     void StrafeEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
         if (!initial_position_set) {
             initial_position_set   = true;
@@ -106,12 +90,11 @@ namespace module::support::optimisation {
         save_file_stream.close();
 
         // Get constant variables
-        YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+        YAML::Node config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
-        gravity_max = eval_config["gravity"]["max"].as<float>();
-        gravity_min = eval_config["gravity"]["min"].as<float>();
+        cfg.fallen_angle = config["fallen_angle"].as<float>();
 
-        fallen_angle = eval_config["fallen_angle"].as<float>();
+        fallen = false;
     }
 
     void StrafeEvaluator::reset_simulation() {
@@ -132,6 +115,33 @@ namespace module::support::optimisation {
             subsumption_id,
             Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
+    }
+
+    bool StrafeEvaluator::has_fallen(const Sensors& sensors) {
+        update_max_field_plane_sway(sensors);
+
+        // Transform to torso {t} from world {w} space
+        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // Basis Z vector of torso {t} in world {w} space
+        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+
+        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+        if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
+            NUClear::log<NUClear::DEBUG>("Fallen!");
+            fallen = true;
+            return true;
+        }
+        return false;
+    }
+
+    void StrafeEvaluator::update_max_field_plane_sway(const Sensors& sensors) {
+        auto accelerometer = sensors.accelerometer;
+
+        // Calculate the robot sway along the field plane (left/right, forward/backward)
+        double field_plane_sway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
+        if (field_plane_sway > max_field_plane_sway) {
+            max_field_plane_sway = field_plane_sway;
+        }
     }
 
     std::unique_ptr<NSGA2FitnessScores> StrafeEvaluator::calculate_fitness_scores(bool early_termination,
@@ -182,16 +192,6 @@ namespace module::support::optimisation {
             0,  // Robot didn't fall
             0   // Second constraint unused, fixed to 0
         };
-    }
-
-    void StrafeEvaluator::update_max_field_plane_sway(const Sensors& sensors) {
-        auto accelerometer = sensors.accelerometer;
-
-        // Calculate the robot sway along the field plane (left/right, forward/backward)
-        double field_plane_sway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
-        if (field_plane_sway > max_field_plane_sway) {
-            max_field_plane_sway = field_plane_sway;
-        }
     }
 
 }  // namespace module::support::optimisation

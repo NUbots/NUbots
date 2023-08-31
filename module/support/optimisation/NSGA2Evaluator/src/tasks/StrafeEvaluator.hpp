@@ -37,6 +37,11 @@ namespace module::support::optimisation {
         bool check_off_course();
 
     private:
+        struct Config {
+            /// @brief Threshold angle for fallover detection, between torso z axis and world z axis
+            float fallen_angle = 0.0f;
+        } cfg;
+
         /// @brief Robot state for this evaluation, used during fitness and constraint calculation
         bool initial_position_set              = false;
         Eigen::Vector3d initial_robot_position = Eigen::Vector3d::Zero();
@@ -55,10 +60,8 @@ namespace module::support::optimisation {
         /// @brief The walk command rotation.
         double walk_command_rotation = 0.0;
 
-        /// @brief Configuration Min and Max values
-        float gravity_max = 0.0;
-        float gravity_min = 0.0;
-        float fallen_angle = 0.0;
+        /// @brief Indicates that a fall has occured.
+        bool fallen = false;
     };
 
 }  // namespace module::support::optimisation

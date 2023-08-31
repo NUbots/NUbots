@@ -33,23 +33,6 @@ namespace module::support::optimisation {
 
     using extension::Configuration;
 
-    bool WalkEvaluator::has_fallen(const Sensors& sensors) {
-        update_max_field_plane_sway(sensors);
-
-        // Transform to torso {t} from world {w} space
-        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
-        // Basis Z vector of torso {t} in world {w} space
-        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-
-        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-        if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > fallen_angle) {
-            NUClear::log<NUClear::DEBUG>("Fallen!");
-            fallen = true;
-            return true;
-        }
-        return false;
-    }
-
     void WalkEvaluator::process_optimisation_robot_position(const OptimisationRobotPosition& position) {
         if (!initial_position_set) {
             initial_position_set   = true;
@@ -112,12 +95,9 @@ namespace module::support::optimisation {
         save_file_stream.close();
 
         // Get constant variables
-        YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+        YAML::Node config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
-        gravity_max = eval_config["gravity"]["max"].as<float>();
-        gravity_min = eval_config["gravity"]["min"].as<float>();
-
-        fallen_angle = eval_config["fallen_angle"].as<float>();
+        cfg.fallen_angle = config["fallen_angle"].as<float>();
 
         fallen = false;
     }
@@ -143,6 +123,33 @@ namespace module::support::optimisation {
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
     }
 
+    bool WalkEvaluator::has_fallen(const Sensors& sensors) {
+        update_max_field_plane_sway(sensors);
+
+        // Transform to torso {t} from world {w} space
+        Eigen::Matrix4d Hwt = sensors.Htw.inverse().matrix();
+        // Basis Z vector of torso {t} in world {w} space
+        Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+
+        // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+        if (!fallen && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
+            NUClear::log<NUClear::DEBUG>("Fallen!");
+            fallen = true;
+            return true;
+        }
+        return false;
+    }
+
+    void WalkEvaluator::update_max_field_plane_sway(const Sensors& sensors) {
+        auto accelerometer = sensors.accelerometer;
+
+        // Calculate the robot sway along the field plane (left/right, forward/backward)
+        double field_plane_sway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
+        if (field_plane_sway > max_field_plane_sway) {
+            max_field_plane_sway = field_plane_sway;
+        }
+    }
+
     std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculate_fitness_scores(bool early_termination,
                                                                                 double sim_time,
                                                                                 int generation,
@@ -151,7 +158,7 @@ namespace module::support::optimisation {
         auto constraints = early_termination ? calculate_constraints(sim_time) : constraints_not_violated();
 
         double trial_duration = sim_time - trial_start_time;
-        NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
+        NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration, trial_start_time);
         NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
         NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
         NUClear::log<NUClear::DEBUG>("    constraints:", constraints[0], constraints[1]);
@@ -191,16 +198,6 @@ namespace module::support::optimisation {
             0.0,  // Robot didn't fall
             0.0   // Second constraint unused, fixed to 0
         };
-    }
-
-    void WalkEvaluator::update_max_field_plane_sway(const Sensors& sensors) {
-        auto accelerometer = sensors.accelerometer;
-
-        // Calculate the robot sway along the field plane (left/right, forward/backward)
-        double field_plane_sway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
-        if (field_plane_sway > max_field_plane_sway) {
-            max_field_plane_sway = field_plane_sway;
-        }
     }
 
 }  // namespace module::support::optimisation

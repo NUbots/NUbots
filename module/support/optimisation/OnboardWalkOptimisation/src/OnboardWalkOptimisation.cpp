@@ -39,8 +39,10 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
     });
 
     on<Trigger<Sensors>>().then("Stability Reset Check", [this](const Sensors& sensors) {
+        // Length of time from first standing upright
         const auto time_waited =
             std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - start_time).count();
+        // Trigger the next individual after standing for the config value cfg.wait_time
         if (resetting && is_upright && (time_waited > cfg.wait_time)) {
             NUClear::log<NUClear::DEBUG>("Stood upright for {} seconds. Reset started.", cfg.wait_time);
             resetting = false;
@@ -54,10 +56,10 @@ OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Enviro
 
         // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
         if (resetting && !is_upright && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) < cfg.standing_angle) {
-            // Start timer
             is_upright = true;
+            // Start timer
             start_time = NUClear::clock::now();
-            // log<NUClear::DEBUG>("Standing upright at time", start_time);
+            NUClear::log<NUClear::DEBUG>("Starting to stand upright at time", start_time.time_since_epoch());
         }
         else if (resetting) {
             is_upright = false;

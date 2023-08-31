@@ -39,12 +39,15 @@ namespace module::support::optimisation {
         void update_max_field_plane_sway(const Sensors& sensors);
 
     private:
+        struct Config {
+            /// @brief Threshold angle for fallover detection, between torso z axis and world z axis
+            float fallen_angle = 0.0f;
+        } cfg;
+
         /// @brief Robot state for this evaluation, used during fitness and constraint calculation
         Eigen::Vector3d robot_position = Eigen::Vector3d::Zero();
         double max_field_plane_sway    = 0.0;
         RawSensors current_sensors;
-
-        float fallen_angle = 0.0;
 
         /// @brief The amount of time to run a single trial, in seconds.
         std::chrono::seconds trial_duration_limit = std::chrono::seconds(0);
@@ -58,6 +61,9 @@ namespace module::support::optimisation {
 
         /// @brief The script object we are using
         ::extension::Script script;
+
+        /// @brief Indicates that a fall has occured.
+        bool fallen = false;
     };
 
 }  // namespace module::support::optimisation

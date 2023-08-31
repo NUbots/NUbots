@@ -9,25 +9,20 @@ class OnboardWalkOptimisation : public NUClear::Reactor {
 private:
     /// @brief Stores configuration values
     struct Config {
-        /// @brief Threshold angle for stability reset, between torso z axis and world z axis
+        /// @brief Threshold angle for standing stably, from torso z axis to world z axis.
         float standing_angle = 0.0f;
 
+        /// @brief Time required to be standing before starting a new individual.
         float wait_time = 0.0f;
     } cfg;
 
-    /// @brief When set, the next ActuatorRequests will set the reset world command to end the simulation.
-    bool reset_simulation_world = false;
-
-    /// @brief When set, the next ActuatorRequests will set the reset time command to end the simulation.
-    bool reset_simulation_time = false;
-
-    /// @brief When set, the next ActuatorRequests will set the terminate command to end the simulation.
-    bool terminate_simulation = false;
-
+    /// @brief Indicates that the optimisation needs resetting for the next individual.
     bool resetting = false;
 
+    /// @brief Used for stable stand, indicates whether we are still standing upright.
     bool is_upright = false;
 
+    /// @brief Used to make sure the robot has been standing for enough time before starting.
     NUClear::clock::time_point start_time{NUClear::clock::now()};
 
 public:
