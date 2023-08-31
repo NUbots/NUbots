@@ -29,9 +29,11 @@ mount ${ROOT} /mnt
 mkdir -p /mnt/boot/efi
 mount ${BOOT} /mnt/boot/efi
 
-# Bootstrap Pacman, and trust everything to prevent pgp key errors
+# Bootstrap Pacman
 pacstrap /mnt base linux linux-firmware
-cp /etc/pacman.conf /mnt/etc/pacman.conf
+# Set mirrorlist to match Dockerfile
+# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
+echo -e "Server=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Update fstab
 genfstab -U /mnt >> /mnt/etc/fstab
