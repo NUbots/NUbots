@@ -1,8 +1,8 @@
 find_package(Eigen3 REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC Eigen3::Eigen)
 
-find_package(YAML-CPP REQUIRED)
-target_link_libraries(nuclear_utility PUBLIC YAML-CPP::YAML-CPP)
+find_package(yaml-cpp REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC yaml-cpp)
 
 find_package(ExprTk REQUIRED)
 target_link_libraries(nuclear_utility PRIVATE ExprTk::ExprTk)

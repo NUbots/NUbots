@@ -162,6 +162,10 @@ export class LocalisationRobotModel {
     });
   });
 
+  @computed get id() {
+    return this.model.id;
+  }
+
   @computed get visible() {
     return this.model.enabled;
   }

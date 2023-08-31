@@ -6,6 +6,7 @@
 #include <google/protobuf/timestamp.pb.h>
 #include <nuclear_bits/clock.hpp>
 
+#include "math_types.hpp"
 #include "neutron_type_map.hpp"
 #include "proto_neutron_map.hpp"
 #include "proto_neutron_sfinae.hpp"

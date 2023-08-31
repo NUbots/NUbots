@@ -285,11 +285,11 @@ namespace module::vision {
                     float distance =
                         field.dimensions.goalpost_width * radius * 0.5f / std::sqrt(1.0f - radius * radius);
 
-                    Eigen::Vector3f top_point(bottom_point * distance);
-                    top_point.z() += field.dimensions.goal_crossbar_height;
-                    g.post.top    = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * top_point.normalized();
-                    g.post.bottom = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * bottom_point.normalized();
-                    g.post.distance = distance;
+                            Eigen::Vector3f top_point(bottom_point * distance);
+                            top_point.z() += field.dimensions.goal_crossbar_height;
+                            g.post.top      = horizon.Hcw.rotation().cast<float>() * top_point.normalized();
+                            g.post.bottom   = horizon.Hcw.rotation().cast<float>() * bottom_point.normalized();
+                            g.post.distance = distance;
 
                     // Attach the measurement to the object (distance from camera to bottom center of post)
                     g.measurements.emplace_back();  // Emplaces default constructed object
@@ -338,13 +338,10 @@ namespace module::vision {
 auto is_left_of = [&](const Eigen::Vector3f& rGCc0, const Eigen::Vector3f& rGCc1) {
     const Eigen::Vector3f cam_space_z = horizon.Hcw.block<3, 1>(0, 2).cast<float>();
 
-    // Direction (determined by RHR) needed to turn to get from one post to the other
-    // Anti-clockwise (negative) turn from rGCc0 to rGCc1 around cam_space_z
-    // ==> rGCc1 is to the left of rGCc0
-    // Clockwise (positive) turn from rGCc0 to rGCc1 around cam_space_z
-    // ==> rGCc0 is to the left of rGCc1
-    return rGCc0.cross(rGCc1).dot(cam_space_z) < 0.0f;
-};
+                    // Returns true if rGCc0 is to the left of rGCc1, with respect to camera z
+                    // The vectors are assumed to have unit norm
+                    auto is_left_of = [&](const Eigen::Vector3f& rGCc0, const Eigen::Vector3f& rGCc1) {
+                        const Eigen::Vector3f cam_space_z = horizon.Hcw.matrix().block<3, 1>(0, 2).cast<float>();
 
 // Calculate the distance between 2 goal posts using the law of cosines
 // The vectors are assumed to have unit norm

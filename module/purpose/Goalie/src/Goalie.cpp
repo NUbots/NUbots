@@ -22,8 +22,14 @@ namespace module::purpose {
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
     using GoalieTask = message::purpose::Goalie;
+    using message::purpose::CornerKickGoalie;
+    using message::purpose::DirectFreeKickGoalie;
+    using message::purpose::GoalKickGoalie;
+    using message::purpose::InDirectFreeKickGoalie;
     using message::purpose::NormalGoalie;
+    using message::purpose::PenaltyKickGoalie;
     using message::purpose::PenaltyShootoutGoalie;
+    using message::purpose::ThrowInGoalie;
     using message::strategy::WalkToFieldPosition;
 
     using extension::Configuration;
@@ -52,6 +58,12 @@ namespace module::purpose {
                         case GameMode::PENALTY_SHOOTOUT: emit<Task>(std::make_unique<PenaltyShootoutGoalie>()); break;
                         case GameMode::NORMAL:
                         case GameMode::OVERTIME: emit<Task>(std::make_unique<NormalGoalie>()); break;
+                        case GameMode::DIRECT_FREEKICK: emit<Task>(std::make_unique<DirectFreeKickGoalie>()); break;
+                        case GameMode::INDIRECT_FREEKICK: emit<Task>(std::make_unique<InDirectFreeKickGoalie>()); break;
+                        case GameMode::PENALTYKICK: emit<Task>(std::make_unique<PenaltyKickGoalie>()); break;
+                        case GameMode::CORNER_KICK: emit<Task>(std::make_unique<CornerKickGoalie>()); break;
+                        case GameMode::GOAL_KICK: emit<Task>(std::make_unique<GoalKickGoalie>()); break;
+                        case GameMode::THROW_IN: emit<Task>(std::make_unique<ThrowInGoalie>()); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
                 }
@@ -83,6 +95,24 @@ namespace module::purpose {
 
         // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
         on<Provide<PenaltyShootoutGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Direct free kick
+        on<Provide<DirectFreeKickGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Indirect free kick
+        on<Provide<InDirectFreeKickGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Penalty kick
+        on<Provide<PenaltyKickGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Corner kick
+        on<Provide<CornerKickGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Goal kick
+        on<Provide<GoalKickGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+
+        // Throw in
+        on<Provide<ThrowInGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
     }
 
     void Goalie::play() {

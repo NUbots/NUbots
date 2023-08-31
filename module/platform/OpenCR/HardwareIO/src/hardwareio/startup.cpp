@@ -3,6 +3,9 @@
 namespace module::platform::OpenCR {
 
     void HardwareIO::startup() {
+        // first, disable the packet watchdog as we haven't sent anything yet and don't want it to trigger
+        packet_watchdog.disable();
+
         // Set the OpenCR to not return a status packet when written to (to allow consecutive writes)
         opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
                                                           uint16_t(OpenCR::Address::STATUS_RETURN_LEVEL),
@@ -13,11 +16,10 @@ namespace module::platform::OpenCR {
                                                           uint16_t(OpenCR::Address::RETURN_DELAY_TIME),
                                                           uint8_t(0)));
 
-        // Disable and then enable power to the servos
-        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
-                                                          uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
-                                                          uint8_t(0)));
-        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        // We do not disable and enable the servo power on startup because doing so would make the robot collapse if it
+        // were standing, possibly resulting in damage. Instead, we leave the servos powered on and if there are any
+        // servo errors, they can be cleared by using the red button to power off the servos, or by turning off the
+        // robot entirely.
         opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(NUgus::ID::OPENCR),
                                                           uint16_t(OpenCR::Address::DYNAMIXEL_POWER),
                                                           uint8_t(1)));
@@ -133,6 +135,14 @@ namespace module::platform::OpenCR {
             dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(uint16_t(AddressBook::SERVO_WRITE_ADDRESS_2),
                                                                           write_data2));
 
+        // Loop over all servo states and set the servos to uninitialised so we can read their state and update our
+        // internal goal state
+        for (auto& servo_state : servo_states) {
+            servo_state.initialised = false;
+        }
+
+        // Now, enable the packet watchdog before we send anything.
+        packet_watchdog.enable();
 
         // Find OpenCR firmware and model versions
         // This has to be called last, as we need to wait for the response packet before starting

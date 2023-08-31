@@ -15,9 +15,10 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
+  actuation::FootController
   # Skills
-  skill::QuinticWalk
-  skill::ScriptKick
+  skill::Walk
+  skill::SplineKick
   skill::GetUp
   skill::Look
   # Planners
