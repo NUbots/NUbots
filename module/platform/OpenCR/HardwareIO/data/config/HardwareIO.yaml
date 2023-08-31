@@ -94,3 +94,8 @@ servos:
     direction: 1
     offset: 0.0
     simulated: false
+
+alarms:
+  temperature:
+    level: 60
+    buzzer_frequency: 880 # Hz

@@ -23,6 +23,10 @@
 #include <Eigen/Core>
 #include <nuclear>
 
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
+#include "message/vision/GreenHorizon.hpp"
+
 namespace module::vision {
 
     class GoalDetector : public NUClear::Reactor {
@@ -34,11 +38,16 @@ namespace module::vision {
             Eigen::Vector3f goal_projection_covariance = Eigen::Vector3f::Zero();
             bool use_median                            = false;
             float max_goal_distance                    = 0;
+            float max_benchmark_error                  = 1.0;
         } config{};
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
         explicit GoalDetector(std::unique_ptr<NUClear::Environment> environment);
+
+        void benchmark_goals(const message::support::FieldDescription& field,
+                             const message::vision::GreenHorizon& horizon,
+                             std::unique_ptr<message::vision::Goals>& goals);
     };
 }  // namespace module::vision
 
