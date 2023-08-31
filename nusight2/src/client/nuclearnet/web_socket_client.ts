@@ -1,11 +1,11 @@
 export interface WebSocketClient {
-  connect(): void
+  connect(): void;
 
-  disconnect(): void
+  disconnect(): void;
 
-  on(event: string, fn: Function): void
+  on(event: string, fn: Function): void;
 
-  off(event: string, fn?: Function): void
+  off(event: string, fn?: Function): void;
 
-  send(event: string, ...args: any[]): void
+  send(event: string, ...args: any[]): void;
 }

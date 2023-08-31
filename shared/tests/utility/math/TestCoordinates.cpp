@@ -19,7 +19,8 @@
 
 #include <Eigen/Core>
 #include <array>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <cfloat>
 #include <cmath>
 #include <fmt/format.h>
@@ -30,6 +31,7 @@
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+using Catch::Matchers::WithinRel;
 using utility::math::coordinates::cartesianToSpherical;
 using utility::math::coordinates::sphericalToCartesian;
 using utility::support::Expression;
@@ -58,31 +60,9 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
             WHEN("Cartesian coordinates are converted to spherical coordinates") {
                 static const Eigen::Vector3d result = cartesianToSpherical(cart_coords.at(i));
                 THEN("The results of the calculation should be approximately equal to the expected values") {
-                    // Approx is a Catch2 wrapper class used to allow more tolerant comparisons
-                    // when comparing floating point values.
-                    // Epsilon sets the cooeffcient by which the result can differ from Approx's value before
-                    // it's rejected.
-                    Approx approx_x = Approx(cart_to_spher_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx approx_y = Approx(cart_to_spher_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx approx_z = Approx(cart_to_spher_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
-
-                    INFO("Test value at index: " << i);
-
-                    INFO("Calculated x value: " << result.x());
-                    INFO("Expected x value: " << cart_to_spher_expected.at(i).x());
-                    INFO("Expected approximate x value: " << approx_x.toString());
-
-                    INFO("Calculated y value: " << result.y());
-                    INFO("Expected y value: " << cart_to_spher_expected.at(i).y());
-                    INFO("Expected approximate y value: " << approx_y.toString());
-
-                    INFO("Calculated z value: " << result.z());
-                    INFO("Expected z value: " << cart_to_spher_expected.at(i).z());
-                    INFO("Expected approximate z value: " << approx_z.toString());
-
-                    REQUIRE(result.x() == approx_x);
-                    REQUIRE(result.y() == approx_y);
-                    REQUIRE(result.z() == approx_z);
+                    REQUIRE_THAT(result.x(), WithinRel(cart_to_spher_expected.at(i).x(), 1e-6));
+                    REQUIRE_THAT(result.y(), WithinRel(cart_to_spher_expected.at(i).y(), 1e-6));
+                    REQUIRE_THAT(result.z(), WithinRel(cart_to_spher_expected.at(i).z(), 1e-6));
                 }
             }
         }
@@ -102,31 +82,9 @@ SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[ut
             WHEN("Spherical coordinates are converted to cartesian coordinates") {
                 static const Eigen::Vector3d result = sphericalToCartesian(spher_coords.at(i));
                 THEN("The results of the calculation should be approximately equal to the expected values") {
-                    // Approx is a Catch2 wrapper class used to allow more tolerant comparisons
-                    // when comparing floating point values.
-                    // Epsilon sets the cooeffcient by which the result can differ from Approx's value before
-                    // it's rejected.
-                    Approx approx_x = Approx(spher_to_cart_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx approx_y = Approx(spher_to_cart_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx approx_z = Approx(spher_to_cart_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
-
-                    INFO("Test value at index: " << i);
-
-                    INFO("Calculated x value: " << result.x());
-                    INFO("Expected x value: " << spher_to_cart_expected.at(i).x());
-                    INFO("Expected approximate x value: " << approx_x.toString());
-
-                    INFO("Calculated y value: " << result.y());
-                    INFO("Expected y value: " << spher_to_cart_expected.at(i).y());
-                    INFO("Expected approximate y value: " << approx_y.toString());
-
-                    INFO("Calculated z value: " << result.z());
-                    INFO("Expected z value: " << spher_to_cart_expected.at(i).z());
-                    INFO("Expected approximate z value: " << approx_z.toString());
-
-                    REQUIRE(result.x() == approx_x);
-                    REQUIRE(result.y() == approx_y);
-                    REQUIRE(result.z() == approx_z);
+                    REQUIRE_THAT(result.x(), WithinRel(spher_to_cart_expected.at(i).x(), 1e-6));
+                    REQUIRE_THAT(result.y(), WithinRel(spher_to_cart_expected.at(i).y(), 1e-6));
+                    REQUIRE_THAT(result.z(), WithinRel(spher_to_cart_expected.at(i).z(), 1e-6));
                 }
             }
         }

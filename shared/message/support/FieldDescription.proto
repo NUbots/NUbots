@@ -68,10 +68,16 @@ message FieldDescription {
         double goal_net_height = 14;
         /// Measured from the goal line to the middle of the penalty mark
         double penalty_mark_distance = 15;
-
+        /// Diameter of the circle in the center of the field
         double center_circle_diameter = 16;
-
+        /// Minimum width of the border strip around the field
         double border_strip_min_width = 17;
+        /// 'Penalty area' is equivalent to 18-yard box in soccer. Length is from the goal line to the horizontal line
+        /// if you're facing the centre of the field from the goal line
+        double penalty_area_length = 18;
+        /// 'Penalty area' is equivalent to 18-yard box in soccer. Width is the distance between the sides of the
+        ///  penalty box facing the centre of the field/goal
+        double penalty_area_width = 19;
     }
     /// @see Law 2
     double ball_radius = 1;

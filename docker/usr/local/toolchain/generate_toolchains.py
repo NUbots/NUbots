@@ -1,17 +1,17 @@
 #! /usr/bin/env python3
 
+import json
 import os
 from textwrap import dedent
 
 
 def generate_cmake_toolchain(target, prefix):
-
     template = dedent(
         """\
         set(CMAKE_SYSTEM_NAME Linux)
         set(CMAKE_SYSTEM_PROCESSOR x86_64)
-        set(CMAKE_C_COMPILER gcc)
-        set(CMAKE_CXX_COMPILER g++)
+        set(CMAKE_C_COMPILER /usr/bin/gcc)
+        set(CMAKE_CXX_COMPILER /usr/bin/g++)
         set(CMAKE_FIND_ROOT_PATH
                {prefix}
                "/usr/local"
@@ -58,7 +58,6 @@ def generate_cmake_toolchain(target, prefix):
 
 
 def generate_meson_cross_file(target):
-
     template = dedent(
         """\
         [host_machine]
@@ -93,8 +92,24 @@ def generate_meson_cross_file(target):
     )
 
 
-def generate_toolchain_script(target):
+def generate_json_env(target, prefix):
+    flags = " ".join(target["release_flags"] + target["flags"])
+    return json.dumps(
+        {
+            # Set our compilers
+            "CC": "/usr/bin/gcc",
+            "CXX": "/usr/bin/g++",
+            # Set our package config so it finds things in the toolchain
+            "PKG_CONFIG_PATH": f"{prefix}/lib/pkgconfig",
+            # Set our optimisation flags
+            "CFLAGS": flags,
+            "CXXFLAGS": flags,
+            "CPPFLAGS": flags,
+        }
+    )
 
+
+def generate_toolchain_script(target):
     template = dedent(
         """\
         #!/bin/sh
@@ -102,8 +117,6 @@ def generate_toolchain_script(target):
         # Set our compilers
         export CC=/usr/bin/gcc
         export CXX=/usr/bin/g++
-        export FC=/usr/bin/gfortran
-        export F77=/usr/bin/gfortran
 
         # Set our package config so it finds things in the toolchain
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
@@ -112,8 +125,6 @@ def generate_toolchain_script(target):
         export CFLAGS="${{CFLAGS}} {flags}"
         export CXXFLAGS="${{CXXFLAG}} ${{CFLAGS}}"
         export CPPFLAGS="${{CPPFLAGS}} ${{CFLAGS}}"
-        export FFLAGS="${{FFLAGS}} ${{CFLAGS}}"
-        export FCFLAGS="${{FCFLAGS}} ${{CFLAGS}}"
         """
     )
 
@@ -121,6 +132,10 @@ def generate_toolchain_script(target):
 
 
 def generate(prefix, toolchain, target):
+    print("Generating json toolchain script for {} in {}".format(toolchain, prefix))
+    with open(os.path.join(prefix, "toolchain.json"), "w") as f:
+        f.write(generate_json_env(target, prefix))
+
     print("Generating toolchain script for {} in {}".format(toolchain, prefix))
     with open(os.path.join(prefix, "toolchain.sh"), "w") as f:
         f.write(generate_toolchain_script(target))

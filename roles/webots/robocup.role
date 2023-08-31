@@ -1,44 +1,61 @@
 nuclear_role(
-  # FileWatcher, FileLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these and
-  # without it many roles do not run
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher
   support::SignalCatcher
-  support::logging::FileLogHandler
   support::logging::ConsoleLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
-  # Support
+  # Config
+  support::configuration::SoccerConfig
+  actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
+  # Network
+  network::PlotJuggler
   network::NUClearNet
   network::NetworkForwarder
-  network::PlotJuggler
-  support::configuration::SoccerConfig
-  # input
+  # Sensors
   input::GameController
-  # Simulator connection
   input::SensorFilter
   platform::Webots
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
-  vision::GoalDetector
   vision::BallDetector
-  output::ImageCompressor
+  vision::FieldLineDetector
   # Localisation
-  localisation::BallFilter
-  localisation::RobotParticleLocalisation
-  # Behaviour
-  behaviour::Controller
-  behaviour::skills::Getup
-  behaviour::skills::KickScript
-  behaviour::skills::HeadBehaviourSoccer
-  behaviour::skills::Stand
-  behaviour::planning::SimpleWalkPathPlanner
-  behaviour::strategy::SoccerStrategy
-  # Motion
-  motion::ScriptEngine
-  motion::QuinticWalk
-  motion::HeadController
-  # Data logger
-  support::logging::DataLogging
+  localisation::FieldLocalisation
+  localisation::BallLocalisation
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  skill::SplineKick
+  skill::GetUp
+  skill::Look
+  skill::Dive
+  # Planners
+  planning::PlanWalkPath
+  planning::PlanLook
+  planning::PlanKick
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+  strategy::StrategiseLook
+  strategy::WalkToBall
+  strategy::WalkToFieldPosition
+  strategy::FindObject
+  strategy::Ready
+  strategy::DiveToBall
+  strategy::KickToGoal
+  strategy::AlignBallToGoal
+  strategy::WalkInsideBoundedBox
+  # Purposes
+  purpose::Defender
+  purpose::Striker
+  purpose::Soccer
+  purpose::Goalie
 )

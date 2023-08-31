@@ -35,6 +35,10 @@
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
+// Make a formatter for Eigen::Transpose type so fmt::format know how to deal with it
+template <typename Derived>
+struct fmt::formatter<Eigen::Transpose<Derived>> : fmt::ostream_formatter {};
+
 namespace module::vision {
 
     using extension::Configuration;
@@ -331,6 +335,7 @@ namespace module::vision {
                         Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
 
                         const Eigen::Vector3f rBCc = Hcw * horizon.vision_ground_truth.rBWw;
+                        const Eigen::Vector3f rBWw = horizon.vision_ground_truth.rBWw;
 
                         Eigen::Vector3f ball_position_projection = uBCw * projection_distance;
                         Eigen::Vector3f ball_position_angular    = uBCw * angular_distance;
@@ -338,6 +343,7 @@ namespace module::vision {
                         Eigen::Vector3f ball_error_angular       = (ball_position_angular - rBCc).cwiseAbs();
 
                         emit(graph("True rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
+                        emit(graph("True rBWw", rBWw.x(), rBWw.y(), rBWw.z()));
                         emit(graph("Angular Distance Ball error",
                                    ball_error_projection.x(),
                                    ball_error_projection.y(),

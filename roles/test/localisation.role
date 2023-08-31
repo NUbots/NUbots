@@ -1,21 +1,52 @@
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run
+  # and without it many roles do not run support::SignalCatcher
   extension::FileWatcher
-  support::SignalCatcher
+  support::logging::FileLogHandler
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
-  support::configuration::SoccerConfig
-  # Support
+  actuation::KinematicsConfiguration
+  # Support and Configuration
   support::configuration::GlobalConfig
+  support::configuration::SoccerConfig
+  # NUsight
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
-  # Localisation
-  localisation::RobotParticleLocalisation
-  support::LocalisationSimulator
-  # Sensors
+  output::ImageCompressor
+  # Platform
+  platform::${SUBCONTROLLER}::HardwareIO
+  input::Camera
   input::SensorFilter
-  # platform::cm740::HardwareSimulator
+  # Network
+  network::NUClearNet
+  network::PlotJuggler
+  # Vision
+  vision::VisualMesh
+  vision::GreenHorizonDetector
+  vision::GoalDetector
+  vision::BallDetector
+  vision::FieldLineDetector
+  # Localisation
+  localisation::BallLocalisation
+  localisation::FieldLocalisation
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  skill::SplineKick
+  skill::GetUp
+  skill::Look
+  # Planners
+  planning::GetUpPlanner
+  planning::FallingRelaxPlanner
+  # Strategies
+  strategy::FallRecovery
+  strategy::StandStill
+  # Purpose
+  purpose::KeyboardWalk
 )

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2019 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_FILTER_PARTICLEFILTER_HPP
@@ -71,7 +71,7 @@ namespace utility::math::filter {
 
         using Model = FilterModel<Scalar>;
         // The model
-        Model model;
+        Model model{};
 
         using StateVec = Eigen::Matrix<Scalar, Model::size, 1>;
         using StateMat = Eigen::Matrix<Scalar, Model::size, Model::size>;
@@ -186,8 +186,8 @@ namespace utility::math::filter {
         using ParticleList    = Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic>;
         using ParticleWeights = std::vector<Scalar>;
 
-        ParticleList particles;
-        ParticleWeights weights;
+        ParticleList particles{};
+        ParticleWeights weights{};
 
         /**
          * @brief Clears all particles in the filter and samples new particles from the multivariate normal
@@ -409,20 +409,24 @@ namespace utility::math::filter {
             logits = Eigen::exp(logits.array() - logits.maxCoeff());
 
             // Return the mean log probability
-            return logits.mean();
+            Scalar sum(0);
+            for (int i = 0; i < logits.size(); ++i) {
+                sum += logits[i];
+            }
+            return sum / Scalar(logits.size());
         }
 
         /**
          * @brief Calculates and returns the mean of all particles.
          */
-        [[nodiscard]] StateVec getMean() const {
+        [[nodiscard]] StateVec get_state() const {
             return particles.rowwise().mean();
         }
 
         /**
          * @brief Calculates and returns the covariance of the particles.
          */
-        [[nodiscard]] StateMat getCovariance() const {
+        [[nodiscard]] StateMat get_covariance() const {
             auto mean_centered = particles.transpose().rowwise() - particles.transpose().colwise().mean();
             return (mean_centered.transpose() * mean_centered) / (particles.transpose().rows() - 1);
         }

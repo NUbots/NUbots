@@ -1,8 +1,8 @@
 find_package(Eigen3 REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC Eigen3::Eigen)
 
-find_package(YAML-CPP REQUIRED)
-target_link_libraries(nuclear_utility PUBLIC YAML-CPP::YAML-CPP)
+find_package(yaml-cpp REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC yaml-cpp)
 
 find_package(ExprTk REQUIRED)
 target_link_libraries(nuclear_utility PRIVATE ExprTk::ExprTk)
@@ -33,3 +33,14 @@ add_custom_command(
 target_sources(nuclear_utility PRIVATE "${CMAKE_BINARY_DIR}/recordings")
 
 target_compile_features(nuclear_utility PUBLIC cxx_std_17)
+
+# Add the scripts directory to the build directory
+file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/skill/scripts" DESTINATION ${PROJECT_BINARY_DIR})
+
+# Add the scripts to the script files variable for the install script
+file(GLOB_RECURSE scripts "${PROJECT_BINARY_DIR}/scripts/*")
+
+set(SCRIPT_FILES
+    ${scripts}
+    CACHE INTERNAL "A list of all script files" FORCE
+)

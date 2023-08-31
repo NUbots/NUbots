@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import glob
 import multiprocessing
 import os
 import random
@@ -9,6 +8,7 @@ import subprocess
 import sys
 import textwrap
 from datetime import datetime
+from glob import glob
 from pathlib import Path
 from subprocess import DEVNULL
 
@@ -22,7 +22,7 @@ random.seed(datetime.now())
 
 # The docker image details for Robocup
 ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't be changed
-ROBOCUP_IMAGE_TAG = "robocup2021"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
+ROBOCUP_IMAGE_TAG = "robocup"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
 ROBOCUP_IMAGE_REGISTRY = "047817357099.dkr.ecr.us-east-2.amazonaws.com/hl-vs-nubots"  # Provided by the TC
 
 # NUbots RoboCup team ID
@@ -97,10 +97,11 @@ def register(command):
 
 
 def get_cmake_flags(roles_to_build):
-    roles_dir = os.path.join(b.project_dir, "roles")
-    roles_glob = os.path.join(roles_dir, "*.role")
 
-    available_roles = [Path(role_path).stem for role_path in glob.glob(roles_glob)]
+    # Find all available roles
+    available_roles = glob(os.path.join(b.project_dir, "roles", "**", "*.role"), recursive=True)
+    available_roles = [role.split(os.path.join(b.project_dir, "roles/"))[1] for role in available_roles]
+    available_roles = [role.split(".")[0] for role in available_roles]
 
     # Ensure that all the roles requested are available
     for role in roles_to_build:

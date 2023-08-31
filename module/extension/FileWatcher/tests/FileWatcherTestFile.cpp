@@ -16,8 +16,7 @@
  */
 
 // Uncomment this line when other test files are added
-// #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <filesystem>
 #include <fmt/format.h>
 #include <fstream>
@@ -80,10 +79,10 @@ namespace {
         }
 
         // We have a non default destructor so rule of 5 is needed
-        TestReactor(const TestReactor&) = delete;
-        TestReactor(TestReactor&&)      = delete;
+        TestReactor(const TestReactor&)            = delete;
+        TestReactor(TestReactor&&)                 = delete;
         TestReactor& operator=(const TestReactor&) = delete;
-        TestReactor& operator=(TestReactor&&) = delete;
+        TestReactor& operator=(TestReactor&&)      = delete;
 
     private:
         std::filesystem::path dir_path;

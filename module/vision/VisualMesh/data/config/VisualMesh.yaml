@@ -1,4 +1,4 @@
-log_level: WARN
+log_level: INFO
 # When making a visualmesh config file for a new platform, specify the cameras as follows:
 # The settings for each camera
 # CameraName:
