@@ -58,7 +58,7 @@ namespace module::platform::OpenCR {
                                            -convert::acc(data.acc[1]),   // Y
                                            -convert::acc(data.acc[2]));  // Z
         // Command send/receive errors only
-        opencr_state.error_flags = packet.error;
+        opencr_state.packet_error = packet.error;
 
         // Work out a battery charged percentage
         battery_state.current_voltage = convert::voltage(data.voltage);
