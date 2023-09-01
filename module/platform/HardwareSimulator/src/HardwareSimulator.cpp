@@ -53,10 +53,11 @@ namespace module::platform {
         : Reactor(std::move(environment)) {
 
         /*
-         CM740 Data
+         Subcontroller Data
          */
+
         // Read our Error code
-        sensors.platform_error_flags = 0;
+        sensors.subcontroller_error = 0;
 
         // LED Panel
         sensors.led_panel.led2 = false;
@@ -82,7 +83,7 @@ namespace module::platform {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.error_flags = 0;
+        sensors.fsr.right.hardware_error = 0;
 
         // Sensors
         sensors.fsr.right.fsr1 = 1;
@@ -96,7 +97,7 @@ namespace module::platform {
 
         // Left Sensor
         // Error
-        sensors.fsr.left.error_flags = 0;
+        sensors.fsr.left.hardware_error = 0;
 
         // Sensors
         sensors.fsr.left.fsr1 = 1;
@@ -117,7 +118,7 @@ namespace module::platform {
             RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
 
             // Error code
-            servo.error_flags = 0;
+            servo.hardware_error = 0;
 
             // Booleans
             servo.torque_enabled = true;

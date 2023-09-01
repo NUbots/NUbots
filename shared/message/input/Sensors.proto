@@ -29,13 +29,13 @@ import "Transform.proto";
 
 message Sensors {
     /// Full set of information to use a given servo.
-    /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ;
-    /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
+    /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/ ;
+    /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106-2/
     message Servo {
         /// Set of things which can or have gone wrong.
-        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
-        uint32 error_flags = 1;
-        uint32 id          = 2;
+        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#hardware-error-status70
+        uint32 hardware_error = 1;
+        uint32 id             = 2;
         /// Whether the torque is on or off
         bool enabled = 3;
         /// Proportional gain. In proportion to the servo's position error. Gain
@@ -50,7 +50,7 @@ message Sensors {
         float d_gain = 6;
         /// It is a position value of destination. 0 to 4,095 (0xFFF) is available.
         /// The unit is 0.088 [°]. (FROM
-        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-64/#specifications): If
+        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#specifications): If
         /// Goal Position is out of the range, Angle Limit Error Bit (Bit1) of
         /// Status Packet is returned as ‘1’ and Alarm is triggered as set in Alarm
         /// LED/Shutdown
