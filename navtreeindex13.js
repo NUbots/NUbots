@@ -1,7 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dab8fa56934a1599d1681f8a50c938b05b":[2,0,3,8,0,1,0,81],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dab9984206799a7f9fe4bd1b6c18db8112":[2,0,3,8,0,1,0,47],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dabb8067813b4d9f9164117fb703eda71a":[2,0,3,8,0,1,0,39],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dabbd6171cdefa770757334245aca35f3e":[2,0,3,8,0,1,0,59],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227dabc003162873fe73b4e2170164c4bc310":[2,0,3,8,0,1,0,79],
@@ -134,14 +132,14 @@ var NAVTREEINDEX13 =
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ModelWatchdog.html":[2,0,3,8,0,6,2],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html":[2,0,3,8,0,6,3],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a130a00f4058b3cf38ce164c6fc14aa9c":[2,0,3,8,0,6,3,3],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419":[2,0,3,8,0,6,3,6],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a160a09890d34b9ba8b8ecc9166c996d7":[2,0,3,8,0,6,3,8],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419":[2,0,3,8,0,6,3,5],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a43238189263de8350aa91aa3e93dff09":[2,0,3,8,0,6,3,2],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4b42a8eb2680c64e2729a511ea5d0af8":[2,0,3,8,0,6,3,8],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a5dfea7221a92d6c2520899a6e6b0b034":[2,0,3,8,0,6,3,7],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4b42a8eb2680c64e2729a511ea5d0af8":[2,0,3,8,0,6,3,7],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a5dfea7221a92d6c2520899a6e6b0b034":[2,0,3,8,0,6,3,6],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a7a13a8057ee6f3aae47238eb9f686b4c":[2,0,3,8,0,6,3,1],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a9cc3c946ff42f33eb89168d33a2c52d8":[2,0,3,8,0,6,3,0],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#ae9ce5d2d360ce756b240011c51b10009":[2,0,3,8,0,6,3,4],
-"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2":[2,0,3,8,0,6,3,5],
+"structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2":[2,0,3,8,0,6,3,4],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1PacketWatchdog.html":[2,0,3,8,0,6,4],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html":[2,0,3,8,0,6,5],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#a1704a2f486bab4dbb48ae2406d9fbd1e":[2,0,3,8,0,6,5,5],
@@ -249,5 +247,7 @@ var NAVTREEINDEX13 =
 "structmodule_1_1skill_1_1Look_1_1Config.html#a424bf993615a006af07d97f0a523497a":[2,0,3,10,2,0,0],
 "structmodule_1_1skill_1_1Look_1_1Config.html#a733b1c413238944ae7006b908ce3fefc":[2,0,3,10,2,0,2],
 "structmodule_1_1skill_1_1Look_1_1Config.html#ae0180a11f87c07d2c869a2be246f43e7":[2,0,3,10,2,0,1],
-"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html":[2,0,3,10,3,0]
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html":[2,0,3,10,3,0],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#a19e38b82283dbf4a6b5b6f21d9c905ea":[2,0,3,10,3,0,6],
+"structmodule_1_1skill_1_1QuinticWalk_1_1Config.html#a3a9cf1187274fd06a57a4ebff2c617eb":[2,0,3,10,3,0,2]
 };

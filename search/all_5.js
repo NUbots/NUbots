@@ -16,13 +16,12 @@ var searchData=
   ['engines_5fmutex_259',['engines_mutex',['../classmodule_1_1vision_1_1VisualMesh.html#a8c344ab52cbc5f051d3c165661266392',1,'module::vision::VisualMesh']]],
   ['epoch_260',['epoch',['../structutility_1_1clock_1_1ClockData.html#a888a9015a04bcee16592b8ab782259a0',1,'utility::clock::ClockData']]],
   ['error_261',['error',['../structdynamixel_1_1v2_1_1StatusReturnCommand.html#a1b5fc7b6b89a204623574f8b76699063',1,'dynamixel::v2::StatusReturnCommand']]],
-  ['error_5fflags_262',['error_flags',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#ae9ce5d2d360ce756b240011c51b10009',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]],
-  ['error_5fio_263',['error_io',['../classmodule_1_1platform_1_1Webots.html#a82791865473327c6ce3bfcbf32410a9c',1,'module::platform::Webots']]],
-  ['eval_264',['eval',['../classutility_1_1motion_1_1splines_1_1Trajectory.html#a7db37d4cfcc761f5593e9802af813d64',1,'utility::motion::splines::Trajectory']]],
-  ['executekick_265',['ExecuteKick',['../structmodule_1_1motion_1_1ExecuteKick.html',1,'module::motion']]],
-  ['exist_266',['exist',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a69de9ba2f40d63f2d393641676ad1d3b',1,'utility::motion::splines::SplineContainer']]],
-  ['expandbinomial_267',['expandBinomial',['../classutility_1_1motion_1_1splines_1_1Polynom.html#ab111fb9a6913a5f3fd36b6b5e476b91c',1,'utility::motion::splines::Polynom']]],
-  ['exportdata_268',['exportData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2bba3fa3eeedff46c70e4e911127f7cb',1,'utility::motion::splines::Spline::exportData()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67',1,'utility::motion::splines::SplineContainer::exportData()']]],
-  ['expression_269',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]],
-  ['eye_5fled_270',['eye_led',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]]
+  ['error_5fio_262',['error_io',['../classmodule_1_1platform_1_1Webots.html#a82791865473327c6ce3bfcbf32410a9c',1,'module::platform::Webots']]],
+  ['eval_263',['eval',['../classutility_1_1motion_1_1splines_1_1Trajectory.html#a7db37d4cfcc761f5593e9802af813d64',1,'utility::motion::splines::Trajectory']]],
+  ['executekick_264',['ExecuteKick',['../structmodule_1_1motion_1_1ExecuteKick.html',1,'module::motion']]],
+  ['exist_265',['exist',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a69de9ba2f40d63f2d393641676ad1d3b',1,'utility::motion::splines::SplineContainer']]],
+  ['expandbinomial_266',['expandBinomial',['../classutility_1_1motion_1_1splines_1_1Polynom.html#ab111fb9a6913a5f3fd36b6b5e476b91c',1,'utility::motion::splines::Polynom']]],
+  ['exportdata_267',['exportData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2bba3fa3eeedff46c70e4e911127f7cb',1,'utility::motion::splines::Spline::exportData()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67',1,'utility::motion::splines::SplineContainer::exportData()']]],
+  ['expression_268',['Expression',['../structutility_1_1support_1_1Expression.html',1,'utility::support']]],
+  ['eye_5fled_269',['eye_led',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2',1,'module::platform::OpenCR::HardwareIO::OpenCRState']]]
 ];

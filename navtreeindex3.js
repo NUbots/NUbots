@@ -1,7 +1,5 @@
 var NAVTREEINDEX3 =
 {
-"classmodule_1_1motion_1_1SixDOFFootController.html#aac6df09ee989f27a84bcb76babc5393b":[2,0,3,4,6,12],
-"classmodule_1_1motion_1_1SixDOFFootController.html#ab053b3a72a1f5787fafc3a90ee02a17c":[2,0,3,4,6,8],
 "classmodule_1_1motion_1_1SixDOFFootController.html#abc5c94e2a88100cff823d36a57c387d6":[2,0,3,4,6,13],
 "classmodule_1_1motion_1_1SixDOFFootController.html#abd547309977a8f1c6f0a1b5eb9971137":[2,0,3,4,6,4],
 "classmodule_1_1motion_1_1SixDOFFootController.html#ae2188a2774ff024a93121f9ec138b3d5":[2,0,3,4,6,16],
@@ -249,5 +247,7 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#ad1e19adbd6235cb985ff0eb0e3a6221d":[2,0,3,8,0,10,2],
 "classmodule_1_1platform_1_1Webots.html":[2,0,3,8,2],
 "classmodule_1_1platform_1_1Webots.html#a0e3aeeed4dc3662ec83d8bfcb3250a2a":[2,0,3,8,2,30],
-"classmodule_1_1platform_1_1Webots.html#a13e4c3a6a31e38e55a64b12bd61411c1":[2,0,3,8,2,12]
+"classmodule_1_1platform_1_1Webots.html#a13e4c3a6a31e38e55a64b12bd61411c1":[2,0,3,8,2,12],
+"classmodule_1_1platform_1_1Webots.html#a14ce2e31b4513dd1edaae6884f12d0a7":[2,0,3,8,2,7],
+"classmodule_1_1platform_1_1Webots.html#a15f8677186f106976c4f181422de1ba5":[2,0,3,8,2,31]
 };

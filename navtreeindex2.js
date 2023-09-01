@@ -1,7 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"classmodule_1_1input_1_1GameController.html#a92e61a0a9f53b48ba50028c3ca04dd2a":[2,0,3,2,6,16],
-"classmodule_1_1input_1_1GameController.html#a94b56ab486d51495d2d4cd3aea83a2b2":[2,0,3,2,6,17],
 "classmodule_1_1input_1_1GameController.html#a99a51ca7cdde8135305d3f0c0ce7ca60":[2,0,3,2,6,1],
 "classmodule_1_1input_1_1GameController.html#a9dc27cdd03c1ecb6947480c5e7bf5e8d":[2,0,3,2,6,22],
 "classmodule_1_1input_1_1GameController.html#a9f1fc2435946ca453af40fcb0774ae06":[2,0,3,2,6,6],
@@ -249,5 +247,7 @@ var NAVTREEINDEX2 =
 "classmodule_1_1motion_1_1SixDOFFootController.html#a9b40cae99876ff4e0854c3461d83f3e4":[2,0,3,4,6,19],
 "classmodule_1_1motion_1_1SixDOFFootController.html#aa17bad9fc8c2993904df2d6e3c1f21c7":[2,0,3,4,6,3],
 "classmodule_1_1motion_1_1SixDOFFootController.html#aa43e46587002eac3c6f48d279a5fd814":[2,0,3,4,6,17],
-"classmodule_1_1motion_1_1SixDOFFootController.html#aa6dac37ea7c7201759f38787cf271e00":[2,0,3,4,6,7]
+"classmodule_1_1motion_1_1SixDOFFootController.html#aa6dac37ea7c7201759f38787cf271e00":[2,0,3,4,6,7],
+"classmodule_1_1motion_1_1SixDOFFootController.html#aac6df09ee989f27a84bcb76babc5393b":[2,0,3,4,6,12],
+"classmodule_1_1motion_1_1SixDOFFootController.html#ab053b3a72a1f5787fafc3a90ee02a17c":[2,0,3,4,6,8]
 };

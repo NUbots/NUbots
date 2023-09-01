@@ -192,10 +192,6 @@ uint16_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a130a00f4058b3cf38ce164c6fc14aa9c">dirty</a> = false</td></tr>
 <tr class="memdesc:a130a00f4058b3cf38ce164c6fc14aa9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether any of the variables in this struct have changed. <br /></td></tr>
 <tr class="separator:a130a00f4058b3cf38ce164c6fc14aa9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9ce5d2d360ce756b240011c51b10009"><td class="memItemLeft" align="right" valign="top"><a id="ae9ce5d2d360ce756b240011c51b10009"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#ae9ce5d2d360ce756b240011c51b10009">error_flags</a> = 0</td></tr>
-<tr class="memdesc:ae9ce5d2d360ce756b240011c51b10009"><td class="mdescLeft">&#160;</td><td class="mdescRight">Most recent packet error from the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html">OpenCR</a> device. <br /></td></tr>
-<tr class="separator:ae9ce5d2d360ce756b240011c51b10009"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af3f80ef8831498164b8cd1acd29811a2"><td class="memItemLeft" align="right" valign="top">message::platform::RawSensors::EyeLED&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2">eye_led</a> = {0x000000FF}</td></tr>
 <tr class="memdesc:af3f80ef8831498164b8cd1acd29811a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Colour of the eye LED.  <a href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2">More...</a><br /></td></tr>
 <tr class="separator:af3f80ef8831498164b8cd1acd29811a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -210,6 +206,10 @@ Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 message::platform::RawSensors::LEDPanel&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4b42a8eb2680c64e2729a511ea5d0af8">led_panel</a> = {false, false, false}</td></tr>
 <tr class="memdesc:a4b42a8eb2680c64e2729a511ea5d0af8"><td class="mdescLeft">&#160;</td><td class="mdescRight">State of the LED panel, whether the lights are on or off. <br /></td></tr>
 <tr class="separator:a4b42a8eb2680c64e2729a511ea5d0af8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a160a09890d34b9ba8b8ecc9166c996d7"><td class="memItemLeft" align="right" valign="top"><a id="a160a09890d34b9ba8b8ecc9166c996d7"></a>
+uint8_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a160a09890d34b9ba8b8ecc9166c996d7">packet_error</a> = 0</td></tr>
+<tr class="memdesc:a160a09890d34b9ba8b8ecc9166c996d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Most recent packet error from the <a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html">OpenCR</a> device. <br /></td></tr>
+<tr class="separator:a160a09890d34b9ba8b8ecc9166c996d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section see"><dt>See also</dt><dd><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2dc0f40a460f7d0ab47096fb7561a5e4" title="Contains the current state of the OpenCR device The state is both read from the device (eg reading IM...">opencr_state</a> </dd></dl>
@@ -257,7 +257,7 @@ message::platform::RawSensors::LEDPanel&#160;</td><td class="memItemRight" valig
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>OpenCR</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html">HardwareIO</a></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html">OpenCRState</a></li>
-    <li class="footer">Generated on Thu Aug 17 2023 11:39:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri Sep 1 2023 01:57:56 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

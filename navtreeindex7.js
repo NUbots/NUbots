@@ -1,7 +1,5 @@
 var NAVTREEINDEX7 =
 {
-"classutility_1_1support_1_1ProgressBar.html#ae51e4c30c9d81c3d8e55ebc07017f2bf":[2,0,6,10,3,6],
-"classutility_1_1support_1_1ProgressBar.html#afe738a2efea2a51e9eb72f21f0da522d":[2,0,6,10,3,8],
 "classutility_1_1vision_1_1Mosaic.html":[2,0,6,12,1],
 "classutility_1_1vision_1_1Mosaic.html#a0c399039354964705f25ae938653d6a4":[2,0,6,12,1,6],
 "classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75":[2,0,6,12,1,8],
@@ -51,8 +49,8 @@ var NAVTREEINDEX7 =
 "functions_enum.html":[2,3,4],
 "functions_eval.html":[2,3,5],
 "functions_f.html":[2,3,0,6],
-"functions_func.html":[2,3,1,0],
 "functions_func.html":[2,3,1],
+"functions_func.html":[2,3,1,0],
 "functions_func_a.html":[2,3,1,1],
 "functions_func_b.html":[2,3,1,2],
 "functions_func_c.html":[2,3,1,3],
@@ -249,5 +247,7 @@ var NAVTREEINDEX7 =
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956aaa8ab214aede7607dffb18e7a46b6a3d":[1,0,6,13,2,18],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956ab5859d8721cfdc0312b2838b9c985bc1":[1,0,6,13,2,0],
 "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956abbbff6f584358c2ed346b96d54f970e2":[1,0,6,13,2,14],
-"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956abdea449d31a3975cf169e2b70a7e8c02":[1,0,6,13,2,21]
+"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956abdea449d31a3975cf169e2b70a7e8c02":[1,0,6,13,2,21],
+"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956ac47d7f4f9c2b5e776266b0b4c1a7cea2":[1,0,6,13,2,16],
+"namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956ac634ffea7195608364671ac52ee59a61":[1,0,6,13,2,11]
 };

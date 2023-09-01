@@ -4,9 +4,9 @@ var structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState =
     [ "buttons", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a7a13a8057ee6f3aae47238eb9f686b4c", null ],
     [ "buzzer", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a43238189263de8350aa91aa3e93dff09", null ],
     [ "dirty", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a130a00f4058b3cf38ce164c6fc14aa9c", null ],
-    [ "error_flags", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#ae9ce5d2d360ce756b240011c51b10009", null ],
     [ "eye_led", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#af3f80ef8831498164b8cd1acd29811a2", null ],
     [ "gyro", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4287459b630a0528e0435f37876ba419", null ],
     [ "head_led", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a5dfea7221a92d6c2520899a6e6b0b034", null ],
-    [ "led_panel", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4b42a8eb2680c64e2729a511ea5d0af8", null ]
+    [ "led_panel", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a4b42a8eb2680c64e2729a511ea5d0af8", null ],
+    [ "packet_error", "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1OpenCRState.html#a160a09890d34b9ba8b8ecc9166c996d7", null ]
 ];

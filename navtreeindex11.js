@@ -1,7 +1,5 @@
 var NAVTREEINDEX11 =
 {
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html#aabea4c01d7aab0ed556649fe92959f20":[2,0,3,2,30,3],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html#ab3f4f32bce89edab9cc4157371f42269":[2,0,3,2,30,2],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html":[2,0,3,2,31],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#a26c627edfd6a9b48f0ccffc85e9512bd":[2,0,3,2,31,0],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html#a96f8688a34eaf5c9a888fd5516fe1853":[2,0,3,2,31,1],
@@ -249,5 +247,7 @@ var NAVTREEINDEX11 =
 "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#a94a80598f4abf8b70ed76f25aec2593d":[2,0,3,7,0,0,3],
 "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config.html#ac9566f2ad8657389143447350e85b71d":[2,0,3,7,0,0,2],
 "structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config_1_1Levels.html":[2,0,3,7,0,0,0],
-"structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config_1_1Levels.html#a0eca6506e380df615dc7494e1774097d":[2,0,3,7,0,0,0,2]
+"structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config_1_1Levels.html#a0eca6506e380df615dc7494e1774097d":[2,0,3,7,0,0,0,2],
+"structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config_1_1Levels.html#a3e3c698f4539434f002d3cc6104ef86d":[2,0,3,7,0,0,0,0],
+"structmodule_1_1planning_1_1FallingRelaxPlanner_1_1Config_1_1Levels.html#a8879861f37adeaa0cec7da2874d82f85":[2,0,3,7,0,0,0,1]
 };

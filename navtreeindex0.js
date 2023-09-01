@@ -216,11 +216,9 @@ var NAVTREEINDEX0 =
 "ProgressBar_8cpp.html#a59ebcbb561e8769499753467f224fe19":[1,0,6,14,4],
 "ProgressBar_8cpp.html#a98cdc17896fbd838d11e820acbf9942a":[1,0,6,14,10],
 "RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f":[1,0,6,10,0],
-"RawSensors_8hpp.html#a7632c53b6a9fdc88115294b268a7c4fe":[1,0,6,10,2],
-"RawSensors_8hpp.html#acf66ddef285ab82abef2d5a9afdbc9ec":[1,0,6,10,4],
-"RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21":[1,0,6,10,3],
+"RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21":[1,0,6,10,2],
 "RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7":[1,0,6,10,1],
-"RawSensors_8hpp.html#af793b0b6771416634468994705d160ca":[1,0,6,10,5],
+"RawSensors_8hpp.html#af793b0b6771416634468994705d160ca":[1,0,6,10,3],
 "Ready_8cpp.html#ad71cfd87761d266ccd997e1c01aee34f":[1,0,3,11,16],
 "ScriptTuner_8cpp.html#ac37563885399b8eca4a180e92652ecdc":[1,0,3,9,16],
 "ScriptTuner_8cpp.html#ace3d0d278e71a93f00a95b8cde6dd268":[1,0,3,9,13],
@@ -249,5 +247,7 @@ var NAVTREEINDEX0 =
 "SystemConfiguration_8cpp.html#a607cd8bb89e28621ff5f1096451dda01":[1,0,3,13,7],
 "SystemConfiguration_8cpp.html#a970fd9e148c3ff72e36745b5d4f3344c":[1,0,3,13,5],
 "SystemConfiguration_8cpp.html#af00f4b4aa79e6cdd9826e48909effe7b":[1,0,3,13,6],
-"TrajectoryUtils_8hpp.html#a055aaa07356b7911a25d490bd6c2b096":[1,0,6,7,0,18]
+"TrajectoryUtils_8hpp.html#a055aaa07356b7911a25d490bd6c2b096":[1,0,6,7,0,18],
+"TrajectoryUtils_8hpp.html#a4900dbba8900d90675b9c6aeec5ea7d4":[1,0,6,7,0,20],
+"TrajectoryUtils_8hpp.html#a6e949a419d9136bea530f34b334755bc":[1,0,6,7,0,19]
 };

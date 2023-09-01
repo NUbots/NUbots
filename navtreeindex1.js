@@ -1,7 +1,5 @@
 var NAVTREEINDEX1 =
 {
-"TrajectoryUtils_8hpp.html#a4900dbba8900d90675b9c6aeec5ea7d4":[1,0,6,7,0,20],
-"TrajectoryUtils_8hpp.html#a6e949a419d9136bea530f34b334755bc":[1,0,6,7,0,19],
 "TrajectoryUtils_8hpp.html#a748c4e4b798d740908e5f87e217a207a":[1,0,6,7,0,17],
 "TrajectoryUtils_8hpp.html#a7e47ca682fc9631039402a1884892fef":[1,0,6,7,0,10],
 "TrajectoryUtils_8hpp.html#acba54f0f4522861817101d7fe9143d4e":[1,0,6,7,0,16],
@@ -249,5 +247,7 @@ var NAVTREEINDEX1 =
 "classmodule_1_1input_1_1GameController.html#a709e97d9f316e480721cdad1d81fbdf7":[2,0,3,2,6,20],
 "classmodule_1_1input_1_1GameController.html#a7483a8699fcfadc5f6afa6b96edb4daa":[2,0,3,2,6,15],
 "classmodule_1_1input_1_1GameController.html#a7789049cd317c2ef430b09af624bbe01":[2,0,3,2,6,19],
-"classmodule_1_1input_1_1GameController.html#a8eda00be9363268f81035d4a19ba4b31":[2,0,3,2,6,5]
+"classmodule_1_1input_1_1GameController.html#a8eda00be9363268f81035d4a19ba4b31":[2,0,3,2,6,5],
+"classmodule_1_1input_1_1GameController.html#a92e61a0a9f53b48ba50028c3ca04dd2a":[2,0,3,2,6,16],
+"classmodule_1_1input_1_1GameController.html#a94b56ab486d51495d2d4cd3aea83a2b2":[2,0,3,2,6,17]
 };

@@ -921,9 +921,7 @@ var namespaces_dup =
       [ "platform", null, [
         [ "getRawServo", "RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
         [ "getRawServo", "RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ],
-        [ "make_error_string_v1", "RawSensors_8hpp.html#a7632c53b6a9fdc88115294b268a7c4fe", null ],
         [ "make_packet_error_string", "RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
-        [ "make_servo_error_string_v1", "RawSensors_8hpp.html#acf66ddef285ab82abef2d5a9afdbc9ec", null ],
         [ "make_servo_hardware_error_string", "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
       ] ],
       [ "reflection", null, [
