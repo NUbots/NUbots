@@ -13,7 +13,7 @@ namespace module::platform::OpenCR {
         sensors.timestamp = NUClear::clock::now();
 
         /* OpenCR data */
-        sensors.subcontroller_error = opencr_state.error_flags;
+        sensors.subcontroller_error = opencr_state.packet_error;
         sensors.led_panel           = opencr_state.led_panel;
         sensors.head_led            = opencr_state.head_led;
         sensors.eye_led             = opencr_state.eye_led;
@@ -78,7 +78,7 @@ namespace module::platform::OpenCR {
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.error_flags = servo_states[i].hardware_error;
+                servo.hardware_error = servo_states[i].hardware_error;
 
                 // Accumulate all packet error flags to read at once
                 sensors.subcontroller_error |= servo_states[i].packet_error;
@@ -91,15 +91,12 @@ namespace module::platform::OpenCR {
                 servo.voltage     = servo_states[i].voltage;
                 servo.temperature = servo_states[i].temperature;
 
-                /* Note: removed input voltage bit clear here as it wasn't clear how it fits into the refactor. If there
-                 * are problems with input voltage errors coming up too frequently then this is likely the culprit */
+                // Clear Overvoltage flag if voltage is below the (normal) max battery voltage, as this isn't dangerous
+                if (servo.voltage <= battery_state.charged_voltage) {
+                    servo.hardware_error &= ~RawSensors::HardwareError::INPUT_VOLTAGE;
+                }
             }
         }
-
-        // handle unused compatibility fields
-        sensors.platform_error_flags  = RawSensors::Error::OK_;
-        sensors.fsr.left.error_flags  = RawSensors::Error::OK_;
-        sensors.fsr.right.error_flags = RawSensors::Error::OK_;
 
         return sensors;
     }

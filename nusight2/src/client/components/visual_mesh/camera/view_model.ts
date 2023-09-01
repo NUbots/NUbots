@@ -164,7 +164,8 @@ export class CameraViewModel {
       geometry.addAttribute("goal", new InterleavedBufferAttribute(buffer, 1, 1));
       geometry.addAttribute("fieldLine", new InterleavedBufferAttribute(buffer, 1, 2));
       geometry.addAttribute("field", new InterleavedBufferAttribute(buffer, 1, 3));
-      geometry.addAttribute("environment", new InterleavedBufferAttribute(buffer, 1, 4));
+      geometry.addAttribute("robot", new InterleavedBufferAttribute(buffer, 1, 4));
+      geometry.addAttribute("environment", new InterleavedBufferAttribute(buffer, 1, 5));
 
       return geometry;
     },
