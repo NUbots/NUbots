@@ -200,7 +200,7 @@
 </link>
 
 <joint name="left_foot_base" type="fixed">
-<origin xyz="0.0360247 0 6.93889e-18" rpy="-1.71429e-29 -1.5708 0" />
+<origin xyz="0.038 6.93889e-18 1.38778e-17" rpy="-4.52109e-30 -1.5708 0" />
 <parent link="left_foot" />
 <child link="left_foot_base" />
 <axis xyz="0 0 1" />
@@ -438,7 +438,7 @@
 </link>
 
 <joint name="right_foot_base" type="fixed">
-<origin xyz="0.0360247 -1.38778e-17 0" rpy="-7.57306e-29 -1.5708 0" />
+<origin xyz="0.038 0 6.93889e-18" rpy="-1.26218e-29 -1.5708 0" />
 <parent link="right_foot" />
 <child link="right_foot_base" />
 <axis xyz="0 0 1" />
@@ -605,7 +605,7 @@
 <inertial>
 <origin xyz="-6.93892e-18 3.23117e-35 5e-06" rpy="0 0 0" />
 <mass value="1.01635e-23" />
-<inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
+<inertia ixx="2.90418e-124" ixy="0" ixz="0" iyy="0" iyz="0" izz="2.90418e-124" />
 </inertial>
 </link>
 
