@@ -125,6 +125,10 @@ namespace module::purpose {
                     return;
                 }
             }
+            else {
+                log<NUClear::INFO>("Running LLM as strategy.");
+                emit<Task>(std::make_unique<LLMStrategy>());
+            }
         });
 
 
