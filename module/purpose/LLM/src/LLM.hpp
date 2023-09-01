@@ -40,7 +40,11 @@ namespace module::purpose {
             /// @brief OpenAI API key
             std::string openai_api_key = "";
 
+            /// @brief Whether or not the LLM should act as the planning layer
+            bool planner = false;
         } cfg;
+
+        static const int PROMPT_FREQ = 5;
 
     public:
         /// @brief Called by the powerplant to build and setup the LLM reactor.

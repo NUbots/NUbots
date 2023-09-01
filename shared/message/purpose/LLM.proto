@@ -20,4 +20,5 @@ syntax = "proto3";
 
 package message.purpose;
 
-message LLM {}
+message LLMStrategy {}
+message LLMPlanner {}
