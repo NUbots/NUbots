@@ -49,9 +49,18 @@ namespace module::platform::OpenCR {
                     // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
                     // any packets, otherwise is the nonzero ID of the timed out device
                     for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
+                        // if this is the first packet then send a warning
+                        if (!packet_dropped) {
+                            log<NUClear::WARN>(
+                                "NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE chain will "
+                                "cause all later packets (of higher ID) to be dropped. If there are consecutive "
+                                "dropped packets it is likely that the lowest ID is to blame.");
+                        }
                         // Delete the packet we're waiting on
                         packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
+                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
+                                                       int(dropout_id),
+                                                       static_cast<ServoID>(dropout_id)));
                         // Set flag
                         packet_dropped = true;
                     }
