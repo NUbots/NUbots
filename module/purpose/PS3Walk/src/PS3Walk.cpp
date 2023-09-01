@@ -75,7 +75,7 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 4);
 
             // Stand Still on startup
-            emit<Task>(std::make_unique<StandStill>());
+            //emit<Task>(std::make_unique<StandStill>());
         });
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
@@ -153,8 +153,8 @@ namespace module::purpose {
                         case BUTTON_DPAD_UP:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance move Dpad up");
-                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(load_script<LimbsSequence>("StepClap1.yaml"), 3);
+                                emit<Task>(std::unique_ptr<Walk>(nullptr));
                             }
                             break;
                         case BUTTON_DPAD_DOWN:
@@ -199,7 +199,7 @@ namespace module::purpose {
                                 emit<Task>(load_script<LimbsSequence>("Crouch1.yaml"), 3);
                             }
                             break;
-                        case BUTTON_SQUARE: 
+                        case BUTTON_SQUARE:
                             if (event.value > 0) {
                                 NUClear::log("Do a dance square");
                                 emit<Task>(std::unique_ptr<Walk>(nullptr));
@@ -207,14 +207,14 @@ namespace module::purpose {
                             }
                             break;
                         case BUTTON_L1:
-                            if (event.value > 0) {  
+                            if (event.value > 0) {
                                 NUClear::log("Requesting Left Front Kick");
                                 emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG), 3);
                             }
                             break;
                         case BUTTON_R1:
-                            if (event.value > 0) {  
+                            if (event.value > 0) {
                                 NUClear::log("Requesting Right Front Kick");
                                 emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
