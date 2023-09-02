@@ -7,7 +7,7 @@ uniform vec2 imageSize;
 uniform float imageAspectRatio;
 
 // Current vertex and UV coord of the line join geometry
-attribute vec3 position;
+attribute vec2 position;
 attribute vec2 uv;
 
 // The ray of the line join and color of the join
@@ -15,10 +15,17 @@ attribute vec3 lineJoin;
 attribute vec4 color;
 attribute float radius;
 
-#include "join.glsl"
-
 varying vec2 vUv;
 varying vec4 vColor;
+
+vec2 getJoinVertex(vec2 joinCentre, vec2 position, float radius) {
+
+    // Current xy zoom level. Used to keep the join size contant while zooming in/out
+    vec2 zoom = vec2(length(modelViewMatrix[0].xyz), length(modelViewMatrix[1].xyz));
+
+    // Get the vertex position .
+    return joinCentre + 2.0 * radius * (position.xy / viewSize) * (1.0 / zoom);
+}
 
 void main() {
 
@@ -28,7 +35,7 @@ void main() {
     vec2 lineJoinCentre = topLeft + (lineJoin.xy / imageSize) * topLeft * -2.0;
 
     // Get the vertex position for the join
-    vec2 point = getJoinVertex(lineJoinCentre, position.xy, radius);
+    vec2 point = getJoinVertex(lineJoinCentre, position, radius);
 
     vUv    = uv;
     vColor = color;
