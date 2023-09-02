@@ -33,7 +33,7 @@ settings:
   # BalanceWhiteAuto: Contsinuous
 
 # Camera kinematics
-urdf_path: "/home/nubots/NUbots/module/actuation/Kinematics/data/nugus.urdf"
+urdf_path: "/home/nubots/NUbots/shared/utility/platform/models/nugus.urdf"
 
 roll_offset: 0.0 * pi / 180
 
