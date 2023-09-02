@@ -52,10 +52,6 @@ namespace module::platform {
         /// @brief server_port The port number to connect to on the server
         std::string server_port;
 
-        /// @brief Establish a TCP connection to the specified server/port
-        /// @return If the connection was successful, a file descriptor. Else, -1 is returned
-        [[nodiscard]] int tcpip_connect();
-
         /// @brief Establishes the connection with webots, then binds the reaction handles with the resulting fd
         void setup_connection();
 

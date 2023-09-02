@@ -26,6 +26,7 @@
 #include "clock/clock.hpp"
 
 #include "extension/Configuration.hpp"
+#include "extension/TCP/Send.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/input/Image.hpp"
@@ -34,6 +35,7 @@
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
 
+#include "utility/TCP/connect.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -179,48 +181,6 @@ namespace module::platform {
                                  {"left_touch_sensor_fr", sensor_timestep}};
 
         return msg;
-    }
-
-    int Webots::tcpip_connect() {
-        // Hints for the connection type
-        addrinfo hints{};
-        memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
-        hints.ai_family   = AF_UNSPEC;        // IPv4 or IPv6
-        hints.ai_socktype = SOCK_STREAM;      // TCP
-
-        // Store the ip address information that we will connect to
-        addrinfo* address = nullptr;
-
-        const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
-        if (error != 0) {
-            log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
-                                            server_address,
-                                            gai_strerror(error),
-                                            error));
-            return -1;
-        }
-
-        // Loop through the linked list of potential options for connecting. In order of best to worst.
-        for (addrinfo* addr_ptr = address; addr_ptr != nullptr; addr_ptr = addr_ptr->ai_next) {
-            const int fd_temp = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
-
-            if (fd_temp == -1) {
-                // Bad fd
-                continue;
-            }
-            if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
-                // Connection successful
-                freeaddrinfo(address);
-                return fd_temp;
-            }
-            // Connection was not successful
-            close(fd_temp);
-        }
-
-        // No connection was successful
-        freeaddrinfo(address);
-        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
-        return -1;
     }
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -425,7 +385,7 @@ namespace module::platform {
                 close(fd);
             }
 
-            fd = tcpip_connect();
+            fd = utility::TCP::connect(server_address, server_port).release();
 
             if (fd == -1) {
                 // Connection failed
@@ -568,27 +528,15 @@ namespace module::platform {
                         }
                     }
 
-                    // Serialise ActuatorRequests
-                    std::vector<char> data =
-                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
-
-                    // Size of the message, in network endian
-                    const uint32_t Nn = htonl(data.size());
 
                     // Only send actuator requests if we are connected to the controller
                     if (connection_active) {
-                        // Send the message size first
-                        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                            log<NUClear::ERROR>(
-                                fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                        try {
+                            emit<extension::TCP::Send>(std::make_unique<ActuatorRequests>(actuator_requests), fd);
                         }
-
-
-                        // Now send the data
-                        if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
-                            log<NUClear::ERROR>(
-                                fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
-                        }
+                        catch (std::system_error& e) {
+                            log<NUClear::DEBUG>(e.what());
+                        };
                         log<NUClear::TRACE>("Sending actuator request.");
                     }
                 });
