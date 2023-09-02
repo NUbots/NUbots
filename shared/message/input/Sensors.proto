@@ -136,7 +136,7 @@ message Sensors {
     /// Inertia tensor measured in particle space and relative to the CoM of the particle
     mat3 inertia_tensor = 11;
 
-    /// A set of transforms; one for each servo
+    /// A set of transforms; one for each frame (All the joints, cameras and base of feet)
     repeated mat4 Htx = 12 [(array_size) = 24];
 
     /// Homogeneous transform: torso {t} from ground {g}
