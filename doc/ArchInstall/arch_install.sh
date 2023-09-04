@@ -29,11 +29,15 @@ mount ${ROOT} /mnt
 mkdir -p /mnt/boot/efi
 mount ${BOOT} /mnt/boot/efi
 
-# Bootstrap Pacman
+# Use pacman configuration from dockerfile
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pacman.conf \
+    -O /etc/pacman.conf
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pacman.d/mirrorlist \
+    -O /etc/pacman.d/mirrorlist
+# Bootstrap Pacman and copy pacman config files to new root location
 pacstrap /mnt base linux linux-firmware
-# Set mirrorlist to match Dockerfile
-# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-echo -e "Server=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+cp /etc/pacman.conf /mnt/etc/pacman.conf
+cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist
 
 # Update fstab
 genfstab -U /mnt >> /mnt/etc/fstab
