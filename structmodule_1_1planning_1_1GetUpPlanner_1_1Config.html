@@ -179,26 +179,10 @@ $(document).ready(function(){initNavTree('structmodule_1_1planning_1_1GetUpPlann
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a8f0384d1fc29494dbe44c602dc738924"><td class="memItemLeft" align="right" valign="top"><a id="a8f0384d1fc29494dbe44c602dc738924"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a8f0384d1fc29494dbe44c602dc738924">acc</a> = 0.0</td></tr>
-<tr class="memdesc:a8f0384d1fc29494dbe44c602dc738924"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum acceleration we can have to trigger. <br /></td></tr>
-<tr class="separator:a8f0384d1fc29494dbe44c602dc738924"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c611768e6eec2bfca059e12741800ec"><td class="memItemLeft" align="right" valign="top"><a id="a8c611768e6eec2bfca059e12741800ec"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a8c611768e6eec2bfca059e12741800ec">cos_angle</a> = 0.0</td></tr>
-<tr class="memdesc:a8c611768e6eec2bfca059e12741800ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">The cosine of the angle we need to be at to trigger. <br /></td></tr>
-<tr class="separator:a8c611768e6eec2bfca059e12741800ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad0caf0fb886580bf5cd25239efcdf01c"><td class="memItemLeft" align="right" valign="top"><a id="ad0caf0fb886580bf5cd25239efcdf01c"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#ad0caf0fb886580bf5cd25239efcdf01c">count</a> = 30</td></tr>
-<tr class="memdesc:ad0caf0fb886580bf5cd25239efcdf01c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of frames we need to be at recovery levels before we trigger. <br /></td></tr>
-<tr class="separator:ad0caf0fb886580bf5cd25239efcdf01c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2b8980e8c3d32584dfd002d0d9f38ece"><td class="memItemLeft" align="right" valign="top"><a id="a2b8980e8c3d32584dfd002d0d9f38ece"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a2b8980e8c3d32584dfd002d0d9f38ece">g</a> = 9.8</td></tr>
-<tr class="memdesc:a2b8980e8c3d32584dfd002d0d9f38ece"><td class="mdescLeft">&#160;</td><td class="mdescRight">The acceleration due to gravity to remove from the accelerometer readings. <br /></td></tr>
-<tr class="separator:a2b8980e8c3d32584dfd002d0d9f38ece"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6292a1612a41789e1e440cbdab51a0c"><td class="memItemLeft" align="right" valign="top"><a id="ae6292a1612a41789e1e440cbdab51a0c"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#ae6292a1612a41789e1e440cbdab51a0c">gyro</a> = 0.0</td></tr>
-<tr class="memdesc:ae6292a1612a41789e1e440cbdab51a0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The maximum rate the gyro can be moving at to trigger. <br /></td></tr>
-<tr class="separator:ae6292a1612a41789e1e440cbdab51a0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a24b902fc8adda6ea6cb69494e0ae8541"><td class="memItemLeft" align="right" valign="top"><a id="a24b902fc8adda6ea6cb69494e0ae8541"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html#a24b902fc8adda6ea6cb69494e0ae8541">fallen_angle</a> = 0.0f</td></tr>
+<tr class="memdesc:a24b902fc8adda6ea6cb69494e0ae8541"><td class="mdescLeft">&#160;</td><td class="mdescRight">Threshold angle for executing getup, between torso z axis and world z axis. <br /></td></tr>
+<tr class="separator:a24b902fc8adda6ea6cb69494e0ae8541"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores configuration values. </p>
@@ -211,7 +195,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1planning_1_1GetUpPlanner.html">GetUpPlanner</a></li><li class="navelem"><a class="el" href="structmodule_1_1planning_1_1GetUpPlanner_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Mon Sep 4 2023 08:29:02 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Sep 4 2023 08:34:50 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
