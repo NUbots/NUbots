@@ -1,12 +1,11 @@
-import React, { ComponentType, useMemo } from "react";
+import React, { ComponentType } from "react";
 import classNames from "classnames";
 import { observer } from "mobx-react";
 
 import { RobotModel } from "../../robot/model";
+import { VisionCameraModel } from "../camera/model";
+import { VisionCameraViewProps } from "../camera/view";
 import { VisionRobotModel } from "../model";
-import { VisionCameraModel } from "../vision_camera/model";
-import { VisionCameraViewProps } from "../vision_camera/view";
-import { VisionCameraViewModel } from "../vision_camera/view_model";
 
 import IconChevronLeft from "./icon_chevron_left";
 import IconChevronRight from "./icon_chevron_right";
@@ -52,16 +51,11 @@ const CameraImageViewerMain = observer(
     onPreviousCamera: () => void;
     onNextCamera: () => void;
   }) => {
-    const cameraViewModel = useMemo(
-      () => VisionCameraViewModel.of(props.selectedCamera, props.selectedRobot),
-      [props.selectedCamera, props.selectedRobot],
-    );
     return (
       <div className="flex-grow h-full relative">
         <props.CameraView
           key={props.selectedCamera.id}
           model={props.selectedCamera}
-          viewModel={cameraViewModel}
           robot={props.selectedRobot}
           viewType="full"
           objectFit="fill"
@@ -123,10 +117,6 @@ const CameraImageViewerThumbnail = observer(
     selectedRobot: VisionRobotModel;
     onClick: () => void;
   }) => {
-    const cameraViewModel = useMemo(
-      () => VisionCameraViewModel.of(props.camera, props.selectedRobot),
-      [props.camera, props.selectedRobot],
-    );
     return (
       <div
         className={classNames(style.cameraThumbnail, "cursor-pointer relative", {
@@ -135,7 +125,6 @@ const CameraImageViewerThumbnail = observer(
       >
         <props.CameraView
           model={props.camera}
-          viewModel={cameraViewModel}
           robot={props.selectedRobot}
           viewType="thumbnail"
           objectFit="contain"

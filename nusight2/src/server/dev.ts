@@ -25,7 +25,7 @@ async function main() {
 
   // Initialize socket.io namespace immediately to catch reconnections.
   NUsightServer.of(WebSocketServer.of(sioNetwork.of("/nuclearnet")), {
-    fakeNetworking: withVirtualRobots,
+    fakeNetworking: true,
     connectionOpts: { name: "nusight", address: nuclearnetAddress },
   });
 

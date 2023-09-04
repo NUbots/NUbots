@@ -6,16 +6,16 @@ import { Projection } from "../../../../shared/math/projection";
 import { NUsightNetwork } from "../../../network/nusight_network";
 import { AppController } from "../../app/controller";
 import { AppModel } from "../../app/model";
-import { CameraParams } from "../../camera/camera_params";
-import { ImageFormat } from "../../camera/image";
-import { Lens } from "../../camera/lens";
 import { withRobotSelectorMenuBar } from "../../menu_bar/view";
 import { RobotModel } from "../../robot/model";
+import { CameraParams } from "../camera/camera_params";
+import { ImageFormat } from "../camera/image";
+import { Lens } from "../camera/lens";
+import { VisionCameraModel } from "../camera/model";
+import { VisionCameraViewProps } from "../camera/view";
 import { VisionController } from "../controller";
 import { VisionModel } from "../model";
 import { VisionView } from "../view";
-import { VisionCameraModel } from "../vision_camera/model";
-import { VisionCameraViewProps } from "../vision_camera/view";
 
 interface StoryProps {}
 

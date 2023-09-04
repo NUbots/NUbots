@@ -6,7 +6,7 @@ import { observer } from "mobx-react";
 import { SeededRandom } from "../../../../../shared/base/random/seeded_random";
 import { range } from "../../../../../shared/base/range";
 import useInterval from "../../../../hooks/use-interval";
-import sampleImageUrl from "../../../camera/image_view/stories/images/image.jpg";
+import sampleImageUrl from "../../camera/image_view/stories/images/image.jpg";
 import { GridLayout } from "../grid_layout";
 
 const imageWidth = 600;

@@ -5,7 +5,7 @@ import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
 import { RobotModel } from "../robot/model";
 
-import { VisionCameraModel } from "./vision_camera/model";
+import { VisionCameraModel } from "./camera/model";
 
 export class VisionModel {
   @observable.ref selectedRobot?: VisionRobotModel;

@@ -11,14 +11,14 @@ import { message } from "../../../shared/messages";
 import { toSeconds } from "../../../shared/time/timestamp";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
-import { CameraParams } from "../camera/camera_params";
-import { ImageFormat } from "../camera/image";
-import { Lens } from "../camera/lens";
 import { RobotModel } from "../robot/model";
 
+import { CameraParams } from "./camera/camera_params";
+import { ImageFormat } from "./camera/image";
+import { Lens } from "./camera/lens";
+import { VisionCameraModel } from "./camera/model";
+import { GreenHorizonModel } from "./camera/objects/green_horizon";
 import { VisionRobotModel } from "./model";
-import { GreenHorizonModel } from "./vision_camera/green_horizon";
-import { VisionCameraModel } from "./vision_camera/model";
 
 export class VisionNetwork {
   constructor(private network: Network) {
@@ -75,7 +75,7 @@ export class VisionNetwork {
           Hcw: Matrix4.from(Hcw),
         }),
       });
-      robot.cameras.set(id, (model && camera?.copy(model)) || model);
+      robot.cameras.set(id, camera?.copy(model) || model);
     });
   };
 

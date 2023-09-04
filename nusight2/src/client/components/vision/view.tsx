@@ -1,4 +1,4 @@
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren } from "react";
 import React from "react";
 import { Component } from "react";
 import { ComponentType } from "react";
@@ -9,13 +9,13 @@ import { observer } from "mobx-react";
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
 
+import { VisionCameraModel } from "./camera/model";
+import { VisionCameraViewProps } from "./camera/view";
+import { VisionCameraView } from "./camera/view";
 import { CameraImageViewer } from "./camera_image_viewer/view";
 import { VisionController } from "./controller";
 import { GridLayout } from "./grid_layout/grid_layout";
 import { VisionModel, VisionRobotModel } from "./model";
-import { VisionCameraModel } from "./vision_camera/model";
-import { VisionCameraView, VisionCameraViewProps } from "./vision_camera/view";
-import { VisionCameraViewModel } from "./vision_camera/view_model";
 
 @observer
 export class VisionView extends Component<{
@@ -140,14 +140,9 @@ const GridCameraView = observer(
     selectedRobot: VisionRobotModel;
     onClick: () => void;
   }) => {
-    const viewModel = useMemo(
-      () => VisionCameraViewModel.of(props.camera, props.selectedRobot),
-      [props.camera, props.selectedRobot],
-    );
     return (
       <props.CameraView
         model={props.camera}
-        viewModel={viewModel}
         robot={props.selectedRobot}
         viewType="full"
         objectFit="contain"

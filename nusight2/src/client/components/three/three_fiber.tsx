@@ -1,28 +1,48 @@
 import React from "react";
 import { RawShaderMaterialProps } from "@react-three/fiber";
 import { Canvas, CanvasProps, useThree } from "@react-three/fiber";
+import classNames from "classnames";
 import * as THREE from "three";
 
 import { Vector3 } from "../../../shared/math/vector3";
 
 import style from "./style.module.css";
 
-type Props = { children: React.ReactNode } & CanvasProps;
-export const ThreeFiber = React.forwardRef<HTMLCanvasElement, Props>(({ children, ...props }: Props, ref) => (
-  <div className={style.canvas}>
-    <Canvas
-      ref={ref}
-      frameloop="demand"
-      linear
-      flat
-      gl={{ antialias: true }}
-      style={{ background: "black" }}
-      {...props}
-    >
-      {children}
-    </Canvas>
-  </div>
-));
+type Props = { children: React.ReactNode; objectFit?: ObjectFit } & CanvasProps;
+
+// Based on the object-fit CSS property: https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
+export type ObjectFit =
+  // Stretch content to fill entire container.
+  | { type: "fill" }
+  // Either cover the container with content, or contain the content in the container, while maintaining aspect ratio.
+  | { type: "contain" | "cover"; aspect: number };
+
+export const ThreeFiber = React.forwardRef<HTMLCanvasElement, Props>(
+  ({ children, objectFit = { type: "fill" }, ...props }: Props, ref) => (
+    <div className={style.canvas}>
+      <Canvas
+        ref={ref}
+        frameloop="demand"
+        linear
+        flat
+        gl={{ antialias: true }}
+        className={classNames({
+          [style.cover]: objectFit.type === "cover",
+          [style.contain]: objectFit.type === "contain",
+          [style.fill]: objectFit.type === "fill",
+        })}
+        style={{
+          background: "black",
+          // Use 'none' instead of fill to avoid stretching the visuals during a resize.
+          objectFit: objectFit.type === "fill" ? "none" : objectFit.type,
+        }}
+        {...props}
+      >
+        {children}
+      </Canvas>
+    </div>
+  ),
+);
 
 export const PerspectiveCamera = ({
   lookAt,
@@ -68,7 +88,11 @@ export const RawShaderMaterial = (props: RawShaderMaterialProps) => {
   const uniforms = React.useMemo<NonNullable<RawShaderMaterialProps["uniforms"]>>(() => ({}), []);
   if (props.uniforms) {
     for (const key in props.uniforms) {
-      uniforms[key].value = props.uniforms[key].value;
+      if (!uniforms[key]) {
+        uniforms[key] = { value: props.uniforms[key].value };
+      } else {
+        uniforms[key].value = props.uniforms[key].value;
+      }
     }
   }
   return <rawShaderMaterial {...props} uniforms={uniforms} />;
