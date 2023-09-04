@@ -26,7 +26,7 @@ namespace module::planning {
         });
 
         on<Provide<GetUpWhenFallen>, Uses<GetUp>, Trigger<Sensors>>().then(
-            [this](const RunInfo& info, const Uses<GetUp>& getup, const Sensors& sensors) {
+            [this](const Uses<GetUp>& getup, const Sensors& sensors) {
                 if (getup.run_state == GroupInfo::RunState::RUNNING && !getup.done) {
                     emit<Task>(std::make_unique<Idle>());
                     log<NUClear::DEBUG>("Idle");
@@ -42,7 +42,8 @@ namespace module::planning {
                 log<NUClear::DEBUG>("Angle: ", angle);
 
                 // // Check if angle between torso z axis and world z axis is greater than config value
-                if (angle > cfg.fallen_angle) {
+                // Only emit if we're not already requesting a getup
+                if (angle > cfg.fallen_angle && getup.run_state == GroupInfo::RunState::NO_TASK) {
                     emit<Task>(std::make_unique<GetUp>());
                     log<NUClear::DEBUG>("Execute getup");
                 }
