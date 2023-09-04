@@ -1,5 +1,6 @@
 <map id="module::actuation::Kinematics" name="module::actuation::Kinematics">
-<area shape="rect" id="node1" title=" " alt="" coords="11,169,159,211"/>
-<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="5,80,164,121"/>
+<area shape="rect" id="node1" title=" " alt="" coords="143,185,291,227"/>
+<area shape="rect" id="node2" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="5,81,164,123"/>
 <area shape="rect" id="node3" title=" " alt="" coords="17,5,152,32"/>
+<area shape="rect" id="node4" href="$structmodule_1_1actuation_1_1Kinematics_1_1Config.html" title="Stores configuration values." alt="" coords="188,81,336,123"/>
 </map>

@@ -274,6 +274,7 @@ var namespaces_dup =
         [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
         [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
         [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ],
+        [ "FrameID", "IKKick_8cpp.html#ac46958dcb5cce9c8dbdb3ddd0539232a", null ],
         [ "KickType", "IKKick_8cpp.html#ab3ad9a0901a7cc87c7cccec9aab52bf3", null ],
         [ "LimbID", "IKKick_8cpp.html#a61a4760eed3f929d1ae7176e5dd793dc", null ],
         [ "ServoID", "IKKick_8cpp.html#ab2b0df2c19654efc0988e3603f0aa227", null ],
@@ -696,19 +697,28 @@ var namespaces_dup =
     [ "utility", null, [
       [ "actuation", null, [
         [ "kinematics", null, [
+          [ "calculate_head_joints", "InverseKinematics_8hpp.html#ac81c070cbf00280291564afd33a2779d", null ],
           [ "calculateAllPositions", "ForwardKinematics_8hpp.html#a84e2c61ae7d6b3651408b04e1a1e9e51", null ],
           [ "calculateArmJointPosition", "ForwardKinematics_8hpp.html#acaa0c37a4b94cc4ee1adda38d59a7ef4", null ],
           [ "calculateCentreOfMass", "ForwardKinematics_8hpp.html#a7fb2148a3a02cc01cb2e045e5bbd386d", null ],
           [ "calculateGroundSpace", "ForwardKinematics_8hpp.html#a6f1629195e306fb51055d3f6dfcd3f60", null ],
           [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#acafb13dd600b679a2a8b134382d9e809", null ],
           [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#aeacfb8e0ab7120fe8e077e5fec1defe8", null ],
-          [ "calculateHeadJoints", "InverseKinematics_8hpp.html#a674110bbbef5e47fbaa2cef846afbe7d", null ],
           [ "calculateInertialTensor", "ForwardKinematics_8hpp.html#a8f700e315a0133e6e775249064467147", null ],
           [ "calculateLegJointPosition", "ForwardKinematics_8hpp.html#aab331e0e4b1dbea659cc77d4e7e6d4b6", null ],
           [ "calculateLegJoints", "InverseKinematics_8hpp.html#a7f5ddd1c744524901a443783780aa370", null ],
           [ "calculateLegJoints", "InverseKinematics_8hpp.html#a1eb67657baa287d241436d88039ea785", null ],
           [ "calculatePosition", "ForwardKinematics_8hpp.html#adb9bea25d11c7f7e0eded49ac6cecfdd", null ],
           [ "calculateRobotToIMU", "ForwardKinematics_8hpp.html#a68be5789fb33da4e7d44df7f9b79cfb3", null ]
+        ] ],
+        [ "tinyrobotics", null, [
+          [ "configuration_to_servos", "tinyrobotics_8hpp.html#a7cfbd0a3d7019dc4759bbf134b24da2c", null ],
+          [ "forward_kinematics_to_servo_map", "tinyrobotics_8hpp.html#a1c507ba419daed35009b8311425d8d1d", null ],
+          [ "sensors_to_configuration", "tinyrobotics_8hpp.html#a3973886db37538466f4d52cb9b297ccf", null ],
+          [ "servo_exists", "tinyrobotics_8hpp.html#a415e8b6891a975e4f62223526b5ab748", null ],
+          [ "servos_to_configuration", "tinyrobotics_8hpp.html#a2264553f0a06ca8267d8b0f05c9667d3", null ],
+          [ "joint_map", "tinyrobotics_8hpp.html#a34780ac595cbe79a51992652fbebb504", null ],
+          [ "link_map", "tinyrobotics_8hpp.html#a0867a02e8d463829bc789af482c99f74", null ]
         ] ],
         [ "ServoMap", "structutility_1_1actuation_1_1ServoMap.html", null ],
         [ "ServoMap< HeadPitch >", "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4" ],
@@ -755,9 +765,11 @@ var namespaces_dup =
         [ "writeToFile", "namespaceutility_1_1file.html#a5e0aa63bf00a2bd8ce78d527d0335c1a", null ]
       ] ],
       [ "input", null, [
+        [ "FrameID", "structutility_1_1input_1_1FrameID.html", "structutility_1_1input_1_1FrameID" ],
         [ "LimbID", "structutility_1_1input_1_1LimbID.html", "structutility_1_1input_1_1LimbID" ],
         [ "ServoID", "structutility_1_1input_1_1ServoID.html", "structutility_1_1input_1_1ServoID" ],
         [ "ServoID", "LimbID_8cpp.html#aa0c047925696e66fd1f5d098c744e133", null ],
+        [ "operator<<", "FrameID_8cpp.html#a417f668cd797bbff60417949f5ffcf7e", null ],
         [ "operator<<", "LimbID_8cpp.html#accc0ac967dfb1eea992099c6d2ada892", null ],
         [ "operator<<", "ServoID_8cpp.html#a11209a4933e52343c652ddd60c0d4d62", null ]
       ] ],

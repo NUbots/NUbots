@@ -17,5 +17,6 @@ var structmodule_1_1input_1_1SensorFilter_1_1Config =
     [ "Kp", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#adb0e56e3d872917261c8a525cff2fd5f", null ],
     [ "Q", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#aff495622c7adc2b27a7b4e86c607ec45", null ],
     [ "R", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a4ad75bcbc17d1bdf05312638cb28b619", null ],
-    [ "ukf", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a872e6951b38dc655c2bbae7912d973dd", null ]
+    [ "ukf", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a872e6951b38dc655c2bbae7912d973dd", null ],
+    [ "urdf_path", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#adc8ccce9b96e525fa2026c4bb7a1ed2b", null ]
 ];

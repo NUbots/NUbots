@@ -1,5 +1,16 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a5c4a09b37dbba30c768649d83cf6ed52":[2,0,3,8,0,9,24],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a65e40f3b1b1488fe285dbfd0aa7faf62":[2,0,3,8,0,9,16],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a667e5012027deea7c3176e89d9d5b40e":[2,0,3,8,0,9,19],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a67a03d38221e26440cdd8cd404096fd6":[2,0,3,8,0,9,2],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7b7d28b47fd11687cbbff13f00d7e327":[2,0,3,8,0,9,8],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d089062a79b3384a1d268bc12055417":[2,0,3,8,0,9,13],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9ba":[2,0,3,8,0,9,0],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa075d04eb52ef872a8f99772296a3aede":[2,0,3,8,0,9,0,9],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa09d65563767d405d762e3b454f6c3043":[2,0,3,8,0,9,0,11],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa16aadfc1eb20237947a2192fd2f7ec83":[2,0,3,8,0,9,0,5],
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa41fbf4ecc59285caf47e1e0bb2578d52":[2,0,3,8,0,9,0,15],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa4a0e17d663e15c8996a4f3fb93f8be2d":[2,0,3,8,0,9,0,7],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa69218bcad22288e0cdc655cafac86ef7":[2,0,3,8,0,9,0,20],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa6d2371bbe310fcff4f0eaeeda2b4f65a":[2,0,3,8,0,9,0,16],
@@ -238,16 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1QuinticWalk.html#a94e86a48ca1a3f861f4f11b439dab2d0":[2,0,3,10,3,14],
 "classmodule_1_1skill_1_1QuinticWalk.html#aac93a3b146aebc490ee6e79732d9f2a7":[2,0,3,10,3,7],
 "classmodule_1_1skill_1_1QuinticWalk.html#ac18654b75a1933b92dd0c67a8130de97":[2,0,3,10,3,4],
-"classmodule_1_1skill_1_1QuinticWalk.html#ac7879979a92ab2df0ffde550e0f8ca67":[2,0,3,10,3,16],
-"classmodule_1_1skill_1_1QuinticWalk.html#acdc65aba78326fa0043ab896c4b74aea":[2,0,3,10,3,6],
-"classmodule_1_1skill_1_1QuinticWalk.html#add5a62ac7c0f22006bb3305c619531cc":[2,0,3,10,3,2],
-"classmodule_1_1skill_1_1QuinticWalk.html#ae5f0e445b1d84f170260acad1a777516":[2,0,3,10,3,13],
-"classmodule_1_1skill_1_1QuinticWalk.html#ae75e3d0373b402aeffe7e831b8527795":[2,0,3,10,3,10],
-"classmodule_1_1skill_1_1QuinticWalk.html#aea1bad7265d317af56cf94a398c29537":[2,0,3,10,3,9],
-"classmodule_1_1skill_1_1ScriptKick.html":[2,0,3,10,4],
-"classmodule_1_1skill_1_1ScriptKick.html#a90f1c96cb47b2946ad217493f2e665fa":[2,0,3,10,4,0],
-"classmodule_1_1skill_1_1SplineKick.html":[2,0,3,10,5],
-"classmodule_1_1skill_1_1SplineKick.html#a0e519a142d091abaa376fe7cce9d0fe1":[2,0,3,10,5,1],
-"classmodule_1_1skill_1_1SplineKick.html#a21595584ac6e2f2bc5751c40a1aa02be":[2,0,3,10,5,5],
-"classmodule_1_1skill_1_1SplineKick.html#a3710d033955c0ac1ec5a87e304b7fe20":[2,0,3,10,5,4]
+"classmodule_1_1skill_1_1QuinticWalk.html#ac7879979a92ab2df0ffde550e0f8ca67":[2,0,3,10,3,16]
 };

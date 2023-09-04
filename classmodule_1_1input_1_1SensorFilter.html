@@ -250,9 +250,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a734571fe0006b4b4e2957fc40077ad8c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a734571fe0006b4b4e2957fc40077ad8c">integrate_walkcommand</a> (const double dt, const Stability &amp;stability, const WalkState &amp;walk_state)</td></tr>
 <tr class="memdesc:a734571fe0006b4b4e2957fc40077ad8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a deadreckoning update on the odometry for x, y and yaw using the walk command.  <a href="classmodule_1_1input_1_1SensorFilter.html#a734571fe0006b4b4e2957fc40077ad8c">More...</a><br /></td></tr>
 <tr class="separator:a734571fe0006b4b4e2957fc40077ad8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a20b36e902024f87a8f2e1193179539b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a20b36e902024f87a8f2e1193179539b1">update_kinematics</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const KinematicsModel &amp;kinematics_model, const RawSensors &amp;raw_sensors)</td></tr>
-<tr class="memdesc:a20b36e902024f87a8f2e1193179539b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the sensors message with kinematics data.  <a href="classmodule_1_1input_1_1SensorFilter.html#a20b36e902024f87a8f2e1193179539b1">More...</a><br /></td></tr>
-<tr class="separator:a20b36e902024f87a8f2e1193179539b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a108c8864395b9e74cb4d888497ccecfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">update_kinematics</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const RawSensors &amp;raw_sensors)</td></tr>
+<tr class="memdesc:a108c8864395b9e74cb4d888497ccecfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the sensors message with kinematics data.  <a href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">More...</a><br /></td></tr>
+<tr class="separator:a108c8864395b9e74cb4d888497ccecfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a02988d6e1c81b5fa00fcfc62a307af51"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a02988d6e1c81b5fa00fcfc62a307af51">update_odometry_ground_truth</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a02988d6e1c81b5fa00fcfc62a307af51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes the position, orientation, velocity and rotational velocity of the torso in world space.  <a href="classmodule_1_1input_1_1SensorFilter.html#a02988d6e1c81b5fa00fcfc62a307af51">More...</a><br /></td></tr>
 <tr class="separator:a02988d6e1c81b5fa00fcfc62a307af51"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -278,6 +278,10 @@ struct <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html"
 <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html">utility::math::filter::KalmanFilter</a>&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a15a89bcf7e8aa241e0f7bc1d312f5f22">n_states</a>, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a96af9da50aef0e88a0bd1a844b61886d">n_inputs</a>, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa503f208447ddd9bf98a27c96cdc265e">n_measurements</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a8a09ed758631186a143d04b0529ae97b">kf</a> {}</td></tr>
 <tr class="memdesc:a8a09ed758631186a143d04b0529ae97b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kalman filter for pose estimation. <br /></td></tr>
 <tr class="separator:a8a09ed758631186a143d04b0529ae97b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af52d83229b487471a813526f49536da5"><td class="memItemLeft" align="right" valign="top"><a id="af52d83229b487471a813526f49536da5"></a>
+tinyrobotics::Model&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a089622313a3c016c9d4c4e1a8d69de67">n_joints</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#af52d83229b487471a813526f49536da5">nugus_model</a></td></tr>
+<tr class="memdesc:af52d83229b487471a813526f49536da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">tinyrobotics NUgus model used for kinematics <br /></td></tr>
+<tr class="separator:af52d83229b487471a813526f49536da5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66c82048dee96b89d1febe7260060423"><td class="memItemLeft" align="right" valign="top"><a id="a66c82048dee96b89d1febe7260060423"></a>
 <a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html">utility::math::filter::UKF</a>&lt; double, <a class="el" href="classmodule_1_1input_1_1MotionModel.html">MotionModel</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a66c82048dee96b89d1febe7260060423">ukf</a> {}</td></tr>
 <tr class="memdesc:a66c82048dee96b89d1febe7260060423"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unscented kalman filter for pose estimation. <br /></td></tr>
@@ -289,6 +293,10 @@ Static Public Attributes</h2></td></tr>
 static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a96af9da50aef0e88a0bd1a844b61886d">n_inputs</a> = 0</td></tr>
 <tr class="memdesc:a96af9da50aef0e88a0bd1a844b61886d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of inputs in the Kalman filter. Model has no inputs. <br /></td></tr>
 <tr class="separator:a96af9da50aef0e88a0bd1a844b61886d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a089622313a3c016c9d4c4e1a8d69de67"><td class="memItemLeft" align="right" valign="top"><a id="a089622313a3c016c9d4c4e1a8d69de67"></a>
+static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a089622313a3c016c9d4c4e1a8d69de67">n_joints</a> = 20</td></tr>
+<tr class="memdesc:a089622313a3c016c9d4c4e1a8d69de67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of actuatable joints in the NUgus robot. <br /></td></tr>
+<tr class="separator:a089622313a3c016c9d4c4e1a8d69de67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa503f208447ddd9bf98a27c96cdc265e"><td class="memItemLeft" align="right" valign="top"><a id="aa503f208447ddd9bf98a27c96cdc265e"></a>
 static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa503f208447ddd9bf98a27c96cdc265e">n_measurements</a> = 4</td></tr>
 <tr class="memdesc:aa503f208447ddd9bf98a27c96cdc265e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of measurements in the Kalman filter. y = [roll, pitch, roll rate, pitch rate]'. <br /></td></tr>
@@ -456,8 +464,8 @@ Trent Houliston </dd></dl>
 
 </div>
 </div>
-<a id="a20b36e902024f87a8f2e1193179539b1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a20b36e902024f87a8f2e1193179539b1">&#9670;&nbsp;</a></span>update_kinematics()</h2>
+<a id="a108c8864395b9e74cb4d888497ccecfc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a108c8864395b9e74cb4d888497ccecfc">&#9670;&nbsp;</a></span>update_kinematics()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -467,12 +475,6 @@ Trent Houliston </dd></dl>
           <td>(</td>
           <td class="paramtype">std::unique_ptr&lt; Sensors &gt; &amp;&#160;</td>
           <td class="paramname"><em>sensors</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const KinematicsModel &amp;&#160;</td>
-          <td class="paramname"><em>kinematics_model</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -492,7 +494,7 @@ Trent Houliston </dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">sensors</td><td>The sensors message to update </td></tr>
-    <tr><td class="paramname">kinematics_model</td><td>The kinematics model to use for calculations </td></tr>
+    <tr><td class="paramname">raw_sensors</td><td>The raw sensor data </td></tr>
   </table>
   </dd>
 </dl>
@@ -753,7 +755,7 @@ Trent Houliston </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html">SensorFilter</a></li>
-    <li class="footer">Generated on Fri Sep 1 2023 20:09:27 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon Sep 4 2023 04:05:44 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -332,6 +332,7 @@ var annotated_dup =
         [ "ClockData", "structutility_1_1clock_1_1ClockData.html", "structutility_1_1clock_1_1ClockData" ]
       ] ],
       [ "input", null, [
+        [ "FrameID", "structutility_1_1input_1_1FrameID.html", "structutility_1_1input_1_1FrameID" ],
         [ "LimbID", "structutility_1_1input_1_1LimbID.html", "structutility_1_1input_1_1LimbID" ],
         [ "ServoID", "structutility_1_1input_1_1ServoID.html", "structutility_1_1input_1_1ServoID" ]
       ] ],
