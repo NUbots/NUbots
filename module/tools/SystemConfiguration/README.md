@@ -46,6 +46,10 @@ If `generate_locale` is set in the `SystemConfiguration.yaml` then `locale-gen` 
 
 If `generate_grub` is set in the `SystemConfiguration.yaml` then `grub-mkconfig` is called to ensure that the grub configuration file is up to date
 
+### Mirrors
+
+If `update_mirrorlist` is set in the `SystemConfiguration.yaml` then download the mirrorlist file used in the NUbots dockerfile
+
 ### Message Of The Day
 
 The message of the day file is regenerated to ensure it has the correct contents

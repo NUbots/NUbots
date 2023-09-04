@@ -54,3 +54,6 @@ generate_locale: True
 
 # Generate grub config
 generate_grub: True
+
+# Update mirrorlist
+update_mirrorlist: True
