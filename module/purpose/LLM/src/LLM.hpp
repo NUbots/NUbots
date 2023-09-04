@@ -44,6 +44,10 @@ namespace module::purpose {
             bool planner = false;
             /// @brief Whether to not run the OpenAI API for debugging purposes without costing $$$
             bool debug_no_api = true;
+
+            /// @brief Main prompt information excluding world information
+            /// Affects the performance significantly! Prompt engineering needed.
+            std::string main_prompt = "";
         } cfg;
 
         static const int PROMPT_FREQ = 10;

@@ -1,6 +1,6 @@
 #include "LLM.hpp"
 
-#include <ranges>
+#include <sstream>
 #include <string>
 
 #include "extension/Behaviour.hpp"
@@ -27,6 +27,7 @@
 #include "message/strategy/WalkToBall.hpp"
 #include "message/strategy/WalkToFieldPosition.hpp"
 
+#include "utility/input/LimbID.hpp"
 #include "utility/openai/openai.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -56,6 +57,7 @@ namespace module::purpose {
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
 
+    using utility::input::LimbID;
     using utility::support::Expression;
 
     LLM::LLM(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -76,6 +78,8 @@ namespace module::purpose {
             cfg.openai_api_key                  = config["openai_api_key"].as<std::string>();
             cfg.user_request                    = config["user_request"].as<std::string>();
 
+            cfg.main_prompt = config["main_prompt"].as<std::string>();
+
             cfg.planner      = config["planner"].as<bool>();
             cfg.debug_no_api = config["debug_no_api"].as<bool>();
         });
@@ -87,16 +91,16 @@ namespace module::purpose {
             emit<Task>(std::make_unique<StandStill>(), 0);  // if not doing anything else, just stand
             // This emit starts the tree to achieve the purpose
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 1);
+            emit<Task>(std::make_unique<FallRecovery>(), 2);
 
             if (cfg.planner) {
 
                 log<NUClear::INFO>("Running LLM as planner.");
-                emit<Task>(std::make_unique<LLMPlanner>(), 2);
+                emit<Task>(std::make_unique<LLMPlanner>(), 1);
             }
             else {
                 log<NUClear::INFO>("Running LLM as strategy.");
-                emit<Task>(std::make_unique<LLMStrategy>(), 2);
+                emit<Task>(std::make_unique<LLMStrategy>(), 1);
             }
         });
 
@@ -105,23 +109,13 @@ namespace module::purpose {
            Every<PROMPT_FREQ, std::chrono::seconds>,
            Optional<With<Ball>>,
            Optional<With<Field>>,
-           With<Sensors>>()
+           With<Sensors>,
+           Single>()
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Field>& field,
                          const Sensors& sensors) {
-                std::string prompt =
-                    "You are a soccer-playing humanoid robot. You will be given a goal and you need to provide the "
-                    "immediate tasks to execute now. You are prompted every 10 seconds for tasks.\nThe tasks work in a "
-                    "tree-based structure, with "
-                    "your calls at the top of the tree. Calling the task function creates children in the tree.\nYour "
-                    "output should look like C++ code in the form of \n`TaskFunctionName(args...)`\nThe available "
-                    "tasks are\n - Kick(bool left_foot)\n - Walk(Eigen::Vector3d command) // "
-                    "x meters per second, y meters per second, theta radians per second\n - "
-                    "Look(Eigen::Vector3d rPCt) // Vector from the camera to the point to look at, in torso space\nYou "
-                    "do not need to worry about handling falling.\nCoordinates are x axis forwards, y axis to the left "
-                    "and z axis up. The field is measured from the centre and is 6 by 9 metres. The x-axis faces "
-                    "towards the opponent's goal. The robot is 0.91 centimetres tall and the general shape of a "
-                    "person.\nOne second has passed. Task: play soccer as a striker.\n State information:";
+                std::string prompt = cfg.main_prompt;
+                std::string prompt += "\nState information:";
 
                 Eigen::Isometry3d Htw(sensors.Htw);
 
@@ -160,99 +154,105 @@ namespace module::purpose {
                     prompt += "\nBall: unknown.";
                 }
 
+                prompt += "\nRespond with only the function calls, nothing else.";
+
                 log<NUClear::INFO>("Prompt is:\n", prompt);
 
-                if (!cfg.debug_no_api) {
+                std::string response = "";
 
+                // Testing without OpenAI API calls
+                if (cfg.debug_no_api) {
+                    response = "Look(Eigen::Vector3d(1.6,-0.001,0.23))\nWalk(Eigen::Vector3d(1.0,0.0,0.0))";
+                }
+                else {
                     // Send request to OpenAI API
-                    // nlohmann::json request = {
-                    //     {"model", "gpt-3.5-turbo"},
-                    //     {"messages", nlohmann::json::array({{{"role", "user"}, {"content", prompt}}})},
-                    //     {"max_tokens", 200},
-                    //     {"temperature", 0}};
-                    // auto chat     = utility::openai::chat().create(request);
-                    // auto response = chat.["choices"].[0].["message"].["content"].get<std::string>();
-                    std::string response =
-                        "Look(Eigen::Vector3d(1.587389,-0.001015,0.230369))\nWalk(Eigen::Vector3d(0.000000,0.000000,0."
-                        "000000))\nKick(false)\n)";
+                    nlohmann::json request = {
+                        {"model", "gpt-3.5-turbo"},
+                        {"messages", nlohmann::json::array({{{"role", "user"}, {"content", prompt}}})},
+                        {"max_tokens", 200},
+                        {"temperature", 0}};
+                    auto chat = utility::openai::chat().create(request);
+                    response  = chat["choices"][0]["message"]["content"].get<std::string>();
+                }
 
-                    log<NUClear::INFO>("Response is:\n", response);
+                log<NUClear::INFO>("Response is:\n", response);
 
-                    // Parse the response to extract tasks and priorities
-                    // Parse the Look task
-                    size_t look_pos = response.find("Look");
-                    try {
-                        if (look_pos != std::string::npos) {
-                            // Skip to the Eigen vector
-                            look_pos += 20;
-                            // Find where the arguments are
-                            size_t first_bracket  = response.find("(", look_pos);
-                            size_t second_bracket = response.find(")", first_bracket);
+                // Parse the response to extract tasks and priorities
+                // Parse the Look task
+                size_t look_pos = response.find("Look");
+                try {
+                    if (look_pos != std::string::npos) {
+                        // Skip to the Eigen vector
+                        look_pos += 20;
+                        // Find where the arguments are
+                        size_t first_bracket  = response.find("(", look_pos);
+                        size_t second_bracket = response.find(")", first_bracket);
 
-                            // Get the arguments
-                            // Create a vector from split view
-                            std::vector<double> args{};
-                            for (const std::string_view part : std::ranges::split_view(
-                                     response.substr(first_bracket + 1, second_bracket - first_bracket - 1),
-                                     ',')) {
-                                args.push_back(std::stod(std::string(part)));
-                            }
+                        // Get the arguments
+                        // Create a vector from split view
+                        std::vector<double> args{};
+                        std::stringstream ss(response.substr(first_bracket + 1, second_bracket - first_bracket - 1));
 
-                            emit<Task>(std::make_unique<Look>(
-                                           Eigen::Vector3d(std::stod(args[0]), std::stod(args[1]), std::stod(args[2]))),
-                                       0);
+                        while (ss.good()) {
+                            std::string substr;
+                            std::getline(ss, substr, ',');
+                            args.push_back(std::stod(substr));
                         }
+
+                        emit<Task>(std::make_unique<Look>(Eigen::Vector3d(args[0], args[1], args[2])), 0);
                     }
-                    catch (std::exception& e) {
-                        log<NUClear::ERROR>("Response for Look not formatted correctly.");
-                    }
+                }
+                catch (std::exception& e) {
+                    log<NUClear::ERROR>("Response for Look not formatted correctly.");
+                }
 
-                    // Parse the walk task
-                    size_t walk_pos = response.find("Walk");
-                    try {
-                        if (walk_pos != std::string::npos) {
-                            // Skip to the Eigen vector
-                            walk_pos += 20;
-                            // Find where the arguments are
-                            size_t first_bracket  = response.find("(", walk_pos);
-                            size_t second_bracket = response.find(")", first_bracket);
+                // Parse the walk task
+                size_t walk_pos = response.find("Walk");
+                try {
+                    if (walk_pos != std::string::npos) {
+                        // Skip to the Eigen vector
+                        walk_pos += 20;
+                        // Find where the arguments are
+                        size_t first_bracket  = response.find("(", walk_pos);
+                        size_t second_bracket = response.find(")", first_bracket);
 
-                            // Get the arguments
-                            // Create a vector from split view
-                            std::vector<double> args{};
-                            for (const std::string_view part : std::ranges::split_view(
-                                     response.substr(first_bracket + 1, second_bracket - first_bracket - 1),
-                                     ',')) {
-                                args.push_back(std::stod(std::string(part)));
-                            }
+                        // Get the arguments
+                        // Create a vector from split view
+                        std::vector<double> args{};
+                        std::stringstream ss(response.substr(first_bracket + 1, second_bracket - first_bracket - 1));
 
-                            emit<Task>(std::make_unique<Walk>(
-                                           Eigen::Vector3d(std::stod(args[0]), std::stod(args[1]), std::stod(args[2]))),
-                                       0);
+                        while (ss.good()) {
+                            std::string substr;
+                            std::getline(ss, substr, ',');
+                            args.push_back(std::stod(substr));
                         }
-                    }
-                    catch (std::exception& e) {
-                        log<NUClear::ERROR>("Response for Walk not formatted correctly.");
-                    }
 
-                    // Parse the kick task
-                    size_t kick_pos = response.find("Kick");
-                    try {
-                        if (kick_pos != std::string::npos) {
-                            // Skip to the Eigen vector
-                            kick_pos += 20;
-                            // Find where the arguments are
-                            size_t first_bracket  = response.find("(", kick_pos);
-                            size_t second_bracket = response.find(")", first_bracket);
-                            // Get the kick direction
-                            auto arg = response.substr(first_bracket + 1, second_bracket - first_bracket - 1);
-                            bool kick_direction = (arg == "true") || (arg == "True") || (arg == "TRUE") || (arg == "1");
-                            emit<Task>(std::make_unique<Kick>(kick_direction, 0));
-                        }
+                        emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(args[0], args[1], args[2])), 0);
                     }
-                    catch (std::exception& e) {
-                        log<NUClear::ERROR>("Response for Kick not formatted correctly.");
+                }
+                catch (std::exception& e) {
+                    log<NUClear::ERROR>("Response for Walk not formatted correctly.");
+                }
+
+                // Parse the kick task
+                size_t kick_pos = response.find("Kick");
+                try {
+                    if (kick_pos != std::string::npos) {
+                        // Skip to the Eigen vector
+                        kick_pos += 20;
+                        // Find where the arguments are
+                        size_t first_bracket  = response.find("(", kick_pos);
+                        size_t second_bracket = response.find(")", first_bracket);
+                        // Get the kick direction
+                        auto arg        = response.substr(first_bracket + 1, second_bracket - first_bracket - 1);
+                        LimbID kick_leg = (arg == "true") || (arg == "True") || (arg == "TRUE") || (arg == "1")
+                                              ? LimbID::LEFT_LEG
+                                              : LimbID::RIGHT_LEG;
+                        emit<Task>(std::make_unique<Kick>(kick_leg), 0);
                     }
+                }
+                catch (std::exception& e) {
+                    log<NUClear::ERROR>("Response for Kick not formatted correctly.");
                 }
             });
 
