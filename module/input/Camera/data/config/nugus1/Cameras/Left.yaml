@@ -1,4 +1,4 @@
-serial_number: 0118847F
+serial_number: 011885A9
 
 lens:
   # Lens: Lensagon BF10M19828S118C
@@ -15,16 +15,19 @@ lens:
   # Lens projection type
   projection: EQUIDISTANT
   # Normalised focal length: focal length in pixels / image width
-  focal_length: 0.34407470485610553
+  focal_length: 0.34690945742400775
   # Normalised image centre offset: pixels from centre to optical axis / image width
-  centre: [0.0037393686683910104, -0.007110721366947057]
+  centre: [0.02072339174622414, -0.0011612242293956145]
   # The polynomial distortion coefficients for the lens
-  k: [0.4739103438574755, 0.1549602920025024]
+  k: [0.38553542593448015, 0.1498415334589703]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
   fov: 180 * pi / 180
-  # The homogenous transform from the rigid platform this camera is attached to to its optical location
-  Hpc:
-    - [0.9998477, 0.0000000, -0.0174524, 0.08893612063588988]
-    - [-0.0006091, 0.9993908, -0.0348942, -0.03529909622045881]
-    - [0.0174418, 0.0348995, 0.9992386, 0.0713674563254241]
-    - [0.0, 0.0, 0.0, 1.0]
+
+# Camera kinematics
+urdf_path: "/home/nubots/models/nugus.urdf"
+
+is_left_camera: true
+
+roll_offset: -2.5 * pi / 180
+
+pitch_offset: 0.0 * pi / 180

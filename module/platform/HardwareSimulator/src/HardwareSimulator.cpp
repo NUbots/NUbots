@@ -31,6 +31,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -46,6 +47,7 @@ namespace module::platform {
     using message::input::Sensors;
     using message::platform::RawSensors;
 
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::support::Expression;
 
@@ -155,8 +157,8 @@ namespace module::platform {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
             [this](const std::shared_ptr<const Sensors>& previousSensors) {
                 if (previousSensors) {
-                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
-                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[FrameID::R_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[FrameID::L_ANKLE_ROLL]);
                     Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                     Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
