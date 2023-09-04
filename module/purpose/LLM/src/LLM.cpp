@@ -1,5 +1,8 @@
 #include "LLM.hpp"
 
+#include <ranges>
+#include <string>
+
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -73,61 +76,27 @@ namespace module::purpose {
             cfg.openai_api_key                  = config["openai_api_key"].as<std::string>();
             cfg.user_request                    = config["user_request"].as<std::string>();
 
-            cfg.planner = config["planner"].as<bool>();
+            cfg.planner      = config["planner"].as<bool>();
+            cfg.debug_no_api = config["debug_no_api"].as<bool>();
         });
 
         on<Startup>().then([this] {
             utility::openai::start(cfg.openai_api_key);
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
+            emit<Task>(std::make_unique<StandStill>(), 0);  // if not doing anything else, just stand
             // This emit starts the tree to achieve the purpose
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 1);
 
             if (cfg.planner) {
-                // Create the inital prompt
-                std::string prompt =
-                    "You are a soccer-playing humanoid robot. You will be given a goal and you need to provide the "
-                    "tasks you should execute currently to achieve that goal. You will be prompted every ";
-                prompt += PROMPT_FREQ;
-                prompt +=
-                    " second/s for tasks, with information on the current state. A complete list of the available task "
-                    "functions and their arguments will be provided. \nThe tasks work in a tree-based structure, with "
-                    "your calls at the top of the tree. Calling the task function creates children in the tree. The "
-                    "tasks will only execute if they have priority to get access to the relevant motors. You can "
-                    "specify a priority for tasks, so the tasks "
-                    "with a higher priority value will have priority to access the motors. \nYour task output should "
-                    "look like code in the form of \n`TaskFunctionName(args..., priority)`\nThe available tasks are\n "
-                    "- Kick(bool left_foot)\n - Walk(double x, double y, double theta) // x meters per second, y "
-                    "meters per second, theta radians per second\n - Look(Eigen::Vector3d rPCt) // Vector from the "
-                    "camera to the point to look at, in torso space\nYou do not need to worry about handling falling - "
-                    "there is a sibling to you in the tree with higher priority that will constantly check and handle "
-                    "for falling.\nCoordinates are x axis forwards, y axis to the left and z axis up.\nSay 'Ok!' if "
-                    "you understand.";
 
-                // Send request to OpenAI API
-                nlohmann::json request = {{"model", "text-davinci-003"},
-                                          {"prompt", prompt},
-                                          {"max_tokens", 200},
-                                          {"temperature", 0}};
-                auto completion        = utility::openai::completion().create(request);
-
-                auto response = completion["choices"][0]["text"].get<std::string>();
-                log<NUClear::INFO>("Response is:", response);
-
-                // If the response contains "Ok!" then we are good to go
-                if (response.find("Ok!") != std::string::npos) {
-                    log<NUClear::INFO>("Ok! response received. Running LLM as planner.");
-                    emit<Task>(std::make_unique<LLMPlanner>());
-                }
-                else {
-                    log<NUClear::ERROR>("Response did not contain 'Ok!', exiting...");
-                    return;
-                }
+                log<NUClear::INFO>("Running LLM as planner.");
+                emit<Task>(std::make_unique<LLMPlanner>(), 2);
             }
             else {
                 log<NUClear::INFO>("Running LLM as strategy.");
-                emit<Task>(std::make_unique<LLMStrategy>());
+                emit<Task>(std::make_unique<LLMStrategy>(), 2);
             }
         });
 
@@ -140,7 +109,19 @@ namespace module::purpose {
             .then([this](const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Field>& field,
                          const Sensors& sensors) {
-                std::string prompt = "One second has passed. Task: play soccer as a striker.\n State information:";
+                std::string prompt =
+                    "You are a soccer-playing humanoid robot. You will be given a goal and you need to provide the "
+                    "immediate tasks to execute now. You are prompted every 10 seconds for tasks.\nThe tasks work in a "
+                    "tree-based structure, with "
+                    "your calls at the top of the tree. Calling the task function creates children in the tree.\nYour "
+                    "output should look like C++ code in the form of \n`TaskFunctionName(args...)`\nThe available "
+                    "tasks are\n - Kick(bool left_foot)\n - Walk(Eigen::Vector3d command) // "
+                    "x meters per second, y meters per second, theta radians per second\n - "
+                    "Look(Eigen::Vector3d rPCt) // Vector from the camera to the point to look at, in torso space\nYou "
+                    "do not need to worry about handling falling.\nCoordinates are x axis forwards, y axis to the left "
+                    "and z axis up. The field is measured from the centre and is 6 by 9 metres. The x-axis faces "
+                    "towards the opponent's goal. The robot is 0.91 centimetres tall and the general shape of a "
+                    "person.\nOne second has passed. Task: play soccer as a striker.\n State information:";
 
                 Eigen::Isometry3d Htw(sensors.Htw);
 
@@ -180,13 +161,106 @@ namespace module::purpose {
                 }
 
                 log<NUClear::INFO>("Prompt is:\n", prompt);
+
+                if (!cfg.debug_no_api) {
+
+                    // Send request to OpenAI API
+                    // nlohmann::json request = {
+                    //     {"model", "gpt-3.5-turbo"},
+                    //     {"messages", nlohmann::json::array({{{"role", "user"}, {"content", prompt}}})},
+                    //     {"max_tokens", 200},
+                    //     {"temperature", 0}};
+                    // auto chat     = utility::openai::chat().create(request);
+                    // auto response = chat.["choices"].[0].["message"].["content"].get<std::string>();
+                    std::string response =
+                        "Look(Eigen::Vector3d(1.587389,-0.001015,0.230369))\nWalk(Eigen::Vector3d(0.000000,0.000000,0."
+                        "000000))\nKick(false)\n)";
+
+                    log<NUClear::INFO>("Response is:\n", response);
+
+                    // Parse the response to extract tasks and priorities
+                    // Parse the Look task
+                    size_t look_pos = response.find("Look");
+                    try {
+                        if (look_pos != std::string::npos) {
+                            // Skip to the Eigen vector
+                            look_pos += 20;
+                            // Find where the arguments are
+                            size_t first_bracket  = response.find("(", look_pos);
+                            size_t second_bracket = response.find(")", first_bracket);
+
+                            // Get the arguments
+                            // Create a vector from split view
+                            std::vector<double> args{};
+                            for (const std::string_view part : std::ranges::split_view(
+                                     response.substr(first_bracket + 1, second_bracket - first_bracket - 1),
+                                     ',')) {
+                                args.push_back(std::stod(std::string(part)));
+                            }
+
+                            emit<Task>(std::make_unique<Look>(
+                                           Eigen::Vector3d(std::stod(args[0]), std::stod(args[1]), std::stod(args[2]))),
+                                       0);
+                        }
+                    }
+                    catch (std::exception& e) {
+                        log<NUClear::ERROR>("Response for Look not formatted correctly.");
+                    }
+
+                    // Parse the walk task
+                    size_t walk_pos = response.find("Walk");
+                    try {
+                        if (walk_pos != std::string::npos) {
+                            // Skip to the Eigen vector
+                            walk_pos += 20;
+                            // Find where the arguments are
+                            size_t first_bracket  = response.find("(", walk_pos);
+                            size_t second_bracket = response.find(")", first_bracket);
+
+                            // Get the arguments
+                            // Create a vector from split view
+                            std::vector<double> args{};
+                            for (const std::string_view part : std::ranges::split_view(
+                                     response.substr(first_bracket + 1, second_bracket - first_bracket - 1),
+                                     ',')) {
+                                args.push_back(std::stod(std::string(part)));
+                            }
+
+                            emit<Task>(std::make_unique<Walk>(
+                                           Eigen::Vector3d(std::stod(args[0]), std::stod(args[1]), std::stod(args[2]))),
+                                       0);
+                        }
+                    }
+                    catch (std::exception& e) {
+                        log<NUClear::ERROR>("Response for Walk not formatted correctly.");
+                    }
+
+                    // Parse the kick task
+                    size_t kick_pos = response.find("Kick");
+                    try {
+                        if (kick_pos != std::string::npos) {
+                            // Skip to the Eigen vector
+                            kick_pos += 20;
+                            // Find where the arguments are
+                            size_t first_bracket  = response.find("(", kick_pos);
+                            size_t second_bracket = response.find(")", first_bracket);
+                            // Get the kick direction
+                            auto arg = response.substr(first_bracket + 1, second_bracket - first_bracket - 1);
+                            bool kick_direction = (arg == "true") || (arg == "True") || (arg == "TRUE") || (arg == "1");
+                            emit<Task>(std::make_unique<Kick>(kick_direction, 0));
+                        }
+                    }
+                    catch (std::exception& e) {
+                        log<NUClear::ERROR>("Response for Kick not formatted correctly.");
+                    }
+                }
             });
 
-        // TODO: Add "world model" (SensorFilter, Localisation, etc.) using With, and then use it in the prompt, maybe
-        // have this update at a certain rate such that the request is received?
+        // TODO: Add "world model" (SensorFilter, Localisation, etc.) using With, and then use it in the prompt,
+        // maybe have this update at a certain rate such that the request is received?
         on<Provide<LLMStrategy>>().then([this] {
-            // TODO: Build prompt for LLM in a way which incorporates the current world state and provides a sensible
-            // and parsable response, something along the lines of:
+            // TODO: Build prompt for LLM in a way which incorporates the current world state and provides a
+            // sensible and parsable response, something along the lines of:
             std::string prompt = "Given desired user request: " + cfg.user_request + " and current world state: Ball was last seen 0.1 seconds ago 0.1m away from you. You have the ability to WalkToBall, Kick, LookAround, StandStill. What tasks should you currently do? \n Provide your response as a list of with format: Task: <task> Priority: <priority> \n where <task> is one of the aforementioned tasks, and <priority> is an integer above 0, a higher number means a higher priority and will be take control over a lower priority tasks servos. \n";
 
             // Send request to OpenAI API

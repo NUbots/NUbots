@@ -42,9 +42,11 @@ namespace module::purpose {
 
             /// @brief Whether or not the LLM should act as the planning layer
             bool planner = false;
+            /// @brief Whether to not run the OpenAI API for debugging purposes without costing $$$
+            bool debug_no_api = true;
         } cfg;
 
-        static const int PROMPT_FREQ = 5;
+        static const int PROMPT_FREQ = 10;
 
     public:
         /// @brief Called by the powerplant to build and setup the LLM reactor.

@@ -21,6 +21,10 @@ walk_to_field_position_position: [0, 0, 0]
 
 user_request: "Kick the ball."
 
+# Whether or not to use the LLM as a planner (as opposed to a strategy) layer
 planner: true
 
+# The OpenAI API costs $$$ to use, so we need to use a key to access it
 openai_api_key: ""
+# Use if you want to run the module without the OpenAI API, for debugging non-model aspects of the module for cost saving
+debug_no_api: false
