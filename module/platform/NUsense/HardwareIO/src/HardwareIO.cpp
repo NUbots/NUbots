@@ -37,6 +37,12 @@ namespace module::platform::NUsense {
         });
 
         // TODO add an on<IO> to handle messages coming from nusense
+        // When we receive data back from NUsense it will arrive here
+        on<IO>(nusense.native_handle(), IO::READ).then([this] {
+            // TODO Fill this properly below, receive protobuf bytes and parse them to our NUsense message
+
+        });
+
         // TODO create a message tailored for NUsense and emit it
 
         // When a message for NUsense is detected, serialise it and send it to the port
