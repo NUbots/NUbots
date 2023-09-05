@@ -181,16 +181,6 @@ namespace module::tools {
                 symlink(link, target);
             }
 
-            /*************
-             * MIRRORLIST *
-             **************/
-            if (config["update_mirrorlist"].as<bool>()) {
-                log<NUClear::INFO>("Updating mirror list to match dockerfile");
-                std::system(
-                    "wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pacman.d/mirrorlist \
-                 -O /etc/pacman.d/mirrorlist");
-            }
-
             /**********
              * PACMAN *
              **********/
