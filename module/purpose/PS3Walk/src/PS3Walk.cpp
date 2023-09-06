@@ -34,8 +34,8 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/skill/Script.hpp"
 
-namespace module::purpose {
-
+namespace module::purpose
+{
 
     using extension::Configuration;
     using extension::behaviour::Task;
@@ -55,30 +55,32 @@ namespace module::purpose {
     using NUClear::message::LogMessage;
     using utility::input::LimbID;
 
-    PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment))
+    {
 
-        on<Configuration>("PS3Walk.yaml").then([this](const Configuration& config) {
+        on<Configuration>("PS3Walk.yaml").then([this](const Configuration &config)
+                                               {
             // Use configuration here from file PlanKick.yaml
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
             cfg.maximum_forward_velocity    = config["maximum_forward_velocity"].as<float>();
-            cfg.maximum_rotational_velocity = config["maximum_rotational_velocity"].as<float>();
-        });
-
+            cfg.maximum_rotational_velocity = config["maximum_rotational_velocity"].as<float>(); });
 
         // Start the Director graph for the KeyboardWalk.
-        on<Startup>().then([this] {
-            // At the start of the program, we should be standing
-            // Without this emit, modules that need a Stability message may not run
-            emit(std::make_unique<Stability>(Stability::UNKNOWN));
+        on<Startup>().then([this]
+                           {
+                               // At the start of the program, we should be standing
+                               // Without this emit, modules that need a Stability message may not run
+                               emit(std::make_unique<Stability>(Stability::UNKNOWN));
 
-            // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 4);
+                               // The robot should always try to recover from falling, if applicable, regardless of purpose
+                               emit<Task>(std::make_unique<FallRecovery>(), 4);
 
-            // Stand Still on startup
-            //emit<Task>(std::make_unique<StandStill>());
-        });
+                               // Stand Still on startup
+                               // emit<Task>(std::make_unique<StandStill>());
+                           });
 
-        on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
+        on<Every<1, std::chrono::milliseconds>, Single>().then([this]
+                                                               {
             JoystickEvent event;
             // read from joystick
             if (joystick.sample(&event)) {
@@ -102,8 +104,9 @@ namespace module::purpose {
                             walk_command.x() = static_cast<float>(event.value) / std::numeric_limits<short>::max()
                                                * cfg.maximum_forward_velocity;
                             break;
-                        case AXIS_RIGHT_JOYSTICK_VERTICAL: head_pitch = static_cast<float>(-event.value); break;
-                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: head_yaw = static_cast<float>(-event.value); break;
+                        //max joystick value is 32767
+                        case AXIS_RIGHT_JOYSTICK_VERTICAL: head_pitch = static_cast<float>((-event.value / 32767 )* float(M_PI)); break;
+                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: head_yaw = static_cast<float>((-event.value / 32767 )* float(M_PI)); break;
                     }
                 }
                 // control scheme:
@@ -242,12 +245,12 @@ namespace module::purpose {
             // If it's closed then we should try to reconnect
             else if (!joystick.valid()) {
                 joystick.reconnect();
-            }
-        });
+            } });
 
         // output walk command based on updated strafe and rotation speed from joystick
         // TODO(HardwareTeam): potential performance gain: ignore if value hasn't changed since last emit?
-        on<Every<20, Per<std::chrono::seconds>>>().then([this] {
+        on<Every<20, Per<std::chrono::seconds>>>().then([this]
+                                                        {
             if (!head_locked) {
                 // Create a unit vector in the direction the head should be pointing
                 Eigen::Vector3d uPCt = (Eigen::AngleAxisd(head_yaw, Eigen::Vector3d::UnitZ())
@@ -260,7 +263,6 @@ namespace module::purpose {
             if (moving) {
                 log<NUClear::DEBUG>("Emitting walk command: ", walk_command.transpose());
                 emit<Task>(std::make_unique<Walk>(walk_command.cast<double>()), 2);
-            }
-        });
+            } });
     }
-}  // namespace module::purpose
+} // namespace module::purpose
