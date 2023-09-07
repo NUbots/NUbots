@@ -6,7 +6,7 @@ import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
 
 import Sensors = message.input.Sensors;
-import Say = message.output.Say;
+import Test = message.support.nusight.Test;
 
 describe("Network", () => {
   it("off() unregisters all callbacks", () => {
@@ -37,9 +37,9 @@ describe("Network", () => {
     const nusightNetwork = createMockInstance(NUsightNetwork);
     const network = new Network(nusightNetwork);
 
-    const payload = Say.encode({ message: "hello world" }).finish();
+    const payload = Test.encode({ message: "hello world" }).finish();
     const packet: NUClearNetSend = {
-      type: "message.output.Say",
+      type: "message.support.nusight.Test",
       payload: payload as Buffer,
       reliable: true,
       target: "nusight",
@@ -58,10 +58,10 @@ describe("Network", () => {
 
     const data = { message: "hello world" };
 
-    network.emit(new Say(data));
+    network.emit(new Test(data));
     expect(nusightNetwork.emit).toHaveBeenCalledWith(data, undefined);
 
-    network.emit(new Say(data), { reliable: true });
+    network.emit(new Test(data), { reliable: true });
     expect(nusightNetwork.emit).toHaveBeenCalledWith(data, { reliable: true });
   });
 });

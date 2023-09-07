@@ -10,7 +10,6 @@ import { memoize } from "../../../base/memoize";
 import { BrowserSystemClock } from "../../../time/browser_clock";
 import { RobotModel } from "../../robot/model";
 
-import State = message.behaviour.Behaviour.State;
 import Mode = message.input.GameState.Data.Mode;
 import PenaltyReason = message.input.GameState.Data.PenaltyReason;
 import Phase = message.input.GameState.Data.Phase;
@@ -40,9 +39,6 @@ export class DashboardRobotModel {
 
   // The voltage of the battery
   @observable voltage: number;
-
-  // The state of the behaviour as an enum
-  @observable behaviourState: State;
 
   // The robots position and heading and associated covariance
   @observable robotPosition: Vector3; // x,y,theta
@@ -82,7 +78,6 @@ export class DashboardRobotModel {
       roleName,
       battery,
       voltage,
-      behaviourState,
       robotPosition,
       robotPositionCovariance,
       ballPosition,
@@ -109,7 +104,6 @@ export class DashboardRobotModel {
     this.roleName = roleName;
     this.battery = battery;
     this.voltage = voltage;
-    this.behaviourState = behaviourState;
     this.robotPosition = robotPosition;
     this.robotPositionCovariance = robotPositionCovariance;
     this.ballPosition = ballPosition;
@@ -132,7 +126,6 @@ export class DashboardRobotModel {
       ballPosition: Vector2.of(),
       ballSightColor: "#4DB6AC",
       battery: -1,
-      behaviourState: State.UNKNOWN,
       camera: Transform.of(),
       gameMode: Mode.UNKNOWN_MODE,
       gamePhase: Phase.UNKNOWN_PHASE,
@@ -186,7 +179,6 @@ interface DashboardRobotModelOpts {
   roleName: string;
   battery: number;
   voltage: number;
-  behaviourState: State;
   robotPosition: Vector3; // x, y, theta
   robotPositionCovariance: Matrix3;
   ballPosition: Vector2;

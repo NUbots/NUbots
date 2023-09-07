@@ -5,7 +5,6 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
-#include "message/behaviour/Behaviour.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Kick.hpp"
