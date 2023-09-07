@@ -22,6 +22,7 @@ namespace module::platform::OpenCR {
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
     using utility::support::Expression;
+    using utility::input::ServoID;
 
     using message::output::Buzzer;
 
