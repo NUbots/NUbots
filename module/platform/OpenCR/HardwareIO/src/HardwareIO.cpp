@@ -21,8 +21,8 @@ namespace module::platform::OpenCR {
     using message::actuation::ServoTargets;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
-    using utility::support::Expression;
     using utility::input::ServoID;
+    using utility::support::Expression;
 
     using message::output::Buzzer;
 
@@ -46,30 +46,51 @@ namespace module::platform::OpenCR {
                     }
 
                     // Check what the hangup was
-                    bool packet_dropped = false;
+
+                    int num_packets_dropped        = 0;                 // keep track of how many we dropped
+                    NUgus::ID first_dropped_packet = NUgus::ID::NO_ID;  // keep track in case we have a chain
+
                     // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
                     // any packets, otherwise is the nonzero ID of the timed out device
                     for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
-                        // if this is the first packet then send a warning
-                        if (!packet_dropped) {
-                            log<NUClear::WARN>(
-                                "NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE chain will "
-                                "cause all later packets (of higher ID) to be dropped. If there are consecutive "
-                                "dropped packets it is likely that the lowest ID is to blame.");
-                        }
+
                         // Delete the packet we're waiting on
                         packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
-                                                       int(dropout_id),
-                                                       static_cast<ServoID>(dropout_id)));
-                        // Set flag
-                        packet_dropped = true;
+
+                        // notify with ID and servo name
+                        log<NUClear::WARN>(fmt::format(
+                            "Dropped packet from ID {} ({})",
+                            int(dropout_id),
+                            /* off-by-one hell. ServoID is 0 indexed, NUgus::ID is 1 indexed*/
+                            dropout_id <= ServoID::Value::NUMBER_OF_SERVOS ? static_cast<ServoID>(dropout_id - 1)
+                                                                           : "not a servo"));
+
+                        // if this is the first packet, set our flag
+                        if (num_packets_dropped == 0) {
+                            first_dropped_packet = dropout_id;
+                        }
+
+                        // increment our counter
+                        num_packets_dropped++;
+                    }
+
+                    // if this is the first packet then send a warning
+                    if (num_packets_dropped > 1) {
+                        log<NUClear::WARN>(
+                            fmt::format("NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE "
+                                        "chain will cause all later packets (of higher ID) to be dropped. Consider "
+                                        "checking cables for ID {} ({})",
+                                        int(first_dropped_packet),
+                                        /* off-by-one hell. ServoID is 0 indexed, NUgus::ID is 1 indexed*/
+                                        first_dropped_packet <= ServoID::Value::NUMBER_OF_SERVOS
+                                            ? static_cast<ServoID>(first_dropped_packet - 1)
+                                            : "not a servo"));
                     }
 
                     // Send a request for all servo packets, only if there were packets dropped
                     // In case the system stops for some other reason, we don't want the watchdog
                     // to make it automatically restart
-                    if (packet_dropped) {
+                    if (num_packets_dropped > 0) {
                         log<NUClear::WARN>("Requesting servo packets to restart system");
                         send_servo_request();
                     }
