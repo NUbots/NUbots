@@ -5,25 +5,24 @@
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
-#include "message/motion/WalkCommand.hpp"
+#include "extension/Behaviour.hpp"
+
+#include "message/skill/Walk.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
-#include "utility/behaviour/Action.hpp"
+#include "utility/file/fileutil.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::optimisation {
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::WalkCommand;
-    using message::platform::RawSensors;
+    using message::skill::Walk;
+    using message::input::Sensors;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2TrialExpired;
 
-    using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::support::Expression;
@@ -32,18 +31,18 @@ namespace module::support::optimisation {
         robot_position = position.value;
     }
 
-    void StandEvaluator::set_up_trial(const NSGA2EvaluationRequest& currentRequest) {
-        load_script(currentRequest.task_config_path);
+    void StandEvaluator::set_up_trial(const NSGA2EvaluationRequest& current_request) {
+        load_script(current_request.task_config_path);
         std::chrono::milliseconds limit_ms = std::chrono::milliseconds(0);
-        for (size_t i = 0; i < currentRequest.parameters.real_params.size(); i++) {
-            int frame_time            = currentRequest.parameters.real_params[i];
+        for (size_t i = 0; i < current_request.parameters.real_params.size(); i++) {
+            int frame_time            = current_request.parameters.real_params[i];
             limit_ms                  = limit_ms + std::chrono::milliseconds(frame_time);
-            script.frames[i].duration = std::chrono::milliseconds(frame_time);
+            // script.frames[i].duration = std::chrono::milliseconds(frame_time);
         }
         save_script(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
-                                currentRequest.generation,
-                                currentRequest.id,
-                                currentRequest.task));
+                                current_request.generation,
+                                current_request.id,
+                                current_request.task));
 
         auto overhead = std::chrono::seconds(2);  // Overhead tacked on to give the robot time to fall over if unstable
         trial_duration_limit = std::chrono::duration_cast<std::chrono::seconds>(limit_ms) + overhead;
@@ -63,9 +62,9 @@ namespace module::support::optimisation {
         max_field_plane_sway = 0.0;
     }
 
-    void StandEvaluator::evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator) {
+    void StandEvaluator::evaluating_state(NSGA2Evaluator* evaluator) {
         NUClear::log<NUClear::DEBUG>("Running Script");
-        run_script(subsumption_id, evaluator);
+        run_script(evaluator);
         NUClear::log<NUClear::DEBUG>("schedule expire");
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
     }
@@ -135,7 +134,7 @@ namespace module::support::optimisation {
     void StandEvaluator::load_script(std::string script_path) {
         if (utility::file::exists(script_path)) {
             NUClear::log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
-            script = YAML::LoadFile(script_path).as<::extension::Script>();
+            script = script_path;
         }
         else {
             NUClear::log<NUClear::ERROR>("No script found at: ", script_path, '\n');
@@ -148,8 +147,8 @@ namespace module::support::optimisation {
         utility::file::writeToFile(script_path, n);
     }
 
-    void StandEvaluator::run_script(size_t subsumption_id, NSGA2Evaluator* evaluator) {
-        evaluator->emit(std::make_unique<extension::ExecuteScript>(subsumption_id, script, NUClear::clock::now()));
+    void StandEvaluator::run_script(NSGA2Evaluator* evaluator) {
+        evaluator->emit<Task>(load_script<LimbsSequence>(script));
     }
 
 }  // namespace module::support::optimisation

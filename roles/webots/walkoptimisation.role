@@ -8,11 +8,15 @@ nuclear_role(
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
   platform::Webots
-  behaviour::Controller
-  behaviour::skills::Stand
-  motion::ScriptEngine
-  motion::QuinticWalk
   input::SensorFilter
+  # Director
+  extension::Director
+  # Skills
+  #skill::Walk
+  # behaviour::Controller
+  # behaviour::skills::Stand
+  # motion::ScriptEngine
+  # motion::QuinticWalk
   support::optimisation::NSGA2Evaluator
   support::optimisation::NSGA2Optimiser
 )

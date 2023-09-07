@@ -5,25 +5,26 @@
 #include <yaml-cpp/yaml.h>
 
 #include "tasks/RotationEvaluator.hpp"
-#include "tasks/StandEvaluator.hpp"
+// #include "tasks/StandEvaluator.hpp"
 #include "tasks/StrafeEvaluator.hpp"
 #include "tasks/WalkEvaluator.hpp"
 
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
-#include "extension/Script.hpp"
 
-#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
+#include "message/skill/Walk.hpp"
+#include "message/strategy/FallRecovery.hpp"
+#include "message/strategy/StandStill.hpp"
+
 #include "message/input/Sensors.hpp"
-#include "message/motion/WalkCommand.hpp"
-#include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
-#include "utility/behaviour/Action.hpp"
-#include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -33,10 +34,11 @@ namespace module::support::optimisation {
     using extension::Configuration;
 
     using message::input::Sensors;
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::WalkCommand;
-    using message::platform::RawSensors;
+    using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
+    using message::skill::Walk;
+    using message::strategy::FallRecovery;
+    using message::strategy::StandStill;
     using message::platform::webots::OptimisationCommand;
     using message::platform::webots::OptimisationRobotPosition;
     using message::support::optimisation::NSGA2Evaluating;
@@ -49,34 +51,45 @@ namespace module::support::optimisation {
     using message::support::optimisation::OptimisationResetDone;
     using message::support::optimisation::OptimisationTimeUpdate;
 
-    using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::support::Expression;
 
-    NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
-        log<NUClear::INFO>("Setting up the NSGA2 evaluator");
+    NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        // : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
+        // log<NUClear::INFO>("Setting up the NSGA2 evaluator");
 
-        emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
-            subsumption_id,
-            "NSGA2 Evaluator",
-            {std::pair<float, std::set<LimbID>>(
-                1,
-                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>& given_limbs) {
-                if (given_limbs.find(LimbID::LEFT_LEG) != given_limbs.end()) {
-                    // Enable the walk engine.
-                    emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumption_id));
-                }
-            },
-            [this](const std::set<LimbID>& taken_limbs) {
-                if (taken_limbs.find(LimbID::LEFT_LEG) != taken_limbs.end()) {
-                    // Shut down the walk engine, since we don't need it right now.
-                    emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumption_id));
-                }
-            },
-            [this](const std::set<ServoID>&) {}}));
+        // emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
+        //     subsumption_id,
+        //     "NSGA2 Evaluator",
+        //     {std::pair<float, std::set<LimbID>>(
+        //         1,
+        //         {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+        //     [this](const std::set<LimbID>& given_limbs) {
+        //         if (given_limbs.find(LimbID::LEFT_LEG) != given_limbs.end()) {
+        //             // Enable the walk engine.
+        //             emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumption_id));
+        //         }
+        //     },
+        //     [this](const std::set<LimbID>& taken_limbs) {
+        //         if (taken_limbs.find(LimbID::LEFT_LEG) != taken_limbs.end()) {
+        //             // Shut down the walk engine, since we don't need it right now.
+        //             emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumption_id));
+        //         }
+        //     },
+        //     [this](const std::set<ServoID>&) {}}));
+
+        on<Startup>().then([this] {
+            // At the start of the program, we should be standing
+            // Without these emits, modules that need a Stability and WalkState messages may not run
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
+
+            // On the lowest level, just stand
+            emit<Task>(std::make_unique<StandStill>(), 0);
+            // // On the highest level, recover from falling
+            // emit<Task>(std::make_unique<FallRecovery>(), 3);
+        });
 
         // Handle a state transition event
         on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
@@ -162,7 +175,7 @@ namespace module::support::optimisation {
         on<Trigger<OptimisationResetDone>, Single>().then([this](const OptimisationResetDone&) {
             log<NUClear::INFO>("Reset done");
             // Send a zero walk command to stop walking
-            // emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
+            // emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
             emit(std::make_unique<Event>(Event::RESET_DONE));
         });
 
@@ -224,6 +237,10 @@ namespace module::support::optimisation {
         }
     }
 
+    void NSGA2Evaluator::walk(Eigen::Vector3d vec3) {
+        emit<Task>(std::make_unique<Walk>(vec3), 1);
+    }
+
     /// @brief Handle the WAITING_FOR_REQUEST state
     void NSGA2Evaluator::waiting_for_request() {
         log<NUClear::DEBUG>("Waiting For Request");
@@ -246,9 +263,9 @@ namespace module::support::optimisation {
         else if (last_eval_request_msg.task == "rotation") {
             task = std::make_unique<RotationEvaluator>();
         }
-        else if (last_eval_request_msg.task == "stand") {
-            task = std::make_unique<StandEvaluator>();
-        }
+        // else if (last_eval_request_msg.task == "stand") {
+        //     task = std::make_unique<StandEvaluator>();
+        // }
         else {
             log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
         }
@@ -307,7 +324,7 @@ namespace module::support::optimisation {
         evaluation_running = false;
 
         // Send a zero walk command to stop walking
-        emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
+        emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
         bool early_termination = true;
         auto fitness_scores    = task->calculate_fitness_scores(early_termination, sim_time, generation, individual);
         emit(fitness_scores);
@@ -320,7 +337,7 @@ namespace module::support::optimisation {
         log<NUClear::DEBUG>("Terminating Gracefully");
 
         // Send a zero walk command to stop walking
-        emit(std::make_unique<WalkCommand>(subsumption_id, Eigen::Vector3d(0.0, 0.0, 0.0)));
+        emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
         bool early_termination = false;
         auto fitness_scores    = task->calculate_fitness_scores(early_termination, sim_time, generation, individual);
         emit(fitness_scores);

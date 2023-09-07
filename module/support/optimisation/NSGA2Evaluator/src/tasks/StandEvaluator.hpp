@@ -7,8 +7,6 @@
 
 #include "EvaluatorTask.hpp"
 
-#include "extension/Script.hpp"
-
 #include "message/platform/RawSensors.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
@@ -26,7 +24,7 @@ namespace module::support::optimisation {
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
         void set_up_trial(const NSGA2EvaluationRequest& request);
         void reset_simulation();
-        void evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator);
+        void evaluating_state(NSGA2Evaluator* evaluator);
         std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
                                                                      double sim_time,
                                                                      int generation,
@@ -57,10 +55,9 @@ namespace module::support::optimisation {
 
         void load_script(std::string script_path);
         void save_script(std::string script_path);
-        void run_script(size_t subsumption_id, NSGA2Evaluator* evaluator);
 
-        /// @brief The script object we are using
-        ::extension::Script script;
+        std::string script;
+        void run_script(NSGA2Evaluator* evaluator);
 
         /// @brief Indicates that a fall has occured.
         bool fallen = false;

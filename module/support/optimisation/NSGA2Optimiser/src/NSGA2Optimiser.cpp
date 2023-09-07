@@ -2,7 +2,7 @@
 
 #include "tasks/MultiPathOptimiser.hpp"
 #include "tasks/RotationOptimiser.hpp"
-#include "tasks/StandOptimiser.hpp"
+// #include "tasks/StandOptimiser.hpp"
 #include "tasks/StrafeOptimiser.hpp"
 #include "tasks/WalkOptimiser.hpp"
 
@@ -65,10 +65,10 @@ namespace module::support::optimisation {
                 log<NUClear::INFO>("Task type is Multipath");
                 task = std::make_unique<MultiPathOptimiser>();
             }
-            else if (task_type == "stand") {
-                log<NUClear::INFO>("Task type is Stand");
-                task = std::make_unique<StandOptimiser>();
-            }
+            // else if (task_type == "stand") {
+            //     log<NUClear::INFO>("Task type is Stand");
+            //     task = std::make_unique<StandOptimiser>();
+            // }
             else {
                 log<NUClear::ERROR>("Unrecognised optimiser task", task_type);
                 powerplant.shutdown();

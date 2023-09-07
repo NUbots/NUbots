@@ -5,28 +5,24 @@
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/motion/WalkCommand.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
-#include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::optimisation {
-    using message::motion::DisableWalkEngineCommand;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::WalkCommand;
-    using message::platform::RawSensors;
-    // using message::input::Sensors;
+    using message::skill::Walk;
+    using message::input::Sensors;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2TrialExpired;
 
-    using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::support::Expression;
@@ -110,16 +106,14 @@ namespace module::support::optimisation {
         max_field_plane_sway   = 0.0;
     }
 
-    void WalkEvaluator::evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator) {
+    void WalkEvaluator::evaluating_state(NSGA2Evaluator* evaluator) {
         NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
                                                  walk_command_velocity.x(),
                                                  walk_command_velocity.y(),
                                                  walk_command_rotation));
 
         NUClear::log<NUClear::DEBUG>("Walk started");
-        evaluator->emit(std::make_unique<WalkCommand>(
-            subsumption_id,
-            Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
+        evaluator->walk(Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation));
         evaluator->schedule_trial_expired_message(0, trial_duration_limit);
     }
 

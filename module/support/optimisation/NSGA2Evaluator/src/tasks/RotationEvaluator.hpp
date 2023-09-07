@@ -25,7 +25,7 @@ namespace module::support::optimisation {
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
         void set_up_trial(const NSGA2EvaluationRequest& request);
         void reset_simulation();
-        void evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator);
+        void evaluating_state(NSGA2Evaluator* evaluator);
         std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
                                                                      double sim_time,
                                                                      int generation,

@@ -23,6 +23,8 @@ namespace module::support::optimisation {
         explicit NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment);
         void schedule_trial_expired_message(const int trial_stage, const std::chrono::seconds delay_time);
 
+        void walk(Eigen::Vector3d vec3);
+
         enum State {
             UNKNOWN                = 0,
             WAITING_FOR_REQUEST    = 1,

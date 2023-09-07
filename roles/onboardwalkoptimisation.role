@@ -8,10 +8,14 @@ nuclear_role(
   support::configuration::GlobalConfig
   # Sensors
   platform::${SUBCONTROLLER}::HardwareIO
-  behaviour::Controller
+  input::SensorFilter
+  # Director
+  extension::Director
+  # Skills
+  #skill::Walk
+  # behaviour::Controller
   # behaviour::skills::Stand
   # motion::ScriptEngine
-  input::SensorFilter
   # motion::QuinticWalk
 
   # Optimisation

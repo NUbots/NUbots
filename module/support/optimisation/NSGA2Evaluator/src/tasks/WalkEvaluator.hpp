@@ -7,13 +7,11 @@
 
 #include "EvaluatorTask.hpp"
 
-#include "message/platform/RawSensors.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module::support::optimisation {
-    using message::platform::RawSensors;
     using message::input::Sensors;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
@@ -24,7 +22,7 @@ namespace module::support::optimisation {
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
         void set_up_trial(const NSGA2EvaluationRequest& request);
         void reset_simulation();
-        void evaluating_state(size_t subsumption_id, NSGA2Evaluator* evaluator);
+        void evaluating_state(NSGA2Evaluator* evaluator);
         std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
                                                                      double sim_time,
                                                                      int generation,
