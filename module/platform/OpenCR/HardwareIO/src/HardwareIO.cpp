@@ -58,12 +58,9 @@ namespace module::platform::OpenCR {
                         packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
 
                         // notify with ID and servo name
-                        log<NUClear::WARN>(fmt::format(
-                            "Dropped packet from ID {} ({})",
-                            int(dropout_id),
-                            /* off-by-one hell. ServoID is 0 indexed, NUgus::ID is 1 indexed*/
-                            dropout_id <= ServoID::Value::NUMBER_OF_SERVOS ? static_cast<ServoID>(dropout_id - 1)
-                                                                           : "not a servo"));
+                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
+                                                       int(dropout_id),
+                                                       nugus.device_name(dropout_id)));
 
                         // if this is the first packet, set our flag
                         if (num_packets_dropped == 0) {
@@ -81,10 +78,7 @@ namespace module::platform::OpenCR {
                                         "chain will cause all later packets (of higher ID) to be dropped. Consider "
                                         "checking cables for ID {} ({})",
                                         int(first_dropped_packet),
-                                        /* off-by-one hell. ServoID is 0 indexed, NUgus::ID is 1 indexed*/
-                                        first_dropped_packet <= ServoID::Value::NUMBER_OF_SERVOS
-                                            ? static_cast<ServoID>(first_dropped_packet - 1)
-                                            : "not a servo"));
+                                        nugus.device_name(first_dropped_packet)));
                     }
 
                     // Send a request for all servo packets, only if there were packets dropped
