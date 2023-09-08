@@ -8,6 +8,7 @@ The NSGA2 library [here](./src/nsga2/) was adapted from https://github.com/dojed
 
 There are individual optimisation tasks. These are contained in the tasks folder.
 The current tasks available are:
+
 - Walk forwards
 - Strafe walk
 - Rotate walk
@@ -18,6 +19,7 @@ The parameters to be optimised can be found in the 'NSGA2Optimiser.yaml' file.
 ## Usage
 
 The NSGA2.yaml file contains the parameters for running this module. The parameters to set are:
+
 - Search space width (population size)
 - Search space depth (number of generations)
 - Number of objectives to be evaluated

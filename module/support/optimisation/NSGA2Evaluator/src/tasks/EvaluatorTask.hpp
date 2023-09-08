@@ -6,18 +6,22 @@
 
 #include "NSGA2Evaluator.hpp"
 
-#include "message/platform/RawSensors.hpp"
+#include "extension/Behaviour.hpp"
+
 #include "message/input/Sensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module::support::optimisation {
-    using message::platform::RawSensors;
     using message::input::Sensors;
+    using message::platform::RawSensors;
     using message::platform::webots::OptimisationRobotPosition;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
+
+    using ::extension::behaviour::Task;
 
     class NSGA2Evaluator;  // forward declaration
 

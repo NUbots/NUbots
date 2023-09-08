@@ -14,12 +14,11 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/platform/webots/messages.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
-
-#include "message/input/Sensors.hpp"
-#include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
@@ -33,14 +32,14 @@ namespace module::support::optimisation {
 
     using extension::Configuration;
 
-    using message::input::Sensors;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
+    using message::input::Sensors;
+    using message::platform::webots::OptimisationCommand;
+    using message::platform::webots::OptimisationRobotPosition;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
-    using message::platform::webots::OptimisationCommand;
-    using message::platform::webots::OptimisationRobotPosition;
     using message::support::optimisation::NSGA2Evaluating;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
@@ -55,7 +54,8 @@ namespace module::support::optimisation {
     using utility::input::ServoID;
     using utility::support::Expression;
 
-    NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
         // : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
         // log<NUClear::INFO>("Setting up the NSGA2 evaluator");
 
@@ -295,7 +295,7 @@ namespace module::support::optimisation {
         if (event == Event::RESET_DONE) {
             if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
                 || last_eval_request_msg.task == "strafe" || last_eval_request_msg.task == "rotation") {
-                task->evaluating_state(subsumption_id, this);
+                task->evaluating_state(this);
                 evaluation_running = true;
             }
             else {

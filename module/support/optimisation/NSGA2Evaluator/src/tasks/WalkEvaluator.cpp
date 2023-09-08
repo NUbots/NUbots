@@ -17,8 +17,8 @@
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::optimisation {
-    using message::skill::Walk;
     using message::input::Sensors;
+    using message::skill::Walk;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2TrialExpired;

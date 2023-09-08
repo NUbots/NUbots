@@ -5,8 +5,7 @@
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
-#include "extension/Behaviour.hpp"
-
+#include "message/actuation/Limbs.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
@@ -14,11 +13,13 @@
 #include "utility/file/fileutil.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/skill/Script.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::optimisation {
-    using message::skill::Walk;
+    using message::actuation::LimbsSequence;
     using message::input::Sensors;
+    using message::skill::Walk;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2TrialExpired;
@@ -35,8 +36,8 @@ namespace module::support::optimisation {
         load_script(current_request.task_config_path);
         std::chrono::milliseconds limit_ms = std::chrono::milliseconds(0);
         for (size_t i = 0; i < current_request.parameters.real_params.size(); i++) {
-            int frame_time            = current_request.parameters.real_params[i];
-            limit_ms                  = limit_ms + std::chrono::milliseconds(frame_time);
+            int frame_time = current_request.parameters.real_params[i];
+            limit_ms       = limit_ms + std::chrono::milliseconds(frame_time);
             // script.frames[i].duration = std::chrono::milliseconds(frame_time);
         }
         save_script(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
@@ -148,7 +149,7 @@ namespace module::support::optimisation {
     }
 
     void StandEvaluator::run_script(NSGA2Evaluator* evaluator) {
-        evaluator->emit<Task>(load_script<LimbsSequence>(script));
+        evaluator->emit<Task>(utility::skill::load_script<LimbsSequence>(script));
     }
 
 }  // namespace module::support::optimisation

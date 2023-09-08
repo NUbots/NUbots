@@ -7,14 +7,14 @@
 
 #include "EvaluatorTask.hpp"
 
-#include "message/platform/RawSensors.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module::support::optimisation {
-    using message::platform::RawSensors;
     using message::input::Sensors;
+    using message::platform::RawSensors;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2FitnessScores;
 
