@@ -28,6 +28,7 @@ var classmodule_1_1platform_1_1OpenCR_1_1NUgus =
       [ "BROADCAST", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a7d4616f4d0f4738c0eec5691d014a9baa81d741a35dc8a42c885b7cc031afd17f", null ]
     ] ],
     [ "NUgus", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af1e2a5d3115baf9be61986d2fad0df1e", null ],
+    [ "device_name", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a5d6a70cfa8fd7336a94b456dfc55f41c", null ],
     [ "operator[]", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a67a03d38221e26440cdd8cd404096fd6", null ],
     [ "servo_ids", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#af6925b8414d2a4b7add6b98547afb216", null ],
     [ "HEAD_PITCH", "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#ae50f0e505f49f69c1f0c907744fdcea5", null ],
