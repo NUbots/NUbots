@@ -23,13 +23,14 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
@@ -42,7 +43,6 @@ using extension::Configuration;
 
 namespace module::input {
 
-    using message::actuation::KinematicsModel;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
@@ -55,6 +55,12 @@ namespace module::input {
     class SensorFilter : public NUClear::Reactor {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Number of actuatable joints in the NUgus robot
+        static const int n_joints = 20;
+
+        /// @brief tinyrobotics NUgus model used for kinematics
+        tinyrobotics::Model<double, n_joints> nugus_model;
 
         /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};
@@ -143,6 +149,9 @@ namespace module::input {
 
 
         struct Config {
+            /// @brief Path to NUgus URDF file
+            std::string urdf_path = "";
+
             /// @brief Config for the button debouncer
             struct Button {
                 Button() = default;
@@ -272,10 +281,8 @@ namespace module::input {
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
-        /// @param kinematics_model The kinematics model to use for calculations
-        void update_kinematics(std::unique_ptr<Sensors>& sensors,
-                               const KinematicsModel& kinematics_model,
-                               const RawSensors& raw_sensors);
+        /// @param raw_sensors The raw sensor data
+        void update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
         /// @param dt The time since the last update

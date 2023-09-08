@@ -107,8 +107,14 @@ namespace module::platform::OpenCR {
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
 
+            // populate alarm config levels
             cfg.alarms.temperature.level            = config["alarms"]["temperature"]["level"].as<float>();
             cfg.alarms.temperature.buzzer_frequency = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
+
+            // populate battery config levels
+            battery_state.charged_voltage = config["battery"]["charged_voltage"].as<float>();
+            battery_state.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
+            battery_state.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {

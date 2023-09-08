@@ -25,6 +25,7 @@
 
 #include "message/actuation/BodySide.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -35,6 +36,7 @@ namespace module::input {
 
     using extension::Configuration;
 
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
@@ -81,10 +83,10 @@ namespace module::input {
 
         // Compute the height of the torso using the kinematics from a foot which is on the ground
         if (sensors->feet[BodySide::LEFT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]).inverse().translation().z();
         }
         else if (sensors->feet[BodySide::RIGHT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse()).translation().z();
         }
 
         // **************** Construct Odometry Output ****************
