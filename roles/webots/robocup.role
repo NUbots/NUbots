@@ -10,6 +10,7 @@ nuclear_role(
   # Network
   network::PlotJuggler
   network::NUClearNet
+  network::RobotCommunication
   network::NetworkForwarder
   # Sensors
   input::GameController

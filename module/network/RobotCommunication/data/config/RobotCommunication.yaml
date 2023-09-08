@@ -1,4 +1,5 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
-port: // find port of virtual season. 4 digit
-broadcast_ip: 10.1.255.255
+send_port: 3737
+receive_port: 0000
+broadcast_ip: "10.1.255.255"

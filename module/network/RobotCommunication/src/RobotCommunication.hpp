@@ -2,6 +2,7 @@
 #define MODULE_NETWORK_ROBOTCOMMUNICATION_HPP
 
 #include <nuclear>
+#include <string>
 
 namespace module::network {
 
@@ -12,7 +13,7 @@ namespace module::network {
             /// @brief The port to communicate over
             uint send_port    = 0;
             uint receive_port = 0;
-            uint broadcast_ip = 0;
+            std::string broadcast_ip = "";
         } cfg;
 
         ReactionHandle listen_handle;
