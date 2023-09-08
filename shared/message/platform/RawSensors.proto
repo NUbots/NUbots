@@ -32,21 +32,6 @@ message RawSensors {
     /// Set of error flags/statuses.
     /// bitmask values.
 
-    /// @note RawSensors::Error is kept for protocol v1 compatibility only.
-    /// Values are suffixed with an underscore to resolve naming conflicts.
-    enum Error {
-        OK_            = 0;  // not really a flag but the lack of any other flag
-        INPUT_VOLTAGE_ = 1;
-        ANGLE_LIMIT_   = 2;
-        OVERHEATING_   = 4;
-        RANGE_         = 8;
-        CHECKSUM_      = 16;
-        OVERLOAD_      = 32;
-        INSTRUCTION_   = 64;
-        CORRUPT_DATA_  = 128;
-        TIMEOUT_       = 256;
-    }
-
     // See https://emanual.robotis.com/docs/en/dxl/protocol2/#error
     enum PacketError {
         PACKET_OK   = 0;
@@ -110,13 +95,13 @@ message RawSensors {
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
-        float  fsr1        = 1;
-        float  fsr2        = 2;
-        float  fsr3        = 3;
-        float  fsr4        = 4;
-        float  centre_x    = 5;
-        float  centre_y    = 6;
-        uint32 error_flags = 7;
+        float  fsr1           = 1;
+        float  fsr2           = 2;
+        float  fsr3           = 3;
+        float  fsr4           = 4;
+        float  centre_x       = 5;
+        float  centre_y       = 6;
+        uint32 hardware_error = 7;
     }
 
     message FSRs {
@@ -128,31 +113,28 @@ message RawSensors {
 
     // Full set of information to use for servos using Dynamixel v2 firmware
     message Servo {
-        // keep this for compatibility with cm740/v1 while we need it
-        uint32 error_flags = 1;  // components of type RawSensors::Error (but can have multiple bits set)
-        // this is for the protocol v2
-        uint32 hardware_error  = 2;  // components of type RawSensors::HardwareError (but can have multiple bits set)
-        bool   torque_enabled  = 3;
-        float  velocity_i_gain = 4;
-        float  velocity_p_gain = 5;
-        float  position_d_gain = 6;
-        float  position_i_gain = 7;
-        float  position_p_gain = 8;
-        float  feed_forward_1st_Gain = 9;
-        float  feed_forward_2nd_Gain = 10;
-        float  present_PWM           = 11;
-        float  present_current       = 12;
-        float  present_velocity      = 13;
-        float  present_position      = 14;
-        float  goal_PWM              = 15;
-        float  goal_current          = 16;
-        float  goal_velocity         = 17;
-        float  goal_position         = 18;
-        float  voltage               = 19;
-        float  temperature           = 20;
-        float  profile_acceleration  = 21;
+        uint32 hardware_error  = 1;  // components of type RawSensors::HardwareError (but can have multiple bits set)
+        bool   torque_enabled  = 2;
+        float  velocity_i_gain = 3;
+        float  velocity_p_gain = 4;
+        float  position_d_gain = 5;
+        float  position_i_gain = 6;
+        float  position_p_gain = 7;
+        float  feed_forward_1st_Gain = 8;
+        float  feed_forward_2nd_Gain = 9;
+        float  present_PWM           = 10;
+        float  present_current       = 11;
+        float  present_velocity      = 12;
+        float  present_position      = 13;
+        float  goal_PWM              = 14;
+        float  goal_current          = 15;
+        float  goal_velocity         = 16;
+        float  goal_position         = 17;
+        float  voltage               = 18;
+        float  temperature           = 19;
+        float  profile_acceleration  = 20;
         // Replaces "Moving speed" from v1 protocol, basically just the set speed.
-        float profile_velocity = 22;
+        float profile_velocity = 21;
     };
 
     /// Set of all the servos on the robot
@@ -181,23 +163,20 @@ message RawSensors {
 
     google.protobuf.Timestamp timestamp = 1;  // Timestamp when our data were taken
 
-    // again, keep this for compatibility with cm740/v1 while we need it
-    uint32 platform_error_flags = 2;
-    // this is for protocol v2
-    uint32 subcontroller_error = 3;  // components of type RawSensors::PacketError (but can have multiple bits set)
+    uint32 subcontroller_error = 2;  // components of type RawSensors::PacketError (but can have multiple bits set)
 
-    LEDPanel led_panel     = 4;
-    HeadLED  head_led      = 5;
-    EyeLED   eye_led       = 6;
-    Buttons  buttons       = 7;
-    fvec3    accelerometer = 8;
-    fvec3    gyroscope     = 9;
-    Servos   servo         = 10;
-    float    battery       = 11;
-    FSRs     fsr           = 12;
+    LEDPanel led_panel     = 3;
+    HeadLED  head_led      = 4;
+    EyeLED   eye_led       = 5;
+    Buttons  buttons       = 6;
+    fvec3    accelerometer = 7;
+    fvec3    gyroscope     = 8;
+    Servos   servo         = 9;
+    float    battery       = 10;
+    FSRs     fsr           = 11;
 
     /// Ground truth from a simulator
-    webots.OdometryGroundTruth odometry_ground_truth = 13;
+    webots.OdometryGroundTruth odometry_ground_truth = 12;
 }
 
 message ButtonLeftDown {}
