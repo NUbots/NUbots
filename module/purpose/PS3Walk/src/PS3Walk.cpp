@@ -72,10 +72,10 @@ namespace module::purpose {
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
 
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 4);
+            // emit<Task>(std::make_unique<FallRecovery>(), 4);
 
             // Stand Still on startup
-            //emit<Task>(std::make_unique<StandStill>());
+            // emit<Task>(std::make_unique<StandStill>());
         });
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
@@ -102,8 +102,12 @@ namespace module::purpose {
                             walk_command.x() = static_cast<float>(event.value) / std::numeric_limits<short>::max()
                                                * cfg.maximum_forward_velocity;
                             break;
-                        case AXIS_RIGHT_JOYSTICK_VERTICAL: head_pitch = static_cast<float>(-event.value); break;
-                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: head_yaw = static_cast<float>(-event.value); break;
+                        case AXIS_RIGHT_JOYSTICK_VERTICAL:
+                            head_pitch = static_cast<float>(-event.value) * double(M_PI) / 31767.0f;
+                            break;
+                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
+                            head_yaw = static_cast<float>(-event.value) * double(M_PI) / 31767.0f;
+                            break;
                     }
                 }
                 // control scheme:
