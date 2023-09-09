@@ -61,8 +61,6 @@ kalman:
   Q: [1e-6, 1e-6, 1e-5, 1e-5]
   # Measurement model noise
   R: [0.000011025, 0.000011025, 0.0018284176, 0.0018284176]
-  # Mahony Filter initial deadreckoned position and height
-  initial_rTWw: [0, 0, 0.49]
 
 mahony:
   # Mahony "Proportional" Gain on error
@@ -71,11 +69,15 @@ mahony:
   Ki: 0.3
   # Mahony Filter initial bias
   bias: [0, 0, 0]
-  # Mahony Filter initial deadreckoned position and height
-  initial_rTWw: [0, 0, 0.49]
 
 # Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
 deadreckoning_scale: [1, 1, 0.6]
 
+# Kalman/Mahony filter initial pose
+initial_rTWw: [0, 0, 0.49]
+initial_rpy: [0, 0.3839, 0]
+
 # Specify which filtering method to use, either UKF, KF, MAHONY or GROUND_TRUTH
 filtering_method: MAHONY
+
+urdf_path: "/home/nubots/NUbots/shared/utility/platform/models/nugus.urdf"
