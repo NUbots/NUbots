@@ -31,8 +31,8 @@ namespace module::purpose {
     class PS3Walk : public NUClear::Reactor {
     public:
         // axes
-        static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 0;
-        static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 1;
+        static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
+        static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
         static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 3;
         static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 4;
         static constexpr uint AXIS_L2                        = 12;
