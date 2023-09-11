@@ -5,6 +5,7 @@
 
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Kick.hpp"
@@ -21,6 +22,7 @@ namespace module::skill {
     using message::actuation::RightArm;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
+    using message::behaviour::state::Stability;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using message::skill::Kick;
@@ -80,8 +82,12 @@ namespace module::skill {
             kick_generator.reset();
         });
 
-        on<Provide<Kick>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then(
-            [this](const Kick& kick, const RunInfo& info) {
+        on<Provide<Kick>,
+           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
+           When<Stability, std::equal_to, Stability::STANDING>,
+           Single>()
+            .then([this](const Kick& kick, const RunInfo& info) {
+                log<NUClear::WARN>("KICKING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)

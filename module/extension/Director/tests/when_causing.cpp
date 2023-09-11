@@ -83,11 +83,10 @@ namespace {
                 events.push_back("emitting task at high priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 100);
             });
-            // reduce the priority to try to get normal Helper provider running
+            // Remove the task so the helper goes back to its normal Provider
             on<Trigger<Step<5>>, Priority::LOW>().then([this] {
-                // Reduce the priority of the Simple task to get the normal Helper Provider to run
-                events.push_back("emitting task at low priority again");
-                emit<Task>(std::make_unique<SimpleTask>(), 1);
+                events.push_back("removing task");
+                emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
             on<Trigger<Step<6>>, Priority::LOW>().then([this] {
                 events.push_back("emitting helper task again");
@@ -123,8 +122,7 @@ TEST_CASE("Test that the causing keyword can provide what another module needs",
         "emitting task at high priority",
         "helper causing allow",
         "task executed",
-        "emitting task at low priority again",
-        "task executed",
+        "removing task",
         "emitting helper task again",
         "helper waiting",
     };
