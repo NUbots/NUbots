@@ -358,8 +358,10 @@ RUN chmod 440 /etc/sudoers.d/user
 # Create the user, and setup sudo so no password is required
 ARG user_uid=1000
 ARG user_gid=$user_uid
-RUN groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid $user_gid -m nubots
+ARG dialout_gid=20
+RUN groupadd --gid $dialout_gid dialout \
+    && groupadd --gid $user_gid nubots \
+    && useradd --uid $user_uid --gid nubots -G dialout -m nubots
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user

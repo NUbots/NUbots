@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import grp
 import json
 import os
 import re
@@ -123,6 +124,8 @@ def build(image, platform, username, uid, reset):
             f"platform={platform}",
             "--build-arg",
             f"user_uid={uid}",
+            "--build-arg",
+            f"dialout_gid={grp.getgrnam('dialout').gr_gid}",
             "--output=type=docker",
             f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform}",
             f"--cache-to=type=inline",
