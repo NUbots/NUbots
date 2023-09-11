@@ -83,9 +83,9 @@ namespace module::purpose {
             // read from joystick
             if (joystick.sample(&event)) {
 
-                // log<NUClear::DEBUG>("Event number: ", float(event.number));
+                log<NUClear::DEBUG>("Event number: ", float(event.number));
                 // log<NUClear::DEBUG>("Event value: ", event.value);
-                // log<NUClear::DEBUG>("Event isAxis: ", event.isAxis());
+                log<NUClear::DEBUG>("Event isAxis: ", event.isAxis());
                 // log<NUClear::DEBUG>("Event isButton: ", event.isButton());
 
                 if (event.isAxis()) {
@@ -103,10 +103,12 @@ namespace module::purpose {
                                                * cfg.maximum_forward_velocity;
                             break;
                         case AXIS_RIGHT_JOYSTICK_VERTICAL:
-                            head_pitch = static_cast<float>(-event.value) * double(M_PI) / 31767.0f;
+                            head_pitch = static_cast<float>(-event.value) / 32767.0f;
+                            log<NUClear::DEBUG>("Event head pitch: ", head_pitch);
                             break;
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
-                            head_yaw = static_cast<float>(-event.value) * double(M_PI) / 31767.0f;
+                            head_yaw = static_cast<float>(-event.value) / 32767.0f;
+                            log<NUClear::DEBUG>("Event head yaw: ", head_yaw);
                             break;
                     }
                 }

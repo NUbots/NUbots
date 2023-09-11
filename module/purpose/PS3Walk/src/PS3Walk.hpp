@@ -33,8 +33,8 @@ namespace module::purpose {
         // axes
         static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 0;
         static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 1;
-        static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 2;
-        static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 3;
+        static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 3;
+        static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 4;
         static constexpr uint AXIS_L2                        = 12;
         static constexpr uint AXIS_R2                        = 13;
         static constexpr uint AXIS_ACCEL_Y                   = 23;
