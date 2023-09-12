@@ -88,7 +88,7 @@ jobs:
 
       # Setup docker buildx
       - name: 🐳 Set up docker buildx 🐳
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
         with:
           driver-opts: |
             env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
