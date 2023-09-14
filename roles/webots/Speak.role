@@ -54,4 +54,5 @@ nuclear_role(
   strategy::KickToGoal
   strategy::AlignBallToGoal
   # Purposes
+  purpose::Chat
 )
