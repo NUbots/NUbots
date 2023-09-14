@@ -8,11 +8,9 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
 #include "message/actuation/ServoCommand.hpp"
-#include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
-#include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
@@ -32,7 +30,6 @@ namespace module::skill {
     using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
-    using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
@@ -159,28 +156,23 @@ namespace module::skill {
         });
 
         // Runs every time the Walk provider starts (wasn't running)
-        on<Start<Walk>, With<Behaviour::State>, With<KinematicsModel>>().then(
-            [this](const Behaviour::State& behaviour, const KinematicsModel& model) {
-                kinematicsModel = model;
-                first_run       = true;
-                current_orders.setZero();
-                is_left_support  = true;
-                last_update_time = NUClear::clock::now();
-                walk_engine.reset();
-                if (behaviour == Behaviour::State::GOALIE_WALK) {
-                    current_cfg = goalie_cfg;
-                }
-                else {
-                    current_cfg = normal_cfg;
-                }
-                // Send these parameters to the walk engine
-                walk_engine.set_parameters(current_cfg.params);
+        on<Start<Walk>, With<KinematicsModel>>().then([this](const KinematicsModel& model) {
+            kinematicsModel = model;
+            first_run       = true;
+            current_orders.setZero();
+            is_left_support  = true;
+            last_update_time = NUClear::clock::now();
+            walk_engine.reset();
 
-                imu_reaction.enable(current_cfg.imu_active);
+            // Send these parameters to the walk engine
+            current_cfg = normal_cfg;
+            walk_engine.set_parameters(current_cfg.params);
 
-                // Update the walking state
-                emit(std::make_unique<WalkState>(WalkState::State::WALKING, Eigen::Vector3d::Zero()));
-            });
+            imu_reaction.enable(current_cfg.imu_active);
+
+            // Update the walking state
+            emit(std::make_unique<WalkState>(WalkState::State::WALKING, Eigen::Vector3d::Zero()));
+        });
 
         // Runs every time the Walk task is removed from the director tree
         on<Stop<Walk>>().then([this] {

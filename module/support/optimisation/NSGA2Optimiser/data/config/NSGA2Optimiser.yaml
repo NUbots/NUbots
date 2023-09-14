@@ -23,7 +23,7 @@ eta:
   M: 20
 
 task: "walk"
-task_config_path: "config/webots/quinticwalk.yaml"
+task_config_path: "config/webots/QuinticWalk.yaml"
 
 # Only for multipath
 task_supplied_pop: "false"
