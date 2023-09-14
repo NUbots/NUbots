@@ -31,6 +31,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -46,6 +47,7 @@ namespace module::platform {
     using message::input::Sensors;
     using message::platform::RawSensors;
 
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::support::Expression;
 
@@ -53,10 +55,11 @@ namespace module::platform {
         : Reactor(std::move(environment)) {
 
         /*
-         CM740 Data
+         Subcontroller Data
          */
+
         // Read our Error code
-        sensors.platform_error_flags = 0;
+        sensors.subcontroller_error = 0;
 
         // LED Panel
         sensors.led_panel.led2 = false;
@@ -82,7 +85,7 @@ namespace module::platform {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.error_flags = 0;
+        sensors.fsr.right.hardware_error = 0;
 
         // Sensors
         sensors.fsr.right.fsr1 = 1;
@@ -96,7 +99,7 @@ namespace module::platform {
 
         // Left Sensor
         // Error
-        sensors.fsr.left.error_flags = 0;
+        sensors.fsr.left.hardware_error = 0;
 
         // Sensors
         sensors.fsr.left.fsr1 = 1;
@@ -117,7 +120,7 @@ namespace module::platform {
             RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
 
             // Error code
-            servo.error_flags = 0;
+            servo.hardware_error = 0;
 
             // Booleans
             servo.torque_enabled = true;
@@ -154,8 +157,8 @@ namespace module::platform {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
             [this](const std::shared_ptr<const Sensors>& previousSensors) {
                 if (previousSensors) {
-                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
-                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[FrameID::R_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[FrameID::L_ANKLE_ROLL]);
                     Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                     Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 

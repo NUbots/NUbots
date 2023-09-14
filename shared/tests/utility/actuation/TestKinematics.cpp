@@ -58,7 +58,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
         INFO("Testing with the random vector, " << camera_vector.transpose());
 
         std::vector<std::pair<ServoID, double>> angles =
-            utility::actuation::kinematics::calculateHeadJoints(camera_vector);
+            utility::actuation::kinematics::calculate_head_joints(camera_vector);
 
         // Make our sensors object
         Sensors sensors;

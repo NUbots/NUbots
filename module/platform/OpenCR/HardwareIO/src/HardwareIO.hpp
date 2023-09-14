@@ -74,7 +74,7 @@ namespace module::platform::OpenCR {
             uint16_t buzzer = 0;
 
             /// @brief Most recent packet error from the OpenCR device
-            uint8_t error_flags = 0;
+            uint8_t packet_error = 0;
         };
 
         /// @see battery_state

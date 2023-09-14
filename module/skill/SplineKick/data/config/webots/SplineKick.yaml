@@ -15,18 +15,18 @@ foot_waypoints:
 # Waypoints for torso relative to planted foot [x, y, z, time]
 # Assume for a right foot planted kick with left foot and it will be mirrored by kick generator if left kick is requested
 torso_waypoints:
-  - [0, 0.09, 0.42, 0]
-  - [0, 0.09, 0.42, 0.5]
-  - [0, 0.05, 0.42, 1]
-  - [0, -0.025, 0.42, 1.25]
-  - [0, 0.09, 0.42, 1.75]
-  - [0, 0.09, 0.42, 3]
+  - [0, 0.09, 0.46, 0]
+  - [0, 0.09, 0.46, 0.5]
+  - [0, 0.05, 0.46, 1]
+  - [0, -0.025, 0.46, 1.25]
+  - [0, 0.09, 0.46, 1.75]
+  - [0, 0.09, 0.46, 3]
 
 # Torso pitch (in radians)
-torso_pitch: 26.92902 * pi / 180
+torso_pitch: 10 * pi / 180
 
 gains:
-  arms: 8
+  arms: 1
 
 # Fixed position of the arm joints during kicking
 arms:
@@ -34,5 +34,5 @@ arms:
   left_shoulder_pitch: 1.7
   right_shoulder_roll: -0.2
   left_shoulder_roll: 0.2
-  right_elbow: -2.4
-  left_elbow: -2.4
+  right_elbow: -0.7
+  left_elbow: -0.7
