@@ -15,7 +15,7 @@ nuclear_role(
   actuation::Kinematics
   actuation::Servos
   # Skills
-  skill::QuinticWalk
+  skill::Walk
   support::optimisation::NSGA2Evaluator
   support::optimisation::NSGA2Optimiser
 )

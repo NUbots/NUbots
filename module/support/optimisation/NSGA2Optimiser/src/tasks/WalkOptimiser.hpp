@@ -24,7 +24,7 @@ namespace module::support::optimisation {
 
     private:
         int trial_duration_limit;
-        std::string quintic_walk_path;
+        std::string walk_path;
     };
 
 }  // namespace module::support::optimisation

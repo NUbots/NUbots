@@ -43,7 +43,7 @@ namespace module::support::optimisation {
         trial_duration_limit = std::chrono::seconds(current_request.trial_duration_limit);
 
         // Set our walk command
-        walk_command_velocity.x() = current_request.parameters.real_params[11];
+        walk_command_velocity.x() = current_request.parameters.real_params[18];
         walk_command_velocity.y() = 0.0;
         walk_command_rotation     = 0.0;
 
@@ -54,24 +54,31 @@ namespace module::support::optimisation {
 
         // The mapping of parameters depends on how the config file was read by the optimiser
         auto walk                    = walk_config["walk"];
-        walk["freq"]                 = current_request.parameters.real_params[0];
-        walk["double_support_ratio"] = current_request.parameters.real_params[1];
+        walk["period"]               = current_request.parameters.real_params[0];
 
-        auto foot        = walk["foot"];
-        foot["distance"] = current_request.parameters.real_params[2];
-        foot["rise"]     = current_request.parameters.real_params[3];
+        auto step           = walk["step"];
+        step["limits"][0]   = current_request.parameters.real_params[1];
+        step["limits"][1]   = current_request.parameters.real_params[2];
+        step["limits"][2]   = current_request.parameters.real_params[3];
+        step["height"]      = current_request.parameters.real_params[4];
+        step["width"]       = current_request.parameters.real_params[5];
 
-        auto trunk        = walk["trunk"];
-        trunk["height"]   = current_request.parameters.real_params[4];
-        trunk["pitch"]    = current_request.parameters.real_params[5];
-        trunk["x_offset"] = current_request.parameters.real_params[6];
-        trunk["y_offset"] = current_request.parameters.real_params[7];
+        auto torso          = walk["torso"];
+        torso["height"]     = current_request.parameters.real_params[6];
+        torso["pitch"]      = current_request.parameters.real_params[7];
+        torso["sway_ratio"] = current_request.parameters.real_params[8];
 
-        trunk["swing"] = current_request.parameters.real_params[8];
-        trunk["pause"] = current_request.parameters.real_params[9];
+        torso["position_offset"][0] = current_request.parameters.real_params[9];
+        torso["position_offset"][1] = current_request.parameters.real_params[10];
+        torso["position_offset"][2] = current_request.parameters.real_params[11];
 
-        auto pause        = walk["pause"];
-        pause["duration"] = current_request.parameters.real_params[10];
+        torso["sway_offset"][0] = current_request.parameters.real_params[12];
+        torso["sway_offset"][1] = current_request.parameters.real_params[13];
+        torso["sway_offset"][2] = current_request.parameters.real_params[14];
+
+        torso["final_position_ratio"][0]    = current_request.parameters.real_params[15];
+        torso["final_position_ratio"][1]    = current_request.parameters.real_params[16];
+        torso["final_position_ratio"][2]    = current_request.parameters.real_params[17];
 
         // Write the updated config to disk
         std::ofstream overwrite_file_stream(current_request.task_config_path);

@@ -25,33 +25,44 @@ namespace module::support::optimisation {
 
         // Extract the initial values and limits and from config file, for all of the parameters
         auto walk = config["walk"];
-        for (const auto& element :
-             std::vector<std::string>({std::string("freq"), std::string("double_support_ratio")})) {
+        for (const auto& element : std::vector<std::string>({std::string("period")})) {
             param_initial_values.emplace_back(walk[element][0].as<Expression>());
             param_limits.emplace_back(walk[element][1].as<Expression>(), walk[element][2].as<Expression>());
         }
 
-        auto foot = walk["foot"];
-        for (const auto& element : std::vector<std::string>({std::string("distance"), std::string("rise")})) {
-            param_initial_values.emplace_back(foot[element][0].as<Expression>());
-            param_limits.emplace_back(foot[element][1].as<Expression>(), foot[element][2].as<Expression>());
+        auto step = walk["step"];
+        for (const auto& element : std::vector<std::string>({std::string("limits")})) {
+            param_initial_values.emplace_back(step[element][0][0].as<Expression>());
+            param_initial_values.emplace_back(step[element][0][1].as<Expression>());
+            param_initial_values.emplace_back(step[element][0][2].as<Expression>());
+            param_limits.emplace_back(step[element][1][0].as<Expression>(), step[element][2][0].as<Expression>());
+            param_limits.emplace_back(step[element][1][1].as<Expression>(), step[element][2][1].as<Expression>());
+            param_limits.emplace_back(step[element][1][2].as<Expression>(), step[element][2][2].as<Expression>());
         }
 
-        auto trunk = walk["trunk"];
+        for (const auto& element : std::vector<std::string>({std::string("height"),
+                                                             std::string("width")})) {
+            param_initial_values.emplace_back(step[element][0].as<Expression>());
+            param_limits.emplace_back(step[element][1].as<Expression>(), step[element][2].as<Expression>());
+        }
+
+        auto torso = walk["torso"];
         for (const auto& element : std::vector<std::string>({std::string("height"),
                                                              std::string("pitch"),
-                                                             std::string("x_offset"),
-                                                             std::string("y_offset"),
-                                                             std::string("swing"),
-                                                             std::string("pause")})) {
-            param_initial_values.emplace_back(trunk[element][0].as<Expression>());
-            param_limits.emplace_back(trunk[element][1].as<Expression>(), trunk[element][2].as<Expression>());
+                                                             std::string("sway_ratio")})) {
+            param_initial_values.emplace_back(torso[element][0].as<Expression>());
+            param_limits.emplace_back(torso[element][1].as<Expression>(), torso[element][2].as<Expression>());
         }
 
-        auto pause = walk["pause"];
-        for (const auto& element : std::vector<std::string>({std::string("duration")})) {
-            param_initial_values.emplace_back(pause[element][0].as<Expression>());
-            param_limits.emplace_back(pause[element][1].as<Expression>(), pause[element][2].as<Expression>());
+        for (const auto& element : std::vector<std::string>({std::string("position_offset"),
+                                                             std::string("sway_offset"),
+                                                             std::string("final_position_ratio")})) {
+            param_initial_values.emplace_back(torso[element][0][0].as<Expression>());
+            param_initial_values.emplace_back(torso[element][0][1].as<Expression>());
+            param_initial_values.emplace_back(torso[element][0][2].as<Expression>());
+            param_limits.emplace_back(torso[element][1][0].as<Expression>(), torso[element][2][0].as<Expression>());
+            param_limits.emplace_back(torso[element][1][1].as<Expression>(), torso[element][2][1].as<Expression>());
+            param_limits.emplace_back(torso[element][1][2].as<Expression>(), torso[element][2][2].as<Expression>());
         }
 
         auto walk_command = config["walk_command"];
@@ -61,7 +72,7 @@ namespace module::support::optimisation {
                                       walk_command[element][2].as<Expression>());
         }
 
-        quintic_walk_path    = config["task_config_path"].as<std::string>();
+        walk_path            = config["task_config_path"].as<std::string>();
         trial_duration_limit = config["trial_duration_limit"].as<int>();
 
         // Set configuration for real variables
@@ -81,7 +92,7 @@ namespace module::support::optimisation {
         request->id               = id;
         request->generation       = generation;
         request->task             = "walk";
-        request->task_config_path = quintic_walk_path;
+        request->task_config_path = walk_path;
 
         request->trial_duration_limit = trial_duration_limit;
 
