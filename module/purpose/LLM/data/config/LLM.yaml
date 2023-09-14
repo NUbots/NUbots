@@ -19,10 +19,10 @@ tasks:
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
 walk_to_field_position_position: [0, 0, 0]
 
-user_request: "Kick the ball."
+user_request: "Find the ball"
 
 # Whether or not to use the LLM as a planner (as opposed to a strategy) layer
-planner: true
+planner: false
 
 # The OpenAI API costs $$$ to use, so we need to use a key to access it
 openai_api_key: ""

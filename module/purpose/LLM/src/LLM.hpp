@@ -50,7 +50,7 @@ namespace module::purpose {
             std::string main_prompt = "";
         } cfg;
 
-        static const int PROMPT_FREQ = 10;
+        static const int PROMPT_FREQ = 2;
 
     public:
         /// @brief Called by the powerplant to build and setup the LLM reactor.

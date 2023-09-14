@@ -13,6 +13,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/planning/LookAround.hpp"
+#include "message/planning/WalkPath.hpp"
 #include "message/purpose/LLM.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
@@ -42,6 +43,7 @@ namespace module::purpose {
     using message::localisation::Field;
     using message::planning::KickTo;
     using message::planning::LookAround;
+    using message::planning::TurnOnSpot;
     using message::purpose::LLMPlanner;
     using message::purpose::LLMStrategy;
     using message::skill::Kick;
@@ -115,7 +117,7 @@ namespace module::purpose {
                          const std::shared_ptr<const Field>& field,
                          const Sensors& sensors) {
                 std::string prompt = cfg.main_prompt;
-                std::string prompt += "\nState information:";
+                prompt += "\nState information:";
 
                 Eigen::Isometry3d Htw(sensors.Htw);
 
@@ -258,73 +260,99 @@ namespace module::purpose {
 
         // TODO: Add "world model" (SensorFilter, Localisation, etc.) using With, and then use it in the prompt,
         // maybe have this update at a certain rate such that the request is received?
-        on<Provide<LLMStrategy>>().then([this] {
-            // TODO: Build prompt for LLM in a way which incorporates the current world state and provides a
-            // sensible and parsable response, something along the lines of:
-            std::string prompt = "Given desired user request: " + cfg.user_request + " and current world state: Ball was last seen 0.1 seconds ago 0.1m away from you. You have the ability to WalkToBall, Kick, LookAround, StandStill. What tasks should you currently do? \n Provide your response as a list of with format: Task: <task> Priority: <priority> \n where <task> is one of the aforementioned tasks, and <priority> is an integer above 0, a higher number means a higher priority and will be take control over a lower priority tasks servos. \n";
-
-            // Send request to OpenAI API
-            nlohmann::json request = {{"model", "text-davinci-003"},
-                                      {"prompt", prompt},
-                                      {"max_tokens", 100},
-                                      {"temperature", 0}};
-            auto completion        = utility::openai::completion().create(request);
-
-            // TODO: Parse response, and get the tasks to be emitted
-            auto response = completion["choices"][0]["text"].get<std::string>();
-            log<NUClear::INFO>("Response is:\n", response);
-
-            // Parse the response to extract tasks and priorities
-            std::string task;
-            int priority;
-            std::regex r(R"(Task: (\w+) Priority: (\d+))");
-            std::sregex_iterator it(response.begin(), response.end(), r);
-            std::sregex_iterator reg_end;
-
-            for (; it != reg_end; ++it) {
-                task     = (*it)[1].str();
-                priority = std::stoi((*it)[2].str());
-
-                if (task == "FindBall") {
-                    emit<Task>(std::make_unique<FindBall>(), priority);
+        on<Provide<LLMStrategy>,
+           Every<PROMPT_FREQ, std::chrono::seconds>,
+           Optional<With<Ball>>,
+           Optional<With<Field>>,
+           With<Sensors>,
+           Single>()
+            .then([this](const std::shared_ptr<const Ball>& ball,
+                         const std::shared_ptr<const Field>& field,
+                         const Sensors& sensors) {
+                std::string time_since_ball_seen = "unknown";
+                std::string distance_to_ball     = "unknown";
+                std::string ball_is_visible      = "is not currently visible";
+                if (ball) {
+                    time_since_ball_seen = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(
+                                                              NUClear::clock::now() - ball->time_of_measurement)
+                                                              .count()
+                                                          / 1000.0);
+                    ball_is_visible      = "is currently visible";
+                    Eigen::Vector3d rBRr = sensors.Hrw * ball->rBWw;
+                    distance_to_ball     = std::to_string(rBRr.norm());
                 }
-                else if (task == "LookAtBall") {
-                    emit<Task>(std::make_unique<LookAtBall>(), priority);
-                }
-                else if (task == "WalkToBall") {
-                    emit<Task>(std::make_unique<WalkToBall>(), priority);
-                }
-                else if (task == "AlignBallToGoal") {
-                    emit<Task>(std::make_unique<AlignBallToGoal>(), priority);
-                }
-                else if (task == "KickToGoal") {
-                    emit<Task>(std::make_unique<KickToGoal>(), priority);
-                }
-                else if (task == "WalkToFieldPosition") {
-                    emit<Task>(
-                        std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(cfg.walk_to_field_position_position.x(),
-                                                                              cfg.walk_to_field_position_position.y(),
-                                                                              0),
-                                                              cfg.walk_to_field_position_position.z()),
-                        priority);
-                }
-                else if (task == "Kick") {
-                    emit<Task>(std::make_unique<KickTo>(), priority);
-                }
-                else if (task == "LookAround") {
-                    emit<Task>(std::make_unique<LookAround>(), priority);
-                }
-                else if (task == "StandStill") {
-                    emit<Task>(std::make_unique<StandStill>(), priority);
-                }
-                else {
-                    log<NUClear::ERROR>("Unexpected task from LLM response: ", task);
-                }
-            }
 
 
-            // Profit.
-        });
+                // Build prompt for LLM
+                std::string prompt = "Given desired user request: " + cfg.user_request + " and current information of the world: " + "Ball " + ball_is_visible + " , last seen " + time_since_ball_seen + " seconds ago" + distance_to_ball + " m away from you. You have the ability to WalkToBall, Kick, LookAround, LookAtBall, StandStill, TurnOnSpot. What tasks should you currently do to achieve the request? \n Provide your response as a list of with format: Task: <task> Priority: <priority> \n where <task> is one of the aforementioned tasks, and <priority> is an integer above 0, a higher number means a higher priority and will be take control over a lower priority tasks servos.Only use the tasks required to achieve the request. Use the skills to navigate your environment to achieve the task. Only once you have achieved the task: + " + cfg.user_request + " , respond with StandStill with the highest priority. \n";
+                log<NUClear::INFO>("Prompt is:\n", prompt);
+                // Send request to OpenAI API
+                nlohmann::json request = {
+                    {"model", "gpt-3.5-turbo"},
+                    {"messages", nlohmann::json::array({{{"role", "user"}, {"content", prompt}}})},
+                    {"max_tokens", 100},
+                    {"temperature", 0}};
+                //   {"prompt", prompt},
+                auto chat = utility::openai::chat().create(request);
+
+                // auto response = completion["choices"][0]["text"].get<std::string>();
+                auto response = chat["choices"][0]["message"]["content"].get<std::string>();
+                log<NUClear::INFO>("Response is:\n", response);
+
+                // Parse the response to extract tasks and priorities
+                std::string task;
+                int priority;
+                std::regex r(R"(Task: (\w+) Priority: (\d+))");
+                std::sregex_iterator it(response.begin(), response.end(), r);
+                std::sregex_iterator reg_end;
+
+                for (; it != reg_end; ++it) {
+                    task     = (*it)[1].str();
+                    priority = std::stoi((*it)[2].str());
+
+                    if (task == "FindBall") {
+                        emit<Task>(std::make_unique<FindBall>(), priority);
+                    }
+                    else if (task == "LookAtBall") {
+                        emit<Task>(std::make_unique<LookAtBall>(), priority);
+                    }
+                    else if (task == "WalkToBall") {
+                        emit<Task>(std::make_unique<WalkToBall>(), priority);
+                    }
+                    else if (task == "AlignBallToGoal") {
+                        emit<Task>(std::make_unique<AlignBallToGoal>(), priority);
+                    }
+                    else if (task == "KickToGoal") {
+                        emit<Task>(std::make_unique<KickToGoal>(), priority);
+                    }
+                    else if (task == "WalkToFieldPosition") {
+                        emit<Task>(std::make_unique<WalkToFieldPosition>(
+                                       Eigen::Vector3f(cfg.walk_to_field_position_position.x(),
+                                                       cfg.walk_to_field_position_position.y(),
+                                                       0),
+                                       cfg.walk_to_field_position_position.z()),
+                                   priority);
+                    }
+                    else if (task == "Kick") {
+                        emit<Task>(std::make_unique<KickTo>(), priority);
+                    }
+                    else if (task == "LookAround") {
+                        emit<Task>(std::make_unique<LookAround>(), priority);
+                    }
+                    else if (task == "StandStill") {
+                        emit<Task>(std::make_unique<StandStill>(), priority);
+                    }
+                    else if (task == "TurnOnSpot") {
+                        emit<Task>(std::make_unique<TurnOnSpot>(), priority);
+                    }
+                    else {
+                        log<NUClear::ERROR>("Unexpected task from LLM response: ", task);
+                    }
+                }
+
+
+                // Profit.
+            });
     }
 
 }  // namespace module::purpose
