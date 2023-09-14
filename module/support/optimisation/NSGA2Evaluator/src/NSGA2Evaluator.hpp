@@ -5,6 +5,7 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
+#include "extension/Behaviour.hpp"
 #include "tasks/EvaluatorTask.hpp"
 
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
@@ -16,7 +17,7 @@ namespace module::support::optimisation {
 
     class EvaluatorTask;  // Forward declaration
 
-    class NSGA2Evaluator : public NUClear::Reactor {
+    class NSGA2Evaluator : public ::extension::behaviour::BehaviourReactor {
 
     public:
         /// @brief Called by the powerplant to build and setup the NSGA2Evaluator reactor.

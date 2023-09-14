@@ -55,7 +55,7 @@ namespace module::support::optimisation {
     using utility::support::Expression;
 
     NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+        : BehaviourReactor(std::move(environment)) {
         // : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
         // log<NUClear::INFO>("Setting up the NSGA2 evaluator");
 

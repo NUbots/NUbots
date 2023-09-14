@@ -17,7 +17,7 @@
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::optimisation {
-    using message::actuation::LimbsSequence;
+    using message::actuation::BodySequence;
     using message::input::Sensors;
     using message::skill::Walk;
     using message::support::optimisation::NSGA2EvaluationRequest;
@@ -149,7 +149,7 @@ namespace module::support::optimisation {
     }
 
     void StandEvaluator::run_script(NSGA2Evaluator* evaluator) {
-        evaluator->emit<Task>(utility::skill::load_script<LimbsSequence>(script));
+        evaluator->emit<Task>(utility::skill::load_script<BodySequence>(script));
     }
 
 }  // namespace module::support::optimisation

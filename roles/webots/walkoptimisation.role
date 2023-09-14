@@ -11,12 +11,11 @@ nuclear_role(
   input::SensorFilter
   # Director
   extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
   # Skills
-  #skill::Walk
-  # behaviour::Controller
-  # behaviour::skills::Stand
-  # motion::ScriptEngine
-  # motion::QuinticWalk
+  skill::Walk
   support::optimisation::NSGA2Evaluator
   support::optimisation::NSGA2Optimiser
 )
