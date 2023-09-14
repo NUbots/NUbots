@@ -13,7 +13,7 @@ nuclear_role(
   network::NetworkForwarder
   # Sensors
   input::GameController
-  input::RobotCommunication
+  network::RobotCommunication
   input::SensorFilter
   platform::Webots
   # Vision

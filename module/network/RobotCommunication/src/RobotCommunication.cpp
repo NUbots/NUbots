@@ -76,20 +76,33 @@ namespace module::network {
 
 
                 log<NUClear::DEBUG>("game_state->data.self.penalty_reason: ", game_state->data.self.penalty_reason);
+                int penaltyReason = game_state->data.self.penalty_reason;
 
 
                 auto msg = std::make_unique<RoboCup>();
 
-                // msg->state        = game_state.phase;
+                // msg->state = game_state->data.self.phase;
 
                 // Timestamp
                 msg->timestamp = NUClear::clock::now();
 
                 // State TODO: Figure out <here> from game_state
+                int state = 0;
+
+                if (penaltyReason == 0) {
+                   state = 0;
+                } else if (penaltyReason == 1) {
+                    state = 1;
+                } else {
+                    state = 2;
+                }
+
                 // msg->state = <here>;
 
                 log<NUClear::DEBUG>("State: ", msg->state);
+                log<NUClear::DEBUG>("this state: ", state);
                 // Current pose
+
 
                 // Walk command
 
