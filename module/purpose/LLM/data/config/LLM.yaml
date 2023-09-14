@@ -1,0 +1,33 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Tasks to emit on startup. Note: 0 priority will not emit the task.
+tasks:
+  # Strategies
+  align_ball_to_goal_priority: 0
+  find_ball_priority: 0
+  look_at_ball_priority: 0
+  walk_to_ball_priority: 0
+  walk_to_field_position_priority: 0
+  kick_to_goal_priority: 0
+  stand_still_priority: 0
+
+  # Planners
+  kick_to_priority: 0
+  look_around_priority: 0
+
+# Position to walk to when emitting WalkToFieldPosition [x, y, theta]
+walk_to_field_position_position: [0, 0, 0]
+
+user_request: "Find the ball"
+
+# Whether or not to use the LLM as a planner (as opposed to a strategy) layer
+planner: false
+
+# The OpenAI API costs $$$ to use, so we need to use a key to access it
+openai_api_key: ""
+# Use if you want to run the module without the OpenAI API, for debugging non-model aspects of the module for cost saving
+debug_no_api: false
+
+# Main LLM prompt
+main_prompt: "You are running onboard a humanoid robot. Your purpose is to determine how the robot should behave, based on a general purpose given to you and sensor information. I will first tell you the format of your output, and then I will list the possible actions you can take. \nThe output should be in C++ by calling the functions for the tasks.\n`MyTask(args...)`\nMyTask is sent to the Director system, which is a tree-based behaviour framework and algorithm. You can have multiple of these calls. Either all of the tasks run or none of them run.\nThe possible tasks you have are\n- Walk(Eigen::Vector3d command) // uses legs, x m/s, y m/s, radians/s\n- Look(Eigen::Vector3d rPCt) // Uses head, vector from the camera to the point to look at, in torso space\n- Kick(bool left_foot) // uses legs\nYour purpose is to kick the ball. The compete system, including task functionality, is already implemented. You only need to provide the emit function calls, do not write anything else. You do not need to emit all functions, only emit the ones necessary right now based on the world state. You will be prompted regularly for new tasks. You cannot emit tasks for both the kick and walk at the same time since they use competing servos. Output only the C++.\nYour task is to walk to the ball and kick."
