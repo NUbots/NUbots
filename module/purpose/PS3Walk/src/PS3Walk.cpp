@@ -99,7 +99,7 @@ namespace module::purpose {
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
                             // x is forward relative to robot
-                            walk_command.x() = static_cast<float>(event.value) / std::numeric_limits<short>::max()
+                            walk_command.x() = static_cast<float>(-event.value) / std::numeric_limits<short>::max()
                                                * cfg.maximum_forward_velocity;
                             break;
                         case AXIS_RIGHT_JOYSTICK_VERTICAL:
@@ -258,7 +258,7 @@ namespace module::purpose {
                                         * Eigen::AngleAxisd(-head_pitch, Eigen::Vector3d::UnitY()))
                                            .toRotationMatrix()
                                        * Eigen::Vector3d::UnitX();
-                emit<Task>(std::make_unique<Look>(uPCt, false));
+                emit<Task>(std::make_unique<Look>(uPCt, true));
             }
 
             if (moving) {
