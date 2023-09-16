@@ -93,6 +93,8 @@ def run(target, local, user, config, toolchain, **kwargs):
                 "--include=local/sbin/**",
                 "--include=local/share",
                 "--include=local/share/**",
+                "--include=local/man",
+                "--include=local/man/**",
                 "--exclude=*",
                 "--checksum",
                 "--delete",
