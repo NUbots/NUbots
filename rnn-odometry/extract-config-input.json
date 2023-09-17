@@ -20,7 +20,11 @@
         "data.servo.lAnkleRoll.presentPosition",
         "data.servo.headPan.presentPosition",
         "data.servo.headTilt.presentPosition",
-        "data.accelerometer",
-        "data.gyroscope"
+        "data.accelerometer.x",
+        "data.accelerometer.y",
+        "data.accelerometer.z",
+        "data.gyroscope.x",
+        "data.gyroscope.y",
+        "data.gyroscope.z"
     ]
 }
