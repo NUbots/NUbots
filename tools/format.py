@@ -96,7 +96,7 @@ def _get_args(path):
         modified = dates[0].split("-")[0]
         added = dates[-1].split("-")[0]
 
-    return {"added": f"{added}, "modified": f"{modified}}
+    return {"added": f"{added}", "modified": f"{modified}"}
 
 
 # Format or check the file
