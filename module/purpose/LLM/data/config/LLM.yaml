@@ -19,7 +19,10 @@ tasks:
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
 walk_to_field_position_position: [0, 0, 0]
 
-user_request: "Find the ball"
+# user_request: "find the ball"
+# user_request: "approach the ball"
+user_request: "approach and kick the ball, considering that if the ball is not visible you will need to move to find it"
+# user_request: "playing soccer, considering that if the ball is not visible you will need to move to find it"
 
 # Whether or not to use the LLM as a planner (as opposed to a strategy) layer
 planner: false
