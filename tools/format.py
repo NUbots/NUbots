@@ -24,7 +24,7 @@ formatters["licence"] = {
             "licenseheaders",
             "-t",
             os.path.join(b.project_dir, ".licence.tmpl"),
-            "--years={years}",
+            "--years={added}",
             "--owner=NUbots",
             f"--projname=NUbots",
             "--projurl=https://github.com/NUbots/NUbots",
@@ -96,7 +96,7 @@ def _get_args(path):
         modified = dates[0].split("-")[0]
         added = dates[-1].split("-")[0]
 
-    return {"years": f"{added}" if modified == added else f"{added}-{modified}"}
+    return {"added": f"{added}, "modified": f"{modified}}
 
 
 # Format or check the file
