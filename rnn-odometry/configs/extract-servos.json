@@ -1,0 +1,24 @@
+{
+    "keys_to_extract": [
+        "data.servo.rShoulderPitch.presentPosition",
+        "data.servo.lShoulderPitch.presentPosition",
+        "data.servo.rShoulderRoll.presentPosition",
+        "data.servo.lShoulderRoll.presentPosition",
+        "data.servo.rElbow.presentPosition",
+        "data.servo.lElbow.presentPosition",
+        "data.servo.rHipYaw.presentPosition",
+        "data.servo.lHipYaw.presentPosition",
+        "data.servo.rHipRoll.presentPosition",
+        "data.servo.lHipRoll.presentPosition",
+        "data.servo.rHipPitch.presentPosition",
+        "data.servo.lHipPitch.presentPosition",
+        "data.servo.rKnee.presentPosition",
+        "data.servo.lKnee.presentPosition",
+        "data.servo.rAnklePitch.presentPosition",
+        "data.servo.lAnklePitch.presentPosition",
+        "data.servo.rAnkleRoll.presentPosition",
+        "data.servo.lAnkleRoll.presentPosition",
+        "data.servo.headPan.presentPosition",
+        "data.servo.headTilt.presentPosition"
+    ]
+}
