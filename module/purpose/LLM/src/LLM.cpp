@@ -277,14 +277,17 @@ namespace module::purpose {
                                                               NUClear::clock::now() - ball->time_of_measurement)
                                                               .count()
                                                           / 1000.0);
-                    ball_is_visible      = "is currently visible";
-                    Eigen::Vector3d rBRr = sensors.Hrw * ball->rBWw;
-                    distance_to_ball     = std::to_string(rBRr.norm());
+                    if (std::stoi(time_since_ball_seen) < 2.0) {
+                        ball_is_visible      = "is currently visible";
+                        Eigen::Vector3d rBRr = sensors.Hrw * ball->rBWw;
+                        distance_to_ball     = std::to_string(rBRr.norm());
+                    }
                 }
 
 
                 // Build prompt for LLM
-                std::string prompt = "Given desired user request: " + cfg.user_request + " and current information of the world: " + "Ball " + ball_is_visible + " , last seen " + time_since_ball_seen + " seconds ago" + distance_to_ball + " m away from you. You have the ability to WalkToBall, Kick, LookAround, LookAtBall, StandStill, TurnOnSpot. What tasks should you currently do to achieve the request? \n Provide your response as a list of with format: Task: <task> Priority: <priority> \n where <task> is one of the aforementioned tasks, and <priority> is an integer above 0, a higher number means a higher priority and will be take control over a lower priority tasks servos.Only use the tasks required to achieve the request. Use the skills to navigate your environment to achieve the task. Only once you have achieved the task: + " + cfg.user_request + " , respond with StandStill with the highest priority. \n";
+                std::string prompt = "Given desired user request: " + cfg.user_request + " and current information of the world: " + "Ball " + ball_is_visible + "-, last seen " + time_since_ball_seen + " seconds ago " + distance_to_ball + " m away from you. You have the ability to WalkToBall (requires visible ball), Kick (requires ball close), LookAround (only for the head, cannot look behind), LookAtBall (requires visible ball), StandStill, TurnOnSpot. What tasks should you currently do to achieve the request? \n Provide your response as a list of with format: Task: <task> Priority: <priority> \n where <task> is one of the aforementioned tasks, and <priority> is an integer above 0. Tasks with a larger priority number will take control over a lower priority task if they are moving the same motors. Only use the tasks required right now to progress towards the request. Use the skills to navigate your environment to achieve the task " + cfg.user_request + ". \n";
+
                 log<NUClear::INFO>("Prompt is:\n", prompt);
                 // Send request to OpenAI API
                 nlohmann::json request = {
