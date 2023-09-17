@@ -1,0 +1,14 @@
+{
+    "keys_to_extract": [
+        "data.odometryGroundTruth.Htw.x.x",
+        "data.odometryGroundTruth.Htw.x.y",
+        "data.odometryGroundTruth.Htw.x.z",
+        "data.odometryGroundTruth.Htw.y.x",
+        "data.odometryGroundTruth.Htw.y.y",
+        "data.odometryGroundTruth.Htw.y.z",
+        "data.odometryGroundTruth.Htw.z.x",
+        "data.odometryGroundTruth.Htw.z.y",
+        "data.odometryGroundTruth.Htw.z.z"
+
+    ]
+}
