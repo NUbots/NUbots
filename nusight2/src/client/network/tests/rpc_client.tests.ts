@@ -9,7 +9,7 @@ import { Network } from "../network";
 import { NUsightNetwork } from "../nusight_network";
 import { nextRpcToken, RpcClient, RpcError } from "../rpc_client";
 
-import Say = message.output.Say;
+import Test = message.support.nusight.Test;
 import ScrubberLoadRequest = message.eye.ScrubberLoadRequest;
 
 describe("RpcClient", () => {
@@ -28,7 +28,7 @@ describe("RpcClient", () => {
     }
 
     // @ts-expect-error
-    const resultB = await client.call(new Say({ message: "hi" }));
+    const resultB = await client.call(new Test({ message: "hi" }));
     if (resultB.ok) {
       throw new Error("Expected invalid RPC call to fail");
     } else {

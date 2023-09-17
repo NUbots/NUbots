@@ -28,6 +28,8 @@
 #include <mutex>
 #include <nuclear>
 #include <string>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 #include <vector>
 
 #include "message/input/Image.hpp"

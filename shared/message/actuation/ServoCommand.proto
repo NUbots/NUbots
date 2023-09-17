@@ -23,10 +23,6 @@ package message.actuation;
 
 import "google/protobuf/timestamp.proto";
 
-/// These messages are for use with Director. See message.behaviour.ServoCommand for the ServoCommand message to be used
-/// with Controller. Director will supersede Controller - when message.behaviour.ServoCommand is deleted, delete this
-/// comment as well.
-
 message ServoState {
     /// Proportional gain. In proportion to the servo's position error. Gain
     /// values are in range 0-100.

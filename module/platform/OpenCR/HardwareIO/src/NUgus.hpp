@@ -127,6 +127,37 @@ namespace module::platform::OpenCR {
                     uint8_t(ID::L_ANKLE_PITCH),    uint8_t(ID::R_ANKLE_ROLL),     uint8_t(ID::L_ANKLE_ROLL),
                     uint8_t(ID::HEAD_YAW),         uint8_t(ID::HEAD_PITCH)};
         }
+
+        constexpr std::string device_name(ID id) const {
+            switch (id) {
+                case ID::NO_ID: return "NO_ID";
+                case ID::R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
+                case ID::L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
+                case ID::R_SHOULDER_ROLL: return "R_SHOULDER_ROLL";
+                case ID::L_SHOULDER_ROLL: return "L_SHOULDER_ROLL";
+                case ID::R_ELBOW: return "R_ELBOW";
+                case ID::L_ELBOW: return "L_ELBOW";
+                case ID::R_HIP_YAW: return "R_HIP_YAW";
+                case ID::L_HIP_YAW: return "L_HIP_YAW";
+                case ID::R_HIP_ROLL: return "R_HIP_ROLL";
+                case ID::L_HIP_ROLL: return "L_HIP_ROLL";
+                case ID::R_HIP_PITCH: return "R_HIP_PITCH";
+                case ID::L_HIP_PITCH: return "L_HIP_PITCH";
+                case ID::R_KNEE: return "R_KNEE";
+                case ID::L_KNEE: return "L_KNEE";
+                case ID::R_ANKLE_PITCH: return "R_ANKLE_PITCH";
+                case ID::L_ANKLE_PITCH: return "L_ANKLE_PITCH";
+                case ID::R_ANKLE_ROLL: return "R_ANKLE_ROLL";
+                case ID::L_ANKLE_ROLL: return "L_ANKLE_ROLL";
+                case ID::HEAD_YAW: return "HEAD_YAW";
+                case ID::HEAD_PITCH: return "HEAD_PITCH";
+                case ID::R_FSR: return "R_FSR";
+                case ID::L_FSR: return "L_FSR";
+                case ID::OPENCR: return "OPENCR";
+                case ID::BROADCAST: return "BROADCAST";
+                default: throw std::runtime_error("enum NUgus::ID's value is corrupt, unknown value stored");
+            }
+        }
     };
 
     /// @brief The first part of the servo data to write to the dynamixel
@@ -167,7 +198,7 @@ namespace module::platform::OpenCR {
     struct OpenCRWriteData {
         uint8_t led;
         uint16_t rgb_led;
-        uint8_t buzzer;
+        uint16_t buzzer;
     } __attribute__((packed));
 
     /// @brief The data to read from the OpenCR device

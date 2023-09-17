@@ -17,12 +17,14 @@ attribute float ball;
 attribute float goal;
 attribute float field;
 attribute float fieldLine;
+attribute float robot;
 attribute float environment;
 
 varying float vBall;
 varying float vGoal;
 varying float vFieldLine;
 varying float vField;
+varying float vRobot;
 varying float vEnvironment;
 
 #include "../../../camera/objects/shaders/projection.glsl"
@@ -37,6 +39,7 @@ void main() {
     vBall        = ball;
     vGoal        = goal;
     vFieldLine   = fieldLine;
+    vRobot       = robot;
     vField       = field;
     vEnvironment = environment;
 

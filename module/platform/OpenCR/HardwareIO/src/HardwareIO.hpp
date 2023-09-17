@@ -74,7 +74,7 @@ namespace module::platform::OpenCR {
             uint16_t buzzer = 0;
 
             /// @brief Most recent packet error from the OpenCR device
-            uint8_t error_flags = 0;
+            uint8_t packet_error = 0;
         };
 
         /// @see battery_state
@@ -223,6 +223,18 @@ namespace module::platform::OpenCR {
 
         /// @brief Handle for our watchdog timer for packet handling
         ReactionHandle packet_watchdog;
+
+        /// @brief Stores configuration values
+        struct Config {
+            struct {
+                struct {
+                    /// @brief Container for the max tolerable temp for all servos
+                    float level = 0.0;
+                    /// @brief Container for the buzzer frequency, used if a Buzzer message is emitted
+                    float buzzer_frequency = 0.0;
+                } temperature;
+            } alarms;
+        } cfg;
     };
 
 }  // namespace module::platform::OpenCR

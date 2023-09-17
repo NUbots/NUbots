@@ -33,7 +33,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Setup docker buildx
       - name: 🐳 Set up docker buildx 🐳

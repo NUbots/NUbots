@@ -8,6 +8,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+#include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
@@ -20,9 +21,10 @@ namespace module::platform::OpenCR {
     using message::actuation::ServoTargets;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using utility::input::ServoID;
     using utility::support::Expression;
 
-    using message::platform::ButtonMiddleDown;
+    using message::output::Buzzer;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
@@ -44,21 +46,45 @@ namespace module::platform::OpenCR {
                     }
 
                     // Check what the hangup was
-                    bool packet_dropped = false;
+
+                    int num_packets_dropped        = 0;                 // keep track of how many we dropped
+                    NUgus::ID first_dropped_packet = NUgus::ID::NO_ID;  // keep track in case we have a chain
+
                     // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
                     // any packets, otherwise is the nonzero ID of the timed out device
                     for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
+
                         // Delete the packet we're waiting on
                         packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
-                        // Set flag
-                        packet_dropped = true;
+
+                        // notify with ID and servo name
+                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
+                                                       int(dropout_id),
+                                                       nugus.device_name(dropout_id)));
+
+                        // if this is the first packet, set our flag
+                        if (num_packets_dropped == 0) {
+                            first_dropped_packet = dropout_id;
+                        }
+
+                        // increment our counter
+                        num_packets_dropped++;
+                    }
+
+                    // if this is the first packet then send a warning
+                    if (num_packets_dropped > 1) {
+                        log<NUClear::WARN>(
+                            fmt::format("NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE "
+                                        "chain will cause all later packets (of higher ID) to be dropped. Consider "
+                                        "checking cables for ID {} ({})",
+                                        int(first_dropped_packet),
+                                        nugus.device_name(first_dropped_packet)));
                     }
 
                     // Send a request for all servo packets, only if there were packets dropped
                     // In case the system stops for some other reason, we don't want the watchdog
                     // to make it automatically restart
-                    if (packet_dropped) {
+                    if (num_packets_dropped > 0) {
                         log<NUClear::WARN>("Requesting servo packets to restart system");
                         send_servo_request();
                     }
@@ -105,6 +131,15 @@ namespace module::platform::OpenCR {
                 nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
+
+            // populate alarm config levels
+            cfg.alarms.temperature.level            = config["alarms"]["temperature"]["level"].as<float>();
+            cfg.alarms.temperature.buzzer_frequency = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
+
+            // populate battery config levels
+            battery_state.charged_voltage = config["battery"]["charged_voltage"].as<float>();
+            battery_state.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
+            battery_state.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -286,6 +321,11 @@ namespace module::platform::OpenCR {
             opencr_state.led_panel.led3 = led.led3;
             opencr_state.led_panel.led4 = led.led4;
             opencr_state.dirty          = true;
+        });
+
+        on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
+            // Fill the necessary field within the opencr_state struct
+            opencr_state.buzzer = buzzer_msg.frequency;
         });
     }
 
