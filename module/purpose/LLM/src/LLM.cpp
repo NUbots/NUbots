@@ -6,6 +6,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
@@ -30,12 +31,14 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/openai/openai.hpp"
+#include "utility/skill/Script.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::purpose {
 
     using extension::Configuration;
 
+    using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
@@ -58,6 +61,7 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
+    using utility::skill::load_script;
 
     using utility::input::LimbID;
     using utility::support::Expression;
@@ -106,6 +110,11 @@ namespace module::purpose {
             }
         });
 
+        // on<Every<20, std::chrono::seconds>>().then([this] {
+        //     // switch task
+        //     cfg.user_request = "stand and wave";
+        //     log<NUClear::INFO>("SWITCHING TO WAVE");
+        // });
 
         on<Provide<LLMPlanner>,
            Every<PROMPT_FREQ, std::chrono::seconds>,
@@ -286,7 +295,7 @@ namespace module::purpose {
 
 
                 // Build prompt for LLM
-                std::string prompt = "Given desired user request: " + cfg.user_request + " and current information of the world: " + "Ball " + ball_is_visible + "-, last seen " + time_since_ball_seen + " seconds ago " + distance_to_ball + " m away from you. You have the ability to WalkToBall (requires visible ball), Kick (needs higher priority than walk), LookAround, LookAtBall (requires visible ball), StandStill, TurnOnSpot. What tasks should you currently do to achieve the request? \n Provide your response as a list of with format: Task: <task> Priority: <priority> \n where <task> is one of the aforementioned tasks, and <priority> is an integer above 0. Tasks with a larger priority number will take control over a lower priority task if they are moving the same motors. Only use the tasks required right now to progress towards the request. Use the skills to navigate your environment to achieve the task " + cfg.user_request + ", considering that if the ball is not visible you will need to move to find it.\n";
+                std::string prompt = "Given desired user request: " + cfg.user_request + " and current information of the world: " + "Ball " + ball_is_visible + "-, last seen " + time_since_ball_seen + " seconds ago " + distance_to_ball + " m away from you. You have the ability to WalkToBall (requires visible ball), Kick (needs higher priority than walk), LookAround, LookAtBall (requires visible ball), StandStill, TurnOnSpot, Wave. What tasks should you currently do to achieve the request? \n Provide your response as a list of with format: Task: <task> Priority: <priority> \n where <task> is one of the aforementioned tasks, and <priority> is an integer above 0. Tasks with a larger priority number will take control over a lower priority task if they are moving the same motors. Only use the tasks required right now to progress towards the request. Use the skills to navigate your environment to achieve the task " + cfg.user_request + ", considering that if the ball is not visible you will need to move to find it.\n";
 
                 log<NUClear::INFO>("Prompt is:\n", prompt);
                 // Send request to OpenAI API
@@ -347,6 +356,9 @@ namespace module::purpose {
                     }
                     else if (task == "TurnOnSpot") {
                         emit<Task>(std::make_unique<TurnOnSpot>(), priority);
+                    }
+                    else if (task == "Wave") {
+                        emit<Task>(load_script<BodySequence>("Wave.yaml"), priority);
                     }
                     else {
                         log<NUClear::ERROR>("Unexpected task from LLM response: ", task);

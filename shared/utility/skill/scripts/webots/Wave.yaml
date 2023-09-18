@@ -1,0 +1,86 @@
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1
+      gain: 10
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1
+      gain: 10
+      torque: 0
+    - id: R_SHOULDER_PITCH
+      position: 0.200000003
+      gain: 10
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1
+      gain: 10
+      torque: 0
+    - id: R_SHOULDER_PITCH
+      position: 0.200000003
+      gain: 10
+      torque: 0
+    - id: R_ELBOW
+      position: -2.20000005
+      gain: 10
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1
+      gain: 10
+      torque: 0
+    - id: R_SHOULDER_PITCH
+      position: 0.200000003
+      gain: 10
+      torque: 0
+    - id: R_ELBOW
+      position: -0.5
+      gain: 10
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1
+      gain: 10
+      torque: 0
+    - id: R_SHOULDER_PITCH
+      position: 0.200000003
+      gain: 10
+      torque: 0
+    - id: R_ELBOW
+      position: -2.20000005
+      gain: 10
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -1
+      gain: 10
+      torque: 0
+    - id: R_SHOULDER_PITCH
+      position: 0.200000003
+      gain: 10
+      torque: 0
+    - id: R_ELBOW
+      position: -0.5
+      gain: 10
+      torque: 0
+- duration: 1000
+  targets:
+    - id: R_SHOULDER_ROLL
+      position: -0.200000003
+      gain: 10
+      torque: 0
+    - id: R_SHOULDER_PITCH
+      position: 1.5
+      gain: 10
+      torque: 0
+    - id: R_ELBOW
+      position: -0.400000006
+      gain: 10
+      torque: 0
