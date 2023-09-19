@@ -289,6 +289,10 @@ namespace module::input {
         /// @param walk_state Current state of walk engine
         void integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state);
 
+        /// @brief Updates translational and yaw components of odometry using the anchor method
+        /// @param walk_state Current state of walk engine
+        void anchor_update(std::unique_ptr<Sensors>& sensors, const Stability& stability, const WalkState& walk_state);
+
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
 
@@ -343,11 +347,19 @@ namespace module::input {
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
+        /// @brief Anchor position of the robot in world space
+        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+
+        /// @brief Current support phase of the robot
+        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+
         /// @brief Dead reckoning yaw orientation of the robot in world space
         double yaw = 0;
 
+
         /// @brief Transform of torso from world space
-        Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+        Eigen::Isometry3d Hwt        = Eigen::Isometry3d::Identity();
+        Eigen::Isometry3d Hwt_mahony = Eigen::Isometry3d::Identity();
 
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();

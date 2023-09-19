@@ -38,7 +38,6 @@ namespace module::input {
     using utility::support::Expression;
 
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkState;
     using message::localisation::ResetFieldLocalisation;
 
     using extension::Configuration;
@@ -168,6 +167,50 @@ namespace module::input {
             // Rotate the change in position into world coordinates before adding it to the current position
             Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
             Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
+        }
+    }
+
+    void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors,
+                                     const Stability& stability,
+                                     const WalkState& walk_state) {
+        // Check if we are not currently falling
+        // Update torso frame estimate using kinematics relative to the anchor frame
+        switch (current_support_phase.value) {
+            case WalkState::SupportPhase::LEFT:
+                // Update the anchor frame to the left foot
+                Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+
+                log<NUClear::DEBUG>("Hwt.translation().z() = {}", Hwt.translation().z());
+                log<NUClear::DEBUG>("sensors->Htx[FrameID::L_FOOT_BASE].translation().z() = {}",
+                                    Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]).translation().z());
+                break;
+            case WalkState::SupportPhase::RIGHT:
+                // Update the anchor frame to the right foot
+                Hwt = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+                break;
+            default: break;
+        }
+
+        // Update the anchor {a} frame if a support phase switch just occurred (could be done with touch sensors)
+        if (walk_state.support_phase != current_support_phase) {
+            log<NUClear::DEBUG>("Support Phase Switch");
+            current_support_phase = walk_state.support_phase;
+            switch (current_support_phase.value) {
+                case WalkState::SupportPhase::LEFT:
+                    // Update the anchor frame to the left foot
+                    Hwa = Hwt * sensors->Htx[FrameID::L_FOOT_BASE];
+                    break;
+                case WalkState::SupportPhase::RIGHT:
+                    // Update the anchor frame to the right foot
+                    Hwa = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
+                    break;
+                default: break;
+            }
+            // Set the z translation of the anchor frame to 0
+            Hwa.translation().z() = 0;
+            // Set the roll and pitch of the anchor frame to 0
+            Hwa.linear() =
+                Eigen::AngleAxisd(std::atan2(Hwa(1, 0), Hwa(0, 0)), Eigen::Vector3d::UnitZ()).toRotationMatrix();
         }
     }
 

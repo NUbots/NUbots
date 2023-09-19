@@ -36,6 +36,7 @@ namespace module::input {
 
     using extension::Configuration;
 
+    using std::chrono::duration_cast;
     using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
@@ -67,34 +68,26 @@ namespace module::input {
 
         // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
         if (walk_state != nullptr && stability != nullptr) {
-            integrate_walkcommand(dt, *stability, *walk_state);
+            // integrate_walkcommand(dt, *stability, *walk_state);
+            anchor_update(sensors, *stability, *walk_state);
         }
 
         // **************** Roll/Pitch Orientation Measurement Update ****************
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
                                             sensors->gyroscope,
-                                            Hwt,
+                                            Hwt_mahony,
                                             dt,
                                             cfg.Ki,
                                             cfg.Kp,
                                             cfg.bias);
-        // Extract the roll and pitch from the orientation quaternion
-        Eigen::Vector3d rpy = MatrixToEulerIntrinsic(Hwt.rotation());
-
-        // Compute the height of the torso using the kinematics from a foot which is on the ground
-        if (sensors->feet[BodySide::LEFT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]).inverse().translation().z();
-        }
-        else if (sensors->feet[BodySide::RIGHT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse()).translation().z();
-        }
 
         // **************** Construct Odometry Output ****************
-        // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning of walk command
-        const double roll  = rpy(0);
-        const double pitch = rpy(1);
-        Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
-        sensors->Htw       = Hwt.inverse();
+        // Convert the rotation matrix to euler angles
+        Eigen::Vector3d rpy_mahony = MatrixToEulerIntrinsic(Hwt_mahony.linear());
+        Eigen::Vector3d rpy_anchor = MatrixToEulerIntrinsic(Hwt.linear());
+        Hwt.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
+        sensors->Htw = Hwt.inverse();
+        // EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z())).inverse();
 
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
         Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();

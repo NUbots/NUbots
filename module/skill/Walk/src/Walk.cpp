@@ -141,7 +141,9 @@ namespace module::skill {
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
                 // Emit walk engine state
-                emit(std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target));
+                WalkState::SupportPhase phase = walk_generator.is_left_foot_planted() ? WalkState::SupportPhase::LEFT
+                                                                                      : WalkState::SupportPhase::RIGHT;
+                emit(std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase));
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
