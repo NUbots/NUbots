@@ -64,7 +64,7 @@ kalman:
 
 mahony:
   # Mahony "Proportional" Gain on error
-  Kp: 1
+  Kp: 0.5
   # Mahony "Integral" Gain used to compute bias
   Ki: 0.3
   # Mahony Filter initial bias
