@@ -17,53 +17,13 @@ namespace module::support::optimisation {
 
     void WalkOptimiser::setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
         NUClear::log<NUClear::INFO>("Walk Optimiser Setting up NSGA2");
-        // The initial values of the parameters to optimise
-        std::vector<double> param_initial_values;
-
-        // Parallel to param_initial_values, sets the limit (min, max) of each parameter value
-        std::vector<std::pair<double, double>> param_limits;
 
         // Extract the initial values and limits and from config file, for all of the parameters
         auto walk = config["walk"];
-        for (const auto& element : std::vector<std::string>({std::string("period")})) {
-            param_initial_values.emplace_back(walk[element][0].as<Expression>());
-            param_limits.emplace_back(walk[element][1].as<Expression>(), walk[element][2].as<Expression>());
-        }
+        add_parameters(walk);
 
-        auto step = walk["step"];
-        for (const auto& element : std::vector<std::string>({std::string("limits")})) {
-            param_initial_values.emplace_back(step[element][0][0].as<Expression>());
-            param_initial_values.emplace_back(step[element][0][1].as<Expression>());
-            param_initial_values.emplace_back(step[element][0][2].as<Expression>());
-            param_limits.emplace_back(step[element][1][0].as<Expression>(), step[element][2][0].as<Expression>());
-            param_limits.emplace_back(step[element][1][1].as<Expression>(), step[element][2][1].as<Expression>());
-            param_limits.emplace_back(step[element][1][2].as<Expression>(), step[element][2][2].as<Expression>());
-        }
-
-        for (const auto& element : std::vector<std::string>({std::string("height"),
-                                                             std::string("width")})) {
-            param_initial_values.emplace_back(step[element][0].as<Expression>());
-            param_limits.emplace_back(step[element][1].as<Expression>(), step[element][2].as<Expression>());
-        }
-
-        auto torso = walk["torso"];
-        for (const auto& element : std::vector<std::string>({std::string("height"),
-                                                             std::string("pitch"),
-                                                             std::string("sway_ratio")})) {
-            param_initial_values.emplace_back(torso[element][0].as<Expression>());
-            param_limits.emplace_back(torso[element][1].as<Expression>(), torso[element][2].as<Expression>());
-        }
-
-        for (const auto& element : std::vector<std::string>({std::string("position_offset"),
-                                                             std::string("sway_offset"),
-                                                             std::string("final_position_ratio")})) {
-            param_initial_values.emplace_back(torso[element][0][0].as<Expression>());
-            param_initial_values.emplace_back(torso[element][0][1].as<Expression>());
-            param_initial_values.emplace_back(torso[element][0][2].as<Expression>());
-            param_limits.emplace_back(torso[element][1][0].as<Expression>(), torso[element][2][0].as<Expression>());
-            param_limits.emplace_back(torso[element][1][1].as<Expression>(), torso[element][2][1].as<Expression>());
-            param_limits.emplace_back(torso[element][1][2].as<Expression>(), torso[element][2][2].as<Expression>());
-        }
+        auto arms = config["arms"];
+        add_parameters(arms);
 
         auto walk_command = config["walk_command"];
         for (const auto& element : std::vector<std::string>({std::string("velocity")})) {
@@ -83,6 +43,22 @@ namespace module::support::optimisation {
 
         // Set configuration for binary variables
         nsga2_algorithm.set_bin_variable_count(0);
+    }
+
+    void WalkOptimiser::add_parameters(YAML::Node param) {
+        for (const auto& element : param) {
+            YAML::Node child = element.second;
+            if (child.IsMap()) {
+                NUClear::log<NUClear::DEBUG>("Parent:", element.first.as<std::string>());
+                add_parameters(child);
+            }
+            else {
+                std::string key = element.first.as<std::string>();       // <- key
+                NUClear::log<NUClear::DEBUG>("Element:", key, child);
+                param_initial_values.emplace_back(child[0].as<Expression>());
+                param_limits.emplace_back(child[1].as<Expression>(), child[2].as<Expression>());
+            }
+        }
     }
 
     std::unique_ptr<NSGA2EvaluationRequest> WalkOptimiser::make_evaluation_request(const int id,

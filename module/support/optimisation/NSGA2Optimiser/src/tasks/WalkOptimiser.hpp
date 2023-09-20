@@ -25,6 +25,14 @@ namespace module::support::optimisation {
     private:
         int trial_duration_limit;
         std::string walk_path;
+
+        /// @brief The initial values of the parameters to optimise
+        std::vector<double> param_initial_values;
+
+        /// @brief Parallel to param_initial_values, sets the limit (min, max) of each parameter value
+        std::vector<std::pair<double, double>> param_limits;
+
+        void add_parameters(YAML::Node param);
     };
 
 }  // namespace module::support::optimisation
