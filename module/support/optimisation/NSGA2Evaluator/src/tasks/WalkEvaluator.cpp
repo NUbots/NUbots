@@ -43,7 +43,7 @@ namespace module::support::optimisation {
         trial_duration_limit = std::chrono::seconds(current_request.trial_duration_limit);
 
         // Set our walk command
-        walk_command_velocity.x() = current_request.parameters.real_params[18];
+        walk_command_velocity.x() = current_request.parameters.real_params[25];
         walk_command_velocity.y() = 0.0;
         walk_command_rotation     = 0.0;
 
@@ -53,8 +53,8 @@ namespace module::support::optimisation {
         NUClear::log<NUClear::INFO>("CurrentConfigPath", current_request.task_config_path);
 
         // The mapping of parameters depends on how the config file was read by the optimiser
-        auto walk                    = walk_config["walk"];
-        walk["period"]               = current_request.parameters.real_params[0];
+        auto walk           = walk_config["walk"];
+        walk["period"]      = current_request.parameters.real_params[0];
 
         auto step           = walk["step"];
         step["limits"][0]   = current_request.parameters.real_params[1];
@@ -62,11 +62,11 @@ namespace module::support::optimisation {
         step["limits"][2]   = current_request.parameters.real_params[3];
         step["height"]      = current_request.parameters.real_params[4];
         step["width"]       = current_request.parameters.real_params[5];
+        step["apex_ratio"]  = current_request.parameters.real_params[6];
 
         auto torso          = walk["torso"];
-        torso["height"]     = current_request.parameters.real_params[6];
-        torso["pitch"]      = current_request.parameters.real_params[7];
-        torso["sway_ratio"] = current_request.parameters.real_params[8];
+        torso["height"]     = current_request.parameters.real_params[7];
+        torso["pitch"]      = current_request.parameters.real_params[8];
 
         torso["position_offset"][0] = current_request.parameters.real_params[9];
         torso["position_offset"][1] = current_request.parameters.real_params[10];
@@ -76,9 +76,19 @@ namespace module::support::optimisation {
         torso["sway_offset"][1] = current_request.parameters.real_params[13];
         torso["sway_offset"][2] = current_request.parameters.real_params[14];
 
-        torso["final_position_ratio"][0]    = current_request.parameters.real_params[15];
-        torso["final_position_ratio"][1]    = current_request.parameters.real_params[16];
-        torso["final_position_ratio"][2]    = current_request.parameters.real_params[17];
+        torso["sway_ratio"] = current_request.parameters.real_params[15];
+
+        torso["final_position_ratio"][0]    = current_request.parameters.real_params[16];
+        torso["final_position_ratio"][1]    = current_request.parameters.real_params[17];
+        torso["final_position_ratio"][2]    = current_request.parameters.real_params[18];
+
+        auto arms                       = walk_config["arms"];
+        arms["right_shoulder_pitch"]    = current_request.parameters.real_params[19];
+        arms["left_shoulder_pitch"]     = current_request.parameters.real_params[20];
+        arms["right_shoulder_roll"]     = current_request.parameters.real_params[21];
+        arms["left_shoulder_roll"]      = current_request.parameters.real_params[22];
+        arms["right_elbow"]             = current_request.parameters.real_params[23];
+        arms["left_elbow"]              = current_request.parameters.real_params[24];
 
         // Write the updated config to disk
         std::ofstream overwrite_file_stream(current_request.task_config_path);
