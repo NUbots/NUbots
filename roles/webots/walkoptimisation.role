@@ -17,6 +17,8 @@ nuclear_role(
   actuation::FootController
   # Skills
   skill::Walk
+
+  # Optimisation
   support::optimisation::NSGA2Evaluator
   support::optimisation::NSGA2Optimiser
 )
