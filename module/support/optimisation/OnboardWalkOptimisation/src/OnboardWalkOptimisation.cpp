@@ -36,6 +36,7 @@ namespace module::support::optimisation {
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
             if (msg.command == OptimisationCommand::CommandType::RESET_ROBOT) {
                 NUClear::log<NUClear::DEBUG>("Onboard Resetting!");
+                is_upright = false;
                 resetting = true;
             }
         });
