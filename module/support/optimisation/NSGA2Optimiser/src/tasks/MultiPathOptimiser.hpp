@@ -24,8 +24,19 @@ namespace module::support::optimisation {
         std::vector<std::vector<double>> read_in_population_file(const std::string flie_name);
 
     private:
+        /// @brief The maximum duration in seconds that a trial can take
         int trial_duration_limit;
-        std::string quintic_walk_path;
+
+        /// @brief Path for the Walk config file
+        std::string walk_config_path;
+
+        /// @brief The initial values of the parameters to optimise
+        std::vector<double> param_initial_values;
+
+        /// @brief Parallel to param_initial_values, sets the limit (min, max) of each parameter value
+        std::vector<std::pair<double, double>> param_limits;
+
+        void add_parameters(YAML::Node param);
     };
 
 }  // namespace module::support::optimisation

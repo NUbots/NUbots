@@ -17,11 +17,6 @@ namespace module::support::optimisation {
 
     void StandOptimiser::setup_nsga2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2_algorithm) {
         NUClear::log<NUClear::INFO>("Stand Optimiser Setting up NSGA2");
-        // The initial values of the parameters to optimise
-        std::vector<double> param_initial_values;
-
-        // Parallel to param_initial_values, sets the limit (min, max) of each parameter value
-        std::vector<std::pair<double, double>> param_limits;
 
         // Extract the initial values and limits and from config file, for all of the parameters
         script_path = config["task_config_path"].as<std::string>();

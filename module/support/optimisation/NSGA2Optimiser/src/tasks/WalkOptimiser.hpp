@@ -23,8 +23,11 @@ namespace module::support::optimisation {
                                                                         std::vector<double> reals);
 
     private:
+        /// @brief The maximum duration in seconds that a trial can take
         int trial_duration_limit;
-        std::string walk_path;
+
+        /// @brief Path for the Walk config file
+        std::string walk_config_path;
 
         /// @brief The initial values of the parameters to optimise
         std::vector<double> param_initial_values;

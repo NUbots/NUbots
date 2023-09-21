@@ -32,7 +32,7 @@ namespace module::support::optimisation {
                                       walk_command[element][2].as<Expression>());
         }
 
-        walk_path            = config["task_config_path"].as<std::string>();
+        walk_config_path            = config["task_config_path"].as<std::string>();
         trial_duration_limit = config["trial_duration_limit"].as<int>();
 
         // Set configuration for real variables
@@ -46,6 +46,7 @@ namespace module::support::optimisation {
     }
 
     void WalkOptimiser::add_parameters(YAML::Node param) {
+        // Load the children parameters of the given node
         for (const auto& element : param) {
             YAML::Node child = element.second;
             if (child.IsMap()) {
@@ -65,7 +66,7 @@ namespace module::support::optimisation {
         request->id               = id;
         request->generation       = generation;
         request->task             = "walk";
-        request->task_config_path = walk_path;
+        request->task_config_path = walk_config_path;
 
         request->trial_duration_limit = trial_duration_limit;
 

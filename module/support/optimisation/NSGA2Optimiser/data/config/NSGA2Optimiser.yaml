@@ -23,7 +23,7 @@ eta:
   M: 20
 
 task: "walk"
-task_config_path: "config/webots/Walk.yaml"
+task_config_path: "config/Walk.yaml"
 
 # Only for multipath
 task_supplied_pop: "false"
