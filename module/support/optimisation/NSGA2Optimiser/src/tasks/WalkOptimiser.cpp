@@ -49,12 +49,9 @@ namespace module::support::optimisation {
         for (const auto& element : param) {
             YAML::Node child = element.second;
             if (child.IsMap()) {
-                NUClear::log<NUClear::DEBUG>("Parent:", element.first.as<std::string>());
                 add_parameters(child);
             }
             else {
-                std::string key = element.first.as<std::string>();       // <- key
-                NUClear::log<NUClear::DEBUG>("Element:", key, child);
                 param_initial_values.emplace_back(child[0].as<Expression>());
                 param_limits.emplace_back(child[1].as<Expression>(), child[2].as<Expression>());
             }
