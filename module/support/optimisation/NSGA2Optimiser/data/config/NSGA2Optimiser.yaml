@@ -5,7 +5,7 @@ max_generations: 5
 num_objectives: 1
 num_constraints: 2
 seed: 7777777
-trial_duration_limit: 20 # number of seconds to run a single trial for
+trial_duration_limit: 5 # number of seconds to run a single trial for
 probabilities:
   real:
     # Note that simulated binary crossover (SBX) does something like mutation as well
@@ -76,12 +76,8 @@ walk:
 
 # Fixed position of the arm joints during walking
 arms:
-  right_shoulder_pitch: [1.7, 1, 2]
-  left_shoulder_pitch: [1.7, 1, 2]
-  right_shoulder_roll: [-0.4, -0.5, 0.5]
-  left_shoulder_roll: [0.35, 0, 1]
-  right_elbow: [-0.7, -1, 1]
-  left_elbow: [-0.7, -1, 1]
+  shoulder_pitch: [1.7, 0.5, 2.5]
+  elbow: [-0.7, -2, 0]
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:

@@ -39,7 +39,6 @@ namespace module::support::optimisation {
     using message::platform::webots::OptimisationRobotPosition;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
-    using message::strategy::StandStill;
     using message::support::optimisation::NSGA2Evaluating;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
@@ -56,37 +55,17 @@ namespace module::support::optimisation {
 
     NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
-        // : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
-        // log<NUClear::INFO>("Setting up the NSGA2 evaluator");
-
-        // emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
-        //     subsumption_id,
-        //     "NSGA2 Evaluator",
-        //     {std::pair<float, std::set<LimbID>>(
-        //         1,
-        //         {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-        //     [this](const std::set<LimbID>& given_limbs) {
-        //         if (given_limbs.find(LimbID::LEFT_LEG) != given_limbs.end()) {
-        //             // Enable the walk engine.
-        //             emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumption_id));
-        //         }
-        //     },
-        //     [this](const std::set<LimbID>& taken_limbs) {
-        //         if (taken_limbs.find(LimbID::LEFT_LEG) != taken_limbs.end()) {
-        //             // Shut down the walk engine, since we don't need it right now.
-        //             emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumption_id));
-        //         }
-        //     },
-        //     [this](const std::set<ServoID>&) {}}));
 
         on<Startup>().then([this] {
+            // On the lowest level, just stand
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
+
             // At the start of the program, we should be standing
             // Without these emits, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
 
-            // On the lowest level, just stand
-            emit<Task>(std::make_unique<StandStill>(), 0);
+
             // // On the highest level, recover from falling
             // emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
@@ -174,8 +153,6 @@ namespace module::support::optimisation {
 
         on<Trigger<OptimisationResetDone>, Single>().then([this](const OptimisationResetDone&) {
             log<NUClear::INFO>("Reset done");
-            // Send a zero walk command to stop walking
-            // emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
             emit(std::make_unique<Event>(Event::RESET_DONE));
         });
 
