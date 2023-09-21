@@ -31,7 +31,7 @@ namespace module::support::optimisation {
                                                                      int individual);
 
         // Task-specific functions
-        std::vector<double> calculate_scores(double trialDuration);
+        std::vector<double> calculate_scores(double trial_duration);
         std::vector<double> calculate_constraints(bool early_termination);
         bool has_fallen(const Sensors& sensors);
         void update_max_field_plane_sway(const Sensors& sensors);

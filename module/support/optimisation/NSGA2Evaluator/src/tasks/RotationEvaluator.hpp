@@ -23,19 +23,42 @@ namespace module::support::optimisation {
     public:
         // Implementing the EvaluatorTask interface
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
+
+        /// @brief Setup the next trial, updating the trial duration, velocity, and walk config parameters also saving
+        /// them into a new file
         void set_up_trial(const NSGA2EvaluationRequest& request);
+
+        /// @brief Reset the local state of the simulation
         void reset_simulation();
+
+        /// @brief Starts an evaluation, running the walk and setting the duration
+        /// @param evaluator Instance of the NSGA2Evaluator which this task is running from
         void evaluating_state(NSGA2Evaluator* evaluator);
+
+        /// @brief Detects whether we have fallen
+        bool has_fallen(const Sensors& sensors);
+
+        /// @brief After an evaluation has completed calculates the scores for the individual
+        /// @param early_termination Has the trial been forced to terminate early
+        /// @param sim_time Current time in milliseconds
+        /// @param generation The generation that we have been evaluating
+        /// @param individual The specific individual we were trialing
         std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
                                                                      double sim_time,
                                                                      int generation,
                                                                      int individual);
 
         // Task-specific functions
+        /// @brief Determine scores for the algorithm based on distance travelled and sway
         std::vector<double> calculate_scores();
-        std::vector<double> calculate_constraints(double simTime);
+
+        /// @brief Determine constraints for the algorithm, if we have fallen, based on the time that the trial ran for
+        std::vector<double> calculate_constraints(double sim_time);
+
+        /// @brief Gives no constraints as a result of staying upright for the duration of the trial
         std::vector<double> constraints_not_violated();
-        bool has_fallen(const Sensors& sensors);
+
+        /// @brief Calculate the robot sway along the field plane (left/right, forward/backward)
         void update_max_field_plane_sway(const Sensors& sensors);
 
     private:
