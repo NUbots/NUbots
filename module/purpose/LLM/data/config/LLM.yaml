@@ -19,11 +19,11 @@ tasks:
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
 walk_to_field_position_position: [0, 0, 0]
 
-# user_request: "find the ball"
+user_request: "find the ball"
 # user_request: "walk to the ball"
 # user_request: "approach the ball" # with falling over
 # user_request: "approach and kick the ball"
-user_request: "play soccer"
+# user_request: "play soccer"
 # user_request: "playing soccer"
 # user_request: "walk to the moon"
 # user_request: "jump"

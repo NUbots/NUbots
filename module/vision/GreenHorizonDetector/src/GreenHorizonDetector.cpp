@@ -64,7 +64,7 @@ namespace module::vision {
 
             // Cluster the points
             // Points are clustered based on their connectivity to other field points
-            // Clustering is down in two steps
+            // Clustering is done in two steps
             // 1) We take the set of field points found above and partition them into potential clusters by
             //    a) Add the first point and its field neighbours to a cluster
             //    b) Find all other field points who are neighbours of the points in the cluster
@@ -106,33 +106,33 @@ namespace module::vision {
 
                         // Ranges do not overlap
                         // Merge the clusters
-                        if ((max_a < min_b) || (max_b < min_a)) {
-                            // Append the second cluster on to the first
-                            it->insert(it->end(), it2->begin(), it2->end());
-                            // Delete the second cluster
-                            it2 = clusters.erase(it2);
-                        }
+                        // if ((max_a < min_b) || (max_b < min_a)) {
+                        // Append the second cluster on to the first
+                        it->insert(it->end(), it2->begin(), it2->end());
+                        // Delete the second cluster
+                        it2 = clusters.erase(it2);
+                        // }
                         // Second cluster is overlapping first cluster either on the left or the right
                         // Keep the largest cluster
-                        else if (((min_a <= min_b) && (min_b <= max_a)) || ((min_b <= min_a) && (min_a <= max_b))) {
-                            // Delete the second cluster
-                            it2 = clusters.erase(it2);
-                        }
-                        else {
-                            log<NUClear::DEBUG>(
-                                "The clusters are neither overlapping, nor are they not overlapping. What have "
-                                "you "
-                                "done???");
-                            log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
-                                                            *range_a.first,
-                                                            *range_a.second,
-                                                            min_a,
-                                                            max_a,
-                                                            *range_b.first,
-                                                            *range_b.second,
-                                                            min_b,
-                                                            max_b));
-                        }
+                        // else if (((min_a <= min_b) && (min_b <= max_a)) || ((min_b <= min_a) && (min_a <= max_b))) {
+                        //     // Delete the second cluster
+                        //     it2 = clusters.erase(it2);
+                        // }
+                        // else {
+                        //     log<NUClear::DEBUG>(
+                        //         "The clusters are neither overlapping, nor are they not overlapping. What have "
+                        //         "you "
+                        //         "done???");
+                        //     log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
+                        //                                     *range_a.first,
+                        //                                     *range_a.second,
+                        //                                     min_a,
+                        //                                     max_a,
+                        //                                     *range_b.first,
+                        //                                     *range_b.second,
+                        //                                     min_b,
+                        //                                     max_b));
+                        // }
                     }
                 }
             }

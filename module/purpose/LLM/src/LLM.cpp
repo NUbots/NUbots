@@ -355,7 +355,7 @@ namespace module::purpose {
                         emit<Task>(std::make_unique<StandStill>(), priority);
                     }
                     else if (task == "TurnOnSpot") {
-                        emit<Task>(std::make_unique<TurnOnSpot>(), priority);
+                        emit<Task>(std::make_unique<TurnOnSpot>(true), priority);
                     }
                     else if (task == "Wave") {
                         emit<Task>(load_script<BodySequence>("Wave.yaml"), priority);
