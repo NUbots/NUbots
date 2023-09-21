@@ -82,16 +82,20 @@ namespace module::input {
                                             cfg.Kp,
                                             cfg.bias);
 
+
         // **************** Construct Odometry Output ****************
+        sensors->Htw = Hwt.inverse();
         // Convert the rotation matrix to euler angles
         Eigen::Vector3d rpy_mahony = MatrixToEulerIntrinsic(Hwt_mahony.linear());
         Eigen::Vector3d rpy_anchor = MatrixToEulerIntrinsic(Hwt.linear());
-        Hwt.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
-        sensors->Htw = Hwt.inverse();
-        // EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z())).inverse();
+        // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
+        Hwt_mahony.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0));
+        // Replace roll and pitch with mahony filter values
+        sensors->Htw.linear() =
+            EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z())).inverse();
 
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwr.linear()          = Eigen::AngleAxisd(rpy_anchor.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
         sensors->Hrw          = Hwr.inverse();
         update_loop.enable();

@@ -198,12 +198,11 @@ namespace module::input {
                 // Update the anchor frame to the base of right foot
                 Hwa = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
             }
-
-            // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on flat ground
-            Hwa.translation().z() = 0;
-            Hwa.linear() = Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwa.linear()).z(), Eigen::Vector3d::UnitZ())
-                               .toRotationMatrix();
         }
+        // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on flat ground
+        Hwa.translation().z() = 0;
+        Hwa.linear() =
+            Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwa.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
