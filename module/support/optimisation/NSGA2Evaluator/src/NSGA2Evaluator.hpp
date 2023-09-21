@@ -60,9 +60,6 @@ namespace module::support::optimisation {
         /// @brief Pointer to an instance of the task being evaluated
         std::unique_ptr<EvaluatorTask> task;
 
-        /// @brief Subsumption priority ID for this module
-        size_t subsumption_id;
-
         /// @brief The number of the current generation
         int generation = 0;
 

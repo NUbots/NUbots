@@ -34,7 +34,6 @@ namespace module::support::optimisation {
         std::vector<double> calculate_constraints(double simTime);
         std::vector<double> constraints_not_violated();
         void update_max_field_plane_sway(const Sensors& sensors);
-        bool check_off_course();
 
     private:
         struct Config {

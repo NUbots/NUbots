@@ -114,7 +114,7 @@ namespace module::support::optimisation {
     }
 
     void WalkEvaluator::reset_simulation() {
-        // Reset our local stateconst OptimisationRobotPosition& position
+        // Reset our local state
         trial_start_time       = 0.0;
         robot_position         = Eigen::Vector3d::Zero();
         initial_robot_position = Eigen::Vector3d::Zero();

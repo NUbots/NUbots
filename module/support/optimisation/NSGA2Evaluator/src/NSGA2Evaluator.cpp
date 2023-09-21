@@ -57,17 +57,8 @@ namespace module::support::optimisation {
         : BehaviourReactor(std::move(environment)) {
 
         on<Startup>().then([this] {
-            // On the lowest level, just stand
+            // When starting up have the robot stand
             emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
-
-            // At the start of the program, we should be standing
-            // Without these emits, modules that need a Stability and WalkState messages may not run
-            emit(std::make_unique<Stability>(Stability::UNKNOWN));
-            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
-
-
-            // // On the highest level, recover from falling
-            // emit<Task>(std::make_unique<FallRecovery>(), 3);
         });
 
         // Handle a state transition event
@@ -144,6 +135,7 @@ namespace module::support::optimisation {
         });
 
         on<Trigger<Sensors>, Single>().then([this](const Sensors& sensors) {
+            // When an evaluaton is running, check to see if we have fallen
             if (evaluation_running) {
                 if (task->has_fallen(sensors)) {
                     emit(std::make_unique<Event>(Event::TERMINATE_EARLY));
@@ -218,13 +210,13 @@ namespace module::support::optimisation {
         emit<Task>(std::make_unique<Walk>(vec3), 1);
     }
 
-    /// @brief Handle the WAITING_FOR_REQUEST state
+    // Handle the WAITING_FOR_REQUEST state
     void NSGA2Evaluator::waiting_for_request() {
         log<NUClear::DEBUG>("Waiting For Request");
         emit(std::make_unique<NSGA2EvaluatorReady>());  // Let the optimiser know we're ready
     }
 
-    /// @brief Handle the SETTING_UP_TRIAL state
+    // Handle the SETTING_UP_TRIAL state
     void NSGA2Evaluator::setting_up_trial() {
         log<NUClear::DEBUG>("Setting Up Trial");
 
@@ -252,7 +244,7 @@ namespace module::support::optimisation {
         emit(std::make_unique<Event>(Event::TRIAL_SETUP_DONE));
     }
 
-    /// @brief Handle the RESETTING_SIMULATION state
+    // Handle the RESETTING_SIMULATION state
     void NSGA2Evaluator::resetting_simulation() {
         log<NUClear::DEBUG>("Resetting Simulation");
 
@@ -264,7 +256,7 @@ namespace module::support::optimisation {
         emit(reset);
     }
 
-    /// @brief Handle the EVALUATING state
+    // Handle the EVALUATING state
     void NSGA2Evaluator::evaluating(NSGA2Evaluator::Event event) {
         log<NUClear::DEBUG>("Evaluating");
         std::this_thread::sleep_for(std::chrono::milliseconds(500));
@@ -294,7 +286,7 @@ namespace module::support::optimisation {
         emit<Scope::DELAY>(message, delay_time);
     }
 
-    /// @brief Handle the TERMINATING_EARLY state
+    // Handle the TERMINATING_EARLY state
     void NSGA2Evaluator::terminating_early() {
         log<NUClear::DEBUG>("Terminating Early");
 
@@ -309,7 +301,7 @@ namespace module::support::optimisation {
         emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
     }
 
-    /// @brief Handle the TERMINATING_GRACEFULLY state
+    // Handle the TERMINATING_GRACEFULLY state
     void NSGA2Evaluator::terminating_gracefully() {
         log<NUClear::DEBUG>("Terminating Gracefully");
 
