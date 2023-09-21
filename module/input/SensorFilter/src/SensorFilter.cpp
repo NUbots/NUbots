@@ -47,10 +47,10 @@ namespace module::input {
         on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // **************************************** Button config ****************************************
+            // Button config
             cfg.buttons.debounce_threshold = config["buttons"]["debounce_threshold"].as<int>();
 
-            // **************************************** Foot down config ****************************************
+            // Foot down config
             const FootDownMethod method = config["foot_down"]["method"].as<std::string>();
             std::map<FootDownMethod, float> thresholds;
             for (const auto& threshold : config["foot_down"]["known_methods"]) {
@@ -58,17 +58,23 @@ namespace module::input {
             }
             cfg.footDown.set_method(method, thresholds);
 
-            //  **************************************** Configure Filters ****************************************
+            //  Kinematics Model
+            cfg.urdf_path = config["urdf_path"].as<std::string>();
+            nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
+
+            //  Configure Filters
             cfg.filtering_method = config["filtering_method"].as<std::string>();
             configure_ukf(config);
             configure_kf(config);
             configure_mahony(config);
 
-            // ****************************************  Kinematics Model ****************************************
-            cfg.urdf_path = config["urdf_path"].as<std::string>();
-            nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
-
             // Deadreckoning
+            Hwa.translation().y() =
+                tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
+                                                                   nugus_model.home_configuration(),
+                                                                   config["initial_anchor_frame"].as<std::string>())
+                    .translation()
+                    .y();
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
         });
 
