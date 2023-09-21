@@ -25,7 +25,7 @@ user_request: "find the ball"
 # user_request: "approach and kick the ball"
 # user_request: "play soccer"
 # user_request: "playing soccer"
-# user_request: "walk to the moon"
+# user_request: "pick up the ball"
 # user_request: "jump"
 # user_request: ["approach the ball", "wave"]
 
