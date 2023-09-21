@@ -43,7 +43,7 @@ namespace module::support::optimisation {
         trial_duration_limit = std::chrono::seconds(current_request.trial_duration_limit);
 
         // Set our walk command
-        walk_command_velocity.x() = current_request.parameters.real_params[25];
+        walk_command_velocity.x() = current_request.parameters.real_params[21];
         walk_command_velocity.y() = 0.0;
         walk_command_rotation     = 0.0;
 
@@ -84,11 +84,9 @@ namespace module::support::optimisation {
 
         auto arms                       = walk_config["arms"];
         arms["right_shoulder_pitch"]    = current_request.parameters.real_params[19];
-        arms["left_shoulder_pitch"]     = current_request.parameters.real_params[20];
-        arms["right_shoulder_roll"]     = current_request.parameters.real_params[21];
-        arms["left_shoulder_roll"]      = current_request.parameters.real_params[22];
-        arms["right_elbow"]             = current_request.parameters.real_params[23];
-        arms["left_elbow"]              = current_request.parameters.real_params[24];
+        arms["left_shoulder_pitch"]     = current_request.parameters.real_params[19];
+        arms["right_elbow"]             = current_request.parameters.real_params[20];
+        arms["left_elbow"]              = current_request.parameters.real_params[20];
 
         // Write the updated config to disk
         std::ofstream overwrite_file_stream(current_request.task_config_path);
