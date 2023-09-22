@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with PS3Walk.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
  */
 
 #include "PS3Walk.hpp"
@@ -70,23 +70,12 @@ namespace module::purpose {
             // At the start of the program, we should be standing
             // Without this emit, modules that need a Stability message may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
-
-            // The robot should always try to recover from falling, if applicable, regardless of purpose
-            // emit<Task>(std::make_unique<FallRecovery>(), 4);
-
-            // Stand Still on startup
-            // emit<Task>(std::make_unique<StandStill>());
         });
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
             JoystickEvent event;
             // read from joystick
             if (joystick.sample(&event)) {
-
-                // log<NUClear::DEBUG>("Event number: ", float(event.number));
-                //  log<NUClear::DEBUG>("Event value: ", event.value);
-                // log<NUClear::DEBUG>("Event isAxis: ", event.isAxis());
-                //  log<NUClear::DEBUG>("Event isButton: ", event.isButton());
 
                 if (event.isAxis()) {
                     // event was an axis event
@@ -110,23 +99,6 @@ namespace module::purpose {
                             break;
                     }
                 }
-                // control scheme:
-                // BUTTON_SELECT         = toggles head lock;
-                // BUTTON_LEFT_JOYSTICK  = controls the walking;
-                // BUTTON_RIGHT_JOYSTICK = controls the head yaw and pitch;
-                // BUTTON_START          = toggles walk lock;
-                // BUTTON_DPAD_UP        = ;
-                // BUTTON_DPAD_RIGHT     = ;
-                // BUTTON_DPAD_DOWN      = ;
-                // BUTTON_DPAD_LEFT      = ;
-                // BUTTON_L2             = left side kick (not active);
-                // BUTTON_R2             = right side kick (not active);
-                // BUTTON_L1             = left front kick (not active);
-                // BUTTON_R1             = right front kick (not active);
-                // BUTTON_TRIANGLE       = ;
-                // BUTTON_CIRCLE         = ;
-                // BUTTON_CROSS          = ;
-                // BUTTON_SQUARE         = ;
                 else if (event.isButton()) {
                     // event was a button event
                     switch (event.number) {
@@ -250,7 +222,6 @@ namespace module::purpose {
         });
 
         // output walk command based on updated strafe and rotation speed from joystick
-        // TODO(HardwareTeam): potential performance gain: ignore if value hasn't changed since last emit?
         on<Every<20, Per<std::chrono::seconds>>>().then([this] {
             if (!head_locked) {
                 // Create a unit vector in the direction the head should be pointing
@@ -262,7 +233,6 @@ namespace module::purpose {
             }
 
             if (moving) {
-                log<NUClear::DEBUG>("Emitting walk command: ", walk_command.transpose());
                 emit<Task>(std::make_unique<Walk>(walk_command.cast<double>()), 2);
             }
         });

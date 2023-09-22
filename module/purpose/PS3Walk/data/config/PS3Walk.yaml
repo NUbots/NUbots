@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 maximum_forward_velocity: 0.15
 maximum_rotational_velocity: 0.25
