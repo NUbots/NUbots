@@ -1,3 +1,8 @@
+log_level: INFO
+
+buttons:
+  debounce_threshold: 7
+
 foot_down:
   method: FSR
   known_methods:
