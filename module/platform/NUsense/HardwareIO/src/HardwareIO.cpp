@@ -1,5 +1,6 @@
 #include "extension/Configuration.hpp"
 #include "HardwareIO.hpp"
+#include "message/actuation/ServoTarget.hpp"
 #include "NUsense/SIProcessor.hpp"
 
 
@@ -7,6 +8,9 @@ namespace module::platform::NUsense {
 
     using extension::Configuration;
     using message::platform::RawSensors;// This will most likely change to a more specific message for NUsense
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
+
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), nusense() {
 
@@ -46,9 +50,21 @@ namespace module::platform::NUsense {
         // TODO create a message tailored for NUsense and emit it
 
         // When a message for NUsense is detected, serialise it and send it to the port
-        on<Trigger<RawSensors>>().then([this](const RawSensors& msg){
-            std::vector<char> serialised_msg = msg_to_nbs(msg);
-            nusense.write(serialised_msg.data(), serialised_msg.size());
+        // on<Trigger<RawSensors>>().then([this](const RawSensors& msg){
+        //     std::vector<char> serialised_msg = msg_to_nbs(msg);
+        //     nusense.write(serialised_msg.data(), serialised_msg.size());
+        // });
+
+        on <Trigger<ServoTargets>>().then([this](const ServoTargets& commands){
+            log<NUClear::INFO>("Servo targets received");
+        });
+
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
+            auto commandList = std::make_unique<ServoTargets>();
+            commandList->targets.push_back(command);
+
+            // Emit it so it's captured by the reaction above
+            emit<Scope::DIRECT>(commandList);
         });
     }
 
