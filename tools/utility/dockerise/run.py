@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
+import json
 import os
 import re
 import shutil
+import socket
+import struct
 import subprocess
 import sys
 from subprocess import DEVNULL
@@ -229,6 +232,25 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         network = kwargs["network"]
         if network is None:
             network = "host" if _is_linux() else "bridge"
+
+        # If we are using a custom docker extract the broadcast address for use in NUClearNet
+        if network != "host":
+            # Load the network information
+            inspect = json.loads(
+                subprocess.check_output(["docker", "network", "inspect", network, "--format", "{{json . }}"]).decode(
+                    "utf-8"
+                )
+            )
+            # Access the subnet property
+            ip, subnet = inspect["IPAM"]["Config"][0]["Subnet"].split("/")
+
+            # Convert the ip to a long and the subnet to a mask then broadcast is just a bitwise of the two
+            (ip,) = struct.unpack("!L", socket.inet_aton(ip))
+            subnet = 0xFFFFFFFF << (32 - int(subnet))
+            broadcast = socket.inet_ntoa(struct.pack("!L", 0xFFFFFFFF & (ip | ~subnet)))
+
+            # Add the broadcast address to the environment so binaries can use it
+            docker_args.extend(["--env", f"BROADCAST_ADDRESS:{broadcast}"])
 
         docker_args.extend(["--network", network])
 
