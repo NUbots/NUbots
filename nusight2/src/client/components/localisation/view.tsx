@@ -178,6 +178,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel} />;
       })}
       <FieldLineDots model={model} />
+      <Ball model={model} />
     </object3D>
   );
 });
@@ -196,6 +197,22 @@ const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
                 </mesh>
               );
             })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Ball = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible && (
+          <object3D key={robot.id}>
+            <mesh position={robot.ball.toArray()}>
+              <sphereBufferGeometry args={[robot.ball.z, 20, 20]} />
+              <meshBasicMaterial color="lightblue" />
+            </mesh>
           </object3D>
         ),
     )}

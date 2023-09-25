@@ -120,6 +120,7 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinesDots: { rPWw: Vector3[] };
+  @observable ball: Vector3;
 
   constructor({
     model,
@@ -130,6 +131,7 @@ export class LocalisationRobotModel {
     Rwt,
     motors,
     fieldLinesDots,
+    ball,
   }: {
     model: RobotModel;
     name: string;
@@ -139,6 +141,7 @@ export class LocalisationRobotModel {
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinesDots: { rPWw: Vector3[] };
+    ball: Vector3;
   }) {
     this.model = model;
     this.name = name;
@@ -148,6 +151,7 @@ export class LocalisationRobotModel {
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinesDots = fieldLinesDots;
+    this.ball = ball;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -159,6 +163,7 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinesDots: { rPWw: [] },
+      ball: Vector3.of(),
     });
   });
 
