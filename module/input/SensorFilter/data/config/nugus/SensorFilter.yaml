@@ -1,5 +1,10 @@
+log_level: INFO
+
+buttons:
+  debounce_threshold: 7
+
 foot_down:
-  method: FSR
+  method: Z_HEIGHT
   known_methods:
     - name: FSR # Literal FSR
       certainty_threshold: 30 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
@@ -78,7 +83,7 @@ initial_anchor_frame: "left_foot_base"
 initial_rTWw: [0, 0, 0.49]
 initial_rpy: [0, 0.21, 0]
 
-# Specify which filtering method to use, either UKF, KF, MAHONY or GROUND_TRUTH
+# Specify which filtering method to use, either UKF, KF or MAHONY
 filtering_method: MAHONY
 
-urdf_path: "models/nugus.urdf"
+urdf_path: "/home/nubots/models/nugus.urdf"
