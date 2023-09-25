@@ -138,7 +138,7 @@ namespace module::input {
                                   update_odometry_kf(sensors, previous_sensors, raw_sensors, stability, walk_state);
                                   break;
                               case FilteringMethod::MAHONY:
-                                  update_odometry_mahony(sensors, previous_sensors, raw_sensors, stability, walk_state);
+                                  update_odometry_mahony(sensors, previous_sensors, raw_sensors, walk_state);
                                   break;
                               case FilteringMethod::GROUND_TRUTH:
                                   update_odometry_ground_truth(sensors, raw_sensors);
@@ -176,9 +176,7 @@ namespace module::input {
         }
     }
 
-    void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors,
-                                     const Stability& stability,
-                                     const WalkState& walk_state) {
+    void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state) {
         // Compute torso pose in world space using kinematics from anchor frame
         if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
             Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
