@@ -36,7 +36,6 @@ namespace module::input {
 
     using extension::Configuration;
 
-    using std::chrono::duration_cast;
     using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
@@ -59,21 +58,20 @@ namespace module::input {
                                               const RawSensors& raw_sensors,
                                               const std::shared_ptr<const Stability>& stability,
                                               const std::shared_ptr<const WalkState>& walk_state) {
-        // **************** Time Update ****************
+
+        // **************** Anchor Update ****************
+        // Updates translational and yaw components of odometry using the anchor method
+        if (walk_state != nullptr && stability != nullptr) {
+            anchor_update(sensors, *stability, *walk_state);
+        }
+
+        // **************** Roll/Pitch Orientation Measurement Update ****************
         // Calculate our time offset from the last read then update the filter's time
         const double dt = std::max(
             std::chrono::duration_cast<std::chrono::duration<double>>(
                 raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
                 .count(),
             0.0);
-
-        // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
-        if (walk_state != nullptr && stability != nullptr) {
-            // integrate_walkcommand(dt, *stability, *walk_state);
-            anchor_update(sensors, *stability, *walk_state);
-        }
-
-        // **************** Roll/Pitch Orientation Measurement Update ****************
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
                                             sensors->gyroscope,
                                             Hwt_mahony,
@@ -90,7 +88,7 @@ namespace module::input {
         Eigen::Vector3d rpy_anchor = MatrixToEulerIntrinsic(Hwt.linear());
         // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
         Hwt_mahony.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0));
-        // Replace roll and pitch with mahony filter values
+        // Replace roll and pitch with mahony filter estimation
         sensors->Htw.linear() =
             EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z())).inverse();
 

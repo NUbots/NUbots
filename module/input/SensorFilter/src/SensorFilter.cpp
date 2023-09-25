@@ -179,7 +179,7 @@ namespace module::input {
     void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors,
                                      const Stability& stability,
                                      const WalkState& walk_state) {
-        // Compute torso pose in world space using anchor frame
+        // Compute torso pose in world space using kinematics from anchor frame
         if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
             Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
         }
@@ -187,7 +187,7 @@ namespace module::input {
             Hwt = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
         }
 
-        // Update the anchor {a} frame if a support phase switch just occurred (could be done with touch sensors)
+        // Update the anchor {a} frame if a support phase switch just occurred (could be done with foot down sensors)
         if (walk_state.support_phase != current_support_phase) {
             current_support_phase = walk_state.support_phase;
             if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
