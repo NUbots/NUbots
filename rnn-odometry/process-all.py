@@ -27,6 +27,8 @@ def main():
     # get the contents of the config directory
 
     config_dir_contents = os.listdir(config_dir)
+    # Create the directory if it doesn't exist
+    os.makedirs(json_output_path + "/" + file_prefix, exist_ok=True)
     # count the size of the json output directory
     json_output_dir_contents = os.listdir(json_output_path + "/" + file_prefix)
     json_output_dir_count = 0
@@ -36,6 +38,8 @@ def main():
     # increment
     json_output_dir_count += 1
 
+    # Create the directory if it doesn't exist
+    os.makedirs(npy_output_path + "/" + file_prefix, exist_ok=True)
     # count the size of the npy output directory
     npy_output_dir_contents = os.listdir(npy_output_path + "/" + file_prefix)
     npy_output_dir_count = 0
