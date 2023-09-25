@@ -211,7 +211,7 @@ const Ball = ({ model }: { model: LocalisationModel }) => (
           <object3D key={robot.id}>
             <mesh position={robot.ball.toArray()}>
               <sphereBufferGeometry args={[robot.ball.z, 20, 20]} />
-              <meshBasicMaterial color="lightblue" />
+              <meshStandardMaterial color="#1E90FF" />
             </mesh>
           </object3D>
         ),
