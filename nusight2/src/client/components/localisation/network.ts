@@ -39,13 +39,13 @@ export class LocalisationNetwork {
   @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.fieldLinesDots.rPFf = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw).applyMatrix4(robot.Hfw));
+    robot.fieldLinePoints.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw));
   }
 
   @action.bound
   private onBall(robotModel: RobotModel, ball: message.localisation.Ball) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.ball.rBFf = Vector3.from(ball.rBWw).applyMatrix4(robot.Hfw);
+    robot.ball.rBWw = Vector3.from(ball.rBWw);
   }
 
   @action

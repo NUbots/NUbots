@@ -119,8 +119,8 @@ export class LocalisationRobotModel {
   @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
-  @observable fieldLinesDots: { rPFf: Vector3[] };
-  @observable ball:  { rBFf: Vector3 };
+  @observable fieldLinePoints: { rPWw: Vector3[] };
+  @observable ball:  { rBWw: Vector3 };
 
   constructor({
     model,
@@ -130,7 +130,7 @@ export class LocalisationRobotModel {
     Hfw,
     Rwt,
     motors,
-    fieldLinesDots,
+    fieldLinePoints,
     ball,
   }: {
     model: RobotModel;
@@ -140,8 +140,8 @@ export class LocalisationRobotModel {
     Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
-    fieldLinesDots: { rPFf: Vector3[] };
-    ball: { rBFf: Vector3 };
+    fieldLinePoints: { rPWw: Vector3[] };
+    ball: { rBWw: Vector3 };
   }) {
     this.model = model;
     this.name = name;
@@ -150,7 +150,7 @@ export class LocalisationRobotModel {
     this.Hfw = Hfw;
     this.Rwt = Rwt;
     this.motors = motors;
-    this.fieldLinesDots = fieldLinesDots;
+    this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
   }
 
@@ -162,8 +162,8 @@ export class LocalisationRobotModel {
       Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
-      fieldLinesDots: { rPFf: [] },
-      ball: { rBFf: Vector3.of() },
+      fieldLinePoints: { rPWw: [] },
+      ball: { rBWw: Vector3.of() },
     });
   });
 
@@ -179,5 +179,17 @@ export class LocalisationRobotModel {
   @computed
   get Hft(): Matrix4 {
     return this.Hfw.multiply(this.Htw.invert());
+  }
+
+  /** Field line points in field space */
+  @computed
+  get rPFf(): Vector3[] {
+    return this.fieldLinePoints.rPWw.map(rPWw => rPWw.applyMatrix4(this.Hfw));
+  }
+
+  /** Ball position in field space */
+  @computed
+  get rBFf(): Vector3 {
+    return this.ball.rBWw.applyMatrix4(this.Hfw);
   }
 }
