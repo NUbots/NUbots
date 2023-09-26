@@ -178,7 +178,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel} />;
       })}
       <FieldLineDots model={model} />
-      <Ball model={model} />
+      <Balls model={model} />
     </object3D>
   );
 });
@@ -189,7 +189,7 @@ const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
       (robot) =>
         robot.visible && (
           <object3D key={robot.id}>
-            {robot.fieldLinesDots.rPWw.map((d, i) => {
+            {robot.fieldLinesDots.rPFf.map((d, i) => {
               return (
                 <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
                   <circleBufferGeometry args={[0.02, 20]} />
@@ -203,17 +203,15 @@ const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
   </>
 );
 
-const Ball = ({ model }: { model: LocalisationModel }) => (
+const Balls = ({ model }: { model: LocalisationModel }) => (
   <>
     {model.robots.map(
       (robot) =>
         robot.visible && (
-          <object3D key={robot.id}>
-            <mesh position={robot.ball.toArray()}>
-              <sphereBufferGeometry args={[robot.ball.z, 20, 20]} />
-              <meshStandardMaterial color="#1E90FF" />
+            <mesh position={robot.ball.rBFf.toArray()} scale={[robot.ball.rBFf.z, robot.ball.rBFf.z, robot.ball.rBFf.z]}>
+              <sphereBufferGeometry args={[1, 20, 20]} />
+              <meshStandardMaterial color="orange" />
             </mesh>
-          </object3D>
         ),
     )}
   </>

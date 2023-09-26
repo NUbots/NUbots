@@ -119,8 +119,8 @@ export class LocalisationRobotModel {
   @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
-  @observable fieldLinesDots: { rPWw: Vector3[] };
-  @observable ball: Vector3;
+  @observable fieldLinesDots: { rPFf: Vector3[] };
+  @observable ball:  { rBFf: Vector3 };
 
   constructor({
     model,
@@ -140,8 +140,8 @@ export class LocalisationRobotModel {
     Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
-    fieldLinesDots: { rPWw: Vector3[] };
-    ball: Vector3;
+    fieldLinesDots: { rPFf: Vector3[] };
+    ball: { rBFf: Vector3 };
   }) {
     this.model = model;
     this.name = name;
@@ -162,8 +162,8 @@ export class LocalisationRobotModel {
       Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
-      fieldLinesDots: { rPWw: [] },
-      ball: Vector3.of(),
+      fieldLinesDots: { rPFf: [] },
+      ball: { rBFf: Vector3.of() },
     });
   });
 
