@@ -141,7 +141,7 @@ export class LocalisationRobotModel {
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
-    ball: { rBWw: Vector3 };
+    ball?: { rBWw: Vector3 };
   }) {
     this.model = model;
     this.name = name;
@@ -163,7 +163,6 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
-      ball: { rBWw: Vector3.of() },
     });
   });
 
@@ -189,7 +188,7 @@ export class LocalisationRobotModel {
 
   /** Ball position in field space */
   @computed
-  get rBFf(): Vector3 | undefined{
+  get rBFf(): Vector3 | undefined {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
   }
 }

@@ -45,7 +45,7 @@ export class LocalisationNetwork {
   @action.bound
   private onBall(robotModel: RobotModel, ball: message.localisation.Ball) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.ball.rBWw = Vector3.from(ball.rBWw);
+    robot.ball = { rBWw: Vector3.from(ball.rBWw) };
   }
 
   @action
