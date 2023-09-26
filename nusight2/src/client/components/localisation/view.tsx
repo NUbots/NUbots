@@ -207,8 +207,8 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
   <>
     {model.robots.map(
       (robot) =>
-        robot.visible && (
-            <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]}>
+        robot.visible && robot.rBFf && (
+            <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
               <sphereBufferGeometry args={[1, 20, 20]} />
               <meshStandardMaterial color="orange" />
             </mesh>
