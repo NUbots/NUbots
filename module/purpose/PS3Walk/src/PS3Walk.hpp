@@ -66,8 +66,8 @@ namespace module::purpose {
     private:
         /// @brief Stores configuration values
         struct Config {
-            float maximum_forward_velocity    = 0;
-            float maximum_rotational_velocity = 0;
+            double maximum_forward_velocity    = 0;
+            double maximum_rotational_velocity = 0;
         } cfg;
 
         /// @brief
@@ -83,10 +83,10 @@ namespace module::purpose {
         bool head_locked = false;
 
         /// @brief
-        float head_pitch = 0.0f;
+        double head_pitch = 0.0d;
 
         /// @brief
-        float head_yaw = 0.0f;
+        double head_yaw = 0.0d;
     };
 }  // namespace module::purpose
 

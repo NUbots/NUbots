@@ -60,8 +60,8 @@ namespace module::purpose {
         on<Configuration>("PS3Walk.yaml").then([this](const Configuration& config) {
             // Use configuration here from file PlanKick.yaml
             this->log_level                 = config["log_level"].as<NUClear::LogLevel>();
-            cfg.maximum_forward_velocity    = config["maximum_forward_velocity"].as<float>();
-            cfg.maximum_rotational_velocity = config["maximum_rotational_velocity"].as<float>();
+            cfg.maximum_forward_velocity    = config["maximum_forward_velocity"].as<double>();
+            cfg.maximum_rotational_velocity = config["maximum_rotational_velocity"].as<double>();
         });
 
 
@@ -83,19 +83,19 @@ namespace module::purpose {
                         case AXIS_LEFT_JOYSTICK_HORIZONTAL:
                             // y is left relative to robot
                             // strafe[1] = -event.value;
-                            walk_command.z() = static_cast<float>(-event.value) / std::numeric_limits<short>::max()
+                            walk_command.z() = static_cast<double>(-event.value) / std::numeric_limits<short>::max()
                                                * cfg.maximum_rotational_velocity;
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
                             // x is forward relative to robot
-                            walk_command.x() = static_cast<float>(-event.value) / std::numeric_limits<short>::max()
+                            walk_command.x() = static_cast<double>(-event.value) / std::numeric_limits<short>::max()
                                                * cfg.maximum_forward_velocity;
                             break;
                         case AXIS_RIGHT_JOYSTICK_VERTICAL:
-                            head_pitch = static_cast<float>(-event.value) / 32767.0f;
+                            head_pitch = static_cast<double>(-event.value) / 32767.0f;
                             break;
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
-                            head_yaw = static_cast<float>(-event.value) / 32767.0f;
+                            head_yaw = static_cast<double>(-event.value) / 32767.0f;
                             break;
                     }
                 }
