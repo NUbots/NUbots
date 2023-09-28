@@ -145,6 +145,7 @@ namespace module::support::optimisation {
 
         on<Trigger<OptimisationResetDone>, Single>().then([this](const OptimisationResetDone&) {
             log<NUClear::INFO>("Reset done");
+            task->reset_trial();
             emit(std::make_unique<Event>(Event::RESET_DONE));
         });
 
@@ -244,8 +245,6 @@ namespace module::support::optimisation {
     // Handle the RESETTING_TRIAL state
     void NSGA2Evaluator::resetting_trial() {
         log<NUClear::DEBUG>("Resetting Trial");
-
-        task->reset_trial();
 
         // Tell Webots to reset the world
         std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
