@@ -26,7 +26,6 @@ namespace module::support::optimisation {
         void reset_simulation();
         void evaluating_state(NSGA2Evaluator* evaluator);
         std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
-                                                                     double sim_time,
                                                                      int generation,
                                                                      int individual);
 
@@ -51,7 +50,7 @@ namespace module::support::optimisation {
         std::chrono::seconds trial_duration_limit = std::chrono::seconds(0);
 
         /// @brief Keep track of when the trial started
-        double trial_start_time = 0.0;
+        NUClear::clock::time_point trial_start_time{NUClear::clock::now()};
 
         void load_script(std::string script_path);
         void save_script(std::string script_path);

@@ -23,12 +23,10 @@ package message.support.optimisation;
 
 message NSGA2TrialExpired {
     // generation and individual allows us to identifiy who made the message
-    int32 generation = 1;
-    int32 individual = 2;
-    // in case we want to know when the trial started
-    int32 time_started = 3;
+    int32 generation  = 1;
+    int32 individual  = 2;
     // To support multi-stage trials
-    int32 trial_stage = 4;
+    int32 trial_stage = 3;
 }
 
 message NSGA2FitnessScores {

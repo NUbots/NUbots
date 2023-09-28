@@ -53,9 +53,6 @@ namespace module::support::optimisation {
             FITNESS_SCORES_SENT = 7
         };
 
-        /// @brief The current simulation time
-        double sim_time = 0.0;
-
     private:
         /// @brief Pointer to an instance of the task being evaluated
         std::unique_ptr<EvaluatorTask> task;

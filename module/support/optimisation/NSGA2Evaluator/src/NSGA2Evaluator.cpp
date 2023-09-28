@@ -148,9 +148,6 @@ namespace module::support::optimisation {
             emit(std::make_unique<Event>(Event::RESET_DONE));
         });
 
-        on<Trigger<OptimisationTimeUpdate>, Single>().then(
-            [this](const OptimisationTimeUpdate& update) { sim_time = update.sim_time; });
-
         on<Trigger<NSGA2Terminate>, Single>().then([this]() {
             // NSGA2Terminate is emitted when we've finished all generations and all individuals
             emit(std::make_unique<Event>(Event::TERMINATE_EVALUATION));
@@ -259,7 +256,6 @@ namespace module::support::optimisation {
     // Handle the EVALUATING state
     void NSGA2Evaluator::evaluating(NSGA2Evaluator::Event event) {
         log<NUClear::DEBUG>("Evaluating");
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
 
         if (event == Event::RESET_DONE) {
             if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
@@ -276,7 +272,6 @@ namespace module::support::optimisation {
     void NSGA2Evaluator::schedule_trial_expired_message(const int trial_stage, const std::chrono::seconds delay_time) {
         // Prepare the trial expired message
         std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
-        message->time_started                      = sim_time;
         message->generation                        = generation;
         message->individual                        = individual;
         message->trial_stage                       = trial_stage;
@@ -295,7 +290,7 @@ namespace module::support::optimisation {
         // Send a zero walk command to stop walking
         emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
         bool early_termination = true;
-        auto fitness_scores    = task->calculate_fitness_scores(early_termination, sim_time, generation, individual);
+        auto fitness_scores    = task->calculate_fitness_scores(early_termination, generation, individual);
         emit(fitness_scores);
 
         emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
@@ -308,7 +303,7 @@ namespace module::support::optimisation {
         // Send a zero walk command to stop walking
         emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()), 1);
         bool early_termination = false;
-        auto fitness_scores    = task->calculate_fitness_scores(early_termination, sim_time, generation, individual);
+        auto fitness_scores    = task->calculate_fitness_scores(early_termination, generation, individual);
         emit(fitness_scores);
 
         emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request

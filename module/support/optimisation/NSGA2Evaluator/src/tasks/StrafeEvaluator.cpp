@@ -110,7 +110,7 @@ namespace module::support::optimisation {
 
     void StrafeEvaluator::reset_simulation() {
         // Reset our local state
-        trial_start_time       = 0.0;
+        trial_start_time       = NUClear::clock::now();
         robot_position         = Eigen::Vector3d::Zero();
         initial_robot_position = Eigen::Vector3d::Zero();
         max_field_plane_sway   = 0.0;
@@ -154,13 +154,14 @@ namespace module::support::optimisation {
     }
 
     std::unique_ptr<NSGA2FitnessScores> StrafeEvaluator::calculate_fitness_scores(bool early_termination,
-                                                                                  double sim_time,
                                                                                   int generation,
                                                                                   int individual) {
-        auto scores      = calculate_scores();
-        auto constraints = early_termination ? calculate_constraints(sim_time) : constraints_not_violated();
+        double trial_duration =
+            std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - trial_start_time).count();
 
-        double trial_duration = sim_time - trial_start_time;
+        auto scores      = calculate_scores();
+        auto constraints = early_termination ? calculate_constraints(trial_duration) : constraints_not_violated();
+
         NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
         NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
         NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
@@ -183,12 +184,12 @@ namespace module::support::optimisation {
         };
     }
 
-    std::vector<double> StrafeEvaluator::calculate_constraints(double sim_time) {
+    std::vector<double> StrafeEvaluator::calculate_constraints(double trial_duration) {
         // Convert trial duration limit to ms, add 1 for overhead
         const auto overhead = std::chrono::seconds(1);
         double max_trial_duration =
             (std::chrono::duration_cast<std::chrono::milliseconds>(trial_duration_limit + overhead)).count();
-        double trial_duration = sim_time - trial_start_time;
+
         return {
             trial_duration - max_trial_duration,  // Punish for falling over, based on how long the trial took
                                                   // (more negative is worse)

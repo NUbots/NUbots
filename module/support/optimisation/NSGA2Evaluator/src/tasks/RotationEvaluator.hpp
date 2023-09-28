@@ -40,11 +40,9 @@ namespace module::support::optimisation {
 
         /// @brief After an evaluation has completed calculates the scores for the individual
         /// @param early_termination Has the trial been forced to terminate early
-        /// @param sim_time Current time in milliseconds
         /// @param generation The generation that we have been evaluating
         /// @param individual The specific individual we were trialing
         std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
-                                                                     double sim_time,
                                                                      int generation,
                                                                      int individual);
 
@@ -53,7 +51,7 @@ namespace module::support::optimisation {
         std::vector<double> calculate_scores();
 
         /// @brief Determine constraints for the algorithm, if we have fallen, based on the time that the trial ran for
-        std::vector<double> calculate_constraints(double sim_time);
+        std::vector<double> calculate_constraints(double trial_duration);
 
         /// @brief Gives no constraints as a result of staying upright for the duration of the trial
         std::vector<double> constraints_not_violated();
@@ -77,7 +75,7 @@ namespace module::support::optimisation {
         std::chrono::seconds trial_duration_limit = std::chrono::seconds(0);
 
         /// @brief Keep track of when the trial started
-        double trial_start_time = 0.0;
+        NUClear::clock::time_point trial_start_time{NUClear::clock::now()};
 
         /// @brief The walk command velocity.
         Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.0, 0.0);

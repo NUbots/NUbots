@@ -702,7 +702,6 @@ namespace module::platform {
 
         // Emit the webots time update
         auto time_update_msg        = std::make_unique<OptimisationTimeUpdate>();
-        time_update_msg->sim_time   = current_sim_time;
         time_update_msg->real_time  = current_real_time;
         time_update_msg->sim_delta  = sim_delta;
         time_update_msg->real_delta = real_delta;

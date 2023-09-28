@@ -58,7 +58,7 @@ namespace module::support::optimisation {
 
     void StandEvaluator::reset_simulation() {
         // Reset our local state
-        trial_start_time     = 0.0;
+        trial_start_time     = NUClear::clock::now();
         robot_position       = Eigen::Vector3d::Zero();
         max_field_plane_sway = 0.0;
     }
@@ -98,10 +98,11 @@ namespace module::support::optimisation {
     }
 
     std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculate_fitness_scores(bool early_termination,
-                                                                                 double sim_time,
                                                                                  int generation,
                                                                                  int individual) {
-        double trial_duration = sim_time - trial_start_time;
+        double trial_duration =
+            std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - trial_start_time).count();
+
         auto scores           = calculate_scores(trial_duration);
         auto constraints      = calculate_constraints(early_termination);
 
