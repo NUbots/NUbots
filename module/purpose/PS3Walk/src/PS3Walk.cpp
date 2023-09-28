@@ -92,10 +92,10 @@ namespace module::purpose {
                                                * cfg.maximum_forward_velocity;
                             break;
                         case AXIS_RIGHT_JOYSTICK_VERTICAL:
-                            head_pitch = static_cast<double>(-event.value) / 32767.0f;
+                            head_pitch = static_cast<double>(-event.value) / 32767.0;
                             break;
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
-                            head_yaw = static_cast<double>(-event.value) / 32767.0f;
+                            head_yaw = static_cast<double>(-event.value) / 32767.0;
                             break;
                     }
                 }

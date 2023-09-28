@@ -74,7 +74,7 @@ namespace module::purpose {
         Joystick joystick;
 
         /// @brief
-        Eigen::Vector3f walk_command = Eigen::Vector3f::Zero();
+        Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
         /// @brief
         bool moving = false;
@@ -83,10 +83,10 @@ namespace module::purpose {
         bool head_locked = false;
 
         /// @brief
-        double head_pitch = 0.0d;
+        double head_pitch = 0.0;
 
         /// @brief
-        double head_yaw = 0.0d;
+        double head_yaw = 0.0;
     };
 }  // namespace module::purpose
 
