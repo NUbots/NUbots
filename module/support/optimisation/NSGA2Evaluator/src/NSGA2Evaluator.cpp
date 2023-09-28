@@ -68,7 +68,7 @@ namespace module::support::optimisation {
             const char* state_string[] = {"UNKNOWN",
                                           "WAITING_FOR_REQUEST",
                                           "SETTING_UP_TRIAL",
-                                          "RESETTING_SIMULATION",
+                                          "RESETTING_TRIAL",
                                           "EVALUATING",
                                           "TERMINATING_EARLY",
                                           "TERMINATING_GRACEFULLY",
@@ -97,9 +97,9 @@ namespace module::support::optimisation {
                     current_state = new_state;
                     setting_up_trial();
                     break;
-                case State::RESETTING_SIMULATION:
+                case State::RESETTING_TRIAL:
                     current_state = new_state;
-                    resetting_simulation();
+                    resetting_trial();
                     break;
                 case State::EVALUATING:
                     current_state = new_state;
@@ -170,7 +170,7 @@ namespace module::support::optimisation {
         switch (current_state) {
             case State::WAITING_FOR_REQUEST: return transition_events(event);
             case State::SETTING_UP_TRIAL: return transition_events(event);
-            case State::RESETTING_SIMULATION: return transition_events(event);
+            case State::RESETTING_TRIAL: return transition_events(event);
             case State::EVALUATING: return transition_events(event);
             case State::TERMINATING_EARLY: return transition_events(event);
             case State::TERMINATING_GRACEFULLY: return transition_events(event);
@@ -193,7 +193,7 @@ namespace module::support::optimisation {
             case Event::EVALUATE_REQUEST: return State::SETTING_UP_TRIAL;
             case Event::CHECK_READY: return State::WAITING_FOR_REQUEST;
             case Event::TERMINATE_EVALUATION: return State::FINISHED;
-            case Event::TRIAL_SETUP_DONE: return State::RESETTING_SIMULATION;
+            case Event::TRIAL_SETUP_DONE: return State::RESETTING_TRIAL;
             case Event::RESET_DONE: return State::EVALUATING;
             case Event::TERMINATE_EARLY: return State::TERMINATING_EARLY;
             case Event::TRIAL_COMPLETED: return State::TERMINATING_GRACEFULLY;
@@ -241,11 +241,11 @@ namespace module::support::optimisation {
         emit(std::make_unique<Event>(Event::TRIAL_SETUP_DONE));
     }
 
-    // Handle the RESETTING_SIMULATION state
-    void NSGA2Evaluator::resetting_simulation() {
-        log<NUClear::DEBUG>("Resetting Simulation");
+    // Handle the RESETTING_TRIAL state
+    void NSGA2Evaluator::resetting_trial() {
+        log<NUClear::DEBUG>("Resetting Trial");
 
-        task->reset_simulation();
+        task->reset_trial();
 
         // Tell Webots to reset the world
         std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();

@@ -30,7 +30,7 @@ namespace module::support::optimisation {
             UNKNOWN                = 0,
             WAITING_FOR_REQUEST    = 1,
             SETTING_UP_TRIAL       = 2,
-            RESETTING_SIMULATION   = 3,
+            RESETTING_TRIAL        = 3,
             EVALUATING             = 4,
             TERMINATING_EARLY      = 5,
             TERMINATING_GRACEFULLY = 6,
@@ -101,8 +101,8 @@ namespace module::support::optimisation {
         /// @brief Handle the SETTING_UP_TRIAL state
         void setting_up_trial();
 
-        /// @brief Handle the RESETTING_SIMULATION state
-        void resetting_simulation();
+        /// @brief Handle the RESETTING_TRIAL state
+        void resetting_trial();
 
         /// @brief Handle the STANDING state
         void standing();

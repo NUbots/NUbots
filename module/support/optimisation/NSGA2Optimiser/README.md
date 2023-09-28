@@ -23,10 +23,10 @@ The NSGA2.yaml file contains the parameters for running this module. The paramet
 - Search space width (population size)
 - Search space depth (number of generations)
 - Number of objectives to be evaluated
-- Simulation time limit
+- Trial time limit
 - Simulated binary crossover value
 - Mutation value
-- The task, e.g. "walk
+- The task, e.g. "walk"
 
 ## Consumes
 

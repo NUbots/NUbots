@@ -14,14 +14,14 @@ To implement the evaluator for a new optimisation scenario, extend from the Eval
 
 ## Consumes
 
-- `module::support::optimisation::Event` Describes the current evaluator state. Possible values include WAITING_FOR_REQUEST, SETTING_UP_TRIAL, RESETTING_SIMULATION, EVALUATING, TERMINATING_EARLY, TERMINATING_GRACEFULLY, and FINISHED.
+- `module::support::optimisation::Event` Describes the current evaluator state. Possible values include WAITING_FOR_REQUEST, SETTING_UP_TRIAL, RESETTING_TRIAL, EVALUATING, TERMINATING_EARLY, TERMINATING_GRACEFULLY, and FINISHED.
 - `module::support::optimisation::WalkEvaluator` A walk evaluation task.
 - `module::support::optimisation::StrafeEvaluator` A walk strafe evaluation task.
 - `module::support::optimisation::RotationEvaluator` A walk rotation evaluation task.
 - `module::support::optimisation::StandEvaluator` A stand evaluation task.
 - `message::support::optimisation::NSGA2Terminate` Coordinates shutting down of the evaluator.
 - `message::support::optimisation::NSGA2EvaluationRequest` Enables the evaluation of individuals.
-- `message::platform::RawSensors` Contains sensor data from the simulation which is used for calculating an individual's fitness.
+- `message::input::Sensors` Contains sensor data which is used for calculating an individual's fitness.
 
 ## Emits
 

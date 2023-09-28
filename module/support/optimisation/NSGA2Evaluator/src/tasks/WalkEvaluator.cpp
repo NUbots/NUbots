@@ -113,7 +113,7 @@ namespace module::support::optimisation {
         fallen = false;
     }
 
-    void WalkEvaluator::reset_simulation() {
+    void WalkEvaluator::reset_trial() {
         // Reset our local state
         trial_start_time       = NUClear::clock::now();
         robot_position         = Eigen::Vector3d::Zero();

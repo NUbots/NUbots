@@ -56,7 +56,7 @@ namespace module::support::optimisation {
         fallen = false;
     }
 
-    void StandEvaluator::reset_simulation() {
+    void StandEvaluator::reset_trial() {
         // Reset our local state
         trial_start_time     = NUClear::clock::now();
         robot_position       = Eigen::Vector3d::Zero();

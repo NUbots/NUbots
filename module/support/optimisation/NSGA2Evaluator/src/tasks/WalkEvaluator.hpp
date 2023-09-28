@@ -25,8 +25,8 @@ namespace module::support::optimisation {
         /// them into a new file
         void set_up_trial(const NSGA2EvaluationRequest& request);
 
-        /// @brief Reset the local state of the simulation
-        void reset_simulation();
+        /// @brief Reset the local state of the trial
+        void reset_trial();
 
         /// @brief Starts an evaluation, running the walk and setting the duration
         /// @param evaluator Instance of the NSGA2Evaluator which this task is running from

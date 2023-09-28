@@ -23,7 +23,7 @@ namespace module::support::optimisation {
         // Implementing the EvaluatorTask interface
         void process_optimisation_robot_position(const OptimisationRobotPosition& position);
         void set_up_trial(const NSGA2EvaluationRequest& request);
-        void reset_simulation();
+        void reset_trial();
         void evaluating_state(NSGA2Evaluator* evaluator);
         std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
                                                                      int generation,

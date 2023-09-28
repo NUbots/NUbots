@@ -30,7 +30,7 @@ namespace module::support::optimisation {
         virtual bool has_fallen(const Sensors& sensors)                                             = 0;
         virtual void process_optimisation_robot_position(const OptimisationRobotPosition& position) = 0;
         virtual void set_up_trial(const NSGA2EvaluationRequest& request)                            = 0;
-        virtual void reset_simulation()                                                             = 0;
+        virtual void reset_trial()                                                                  = 0;
         virtual void evaluating_state(NSGA2Evaluator* evaluator)                                    = 0;
         virtual std::unique_ptr<NSGA2FitnessScores> calculate_fitness_scores(bool early_termination,
                                                                              int generation,

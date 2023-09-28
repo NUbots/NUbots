@@ -108,7 +108,7 @@ namespace module::support::optimisation {
         fallen = false;
     }
 
-    void StrafeEvaluator::reset_simulation() {
+    void StrafeEvaluator::reset_trial() {
         // Reset our local state
         trial_start_time       = NUClear::clock::now();
         robot_position         = Eigen::Vector3d::Zero();
