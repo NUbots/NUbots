@@ -184,6 +184,8 @@ namespace module::support::optimisation {
 
     std::vector<double> WalkEvaluator::calculate_scores() {
         auto robot_distance_travelled = std::fabs(initial_robot_position.x() - robot_position.x());
+        NUClear::log<NUClear::DEBUG>("Distance travelled", robot_distance_travelled);
+        NUClear::log<NUClear::DEBUG>("Max field plane sway", max_field_plane_sway);
         return {
             max_field_plane_sway,           // For now, we want to reduce this
             1.0 / robot_distance_travelled  // 1/x since the NSGA2 optimiser is a minimiser
