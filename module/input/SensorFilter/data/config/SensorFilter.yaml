@@ -77,6 +77,7 @@ mahony:
 
 # Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
 deadreckoning_scale: [1, 1, 0.6]
+initial_anchor_frame: "left_foot_base"
 
 # Kalman/Mahony filter initial pose
 initial_rTWw: [0, 0, 0.49]
