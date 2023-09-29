@@ -17,6 +17,7 @@ namespace module::support::optimisation {
     using message::platform::ButtonMiddleDown;
     using message::platform::RawSensors;
     using message::platform::webots::OptimisationCommand;
+    using message::platform::webots::OptimisationRobotPosition;
     using message::support::optimisation::NSGA2Evaluating;
     using message::support::optimisation::OptimisationResetDone;
     using message::support::optimisation::OptimisationTimeUpdate;
@@ -72,6 +73,15 @@ namespace module::support::optimisation {
                     is_upright = false;
                     NUClear::log<NUClear::DEBUG>("No longer standing.");
                 }
+            }
+            else {
+                Eigen::Isometry3d Hwt = sensors.Htw.inverse();
+                // log<NUClear::DEBUG>("Hwt\n", Hwt.matrix());
+                Eigen::Vector3d rTWw = Hwt.translation();
+
+                auto robot_position   = std::make_unique<OptimisationRobotPosition>();
+                robot_position->value = rTWw;
+                emit(robot_position);
             }
         });
 
