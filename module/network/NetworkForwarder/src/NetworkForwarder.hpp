@@ -62,7 +62,7 @@ namespace module::network {
                                 const auto& target = target_handle.first;
                                 auto& h            = target_handle.second;
 
-                                if (h.last_message.count(id) == 0
+                                if (!h.last_message.contains(id)
                                     || duration_cast<duration<double>>(now - h.last_message[id]).count() > h.period) {
                                     powerplant.emit_shared<Scope::NETWORK>(std::move(msg), target, false);
                                     h.last_message[id] = now;
