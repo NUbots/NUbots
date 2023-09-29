@@ -120,7 +120,7 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
-  @observable ball?:  { rBWw: Vector3 };
+  @observable ball?: { rBWw: Vector3 };
 
   constructor({
     model,
@@ -183,7 +183,7 @@ export class LocalisationRobotModel {
   /** Field line points in field space */
   @computed
   get rPFf(): Vector3[] {
-    return this.fieldLinePoints.rPWw.map(rPWw => rPWw.applyMatrix4(this.Hfw));
+    return this.fieldLinePoints.rPWw.map((rPWw) => rPWw.applyMatrix4(this.Hfw));
   }
 
   /** Ball position in field space */
