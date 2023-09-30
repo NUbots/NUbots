@@ -110,7 +110,7 @@ namespace module::purpose {
             }
         });
 
-        // on<Every<20, std::chrono::seconds>>().then([this] {
+        // on<Every<5, std::chrono::seconds>>().then([this] {
         //     // switch task
         //     cfg.user_request = "stand and wave";
         //     log<NUClear::INFO>("SWITCHING TO WAVE");
@@ -270,12 +270,14 @@ namespace module::purpose {
         // TODO: Add "world model" (SensorFilter, Localisation, etc.) using With, and then use it in the prompt,
         // maybe have this update at a certain rate such that the request is received?
         on<Provide<LLMStrategy>,
+           Uses<BodySequence>,
            Every<PROMPT_FREQ, std::chrono::seconds>,
            Optional<With<Ball>>,
            Optional<With<Field>>,
            With<Sensors>,
            Single>()
-            .then([this](const std::shared_ptr<const Ball>& ball,
+            .then([this](const Uses<BodySequence>& body_sequence,
+                         const std::shared_ptr<const Ball>& ball,
                          const std::shared_ptr<const Field>& field,
                          const Sensors& sensors) {
                 std::string time_since_ball_seen = "unknown";
@@ -357,8 +359,12 @@ namespace module::purpose {
                     else if (task == "TurnOnSpot") {
                         emit<Task>(std::make_unique<TurnOnSpot>(true), priority);
                     }
-                    else if (task == "Wave") {
+                    else if (task == "Wave" && body_sequence.run_state != GroupInfo::RunState::RUNNING) {
                         emit<Task>(load_script<BodySequence>("Wave.yaml"), priority);
+                    }
+                    else if (task == "Wave") {
+                        log<NUClear::INFO>("Wave task ignored as body sequence is already running.");
+                        emit<Task>(std::make_unique<Idle>());
                     }
                     else {
                         log<NUClear::ERROR>("Unexpected task from LLM response: ", task);

@@ -8,9 +8,10 @@ nuclear_role(
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
   # Network
-  network::PlotJuggler
-  network::NUClearNet
-  network::NetworkForwarder
+  # network::PlotJuggler
+  # network::NUClearNet
+  # network::NetworkForwarder
+  # output::ImageCompressor
   # Sensors
   platform::${SUBCONTROLLER}::HardwareIO
   input::Camera
