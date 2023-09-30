@@ -1,13 +1,15 @@
 #include "NetworkForwarder.hpp"
 
+#include <regex>
+#include <string>
+
 #include "extension/Configuration.hpp"
 
-#include "utility/support/yaml_expression.hpp"
+#include "utility/support/math_string.hpp"
 
 namespace module::network {
 
     using extension::Configuration;
-    using utility::support::Expression;
 
     NetworkForwarder::NetworkForwarder(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -31,23 +33,30 @@ namespace module::network {
                     double period = std::numeric_limits<double>::infinity();
                     bool enabled  = false;
 
-                    // First we try reading this field as a double, if it is "true" or "false" it will throw an
-                    // exception
-                    try {
-                        auto fps = setting.second.as<Expression>();
-                        enabled  = fps != 0.0;
-                        period   = enabled ? 1.0 / fps : std::numeric_limits<double>::infinity();
+                    // Read in as a string and check for true or false
+                    // Explicitly using the yaml supported variants, see https://yaml.org/type/bool.html
+                    // If it is neither "true-ish" nor "false-ish", it must be "Expression-ish"
+                    auto fps_str = setting.second.as<std::string>();
+                    std::regex true_re("y|Y|yes|Yes|YES|true|True|TRUE|on|On|ON");
+                    std::regex false_re("n|N|no|No|NO|false|False|FALSE|off|Off|OFF");
+                    if (std::regex_match(fps_str, true_re)) {
+                        enabled = true;
+                        period  = 0.0;
                     }
-                    // If this happens we assume it's a boolean instead
-                    catch (const YAML::TypedBadConversion<double>&) {
-                        enabled = setting.second.as<bool>();
-                        period  = enabled ? 0.0 : std::numeric_limits<double>::infinity();
+                    else if (std::regex_match(fps_str, false_re)) {
+                        enabled = false;
+                        period  = std::numeric_limits<double>::infinity();
+                    }
+                    else {
+                        auto fps = utility::support::parse_math_string<double>(fps_str);
+                        enabled  = fps > 0.0;
+                        period   = enabled ? 1.0 / fps : std::numeric_limits<double>::infinity();
                     }
 
                     // Message if we have enabled/disabled a particular message type
-                    if (handles.find(name) != handles.end()) {
+                    if (handles.contains(name)) {
                         auto& handle = handles[name];
-                        bool active  = handle->targets.count(target) != 0;
+                        bool active  = handle->targets.contains(target);
 
                         if (enabled && !active) {
                             log<NUClear::INFO>("Forwarding", name, "to", target);

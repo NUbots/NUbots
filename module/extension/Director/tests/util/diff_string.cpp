@@ -31,7 +31,7 @@ namespace util {
         auto max_a_it = std::max_element(expected.begin(), expected.end(), len);
         auto max_b_it = std::max_element(actual.begin(), actual.end(), len);
         int max_a     = int(std::max(std::strlen("Expected"), max_a_it != expected.end() ? max_a_it->size() : 0));
-        int max_b     = int(std::max(std::strlen("Actual"), max_b_it != expected.end() ? max_b_it->size() : 0));
+        int max_b     = int(std::max(std::strlen("Actual"), max_b_it != actual.end() ? max_b_it->size() : 0));
 
         // Start with a header
         std::string output = fmt::format("{:<{}}    |    {:>{}}\n", "Expected", max_a, "Actual", max_b);
