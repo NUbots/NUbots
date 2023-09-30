@@ -93,7 +93,7 @@ jobs:
       # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        run: yarn --prefer-offline
+        run: yarn global add node-gyp && yarn --prefer-offline
 
       - name: Type Check NUsight
         working-directory: nusight2
