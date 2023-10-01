@@ -18,6 +18,7 @@ export class LocalisationNetwork {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.vision.FieldLines, this.onFieldLines);
+    this.network.on(message.localisation.Ball, this.onBall);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -38,7 +39,13 @@ export class LocalisationNetwork {
   @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.fieldLinesDots.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw).applyMatrix4(robot.Hfw));
+    robot.fieldLinePoints.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw));
+  }
+
+  @action.bound
+  private onBall(robotModel: RobotModel, ball: message.localisation.Ball) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.ball = { rBWw: Vector3.from(ball.rBWw) };
   }
 
   @action
