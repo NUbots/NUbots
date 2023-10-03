@@ -55,7 +55,8 @@ RUN install-package \
     colordiff \
     parallel \
     vim \
-    nano
+    nano \
+    lld
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -98,9 +99,10 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN echo $(which ld) && echo $(ls /usr/bin | grep lld) && install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
     --build-system cmake \
     --configure-path "llvm" \
+    # -DCMAKE_CXX_FLAGS="-fuse-ld=ld" \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
@@ -181,7 +183,7 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
 
 # Install intel compute runtime (OpenCL implementation)
 RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/22.29.23750.tar.gz \
-    --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
+    # --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
 
