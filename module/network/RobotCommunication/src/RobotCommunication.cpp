@@ -5,7 +5,7 @@
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
 #include "message/localisation/Ball.hpp"
-#include "message/skill/Walk.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/GlobalConfig.hpp"
@@ -22,7 +22,7 @@ namespace module::network {
     using message::input::GameState;
     using message::skill::Kick;
     using message::platform::webots::SensorMeasurements;
-    using message::skill::Walk;
+    using message::behaviour::state::WalkState;
     using message::support::GlobalConfig;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -54,15 +54,13 @@ namespace module::network {
                 //         emit(NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(p));
                 //     });
             }
-
-            log<NUClear::DEBUG>("uoooo,dpwomwod");
         });
 
         // walk command should be updated to director
         // determine way to do this where we don't require a filtered ball trigger (optional triggers, every...)
-        on<Every<2, Per<std::chrono::seconds>>, Optional<With<Ball>>, Optional<With<Walk>>, Optional<With<Kick>>, Optional<With<Field>>, Optional<With<GameState>>, Optional<With<GlobalConfig>>>()
+        on<Every<2, Per<std::chrono::seconds>>, Optional<With<Ball>>, Optional<With<WalkState>>, Optional<With<Kick>>, Optional<With<Field>>, Optional<With<GameState>>, Optional<With<GlobalConfig>>>()
             .then([this](const std::shared_ptr<const  Ball>& ball,
-                         const std::shared_ptr<const  Walk>& walk,
+                         const std::shared_ptr<const  WalkState>& walk_state,
                          const std::shared_ptr<const  Kick>& kick,
                          const std::shared_ptr<const  Field>& field,
                          const std::shared_ptr<const  GameState>& game_state,
@@ -70,64 +68,79 @@ namespace module::network {
 
                 log<NUClear::DEBUG>("Send robocup msg!");
 
-                if(ball != nullptr) {
-                    log<NUClear::DEBUG>("Ball position rBWw: ", ball->rBWw);
-                }
 
 
-                log<NUClear::DEBUG>("game_state->data.self.penalty_reason: ", game_state->data.self.penalty_reason);
+                // log<NUClear::DEBUG>("game_state->data.self.penalty_reason: ", game_state->data.self.penalty_reason);
                 int penaltyReason = game_state->data.self.penalty_reason;
+
+                int phase = game_state->data.phase;
+                // log<NUClear::DEBUG>("game_state->data.phase: ", game_state->data.phase);
 
 
                 auto msg = std::make_unique<RoboCup>();
 
-                // msg->state = game_state->data.self.phase;
 
                 // Timestamp
                 msg->timestamp = NUClear::clock::now();
 
-                // State TODO: Figure out <here> from game_state
+                // State
                 int state = 0;
 
-                if (penaltyReason == 0) {
-                   state = 0;
-                } else if (penaltyReason == 1) {
-                    state = 1;
-                } else {
-                    state = 2;
+                switch (penaltyReason) {
+                    case 0: state = 0; break;
+                    case 1: state = 1; break;
+                    default: state = 2; break;
                 }
 
-                // msg->state = <here>;
-
-                log<NUClear::DEBUG>("State: ", msg->state);
-                log<NUClear::DEBUG>("this state: ", state);
                 // Current pose
 
-
-                // Walk command
+                // Walk_state command
+                if (walk_state != nullptr) {
+                    msg->walk_command = {static_cast<float>(walk_state->velocity_target.x()), static_cast<float>(walk_state->velocity_target.y()), static_cast<float>(walk_state->velocity_target.z())};
+                    log<NUClear::DEBUG>("walk_state command x", msg->walk_command.x);
+                    log<NUClear::DEBUG>("walk_state command y", msg->walk_command.y);
+                }
 
                 // Target pose
 
                 // Kick target
-
-                // Ball
+                if (kick) {
+                    message::input::fvec2 kick_target;
+                    kick_target.x = kick->target.x();
+                    kick_target.y = kick->target.y();
+                    msg->kick_target = kick_target;
+                    log<NUClear::DEBUG>("kick_target ", kick_target.x);
+                }
 
                 // Robots
+                if (robot != nullptr) {
+                    // msg->Robot.player_id  = config.player_id;
+                    // msg->Robot->position   = game_state.Hfw;
+                    // msg->Robot->covariance = game_state.covariance;
+                    // msg->Robot->team       = config.team_id;
+                }
+
+                // Ball
+                if(ball != nullptr) {
+                    msg->ball.position = {static_cast<float>(ball->rBWw.x()), static_cast<float>(ball->rBWw.y()), static_cast<float>(ball->rBWw.z())};
+                    msg->ball.velocity = {static_cast<float>(ball->vBw.x()), static_cast<float>(ball->vBw.y()), static_cast<float>(ball->vBw.z())};
+                    // msg->ball.covariance =  {
+                    //     static_cast<float>(ball->covariance[0][0]),
+                    //     static_cast<float>(ball->covariance[1][0]),
+                    //     static_cast<float>(ball->covariance[2][0])
+                    // };
 
 
-                // msg->current_pose = field.covariance;
-                // // msg->walk_command = walk.command;
+                    float position = msg->ball.position.x; //TODO: I am proof of concept delete me ~
+                    log<NUClear::DEBUG>("Ball position rBWw: ", position);
+                    log<NUClear::DEBUG>("Ball velocity vBw: ", ball->vBw);
+                    log<NUClear::DEBUG>("Ball covariance: ", ball->covariance);
+                }
+
+                // msg->walk_command = walk->velocity_target;
+                // log<NUClear::DEBUG>("walk command: ", walk->velocity_target);mand;
                 // msg->kick_target  = kick.target;
 
-                // msg->Robot->player_id  = config.player_id;
-                // msg->Robot->position   = game_state.Hfw;
-                // msg->Robot->covariance = game_state.covariance;
-                // msg->Robot->team       = config.team_id;
-
-                // msg->ball->position = ball.rBTt;
-                // todo: should add covariance and velocity to the ball message
-                // msg->ball->velocity   = 0;  // velocity is n/a atm
-                // msg->ball->covariance = ballData.measurement.covariance;
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
