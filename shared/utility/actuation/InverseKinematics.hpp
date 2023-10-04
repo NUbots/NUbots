@@ -42,19 +42,19 @@ namespace utility::actuation::kinematics {
     using utility::input::LimbID;
     using utility::input::ServoID;
 
-    /*! @brief Calculates the leg joints for a given input ankle position.
-            The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint
-       of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder
-       to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is
-       left, z is normal to the plane of the foot
-        @param target The target 4x4 basis matrix for the ankle
-        @param isLeft Request for left leg motors or right leg motors?
-        @param RobotKinematicsModel The class containing the leg model of the robot.
-    */
+    /** @brief Calculates the leg joints for a given input ankle position. The robot coordinate system has origin a
+     * distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of the hips. Robot coordinate system: x is out of the
+     * front of the robot y is left, from right shoulder to left z is upward, from feet to head Input ankle coordinate
+     * system: x is forward, from heel to toe y is left, z is normal to the plane of the foot
+     * @param model KinematicsModel containing dimensions of the robot
+     * @param Htf_ Desired pose of foot {f} in torso {t} space
+     * @param limb Which leg to solve IK for (left or right)
+     * @return Vector of pairs of servo ID and joint angles
+     */
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculate_leg_joints(
         const message::actuation::KinematicsModel& model,
-        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& target_,
+        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& Htf_,
         const LimbID& limb) {
         const Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
         const Scalar DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
@@ -62,26 +62,26 @@ namespace utility::actuation::kinematics {
         const Scalar UPPER_LEG_LENGTH                = model.leg.UPPER_LEG_LENGTH;
         const Scalar LOWER_LEG_LENGTH                = model.leg.LOWER_LEG_LENGTH;
 
-        std::vector<std::pair<ServoID, Scalar>> positions;
+        std::vector<std::pair<ServoID, Scalar>> joints;
 
-        // Correct for input referencing the bottom of the foot
-        Eigen::Transform<Scalar, 3, Eigen::Isometry> target(target_);
-        target.translation() = Eigen::Matrix<Scalar, 3, 1>(target_.translation().y(),
-                                                           target_.translation().x(),
-                                                           -(target_.translation().z() + model.leg.FOOT_HEIGHT));
+        // Correct for input referencing the bottom of the foot and convention used in IK implementation
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> Htf(Htf_);
+        Htf.translation() = Eigen::Matrix<Scalar, 3, 1>(Htf_.translation().y(),
+                                                        Htf_.translation().x(),
+                                                        -(Htf_.translation().z() + model.leg.FOOT_HEIGHT));
         // Swap legs if needed
         if (limb != LimbID::LEFT_LEG) {
-            target(0, 1)             = -target(0, 1);
-            target(0, 2)             = -target(0, 2);
-            target(1, 0)             = -target(1, 0);
-            target(2, 0)             = -target(2, 0);
-            target.translation().x() = -target.translation().x();
+            Htf(0, 1)             = -Htf(0, 1);
+            Htf(0, 2)             = -Htf(0, 2);
+            Htf(1, 0)             = -Htf(1, 0);
+            Htf(2, 0)             = -Htf(2, 0);
+            Htf.translation().x() = -Htf.translation().x();
         }
 
-        // Apply offsets to target and clamp to limits
-        const Eigen::Matrix<Scalar, 3, 1> ankle_x   = target.matrix().template leftCols<1>().template head<3>();
-        const Eigen::Matrix<Scalar, 3, 1> ankle_y   = target.matrix().template middleCols<1>(1).template head<3>();
-        const Eigen::Matrix<Scalar, 3, 1> ankle_pos = target.translation();
+        // Apply offsets to Htf and clamp to limits
+        const Eigen::Matrix<Scalar, 3, 1> ankle_x   = Htf.matrix().template leftCols<1>().template head<3>();
+        const Eigen::Matrix<Scalar, 3, 1> ankle_y   = Htf.matrix().template middleCols<1>(1).template head<3>();
+        const Eigen::Matrix<Scalar, 3, 1> ankle_pos = Htf.translation();
 
         const Eigen::Matrix<Scalar, 3, 1> hip_offset(LENGTH_BETWEEN_LEGS * 0.5,
                                                      HIP_OFFSET_X,
@@ -154,38 +154,31 @@ namespace utility::actuation::kinematics {
                 std::max(std::min(hip_x_projected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitX()), Scalar(1)), Scalar(-1)));
 
         if (limb == LimbID::LEFT_LEG) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, hip_yaw));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hip_roll));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, hip_pitch));
-            positions.push_back(std::make_pair(ServoID::L_KNEE, knee_pitch));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, ankle_pitch));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankle_roll));
+            joints.push_back(std::make_pair(ServoID::L_HIP_YAW, hip_yaw));
+            joints.push_back(std::make_pair(ServoID::L_HIP_ROLL, hip_roll));
+            joints.push_back(std::make_pair(ServoID::L_HIP_PITCH, hip_pitch));
+            joints.push_back(std::make_pair(ServoID::L_KNEE, knee_pitch));
+            joints.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, ankle_pitch));
+            joints.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankle_roll));
         }
         else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * hip_yaw));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hip_roll));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * hip_pitch));
-            positions.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * knee_pitch));
-            positions.push_back(
+            joints.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * hip_yaw));
+            joints.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hip_roll));
+            joints.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * hip_pitch));
+            joints.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * knee_pitch));
+            joints.push_back(
                 std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * ankle_pitch));
-            positions.push_back(
-                std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankle_roll));
+            joints.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankle_roll));
         }
 
-        return positions;
-    }
-
-    template <typename Scalar>
-    [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculate_leg_joints(
-        const message::actuation::KinematicsModel& model,
-        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& leftTarget,
-        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& rightTarget) {
-        auto joints  = calculate_leg_joints<Scalar>(model, leftTarget, LimbID::LEFT_LEG);
-        auto joints2 = calculate_leg_joints<Scalar>(model, rightTarget, LimbID::RIGHT_LEG);
-        joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }
 
+    /**
+     * @brief Calculates the head joint angles to "look" in a desired direction
+     * @param uPCt Desired direction to look, unit vector from camera {C} to point {P} in torso {t} space
+     * @return Vector of pairs of servo ID and joint angles
+     */
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculate_head_joints(
         const Eigen::Matrix<Scalar, 3, 1>& uPCt) {
