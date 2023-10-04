@@ -38,7 +38,7 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::Walk;
 
-    using utility::actuation::kinematics::calculateLegJoints;
+    using utility::actuation::kinematics::calculate_leg_joints;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
