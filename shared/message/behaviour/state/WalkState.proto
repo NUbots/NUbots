@@ -31,9 +31,18 @@ message WalkState {
         STOPPED  = 3;
     }
 
+    enum SupportPhase {
+        DOUBLE = 0;
+        LEFT   = 1;
+        RIGHT  = 2;
+    }
+
     /// Walking state
     State state = 1;
 
     /// Current requested velocity target (dx, dy, dtheta)
     vec3 velocity_target = 2;
+
+    /// Support phase
+    SupportPhase support_phase = 3;
 }
