@@ -161,21 +161,20 @@ namespace utility::actuation::kinematics {
                 std::max(std::min(hip_x_projected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitX()), Scalar(1)), Scalar(-1)));
 
         if (limb == LimbID::LEFT_LEG) {
-            joints.push_back(std::make_pair(ServoID::L_HIP_YAW, hip_yaw));
-            joints.push_back(std::make_pair(ServoID::L_HIP_ROLL, hip_roll));
-            joints.push_back(std::make_pair(ServoID::L_HIP_PITCH, hip_pitch));
-            joints.push_back(std::make_pair(ServoID::L_KNEE, knee_pitch));
-            joints.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, ankle_pitch));
-            joints.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankle_roll));
+            joints.emplace_back(ServoID::L_HIP_YAW, hip_yaw);
+            joints.emplace_back(ServoID::L_HIP_ROLL, hip_roll);
+            joints.emplace_back(ServoID::L_HIP_PITCH, hip_pitch);
+            joints.emplace_back(ServoID::L_KNEE, knee_pitch);
+            joints.emplace_back(ServoID::L_ANKLE_PITCH, ankle_pitch);
+            joints.emplace_back(ServoID::L_ANKLE_ROLL, ankle_roll);
         }
         else {
-            joints.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * hip_yaw));
-            joints.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hip_roll));
-            joints.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * hip_pitch));
-            joints.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * knee_pitch));
-            joints.push_back(
-                std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * ankle_pitch));
-            joints.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankle_roll));
+            joints.emplace_back(ServoID::R_HIP_YAW, model.leg.LEFT_TO_RIGHT_HIP_YAW * hip_yaw);
+            joints.emplace_back(ServoID::R_HIP_ROLL, model.leg.LEFT_TO_RIGHT_HIP_ROLL * hip_roll);
+            joints.emplace_back(ServoID::R_HIP_PITCH, model.leg.LEFT_TO_RIGHT_HIP_PITCH * hip_pitch);
+            joints.emplace_back(ServoID::R_KNEE, model.leg.LEFT_TO_RIGHT_KNEE * knee_pitch);
+            joints.emplace_back(ServoID::R_ANKLE_PITCH, model.leg.LEFT_TO_RIGHT_ANKLE_PITCH * ankle_pitch);
+            joints.emplace_back(ServoID::R_ANKLE_ROLL, model.leg.LEFT_TO_RIGHT_ANKLE_ROLL * ankle_roll);
         }
 
         return joints;
