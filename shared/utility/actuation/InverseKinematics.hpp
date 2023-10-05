@@ -66,9 +66,16 @@ namespace utility::actuation::kinematics {
 
         // Correct for input referencing the bottom of the foot and convention used in IK implementation
         Eigen::Transform<Scalar, 3, Eigen::Isometry> Htf(Htf_);
-        Htf.translation() = Eigen::Matrix<Scalar, 3, 1>(Htf_.translation().y(),
-                                                        Htf_.translation().x(),
-                                                        -(Htf_.translation().z() + model.leg.FOOT_HEIGHT));
+        Htf = Htf.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, model.leg.FOOT_HEIGHT));
+        Eigen::Matrix<Scalar, 3, 3> R;
+        // clang-format off
+        R << 0.0, 1.0,  0.0,
+                1.0, 0.0,  0.0,
+                0.0, 0.0, -1.0;
+        // clang-format on
+        Htf.translation() = R * Htf.translation();
+        Htf.linear()      = R * Htf.linear() * R.transpose();
+
         // Swap legs if needed
         if (limb != LimbID::LEFT_LEG) {
             Htf(0, 1)             = -Htf(0, 1);
