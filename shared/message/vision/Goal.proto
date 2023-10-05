@@ -72,5 +72,5 @@ message Goals {
 
     repeated Goal goals = 4;
     repeated vec3 points = 5;  // Unit vectors pointing from camera to each goal
-    repeated vec3 rPWw = 6; // Points projected onto the ground plane
+    repeated vec3 rGWw = 6; // Goal detections projected onto the ground plane
 }

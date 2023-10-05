@@ -305,13 +305,13 @@ namespace module::localisation {
 
         on<Trigger<Goals>>().then("Particle Filter Goal Posts", [this](const Goals& goals) {
             Eigen::Isometry3d Hcw = Eigen::Isometry3d(goals.Hcw);
-            if (!falling && goals.rPWw.size() > cfg.min_observations) {
+            if (!falling && goals.rGWw.size() > cfg.min_observations) {
                 // Add noise to the particles
                 add_noise();
 
                 // Calculate the weight of each particle based on distance to the goal posts
                 for (int i = 0; i < cfg.n_particles; i++) {
-                    particles[i].weight = calculate_goal_weight(particles[i].state, goals.rPWw);
+                    particles[i].weight = calculate_goal_weight(particles[i].state, goals.rGWw);
                 }
 
                 // Resample the particles based on the weights
@@ -322,8 +322,8 @@ namespace module::localisation {
             covariance = compute_covariance();
             if (log_level <= NUClear::DEBUG) {
 
-                for (auto rPWw : goals.rPWw) {
-                    auto observation_cell = position_in_map(state, rPWw);
+                for (auto rGWw : goals.rGWw) {
+                    auto observation_cell = position_in_map(state, rGWw);
                     emit(graph("Goal point", observation_cell.x(), observation_cell.y()));
                 }
             }

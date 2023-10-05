@@ -57,11 +57,7 @@ export class LocalisationNetwork {
       const Hwc = Matrix4.from(goals.Hcw).invert();
 
       // Transform and store each rGCc
-      robot.goals.rGWw = goals.goals.flatMap(goal =>
-          goal.measurements.map(measurement => {
-              return Vector3.from(measurement.rGCc).applyMatrix4(Hwc);
-          })
-      );
+      robot.goals.rGWw = goals.rGWw.map((rGWw) => Vector3.from(rGWw));
   }
   @action
   private onSensors = (robotModel: RobotModel, sensors: message.input.Sensors) => {
