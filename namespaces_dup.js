@@ -784,6 +784,7 @@ var namespaces_dup =
       [ "math", null, [
         [ "angle", "namespaceutility_1_1math_1_1angle.html", [
           [ "acos_clamped", "namespaceutility_1_1math_1_1angle.html#ad2ac2cb47e41dcec768e82c097bd2c90", null ],
+          [ "angle_between", "namespaceutility_1_1math_1_1angle.html#aae40e7b65b4974484416fe3e30f52468", null ],
           [ "angleDistance", "namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599", null ],
           [ "asin_clamped", "namespaceutility_1_1math_1_1angle.html#a58909fc949c49bd2efc0a444ecd55560", null ],
           [ "difference", "namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945", null ],
