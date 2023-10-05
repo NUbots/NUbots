@@ -74,10 +74,12 @@ namespace utility::math::angle {
      *
      * @return The acute angle in range [0,pi] between two vectors.
      */
-    template <typename Derived, typename Scalar = typename Derived::Scalar>
-    typename std::enable_if_t<std::is_floating_point_v<Scalar>, Scalar> angle_between(
-        const Eigen::MatrixBase<Derived>& u,
-        const Eigen::MatrixBase<Derived>& v) {
+    template <typename DerivedU, typename DerivedV>
+    auto angle_between(const Eigen::MatrixBase<DerivedU>& u, const Eigen::MatrixBase<DerivedV>& v) ->
+        typename std::enable_if_t<
+            std::is_floating_point_v<typename DerivedU::Scalar> && std::is_floating_point_v<typename DerivedV::Scalar>,
+            typename DerivedU::Scalar> {
+        using Scalar = typename DerivedU::Scalar;
         return u.dot(v) < Scalar(0) ? std::numbers::pi_v<Scalar> - Scalar(2) * std::asin((-v - u).norm() * Scalar(0.5))
                                     : Scalar(2) * std::asin((v - u).norm() * Scalar(0.5));
     }
