@@ -179,6 +179,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       })}
       <FieldLinePoints model={model} />
       <Balls model={model} />
+      <Goals model={model} />
     </object3D>
   );
 });
@@ -213,6 +214,26 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
             <sphereBufferGeometry args={[1, 20, 20]} />
             <meshStandardMaterial color="orange" />
           </mesh>
+        ),
+    )}
+  </>
+);
+
+const Goals = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible && (
+          <object3D key={robot.id}>
+            {robot.rGFf.map((d, i) => {
+              return (
+                <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
+                  <circleBufferGeometry args={[0.02, 20]} />
+                  <meshBasicMaterial color="red" />
+                </mesh>
+              );
+            })}
+          </object3D>
         ),
     )}
   </>

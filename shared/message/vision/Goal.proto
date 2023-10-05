@@ -46,7 +46,7 @@ message Goal {
     message Measurement {
         MeasurementType type = 1;
         /// Normal vectors point inwards towards the centre of the object
-        fvec3 srGCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+        fvec3 rGCc      = 2;  // Goal from camera in camera space
         fmat3 covariance = 3;
     }
     message Post {

@@ -257,10 +257,7 @@ namespace module::vision {
                             g.measurements.emplace_back();  // Emplaces default constructed object
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
 
-                            // Spherical Reciprocal Coordinates (1/distance, phi, theta)
-                            g.measurements.back().srGCc =
-                                cartesianToReciprocalSpherical(Eigen::Vector3f(g.post.bottom * distance));
-
+                            g.measurements.back().rGCc       = Eigen::Vector3f(g.post.bottom * distance);
                             g.measurements.back().covariance = config.goal_projection_covariance.asDiagonal();
 
                             // Angular positions from the camera

@@ -19,6 +19,7 @@ export class LocalisationNetwork {
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.localisation.Ball, this.onBall);
+    this.network.on(message.vision.Goals, this.onGoals);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -48,6 +49,20 @@ export class LocalisationNetwork {
     robot.ball = { rBWw: Vector3.from(ball.rBWw) };
   }
 
+  @action.bound
+  private onGoals(robotModel: RobotModel, goals: message.vision.Goals) {
+      const robot = LocalisationRobotModel.of(robotModel);
+
+      // Get the inverse of the camera to world transform
+      const Hwc = Matrix4.from(goals.Hcw).invert();
+
+      // Transform and store each rGCc
+      robot.goals.rGWw = goals.goals.flatMap(goal =>
+          goal.measurements.map(measurement => {
+              return Vector3.from(measurement.rGCc).applyMatrix4(Hwc);
+          })
+      );
+  }
   @action
   private onSensors = (robotModel: RobotModel, sensors: message.input.Sensors) => {
     // Ignore empty Sensors packets which may be emitted by the nbs scrubber
