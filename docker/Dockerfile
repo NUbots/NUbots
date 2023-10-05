@@ -99,7 +99,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # LLVM and Clang
-RUN echo $(which ld) && echo $(ls /usr/bin | grep lld) && install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
+RUN echo $(which ld) && echo $(ls /usr/bin | grep lld) && LD_DEBUG=all install-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
     --build-system cmake \
     --configure-path "llvm" \
     # -DCMAKE_CXX_FLAGS="-fuse-ld=ld" \
@@ -183,7 +183,7 @@ RUN install-from-source https://github.com/intel/media-driver/archive/refs/tags/
 
 # Install intel compute runtime (OpenCL implementation)
 RUN install-from-source https://github.com/intel/compute-runtime/archive/refs/tags/22.29.23750.tar.gz \
-    # --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
+    --patch https://github.com/intel/compute-runtime/commit/78c96db2faacdc3406a24a91f017aeae40b7ca54.patch \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=${prefix}
 
