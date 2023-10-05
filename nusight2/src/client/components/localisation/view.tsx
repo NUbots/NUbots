@@ -227,9 +227,9 @@ const Goals = ({ model }: { model: LocalisationModel }) => (
           <object3D key={robot.id}>
             {robot.rGFf.map((d, i) => {
               return (
-                <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
-                  <circleBufferGeometry args={[0.02, 20]} />
-                  <meshBasicMaterial color="red" />
+                <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.6)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderBufferGeometry args={[0.05, 0.05, 1.2, 20]} />
+                  <meshStandardMaterial color="yellow" />
                 </mesh>
               );
             })}
