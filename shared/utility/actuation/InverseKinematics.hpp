@@ -97,9 +97,9 @@ namespace utility::actuation::kinematics {
         }
 
         // Knee pitch
-        const Scalar sqr_length    = std::pow(length, 2);
-        const Scalar sqr_upper_leg = std::pow(model.leg.UPPER_LEG_LENGTH, 2);
-        const Scalar sqr_lower_leg = std::pow(model.leg.LOWER_LEG_LENGTH, 2);
+        const Scalar sqr_length    = length * length;
+        const Scalar sqr_upper_leg = model.leg.UPPER_LEG_LENGTH * model.leg.UPPER_LEG_LENGTH;
+        const Scalar sqr_lower_leg = model.leg.LOWER_LEG_LENGTH * model.leg.LOWER_LEG_LENGTH;
         const Scalar cos_knee      = (sqr_upper_leg + sqr_lower_leg - sqr_length)
                                 / (2.0 * model.leg.UPPER_LEG_LENGTH * model.leg.LOWER_LEG_LENGTH);
         const Scalar knee_pitch = M_PI - acos_clamped(cos_knee);
