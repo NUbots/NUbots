@@ -68,10 +68,6 @@ namespace module::input {
             configure_kf(config);
             configure_mahony(config);
 
-            // ****************************************  Kinematics Model ****************************************
-            cfg.urdf_path = config["urdf_path"].as<std::string>();
-            nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
-
             // Deadreckoning
             Hwa.translation().y() =
                 tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,

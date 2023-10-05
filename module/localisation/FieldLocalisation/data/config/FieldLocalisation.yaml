@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 0.01
