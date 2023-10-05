@@ -7,6 +7,7 @@
 
 #include "message/behaviour/state/Stability.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
 
 namespace module::localisation {
 
@@ -17,6 +18,7 @@ namespace module::localisation {
     using message::localisation::ResetFieldLocalisation;
     using message::support::FieldDescription;
     using message::vision::FieldLines;
+    using Goals = message::vision::Goals;
 
     using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
@@ -175,6 +177,13 @@ namespace module::localisation {
             // Precompute the distance map
             fieldline_map.create_distance_map(cfg.grid_size);
 
+
+            // Build list of goal posts in field space
+            goal_posts.push_back(Eigen::Vector3d(fd.dimensions.field_length / 2, fd.dimensions.goal_width / 2, 0));
+            goal_posts.push_back(Eigen::Vector3d(fd.dimensions.field_length / 2, -fd.dimensions.goal_width / 2, 0));
+            goal_posts.push_back(Eigen::Vector3d(-fd.dimensions.field_length / 2, fd.dimensions.goal_width / 2, 0));
+            goal_posts.push_back(Eigen::Vector3d(-fd.dimensions.field_length / 2, -fd.dimensions.goal_width / 2, 0));
+
             // Save the map to a csv file
             if (cfg.save_map) {
                 std::ofstream file("recordings/fieldline_map.csv");
@@ -233,7 +242,7 @@ namespace module::localisation {
             }
         });
 
-        on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
+        on<Trigger<FieldLines>>().then("Particle Filter Field Lines", [this](const FieldLines& field_lines) {
             Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
             if (!falling && field_lines.rPWw.size() > cfg.min_observations) {
                 // Add noise to the particles
@@ -293,6 +302,41 @@ namespace module::localisation {
             field->uncertainty = covariance.trace();
             emit(field);
         });
+
+        on<Trigger<Goals>>().then("Particle Filter Goal Posts", [this](const Goals& goals) {
+            Eigen::Isometry3d Hcw = Eigen::Isometry3d(goals.Hcw);
+            if (!falling && goals.rPWw.size() > cfg.min_observations) {
+                // Add noise to the particles
+                add_noise();
+
+                // Calculate the weight of each particle based on distance to the goal posts
+                for (int i = 0; i < cfg.n_particles; i++) {
+                    particles[i].weight = calculate_goal_weight(particles[i].state, goals.rPWw);
+                }
+
+                // Resample the particles based on the weights
+                resample();
+            }
+            // Compute the state (mean) and covariance of the particles
+            state      = compute_mean();
+            covariance = compute_covariance();
+            if (log_level <= NUClear::DEBUG) {
+
+                for (auto rPWw : goals.rPWw) {
+                    auto observation_cell = position_in_map(state, rPWw);
+                    emit(graph("Goal point", observation_cell.x(), observation_cell.y()));
+                }
+            }
+            // // Build and emit the field message
+            // auto field(std::make_unique<Field>());
+            // Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
+            // Hfw.translation()  = Eigen::Vector3d(state.x(), state.y(), 0);
+            // Hfw.linear()       = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+            // field->Hfw         = Hfw.matrix();
+            // field->covariance  = covariance;
+            // field->uncertainty = covariance.trace();
+            // emit(field);
+        });
     }
 
     Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d particle, const Eigen::Vector3d rPWw) {
@@ -325,6 +369,41 @@ namespace module::localisation {
             else {
                 weight *= cfg.outside_map_penalty_factor;
             }
+        }
+
+        return std::max(weight, 0.0);
+    }
+
+    double FieldLocalisation::calculate_goal_weight(const Eigen::Vector3d particle,
+                                                    const std::vector<Eigen::Vector3d>& observations) {
+        double weight = 0;
+        Eigen::Isometry3d Hfw;
+        Hfw.translation() = Eigen::Vector3d(particle(0), particle(1), 0.0);
+        Hfw.linear()      = Eigen::AngleAxisd(particle(2), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        for (auto rPWw : observations) {
+            // Get the position of the observation in the map for this particle [x, y]
+            Eigen::Vector3d rPFf = Hfw * rPWw;
+
+            log<NUClear::DEBUG>("rPFf: ", rPFf.transpose());
+
+            // Data association: Find the closest goal point in the map
+            double min_distance = std::numeric_limits<double>::max();
+            for (auto rGFf : goal_posts) {
+                double distance = (rGFf - rPFf).norm();
+                if (distance < min_distance) {
+                    min_distance = distance;
+                }
+            }
+
+            // Check if the observation is within the max range and within the field
+            if (min_distance < cfg.max_range) {
+                weight += std::exp(-0.5 * std::pow(min_distance / cfg.measurement_noise, 2))
+                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
+            }
+            // // If the observation is outside the max range, penalise it
+            // else {
+            //     weight *= cfg.outside_map_penalty_factor;
+            // }
         }
 
         return std::max(weight, 0.0);
