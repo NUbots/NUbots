@@ -2,7 +2,7 @@
 population_size: 4
 # More generations encourages deeper search
 max_generations: 5
-num_objectives: 1
+num_objectives: 2
 num_constraints: 2
 seed: 7777777
 trial_duration_limit: 10 # number of seconds to run a single trial for
