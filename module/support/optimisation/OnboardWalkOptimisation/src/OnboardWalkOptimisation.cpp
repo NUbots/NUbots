@@ -4,10 +4,11 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
+#include "message/support/optimisation/OptimisationRobotPosition.hpp"
+#include "message/support/optimisation/OptimisationCommand.hpp"
 
 namespace module::support::optimisation {
 
@@ -16,11 +17,12 @@ namespace module::support::optimisation {
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonMiddleDown;
     using message::platform::RawSensors;
-    using message::platform::webots::OptimisationCommand;
-    using message::platform::webots::OptimisationRobotPosition;
+
     using message::support::optimisation::NSGA2Evaluating;
     using message::support::optimisation::OptimisationResetDone;
     using message::support::optimisation::OptimisationTimeUpdate;
+    using message::support::optimisation::OptimisationRobotPosition;
+    using message::support::optimisation::OptimisationCommand;
 
     OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -75,8 +77,8 @@ namespace module::support::optimisation {
                 }
             }
             else {
+                // Calculate and emit an odometry position vector
                 Eigen::Isometry3d Hwt = sensors.Htw.inverse();
-                // log<NUClear::DEBUG>("Hwt\n", Hwt.matrix());
                 Eigen::Vector3d rTWw = Hwt.translation();
 
                 auto robot_position   = std::make_unique<OptimisationRobotPosition>();
@@ -84,16 +86,5 @@ namespace module::support::optimisation {
                 emit(robot_position);
             }
         });
-
-        // Reset for next run or terminate when paused
-        on<Trigger<ButtonLeftDown>, Single>().then([this] {
-            NUClear::log<NUClear::DEBUG>("Left Button Pressed");
-            if (false) {
-                emit(std::make_unique<OptimisationResetDone>());
-            }
-        });
-
-        // Pause optimisation
-        on<Trigger<ButtonMiddleDown>, Single>().then([this] {});
     }
 }  // namespace module::support::optimisation

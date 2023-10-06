@@ -8,9 +8,9 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
+#include "message/support/optimisation/OptimisationCommand.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -18,11 +18,11 @@ namespace module::support::optimisation {
 
     using extension::Configuration;
 
-    using message::platform::webots::OptimisationCommand;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReady;
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2Terminate;
+    using message::support::optimisation::OptimisationCommand;
 
     using utility::support::Expression;
 

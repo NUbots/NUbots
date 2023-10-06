@@ -24,6 +24,9 @@ package message.platform.webots;
 import "Matrix.proto";
 import "Vector.proto";
 
+import "message/support/optimisation/OptimisationRobotPosition.proto";
+import "message/support/optimisation/OptimisationCommand.proto";
+
 // Copy of cyberbotics/webots projects/samples/contests/robocup/controllers/player/messages.proto
 
 
@@ -102,11 +105,6 @@ message VisionGroundTruth {
     fvec3 rBWw = 2;
 }
 
-// NUbots-specific, used for the walk optimisation
-message OptimisationRobotPosition {
-    vec3 value = 1;
-}
-
 message SensorMeasurements {
     // simulation time stamp at which the measurements were performed expressed in [ms] from the start of the connection
     uint32 time = 1;
@@ -126,7 +124,7 @@ message SensorMeasurements {
     VisionGroundTruth   vision_ground_truth   = 101;
 
     // NUbots-specific, used for the walk optimisation
-    OptimisationRobotPosition robot_position = 102;
+    support.optimisation.OptimisationRobotPosition robot_position = 102;
     bool                      reset_done     = 103;
 }
 
@@ -170,17 +168,6 @@ message CameraExposure {
     double exposure = 2;  // photometric exposure of the scene in joule per square meter [J/m^2]
 }
 
-// NUbots-specific, used for the walk optimisation
-message OptimisationCommand {
-    enum CommandType {
-        NO_COMMAND  = 0;
-        RESET_ROBOT = 1;
-        RESET_TIME  = 2;
-        TERMINATE   = 3;
-    }
-    CommandType command = 1;
-}
-
 message ActuatorRequests {
     repeated MotorPosition  motor_positions   = 1;
     repeated MotorVelocity  motor_velocities  = 2;
@@ -192,5 +179,5 @@ message ActuatorRequests {
     repeated CameraExposure camera_exposures  = 8;
 
     // NUbots-specific, used for the walk optimisation
-    OptimisationCommand optimisation_command = 100;
+    support.optimisation.OptimisationCommand optimisation_command = 100;
 }

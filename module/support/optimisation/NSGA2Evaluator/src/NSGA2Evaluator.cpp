@@ -15,7 +15,6 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/platform/webots/messages.hpp"
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -23,6 +22,8 @@
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
+#include "message/support/optimisation/OptimisationRobotPosition.hpp"
+#include "message/support/optimisation/OptimisationRobotPosition.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -35,8 +36,6 @@ namespace module::support::optimisation {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
-    using message::platform::webots::OptimisationCommand;
-    using message::platform::webots::OptimisationRobotPosition;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
     using message::support::optimisation::NSGA2Evaluating;
@@ -48,6 +47,8 @@ namespace module::support::optimisation {
     using message::support::optimisation::NSGA2TrialExpired;
     using message::support::optimisation::OptimisationResetDone;
     using message::support::optimisation::OptimisationTimeUpdate;
+    using message::support::optimisation::OptimisationRobotPosition;
+    using message::support::optimisation::OptimisationCommand;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
