@@ -98,11 +98,12 @@ namespace module::localisation {
 
                     // Data association: ensure the ball is within the acceptance radius
                     bool accept_ball = true;
-                    if (lowest_distance > cfg.acceptance_radius) {
+                    if (lowest_distance > cfg.acceptance_radius && !first_ball_seen) {
                         accept_ball = false;
                         rejection_count++;
                     }
                     else {
+                        first_ball_seen = true;
                         rejection_count = 0;
                     }
                     log<NUClear::DEBUG>("Rejection count: ", rejection_count);

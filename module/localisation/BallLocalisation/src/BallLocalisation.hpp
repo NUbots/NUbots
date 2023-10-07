@@ -59,6 +59,9 @@ namespace module::localisation {
         /// @brief Rejection count
         int rejection_count = 0;
 
+        /// @brief Whether or not this is the first time we have seen a ball
+        bool first_ball_seen = true;
+
         /// @brief The time of the last time update
         NUClear::clock::time_point last_time_update;
 
