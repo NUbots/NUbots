@@ -34,9 +34,9 @@ namespace extension::behaviour {
             OTHER_TRIGGER,
             /// A new task has been given to this provider
             NEW_TASK,
-            /// The provider has been started (will happen on on<Started<X>>)
+            /// The provider has been started (will happen on on<Start<X>>)
             STARTED,
-            /// The provider has been stopped (will happen on on<Stopped<X>>)
+            /// The provider has been stopped (will happen on on<Stop<X>>)
             STOPPED,
             /// A subtask has finished and emitted a Done message
             SUBTASK_DONE,

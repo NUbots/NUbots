@@ -105,7 +105,7 @@ namespace module::actuation {
             // Make an initial count message
             emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(0));
 
-            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>>().then(
+            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>, Single>().then(
                 [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
                     if (sequence.frames.empty()) {
