@@ -40,6 +40,7 @@ namespace module::actuation {
                                                        servo.command.state.torque));
                 }
                 // If the time to reach the position is over, then stop requesting the position
+                // Only emit Done once, so as not to spam the parent
                 else if (NUClear::clock::now() >= servo.command.time && !info.done) {
                     emit<Task>(std::make_unique<Done>());
                 }
