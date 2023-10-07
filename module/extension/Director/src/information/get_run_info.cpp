@@ -23,9 +23,15 @@ namespace module::extension {
 
     using ::extension::behaviour::RunInfo;
 
-    RunInfo Director::_get_run_info(const uint64_t& /*reaction_id*/) {
+    RunInfo Director::_get_run_info(const uint64_t& reaction_id) {
+        std::lock_guard<std::recursive_mutex> lock(director_mutex);
 
-        return RunInfo{current_run_reason};
+        if (providers.contains(reaction_id)) {
+            return RunInfo{current_run_reason, providers.at(reaction_id)->group.done};
+        }
+
+        log<NUClear::ERROR>("Getting run information for a reaction that isn't a Provider.");
+        return RunInfo{current_run_reason, false};
     }
 
 }  // namespace module::extension

@@ -40,7 +40,7 @@ namespace module::actuation {
                                                        servo.command.state.torque));
                 }
                 // If the time to reach the position is over, then stop requesting the position
-                else if (NUClear::clock::now() >= servo.command.time) {
+                else if (NUClear::clock::now() >= servo.command.time && !info.done) {
                     emit<Task>(std::make_unique<Done>());
                 }
             });
@@ -105,7 +105,7 @@ namespace module::actuation {
             // Make an initial count message
             emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(0));
 
-            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>, Single>().then(
+            on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>>().then(
                 [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
                     if (sequence.frames.empty()) {

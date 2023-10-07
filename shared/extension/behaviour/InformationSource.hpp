@@ -46,6 +46,9 @@ namespace extension::behaviour {
 
         /// The reason we executed
         RunReason run_reason;
+
+        /// Whether we are currently in a Done state or not
+        bool done;
     };
 
     /**
