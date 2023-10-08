@@ -312,6 +312,14 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+# Install arduino tools
+ENV ARDUINO_DIRECTORIES_DOWNLOADS=/usr/share/arduino/staging
+ENV ARDUINO_DIRECTORIES_DATA=/usr/share/arduino
+ENV ARDUINO_DIRECTORIES_USER=/usr/share/arduino
+COPY --chown=root:root /usr/share/arduino/arduino-cli.yaml /usr/share/arduino/arduino-cli.yaml
+RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh -s 0.34.2
+RUN arduino-cli core install STMicroelectronics:stm32@2.6.0
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
