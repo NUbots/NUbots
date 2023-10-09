@@ -3,7 +3,8 @@ nuclear_role(
   extension::FileWatcher
   support::SignalCatcher
   support::logging::ConsoleLogHandler
-
-  platform::HardwareSimulator
+  # Platform
+  #platform::HardwareSimulator
   platform::NUsense::HardwareIO
+
 )
