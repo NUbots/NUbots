@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect }  from "react";
 import { PropsWithChildren } from "react";
 import { ComponentType } from "react";
 import { reaction } from "mobx";
@@ -25,6 +25,25 @@ type LocalisationViewProps = {
   model: LocalisationModel;
   network: LocalisationNetwork;
 };
+
+import URDFLoader from 'urdf-loader';
+const nugusUrdfPath = '/nugus/robot.urdf';
+function URDFRobot() {
+    const robotRef = useRef();
+
+    useEffect(() => {
+        const loader = new URDFLoader();
+
+        loader.load(nugusUrdfPath, (robot) => {
+            robotRef.current.add(robot);
+        });
+
+    }, [nugusUrdfPath]);
+    return <object3D ref={robotRef} />;
+}
+
+export default URDFRobot;
+
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
@@ -175,7 +194,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       <SkyboxView model={model.skybox} />
       <hemisphereLight args={["#fff", "#fff", 0.6]} />
       {model.robots.map((robotModel) => {
-        return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel} />;
+        return robotModel.visible && <URDFRobot key={robotModel.id} />;
       })}
       <FieldLinePoints model={model} />
       <Balls model={model} />
