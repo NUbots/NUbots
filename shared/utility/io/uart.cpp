@@ -173,4 +173,13 @@ namespace utility::io {
         return ::write(fd, buf, count);
     }
 
+    int uart::available() const {
+        if (connected()) {
+            int nbytes = 0;
+            ::ioctl(fd, FIONREAD, &nbytes);
+            return nbytes;
+        }
+        return -2;
+    }
+
 }  // namespace utility::io

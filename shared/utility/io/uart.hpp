@@ -133,6 +133,13 @@ namespace utility::io {
          * @brief Close the open file descriptor then reset fd = -1
          */
         void close();
+
+        /**
+         * @brief Return the number of bytes available for reading
+         *
+         * @return -2 if no current connection, -1 for some other error. Check errno if -1 is returned.
+         */
+        [[nodiscard]] int available() const;
     };
 
 }  // namespace utility::io
