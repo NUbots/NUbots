@@ -3,7 +3,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="torso_visual.stl" />
+<mesh filename="./torso_visual.stl" />
 </geometry>
 <material name="torso_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -28,7 +28,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_hip_yaw_visual.stl" />
+<mesh filename="./left_hip_yaw_visual.stl" />
 </geometry>
 <material name="left_hip_yaw_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -53,7 +53,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_hip_roll_visual.stl" />
+<mesh filename="./left_hip_roll_visual.stl" />
 </geometry>
 <material name="left_hip_roll_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -78,7 +78,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_upper_leg_visual.stl" />
+<mesh filename="./left_upper_leg_visual.stl" />
 </geometry>
 <material name="left_upper_leg_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -103,7 +103,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_lower_leg_visual.stl" />
+<mesh filename="./left_lower_leg_visual.stl" />
 </geometry>
 <material name="left_lower_leg_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -128,7 +128,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_ankle_visual.stl" />
+<mesh filename="./left_ankle_visual.stl" />
 </geometry>
 <material name="left_ankle_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -153,7 +153,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_foot_visual.stl" />
+<mesh filename="./left_foot_visual.stl" />
 </geometry>
 <material name="left_foot_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -178,7 +178,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_foot_base_visual.stl" />
+<mesh filename="./left_foot_base_visual.stl" />
 </geometry>
 <material name="left_foot_base_material">
 <color rgba="0.615686 0.811765 0.929412 1.0" />
@@ -266,7 +266,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_hip_yaw_visual.stl" />
+<mesh filename="./right_hip_yaw_visual.stl" />
 </geometry>
 <material name="right_hip_yaw_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -291,7 +291,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_hip_roll_visual.stl" />
+<mesh filename="./right_hip_roll_visual.stl" />
 </geometry>
 <material name="right_hip_roll_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -316,7 +316,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_upper_leg_visual.stl" />
+<mesh filename="./right_upper_leg_visual.stl" />
 </geometry>
 <material name="right_upper_leg_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -341,7 +341,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_lower_leg_visual.stl" />
+<mesh filename="./right_lower_leg_visual.stl" />
 </geometry>
 <material name="right_lower_leg_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -366,7 +366,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_ankle_visual.stl" />
+<mesh filename="./right_ankle_visual.stl" />
 </geometry>
 <material name="right_ankle_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -391,7 +391,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_foot_visual.stl" />
+<mesh filename="./right_foot_visual.stl" />
 </geometry>
 <material name="right_foot_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -416,7 +416,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_foot_base_visual.stl" />
+<mesh filename="./right_foot_base_visual.stl" />
 </geometry>
 <material name="right_foot_base_material">
 <color rgba="0.615686 0.811765 0.929412 1.0" />
@@ -504,7 +504,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="neck_visual.stl" />
+<mesh filename="./neck_visual.stl" />
 </geometry>
 <material name="neck_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -529,7 +529,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="head_visual.stl" />
+<mesh filename="./head_visual.stl" />
 </geometry>
 <material name="head_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -554,7 +554,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_camera_visual.stl" />
+<mesh filename="./left_camera_visual.stl" />
 </geometry>
 <material name="left_camera_material">
 <color rgba="0.615686 0.811765 0.929412 1.0" />
@@ -588,7 +588,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_camera_visual.stl" />
+<mesh filename="./right_camera_visual.stl" />
 </geometry>
 <material name="right_camera_material">
 <color rgba="0.615686 0.811765 0.929412 1.0" />
@@ -640,7 +640,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_shoulder_visual.stl" />
+<mesh filename="./left_shoulder_visual.stl" />
 </geometry>
 <material name="left_shoulder_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -665,7 +665,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_upper_arm_visual.stl" />
+<mesh filename="./left_upper_arm_visual.stl" />
 </geometry>
 <material name="left_upper_arm_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -690,7 +690,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="left_lower_arm_visual.stl" />
+<mesh filename="./left_lower_arm_visual.stl" />
 </geometry>
 <material name="left_lower_arm_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -742,7 +742,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_shoulder_visual.stl" />
+<mesh filename="./right_shoulder_visual.stl" />
 </geometry>
 <material name="right_shoulder_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -767,7 +767,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_upper_arm_visual.stl" />
+<mesh filename="./right_upper_arm_visual.stl" />
 </geometry>
 <material name="right_upper_arm_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />
@@ -792,7 +792,7 @@
 <visual>
 <origin xyz="0 0 0" rpy="0 -0 0" />
 <geometry>
-<mesh filename="right_lower_arm_visual.stl" />
+<mesh filename="./right_lower_arm_visual.stl" />
 </geometry>
 <material name="right_lower_arm_material">
 <color rgba="0.286275 0.286275 0.286275 1.0" />

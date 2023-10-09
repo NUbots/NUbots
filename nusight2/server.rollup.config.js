@@ -53,7 +53,7 @@ const config = {
   },
   plugins: [
     url({
-      include: ["**/*.ico", "**/*.jpg"],
+      include: ["**/*.ico", "**/*.jpg", "**/*.stl"],
       publicPath: assetsDir + "/", // Prepended to the path of imported assets
       destDir: assetsDir, // Put copied assets here
       limit: 0, // Don't inline any assets, always copy and link
