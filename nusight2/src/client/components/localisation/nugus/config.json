@@ -1,0 +1,7 @@
+{
+    "documentId": "7a93aa6f68a144f3337682ca",
+    "outputFormat": "urdf",
+    "mergeSTLs": "all",
+    "mergeSTLsCollisions": "true",
+    "postImportCommands": ["python generate_proto.py"]
+}
