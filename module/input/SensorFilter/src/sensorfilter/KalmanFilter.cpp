@@ -23,7 +23,6 @@
 
 #include "message/actuation/BodySide.hpp"
 
-#include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
