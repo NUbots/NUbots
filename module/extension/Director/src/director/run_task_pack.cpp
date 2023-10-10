@@ -180,8 +180,8 @@ namespace module::extension {
 
                 // Check if we are already done, and if so we don't want to pester the parent again
                 if (provider->group.done) {
-                    // Running Done a second time shouldn't happen for a root task since it would already have been
-                    // removed
+                    // Running Done when already in a Done state shouldn't happen for a root task since it should
+                    // already have been removed
                     if (parent_provider->classification == Provider::Classification::ROOT) {
                         log<NUClear::ERROR>("Done task was emitted twice, this should never happen for a root task");
                     }
