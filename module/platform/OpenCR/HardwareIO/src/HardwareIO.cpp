@@ -106,12 +106,7 @@ namespace module::platform::OpenCR {
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Make sure OpenCR is operating at the correct baud rate (based on config params)
-            if (opencr.connected()) {
-                opencr.close();
-            }
-
-            opencr.open(config["opencr"]["device"], config["opencr"]["baud"]);
+            opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
             byte_wait   = config["opencr"]["byte_wait"];
             packet_wait = config["opencr"]["packet_wait"];
 

@@ -2,6 +2,7 @@
 #define UTILITY_IO_UART_HPP
 
 #include <string>
+#include <type_traits>
 
 namespace utility::io {
 
@@ -82,6 +83,20 @@ namespace utility::io {
         ssize_t read(void* buf, size_t count);
 
         /**
+         * @brief Read from the device into a structure
+         *
+         * @param data the structure to read in to
+         *
+         * @return the number of bytes that were actually read, or -1 if fail. See ::read
+         *
+         * @note Implementation in header file to stop the compiler from optimising it away
+         */
+        template <typename T>
+        ssize_t read(T& data) requires std::is_trivially_copyable_v<T> {
+            return read(static_cast<void*>(&data), sizeof(T));
+        }
+
+        /**
          * Write bytes to the uart
          *
          * @param buf the buffer to write bytes from
@@ -90,6 +105,20 @@ namespace utility::io {
          * @return the number of bytes that were written
          */
         ssize_t write(const void* buf, size_t count);
+
+        /**
+         * @brief Write bytes to the uart
+         *
+         * @param data the data to write
+         *
+         * @return the number of bytes that were written
+         *
+         * @note Implementation in header file to stop the compiler from optimising it away
+         */
+        template <typename T>
+        ssize_t write(const T& data) requires std::is_trivially_copyable_v<T> {
+            return write(static_cast<const void*>(&data), sizeof(T));
+        }
 
         /**
          * Read a single character from the uart device, returning -1 if there is no data
