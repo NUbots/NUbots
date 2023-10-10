@@ -27,7 +27,7 @@ type LocalisationViewProps = {
   network: LocalisationNetwork;
 };
 
-const nugusUrdfPath = "/nugus/robot.urdf";
+const nugusUrdfPath = "/robot-models/robot.urdf";
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
