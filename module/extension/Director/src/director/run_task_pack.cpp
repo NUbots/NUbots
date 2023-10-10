@@ -176,12 +176,22 @@ namespace module::extension {
         // See if a done command was emitted
         for (const auto& t : pack.second) {
             if (t->type == typeid(::extension::behaviour::Done)) {
+                auto parent_provider = providers.at(group.active_task->requester_id);
+
+                // Check if we are already done, and if so we don't want to pester the parent again
+                if (provider->group.done) {
+                    // Running Done a second time shouldn't happen for a root task since it would already have been
+                    // removed
+                    if (parent_provider->classification == Provider::Classification::ROOT) {
+                        log<NUClear::ERROR>("Done task was emitted twice, this should never happen for a root task");
+                    }
+                    return;
+                }
 
                 // This provider is now in the done state
                 provider->group.done = true;
 
-                auto parent_provider = providers.at(group.active_task->requester_id);
-                auto& parent_group   = parent_provider->group;
+                auto& parent_group = parent_provider->group;
 
                 // If it's a root provider, then we just remove the task
                 if (parent_provider->classification == Provider::Classification::ROOT) {
