@@ -38,7 +38,7 @@ var searchData=
   ['align_5fradius_38',['align_radius',['../structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#a6d11097fdace879ea88840444cf25a3e',1,'module::strategy::WalkToFieldPosition::Config']]],
   ['alignballtogoal_39',['AlignBallToGoal',['../classmodule_1_1strategy_1_1AlignBallToGoal.html#a4a7d33dac7fe2ad6d8b1dc6825b0e99d',1,'module::strategy::AlignBallToGoal::AlignBallToGoal()'],['../classmodule_1_1strategy_1_1AlignBallToGoal.html',1,'module::strategy::AlignBallToGoal']]],
   ['anchor_5fupdate_40',['anchor_update',['../classmodule_1_1input_1_1SensorFilter.html#ab83166c6f8b1127c967998af06da0a73',1,'module::input::SensorFilter']]],
-  ['angle_5fbetween_41',['angle_between',['../namespaceutility_1_1math_1_1angle.html#aae40e7b65b4974484416fe3e30f52468',1,'utility::math::angle']]],
+  ['angle_5fbetween_41',['angle_between',['../namespaceutility_1_1math_1_1angle.html#ac17aa9cfa9b664e40d817968e598581a',1,'utility::math::angle']]],
   ['angle_5for_5fgain_42',['angle_or_gain',['../classmodule_1_1purpose_1_1ScriptTuner.html#abe21098e5c8895bd186b4b0347c7d3f9',1,'module::purpose::ScriptTuner']]],
   ['angle_5fthreshold_43',['angle_threshold',['../structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#ac3dd980a1fcaa21eba31f847444b67b4',1,'module::strategy::AlignBallToGoal::Config']]],
   ['angledistance_44',['angleDistance',['../namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599',1,'utility::math::angle']]],

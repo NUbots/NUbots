@@ -179,10 +179,10 @@ Functions</h2></td></tr>
 template&lt;typename T &gt; </td></tr>
 <tr class="memitem:ad2ac2cb47e41dcec768e82c097bd2c90"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><b>acos_clamped</b> (const T &amp;a)</td></tr>
 <tr class="separator:ad2ac2cb47e41dcec768e82c097bd2c90"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aae40e7b65b4974484416fe3e30f52468"><td class="memTemplParams" colspan="2">template&lt;typename Derived , typename Scalar  = typename Derived::Scalar&gt; </td></tr>
-<tr class="memitem:aae40e7b65b4974484416fe3e30f52468"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if_t&lt; std::is_floating_point_v&lt; Scalar &gt;, Scalar &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1math_1_1angle.html#aae40e7b65b4974484416fe3e30f52468">angle_between</a> (const Eigen::MatrixBase&lt; Derived &gt; &amp;u, const Eigen::MatrixBase&lt; Derived &gt; &amp;v)</td></tr>
-<tr class="memdesc:aae40e7b65b4974484416fe3e30f52468"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the angle between two vectors.  <a href="namespaceutility_1_1math_1_1angle.html#aae40e7b65b4974484416fe3e30f52468">More...</a><br /></td></tr>
-<tr class="separator:aae40e7b65b4974484416fe3e30f52468"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac17aa9cfa9b664e40d817968e598581a"><td class="memTemplParams" colspan="2">template&lt;typename DerivedU , typename DerivedV &gt; </td></tr>
+<tr class="memitem:ac17aa9cfa9b664e40d817968e598581a"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1math_1_1angle.html#ac17aa9cfa9b664e40d817968e598581a">angle_between</a> (const Eigen::MatrixBase&lt; DerivedU &gt; &amp;u, const Eigen::MatrixBase&lt; DerivedV &gt; &amp;v) -&gt; typename std::enable_if_t&lt; std::is_floating_point_v&lt; typename DerivedU::Scalar &gt; &amp;&amp;std::is_floating_point_v&lt; typename DerivedV::Scalar &gt;, typename DerivedU::Scalar &gt;</td></tr>
+<tr class="memdesc:ac17aa9cfa9b664e40d817968e598581a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the angle between two vectors.  <a href="namespaceutility_1_1math_1_1angle.html#ac17aa9cfa9b664e40d817968e598581a">More...</a><br /></td></tr>
+<tr class="separator:ac17aa9cfa9b664e40d817968e598581a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e107d590603f317a7749498f7976599"><td class="memTemplParams" colspan="2"><a id="a8e107d590603f317a7749498f7976599"></a>
 template&lt;typename Scalar &gt; </td></tr>
 <tr class="memitem:a8e107d590603f317a7749498f7976599"><td class="memTemplItemLeft" align="right" valign="top">double&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599">angleDistance</a> (const Scalar &amp;angleSrc, const Scalar &amp;angleDst)</td></tr>
@@ -213,30 +213,32 @@ double&#160;</td><td class="memItemRight" valign="bottom"><b>vectorToBearing</b>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section author"><dt>Author</dt><dd>Trent Houliston </dd></dl>
 </div><h2 class="groupheader">Function Documentation</h2>
-<a id="aae40e7b65b4974484416fe3e30f52468"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aae40e7b65b4974484416fe3e30f52468">&#9670;&nbsp;</a></span>angle_between()</h2>
+<a id="ac17aa9cfa9b664e40d817968e598581a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac17aa9cfa9b664e40d817968e598581a">&#9670;&nbsp;</a></span>angle_between()</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;typename Derived , typename Scalar  = typename Derived::Scalar&gt; </div>
+template&lt;typename DerivedU , typename DerivedV &gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">std::enable_if_t&lt;std::is_floating_point_v&lt;Scalar&gt;, Scalar&gt; utility::math::angle::angle_between </td>
+          <td class="memname">auto utility::math::angle::angle_between </td>
           <td>(</td>
-          <td class="paramtype">const Eigen::MatrixBase&lt; Derived &gt; &amp;&#160;</td>
+          <td class="paramtype">const Eigen::MatrixBase&lt; DerivedU &gt; &amp;&#160;</td>
           <td class="paramname"><em>u</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Eigen::MatrixBase&lt; Derived &gt; &amp;&#160;</td>
+          <td class="paramtype">const Eigen::MatrixBase&lt; DerivedV &gt; &amp;&#160;</td>
           <td class="paramname"><em>v</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
           <td>)</td>
-          <td></td><td></td>
+          <td></td><td> -&gt; typename std::enable_if_t&lt;
+            std::is_floating_point_v&lt;typename DerivedU::Scalar&gt; &amp;&amp; std::is_floating_point_v&lt;typename DerivedV::Scalar&gt;,
+            typename DerivedU::Scalar&gt; </td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -388,7 +390,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>math</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1math_1_1angle.html">angle</a></li>
-    <li class="footer">Generated on Tue Oct 10 2023 09:40:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Oct 10 2023 23:27:57 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

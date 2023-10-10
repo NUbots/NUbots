@@ -23,6 +23,6 @@ var searchData=
   ['addpoint_1478',['addPoint',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#ab86a4c9d098ed9e13d286a44b324b2db',1,'utility::motion::splines::SmoothSpline']]],
   ['alignballtogoal_1479',['AlignBallToGoal',['../classmodule_1_1strategy_1_1AlignBallToGoal.html#a4a7d33dac7fe2ad6d8b1dc6825b0e99d',1,'module::strategy::AlignBallToGoal']]],
   ['anchor_5fupdate_1480',['anchor_update',['../classmodule_1_1input_1_1SensorFilter.html#ab83166c6f8b1127c967998af06da0a73',1,'module::input::SensorFilter']]],
-  ['angle_5fbetween_1481',['angle_between',['../namespaceutility_1_1math_1_1angle.html#aae40e7b65b4974484416fe3e30f52468',1,'utility::math::angle']]],
+  ['angle_5fbetween_1481',['angle_between',['../namespaceutility_1_1math_1_1angle.html#ac17aa9cfa9b664e40d817968e598581a',1,'utility::math::angle']]],
   ['angledistance_1482',['angleDistance',['../namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599',1,'utility::math::angle']]]
 ];

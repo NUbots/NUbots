@@ -698,6 +698,7 @@ var namespaces_dup =
       [ "actuation", null, [
         [ "kinematics", null, [
           [ "calculate_head_joints", "InverseKinematics_8hpp.html#ac81c070cbf00280291564afd33a2779d", null ],
+          [ "calculate_leg_joints", "InverseKinematics_8hpp.html#aa27e3b07c1ca35e8f7c3a57d12305689", null ],
           [ "calculateAllPositions", "ForwardKinematics_8hpp.html#a84e2c61ae7d6b3651408b04e1a1e9e51", null ],
           [ "calculateArmJointPosition", "ForwardKinematics_8hpp.html#acaa0c37a4b94cc4ee1adda38d59a7ef4", null ],
           [ "calculateCentreOfMass", "ForwardKinematics_8hpp.html#a7fb2148a3a02cc01cb2e045e5bbd386d", null ],
@@ -706,8 +707,6 @@ var namespaces_dup =
           [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#aeacfb8e0ab7120fe8e077e5fec1defe8", null ],
           [ "calculateInertialTensor", "ForwardKinematics_8hpp.html#a8f700e315a0133e6e775249064467147", null ],
           [ "calculateLegJointPosition", "ForwardKinematics_8hpp.html#aab331e0e4b1dbea659cc77d4e7e6d4b6", null ],
-          [ "calculateLegJoints", "InverseKinematics_8hpp.html#a7f5ddd1c744524901a443783780aa370", null ],
-          [ "calculateLegJoints", "InverseKinematics_8hpp.html#a1eb67657baa287d241436d88039ea785", null ],
           [ "calculatePosition", "ForwardKinematics_8hpp.html#adb9bea25d11c7f7e0eded49ac6cecfdd", null ],
           [ "calculateRobotToIMU", "ForwardKinematics_8hpp.html#a68be5789fb33da4e7d44df7f9b79cfb3", null ]
         ] ],
@@ -784,7 +783,7 @@ var namespaces_dup =
       [ "math", null, [
         [ "angle", "namespaceutility_1_1math_1_1angle.html", [
           [ "acos_clamped", "namespaceutility_1_1math_1_1angle.html#ad2ac2cb47e41dcec768e82c097bd2c90", null ],
-          [ "angle_between", "namespaceutility_1_1math_1_1angle.html#aae40e7b65b4974484416fe3e30f52468", null ],
+          [ "angle_between", "namespaceutility_1_1math_1_1angle.html#ac17aa9cfa9b664e40d817968e598581a", null ],
           [ "angleDistance", "namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599", null ],
           [ "asin_clamped", "namespaceutility_1_1math_1_1angle.html#a58909fc949c49bd2efc0a444ecd55560", null ],
           [ "difference", "namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945", null ],
