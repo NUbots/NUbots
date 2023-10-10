@@ -5,7 +5,7 @@ import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
-import URDFLoader from "urdf-loader";
+import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
 import { PerspectiveCamera } from "../three/three_fiber";
@@ -16,6 +16,7 @@ import { FieldView } from "./field/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
+import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
 
@@ -220,8 +221,9 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
   </>
 );
 
-const Robot = ({ model }: { model: LocalisationModel }) => {
-  const robotRef = React.useRef();
+const Robot = ({ model }: { model: LocalisationRobotModel }) => {
+  const robotRef = React.useRef<URDFRobot | null>(null);
+
   // Load the URDF model only once
   React.useEffect(() => {
     const loader = new URDFLoader();
@@ -234,33 +236,32 @@ const Robot = ({ model }: { model: LocalisationModel }) => {
   const rotation = model.Hft.decompose().rotation;
   const motors = model.motors;
   const joints = robotRef.current?.children[0]?.joints;
+
   React.useEffect(() => {
-    if (robotRef.current) {
-      // Update robot's pose
-      robotRef.current.position.copy(position);
-      robotRef.current.quaternion.copy(rotation);
-      // Update robot's joints
-      joints?.head_pitch.setJointValue(motors.headTilt.angle);
-      joints?.left_ankle_pitch.setJointValue(motors.leftAnklePitch.angle);
-      joints?.left_ankle_roll.setJointValue(motors.leftAnkleRoll.angle);
-      joints?.left_elbow_pitch.setJointValue(motors.leftElbow.angle);
-      joints?.left_hip_pitch.setJointValue(motors.leftHipPitch.angle);
-      joints?.left_hip_roll.setJointValue(motors.leftHipRoll.angle);
-      joints?.left_hip_yaw.setJointValue(motors.leftHipYaw.angle);
-      joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
-      joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
-      joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
-      joints?.neck_yaw.setJointValue(motors.headPan.angle);
-      joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
-      joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
-      joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
-      joints?.right_hip_pitch.setJointValue(motors.rightHipPitch.angle);
-      joints?.right_hip_roll.setJointValue(motors.rightHipRoll.angle);
-      joints?.right_hip_yaw.setJointValue(motors.rightHipYaw.angle);
-      joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
-      joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
-      joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
-    }
+    // Update robot's pose
+    robotRef.current.position.copy(position);
+    robotRef.current.quaternion.copy(rotation);
+    // Update robot's joints
+    joints?.head_pitch.setJointValue(motors.headTilt.angle);
+    joints?.left_ankle_pitch.setJointValue(motors.leftAnklePitch.angle);
+    joints?.left_ankle_roll.setJointValue(motors.leftAnkleRoll.angle);
+    joints?.left_elbow_pitch.setJointValue(motors.leftElbow.angle);
+    joints?.left_hip_pitch.setJointValue(motors.leftHipPitch.angle);
+    joints?.left_hip_roll.setJointValue(motors.leftHipRoll.angle);
+    joints?.left_hip_yaw.setJointValue(motors.leftHipYaw.angle);
+    joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
+    joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
+    joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
+    joints?.neck_yaw.setJointValue(motors.headPan.angle);
+    joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
+    joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
+    joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
+    joints?.right_hip_pitch.setJointValue(motors.rightHipPitch.angle);
+    joints?.right_hip_roll.setJointValue(motors.rightHipRoll.angle);
+    joints?.right_hip_yaw.setJointValue(motors.rightHipYaw.angle);
+    joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
+    joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
+    joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
   }, [position, rotation, motors]);
 
   return <object3D ref={robotRef} />;
