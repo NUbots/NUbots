@@ -180,7 +180,7 @@ PROTO nugus
               jointParameters HingeJointParameters {
                     dampingConstant IS MX106-damping
                     staticFriction IS MX106-friction
-                axis 1.000000 0.000000 -0.000004
+                axis 1.000000 -0.000000 -0.000004
                 anchor 0.022133 0.000000 -0.054500
               }
               device [
@@ -198,7 +198,7 @@ PROTO nugus
               ]
               endPoint Solid {
                 translation 0.022133 0.000000 -0.054500
-                rotation -0.000000 1.000000 0.000000 1.570800
+                rotation 0.000000 1.000000 -0.000000 1.570800
                 children [
                   Shape {
                     appearance DEF left_hip_roll_material PBRAppearance {
@@ -215,7 +215,7 @@ PROTO nugus
                     dampingConstant IS MX106-damping
                     staticFriction IS MX106-friction
                       axis -0.000000 1.000000 -0.000004
-                      anchor 0.000000 -0.000000 -0.000000
+                      anchor 0.000000 0.000000 -0.000000
                     }
                     device [
                       RotationalMotor {
@@ -231,8 +231,8 @@ PROTO nugus
                       }
                     ]
                     endPoint Solid {
-                      translation 0.000000 -0.000000 -0.000000
-                      rotation -1.000000 -0.000000 0.000000 1.570800
+                      translation 0.000000 0.000000 -0.000000
+                      rotation -1.000000 -0.000000 -0.000000 1.570800
                       children [
                         Shape {
                           appearance DEF left_upper_leg_material PBRAppearance {
@@ -248,7 +248,7 @@ PROTO nugus
                           jointParameters HingeJointParameters {
                     dampingConstant IS MX106-damping
                     staticFriction IS MX106-friction
-                            axis 0.000000 0.000000 1.000000
+                            axis -0.000000 0.000000 1.000000
                             anchor 0.206046 0.056950 -0.000000
                           }
                           device [
@@ -266,6 +266,7 @@ PROTO nugus
                           ]
                           endPoint Solid {
                             translation 0.206046 0.056950 -0.000000
+                            rotation -0.000000 -0.000000 1.000000 0.004801
                             children [
                               Shape {
                                 appearance DEF left_lower_leg_material PBRAppearance {
@@ -315,7 +316,7 @@ PROTO nugus
                     dampingConstant IS MX106-damping
                     staticFriction IS MX106-friction
                                         axis -0.000000 -1.000000 -0.000004
-                                        anchor 0.000000 0.000000 0.000000
+                                        anchor 0.000000 -0.000000 -0.000000
                                       }
                                       device [
                                         RotationalMotor {
@@ -331,7 +332,7 @@ PROTO nugus
                                         }
                                       ]
                                       endPoint Solid {
-                                        translation 0.000000 0.000000 0.000000
+                                        translation 0.000000 -0.000000 -0.000000
                                         rotation 1.000000 -0.000000 -0.000000 1.570800
                                         children [
                                           Shape {
@@ -371,7 +372,7 @@ PROTO nugus
                                             physics Physics {
                                               density -1
                                               mass 1e-8
-                                              centerOfMass [ -0.000000 0.000000 0.000005 ]
+                                              centerOfMass [ 0.000000 -0.000000 0.000005 ]
                                             }
                                           }
                                         
@@ -463,10 +464,10 @@ PROTO nugus
                                   ]
                                   name "left_ankle"
                                   boundingObject Transform {
-                                    translation -0.018050 0.027094 -0.001668
+                                    translation -0.017756 0.027094 -0.001668
                                     children [
                                       Box {
-                                         size 0.066276 0.094388 0.055300
+                                         size 0.065688 0.094388 0.055300
                                       }
                                     ]
                                   }
@@ -476,7 +477,7 @@ PROTO nugus
                                     centerOfMass [ -0.015733 0.021976 0.000513 ]
                                     inertiaMatrix [
                                       2.657620e-04 1.578470e-04 2.656770e-04
-                                      1.273040e-09 1.319680e-18 3.682900e-06
+                                      1.273040e-09 1.211680e-18 3.682900e-06
                                     ]
                                   }
                                 }
@@ -539,7 +540,7 @@ PROTO nugus
                   centerOfMass [ 0.015733 -0.000686 -0.021707 ]
                   inertiaMatrix [
                     3.142980e-04 3.758080e-04 1.277850e-04
-                    1.527500e-09 9.783650e-18 5.620380e-06
+                    1.527500e-09 9.813720e-18 5.620380e-06
                   ]
                 }
               }
@@ -710,6 +711,8 @@ PROTO nugus
                                   RotationalMotor {
                                     name "right_ankle_pitch"
                                     maxVelocity IS MX106-vel
+                                    minPosition -3.14159
+                                    maxPosition 3.14159
                                     maxTorque IS MX106-torque
                                   }
                                   PositionSensor {
