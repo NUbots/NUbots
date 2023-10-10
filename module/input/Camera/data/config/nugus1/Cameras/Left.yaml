@@ -24,7 +24,7 @@ lens:
   fov: 180 * pi / 180
 
 # Camera kinematics
-urdf_path: "/home/nubots/models/robot.urdf"
+urdf_path: "models/robot.urdf"
 
 is_left_camera: true
 
