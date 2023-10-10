@@ -10,6 +10,7 @@ import URDFLoader, { URDFRobot } from "urdf-loader";
 import { Vector3 } from "../../../shared/math/vector3";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
+import * as THREE from "three";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
@@ -27,7 +28,7 @@ type LocalisationViewProps = {
   network: LocalisationNetwork;
 };
 
-const nugusUrdfPath = "/robot-models/robot.urdf";
+const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
@@ -262,6 +263,20 @@ const Robot = ({ model }: { model: LocalisationRobotModel }) => {
     joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
     joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
     joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
+
+    const material = new THREE.MeshStandardMaterial({
+      color: "#666666",
+      roughness: 0.5,
+      metalness: 0.2
+    });
+
+    robotRef.current.traverse((child) => {
+      console.log(child);
+      if (child.type === 'URDFVisual' && child.children.length > 0) {
+          child.children[0].material = material;
+      }
+    });
+
   }, [position, rotation, motors]);
 
   return <object3D ref={robotRef} />;
