@@ -275,13 +275,13 @@ const Robot = ({ model }: { model: LocalisationRobotModel }) => {
   const material = new THREE.MeshStandardMaterial({
     color: "#666666",
     roughness: 0.5,
-    metalness: 0.2
+    metalness: 0.2,
   });
   if (robotRef.current) {
     robotRef.current.traverse((child) => {
-      if (child.type === 'URDFVisual' && child.children.length > 0) {
-          let mesh = child.children[0] as THREE.Mesh;
-          mesh.material = material;
+      if (child.type === "URDFVisual" && child.children.length > 0) {
+        const mesh = child.children[0] as THREE.Mesh;
+        mesh.material = material;
       }
     });
   }
