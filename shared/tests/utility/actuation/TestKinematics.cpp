@@ -105,7 +105,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         sensors.servo = std::vector<Sensors::Servo>(20);
 
         std::vector<std::pair<ServoID, double>> left_leg_joints =
-            utility::actuation::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::LEFT_LEG);
+            utility::actuation::kinematics::calculate_leg_joints(kinematics_model, ik_request, LimbID::LEFT_LEG);
         for (const auto& leg_joint : left_leg_joints) {
             ServoID servoID;
             double position;
@@ -116,7 +116,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         }
 
         std::vector<std::pair<ServoID, double>> right_leg_joints =
-            utility::actuation::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
+            utility::actuation::kinematics::calculate_leg_joints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
         for (const auto& leg_joint : right_leg_joints) {
             ServoID servoID;
             double position;

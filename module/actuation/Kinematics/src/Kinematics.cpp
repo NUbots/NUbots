@@ -26,7 +26,7 @@ namespace module::actuation {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using utility::actuation::kinematics::calculate_head_joints;
-    using utility::actuation::kinematics::calculateLegJoints;
+    using utility::actuation::kinematics::calculate_leg_joints;
     using utility::actuation::tinyrobotics::configuration_to_servos;
     using utility::actuation::tinyrobotics::servos_to_configuration;
     using utility::input::LimbID;
@@ -71,7 +71,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<LeftLeg>();
-                auto joints = calculateLegJoints<double>(kinematics_model, leg_ik.Htl, LimbID::LEFT_LEG);
+                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htl, LimbID::LEFT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -113,7 +113,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<RightLeg>();
-                auto joints = calculateLegJoints<double>(kinematics_model, leg_ik.Htr, LimbID::RIGHT_LEG);
+                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htr, LimbID::RIGHT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
