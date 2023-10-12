@@ -54,7 +54,7 @@ namespace module::motion {
     using message::actuation::KinematicsModel;
     using message::support::FieldDescription;
 
-    using utility::actuation::kinematics::calculateLegJoints;
+    using utility::actuation::kinematics::calculate_leg_joints;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
     using utility::nusight::graph;
@@ -216,8 +216,8 @@ namespace module::motion {
                 std::vector<std::pair<ServoID, float>> joints;
 
                 // IK
-                auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
-                auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
+                auto kickJoints    = calculate_leg_joints(kinematicsModel, kickFootGoal, kickFoot);
+                auto supportJoints = calculate_leg_joints(kinematicsModel, supportFootGoal, supportFoot);
 
                 // Combine left and right legs
                 joints.insert(joints.end(), kickJoints.begin(), kickJoints.end());

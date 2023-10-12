@@ -13,7 +13,6 @@
 #include "message/eye/DataPoint.hpp"
 #include "message/skill/Walk.hpp"
 
-#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -35,7 +34,6 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::Walk;
 
-    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
