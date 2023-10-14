@@ -2,21 +2,28 @@
 
 import math
 
+import numpy as np
 import tensorflow as tf
+
+from ..grid import possible_lines
 
 
 class LensModel(tf.keras.Model):
     def __init__(
         self,
+        camera_name,
         focal_length,
         centre,
         k,
+        grid_size,
         dtype=tf.float64,
         distortion_reg=1e-4,
         inverse_regularisation=10,
         inverse_parameters=9,
     ):
         super(LensModel, self).__init__(dtype=dtype)
+
+        self.camera_name = camera_name
 
         self.focal_length = self.add_weight("focal_length", shape=(), initializer="ones", dtype=self.dtype)
         self.centre = self.add_weight("centre", shape=(2), initializer="zeros", dtype=self.dtype)
@@ -25,6 +32,7 @@ class LensModel(tf.keras.Model):
         self.focal_length.assign(focal_length)
         self.centre.assign(centre)
         self.k.assign(k)
+        self.grid_size = grid_size
 
         # Often the optimisation will attempt to introduce extreme distortion on the edges that doesn't help
         self.add_loss(lambda: distortion_reg * tf.reduce_sum(tf.square(self.k)))
@@ -82,32 +90,73 @@ class LensModel(tf.keras.Model):
         r_p = self.distortion(r_u, self.inverse_coeffs()[:n_params])
         return tf.reduce_mean(tf.math.squared_difference(r_d, r_p))
 
-    def call(self, screen, training=False):
-        # We use pi/2 a lot
-        pi_2 = tf.cast(math.pi * 0.5, self.dtype)
+    def build(self, input_shape):
+        # Get all the line combinations and store them for future use
+        gradients = possible_lines(input_shape[1], input_shape[2])
 
-        # Unproject the pixel coordinates back into unit vector rays
-        offset = tf.add(screen, self.centre)
+        # Keep keys sorted to keep the ordering consistent
+        keys = list(sorted(gradients.keys()))
+
+        # For each of the lines, pad out the indices needed to have a consistent shape
+        # We also make sure the first and last index are preserved as first and last
+        # This will let us grab the end points of the line so we can work out the total angle subtended
+        self.p_idx = []
+        max_points = max([max([len(line) for line in lines]) for lines in gradients.values()])
+        sum_points = input_shape[1] * input_shape[2]
+        for k in keys:
+            for line in gradients[k]:
+                self.p_idx.append([*line[:-1], *[sum_points for i in range(max_points - len(line))], line[-1]])
+        self.p_idx = tf.stack(self.p_idx, axis=0)
+        self.p_count = tf.math.count_nonzero(self.p_idx < sum_points, axis=-1)
+        self.p_batch = sum([sum([len(line) for line in lines]) for lines in gradients.values()])
+        self.p_valid = tf.squeeze(tf.where(self.p_count > 2), -1)
+
+        # Do the same thing for each of the parallel lines
+        self.l_idx = []
+        max_lines = max([len(gradients[k]) for k in keys])
+        start_lines = tf.cumsum([len(gradients[k]) for k in keys], exclusive=True)
+        sum_lines = sum([len(gradients[k]) for k in keys])
+        for k, s in zip(keys, start_lines):
+            parallel = [i for i in range(s, s + len(gradients[k]))]
+            self.l_idx.append([*parallel[:-1], *[sum_lines for i in range(max_lines - len(parallel))], parallel[-1]])
+        self.l_idx = tf.stack(self.l_idx, axis=0)
+        self.l_count = tf.math.count_nonzero(self.l_idx < sum_lines, axis=-1)
+        self.l_batch = sum_lines
+        self.l_valid = tf.squeeze(tf.where(self.l_count > 2), -1)
+
+        # Store the expected values for the orthogonality check
+        self.zero_angle_idx = keys.index((1, 0))
+        self.gradient_angles = [math.acos(abs(math.cos(math.atan2(k[1], k[0])))) for k in keys if k != (1, 0)]
+
+    def call(self, screen, training=False):
+
+        # Unproject the pixel coordinates back into unit vector rays using the camera model
+        offset = tf.math.subtract(screen, self.centre)
         r_d = tf.linalg.norm(offset, axis=-1, keepdims=True)
         r = self.distortion(r_d, self.k)
         theta = self.theta(r)
         rays = tf.concat([tf.math.cos(theta), tf.math.sin(theta) * offset / r_d], axis=-1)
 
-        # Vertical lines
-        v = rays  # m_v
+        # Flatten rays so that we can index it using gather
+        flat = tf.reshape(rays, [tf.shape(rays)[0], -1, 3])
 
-        # Horizontal lines
-        h_1 = tf.transpose(v[:, ::2, :, :], perm=[0, 2, 1, 3])  # m_h1
-        h_2 = tf.transpose(v[:, 1::2, :, :], perm=[0, 2, 1, 3])  # m_h2
+        # Process each of the individual lines and work out how well each one fits to a plane
+        # We pad the ends with 0s so we can do this as one giant SVD operation.
+        # The 0s should not influence the SVD results as they do not add/remove variance in any dimension
+        p_points = tf.reshape(
+            tf.gather(tf.pad(flat, [[0, 0], [0, 1], [0, 0]]), tf.reshape(self.p_idx, [-1]), axis=1),
+            [-1, *self.p_idx.shape, 3],
+        )
+        p_normals = tf.linalg.svd(p_points)[2][..., 2]
+        p_angles = tf.acos(tf.einsum("ijkl,ijl->ijk", p_points, p_normals))
+        p_totals = tf.acos(tf.einsum("ijk,ijk->ij", p_points[:, :, 0], p_points[:, :, -1]))
 
-        # Get the planes for each of the lines
-        vp = tf.linalg.normalize(tf.linalg.cross(v[:, :, 0, :], v[:, :, -1, :]), axis=-1)[0]  # n_kv
-        hp_1 = tf.linalg.normalize(tf.linalg.cross(h_1[:, :, 0, :], h_1[:, :, -1, :]), axis=-1)[0]  # n_kh1
-        hp_2 = tf.linalg.normalize(tf.linalg.cross(h_2[:, :, 0, :], h_2[:, :, -1, :]), axis=-1)[0]  # n_kh2
-
-        # Collinearity loss, make sure we take the mean angle
-        v_co = tf.reduce_mean(
-            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", v[:, :, 1:-1, :], vp)))), axis=[1, 2]
+        # Process each of the lines that have the same gradient
+        # These form parallel planes so the plane formed by the normals of these will point in the direction of the line
+        # We weight the results by the total subtended angle of the inputs
+        l_points = tf.reshape(
+            tf.gather(tf.pad(p_normals, [[0, 0], [0, 1], [0, 0]]), tf.reshape(self.l_idx, [-1]), axis=1),
+            [-1, *self.l_idx.shape, 3],
         )
         h1_co = tf.reduce_mean(
             tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_1[:, :, 1:-1, :], hp_1)))), axis=[1, 2]
@@ -117,45 +166,114 @@ class LensModel(tf.keras.Model):
         )
         collinearity_loss = tf.math.accumulate_n([v_co, h1_co, h2_co]) / 3.0
 
-        # Get the planes formed by each of the plane normals (parallel plane normals)
-        vpp = tf.linalg.normalize(tf.linalg.cross(vp[:, 0, :], vp[:, -1, :]), axis=-1)[0]
-        hpp = tf.linalg.normalize(tf.linalg.cross(hp_1[:, 0, :], hp_2[:, -1, :]), axis=-1)[0]
+        # We can then take each of these parallel line normals and they should form the plane created by the board
+        # We can check how flat this board is to ensure that the calibration isn't trying to sneak 3d distortions in
+        # to hide the errors
+        x_points = l_normals
+        x_normals = tf.linalg.svd(x_points)[2][..., 2]
+        x_angles = tf.acos(tf.einsum("ijk,ik->ij", x_points, x_normals))
 
-        # Parallelity loss
-        parallelity_loss = tf.reduce_mean(
-            tf.square(
-                tf.subtract(
-                    pi_2,
-                    tf.acos(
-                        tf.concat(
-                            [
-                                tf.einsum("abc,ac->ab", vp[:, 1:-1, :], vpp),
-                                tf.einsum("abc,ac->ab", hp_1[:, 1:, :], hpp),
-                                tf.einsum("abc,ac->ab", hp_2[:, :-1, :], hpp),
-                            ],
-                            axis=-1,
-                        )
-                    ),
+        # Now that we have all the vectors from the planes, we can also check their relative angle to eachother
+        # Given that we know the angles between the vectors on the physical board, we can check them against the angles
+        # that we see here
+        o_angles = tf.acos(
+            tf.abs(
+                tf.einsum(
+                    "ijk,ik->ij",
+                    tf.concat([x_points[:, : self.zero_angle_idx], x_points[:, self.zero_angle_idx + 1 :]], axis=1),
+                    x_points[:, self.zero_angle_idx],
                 )
-            ),
-            axis=1,
+            )
         )
 
+        # Collinearity loss
+        p_angles = tf.gather(p_angles, self.p_valid, axis=1)
+        p_totals = tf.gather(p_totals, self.p_valid, axis=1)
+        p_count = tf.cast(tf.gather(self.p_count, self.p_valid), p_angles.dtype)
+
+        p_angles = tf.reduce_sum(tf.square(math.pi * 0.5 - p_angles), axis=-1)
+        p_weights = tf.square(p_totals)
+        p_weights = p_weights / tf.reduce_sum(p_weights) * tf.cast(tf.size(p_weights), p_weights.dtype)
+        p_loss = tf.reduce_sum(p_angles * p_weights, axis=-1) / self.p_batch
+
+        # Parallelity
+        l_angles = tf.gather(l_angles, self.l_valid, axis=1)
+        l_totals = tf.gather(l_totals, self.l_valid, axis=1)
+        l_count = tf.cast(tf.gather(self.l_count, self.l_valid), p_angles.dtype)
+
+        l_angles = tf.reduce_sum(tf.square(math.pi * 0.5 - l_angles), axis=-1)
+        l_weights = tf.square(l_totals)
+        l_weights = l_weights / tf.reduce_sum(l_weights) * tf.cast(tf.size(l_weights), l_weights.dtype)
+        l_loss = tf.reduce_sum(l_angles * l_weights, axis=-1) / self.l_batch
+
+        # Coplanarity loss
+        x_angles = tf.square(math.pi * 0.5 - x_angles)
+        x_weights = tf.reduce_mean(l_totals, axis=-1) * tf.reduce_mean(p_weights, axis=-1)
+        x_weights = x_weights / tf.reduce_sum(x_weights) * tf.cast(tf.size(x_weights), x_weights.dtype)
+        x_loss = tf.reduce_mean(x_angles * tf.expand_dims(x_weights, 1), axis=-1)
+
         # Orthogonality loss
-        orthogonality_loss = tf.square(tf.subtract(pi_2, tf.acos(tf.abs(tf.einsum("ab,ab->a", vpp, hpp)))))
+        o_angles = tf.square(self.gradient_angles - o_angles)
+        o_weights = x_weights
+        o_loss = tf.reduce_mean(o_angles * tf.expand_dims(o_weights, 1), axis=-1)
 
         # Strip out the worst of values to help with outliers
-        n_elements = tf.size(collinearity_loss) * 8 // 10
-        collinearity_loss = -tf.math.top_k(-collinearity_loss, k=n_elements, sorted=False)[0]
-        parallelity_loss = -tf.math.top_k(-parallelity_loss, k=n_elements, sorted=False)[0]
-        orthogonality_loss = -tf.math.top_k(-orthogonality_loss, k=n_elements, sorted=False)[0]
+        # However when stripping out values we need to make sure we are removing by relative not absolute error
+        # Otherwise the larger images (which will be more sensitive to error) will be removed even if they are good
+        n_elements = tf.size(p_loss) * 8 // 10
+        p_loss = tf.gather(
+            p_loss,
+            tf.math.top_k(
+                -tf.reduce_sum(tf.square(p_angles / (p_totals * p_count)), axis=-1), k=n_elements, sorted=False
+            )[1],
+        )
+        l_loss = tf.gather(
+            l_loss,
+            tf.math.top_k(
+                -tf.reduce_sum(tf.square(l_angles / (l_totals * l_count)), axis=-1), k=n_elements, sorted=False
+            )[1],
+        )
+        # For these other losses, they are already going to be better handled by big images
+        # so the noisiest of values will be the smallest
+        x_loss = -tf.math.top_k(-x_loss, k=n_elements, sorted=False)[0]
+        o_loss = -tf.math.top_k(-o_loss, k=n_elements, sorted=False)[0]
 
         # Add these losses to the model
-        self.add_loss(tf.reduce_mean(collinearity_loss))
-        self.add_loss(tf.reduce_mean(parallelity_loss))
-        self.add_loss(tf.reduce_mean(orthogonality_loss))
-        self.add_metric(name="collinearity", value=collinearity_loss, aggregation="mean")
-        self.add_metric(name="parallelity", value=parallelity_loss, aggregation="mean")
-        self.add_metric(name="orthogonality", value=orthogonality_loss, aggregation="mean")
+        # We don't use x loss as a loss, just a metric as it's way too easy to break
+        self.add_loss(tf.reduce_mean(p_loss))
+        self.add_loss(tf.reduce_mean(l_loss))
+        self.add_loss(tf.reduce_mean(o_loss))
+        self.add_metric(name="{}/collinearity".format(self.camera_name), value=p_loss, aggregation="mean")
+        self.add_metric(name="{}/parallelity".format(self.camera_name), value=l_loss, aggregation="mean")
+        self.add_metric(name="{}/coplanarity".format(self.camera_name), value=x_loss, aggregation="mean")
+        self.add_metric(name="{}/orthogonality".format(self.camera_name), value=o_loss, aggregation="mean")
+
+        # Project the rays onto the orthogonal normal we obtained while doing the optimisation
+        rays = rays / tf.expand_dims(tf.einsum("ijkl,il->ijk", rays, x_normals), -1)
+
+        # Calculate the distance between the points of the rows and columns
+        d1 = tf.norm(rays[:, :, :-1] - rays[:, :, 1:], axis=-1)
+        d2 = tf.norm(rays[:, :-1, :] - rays[:, 1:, :], axis=-1)
+
+        # Calculate what the scale should be for these points to make them be the correct value
+        n_samples = tf.cast(d1.shape[1] * d1.shape[2] + d2.shape[1] * d2.shape[2], d1.dtype)
+        scale = (
+            tf.reduce_sum((self.grid_size * 2.0) / d1, axis=[1, 2], keepdims=True)
+            + tf.reduce_sum((math.sqrt(2.0) * self.grid_size) / d2, axis=[1, 2], keepdims=True)
+        ) / n_samples
+
+        # Rescale the rays to be the correct distance
+        rays = rays * tf.expand_dims(scale, -1)
+
+        # Calculate the variance for the grid distances
+        d1 = tf.norm(rays[:, :, :-1] - rays[:, :, 1:], axis=-1) / 2.0
+        d2 = tf.norm(rays[:, :-1, :] - rays[:, 1:, :], axis=-1) / math.sqrt(2.0)
+
+        # Calculate the variance of these measurements
+        v_a = (
+            tf.reduce_sum(tf.square(d1 - self.grid_size), axis=[1, 2])
+            + tf.reduce_sum(tf.square(d2 - self.grid_size), axis=[1, 2])
+        ) / n_samples
+        self.add_metric(name="{}/grid_error".format(self.camera_name), value=v_a, aggregation="mean")
 
         return rays
