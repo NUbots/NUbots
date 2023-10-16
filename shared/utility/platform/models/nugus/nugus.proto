@@ -2,7 +2,7 @@
 #license : Apache License 2.0
 #license url : http:  // www.apache.org/licenses/LICENSE-2.0
 #This is a proto file for Webots for the nugus
-#Extracted from :/home/tom/NUbots/NUWebots/protos/robot/nugus/robot.urdf
+#Extracted from :/home/tom/NUbots/NUbots/shared/utility/platform/models/nugus/robot.urdf
 
 
 EXTERNPROTO "JerseyBack.proto" EXTERNPROTO "JerseyFront.proto" PROTO nugus

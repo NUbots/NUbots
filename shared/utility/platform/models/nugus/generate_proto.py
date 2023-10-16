@@ -1,28 +1,29 @@
-import numpy as np
-from scipy.spatial import ConvexHull
 import os
-import xml.etree.ElementTree as ET
-import pymeshlab
 import re
 import sys
+import xml.etree.ElementTree as ET
+
+import numpy as np
+import pymeshlab
+from scipy.spatial import ConvexHull
 from urdf2webots.importer import convertUrdfFile
 
 # Parse URDF file
-tree = ET.parse('robot.urdf')
+tree = ET.parse("robot.urdf")
 root = tree.getroot()
 
 # Get all mesh filenames from URDF
 mesh_files = []
 collision_elements = []
 for mesh in root.findall(".//mesh"):
-    filename = mesh.attrib['filename']
+    filename = mesh.attrib["filename"]
 
     # Remove 'package:///' prefix
-    clean_filename = filename.replace('package:///', '')
-    mesh.set('filename', clean_filename)
+    clean_filename = filename.replace("package:///", "")
+    mesh.set("filename", clean_filename)
 
     mesh_files.append(clean_filename)
-    if clean_filename.endswith('_collision.stl'):
+    if clean_filename.endswith("_collision.stl"):
         collision_elements.append(mesh)
 
 # Simplify each STL file referenced in URDF
@@ -36,8 +37,7 @@ for file in mesh_files:
     ms.save_current_mesh(file)
 
 # Find all collision STL files
-collision_files = [
-    file for file in mesh_files if file.endswith('_collision.stl')]
+collision_files = [file for file in mesh_files if file.endswith("_collision.stl")]
 
 # Process collision elements
 for collision in root.findall(".//collision"):
@@ -47,7 +47,7 @@ for collision in root.findall(".//collision"):
     geometry_element = collision.find(".//geometry")
 
     if mesh_element is not None:
-        filename = mesh_element.attrib['filename'].replace('package:///', '')
+        filename = mesh_element.attrib["filename"].replace("package:///", "")
 
         # Load mesh
         ms = pymeshlab.MeshSet()
@@ -75,13 +75,13 @@ for collision in root.findall(".//collision"):
         center_z = (min_z + max_z) / 2
 
         # Create or update the origin element
-        origin_element = collision.find('./origin')
+        origin_element = collision.find("./origin")
         if origin_element is None:
-            origin_element = ET.SubElement(collision, 'origin')
-        origin_element.attrib['xyz'] = f'{center_x} {center_y} {center_z}'
+            origin_element = ET.SubElement(collision, "origin")
+        origin_element.attrib["xyz"] = f"{center_x} {center_y} {center_z}"
 
         # Create box element
-        box_element = ET.Element('box', size=f'{x_size} {y_size} {z_size}')
+        box_element = ET.Element("box", size=f"{x_size} {y_size} {z_size}")
 
         # Find the parent geometry element
         if geometry_element is not None:
@@ -92,21 +92,21 @@ for collision in root.findall(".//collision"):
             geometry_element.append(box_element)
 
 # Save modified URDF
-tree.write('robot.urdf')
+tree.write("robot.urdf")
 
 # Delete all STL files not in URDF
-for file in os.listdir('.'):
-    if file.endswith('.stl') and file not in mesh_files:
+for file in os.listdir("."):
+    if file.endswith(".stl") and file not in mesh_files:
         os.remove(file)
 
 # Delete all STL files used for collision
-for file in os.listdir('.'):
-    if file.endswith('_collision.stl'):
+for file in os.listdir("."):
+    if file.endswith("_collision.stl"):
         os.remove(file)
 
 # Delete all .part files
-for file in os.listdir('.'):
-    if file.endswith('.part'):
+for file in os.listdir("."):
+    if file.endswith(".part"):
         os.remove(file)
 
 
@@ -114,15 +114,15 @@ urdf_file_path = "robot.urdf"
 proto_file_path = "nugus.proto"
 
 # Convert URDF to PROTO using urdf2webots library
-convertUrdfFile(input=urdf_file_path, output=proto_file_path,
-                boxCollision=False, normal=False)
+convertUrdfFile(input=urdf_file_path, output=proto_file_path, boxCollision=False, normal=False)
 
 # Read the existing proto file
-with open(proto_file_path, 'r') as file:
+with open(proto_file_path, "r") as file:
     filedata = file.read()
 
 # Replace constants block
-filedata = filedata.replace('''PROTO nugus [
+filedata = filedata.replace(
+    """PROTO nugus [
   field  SFVec3f     translation     0 0 0
   field  SFRotation  rotation        0 0 1 0
   field  SFString    name            "nugus"  # Is `Robot.name`.
@@ -132,7 +132,8 @@ filedata = filedata.replace('''PROTO nugus [
   field  SFBool      supervisor      FALSE    # Is `Robot.supervisor`.
   field  SFBool      synchronization TRUE     # Is `Robot.synchronization`.
   field  SFBool      selfCollision   FALSE    # Is `Robot.selfCollision`.
-]''', '''
+]""",
+    """
 EXTERNPROTO "JerseyBack.proto"
 EXTERNPROTO "JerseyFront.proto"
 PROTO nugus 
@@ -172,24 +173,31 @@ PROTO nugus
     field MFColor      recognitionColors      [0 0 1]
     # Used in the vision data collection tool
     field SFFloat      height                 0.51
-  ]''')
+  ]""",
+)
 
 # Add recognition colors
-filedata = filedata.replace('selfCollision IS selfCollision', '''selfCollision IS selfCollision
-    recognitionColors IS recognitionColors''')
+filedata = filedata.replace(
+    "selfCollision IS selfCollision",
+    """selfCollision IS selfCollision
+    recognitionColors IS recognitionColors""",
+)
 
 # Replace all servo parameters with constants and change to HingeJointWithBacklash
 # TODO: Replace the joints with the correct constants (currently using MX106 only)
 filedata = filedata.replace("maxVelocity 20.0", "maxVelocity IS MX106-vel")
 filedata = filedata.replace("maxTorque 1.0", "maxTorque IS MX106-torque")
 filedata = filedata.replace(
-    "HingeJointParameters {", "HingeJointParameters {\n                    dampingConstant IS MX106-damping\n                    staticFriction IS MX106-friction")
-filedata = filedata.replace(
-    "PositionSensor {", "PositionSensor {\n                 resolution IS DYNAMIXEL-RESOLUTION")
+    "HingeJointParameters {",
+    "HingeJointParameters {\n                    dampingConstant IS MX106-damping\n                    staticFriction IS MX106-friction",
+)
+filedata = filedata.replace("PositionSensor {", "PositionSensor {\n                 resolution IS DYNAMIXEL-RESOLUTION")
 
 # Add gyro and accelerometer to torso
-filedata = filedata.replace('''recognitionColors IS recognitionColors
-    children [''', '''recognitionColors IS recognitionColors
+filedata = filedata.replace(
+    """recognitionColors IS recognitionColors
+    children [""",
+    """recognitionColors IS recognitionColors
     children [
                             %{
                               if fields.name.value ~= '' then
@@ -266,12 +274,14 @@ filedata = filedata.replace('''recognitionColors IS recognitionColors
                                 }
                                 ]
                             }
-                        ''')
+                        """,
+)
 
 # Add cameras to head
 filedata = filedata.replace(
     ''']
-                    name "right_camera"''', '''
+                    name "right_camera"''',
+    '''
                       DEF right_camera Camera {
                         name "right_camera"
                         translation 0.0 0.0 0.0
@@ -288,10 +298,12 @@ filedata = filedata.replace(
                         recognition USE recognition
                       }
                     ]
-                    name "right_camera"''')
+                    name "right_camera"''',
+)
 filedata = filedata.replace(
     ''']
-                    name "left_camera"''', '''
+                    name "left_camera"''',
+    '''
                       DEF left_camera Camera {
                         name "left_camera"
                         translation 0.0 0.0 0.0
@@ -311,10 +323,12 @@ filedata = filedata.replace(
                         }
                       }
                     ]
-                    name "left_camera"''')
+                    name "left_camera"''',
+)
 
 # Remove camera frames (causing physics issues in webots)
-filedata = filedata.replace('''name "left_camera"
+filedata = filedata.replace(
+    """name "left_camera"
                     boundingObject Pose {
                       translation 0.000000 0.000000 0.000005
                       children [
@@ -327,9 +341,12 @@ filedata = filedata.replace('''name "left_camera"
                       density -1
                       mass 0.000000
                       centerOfMass [ -0.000000 0.000000 0.000005 ]
-                    }''', '')
+                    }""",
+    "",
+)
 
-filedata = filedata.replace('''name "right_camera"
+filedata = filedata.replace(
+    """name "right_camera"
                     boundingObject Pose {
                       translation 0.000000 0.000000 0.000005
                       children [
@@ -342,11 +359,15 @@ filedata = filedata.replace('''name "right_camera"
                       density -1
                       mass 0.000000
                       centerOfMass [ -0.000000 0.000000 0.000005 ]
-                    }''', '')
+                    }""",
+    "",
+)
 
 # Add touch sensors to feet
-filedata = filedata.replace(''']
-                                        name "right_foot"''',  '''
+filedata = filedata.replace(
+    ''']
+                                        name "right_foot"''',
+    '''
                                           # Define four touch sensors for the right foot
                                           # Back right touch sensor on right foot
                                           TouchSensor {
@@ -384,10 +405,13 @@ filedata = filedata.replace(''']
                                             type "bumper"
                                           }
                                         ]
-                                        name "right_foot [foot]"''')
+                                        name "right_foot [foot]"''',
+)
 
-filedata = filedata.replace(''']
-                                        name "left_foot"''',  '''
+filedata = filedata.replace(
+    ''']
+                                        name "left_foot"''',
+    '''
                                           # Define four touch sensors for the left foot
                                           # Back right touch sensor on left foot
                                           TouchSensor {
@@ -453,16 +477,13 @@ filedata = filedata.replace(''']
                                             type "bumper"
                                           }
                                         ]
-                                        name "left_foot [foot]"''')
+                                        name "left_foot [foot]"''',
+)
 # Rename limbs
-filedata = filedata.replace(
-    '''name "right_shoulder_pitch"''', '''name "right_shoulder_pitch [shoulder]"''')
-filedata = filedata.replace(
-    '''name "left_shoulder_pitch"''', '''name "left_shoulder_pitch [shoulder]"''')
-filedata = filedata.replace(
-    '''name "right_hip_roll"''', '''name "right_hip_roll [hip]"''')
-filedata = filedata.replace(
-    '''name "left_hip_roll"''', '''name "left_hip_roll [hip]"''')
+filedata = filedata.replace('''name "right_shoulder_pitch"''', '''name "right_shoulder_pitch [shoulder]"''')
+filedata = filedata.replace('''name "left_shoulder_pitch"''', '''name "left_shoulder_pitch [shoulder]"''')
+filedata = filedata.replace('''name "right_hip_roll"''', '''name "right_hip_roll [hip]"''')
+filedata = filedata.replace('''name "left_hip_roll"''', '''name "left_hip_roll [hip]"''')
 
 # Fix naming issue of bounding object caused by urdf2webots tool
 filedata = filedata.replace("boundingObject Pose", "boundingObject Transform")
@@ -472,11 +493,10 @@ filedata = filedata.replace("mass 0.000000", "mass 1e-8")
 filedata = filedata.replace("mass -1", "mass 1e-8")
 
 # Update colours
-filedata = filedata.replace(
-    "baseColor 0.286275 0.286275 0.286275", "baseColor 0.125 0.125 0.125")
+filedata = filedata.replace("baseColor 0.286275 0.286275 0.286275", "baseColor 0.125 0.125 0.125")
 
 # Write the update proto file
-with open(proto_file_path, 'w') as file:
+with open(proto_file_path, "w") as file:
     file.write(filedata)
 
 print("Proto file updated")
