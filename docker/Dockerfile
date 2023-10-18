@@ -319,6 +319,7 @@ ENV ARDUINO_DIRECTORIES_USER=/usr/share/arduino
 COPY --chown=root:root /usr/share/arduino/arduino-cli.yaml /usr/share/arduino/arduino-cli.yaml
 RUN curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh -s 0.34.2
 RUN arduino-cli core install STMicroelectronics:stm32@2.6.0
+RUN arduino-cli lib install MPU6050@1.0.0
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
@@ -335,10 +336,7 @@ RUN pip install \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
-RUN install-package \
-    arm-none-eabi-gcc \
-    arm-none-eabi-newlib \
-    doxygen
+RUN install-package doxygen
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
