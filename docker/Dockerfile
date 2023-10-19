@@ -313,6 +313,8 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+RUN install-package lame
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
