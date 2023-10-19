@@ -12,6 +12,7 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
+            std::string voice = "en_US/vctk_low";
         } cfg;
 
     public:

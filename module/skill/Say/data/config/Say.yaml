@@ -1,2 +1,4 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
+
+voice: "en_US/vctk_low"

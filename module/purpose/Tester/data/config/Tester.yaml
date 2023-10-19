@@ -21,7 +21,6 @@ tasks:
   chatgpt_priority: 0
   audiogpt_priority: 0
 
-
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
 walk_to_field_position_position: [0, 0, 0]
 
@@ -30,4 +29,4 @@ say_text: "Hello!"
 
 # What to prompt openai chatgpt with
 chatgpt_prompt: "Hello!"
-audiogpt_listen_duration: 10
+audiogpt_listen_duration: 5
