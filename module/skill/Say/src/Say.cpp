@@ -29,8 +29,17 @@ namespace module::skill {
             // Only say text if it is a new task
             if (info.run_reason == RunInfo::NEW_TASK) {
                 // Play the requested audio using python command-line tool mimic3 and aplay
-                log<NUClear::DEBUG>("Saying: {}", say.text);
-                system(std::string("mimic3 '" + say.text + "' | aplay").c_str());
+                // Sanitize the text to remove special characters which could break the command
+                std::string sanitized_text         = say.text;
+                const std::string chars_to_replace = "'\"`|;&$\\";
+                for (char c : chars_to_replace) {
+                    std::replace(sanitized_text.begin(),
+                                 sanitized_text.end(),
+                                 c,
+                                 ' ');  // Replacing each dangerous char with space
+                }
+                log<NUClear::DEBUG>("Saying: ", sanitized_text);
+                system(std::string("mimic3 '" + sanitized_text + "' | aplay").c_str());
             }
 
             // Nod head to indicate that the robot is "talking"
