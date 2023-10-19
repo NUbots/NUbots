@@ -211,6 +211,23 @@ function(IndexArduinoBoards namespace)
           endif()
         endif()
 
+        # Some boards don't define a board-level build variant, but one of the enabled menu options might define a
+        # build variant. In this case the menu option build variant needs to be propagated to the board level build
+        # variant
+        if(ARDUINO.${_menu_identifier}.SEL_OPT STREQUAL "${_menu_opt_identifier}")
+          properties_get_value(
+            "ard_boards.${boards_idx}" "${_board_prefix}.menu.${_menu_prefix}.${_menu_opt_prefix}.build.variant"
+            _build_variant QUIET ""
+          )
+          if(_build_variant)
+            properties_set_value("ard_boards.${boards_idx}" "${_board_prefix}.build.variant" "${_build_variant}")
+            set("ard_boards.${boards_idx}.${_board_prefix}.build.variant"
+                "${_build_variant}"
+                PARENT_SCOPE
+            )
+          endif()
+        endif()
+
         # Set the visibility of this menu containing this option based on whether
         # the board is selected
         if("${is_selected_board}")
