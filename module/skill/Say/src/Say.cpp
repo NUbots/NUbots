@@ -29,6 +29,7 @@ namespace module::skill {
             // Only say text if it is a new task
             if (info.run_reason == RunInfo::NEW_TASK) {
                 // Play the requested audio using python command-line tool mimic3 and aplay
+                log<NUClear::DEBUG>("Saying: {}", say.text);
                 system(std::string("mimic3 '" + say.text + "' | aplay").c_str());
             }
 

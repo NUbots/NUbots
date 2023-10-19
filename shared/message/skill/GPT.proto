@@ -20,9 +20,18 @@ syntax = "proto3";
 
 package message.skill;
 
-message GPTRequest {
+message GPTChatRequest {
     /// Prompt for GPT
     string text = 1;
     /// Whether or not to speak the response
     bool speak_response = 2;
+}
+
+message GPTAudioRequest {
+    /// Whether or not to send the transcription to chat after
+    bool send_to_chat = 1;
+    /// Whether or not to speak the chat response
+    bool speak_response = 2;
+    /// Time to record audio for
+    int32 record_time = 4;
 }

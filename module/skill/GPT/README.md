@@ -10,7 +10,7 @@ Include this module to allow your system to interact with OpenAI's GPT for natur
 
 ## Consumes
 
-- `message::skill::GPTRequest`: A request containing text that needs to be processed by GPT.
+- `message::skill::GPTChatRequest`: A request containing text that needs to be processed by GPT.
 
 ## Emits
 
