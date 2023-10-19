@@ -23,9 +23,6 @@ package message.skill;
 message GPTRequest {
     /// Prompt for GPT
     string text = 1;
-}
-
-message GPTResponse {
-    /// Response from GPT
-    string text = 1;
+    /// Whether or not to speak the response
+    bool speak_response = 2;
 }
