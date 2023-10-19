@@ -24,7 +24,8 @@ namespace module::purpose {
 
     using message::planning::KickTo;
     using message::planning::LookAround;
-    using message::skill::GPTRequest;
+    using message::skill::GPTAudioRequest;
+    using message::skill::GPTChatRequest;
     using message::skill::Say;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
@@ -52,10 +53,12 @@ namespace module::purpose {
             cfg.look_around_priority            = config["tasks"]["look_around_priority"].as<int>();
             cfg.stand_still_priority            = config["tasks"]["stand_still_priority"].as<int>();
             cfg.say_priority                    = config["tasks"]["say_priority"].as<int>();
-            cfg.gpt_priority                    = config["tasks"]["gpt_priority"].as<int>();
+            cfg.chatgpt_priority                = config["tasks"]["chatgpt_priority"].as<int>();
+            cfg.audiogpt_priority               = config["tasks"]["audiogpt_priority"].as<int>();
+            cfg.audiogpt_listen_duration        = config["audiogpt_listen_duration"].as<int>();
             cfg.walk_to_field_position_position = config["walk_to_field_position_position"].as<Expression>();
             cfg.say_text                        = config["say_text"].as<std::string>();
-            cfg.gpt_prompt                      = config["gpt_prompt"].as<std::string>();
+            cfg.chatgpt_prompt                  = config["chatgpt_prompt"].as<std::string>();
         });
 
         on<Startup>().then([this] {
@@ -95,8 +98,12 @@ namespace module::purpose {
             if (cfg.say_priority > 0) {
                 emit<Task>(std::make_unique<Say>(cfg.say_text), cfg.say_priority);
             }
-            if (cfg.gpt_priority > 0) {
-                emit<Task>(std::make_unique<GPTRequest>(cfg.gpt_prompt, true), cfg.gpt_priority);
+            if (cfg.chatgpt_priority > 0) {
+                emit<Task>(std::make_unique<GPTChatRequest>(cfg.chatgpt_prompt, true), cfg.chatgpt_priority);
+            }
+            if (cfg.audiogpt_priority > 0) {
+                emit<Task>(std::make_unique<GPTAudioRequest>(true, true, cfg.audiogpt_listen_duration),
+                           cfg.audiogpt_priority);
             }
         });
     }
