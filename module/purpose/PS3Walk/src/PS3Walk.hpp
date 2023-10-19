@@ -70,22 +70,22 @@ namespace module::purpose {
             double maximum_rotational_velocity = 0;
         } cfg;
 
-        /// @brief
+        /// @brief Controls interactions with the PS3 controller
         Joystick joystick;
 
-        /// @brief
+        /// @brief Stores a vector describing the current direction to walk in. 
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
-        /// @brief
+        /// @brief Stores whether the robot can move or not
         bool moving = false;
 
-        /// @brief
+        /// @brief Stores whether the robot will change its head direction or not
         bool head_locked = false;
 
-        /// @brief
+        /// @brief stores the head pitch value
         double head_pitch = 0.0;
 
-        /// @brief
+        /// @brief stores the head yaw value
         double head_yaw = 0.0;
     };
 }  // namespace module::purpose

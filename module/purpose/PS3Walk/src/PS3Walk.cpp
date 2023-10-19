@@ -21,10 +21,12 @@
 
 #include <nuclear>
 
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Look.hpp"
 #include "message/skill/Walk.hpp"
@@ -41,6 +43,7 @@ namespace module::purpose {
     using extension::behaviour::Task;
     using message::actuation::LimbsSequence;
     using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
     using message::skill::Kick;
     using message::skill::Look;
     using message::skill::Walk;
@@ -68,8 +71,9 @@ namespace module::purpose {
         // Start the Director graph for the KeyboardWalk.
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without this emit, modules that need a Stability message may not run
+            // Without these emits, modules that need a Stability and walkstate messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
         });
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
