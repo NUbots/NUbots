@@ -32,12 +32,14 @@ namespace module::purpose {
             int stand_still_priority = 0;
             /// @brief Priority of Say task
             int say_priority = 0;
-
+            /// @brief Priority of ChatGPT task
+            int gpt_priority = 0;
             /// @brief Position to walk to when emitting WalkToFieldPosition task
             Eigen::Vector3f walk_to_field_position_position = Eigen::Vector3f::Zero();
-
             /// @brief Text to say when emitting Say task
             std::string say_text = "";
+            /// @brief Text to prompt ChatGPT with
+            std::string gpt_prompt = "";
         } cfg;
 
     public:
