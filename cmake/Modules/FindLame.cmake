@@ -1,9 +1,7 @@
-# - Try to find LAME
-# Once done this will define
+# * Try to find LAME Once done this will define
 #
-# LAME_FOUND - system has liblame
-# LAME_INCLUDE_DIRS - the liblame include directory
-# LAME_LIBRARIES - The liblame libraries
+# LAME_FOUND - system has liblame LAME_INCLUDE_DIRS - the liblame include directory LAME_LIBRARIES - The liblame
+# libraries
 
 find_path(LAME_INCLUDE_DIRS lame/lame.h)
 find_library(LAME_LIBRARIES mp3lame)
