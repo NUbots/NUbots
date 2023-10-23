@@ -5,14 +5,19 @@
 #include "message/skill/GPT.hpp"
 #include "message/skill/Say.hpp"
 
+#include "utility/input/microphone.hpp"
 #include "utility/openai/openai.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
+
     using message::skill::GPTAudioRequest;
     using message::skill::GPTChatRequest;
     using message::skill::Say;
+
+    using utility::input::raw_to_mp3;
+    using utility::input::record_audio;
 
     GPT::GPT(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
@@ -49,15 +54,13 @@ namespace module::skill {
         on<Provide<GPTAudioRequest>>().then([this](const GPTAudioRequest& gpt_request, const RunInfo& info) {
             if (info.run_reason == RunInfo::NEW_TASK) {
                 // Record audio for requested time
-                std::string cmd = "arecord -d " + std::to_string(gpt_request.record_time) + " -f cd -t wav audio.wav";
-
-                // Execute the command to record audio and convert it to MP3
                 log<NUClear::INFO>("Recording audio...");
-                system(cmd.c_str());
+                record_audio(std::string("audio.raw"), gpt_request.record_time);
                 log<NUClear::INFO>("Finished recording audio.");
+
                 // Convert audio to mp3
-                system("lame audio.wav audio.mp3");
-                log<NUClear::INFO>("Converted audio to mp3.");
+                raw_to_mp3("audio.raw", "audio.mp3");
+                log<NUClear::INFO>("Converted audio to mp3 format.");
 
                 // Send request to OpenAI API
                 auto audio = utility::openai::audio().transcribe(R"(
