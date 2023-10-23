@@ -60,18 +60,18 @@ namespace utility::input {
 
         buffer = (char*) malloc(frames * channels * 2);  // 2 bytes per sample for SND_PCM_FORMAT_S16_LE
 
-        std::ofstream outFile(filename, std::ios::binary);
+        std::ofstream out_file(filename, std::ios::binary);
 
         int num_periods_per_second = sample_rate / frames;
         int total_periods          = duration_seconds * num_periods_per_second;
 
         for (int i = 0; i < total_periods; ++i) {
             snd_pcm_readi(handle, buffer, frames);
-            outFile.write(buffer, frames * channels * 2);
+            out_file.write(buffer, frames * channels * 2);
         }
 
         // Cleanup
-        outFile.close();
+        out_file.close();
         free(buffer);
         snd_pcm_close(handle);
     }
@@ -96,33 +96,33 @@ namespace utility::input {
         lame_init_params(lame);
 
         std::vector<short> buffer(frames * channels);
-        std::vector<unsigned char> mp3Buffer(1.25 * frames * channels + 7200);
+        std::vector<unsigned char> mp3_buffer(1.25 * frames * channels + 7200);
 
-        std::ifstream inFile(input_file, std::ios::binary);
-        std::ofstream outFile(output_file, std::ios::binary);
+        std::ifstream in_file(input_file, std::ios::binary);
+        std::ofstream out_file(output_file, std::ios::binary);
 
-        while (!inFile.eof()) {
-            inFile.read((char*) buffer.data(), frames * channels * 2);
-            int bytesRead = inFile.gcount();
+        while (!in_file.eof()) {
+            in_file.read((char*) buffer.data(), frames * channels * 2);
+            int bytes_read = in_file.gcount();
 
-            if (bytesRead <= 0) {
+            if (bytes_read <= 0) {
                 NUClear::log<NUClear::ERROR>("Failed to read from input file");
                 break;
             }
 
-            int writeSize = lame_encode_buffer_interleaved(lame,
-                                                           buffer.data(),
-                                                           bytesRead / (2 * channels),
-                                                           mp3Buffer.data(),
-                                                           mp3Buffer.size());
-            outFile.write((const char*) mp3Buffer.data(), writeSize);
+            int write_size = lame_encode_buffer_interleaved(lame,
+                                                            buffer.data(),
+                                                            bytes_read / (2 * channels),
+                                                            mp3_buffer.data(),
+                                                            mp3_buffer.size());
+            out_file.write((const char*) mp3_buffer.data(), write_size);
         }
 
-        int flushSize = lame_encode_flush(lame, mp3Buffer.data(), mp3Buffer.size());
-        outFile.write((const char*) mp3Buffer.data(), flushSize);
+        int flush_size = lame_encode_flush(lame, mp3_buffer.data(), mp3_buffer.size());
+        out_file.write((const char*) mp3_buffer.data(), flush_size);
 
-        inFile.close();
-        outFile.close();
+        in_file.close();
+        out_file.close();
         lame_close(lame);
     }
 
