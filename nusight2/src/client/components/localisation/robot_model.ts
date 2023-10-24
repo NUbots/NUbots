@@ -121,7 +121,7 @@ export class LocalisationRobotModel {
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
-  @observable goals?: { rGWw: Vector3[] };
+  @observable goals: { rGWw: Vector3[] };
 
   constructor({
     model,
@@ -144,7 +144,7 @@ export class LocalisationRobotModel {
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
-    goals?: { rGWw: Vector3[] };
+    goals: { rGWw: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
@@ -167,6 +167,7 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
+      goals: { rGWw: [] },
     });
   });
 

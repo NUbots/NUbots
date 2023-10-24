@@ -52,11 +52,6 @@ export class LocalisationNetwork {
   @action.bound
   private onGoals(robotModel: RobotModel, goals: message.vision.Goals) {
       const robot = LocalisationRobotModel.of(robotModel);
-
-      // Get the inverse of the camera to world transform
-      const Hwc = Matrix4.from(goals.Hcw).invert();
-
-      // Transform and store each rGCc
       robot.goals.rGWw = goals.rGWw.map((rGWw) => Vector3.from(rGWw));
   }
 
