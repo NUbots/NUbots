@@ -46,22 +46,22 @@ message Goal {
     message Measurement {
         MeasurementType type = 1;
         /// Normal vectors point inwards towards the centre of the object
-        fvec3 srGCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
-        fmat3 covariance = 3;
+        vec3 rGCc = 2; // Goal from camera in camera space
+        mat3 covariance = 3;
     }
     message Post {
         /// Vector pointing to top point of post in camera space
-        fvec3 top = 1;
+        vec3 top = 1;
         /// Vector pointing to bottom point of post in camera space
-        fvec3 bottom = 2;
+        vec3 bottom = 2;
         /// Distance from camera to goals, in metres
-        float distance = 3;
+        double distance = 3;
     }
     Side                 side           = 1;
     Post                 post           = 3;
     repeated Measurement measurements   = 4;
-    fvec2                screen_angular = 5;
-    fvec2                angular_size   = 6;
+    vec2                screen_angular = 5;
+    vec2                angular_size   = 6;
 }
 
 message Goals {
@@ -71,4 +71,6 @@ message Goals {
     iso3 Hcw = 3;
 
     repeated Goal goals = 4;
+    /// Goal detections projected onto the ground plane
+    repeated vec3 rGWw = 6;
 }
