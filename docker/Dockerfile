@@ -373,7 +373,7 @@ RUN chmod 440 /etc/sudoers.d/user
 ARG user_uid=1000
 ARG user_gid=$user_uid
 RUN groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid $user_gid -m nubots
+    && useradd --uid $user_uid --gid $user_gid -G audio -m nubots
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user
