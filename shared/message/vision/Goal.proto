@@ -46,7 +46,7 @@ message Goal {
     message Measurement {
         MeasurementType type = 1;
         /// Normal vectors point inwards towards the centre of the object
-        vec3 rGCc = 2; // Goal from camera in camera space
+        vec3 rGCc       = 2;  // Goal from camera in camera space
         mat3 covariance = 3;
     }
     message Post {
@@ -60,8 +60,8 @@ message Goal {
     Side                 side           = 1;
     Post                 post           = 3;
     repeated Measurement measurements   = 4;
-    vec2                screen_angular = 5;
-    vec2                angular_size   = 6;
+    vec2                 screen_angular = 5;
+    vec2                 angular_size   = 6;
 }
 
 message Goals {
