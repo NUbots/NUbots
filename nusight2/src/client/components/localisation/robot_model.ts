@@ -121,6 +121,7 @@ export class LocalisationRobotModel {
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
+  @observable goals?: { rGWw: Vector3[] };
 
   constructor({
     model,
@@ -132,6 +133,7 @@ export class LocalisationRobotModel {
     motors,
     fieldLinePoints,
     ball,
+    goals,
   }: {
     model: RobotModel;
     name: string;
@@ -142,6 +144,7 @@ export class LocalisationRobotModel {
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
+    goals?: { rGWw: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
@@ -152,6 +155,7 @@ export class LocalisationRobotModel {
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
+    this.goals = goals;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -190,5 +194,11 @@ export class LocalisationRobotModel {
   @computed
   get rBFf(): Vector3 | undefined {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
+  }
+
+  /** Goal positions in field space */
+  @computed
+  get rGFf(): Vector3[] {
+    return this.goals.rGWw.map((rGWw) => rGWw.applyMatrix4(this.Hfw));
   }
 }
