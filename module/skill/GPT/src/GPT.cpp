@@ -26,6 +26,7 @@ namespace module::skill {
             this->log_level    = config["log_level"].as<NUClear::LogLevel>();
             cfg.openai_api_key = config["openai_api_key"].as<std::string>();
             cfg.device_name    = config["device_name"].as<std::string>();
+            cfg.pre_prompt     = config["pre_prompt"].as<std::string>();
         });
 
         on<Startup>().then([this] {
@@ -38,7 +39,9 @@ namespace module::skill {
                 // Send request to OpenAI API
                 nlohmann::json request = {
                     {"model", "gpt-3.5-turbo"},
-                    {"messages", nlohmann::json::array({{{"role", "user"}, {"content", gpt_request.text}}})},
+                    {"messages",
+                     nlohmann::json::array(
+                         {{{"role", "user"}, {"content", std::string(cfg.pre_prompt + gpt_request.text)}}})},
                     {"max_tokens", 100},
                     {"temperature", 0}};
                 auto chat = utility::openai::chat().create(request);

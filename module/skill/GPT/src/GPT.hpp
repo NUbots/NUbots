@@ -15,6 +15,8 @@ namespace module::skill {
             std::string openai_api_key = "";
             /// @brief Device name to record from
             std::string device_name = "default";
+            /// @brief Pre-prompt for GPT request
+            std::string pre_prompt = "";
         } cfg;
 
     public:
