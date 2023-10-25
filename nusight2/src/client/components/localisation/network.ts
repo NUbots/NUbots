@@ -51,8 +51,8 @@ export class LocalisationNetwork {
 
   @action.bound
   private onGoals(robotModel: RobotModel, goals: message.vision.Goals) {
-      const robot = LocalisationRobotModel.of(robotModel);
-      robot.goals.rGWw = goals.rGWw.map((rGWw) => Vector3.from(rGWw));
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.goals.rGWw = goals.rGWw.map((rGWw) => Vector3.from(rGWw));
   }
 
   @action
