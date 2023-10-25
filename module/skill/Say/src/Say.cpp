@@ -35,10 +35,8 @@ namespace module::skill {
                 std::string sanitized_text         = say.text;
                 const std::string chars_to_replace = "'\"`|;&$\\";
                 for (char c : chars_to_replace) {
-                    std::replace(sanitized_text.begin(),
-                                 sanitized_text.end(),
-                                 c,
-                                 ' ');  // Replacing each dangerous char with space
+                    std::replace(sanitized_text.begin(), sanitized_text.end(), c,
+                                 '');
                 }
                 log<NUClear::DEBUG>("Saying: ", sanitized_text);
                 system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
