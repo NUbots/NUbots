@@ -13,6 +13,8 @@ namespace module::skill {
         struct Config {
             /// @brief OpenAI API key
             std::string openai_api_key = "";
+            /// @brief Device name to record from
+            std::string device_name = "default";
         } cfg;
 
     public:

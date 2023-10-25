@@ -2,3 +2,5 @@
 log_level: DEBUG
 
 voice: "en_US/vctk_low#p363"
+
+device_name: "hw:0,0"

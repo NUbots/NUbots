@@ -12,7 +12,10 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Mimic3 voice to use
             std::string voice = "en_US/vctk_low";
+            /// @brief Device name to play audio to
+            std::string device_name = "default";
         } cfg;
 
     public:

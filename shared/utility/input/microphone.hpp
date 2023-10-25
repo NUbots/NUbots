@@ -31,7 +31,7 @@ namespace utility::input {
      * @param filename name of the file to save the audio to
      * @param duration_seconds duration of the audio recording in seconds
      */
-    void record_audio(const std::string& filename, int duration_seconds) {
+    void record_audio(const std::string& filename, int duration_seconds, const std::string& device_name = "default") {
         // ALSA parameters
         snd_pcm_t* handle;
         snd_pcm_hw_params_t* params;
@@ -42,7 +42,7 @@ namespace utility::input {
         int channels = 2;  // stereo
 
         // Open PCM device for recording (capture)
-        if (snd_pcm_open(&handle, "default", SND_PCM_STREAM_CAPTURE, 0) < 0) {
+        if (snd_pcm_open(&handle, device_name.c_str(), SND_PCM_STREAM_CAPTURE, 0) < 0) {
             throw std::runtime_error("Failed to open PCM device");
         }
 

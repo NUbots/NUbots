@@ -25,6 +25,7 @@ namespace module::skill {
             // Use configuration here from file GPT.yaml
             this->log_level    = config["log_level"].as<NUClear::LogLevel>();
             cfg.openai_api_key = config["openai_api_key"].as<std::string>();
+            cfg.device_name    = config["device_name"].as<std::string>();
         });
 
         on<Startup>().then([this] {
@@ -55,7 +56,7 @@ namespace module::skill {
             if (info.run_reason == RunInfo::NEW_TASK) {
                 // Record audio for requested time
                 log<NUClear::INFO>("Recording audio...");
-                record_audio(std::string("audio.raw"), gpt_request.record_time);
+                record_audio(std::string("audio.raw"), gpt_request.record_time, cfg.device_name);
                 log<NUClear::INFO>("Finished recording audio.");
 
                 // Convert audio to mp3

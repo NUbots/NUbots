@@ -24,6 +24,7 @@ namespace module::skill {
             // Use configuration here from file Say.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.voice       = config["voice"].as<std::string>();
+            cfg.device_name = config["device_name"].as<std::string>();
         });
 
         on<Provide<SayTask>>().then([this](const SayTask& say, const RunInfo& info) {
@@ -40,7 +41,9 @@ namespace module::skill {
                                  ' ');  // Replacing each dangerous char with space
                 }
                 log<NUClear::DEBUG>("Saying: ", sanitized_text);
-                system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay").c_str());
+                system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
+                                   + cfg.device_name)
+                           .c_str());
             }
 
             // Nod head to indicate that the robot is "talking"

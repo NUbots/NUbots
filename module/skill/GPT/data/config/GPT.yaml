@@ -3,3 +3,5 @@ log_level: INFO
 
 # The OpenAI API costs $$$ to use, so we need to use a key to access it. DO NOT COMMIT THIS
 openai_api_key: ""
+# Device name can be obtained by running arecord -l. The format is hw:<card_number>,<device_number>
+device_name: "hw:0,0"
