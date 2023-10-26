@@ -106,14 +106,14 @@ namespace module::purpose {
                 case KEY_UP: look_up(); break;
                 case KEY_DOWN: look_down(); break;
                 case 'q': quit(); return;
-                case '1': clap_open(); break;
-                case '2': clap_close(); break;
-                case '3': OH_thrust_r(); break;
-                case '4': OH_thrust_l(); break;
-                case '5': star_1(); break;
-                case '6': star_2(); break;
-                case '7': crouch_1(); break;
-                case '8': crouch_2(); break;
+                case '1': dab(); break;
+                case '2': clap(); break;
+                case '3': arm_dangle(); break;
+                case '4': crouch(); break;
+                case '5': raise_the_roof(); break;
+                case '6': star(); break;
+                case '7': the_robot(); break;
+                case '8': wave(); break;
                 default:
                     log<NUClear::ERROR>("Unknown Command");
                     print_status();
@@ -343,60 +343,60 @@ namespace module::purpose {
         std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
     }
 
-    void KeyboardWalk::clap_open() {
+    void KeyboardWalk::dab() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("StepClap1.yaml"), 3);
-        log<NUClear::INFO>("Clap Open Move");
+        emit<Task>(load_script<BodySequence>("Dab.yaml"), 3);
+        log<NUClear::INFO>("Dab Move");
     }
 
-    void KeyboardWalk::clap_close() {
+    void KeyboardWalk::clap() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("StepClap2.yaml"), 3);
-        log<NUClear::INFO>("Clap Close Move");
+        emit<Task>(load_script<BodySequence>("Clap.yaml"), 3);
+        log<NUClear::INFO>("Clap Move");
     }
 
-    void KeyboardWalk::OH_thrust_r() {
+    void KeyboardWalk::arm_dangle() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("OverheadThrustRight.yaml"), 3);
-        log<NUClear::INFO>("Overhead Thrust Right Move");
+        emit<Task>(load_script<BodySequence>("ArmDangle.yaml"), 3);
+        log<NUClear::INFO>("Arm Dangle Move");
     }
 
-    void KeyboardWalk::OH_thrust_l() {
+    void KeyboardWalk::crouch() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("OverheadThrustLeft.yaml"), 3);
-        log<NUClear::INFO>("Overhead Thrust Left Move");
+        emit<Task>(load_script<BodySequence>("Crouch.yaml"), 3);
+        log<NUClear::INFO>("Crouch Move");
     }
 
-    void KeyboardWalk::star_1() {
+    void KeyboardWalk::raise_the_roof() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("Star1.yaml"), 3);
-        log<NUClear::INFO>("Star 1 Move");
+        emit<Task>(load_script<BodySequence>("RaiseTheRoof.yaml"), 3);
+        log<NUClear::INFO>("Raise The Roof Move");
     }
 
-    void KeyboardWalk::star_2() {
+    void KeyboardWalk::star() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("Star2.yaml"), 3);
-        log<NUClear::INFO>("Star 2 Move");
+        emit<Task>(load_script<BodySequence>("Star.yaml"), 3);
+        log<NUClear::INFO>("Star Move");
     }
 
-    void KeyboardWalk::crouch_1() {
+    void KeyboardWalk::the_robot() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("Crouch1.yaml"), 3);
-        log<NUClear::INFO>("Crouch 1 Move");
+        emit<Task>(load_script<BodySequence>("TheRobot.yaml"), 3);
+        log<NUClear::INFO>("The Robot Move");
     }
 
-    void KeyboardWalk::crouch_2() {
+    void KeyboardWalk::wave() {
         reset();
         emit<Task>(std::unique_ptr<Walk>(nullptr));
-        emit<Task>(load_script<BodySequence>("Crouch2.yaml"), 3);
-        log<NUClear::INFO>("Crouch 2./b Move");
+        emit<Task>(load_script<BodySequence>("Wave.yaml"), 3);
+        log<NUClear::INFO>("Wave Move");
     }
     void KeyboardWalk::update_command() {
         // If walking is enabled, update the walk command

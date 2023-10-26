@@ -91,30 +91,30 @@ namespace module::purpose {
 
         /// @brief Quits the program
         void quit();
-        
+
         /// @brief Executes Clap Open move
-        void clap_open(); 
+        void dab();
 
         /// @brief Executes Clap Close move
-        void clap_close(); 
+        void clap();
 
         /// @brief Executes Overhead Thrust Right move
-        void OH_thrust_r(); 
+        void arm_dangle();
 
         /// @brief Executes Overhead Thrust Left move
-        void OH_thrust_l(); 
+        void crouch();
 
         /// @brief Executes Star 1 move
-        void star_1(); 
+        void raise_the_roof();
 
         /// @brief Executes Star 2 move
-        void star_2(); 
+        void star();
 
         /// @brief Executes Crouch 1 move
-        void crouch_1(); 
+        void the_robot();
 
         /// @brief Executes Crouch 2 move
-        void crouch_2(); 
+        void wave();
 
         /// @brief Emits task to kick with specified leg
         /// @param l Leg to kick with (LEFT or RIGHT)
