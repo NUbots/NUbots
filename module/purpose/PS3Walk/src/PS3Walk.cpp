@@ -130,44 +130,44 @@ namespace module::purpose {
                         case BUTTON_DPAD_UP:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance move Dpad up");
-                                emit<Task>(load_script<LimbsSequence>("StepClap1.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Clap.yaml"), 3);
 
                             }
                             break;
                         case BUTTON_DPAD_DOWN:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance Dpad down");
-                                emit<Task>(load_script<LimbsSequence>("StepClap2.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("TheRobot.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_LEFT:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance Dpad left");
-                                emit<Task>(load_script<LimbsSequence>("OverheadThrustRight.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("OverHeadThrust.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_RIGHT:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance Dpad right");
-                                emit<Task>(load_script<LimbsSequence>("OverheadThrustLeft.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("ArmDangle.yaml"), 3);
                             }
                             break;
                         case BUTTON_TRIANGLE:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance triangle");
-                                emit<Task>(load_script<LimbsSequence>("Star1.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Star.yaml"), 3);
                             }
                             break;
                         case BUTTON_CIRCLE:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance circle");
-                                emit<Task>(load_script<LimbsSequence>("Star2.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("RaiseTheRoof.yaml"), 3);
                             }
                             break;
                         case BUTTON_CROSS:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance cross");
-                                emit<Task>(load_script<LimbsSequence>("Crouch1.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Crouch.yaml"), 3);
                             }
                             break;
                         case BUTTON_SQUARE:
