@@ -143,7 +143,7 @@ namespace module::purpose {
                         case BUTTON_DPAD_LEFT:
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance Dpad left");
-                                emit<Task>(load_script<LimbsSequence>("OverHeadThrust.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Dab.yaml"), 3);
                             }
                             break;
                         case BUTTON_DPAD_RIGHT:
