@@ -187,10 +187,10 @@ namespace module::purpose {
                             break;
                         case BUTTON_SQUARE:
                             if (event.value > 0) {
-                                log<NUClear::INFO>("Do a dance square");
+                                log<NUClear::INFO>("Do a wave");
                                 emit<Task>(std::unique_ptr<Walk>(nullptr));
                                 emit<Task>(std::unique_ptr<Look>(nullptr));
-                                emit<Task>(load_script<LimbsSequence>("Crouch2.yaml"), 3);
+                                emit<Task>(load_script<LimbsSequence>("Wave.yaml"), 3);
                             }
                             break;
                         case BUTTON_L1:
