@@ -23,13 +23,14 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
@@ -42,7 +43,6 @@ using extension::Configuration;
 
 namespace module::input {
 
-    using message::actuation::KinematicsModel;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
@@ -55,6 +55,12 @@ namespace module::input {
     class SensorFilter : public NUClear::Reactor {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Number of actuatable joints in the NUgus robot
+        static const int n_joints = 20;
+
+        /// @brief tinyrobotics NUgus model used for kinematics
+        tinyrobotics::Model<double, n_joints> nugus_model;
 
         /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};
@@ -143,6 +149,9 @@ namespace module::input {
 
 
         struct Config {
+            /// @brief Path to NUgus URDF file
+            std::string urdf_path = "";
+
             /// @brief Config for the button debouncer
             struct Button {
                 Button() = default;
@@ -272,15 +281,17 @@ namespace module::input {
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
-        /// @param kinematics_model The kinematics model to use for calculations
-        void update_kinematics(std::unique_ptr<Sensors>& sensors,
-                               const KinematicsModel& kinematics_model,
-                               const RawSensors& raw_sensors);
+        /// @param raw_sensors The raw sensor data
+        void update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
         /// @param dt The time since the last update
         /// @param walk_state Current state of walk engine
         void integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state);
+
+        /// @brief Updates translational and yaw components of odometry using the anchor method
+        /// @param walk_state Current state of walk engine
+        void anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state);
 
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
@@ -320,7 +331,6 @@ namespace module::input {
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
                                     const RawSensors& raw_sensors,
-                                    const std::shared_ptr<const Stability>& stability,
                                     const std::shared_ptr<const WalkState>& walk_state);
 
         /// @brief Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes
@@ -336,20 +346,23 @@ namespace module::input {
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
+        /// @brief Transform from anchor {a} to world {w} space
+        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+
+        /// @brief Current support phase of the robot
+        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+
         /// @brief Dead reckoning yaw orientation of the robot in world space
         double yaw = 0;
 
-        /// @brief Transform of torso from world space
+        /// @brief Transform from torso {t} to world {w} space
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+
+        // @brief Transform from torso {t} to world {w} space using mahony filter (only roll and pitch estimation)
+        Eigen::Isometry3d Hwt_mahony = Eigen::Isometry3d::Identity();
 
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
-
-        /// @brief Bool to indicate if the robot is falling
-        bool falling = false;
-
-        /// @brief Bool to indicate if the robot is walking
-        bool walk_engine_enabled = false;
 
         /// @brief Current state of the left button
         bool left_down = false;

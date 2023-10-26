@@ -7,7 +7,7 @@ uniform vec2 imageSize;
 uniform float imageAspectRatio;
 
 // Current vertex and UV coord of the line segment geometry
-attribute vec3 position;
+attribute vec2 position;
 attribute vec2 uv;
 
 // Start/End ray of the current line segment, with the color of
@@ -22,7 +22,20 @@ varying vec4 vColorA;
 varying vec4 vColorB;
 varying vec2 vUv;
 
-#include "segment.glsl"
+vec2 getSegmentVertex(vec2 start, vec2 end, vec2 position, float width) {
+
+    // Current xy zoom level extracted from the scale part of the mv matrix
+    vec2 zoom = vec2(length(modelViewMatrix[0].xyz), length(modelViewMatrix[1].xyz));
+
+    // The GL direction and length of the current line segment.
+    vec2 xBasis = end - start;
+
+    // The orthogonal direction of the line segment to move in to create the width of the line.
+    vec2 yBasis = normalize(vec2(-xBasis.y / viewSize.x, xBasis.x / viewSize.y)) / viewSize;
+
+    // Position of the line segment vertex
+    return start + (xBasis * position.x) + (yBasis * 2.0 * width * position.y * (1.0 / zoom));
+}
 
 void main() {
 
@@ -33,7 +46,7 @@ void main() {
     vec2 lineStart = topLeft + (startPoint.xy / imageSize) * topLeft * -2.0;
     vec2 lineEnd   = topLeft + (endPoint.xy / imageSize) * topLeft * -2.0;
 
-    vec2 point = getSegmentVertex(lineStart, lineEnd, position.xy, width);
+    vec2 point = getSegmentVertex(lineStart, lineEnd, position, width);
 
     vColorA = startColor;
     vColorB = endColor;

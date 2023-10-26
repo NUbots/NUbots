@@ -31,6 +31,7 @@
 
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/behaviour/Action.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -41,6 +42,7 @@ namespace module::motion {
 
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
+    using FrameID = utility::input::FrameID;
     using ServoID = utility::input::ServoID;
     using message::behaviour::KickPlan;
     using message::behaviour::ServoCommands;
@@ -52,7 +54,7 @@ namespace module::motion {
     using message::actuation::KinematicsModel;
     using message::support::FieldDescription;
 
-    using utility::actuation::kinematics::calculateLegJoints;
+    using utility::actuation::kinematics::calculate_leg_joints;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
     using utility::nusight::graph;
@@ -117,8 +119,8 @@ namespace module::motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Eigen::Isometry3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                Eigen::Isometry3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                Eigen::Isometry3d leftFoot(sensors.Htx[FrameID::L_ANKLE_ROLL]);
+                Eigen::Isometry3d rightFoot(sensors.Htx[FrameID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -214,8 +216,8 @@ namespace module::motion {
                 std::vector<std::pair<ServoID, float>> joints;
 
                 // IK
-                auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
-                auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
+                auto kickJoints    = calculate_leg_joints(kinematicsModel, kickFootGoal, kickFoot);
+                auto supportJoints = calculate_leg_joints(kinematicsModel, supportFootGoal, supportFoot);
 
                 // Combine left and right legs
                 joints.insert(joints.end(), kickJoints.begin(), kickJoints.end());

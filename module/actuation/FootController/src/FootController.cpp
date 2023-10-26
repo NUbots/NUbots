@@ -7,10 +7,8 @@
 #include "message/input/Sensors.hpp"
 #include "message/skill/ControlFoot.hpp"
 
-#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-
 
 namespace module::actuation {
 
@@ -23,7 +21,6 @@ namespace module::actuation {
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
 
-    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::LimbID;
 
     FootController::FootController(std::unique_ptr<NUClear::Environment> environment)
