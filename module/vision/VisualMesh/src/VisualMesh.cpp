@@ -79,7 +79,8 @@ namespace module::vision {
                         auto result = runner(image, Hcw.cast<float>());
 
                         if (result.indices.empty()) {
-                            log<NUClear::WARN>("Hcw resulted in no mesh points being on-screen.");
+                            // The ground is not visible, hence the mesh cannot be drawn
+                            log<NUClear::TRACE>("Hcw resulted in no mesh points being on-screen.");
                         }
                         else {
                             // Move stuff into the emit message

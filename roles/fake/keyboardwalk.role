@@ -6,6 +6,8 @@ nuclear_role(
   # Config
   actuation::KinematicsConfiguration
   # Network
+  network::NUClearNet
+  network::NetworkForwarder
   network::PlotJuggler
   # Sensors
   input::SensorFilter

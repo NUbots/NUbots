@@ -289,6 +289,10 @@ namespace module::input {
         /// @param walk_state Current state of walk engine
         void integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state);
 
+        /// @brief Updates translational and yaw components of odometry using the anchor method
+        /// @param walk_state Current state of walk engine
+        void anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state);
+
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
 
@@ -327,7 +331,6 @@ namespace module::input {
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
                                     const RawSensors& raw_sensors,
-                                    const std::shared_ptr<const Stability>& stability,
                                     const std::shared_ptr<const WalkState>& walk_state);
 
         /// @brief Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes
@@ -343,20 +346,23 @@ namespace module::input {
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
+        /// @brief Transform from anchor {a} to world {w} space
+        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+
+        /// @brief Current support phase of the robot
+        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+
         /// @brief Dead reckoning yaw orientation of the robot in world space
         double yaw = 0;
 
-        /// @brief Transform of torso from world space
+        /// @brief Transform from torso {t} to world {w} space
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+
+        // @brief Transform from torso {t} to world {w} space using mahony filter (only roll and pitch estimation)
+        Eigen::Isometry3d Hwt_mahony = Eigen::Isometry3d::Identity();
 
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
-
-        /// @brief Bool to indicate if the robot is falling
-        bool falling = false;
-
-        /// @brief Bool to indicate if the robot is walking
-        bool walk_engine_enabled = false;
 
         /// @brief Current state of the left button
         bool left_down = false;
