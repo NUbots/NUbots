@@ -125,7 +125,7 @@ def _do_format(path, verbose, check=True):
 
         # Make a copy of the file to do the formatting on
         output_path = os.path.join(tmp_dir.name, os.path.basename(path))
-        shutil.copyfile(path, output_path)
+        shutil.copy(path, output_path)
 
         # Apply our arguments to the formatter command
         args = {"path": output_path, **_get_args(path)}
