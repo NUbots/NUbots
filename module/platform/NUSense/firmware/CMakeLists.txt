@@ -4,18 +4,28 @@
 
 cmake_minimum_required(VERSION 3.12.0)
 
-# Set flags for the arduino toolchain and use the toolchain
+# Select the correct microcontroller and variant
 set(ARDUINO_BOARD stm32.GenH7)
-set(ARDUINO_STM32_GENH7_MENU_PNUM_GENERIC_H753VITX True)
+set(ARDUINO_STM32_GENH7_MENU_PNUM_GENERIC_H753VITX ON)
+
+# Manage serial ports ourselves
+set(ARDUINO_STM32_GENH7_MENU_XSERIAL_NONE ON)
+
+# Enable USB in CDC mode in USB2.0 (HS) mode
+# Creates the `USBSerial` object
 set(ARDUINO_STM32_GENH7_MENU_USB_CDC ON)
 set(ARDUINO_STM32_GENH7_MENU_XUSB_HS ON)
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Arduino/Arduino-toolchain.cmake")
 
-# For some reason this toolchain expects a file in sketch/build.opt
+# Optimise with LTO with a full c library
+set(ARDUINO_STM32_GENH7_MENU_OPT_OSLTO ON)
+set(ARDUINO_STM32_GENH7_MENU_RTLIB_FULL ON)
+
+# For some reason the STM toolchain expects a file in sketch/build.opt
 make_directory(${CMAKE_CURRENT_BINARY_DIR}/sketch)
 file(TOUCH ${CMAKE_CURRENT_BINARY_DIR}/sketch/build.opt)
 
-# Initialise the arduino toolchain first thing
+# Initialise the Arduino toolchain
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Arduino/Arduino-toolchain.cmake")
 include(${CMAKE_TOOLCHAIN_FILE})
 
 # ######################################################################################################################
@@ -32,7 +42,18 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 add_compile_options(-fdiagnostics-color=always)
 
 # Glob all the source files
-file(GLOB src "*.cpp" "**/*.cpp" "*.hpp" "*/**.hpp")
+file(
+  GLOB
+  src
+  "src/*.cpp"
+  "src/**/*.cpp"
+  "src/*.hpp"
+  "src/*/**.hpp"
+  "/usr/share/arduino/packages/STMicroelectronics/hardware/stm32/2.6.0/system/Drivers/STM32H7xx_HAL_Driver/**/*.c"
+  "/usr/share/arduino/packages/STMicroelectronics/hardware/stm32/2.6.0/system/Drivers/CMSIS/Device/ST/STM32H7xx/**/*.c"
+)
+
+list(FILTER src EXCLUDE REGEX ".*template.c$")
 
 # run generate.py to generate the git version file
 find_package(PythonInterp 3 REQUIRED)
@@ -53,7 +74,7 @@ target_include_directories(nusense PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link in the arduino core library
 target_link_arduino_libraries(nusense PRIVATE core)
-target_link_arduino_libraries(nusense PRIVATE MPU6050)
+# target_link_arduino_libraries(nusense PRIVATE MPU6050)
 
 # Enable generation of the hex file
 target_enable_arduino_upload(nusense)
