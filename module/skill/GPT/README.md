@@ -14,7 +14,7 @@ Include this module to allow your system to interact with OpenAI's GPT for natur
 
 ## Emits
 
-- `message::skill::GPTResponse`: A response from GPT containing the generated text based on the input request.
+ `message::skill::Say`: A Task requesting to speak using the output of the GPT model based on the input request.
 
 ## Dependencies
 

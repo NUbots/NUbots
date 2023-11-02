@@ -14,7 +14,7 @@
 namespace module::skill {
 
     using extension::Configuration;
-    using message::actuation::LimbsSequence;
+    using message::actuation::HeadSequence;
     using utility::skill::load_script;
     using SayTask = message::skill::Say;
 
@@ -35,18 +35,18 @@ namespace module::skill {
                 std::string sanitized_text         = say.text;
                 const std::string chars_to_replace = "'\"`|;&$\\";
                 for (char c : chars_to_replace) {
-                    std::replace(sanitized_text.begin(), sanitized_text.end(), c,
-                                 '');
+                    sanitized_text.erase(std::remove(sanitized_text.begin(), sanitized_text.end(), c),
+                                         sanitized_text.end());
                 }
                 log<NUClear::DEBUG>("Saying: ", sanitized_text);
                 system(std::string("mimic3 '" + sanitized_text + "' --voice '" + cfg.voice + "' | aplay -D"
                                    + cfg.device_name)
                            .c_str());
-            }
 
-            // Nod head to indicate that the robot is "talking"
-            if (say.nod) {
-                emit<Task>(load_script<LimbsSequence>("NodYes.yaml"));
+                // Nod head to indicate that the robot is "talking"
+                if (say.nod) {
+                    emit<Task>(load_script<HeadSequence>("Say.yaml"));
+                }
             }
         });
     }
