@@ -93,7 +93,7 @@ namespace module::purpose {
                 emit<Task>(std::make_unique<StandStill>(), cfg.stand_still_priority);
             }
             if (cfg.say_priority > 0) {
-                emit<Task>(std::make_unique<Say>(cfg.say_text), cfg.say_priority);
+                emit<Task>(std::make_unique<Say>(cfg.say_text, true), cfg.say_priority);
             }
             if (cfg.gpt_priority > 0) {
                 emit<Task>(std::make_unique<GPTRequest>(cfg.gpt_prompt, true), cfg.gpt_priority);
