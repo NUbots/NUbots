@@ -29,6 +29,9 @@ namespace module::skill {
 
             /// @brief Desired arm positions while walking
             std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
+
+            /// @brief Walk engine parameters
+            utility::skill::WalkParameters<double> walk_generator_parameters{};
         } cfg;
 
         /// @brief Last time we updated the walk engine
