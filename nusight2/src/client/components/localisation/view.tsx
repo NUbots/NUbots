@@ -179,6 +179,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       })}
       <FieldLinePoints model={model} />
       <Balls model={model} />
+      <SwingFootTrajectory model={model} />
     </object3D>
   );
 });
@@ -217,3 +218,23 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
     )}
   </>
 );
+
+const SwingFootTrajectory = ({ model }: { model: LocalisationModel }) => (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible && (
+            <object3D key={robot.id}>
+              {robot.rSFf.map((d, i) => {
+                return (
+                  <mesh key={String(i)} position={d.toArray()}>
+                    <sphereBufferGeometry args={[0.01, 20]} />
+                    <meshBasicMaterial color="red" />
+                  </mesh>
+                );
+              })}
+            </object3D>
+          ),
+      )}
+    </>
+  );

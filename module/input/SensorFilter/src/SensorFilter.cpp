@@ -123,6 +123,8 @@ namespace module::input {
                              const std::shared_ptr<const WalkState>& walk_state) {
                           auto sensors = std::make_unique<Sensors>();
 
+                          log<NUClear::WARN>(walk_state->velocity_target);
+                          sensors->left_foot_trajectory = walk_state->left_foot_trajectory;
                           // Updates message with raw sensor data
                           update_raw_sensors(sensors, previous_sensors, raw_sensors);
 

@@ -121,6 +121,7 @@ export class LocalisationRobotModel {
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
+  @observable swingFootTrajectory: { rSTt: Vector3[] };
 
   constructor({
     model,
@@ -132,6 +133,7 @@ export class LocalisationRobotModel {
     motors,
     fieldLinePoints,
     ball,
+    swingFootTrajectory,
   }: {
     model: RobotModel;
     name: string;
@@ -142,6 +144,7 @@ export class LocalisationRobotModel {
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
+    swingFootTrajectory: { rSTt: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
@@ -152,6 +155,7 @@ export class LocalisationRobotModel {
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
+    this.swingFootTrajectory = swingFootTrajectory;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -163,6 +167,7 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
+      swingFootTrajectory: { rSTt: [] },
     });
   });
 
@@ -191,4 +196,11 @@ export class LocalisationRobotModel {
   get rBFf(): Vector3 | undefined {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
   }
+
+  /** Swing foot trajectory in field space */
+  @computed
+  get rSFf(): Vector3[] {
+    return this.swingFootTrajectory.rSTt.map((rSTt) => rSTt.applyMatrix4(this.Hft));
+  }
+
 }

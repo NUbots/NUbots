@@ -140,10 +140,11 @@ namespace module::skill {
                 emit<Task>(left_arm, 0, true, "Walk left arm");
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
-                // Emit walk engine state
+                // Emit the walk state
                 WalkState::SupportPhase phase = walk_generator.is_left_foot_planted() ? WalkState::SupportPhase::LEFT
                                                                                       : WalkState::SupportPhase::RIGHT;
-                emit(std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase));
+                auto walk_state =
+                    std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase);
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
@@ -160,7 +161,22 @@ namespace module::skill {
                                Hpt.translation().y(),
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
+
+                    // Generate a set of poses for debugging
+                    std::vector<Eigen::Vector3d> left_foot_trajectory;
+                    std::vector<Eigen::Vector3d> right_foot_trajectory;
+                    double t = 0;
+                    while (t < cfg.walk_generator_parameters.step_period) {
+                        left_foot_trajectory.push_back(walk_generator.get_foot_pose(t, LimbID::LEFT_LEG).translation());
+                        right_foot_trajectory.push_back(
+                            walk_generator.get_foot_pose(t, LimbID::RIGHT_LEG).translation());
+                        t += cfg.walk_generator_parameters.step_period / 10;
+                    }
+                    walk_state->left_foot_trajectory  = left_foot_trajectory;
+                    walk_state->right_foot_trajectory = right_foot_trajectory;
                 }
+
+                emit(walk_state);
             });
     }
 

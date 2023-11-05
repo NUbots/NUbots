@@ -45,4 +45,10 @@ message WalkState {
 
     /// Support phase
     SupportPhase support_phase = 3;
+
+    /// Set of left foot trajectory points
+    repeated vec3 left_foot_trajectory = 4;
+
+    /// Set of right foot trajectory points
+    repeated vec3 right_foot_trajectory = 5;
 }
