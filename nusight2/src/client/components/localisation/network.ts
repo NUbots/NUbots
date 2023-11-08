@@ -66,7 +66,7 @@ export class LocalisationNetwork {
     }
 
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.swingFootTrajectory.rSTt = sensors.leftFootTrajectory.map((rSTt) => Vector3.from(rSTt));
+    robot.swingFootTrajectory.rSTt = sensors.swingFootTrajectory.map((rSTt) => Vector3.from(rSTt));
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);

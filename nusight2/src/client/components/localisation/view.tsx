@@ -9,6 +9,7 @@ import { now } from "mobx-utils";
 import { Vector3 } from "../../../shared/math/vector3";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
+import * as THREE from "three";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
@@ -16,6 +17,7 @@ import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { NUgusView } from "./nugus_robot/view";
+import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
 
@@ -179,7 +181,9 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       })}
       <FieldLinePoints model={model} />
       <Balls model={model} />
-      <SwingFootTrajectory model={model} />
+      {model.robots.map((robotModel) => {
+        return <SwingFootTrajectory model={robotModel} />
+      })}
     </object3D>
   );
 });
@@ -219,22 +223,27 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
   </>
 );
 
-const SwingFootTrajectory = ({ model }: { model: LocalisationModel }) => (
-    <>
-      {model.robots.map(
-        (robot) =>
-          robot.visible && (
-            <object3D key={robot.id}>
-              {robot.rSFf.map((d, i) => {
-                return (
-                  <mesh key={String(i)} position={d.toArray()}>
-                    <sphereBufferGeometry args={[0.01, 20]} />
-                    <meshBasicMaterial color="red" />
-                  </mesh>
-                );
-              })}
-            </object3D>
-          ),
-      )}
-    </>
-  );
+const SwingFootTrajectory = ({ model }: { model: LocalisationRobotModel }) => {
+  // Create ref
+  const trajectoryRef = React.useRef<THREE.Line>(null);
+
+  // Generate spline
+  const waypoints = model.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+  const curve = new THREE.CatmullRomCurve3(waypoints);
+
+  // Get points
+  const points = curve.getPoints(50);
+
+  // React effect
+  React.useEffect(() => {
+    // Add the new line
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    const trajectory = new THREE.Line(geometry, material);
+    trajectoryRef.current?.clear();
+    trajectoryRef.current?.add(trajectory);
+  }, [points]);
+
+
+  return <object3D ref={trajectoryRef} />;
+};

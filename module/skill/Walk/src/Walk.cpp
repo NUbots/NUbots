@@ -162,18 +162,21 @@ namespace module::skill {
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
 
-                    // Generate a set of poses for debugging
-                    std::vector<Eigen::Vector3d> left_foot_trajectory;
-                    std::vector<Eigen::Vector3d> right_foot_trajectory;
+                    // Generate a set of swing foot poses for visually debugging
+                    std::vector<Eigen::Vector3d> swing_foot_trajectory;
                     double t = 0;
                     while (t < cfg.walk_generator_parameters.step_period) {
-                        left_foot_trajectory.push_back(walk_generator.get_foot_pose(t, LimbID::LEFT_LEG).translation());
-                        right_foot_trajectory.push_back(
-                            walk_generator.get_foot_pose(t, LimbID::RIGHT_LEG).translation());
+                        if (walk_generator.is_left_foot_planted()) {
+                            swing_foot_trajectory.push_back(
+                                walk_generator.get_foot_pose(t, LimbID::RIGHT_LEG).translation());
+                        }
+                        else {
+                            swing_foot_trajectory.push_back(
+                                walk_generator.get_foot_pose(t, LimbID::LEFT_LEG).translation());
+                        }
                         t += cfg.walk_generator_parameters.step_period / 10;
                     }
-                    walk_state->left_foot_trajectory  = left_foot_trajectory;
-                    walk_state->right_foot_trajectory = right_foot_trajectory;
+                    walk_state->swing_foot_trajectory = swing_foot_trajectory;
                 }
 
                 emit(walk_state);

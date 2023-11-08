@@ -148,6 +148,6 @@ message Sensors {
     /// Homogeneous transform: world {w} from torso {t}
     iso3 Htw = 15;
 
-    /// Set of left foot trajectory points
-    repeated vec3 left_foot_trajectory = 16;
+    /// Set of swing foot trajectory points
+    repeated vec3 swing_foot_trajectory = 16;
 }
