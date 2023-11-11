@@ -111,36 +111,39 @@ namespace module::purpose {
             }
         });
 
-        on<Trigger<LogMessage>>().then([this](const LogMessage& packet) {
-            // Where this message came from
-            std::string source = "";
+        on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+            if (message.level >= message.display_level) {
+                // Where this message came from
+                std::string source = "";
 
-            // If we know where this log message came from, we display that
-            if (packet.task != nullptr) {
-                // Get our reactor name
-                std::string reactor = packet.task->identifiers.reactor;
+                // If we know where this log message came from, we display that
+                if (message.task != nullptr) {
+                    // Get our reactor name
+                    std::string reactor = message.task->identifiers.reactor;
 
-                // Strip to the last semicolon if we have one
-                size_t lastC = reactor.find_last_of(':');
-                reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+                    // Strip to the last semicolon if we have one
+                    size_t lastC = reactor.find_last_of(':');
+                    reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
-                // This is our source
-                source = reactor + " "
-                         + (packet.task->identifiers.name.empty() ? "" : "- " + packet.task->identifiers.name + " ");
+                    // This is our source
+                    source =
+                        reactor + " "
+                        + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
+                }
+
+                LogColours colours;
+                switch (message.level) {
+                    default:
+                    case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
+                    case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
+                    case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
+                    case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
+                    case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
+                    case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
+                }
+
+                update_window(log_window, colours, source, message.message, true);
             }
-
-            LogColours colours;
-            switch (packet.level) {
-                default:
-                case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
-                case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
-                case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
-                case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
-                case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
-                case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
-            }
-
-            update_window(log_window, colours, source, packet.message, true);
         });
 
         on<Shutdown>().then(endwin);

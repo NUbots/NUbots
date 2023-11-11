@@ -93,37 +93,41 @@ namespace module::support::logging {
 
 
         on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
-            std::lock_guard<std::mutex> lock(mutex);
+            if (message.level >= message.display_level) {
+                std::lock_guard<std::mutex> lock(mutex);
 
-            // Where this message came from
-            std::string source = "";
+                // Where this message came from
+                std::string source = "";
 
-            // If we know where this log message came from, we display that
-            if (message.task != nullptr) {
-                // Get our reactor name
-                std::string reactor = message.task->identifiers.reactor;
+                // If we know where this log message came from, we display that
+                if (message.task != nullptr) {
+                    // Get our reactor name
+                    std::string reactor = message.task->identifiers.reactor;
 
-                // Strip to the last semicolon if we have one
-                size_t lastC = reactor.find_last_of(':');
-                reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+                    // Strip to the last semicolon if we have one
+                    size_t lastC = reactor.find_last_of(':');
+                    reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
-                // This is our source
-                source = reactor + " "
-                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
+                    // This is our source
+                    source =
+                        reactor + " "
+                        + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
+                }
+
+                // Output the level
+                switch (message.level) {
+                    case NUClear::UNKNOWN: std::cerr << source << ": "; break;
+                    case NUClear::TRACE: std::cerr << source << "TRACE: "; break;
+                    case NUClear::DEBUG: std::cerr << source << Colour::green << "DEBUG: "; break;
+                    case NUClear::INFO: std::cerr << source << Colour::brightblue << "INFO: "; break;
+                    case NUClear::WARN: std::cerr << source << Colour::yellow << "WARN: "; break;
+                    case NUClear::ERROR: std::cerr << source << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
+                    case NUClear::FATAL: std::cerr << source << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
+                }
+
+                // Output the message
+                std::cerr << message.message << std::endl;
             }
-
-            // Output the level
-            switch (message.level) {
-                case NUClear::TRACE: std::cerr << source << "TRACE: "; break;
-                case NUClear::DEBUG: std::cerr << source << Colour::green << "DEBUG: "; break;
-                case NUClear::INFO: std::cerr << source << Colour::brightblue << "INFO: "; break;
-                case NUClear::WARN: std::cerr << source << Colour::yellow << "WARN: "; break;
-                case NUClear::ERROR: std::cerr << source << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
-                case NUClear::FATAL: std::cerr << source << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
-            }
-
-            // Output the message
-            std::cerr << message.message << std::endl;
         });
     }
 
