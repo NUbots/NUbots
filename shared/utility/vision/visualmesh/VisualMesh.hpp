@@ -32,13 +32,21 @@ namespace utility::vision::visualmesh {
     Iterator partition_points(Iterator first,
                               Iterator last,
                               const Eigen::MatrixXi& neighbours,
-                              Func&& pred,
+                              Func&& pred,  // function determining if the index has a high enough confidence to use
                               const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
+
+
         return std::partition(first, last, [&](const value_type& idx) {
-            return pred(idx) && std::any_of(search_space.begin(), search_space.end(), [&](const auto& n) {
-                       return !pred(neighbours(n, idx));
-                   });
+            // Check if this index satisfies our confidence requirements
+            bool prediction = pred(idx);
+            // Check if any of the required neighbours satisfy our confidence requirements
+            // Required neighbours are from the search space list
+            bool check = std::any_of(search_space.begin(), search_space.end(), [&](const auto& n) {
+                return !pred(neighbours(n, idx));
+            });
+
+            return prediction && check;
         });
     }
 
