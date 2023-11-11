@@ -224,26 +224,29 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
 );
 
 const SwingFootTrajectory = ({ model }: { model: LocalisationRobotModel }) => {
-  // Create ref
-  const trajectoryRef = React.useRef<THREE.Line>(null);
+  if (model.visible && model.rSFf.length != 0) {
+    // Create ref
+    const trajectoryRef = React.useRef<THREE.Line>(null);
 
-  // Generate spline
-  const waypoints = model.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-  const curve = new THREE.CatmullRomCurve3(waypoints);
+    // Generate spline
+    const waypoints = model.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+    const curve = new THREE.CatmullRomCurve3(waypoints);
 
-  // Get points
-  const points = curve.getPoints(50);
+    // Get points
+    const points = curve.getPoints(50);
 
-  // React effect
-  React.useEffect(() => {
-    // Add the new line
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
-    const trajectory = new THREE.Line(geometry, material);
-    trajectoryRef.current?.clear();
-    trajectoryRef.current?.add(trajectory);
-  }, [points]);
+    // React effect
+    React.useEffect(() => {
+      // Add the new line
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 10 });
+      const trajectory = new THREE.Line(geometry, material);
+      trajectoryRef.current?.clear();
+      trajectoryRef.current?.add(trajectory);
+    }, [points]);
 
 
-  return <object3D ref={trajectoryRef} />;
+    return <object3D ref={trajectoryRef} />;
+  }
+  return <></>;
 };

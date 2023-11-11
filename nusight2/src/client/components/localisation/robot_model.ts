@@ -202,5 +202,4 @@ export class LocalisationRobotModel {
   get rSFf(): Vector3[] {
     return this.swingFootTrajectory.rSTt.map((rSTt) => rSTt.applyMatrix4(this.Hft));
   }
-
 }
