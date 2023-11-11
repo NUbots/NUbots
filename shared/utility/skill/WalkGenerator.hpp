@@ -115,17 +115,13 @@ namespace utility::skill {
          * @return Swing foot pose at time t.
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(const LimbID& limb) const {
-            // Assign the value based on the foot planted
-            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htl =
-                left_foot_is_planted ? get_torso_pose().inverse() : get_torso_pose().inverse() * get_swing_foot_pose();
-            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htr =
-                left_foot_is_planted ? get_torso_pose().inverse() * get_swing_foot_pose() : get_torso_pose().inverse();
-
             // Return the desired pose of the specified foot
             if (limb == LimbID::LEFT_LEG)
-                return Htl;
+                return left_foot_is_planted ? get_torso_pose().inverse()
+                                            : get_torso_pose().inverse() * get_swing_foot_pose();
             if (limb == LimbID::RIGHT_LEG)
-                return Htr;
+                return left_foot_is_planted ? get_torso_pose().inverse() * get_swing_foot_pose()
+                                            : get_torso_pose().inverse();
             throw std::runtime_error("Invalid Limb ID");
         }
 
@@ -136,19 +132,13 @@ namespace utility::skill {
          * @return Swing foot pose at time t.
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_foot_pose(Scalar t, const LimbID& limb) const {
-            // Assign the value based on the foot planted
-            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htl =
-                left_foot_is_planted ? get_torso_pose(t).inverse()
-                                     : get_torso_pose(t).inverse() * get_swing_foot_pose(t);
-            Eigen::Transform<Scalar, 3, Eigen::Isometry> Htr =
-                left_foot_is_planted ? get_torso_pose(t).inverse() * get_swing_foot_pose(t)
-                                     : get_torso_pose(t).inverse();
-
             // Return the desired pose of the specified foot
             if (limb == LimbID::LEFT_LEG)
-                return Htl;
+                return left_foot_is_planted ? get_torso_pose(t).inverse()
+                                            : get_torso_pose(t).inverse() * get_swing_foot_pose(t);
             if (limb == LimbID::RIGHT_LEG)
-                return Htr;
+                return left_foot_is_planted ? get_torso_pose(t).inverse() * get_swing_foot_pose(t)
+                                            : get_torso_pose(t).inverse();
             throw std::runtime_error("Invalid Limb ID");
         }
 
