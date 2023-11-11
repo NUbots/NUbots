@@ -1,7 +1,7 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-urdf_path: "/home/nubots/NUbots/shared/utility/platform/models/nugus.urdf"
+urdf_path: "/home/nubots/models/nugus.urdf"
 
 # Stopping tolerance for IK
 ik_tolerance: 1e-5
