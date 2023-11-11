@@ -117,7 +117,7 @@ TEST_CASE("Tests that the reason for a provider being executed can be provided i
           "[director][triggered][runinfo][runreason]") {
 
     // Run the module
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

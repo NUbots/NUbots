@@ -62,7 +62,7 @@ namespace module::extension {
                         auto lock             = hold_run_reason(RunInfo::RunReason::STOPPED);
                         auto task             = provider->reaction->get_task();
                         if (task) {
-                            task->run(std::move(task));
+                            task->run();
                         }
                     }
                 }

@@ -115,7 +115,7 @@ namespace {
 
 TEST_CASE("Test that if multiple things that are needed have when+causings all will run", "[director][!mayfail]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

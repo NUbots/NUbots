@@ -57,7 +57,7 @@ namespace {
 
 TEST_CASE("Test that a simple task is executed through the director", "[director][simple]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

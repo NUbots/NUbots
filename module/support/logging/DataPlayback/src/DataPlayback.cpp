@@ -9,6 +9,7 @@ namespace module::support::logging {
 
     using extension::Configuration;
     using NUClear::message::CommandLineArguments;
+    using NUClear::util::serialise::xxhash64;
 
     DataPlayback::DataPlayback(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), first_timecode(0) {
@@ -132,7 +133,7 @@ namespace module::support::logging {
                     // Get the name of the type
                     auto name = setting.first.as<std::string>();
                     // Hash our type to work out our type on the wire
-                    uint64_t hash = XXH64(name.c_str(), name.size(), 0x4e55436c);
+                    uint64_t hash = xxhash64(name.c_str(), name.size(), 0x4e55436c);
                     bool enabled  = setting.second.as<bool>();
 
                     // Message if we have enabled/disabled a particular message type

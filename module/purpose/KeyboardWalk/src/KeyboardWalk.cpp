@@ -118,15 +118,15 @@ namespace module::purpose {
             // If we know where this log message came from, we display that
             if (packet.task != nullptr) {
                 // Get our reactor name
-                std::string reactor = packet.task->identifier[1];
+                std::string reactor = packet.task->identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
                 reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
                 // This is our source
-                source =
-                    reactor + " " + (packet.task->identifier[0].empty() ? "" : "- " + packet.task->identifier[0] + " ");
+                source = reactor + " "
+                         + (packet.task->identifiers.name.empty() ? "" : "- " + packet.task->identifiers.name + " ");
             }
 
             LogColours colours;

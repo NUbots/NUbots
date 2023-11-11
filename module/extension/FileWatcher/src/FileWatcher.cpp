@@ -263,7 +263,7 @@ namespace module::extension {
                     FileWatch::FileWatchStore::value = nullptr;
 
                     if (task) {
-                        task->run(std::move(task));
+                        task->run();
                     }
                 }
             }
@@ -283,7 +283,7 @@ namespace module::extension {
                 FileWatch::FileWatchStore::value = nullptr;
 
                 if (task) {
-                    task->run(std::move(task));
+                    task->run();
                 }
             }
         });

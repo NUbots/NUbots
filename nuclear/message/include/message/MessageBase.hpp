@@ -51,7 +51,7 @@ namespace NUClear::util::serialise {
             std::string typeName = type.GetTypeName().substr(9);
 
             // We base the hash on the name of the protocol buffer, removing the protobuf prefix on typeName
-            return XXH64(typeName.c_str(), typeName.size(), 0x4e55436c);
+            return xxhash64(typeName.c_str(), typeName.size(), 0x4e55436c);
         }
     };
 

@@ -11,7 +11,7 @@ nuclear_role(
   support::configuration::SoccerConfig
   # NUsight
   network::NUClearNet
-  network::NetworkForwarder
+  # network::NetworkForwarder
   output::Overview
   output::ImageCompressor
   # Platform
