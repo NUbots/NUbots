@@ -9,6 +9,7 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
+  support::ReactionTimer
   # NUsight
   network::NUClearNet
   network::NetworkForwarder
