@@ -22,7 +22,7 @@ syntax = "proto3";
 package message.support.nuclear;
 
 message ReactionProfile{
-    string identifier = 1;
+    string name = 1;
     uint64 total_time = 2;
     uint64 count      = 3;
     uint64 max_time   = 4;
