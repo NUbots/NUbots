@@ -22,10 +22,16 @@ syntax = "proto3";
 package message.support.nuclear;
 
 message ReactionProfile{
+    /// Name of the reaction
     string name = 1;
-    uint64 total_time = 2;
+    /// Total time spent in the reaction
+    double total_time = 2;
+    /// Number of times the reaction was called
     uint64 count      = 3;
-    uint64 max_time   = 4;
-    uint64 min_time   = 5;
-    uint64 avg_time   = 6;
+    /// Maximum time spent in the reaction
+    double max_time   = 4;
+    /// Minimum time spent in the reaction
+    double min_time   = 5;
+    /// Average time spent in the reaction
+    double avg_time   = 6;
 }

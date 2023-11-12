@@ -18,18 +18,20 @@ namespace module::support {
         });
 
         on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+            double time =
+                1000.0
+                * (double((stats.finished - stats.started).count()) / double(NUClear::clock::duration::period::den));
+
             // Check if we have a profile for this reaction
             if (reaction_profiles.find(stats.identifiers.name) == reaction_profiles.end()) {
-                // Create a and a new profile
+                // Add new profile
                 reaction_profiles[stats.identifiers.name]      = ReactionProfile();
                 reaction_profiles[stats.identifiers.name].name = stats.identifiers.name;
             }
 
-            // Update the profile
-            reaction_profiles[stats.identifiers.name].count++;
+            // Update the profile with the new data
             reaction_profiles[stats.identifiers.name].total_time += time;
-            reaction_profiles[stats.identifiers.name].avg_time =
-                reaction_profiles[stats.identifiers.name].total_time / reaction_profiles[stats.identifiers.name].count;
+            reaction_profiles[stats.identifiers.name].count++;
             reaction_profiles[stats.identifiers.name].max_time =
                 std::max(reaction_profiles[stats.identifiers.name].max_time, time);
             reaction_profiles[stats.identifiers.name].min_time =
