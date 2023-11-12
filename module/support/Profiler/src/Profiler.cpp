@@ -44,13 +44,14 @@ namespace module::support {
             reaction_profiles[stats.reaction_id].avg_time =
                 reaction_profiles[stats.reaction_id].total_time / reaction_profiles[stats.reaction_id].count;
 
-            // Compute the time since the start of the profiler
-            auto now = NUClear::clock::now();
-            double time_since_start =
-                1000.0 * (double((now - start_time).count()) / double(NUClear::clock::duration::period::den));
-            // Compute the percentage of time spent in this reaction since the start of the profiler
-            double percentage = (reaction_profiles[stats.reaction_id].total_time / time_since_start) * 100.0;
-            reaction_profiles[stats.reaction_id].percentage = percentage;
+            // Compute the total time of all the reactions since the start of the profiler
+            double total_time_all = 0;
+            for (auto& profile : reaction_profiles) {
+                total_time_all += profile.second.total_time;
+            }
+
+            reaction_profiles[stats.reaction_id].percentage =
+                100.0 * reaction_profiles[stats.reaction_id].total_time / total_time_all;
 
             // Emit the profile
             auto profile = std::make_unique<ReactionProfileMsg>();
