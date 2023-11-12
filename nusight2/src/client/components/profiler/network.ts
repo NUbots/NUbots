@@ -40,7 +40,8 @@ export class ProfilerNetwork {
         profileData.totalTime,
         profileData.count,
         profileData.minTime,
-        profileData.maxTime
+        profileData.maxTime,
+        profileData.avgTime
       );
     } else {
       // Profile does not exist, add it
@@ -49,7 +50,8 @@ export class ProfilerNetwork {
         profileData.totalTime,
         profileData.count,
         profileData.minTime,
-        profileData.maxTime
+        profileData.maxTime,
+        profileData.avgTime
       ));
     }
   }

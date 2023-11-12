@@ -44,6 +44,7 @@ export class Profile {
     readonly total_time: number,
     readonly count: number,
     readonly min_time: number,
-    readonly max_time: number
+    readonly max_time: number,
+    readonly avg_time: number
   ) {}
 }

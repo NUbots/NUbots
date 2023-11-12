@@ -40,10 +40,11 @@ export class ProfilerView extends React.Component<{
               <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Total Time</th>
+                  <th>Total Time (ms)</th>
                   <th>Count</th>
-                  <th>Min Time</th>
-                  <th>Max Time</th>
+                  <th>Min Time (ms)</th>
+                  <th>Max Time (ms)</th>
+                  <th>Average Time (ms)</th>
                 </tr>
               </thead>
               <tbody>
@@ -54,6 +55,7 @@ export class ProfilerView extends React.Component<{
                     <td>{profile.count}</td>
                     <td>{profile.min_time}</td>
                     <td>{profile.max_time}</td>
+                    <td>{profile.avg_time}</td>
                   </tr>
                 ))}
               </tbody>
