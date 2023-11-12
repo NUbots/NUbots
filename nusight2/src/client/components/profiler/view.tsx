@@ -8,6 +8,7 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 import { ProfilerController } from "./controller";
 import { ProfilerModel } from "./model";
+import { Profile } from "./model";
 import styles from "./style.module.css";
 
 @observer
@@ -20,7 +21,7 @@ export class ProfilerView extends React.Component<{
   @observable sortOrder = "asc"; // 'asc' or 'desc'
 
   @action.bound
-  setSort(column) {
+  setSort(column: string) {
     if (this.sortColumn === column) {
       this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
     } else {
@@ -29,7 +30,7 @@ export class ProfilerView extends React.Component<{
     }
   }
 
-  sortProfiles(profiles) {
+  sortProfiles(profiles: Profile[]) {
     return profiles.slice().sort((a, b) => {
       if (a[this.sortColumn] < b[this.sortColumn]) {
         return this.sortOrder === "asc" ? -1 : 1;
@@ -41,16 +42,18 @@ export class ProfilerView extends React.Component<{
     });
   }
 
-  getSortIcon(column) {
+  getSortIcon(column: string) {
     if (this.sortColumn === column) {
       return this.sortOrder === "asc" ? "↑" : "↓";
     }
     return "";
   }
 
-  getPercentageStyle(percentage) {
+  getPercentageStyle(percentage: number) {
+    // Clamp the percentage between 0 and 100
+    const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
     return {
-      width: `${percentage}%`,
+      width: `${clampedPercentage}%`,
       backgroundColor: 'lightblue',
       height: '100%',
     };
@@ -98,7 +101,7 @@ export class ProfilerView extends React.Component<{
                   <tr key={profile.reactionId}>
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.reactionId}</td>
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.reactor}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.name} </td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.name.replace(/\w+::/g, '')} </td>
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.total_time.toFixed(1)}</td>
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.count}</td>
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.min_time.toFixed(1)}</td>
