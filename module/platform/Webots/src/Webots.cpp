@@ -525,7 +525,7 @@ namespace module::platform {
                                 for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
                                      length          = read_length(buffer)) {
                                     // Decode the protocol buffer and emit it as a message
-                                    char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
+                                    uint8_t* payload = reinterpret_cast<uint8_t*>(buffer.data()) + sizeof(length);
                                     translate_and_emit_sensor(
                                         NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload,
                                                                                                              length));

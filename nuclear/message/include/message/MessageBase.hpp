@@ -25,7 +25,7 @@ namespace NUClear::util::serialise {
             return output;
         }
 
-        [[nodiscard]] static inline T deserialise(const char* in, const size_t& length) {
+        [[nodiscard]] static inline T deserialise(const uint8_t* in, const size_t& length) {
 
             // Make a buffer
             protobuf_type out;

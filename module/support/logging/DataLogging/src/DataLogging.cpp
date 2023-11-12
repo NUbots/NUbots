@@ -121,7 +121,7 @@ namespace module::support::logging {
                 // Get the name of the currently running binary
                 std::vector<uint8_t> data(argv[0].cbegin(), argv[0].cend());
                 data.push_back('\0');
-                const auto* base     = basename(data.data());
+                const auto* base     = basename(reinterpret_cast<const char*>(data.data()));
                 config.output.binary = std::string(base);
 
                 // Rescue any existing recorders that we want to keep
