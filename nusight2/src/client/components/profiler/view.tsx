@@ -48,6 +48,14 @@ export class ProfilerView extends React.Component<{
     return "";
   }
 
+  getPercentageStyle(percentage) {
+    return {
+      width: `${percentage}%`,
+      backgroundColor: 'lightblue',
+      height: '100%',
+    };
+  }
+
   render() {
     const {
       model: { selectedRobot, robots },
@@ -96,7 +104,11 @@ export class ProfilerView extends React.Component<{
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.min_time.toFixed(1)}</td>
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.max_time.toFixed(1)}</td>
                     <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.avg_time.toFixed(1)}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.percentage.toFixed(1)} %</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">
+                      <div style={this.getPercentageStyle(profile.percentage)}>
+                        <span className="inset-0 pl-4">{profile.percentage.toFixed(1)} %</span>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
