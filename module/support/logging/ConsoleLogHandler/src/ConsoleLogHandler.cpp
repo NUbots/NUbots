@@ -36,7 +36,7 @@ namespace module::support::logging {
                 std::lock_guard<std::mutex> lock(mutex);
 
                 // Get our reactor name
-                std::string reactor = stats.identifier[1];
+                std::string reactor = stats.identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
@@ -56,7 +56,8 @@ namespace module::support::logging {
                 }
 
                 // Print our exception details
-                std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                std::cerr << reactor << " "
+                          << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                           << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
                           << " " << Colour::brightred << utility::support::evil::exception_name << " " << exception_what
                           << std::endl;
@@ -74,14 +75,16 @@ namespace module::support::logging {
 
                     std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
 
-                    std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                    std::cerr << reactor << " "
+                              << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                               << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
                               << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
                 }
                 // We don't actually want to crash
                 catch (...) {
 
-                    std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                    std::cerr << reactor << " "
+                              << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                               << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻" << std::endl;
                 }
 #endif
@@ -90,6 +93,10 @@ namespace module::support::logging {
 
 
         on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+            // Only display messages that are above the display level of the reactor that made the log
+            if (message.level < message.display_level) {
+                return;
+            };
             std::lock_guard<std::mutex> lock(mutex);
 
             // Where this message came from
@@ -98,7 +105,7 @@ namespace module::support::logging {
             // If we know where this log message came from, we display that
             if (message.task != nullptr) {
                 // Get our reactor name
-                std::string reactor = message.task->identifier[1];
+                std::string reactor = message.task->identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
@@ -106,11 +113,12 @@ namespace module::support::logging {
 
                 // This is our source
                 source = reactor + " "
-                         + (message.task->identifier[0].empty() ? "" : "- " + message.task->identifier[0] + " ");
+                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
             }
 
             // Output the level
             switch (message.level) {
+                case NUClear::UNKNOWN: std::cerr << source << ": "; break;
                 case NUClear::TRACE: std::cerr << source << "TRACE: "; break;
                 case NUClear::DEBUG: std::cerr << source << Colour::green << "DEBUG: "; break;
                 case NUClear::INFO: std::cerr << source << Colour::brightblue << "INFO: "; break;

@@ -137,7 +137,7 @@ namespace {
 TEST_CASE("Test that when Idle is emitted nothing changes with subtasks", "[director][triggered][idle]") {
 
     // Run the module
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

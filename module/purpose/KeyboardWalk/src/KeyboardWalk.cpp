@@ -111,26 +111,30 @@ namespace module::purpose {
             }
         });
 
-        on<Trigger<LogMessage>>().then([this](const LogMessage& packet) {
+        on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+            // Only display messages that are above the display level of the reactor that made the log
+            if (message.level < message.display_level) {
+                return;
+            };
             // Where this message came from
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (packet.task != nullptr) {
+            if (message.task != nullptr) {
                 // Get our reactor name
-                std::string reactor = packet.task->identifier[1];
+                std::string reactor = message.task->identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
                 reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
                 // This is our source
-                source =
-                    reactor + " " + (packet.task->identifier[0].empty() ? "" : "- " + packet.task->identifier[0] + " ");
+                source = reactor + " "
+                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
             }
 
             LogColours colours;
-            switch (packet.level) {
+            switch (message.level) {
                 default:
                 case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
                 case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
@@ -140,7 +144,7 @@ namespace module::purpose {
                 case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
             }
 
-            update_window(log_window, colours, source, packet.message, true);
+            update_window(log_window, colours, source, message.message, true);
         });
 
         on<Shutdown>().then(endwin);

@@ -90,7 +90,7 @@ namespace {
 TEST_CASE("Test that if all the non optional tasks can't be executed none of them will be",
           "[director][priority][entire]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

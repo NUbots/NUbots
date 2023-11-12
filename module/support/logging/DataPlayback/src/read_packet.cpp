@@ -30,7 +30,7 @@ namespace module::support::logging {
         p.timecode = std::chrono::microseconds(timecode);
         in.read(reinterpret_cast<char*>(&p.hash), sizeof(p.hash));
         p.payload.resize(length - sizeof(p.hash) - sizeof(p.timecode));
-        in.read(p.payload.data(), p.payload.size());
+        in.read(reinterpret_cast<char*>(p.payload.data()), int64_t(p.payload.size()));
 
         return p;
     }

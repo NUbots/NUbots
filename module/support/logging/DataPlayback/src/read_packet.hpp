@@ -12,7 +12,7 @@ namespace module::support::logging {
 
         uint64_t hash{};
         std::chrono::microseconds timecode{};
-        std::vector<char> payload;
+        std::vector<uint8_t> payload;
     };
 
     Packet read_packet(std::ifstream& in);

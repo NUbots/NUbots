@@ -91,7 +91,7 @@ namespace {
 TEST_CASE("Tests that if a provider loses one of its dependent needs it stops running everything",
           "[director][priority][needs]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

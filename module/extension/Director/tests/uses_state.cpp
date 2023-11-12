@@ -120,7 +120,7 @@ namespace {
 
 TEST_CASE("Test that the Uses run state information is correct", "[director][uses][state]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

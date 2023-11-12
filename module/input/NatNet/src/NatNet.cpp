@@ -64,22 +64,23 @@ namespace module::input {
                         .then("NatNet Data", [this](const UDP::Packet& packet) {
                             // Test if we are "connected" to this remote
                             // And if we are we can use the data
-                            if (remote == packet.remote.address && version != 0) {
+                            auto address = static_cast<uint32_t>(std::stoul(packet.remote.address));
+                            if (remote == address && version != 0) {
                                 process(packet.payload);
                             }
                             // We have started connecting but haven't received a return ping
-                            else if (remote == packet.remote.address && version == 0) {
+                            else if (remote == address && version == 0) {
                                 // TODO(HardwareTeam): maybe set a timeout here to try again
                             }
                             // We haven't connected to anything yet
                             else if (remote == 0) {
                                 // This is now our remote
-                                remote = packet.remote.address;
+                                remote = address;
 
                                 // Send a ping command
                                 send_command(Packet::Type::PING);
                             }
-                            else if (remote != packet.remote.address) {
+                            else if (remote != address) {
                                 log<NUClear::WARN>("There is more than one NatNet server running on this network");
                             }
                         });
@@ -441,14 +442,15 @@ namespace module::input {
     }
 
 
-    void NatNet::process(const std::vector<char>& input) {
+    void NatNet::process(const std::vector<uint8_t>& input) {
         // Get our packet
         const Packet& packet = *reinterpret_cast<const Packet*>(input.data());
 
         if (cfg.dump_packets) {
             static int i = 0;
+            std::vector<char> input_char(input.begin(), input.end());
             std::ofstream output(fmt::format("natnet_{:06d}.bin", i++));
-            output.write(input.data(), input.size());
+            output.write(input_char.data(), input_char.size());
         }
 
         // Work out it's type

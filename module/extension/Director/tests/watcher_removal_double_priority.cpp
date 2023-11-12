@@ -103,7 +103,7 @@ TEST_CASE(
     "Test that a watcher can take over from another provider while there is another watcher and no priority is set",
     "[director][remove][watcher][double][priority]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

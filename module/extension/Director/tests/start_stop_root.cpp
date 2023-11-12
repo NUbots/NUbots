@@ -65,7 +65,7 @@ namespace {
 TEST_CASE("Test that the start and stop events fire when a provider gains/loses a root task",
           "[director][start][stop][root]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

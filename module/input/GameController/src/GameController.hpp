@@ -47,7 +47,7 @@ namespace module::input {
         uint send_port;
         uint TEAM_ID;
         uint PLAYER_ID;
-        uint BROADCAST_IP = 0xFFFFFFFF;
+        std::string BROADCAST_IP;
         std::string udp_filter_address;
         std::set<std::string> ignored_ip_addresses;
 

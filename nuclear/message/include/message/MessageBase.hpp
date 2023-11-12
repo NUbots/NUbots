@@ -15,17 +15,17 @@ namespace NUClear::util::serialise {
 
         using protobuf_type = typename T::protobuf_type;
 
-        static inline std::vector<char> serialise(const T& in) {
+        static inline std::vector<uint8_t> serialise(const T& in) {
 
             protobuf_type proto = in;
 
-            std::vector<char> output(proto.ByteSizeLong());
+            std::vector<uint8_t> output(proto.ByteSizeLong());
             proto.SerializeToArray(output.data(), output.size());
 
             return output;
         }
 
-        [[nodiscard]] static inline T deserialise(const char* in, const size_t& length) {
+        [[nodiscard]] static inline T deserialise(const uint8_t* in, const size_t& length) {
 
             // Make a buffer
             protobuf_type out;
@@ -38,7 +38,7 @@ namespace NUClear::util::serialise {
             return out;
         }
 
-        [[nodiscard]] static inline T deserialise(const std::vector<char>& in) {
+        [[nodiscard]] static inline T deserialise(const std::vector<uint8_t>& in) {
             return deserialise(in.data(), in.size());
         }
 
@@ -51,7 +51,7 @@ namespace NUClear::util::serialise {
             std::string typeName = type.GetTypeName().substr(9);
 
             // We base the hash on the name of the protocol buffer, removing the protobuf prefix on typeName
-            return XXH64(typeName.c_str(), typeName.size(), 0x4e55436c);
+            return xxhash64(typeName.c_str(), typeName.size(), 0x4e55436c);
         }
     };
 

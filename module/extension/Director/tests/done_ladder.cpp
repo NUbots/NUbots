@@ -137,7 +137,7 @@ namespace {
 
 TEST_CASE("Test that a ladder of done tasks can be used to produce an aggregate done", "[director][done]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

@@ -83,7 +83,7 @@ namespace {
 
 TEST_CASE("Test that disabled providers are not considered when choosing a provider", "[director][simple]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

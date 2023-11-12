@@ -73,7 +73,7 @@ with open(role_name, "w", encoding="utf-8") as role_file:
 
     start = """\
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     unsigned int nThreads = std::thread::hardware_concurrency() + 2;
     config.thread_count = nThreads >= 4 ? nThreads : 4;
 

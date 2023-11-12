@@ -101,7 +101,7 @@ namespace {
 TEST_CASE("Tests a waiting task can take over subtasks of another task that is being removed",
           "[director][needs][watcher][removal]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

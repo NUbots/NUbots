@@ -49,7 +49,7 @@ namespace utility::nbs {
                   const uint64_t& message_timestamp,
                   const uint64_t& hash,
                   const uint32_t& id,
-                  const std::vector<char>& data);
+                  const std::vector<uint8_t>& data);
 
         /// @brief Gets the number of bytes written
         const uint64_t& get_bytes_written() const;
