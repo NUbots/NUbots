@@ -21,7 +21,7 @@ namespace module::support::logging {
             /// The id field of the message or, if id does not exist, 0.
             uint32_t id = 0;
             /// The raw data we will be writing
-            std::vector<char> data;
+            std::vector<uint8_t> data;
 
             DataLog() : timestamp(NUClear::clock::now()) {}
         };

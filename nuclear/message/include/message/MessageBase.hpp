@@ -15,11 +15,11 @@ namespace NUClear::util::serialise {
 
         using protobuf_type = typename T::protobuf_type;
 
-        static inline std::vector<char> serialise(const T& in) {
+        static inline std::vector<uint8_t> serialise(const T& in) {
 
             protobuf_type proto = in;
 
-            std::vector<char> output(proto.ByteSizeLong());
+            std::vector<uint8_t> output(proto.ByteSizeLong());
             proto.SerializeToArray(output.data(), output.size());
 
             return output;
@@ -38,7 +38,7 @@ namespace NUClear::util::serialise {
             return out;
         }
 
-        [[nodiscard]] static inline T deserialise(const std::vector<char>& in) {
+        [[nodiscard]] static inline T deserialise(const std::vector<uint8_t>& in) {
             return deserialise(in.data(), in.size());
         }
 

@@ -119,7 +119,7 @@ namespace module::support::logging {
                 config.output.split_size = cfg["output"]["split_size"].as<Expression>();
 
                 // Get the name of the currently running binary
-                std::vector<char> data(argv[0].cbegin(), argv[0].cend());
+                std::vector<uint8_t> data(argv[0].cbegin(), argv[0].cend());
                 data.push_back('\0');
                 const auto* base     = basename(data.data());
                 config.output.binary = std::string(base);

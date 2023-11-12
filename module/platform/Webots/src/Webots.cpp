@@ -583,7 +583,7 @@ namespace module::platform {
                     }
 
                     // Serialise ActuatorRequests
-                    std::vector<char> data =
+                    std::vector<uint8_t> data =
                         NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
                     // Size of the message, in network endian
