@@ -8,9 +8,11 @@ import { RobotModel } from "../robot/model";
 import { ProfilerRobotModel } from "./model";
 import { Profile } from "./model";
 
+import ReactionProfile = message.support.nuclear.ReactionProfile;
+
 export class ProfilerNetwork {
   constructor(private network: Network) {
-    this.network.on(message.support.nuclear.ReactionProfile, this.onReactionProfile);
+    this.network.on(ReactionProfile, this.onReactionProfile);
   }
 
   static of(nusightNetwork: NUsightNetwork): ProfilerNetwork {
@@ -23,7 +25,7 @@ export class ProfilerNetwork {
   };
 
   @action.bound
-  private onReactionProfile(robotModel: RobotModel, profileData: any) {
+  private onReactionProfile(robotModel: RobotModel, profileData: ReactionProfile) {
     console.log("onReactionProfile");
 
     const robot = ProfilerRobotModel.of(robotModel);
@@ -35,19 +37,19 @@ export class ProfilerNetwork {
       // Profile exists, update it
       robot.profiles[profileIndex] = new Profile(
         profileData.name,
-        profileData.total_time,
+        profileData.totalTime,
         profileData.count,
-        profileData.min_time,
-        profileData.max_time
+        profileData.minTime,
+        profileData.maxTime
       );
     } else {
       // Profile does not exist, add it
       robot.profiles.push(new Profile(
         profileData.name,
-        profileData.total_time,
+        profileData.totalTime,
         profileData.count,
-        profileData.min_time,
-        profileData.max_time
+        profileData.minTime,
+        profileData.maxTime
       ));
     }
   }
