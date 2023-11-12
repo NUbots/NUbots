@@ -84,32 +84,31 @@ export class ProfilerView extends React.Component<{
             <table className="min-w-full table-auto border-collapse border border-gray-200">
               <thead>
                 <tr>
-                <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("reactionId")}>Reaction ID {this.getSortIcon("reactionId")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("reactor")}>Reactor Name {this.getSortIcon("reactor")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("name")}>Reaction Name {this.getSortIcon("name")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("total_time")}>Total Time (ms) {this.getSortIcon("total_time")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("count")}>Count {this.getSortIcon("count")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("min_time")}>Min Time (ms) {this.getSortIcon("min_time")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("max_time")}>Max Time (ms) {this.getSortIcon("max_time")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("avg_time")}>Average Time (ms) {this.getSortIcon("avg_time")}</th>
-                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("percentage")}>Time % {this.getSortIcon("percentage")}</th>
-
+                <th onClick={() => this.setSort("reactionId")}>Reaction ID {this.getSortIcon("reactionId")}</th>
+                  <th onClick={() => this.setSort("reactor")}>Reactor Name {this.getSortIcon("reactor")}</th>
+                  <th onClick={() => this.setSort("name")}>Reaction Name {this.getSortIcon("name")}</th>
+                  <th onClick={() => this.setSort("total_time")}>Total Time (ms) {this.getSortIcon("total_time")}</th>
+                  <th onClick={() => this.setSort("count")}>Count {this.getSortIcon("count")}</th>
+                  <th onClick={() => this.setSort("min_time")}>Min Time (ms) {this.getSortIcon("min_time")}</th>
+                  <th onClick={() => this.setSort("max_time")}>Max Time (ms) {this.getSortIcon("max_time")}</th>
+                  <th onClick={() => this.setSort("avg_time")}>Average Time (ms) {this.getSortIcon("avg_time")}</th>
+                  <th onClick={() => this.setSort("percentage")}>Time % {this.getSortIcon("percentage")}</th>
                 </tr>
               </thead>
               <tbody>
                 {sortedProfiles.map(profile => (
                   <tr key={profile.reactionId}>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.reactionId}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.reactor}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.name.replace(/\w+::/g, '')} </td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.total_time.toFixed(1)}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.count}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.min_time.toFixed(1)}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.max_time.toFixed(1)}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.avg_time.toFixed(1)}</td>
-                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">
+                    <td>{profile.reactionId}</td>
+                    <td>{profile.reactor}</td>
+                    <td>{profile.name.replace(/\w+::/g, '')} </td>
+                    <td>{profile.total_time.toFixed(1)}</td>
+                    <td>{profile.count}</td>
+                    <td>{profile.min_time.toFixed(1)}</td>
+                    <td>{profile.max_time.toFixed(1)}</td>
+                    <td>{profile.avg_time.toFixed(1)}</td>
+                    <td>
                       <div style={this.getPercentageStyle(profile.percentage)}>
-                        <span className="inset-0 pl-4">{profile.percentage.toFixed(1)} %</span>
+                        <span>{profile.percentage.toFixed(1)} %</span>
                       </div>
                     </td>
                   </tr>

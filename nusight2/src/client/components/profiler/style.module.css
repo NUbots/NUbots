@@ -25,9 +25,34 @@
 .Profiler table {
   width: 100%;
   border-collapse: collapse;
+  border: 1px solid #d1d5db; /* border-gray-200 */
 }
 
 .Profiler th, .Profiler td {
-  border: 1px solid #ddd;
-  padding: 8px;
+  padding: 4px 4px; /* px-4 py-2 */
+  cursor: pointer;
+  max-width: 200px; /* max-w-xs */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border: 1px solid #d1d5db; /* border-gray-200 */
+}
+
+.Profiler th {
+  background-color: #f3f4f6; /* bg-gray-100 */
+}
+
+.Profiler td {
+  border-bottom: 1px solid #d1d5db; /* border-b border-gray-200 */
+}
+
+.Profiler .percentage-bar {
+  position: relative;
+  padding-left: 16px; /* pl-4 */
+}
+
+.Profiler .percentage-bar span {
+  position: absolute;
+  top: 0;
+  left: 0;
 }
