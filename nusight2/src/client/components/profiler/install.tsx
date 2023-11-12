@@ -19,7 +19,7 @@ export function installProfiler({
   Menu: ComponentType;
 }) {
   nav.addRoute({
-    path: "/Profiler",
+    path: "/profiler",
     Icon,
     label: "Profiler",
     Content: React.lazy(async () => {
