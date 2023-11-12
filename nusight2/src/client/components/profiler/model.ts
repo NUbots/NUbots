@@ -41,10 +41,13 @@ export class ProfilerRobotModel {
 export class Profile {
   constructor(
     readonly name: string,
+    readonly reactionId: number,
+    readonly reactor: string,
     readonly total_time: number,
     readonly count: number,
     readonly min_time: number,
     readonly max_time: number,
-    readonly avg_time: number
+    readonly avg_time: number,
+    readonly percentage: number
   ) {}
 }

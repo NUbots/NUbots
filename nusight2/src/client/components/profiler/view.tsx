@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 import React from "react";
-import { action } from "mobx";
+import { action, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { RobotModel } from "../robot/model";
@@ -16,11 +16,46 @@ export class ProfilerView extends React.Component<{
   model: ProfilerModel;
   Menu: React.ComponentType<PropsWithChildren>;
 }> {
+  @observable sortColumn = "name";
+  @observable sortOrder = "asc"; // 'asc' or 'desc'
+
+  @action.bound
+  setSort(column) {
+    if (this.sortColumn === column) {
+      this.sortOrder = this.sortOrder === "asc" ? "desc" : "asc";
+    } else {
+      this.sortColumn = column;
+      this.sortOrder = "asc";
+    }
+  }
+
+  sortProfiles(profiles) {
+    return profiles.slice().sort((a, b) => {
+      if (a[this.sortColumn] < b[this.sortColumn]) {
+        return this.sortOrder === "asc" ? -1 : 1;
+      }
+      if (a[this.sortColumn] > b[this.sortColumn]) {
+        return this.sortOrder === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }
+
+  getSortIcon(column) {
+    if (this.sortColumn === column) {
+      return this.sortOrder === "asc" ? "↑" : "↓";
+    }
+    return "";
+  }
+
   render() {
     const {
       model: { selectedRobot, robots },
       Menu,
     } = this.props;
+
+    const sortedProfiles = selectedRobot ? this.sortProfiles(selectedRobot.profiles) : [];
+
     return (
       <div className={styles.Profiler}>
         <Menu>
@@ -34,33 +69,38 @@ export class ProfilerView extends React.Component<{
           </div>
         </Menu>
         {selectedRobot && (
-          <div className={styles.content}>
-            <div className={styles.content}>
-            <table>
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto border-collapse border border-gray-200">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Total Time (ms)</th>
-                  <th>Count</th>
-                  <th>Min Time (ms)</th>
-                  <th>Max Time (ms)</th>
-                  <th>Average Time (ms)</th>
+                <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("reactionId")}>Reaction ID {this.getSortIcon("reactionId")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("reactor")}>Reactor Name {this.getSortIcon("reactor")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("name")}>Reaction Name {this.getSortIcon("name")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("total_time")}>Total Time (ms) {this.getSortIcon("total_time")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("count")}>Count {this.getSortIcon("count")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("min_time")}>Min Time (ms) {this.getSortIcon("min_time")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("max_time")}>Max Time (ms) {this.getSortIcon("max_time")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("avg_time")}>Average Time (ms) {this.getSortIcon("avg_time")}</th>
+                  <th className="px-4 py-2 border-b border-gray-200 bg-gray-100 cursor-pointer" onClick={() => this.setSort("percentage")}>Time % {this.getSortIcon("percentage")}</th>
+
                 </tr>
               </thead>
               <tbody>
-                {selectedRobot.profiles.map(profile => (
-                  <tr key={profile.name}>
-                    <td>{profile.name}</td>
-                    <td>{profile.total_time}</td>
-                    <td>{profile.count}</td>
-                    <td>{profile.min_time}</td>
-                    <td>{profile.max_time}</td>
-                    <td>{profile.avg_time}</td>
+                {sortedProfiles.map(profile => (
+                  <tr key={profile.reactionId}>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.reactionId}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.reactor}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.name} </td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.total_time.toFixed(1)}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.count}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.min_time.toFixed(1)}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.max_time.toFixed(1)}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.avg_time.toFixed(1)}</td>
+                    <td className="px-4 py-2 border-b border-gray-200 truncate max-w-xs">{profile.percentage.toFixed(1)} %</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
           </div>
         )}
       </div>

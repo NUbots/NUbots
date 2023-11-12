@@ -30,28 +30,34 @@ export class ProfilerNetwork {
 
     const robot = ProfilerRobotModel.of(robotModel);
 
-    // Find the index of the existing profile with the same name
-    const profileIndex = robot.profiles.findIndex(p => p.name === profileData.name);
+    // Find the index of the existing profile with the same reactionId
+    const profileIndex = robot.profiles.findIndex(p => p.reactionId === profileData.reactionId);
 
     if (profileIndex !== -1) {
       // Profile exists, update it
       robot.profiles[profileIndex] = new Profile(
         profileData.name,
+        profileData.reactionId,
+        profileData.reactor,
         profileData.totalTime,
         profileData.count,
         profileData.minTime,
         profileData.maxTime,
-        profileData.avgTime
+        profileData.avgTime,
+        profileData.percentage
       );
     } else {
       // Profile does not exist, add it
       robot.profiles.push(new Profile(
         profileData.name,
+        profileData.reactionId,
+        profileData.reactor,
         profileData.totalTime,
         profileData.count,
         profileData.minTime,
         profileData.maxTime,
-        profileData.avgTime
+        profileData.avgTime,
+        profileData.percentage
       ));
     }
   }
