@@ -118,12 +118,12 @@ namespace module::support::logging {
 
             // Output the level
             switch (message.level) {
-                case NUClear::UNKNOWN: std::cerr << source << ": "; break;
                 case NUClear::TRACE: std::cerr << source << "TRACE: "; break;
                 case NUClear::DEBUG: std::cerr << source << Colour::green << "DEBUG: "; break;
                 case NUClear::INFO: std::cerr << source << Colour::brightblue << "INFO: "; break;
                 case NUClear::WARN: std::cerr << source << Colour::yellow << "WARN: "; break;
                 case NUClear::ERROR: std::cerr << source << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
+                case NUClear::UNKNOWN:;
                 case NUClear::FATAL: std::cerr << source << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
             }
 
