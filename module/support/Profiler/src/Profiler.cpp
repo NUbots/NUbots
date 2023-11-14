@@ -14,7 +14,7 @@ namespace module::support {
     Profiler::Profiler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Profiler.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file Profiler.yaml
+            log_level = config["log_level"].as<NUClear::LogLevel>();
         });
 
         on<Startup>().then([this] {
