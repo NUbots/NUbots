@@ -131,7 +131,7 @@ namespace module::input {
         std::map<uint32_t, CameraModel> camera_models = {};
 
         // The version of NatNet we are running with
-        std::string remote = "";
+        std::string remote;
         uint32_t version   = 0;
 
         ReactionHandle command_handle;

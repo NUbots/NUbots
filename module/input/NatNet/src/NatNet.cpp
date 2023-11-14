@@ -74,7 +74,7 @@ namespace module::input {
                                 // TODO(HardwareTeam): maybe set a timeout here to try again
                             }
                             // We haven't connected to anything yet
-                            else if (remote == "") {
+                            else if (remote.empty()) {
                                 // This is now our remote
                                 remote = address;
 
@@ -91,7 +91,7 @@ namespace module::input {
     }
 
     void NatNet::send_command(Packet::Type type, std::vector<char> data) {
-        if (remote != "") {
+        if (!remote.empty()) {
             // Make a vector to hold our packet
             std::vector<char> packet(sizeof(Packet) - 1);
 
