@@ -31,7 +31,7 @@ export class ProfilerNetwork {
     const robot = ProfilerRobotModel.of(robotModel);
 
     // Find the index of the existing profile with the same reactionId
-    const profileIndex = robot.profiles.findIndex(p => p.reactionId === profileData.reactionId);
+    const profileIndex = robot.profiles.findIndex((p) => p.reactionId === profileData.reactionId);
 
     if (profileIndex !== -1) {
       // Profile exists, update it
@@ -44,21 +44,23 @@ export class ProfilerNetwork {
         profileData.minTime,
         profileData.maxTime,
         profileData.avgTime,
-        profileData.percentage
+        profileData.percentage,
       );
     } else {
       // Profile does not exist, add it
-      robot.profiles.push(new Profile(
-        profileData.name,
-        profileData.reactionId,
-        profileData.reactor,
-        profileData.totalTime,
-        profileData.count,
-        profileData.minTime,
-        profileData.maxTime,
-        profileData.avgTime,
-        profileData.percentage
-      ));
+      robot.profiles.push(
+        new Profile(
+          profileData.name,
+          profileData.reactionId,
+          profileData.reactor,
+          profileData.totalTime,
+          profileData.count,
+          profileData.minTime,
+          profileData.maxTime,
+          profileData.avgTime,
+          profileData.percentage,
+        ),
+      );
     }
   }
 }

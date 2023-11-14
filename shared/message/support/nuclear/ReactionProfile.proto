@@ -21,7 +21,7 @@ syntax = "proto3";
 
 package message.support.nuclear;
 
-message ReactionProfile{
+message ReactionProfile {
     /// Name of the reaction
     string name = 1;
     /// Name of the reactor
@@ -31,13 +31,13 @@ message ReactionProfile{
     /// Total time spent in the reaction
     double total_time = 4;
     /// Number of times the reaction was called
-    uint64 count      = 5;
+    uint64 count = 5;
     /// Maximum time spent in the reaction
-    double max_time   = 6;
+    double max_time = 6;
     /// Minimum time spent in the reaction
-    double min_time   = 7;
+    double min_time = 7;
     /// Average time spent in the reaction
-    double avg_time   = 8;
+    double avg_time = 8;
     /// Percentage of time spent in the reaction (total_time / total time since start)
-    double percentage    = 9;
+    double percentage = 9;
 }

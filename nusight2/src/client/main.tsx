@@ -13,9 +13,9 @@ import { installDashboard } from "./components/dashboard/install";
 import { installLocalisation } from "./components/localisation/install";
 import { withRobotSelectorMenuBar } from "./components/menu_bar/view";
 import { installOdometry } from "./components/odometry/install";
+import { installProfiler } from "./components/profiler/install";
 import { installVision } from "./components/vision/install";
 import { installVisualMesh } from "./components/visual_mesh/install";
-import { installProfiler } from "./components/profiler/install";
 import { NavigationConfiguration } from "./navigation";
 import { NUsightNetwork } from "./network/nusight_network";
 

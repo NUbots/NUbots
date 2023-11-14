@@ -54,8 +54,8 @@ export class ProfilerView extends React.Component<{
     const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
     return {
       width: `${clampedPercentage}%`,
-      backgroundColor: 'lightblue',
-      height: '100%',
+      backgroundColor: "lightblue",
+      height: "100%",
     };
   }
 
@@ -84,7 +84,7 @@ export class ProfilerView extends React.Component<{
             <table className="min-w-full table-auto border-collapse border border-gray-200">
               <thead>
                 <tr>
-                <th onClick={() => this.setSort("reactionId")}>Reaction ID {this.getSortIcon("reactionId")}</th>
+                  <th onClick={() => this.setSort("reactionId")}>Reaction ID {this.getSortIcon("reactionId")}</th>
                   <th onClick={() => this.setSort("reactor")}>Reactor Name {this.getSortIcon("reactor")}</th>
                   <th onClick={() => this.setSort("name")}>Reaction Name {this.getSortIcon("name")}</th>
                   <th onClick={() => this.setSort("total_time")}>Total Time (ms) {this.getSortIcon("total_time")}</th>
@@ -96,11 +96,11 @@ export class ProfilerView extends React.Component<{
                 </tr>
               </thead>
               <tbody>
-                {sortedProfiles.map(profile => (
+                {sortedProfiles.map((profile) => (
                   <tr key={profile.reactionId}>
                     <td>{profile.reactionId}</td>
                     <td>{profile.reactor}</td>
-                    <td>{profile.name.replace(/\w+::/g, '')} </td>
+                    <td>{profile.name.replace(/\w+::/g, "")} </td>
                     <td>{profile.total_time.toFixed(1)}</td>
                     <td>{profile.count}</td>
                     <td>{profile.min_time.toFixed(1)}</td>
