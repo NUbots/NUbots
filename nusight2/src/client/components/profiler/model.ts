@@ -1,6 +1,5 @@
 import { computed } from "mobx";
 import { observable } from "mobx";
-import internal from "stream";
 
 import { memoize } from "../../base/memoize";
 import { AppModel } from "../app/model";
@@ -27,9 +26,7 @@ export class ProfilerRobotModel {
   constructor(readonly robotModel: RobotModel) {}
 
   static of = memoize((robotModel: RobotModel) => {
-    return new ProfilerRobotModel(
-      robotModel,
-    );
+    return new ProfilerRobotModel(robotModel);
   });
 
   // Method to update profiles
@@ -48,6 +45,6 @@ export class Profile {
     readonly min_time: number,
     readonly max_time: number,
     readonly avg_time: number,
-    readonly percentage: number
+    readonly percentage: number,
   ) {}
 }
