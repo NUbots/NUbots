@@ -1,0 +1,18 @@
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher
+  support::logging::ConsoleLogHandler
+  # Config
+  actuation::KinematicsConfiguration
+  platform::Webots
+  input::SensorFilter
+  # Director
+  extension::Director
+  # Onboarding
+  onboarding::Pong
+  onboarding::Ping
+  onboarding::Judge
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+)
