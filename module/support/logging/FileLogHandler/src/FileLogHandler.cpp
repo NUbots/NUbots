@@ -114,6 +114,7 @@ namespace module::support::logging {
                 case NUClear::INFO: log_file << source << Colour::brightblue << "INFO: "; break;
                 case NUClear::WARN: log_file << source << Colour::yellow << "WARN: "; break;
                 case NUClear::ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
+                case NUClear::UNKNOWN:;
                 case NUClear::FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
             }
 

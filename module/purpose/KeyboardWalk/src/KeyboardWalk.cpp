@@ -135,12 +135,12 @@ namespace module::purpose {
 
             LogColours colours;
             switch (message.level) {
-                default:
                 case NUClear::TRACE: colours = LogColours::TRACE_COLOURS; break;
                 case NUClear::DEBUG: colours = LogColours::DEBUG_COLOURS; break;
                 case NUClear::INFO: colours = LogColours::INFO_COLOURS; break;
                 case NUClear::WARN: colours = LogColours::WARN_COLOURS; break;
                 case NUClear::ERROR: colours = LogColours::ERROR_COLOURS; break;
+                case NUClear::UNKNOWN:;
                 case NUClear::FATAL: colours = LogColours::FATAL_COLOURS; break;
             }
 
