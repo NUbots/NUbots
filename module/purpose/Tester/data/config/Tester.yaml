@@ -17,7 +17,7 @@ tasks:
   look_around_priority: 0
 
   # Skills
-  say_priority: 1
+  say_priority: 0
 
 # Position to walk to when emitting WalkToFieldPosition [x, y, theta]
 walk_to_field_position_position: [0, 0, 0]
