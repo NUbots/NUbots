@@ -86,4 +86,4 @@ initial_rpy: [0, 0.21, 0]
 # Specify which filtering method to use, either UKF, KF or MAHONY
 filtering_method: MAHONY
 
-urdf_path: "/home/nubots/models/nugus.urdf"
+urdf_path: "models/robot.urdf"
