@@ -69,7 +69,7 @@ namespace module::input {
             configure_mahony(config);
 
             // Deadreckoning
-            Hwa.translation().y() =
+            Hwp.translation().y() =
                 tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
                                                                    nugus_model.home_configuration(),
                                                                    config["initial_anchor_frame"].as<std::string>())
@@ -123,7 +123,6 @@ namespace module::input {
                              const std::shared_ptr<const WalkState>& walk_state) {
                           auto sensors = std::make_unique<Sensors>();
 
-                          sensors->swing_foot_trajectory = walk_state->swing_foot_trajectory;
                           // Updates message with raw sensor data
                           update_raw_sensors(sensors, previous_sensors, raw_sensors);
 
@@ -180,10 +179,10 @@ namespace module::input {
     void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state) {
         // Compute torso pose in world space using kinematics from anchor frame
         if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
-            Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+            Hwt = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
         }
         else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
-            Hwt = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+            Hwt = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
         }
 
         // Update the anchor {a} frame if a support phase switch just occurred (could be done with foot down sensors)
@@ -191,17 +190,18 @@ namespace module::input {
             current_support_phase = walk_state.support_phase;
             if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
                 // Update the anchor frame to the base of left foot
-                Hwa = Hwt * sensors->Htx[FrameID::L_FOOT_BASE];
+                Hwp = Hwt * sensors->Htx[FrameID::L_FOOT_BASE];
             }
             else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
                 // Update the anchor frame to the base of right foot
-                Hwa = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
+                Hwp = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
             }
         }
         // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on flat ground
-        Hwa.translation().z() = 0;
-        Hwa.linear() =
-            Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwa.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwp.translation().z() = 0;
+        Hwp.linear() =
+            Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwp.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        sensors->Hwp = Hwp;
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
