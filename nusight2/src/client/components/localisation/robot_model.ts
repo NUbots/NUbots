@@ -117,11 +117,12 @@ export class LocalisationRobotModel {
   @observable color?: string;
   @observable Htw: Matrix4; // World to torso
   @observable Hfw: Matrix4; // World to field
+  @observable Hwp: Matrix4; // Anchor point (planted foot) to world
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
-  @observable swingFootTrajectory: { rSTt: Vector3[] };
+  @observable swingFootTrajectory: { rSPp: Vector3[] };
 
   constructor({
     model,
@@ -129,6 +130,7 @@ export class LocalisationRobotModel {
     color,
     Htw,
     Hfw,
+    Hwp,
     Rwt,
     motors,
     fieldLinePoints,
@@ -140,17 +142,19 @@ export class LocalisationRobotModel {
     color?: string;
     Htw: Matrix4;
     Hfw: Matrix4;
+    Hwp: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
-    swingFootTrajectory: { rSTt: Vector3[] };
+    swingFootTrajectory: { rSPp: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
     this.color = color;
     this.Htw = Htw;
     this.Hfw = Hfw;
+    this.Hwp = Hwp;
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
@@ -164,10 +168,11 @@ export class LocalisationRobotModel {
       name: model.name,
       Htw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
-      swingFootTrajectory: { rSTt: [] },
+      swingFootTrajectory: { rSPp: [] },
     });
   });
 
@@ -185,6 +190,12 @@ export class LocalisationRobotModel {
     return this.Hfw.multiply(this.Htw.invert());
   }
 
+  /** Anchor point to field transformation */
+  @computed
+  get Hfp(): Matrix4 {
+    return this.Hfw.multiply(this.Hwp);
+  }
+
   /** Field line points in field space */
   @computed
   get rPFf(): Vector3[] {
@@ -200,6 +211,6 @@ export class LocalisationRobotModel {
   /** Swing foot trajectory in field space */
   @computed
   get rSFf(): Vector3[] {
-    return this.swingFootTrajectory.rSTt.map((rSTt) => rSTt.applyMatrix4(this.Hft));
+    return this.swingFootTrajectory.rSPp.map((rSPp) => rSPp.applyMatrix4(this.Hfp));
   }
 }

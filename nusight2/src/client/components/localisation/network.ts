@@ -45,10 +45,8 @@ export class LocalisationNetwork {
 
   @action.bound
   private onWalkState(robotModel: RobotModel, walkState: message.behaviour.state.WalkState) {
-    console.log("walk state");
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.swingFootTrajectory.rSTt = walkState.swingFootTrajectory.map((rSTt) => Vector3.from(rSTt));
-    console.log(robot.swingFootTrajectory.rSTt);
+    robot.swingFootTrajectory.rSPp = walkState.swingFootTrajectory.map((rSPp) => Vector3.from(rSPp));
   }
 
   @action.bound
@@ -66,9 +64,9 @@ export class LocalisationNetwork {
     }
 
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.swingFootTrajectory.rSTt = sensors.swingFootTrajectory.map((rSTt) => Vector3.from(rSTt));
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
+    robot.Hwp = Matrix4.from(sensors.Hwp);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;
