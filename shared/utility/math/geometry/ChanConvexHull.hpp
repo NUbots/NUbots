@@ -201,7 +201,7 @@ namespace utility::math::geometry {
     }
 
     /// @brief Finds the lower tangent of the convex hulls
-    /// Works by starting at the leftmost point and going counter-clockwise until the leftmost point is reached
+    /// Works by starting at the leftmost point and going counter-clockwise until the rightmost point is reached
     /// @param hulls A vector of sub-hulls, each sub-hull is a vector of indices corresponding to points in `points`
     /// @param points All the points in our space, including points not to be used in the convex hull algorithm
     /// @param leftmost The index of the leftmost point in all the hulls
@@ -227,7 +227,7 @@ namespace utility::math::geometry {
                         (points(1, index) - points(1, current_point)) * (points(0, next_point) - points(0, index))
                         - (points(0, index) - points(0, current_point)) * (points(1, next_point) - points(1, index));
 
-                    if (orientation > 0
+                    if (orientation < 0
                         || (orientation == 0
                             && (points.col(index) - points.col(current_point)).squaredNorm()
                                    > (points.col(next_point) - points.col(current_point)).squaredNorm())) {
@@ -257,17 +257,10 @@ namespace utility::math::geometry {
 
         // Add the leftmost and rightmost points to the merged hull
         merged_hull.push_back(leftmost);
-        merged_hull.push_back(rightmost);
 
         // Find the upper and lower tangents of the hulls and add the points on the tangents to the merged hull
         std::vector<int> upper_tangent = find_upper_tangent(hulls, points, leftmost, rightmost);
         std::vector<int> lower_tangent = find_lower_tangent(hulls, points, leftmost, rightmost);
-        NUClear::log<NUClear::INFO>("Upper tangent has {} points, lower tangent has {} points",
-                                    upper_tangent.size(),
-                                    lower_tangent.size());
-        for (int point : lower_tangent) {
-            NUClear::log<NUClear::INFO>("Lower tangent point: {}, {}", points(0, point), points(1, point));
-        }
 
         // Add the points on the upper tangent to the merged hull in counter-clockwise order
         for (auto it = upper_tangent.rbegin(); it != upper_tangent.rend(); ++it) {
@@ -275,9 +268,11 @@ namespace utility::math::geometry {
         }
 
         // Add the points on the lower tangent to the merged hull in counter-clockwise order
-        for (int point : lower_tangent) {
-            merged_hull.push_back(point);
+        for (auto it = lower_tangent.rbegin(); it != lower_tangent.rend(); ++it) {
+            merged_hull.push_back(*it);
         }
+
+        merged_hull.push_back(leftmost);
         return merged_hull;
     }
 
