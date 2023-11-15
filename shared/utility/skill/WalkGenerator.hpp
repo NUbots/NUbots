@@ -76,7 +76,7 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Get the swing foot pose at the current time.
+         * @brief Get the swing foot (Hps) pose at the current time.
          * @return Trajectory of torso.
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_swing_foot_pose() const {
@@ -84,7 +84,7 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Get the swing foot pose at the given time.
+         * @brief Get the swing foot (Hps) pose at the given time.
          * @param t Time.
          * @return Swing foot pose at time t.
          */
@@ -93,7 +93,7 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Get the torso pose object at the current time.
+         * @brief Get the torso pose (Hpt) object at the current time.
          * @return Pose of torso.
          */
         Eigen::Transform<Scalar, 3, Eigen::Isometry> get_torso_pose() const {
@@ -101,7 +101,7 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Get the torso pose object at the given time.
+         * @brief Get the torso pose (Hpt) object at the given time.
          * @param t Time.
          * @return Pose of torso at time t.
          */

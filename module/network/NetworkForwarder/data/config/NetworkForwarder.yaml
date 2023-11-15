@@ -30,3 +30,5 @@ targets:
     # Localisation Messages
     message.localisation.Ball: true
     message.localisation.Field: true
+
+    message.behaviour.state.WalkState: true
