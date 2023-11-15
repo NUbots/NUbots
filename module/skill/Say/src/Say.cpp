@@ -22,9 +22,16 @@ namespace module::skill {
 
         on<Configuration>("Say.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Say.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.voice       = config["voice"].as<std::string>();
-            cfg.device_name = config["device_name"].as<std::string>();
+            this->log_level  = config["log_level"].as<NUClear::LogLevel>();
+            cfg.voice        = config["voice"].as<std::string>();
+            cfg.device_name  = config["device_name"].as<std::string>();
+            cfg.startup_text = config["startup_text"].as<std::string>();
+        });
+
+        on<Startup>().then([this] {
+            if (!cfg.startup_text.empty()) {
+                emit<Task>(std::make_unique<SayTask>(cfg.startup_text, false));
+            }
         });
 
         on<Provide<SayTask>>().then([this](const SayTask& say, const RunInfo& info) {

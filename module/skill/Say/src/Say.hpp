@@ -16,6 +16,8 @@ namespace module::skill {
             std::string voice = "en_US/vctk_low";
             /// @brief Device name to play audio to
             std::string device_name = "default";
+            /// @brief Text to say on startup
+            std::string startup_text = "";
         } cfg;
 
     public:
