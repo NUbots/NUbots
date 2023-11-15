@@ -123,6 +123,7 @@ export class LocalisationRobotModel {
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
   @observable swingFootTrajectory: { rSPp: Vector3[] };
+  @observable torsoTrajectory: { rTPp: Vector3[] };
 
   constructor({
     model,
@@ -136,6 +137,7 @@ export class LocalisationRobotModel {
     fieldLinePoints,
     ball,
     swingFootTrajectory,
+    torsoTrajectory,
   }: {
     model: RobotModel;
     name: string;
@@ -148,6 +150,7 @@ export class LocalisationRobotModel {
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
     swingFootTrajectory: { rSPp: Vector3[] };
+    torsoTrajectory: { rTPp: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
@@ -160,6 +163,7 @@ export class LocalisationRobotModel {
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
     this.swingFootTrajectory = swingFootTrajectory;
+    this.torsoTrajectory = torsoTrajectory;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -173,6 +177,7 @@ export class LocalisationRobotModel {
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
       swingFootTrajectory: { rSPp: [] },
+      torsoTrajectory: { rTPp: [] },
     });
   });
 
@@ -213,4 +218,11 @@ export class LocalisationRobotModel {
   get rSFf(): Vector3[] {
     return this.swingFootTrajectory.rSPp.map((rSPp) => rSPp.applyMatrix4(this.Hfp));
   }
+
+  /** Torso trajectory in field space */
+  @computed
+  get rTFf(): Vector3[] {
+    return this.torsoTrajectory.rTPp.map((rTPp) => rTPp.applyMatrix4(this.Hfp));
+  }
+
 }

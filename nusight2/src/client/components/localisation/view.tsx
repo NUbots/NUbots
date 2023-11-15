@@ -186,9 +186,14 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       <Balls model={model} />
       {model.robots.map((robotModel) => {
         const swingFootTrajectory = robotModel.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-        // Check if swingFootTrajectory contains points
         if (swingFootTrajectory.length > 0 && robotModel.visible) {
           return <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} />;
+        }
+      })}
+      {model.robots.map((robotModel) => {
+        const torsoTrajectory = robotModel.rTFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+        if (torsoTrajectory.length > 0 && robotModel.visible) {
+          return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} />;
         }
       })}
     </object3D>

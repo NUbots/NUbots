@@ -164,15 +164,14 @@ namespace module::skill {
 
                     // Generate a set of swing foot poses for visually debugging
                     if (walk_task.velocity_target.norm() > 0) {
-
-                        std::vector<Eigen::Vector3d> swing_foot_trajectory;
                         double t = 0;
                         while (t < cfg.walk_generator_parameters.step_period) {
                             auto Hps = walk_generator.get_swing_foot_pose(t);
-                            swing_foot_trajectory.push_back(Hps.translation());
+                            auto Hpt = walk_generator.get_torso_pose(t);
+                            walk_state->swing_foot_trajectory.push_back(Hps.translation());
+                            walk_state->torso_trajectory.push_back(Hpt.translation());
                             t += cfg.walk_generator_parameters.step_period / 10;
                         }
-                        walk_state->swing_foot_trajectory = swing_foot_trajectory;
                     }
                 }
 

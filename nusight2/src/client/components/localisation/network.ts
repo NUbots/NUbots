@@ -47,6 +47,7 @@ export class LocalisationNetwork {
   private onWalkState(robotModel: RobotModel, walkState: message.behaviour.state.WalkState) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.swingFootTrajectory.rSPp = walkState.swingFootTrajectory.map((rSPp) => Vector3.from(rSPp));
+    robot.torsoTrajectory.rTPp = walkState.torsoTrajectory.map((rTPp) => Vector3.from(rTPp));
   }
 
   @action.bound
