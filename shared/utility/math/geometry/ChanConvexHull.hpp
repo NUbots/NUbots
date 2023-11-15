@@ -69,6 +69,10 @@ namespace utility::math::geometry {
     /// @return Indicies corresponding to points in `points` that make up the convex hull for this set of points
     std::vector<int> graham_scan(const std::vector<int>& indices,
                                  const Eigen::Matrix<double, 2, Eigen::Dynamic>& points) {
+        if (indices.size() < 3) {
+            return indices;
+        }
+
         // Copy `indices` so we can modify it
         std::vector<int> indices_copy = indices;
 
@@ -116,18 +120,16 @@ namespace utility::math::geometry {
     /// @param m The number of subsets to partition the indices into
     /// @return All the subsets, stored as a vector containing each subset
     std::vector<std::vector<int>> partition_points(const std::vector<int>& indices, int m) {
-        // Initialise the vector that will store the subsets of indices, there will be `m` subsets
-        std::vector<std::vector<int>> subsets{};
+        std::vector<std::vector<int>> subsets(m);
+        int n           = indices.size();
+        int subset_size = n / m;
+        int remainder   = n % m;
 
-        // Find the number of points in each subset
-        int subset_size = indices.size() / m;
-
-        // Loop over the subsets and add the indices to the subsets
-        // The last subset may have less points than the others, so we need to check for this
-        for (int i = 0; i < m; ++i) {
-            int start  = i * subset_size;
-            int end    = (i == m - 1) ? indices.size() : start + subset_size;
+        for (int i = 0; i < m; i++) {
+            int start  = i * subset_size + std::min(i, remainder);
+            int end    = start + subset_size + (i < remainder ? 1 : 0);
             subsets[i] = std::vector<int>(indices.begin() + start, indices.begin() + end);
+            // NUClear::log<NUClear::INFO>("Subset", i, "has", subsets[i].size(), "points. start-end:", start, end);
         }
 
         return subsets;
@@ -289,7 +291,7 @@ namespace utility::math::geometry {
                                               const Eigen::Matrix<double, 2, Eigen::Dynamic>& points) {
         // Iterator variable to increase the number of subsets in each loop
         // Start it higher than 0 since we have a lot of points
-        int t = 2;
+        int t = 0;
         // The number of subsets to divide the points into, aims to find the smallest `m` such that the convex hull
         // algorithm returns a convex hull with no more than `m` points
         int m = 0;
@@ -306,6 +308,10 @@ namespace utility::math::geometry {
             // Find the convex hulls of each subset using graham scan
             std::vector<std::vector<int>> hulls{};
             for (auto& subset : subsets) {
+                // We can't use this if a subset is too small
+                if (subset.size() < 3) {
+                    return final_hull;
+                }
                 hulls.push_back(graham_scan(subset, points));
             }
 
