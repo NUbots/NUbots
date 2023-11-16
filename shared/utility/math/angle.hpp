@@ -62,6 +62,29 @@ namespace utility::math::angle {
     }
 
     /**
+     *  Finds the angle between two vectors. This method is numerically stable when the vectors are close to parallel.
+     *
+     * @details Based on the implementation found here https://www.plunk.org/~hatch/rightway.html
+     *
+     * @param u A unit vector
+     * @param v A unit vector
+     *
+     * @tparam Derived Type derived from `Eigen::MatrixBase` (i.e. any dense matrix type)
+     * @tparam Scalar  Type of each element stored in the dense matrix (must be a floating point type)
+     *
+     * @return The acute angle in range [0,pi] between two vectors.
+     */
+    template <typename DerivedU, typename DerivedV>
+    auto angle_between(const Eigen::MatrixBase<DerivedU>& u, const Eigen::MatrixBase<DerivedV>& v) ->
+        typename std::enable_if_t<
+            std::is_floating_point_v<typename DerivedU::Scalar> && std::is_floating_point_v<typename DerivedV::Scalar>,
+            typename DerivedU::Scalar> {
+        using Scalar = typename DerivedU::Scalar;
+        return u.dot(v) < Scalar(0) ? std::numbers::pi_v<Scalar> - Scalar(2) * std::asin((-v - u).norm() * Scalar(0.5))
+                                    : Scalar(2) * std::asin((v - u).norm() * Scalar(0.5));
+    }
+
+    /**
      * Calculates the difference between two angles between -pi and pi
      * Method:
      * http://math.stackexchange.com/questions/1158223/solve-for-x-where-a-sin-x-b-cos-x-c-where-a-b-and-c-are-kno
