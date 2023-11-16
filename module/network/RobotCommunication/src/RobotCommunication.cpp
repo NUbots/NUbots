@@ -77,11 +77,11 @@ namespace module::network {
                 // log<NUClear::DEBUG>("game_state->data.phase: ", game_state->data.phase);
 
 
-                auto msg = std::make_unique<RoboCup>();
+                auto teamMessage = std::make_unique<RoboCup>();
 
 
                 // Timestamp
-                msg->timestamp = NUClear::clock::now();
+                teamMessage->timestamp = NUClear::clock::now();
 
                 // State
                 int state = 0;
@@ -93,56 +93,84 @@ namespace module::network {
                 }
 
                 // Current pose
+                // robots are in a vector (repeated)
+                // variable name is "others"
+                // This may assign to a single robot idk
+                if (config != nullptr) {
+                    teamMessage->current_pose.player_id  = config->player_id;
+
+                    // teamMessage->Robot->position   = game_state.Hfw;
+
+                    // just seems like this comes from Overview.proto
+                    // or Field.proto, assuming that this is where the robot is on field?
+
+                    // teamMessage->Robot->covariance = game_state.covariance;
+                    teamMessage->current_pose.team = config->team_id;
+                }
 
                 // Walk_state command
                 if (walk_state != nullptr) {
-                    msg->walk_command = {static_cast<float>(walk_state->velocity_target.x()), static_cast<float>(walk_state->velocity_target.y()), static_cast<float>(walk_state->velocity_target.z())};
-                    log<NUClear::DEBUG>("walk_state command x", msg->walk_command.x);
-                    log<NUClear::DEBUG>("walk_state command y", msg->walk_command.y);
+                    teamMessage->walk_command = {static_cast<float>(walk_state->velocity_target.x()), static_cast<float>(walk_state->velocity_target.y()), static_cast<float>(walk_state->velocity_target.z())};
+                    log<NUClear::DEBUG>("walk_state command x", teamMessage->walk_command.x);
+                    log<NUClear::DEBUG>("walk_state command y", teamMessage->walk_command.y);
                 }
 
                 // Target pose
+
+
+
 
                 // Kick target
                 if (kick) {
                     message::input::fvec2 kick_target;
                     kick_target.x = kick->target.x();
                     kick_target.y = kick->target.y();
-                    msg->kick_target = kick_target;
+                    teamMessage->kick_target = kick_target;
                     log<NUClear::DEBUG>("kick_target ", kick_target.x);
                 }
 
                 // Robots
-                if (robot != nullptr) {
-                    // msg->Robot.player_id  = config.player_id;
-                    // msg->Robot->position   = game_state.Hfw;
-                    // msg->Robot->covariance = game_state.covariance;
-                    // msg->Robot->team       = config.team_id;
-                }
+
+                // where the robot thinks the other robots are
+
+
 
                 // Ball
-                if(ball != nullptr) {
-                    msg->ball.position = {static_cast<float>(ball->rBWw.x()), static_cast<float>(ball->rBWw.y()), static_cast<float>(ball->rBWw.z())};
-                    msg->ball.velocity = {static_cast<float>(ball->vBw.x()), static_cast<float>(ball->vBw.y()), static_cast<float>(ball->vBw.z())};
-                    // msg->ball.covariance =  {
+                if (ball) {
+                    teamMessage->ball.position = {static_cast<float>(ball->rBWw.x()), static_cast<float>(ball->rBWw.y()), static_cast<float>(ball->rBWw.z())};
+                    teamMessage->ball.velocity = {static_cast<float>(ball->vBw.x()), static_cast<float>(ball->vBw.y()), static_cast<float>(ball->vBw.z())};
+
+                    // convert from a mat4 (Ball) to fmat3 (Robocup)
+                    // data types found in math_types.hpp
+                    Eigen::Matrix<double, 4, 4> test = ball->covariance;
+                    log<NUClear::DEBUG>("Test covariance: ", test);
+
+
+                    // teamMessage->ball.covariance =  {
                     //     static_cast<float>(ball->covariance[0][0]),
                     //     static_cast<float>(ball->covariance[1][0]),
                     //     static_cast<float>(ball->covariance[2][0])
                     // };
 
 
-                    float position = msg->ball.position.x; //TODO: I am proof of concept delete me ~
+                    float position = teamMessage->ball.position.x; //TODO: I am proof of concept delete me ~
                     log<NUClear::DEBUG>("Ball position rBWw: ", position);
                     log<NUClear::DEBUG>("Ball velocity vBw: ", ball->vBw);
-                    log<NUClear::DEBUG>("Ball covariance: ", ball->covariance);
+                    // N5Eigen6MatrixIdLi4ELi4ELi0ELi4ELi4EEE lol
+                    // log<NUClear::DEBUG>("Ball covariance: ", typeid(ball->covariance).name());
                 }
 
-                // msg->walk_command = walk->velocity_target;
-                // log<NUClear::DEBUG>("walk command: ", walk->velocity_target);mand;
-                // msg->kick_target  = kick.target;
+                if (walk_state) {
+                    // TODO: try to make shorter?
+                    teamMessage->walk_command.x = static_cast<float>(walk_state->velocity_target(0));
+                    teamMessage->walk_command.y = static_cast<float>(walk_state->velocity_target(1));
+                    teamMessage->walk_command.z = static_cast<float>(walk_state->velocity_target(2));
+
+                    // log<NUClear::DEBUG>("walk command: ", walk->velocity_target);mand;
+                }
 
 
-                emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
+                emit<Scope::UDP>(teamMessage, cfg.broadcast_ip, cfg.send_port);
             });
     }
 
