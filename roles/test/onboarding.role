@@ -12,5 +12,4 @@ nuclear_role(
   actuation::Kinematics
   actuation::Servos
   onboarding::Ping
-  onboarding::Pong
 )
