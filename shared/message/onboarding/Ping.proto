@@ -3,4 +3,8 @@ syntax = "proto3";
 package message.onboarding;
 
 message Ping{
+    // TODO: Fill this message with an int32 field named "count". What should its tag be?
+    // HINT: Look at the format of the other protot messages in the code base for reference.
+
+    int32 count = 1;
 }
