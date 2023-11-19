@@ -320,6 +320,7 @@ RUN install-package libxcursor
 RUN install-package libxi
 RUN install-package mesa
 RUN install-from-source https://github.com/Tom0Brien/mujoco/archive/e1b4a73e845b2096cfc026afc1566233c9844b85.tar.gz
+RUN install-package glfw-x11
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
