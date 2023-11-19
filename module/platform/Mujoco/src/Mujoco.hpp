@@ -35,6 +35,8 @@ namespace module::platform {
         double lastx       = 0;
         double lasty       = 0;
 
+        GLFWwindow* window;
+
 
         // keyboard callback
         void keyboard(GLFWwindow* window, int key, int scancode, int act, int mods) {
@@ -44,7 +46,6 @@ namespace module::platform {
                 mj_forward(m, d);
             }
         }
-
 
         // mouse button callback
         void mouse_button(GLFWwindow* window, int button, int act, int mods) {
@@ -56,7 +57,6 @@ namespace module::platform {
             // update mouse position
             glfwGetCursorPos(window, &lastx, &lasty);
         }
-
 
         // mouse move callback
         void mouse_move(GLFWwindow* window, double xpos, double ypos) {
@@ -95,11 +95,25 @@ namespace module::platform {
             mjv_moveCamera(m, action, dx / height, dy / height, &scn, &cam);
         }
 
-
         // scroll callback
         void scroll(GLFWwindow* window, double xoffset, double yoffset) {
             // emulate vertical mouse motion = 5% of window height
             mjv_moveCamera(m, mjMOUSE_ZOOM, 0, -0.05 * yoffset, &scn, &cam);
+        }
+
+        // Static member functions
+        static void keyboard_callback(GLFWwindow* window, int key, int scancode, int act, int mods) {
+            Mujoco* instance = static_cast<Mujoco*>(glfwGetWindowUserPointer(window));
+            if (instance) {
+                instance->keyboard(window, key, scancode, act, mods);
+            }
+        }
+
+        static void mouse_move_callback(GLFWwindow* window, double xpos, double ypos) {
+            Mujoco* instance = static_cast<Mujoco*>(glfwGetWindowUserPointer(window));
+            if (instance) {
+                instance->mouse_move(window, xpos, ypos);
+            }
         }
     };
 
