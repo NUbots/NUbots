@@ -31,5 +31,5 @@ outside_map_penalty_factor: 0.9
 # Delay before the particle filter starts (allows odometry to settle)
 start_time_delay: 5
 
-# Starting side of the field (LEFT, RIGHT or EITHER)
+# Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT or EITHER)
 starting_side: EITHER
