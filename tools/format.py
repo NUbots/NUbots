@@ -71,7 +71,7 @@ formatters["licence"] = {
         "Dockerfile",
         "**/Dockerfile",
     ],
-    "exclude": [],  # TODO exclude files that are not ours
+    "exclude": ["shared/utility/motion/splines/*"],  # TODO exclude files that are not ours
 }
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
