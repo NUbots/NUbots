@@ -27,6 +27,10 @@
 # SOFTWARE.
 #
 
+# Toolchain for compiling for AWS g4dn.xlarge instances (RoboCup 2021)
+#
+# See 'The Toolchain' in NUbook for details on generating flags
+
 import argparse
 import os
 
