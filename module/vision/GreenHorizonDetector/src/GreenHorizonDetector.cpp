@@ -24,13 +24,13 @@ namespace module::vision {
     GreenHorizonDetector::GreenHorizonDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& config) {
             // Use configuration here from file GreenHorizonDetector.yaml
-            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            config.confidence_threshold = cfg["confidence_threshold"].as<double>();
-            config.cluster_points       = cfg["cluster_points"].as<uint>();
-            config.distance_offset      = cfg["distance_offset"].as<double>();
+            cfg.confidence_threshold = config["confidence_threshold"].as<double>();
+            cfg.cluster_points       = config["cluster_points"].as<uint>();
+            cfg.distance_offset      = config["distance_offset"].as<double>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
@@ -60,8 +60,7 @@ namespace module::vision {
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return cls(FIELD_INDEX, idx) >= config.confidence_threshold
-                           || cls(LINE_INDEX, idx) >= config.confidence_threshold;
+                    return cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= cfg.confidence_threshold;
                 });
 
             // Discard indices that are not on the boundary
@@ -74,21 +73,109 @@ namespace module::vision {
                 }
             }
 
+            std::vector<std::vector<int>> clusters;
+            utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                        indices.end(),
+                                                        neighbours,
+                                                        cfg.cluster_points,
+                                                        clusters);
+
+            log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+
+            // Lambda to get the closest distance of a cluster
+            auto get_closest_distance = [&](const std::vector<int>& cluster) {
+                // Find the cluster that is closest to the robot
+                int closest_point = 0;
+                for (const auto& idx : cluster) {
+                    if (rPWw.col(closest_point).norm() > rPWw.col(idx).norm()) {
+                        closest_point = idx;
+                    }
+                }
+                return rPWw.col(closest_point).norm();
+            };
+
+            // Set the closest cluster to the first cluster
+            int closest_cluster     = 0;
+            double closest_distance = get_closest_distance(clusters[0]);
+
+            // Find the cluster that is closest to the robot
+            for (int i = 1; i < clusters.size(); i++) {
+                double distance = get_closest_distance(clusters[i]);
+                if (distance < closest_distance) {
+                    closest_cluster  = i;
+                    closest_distance = distance;
+                }
+            }
+
+            auto field_cluster = clusters[closest_cluster];
+
+            // Graph the remaining points if debugging
+            if (log_level <= NUClear::DEBUG) {
+                for (int idx : field_cluster) {
+                    emit(graph("Field cluster point", rPWw.col(idx).x(), rPWw.col(idx).y()));
+                }
+            }
+
             // The remaining points are on the boundary of the field
             // They may also appear around other objects such as the ball
             log<NUClear::DEBUG>(fmt::format("Found {} points on the boundary of the field to create a convex hull with",
-                                            indices.size()));
+                                            field_cluster.size()));
 
             // Convex hull algorithms require at least three points
-            if (indices.size() < 3) {
+            if (field_cluster.size() < 3) {
                 log<NUClear::DEBUG>("Not enough points to make a convex hull");
                 return;
             }
 
+            // Eigen::Matrix<double, 3, Eigen::Dynamic> points(3, 10);
+            // // Create a scatter of point representing a square
+            // points.col(0) << 0, 0, 0;
+            // points.col(1) << 0, 1, 0;
+            // points.col(2) << 1, 1, 0;
+            // points.col(3) << 1, 0, 0;
+            // points.col(4) << 0, 0.5, 0;
+            // points.col(5) << 0.5, 1, 0;
+            // points.col(6) << 1, 0.5, 0;
+            // points.col(7) << 0.5, 0, 0;
+            // points.col(8) << 0.5, 0.5, 0;
+            // points.col(9) << 0.5, 0.3, 0;
+
+            // Triangle test
+            // points.col(0) << 0, 0, 0;
+            // points.col(1) << 0.4, 0.8, 0;
+            // points.col(2) << 0.1, 0.8, 0;
+            // points.col(3) << 0.2, 0.4, 0;
+            // points.col(4) << 0, 1, 0;
+            // points.col(5) << 0.0, 0.5, 0;
+            // points.col(6) << 0.5, 0.5, 0;
+            // points.col(7) << 1, 1, 0;
+            // points.col(8) << 0.7, 0.9, 0;
+            // points.col(9) << 0.1, 0.1, 0;
+
+            // points.col(0) << 0, 0, 0;
+            // points.col(1) << 0.4, 0.8, 0;
+            // points.col(2) << 0.35, -0.15, 0;
+            // points.col(3) << 0.2, 0.4, 0;
+            // points.col(4) << 0, 1, 0;
+            // points.col(5) << 0.0, 0.5, 0;
+            // points.col(6) << 0.5, 0.5, 0;
+            // points.col(7) << 1, 1, 0;
+            // points.col(8) << 0.7, 0.9, 0;
+            // points.col(9) << 0.1, 0.1, 0;
+
+
+            // std::vector<int> indices2(points.cols());
+            // std::iota(indices2.begin(), indices2.end(), 0);
+
+            // for (int idx : indices2) {
+            //     emit(graph("Field point", points.col(idx).x(), points.col(idx).y()));
+            // }
+
             log<NUClear::DEBUG>("Calculating convex hull");
 
             // Find the convex hull of the field points
-            auto hull_indices = utility::math::geometry::chans_convex_hull(indices, rPWw);
+            auto hull_indices = utility::math::geometry::chans_convex_hull(field_cluster, rPWw);
+            // auto hull_indices = utility::math::geometry::chans_convex_hull(indices2, points);
 
             log<NUClear::DEBUG>("Calculated a convex hull");
 
@@ -117,12 +204,12 @@ namespace module::vision {
                 const double d                 = mesh.Hcw(2, 3) / ray.z();
                 Eigen::Vector3d ray_projection = ray * d;
                 const double norm              = ray_projection.head<2>().norm();
-                ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
+                ray_projection.head<2>() *= 1.0f + cfg.distance_offset / norm;
                 msg->horizon.emplace_back(ray_projection.normalized().cast<float>());
             }
             log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
                                             hull_indices.size(),
-                                            indices.size()));
+                                            field_cluster.size()));
             emit(std::move(msg));
         });
     }
