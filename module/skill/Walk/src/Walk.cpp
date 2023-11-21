@@ -11,6 +11,7 @@
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -33,6 +34,7 @@ namespace module::skill {
     using WalkTask = message::skill::Walk;
     using message::input::Sensors;
 
+    using utility::input::FrameID;
     using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::math::euler::MatrixToEulerIntrinsic;
@@ -139,19 +141,46 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct leg IK tasks
-                auto left_leg  = std::make_unique<LeftLegIK>();
-                left_leg->time = goal_time;
-                left_leg->Htl  = Htl;
+                auto left_leg   = std::make_unique<LeftLegIK>();
+                auto right_leg  = std::make_unique<RightLegIK>();
+                left_leg->time  = goal_time;
+                right_leg->time = goal_time;
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
                     left_leg->servos[id] = ServoState(cfg.leg_servo_gain, 100);
                 }
-
-                auto right_leg  = std::make_unique<RightLegIK>();
-                right_leg->time = goal_time;
-                right_leg->Htr  = Htr;
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {
                     right_leg->servos[id] = ServoState(cfg.leg_servo_gain, 100);
                 }
+
+                const Eigen::Isometry3d Htl_actual(sensors.Htx[FrameID::L_FOOT_BASE]);
+                const Eigen::Isometry3d Htr_actual(sensors.Htx[FrameID::R_FOOT_BASE]);
+
+
+                if (walk_generator.is_left_foot_planted()) {
+                    // Update K gain by multiplying by the time delta as its integrated "velocity" control
+                    torso_controller.set_Kp(cfg.torso_pid_gains[0] * time_delta);
+                    Eigen::Vector2d torso_position_desired = Htl.inverse().translation().head<2>();
+                    Eigen::Vector2d torso_position_actual  = Htl_actual.inverse().translation().head<2>();
+                    Eigen::Vector2d torso_offset =
+                        torso_controller.update(torso_position_desired, torso_position_actual, time_delta);
+                    auto Hlt = Htl.inverse();
+                    Hlt.translation().head<2>() += torso_offset;
+                    left_leg->Htl  = Hlt.inverse();
+                    right_leg->Htr = Htr;
+                }
+                else {
+                    // Update K gain by multiplying by the time delta as its integrated "velocity" control
+                    torso_controller.set_Kp(cfg.torso_pid_gains[0] * time_delta);
+                    Eigen::Vector2d torso_position_desired = Htr.inverse().translation().head<2>();
+                    Eigen::Vector2d torso_position_actual  = Htr_actual.inverse().translation().head<2>();
+                    Eigen::Vector2d torso_offset =
+                        torso_controller.update(torso_position_desired, torso_position_actual, time_delta);
+                    auto Hrt = Htr.inverse();
+                    Hrt.translation().head<2>() += torso_offset;
+                    right_leg->Htr = Hrt.inverse();
+                    left_leg->Htl  = Htl;
+                }
+
 
                 emit<Task>(left_leg);
                 emit<Task>(right_leg);

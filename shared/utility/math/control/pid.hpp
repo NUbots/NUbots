@@ -49,6 +49,29 @@ namespace utility::math::control {
 
             return P + I + D;
         }
+
+        void set_gains(Scalar Kp, Scalar Ki, Scalar Kd) {
+            this->Kp = Kp;
+            this->Ki = Ki;
+            this->Kd = Kd;
+        }
+
+        void set_Kp(Scalar Kp) {
+            this->Kp = Kp;
+        }
+        void set_Ki(Scalar Ki) {
+            this->Ki = Ki;
+        }
+        void set_Kd(Scalar Kd) {
+            this->Kd = Kd;
+        }
+
+        void set_max_integral(Scalar max_i_error) {
+            max_integral = max_i_error;
+        }
+        void set_min_integral(Scalar min_i_error) {
+            min_integral = min_i_error;
+        }
     };
 
 }  // namespace utility::math::control
