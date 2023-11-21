@@ -7,6 +7,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
@@ -30,6 +31,7 @@ namespace module::skill {
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using WalkTask = message::skill::Walk;
+    using message::input::Sensors;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
@@ -61,6 +63,12 @@ namespace module::skill {
             // Reset the walk engine and last update time
             walk_generator.reset();
             last_update_time = NUClear::clock::now();
+
+            // Controller gains
+            cfg.arm_servo_gain = config["gains"]["arm_servo_gain"].as<double>();
+            cfg.leg_servo_gain = config["gains"]["leg_servo_gain"].as<double>();
+            cfg.K_torso        = config["gains"]["K_torso"].as<double>();
+            cfg.Ki_torso       = config["gains"]["Ki_torso"].as<double>();
 
             // Configure the arms
             for (auto id : utility::input::LimbID::servos_for_arms()) {
@@ -94,11 +102,12 @@ namespace module::skill {
 
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
+           With<Sensors>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk_task) {
+            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -122,11 +131,25 @@ namespace module::skill {
                 Eigen::Isometry3d Htl = walk_generator.get_foot_pose(LimbID::LEFT_LEG);
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
-                // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_generator.is_left_foot_planted()));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_generator.is_left_foot_planted()));
+                // Construct leg IK tasks
+                auto left_leg  = std::make_unique<LeftLegIK>();
+                left_leg->time = goal_time;
+                left_leg->Htl  = Htl;
+                for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_LEG)) {
+                    left_leg->servos[id] = ServoState(cfg.leg_servo_gain, 100);
+                }
 
-                // Construct Arm IK tasks
+                auto right_leg  = std::make_unique<RightLegIK>();
+                right_leg->time = goal_time;
+                right_leg->Htr  = Htr;
+                for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_LEG)) {
+                    right_leg->servos[id] = ServoState(cfg.leg_servo_gain, 100);
+                }
+
+                emit<Task>(left_leg);
+                emit<Task>(right_leg);
+
+                // Construct arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
                 auto right_arm = std::make_unique<RightArm>();
                 for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
