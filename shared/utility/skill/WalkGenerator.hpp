@@ -112,6 +112,24 @@ namespace utility::skill {
         }
 
         /**
+         * @brief Get the torso velocity at the current time.
+         * @param t Time.
+         * @return Pose of torso at time t.
+         */
+        Eigen::Matrix<Scalar, 6, 1> get_torso_velocity() const {
+            return torso_trajectory.velocity(t);
+        }
+
+        /**
+         * @brief Get the torso velocity at the given time.
+         * @param t Time.
+         * @return Pose of torso at time t.
+         */
+        Eigen::Matrix<Scalar, 6, 1> get_torso_velocity(Scalar t) const {
+            return torso_trajectory.velocity(t);
+        }
+
+        /**
          * @brief Get the left or right foot pose at the given time in the torso {t} frame.
          * @param t Time.
          * @param limb Limb ID of foot to get pose of.

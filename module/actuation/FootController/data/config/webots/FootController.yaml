@@ -1,6 +1,10 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-servo_gain: 8
+servo_gain: 15
 
-keep_level: false
+alpha: 0.03
+K_com: 0.5
+K_zmp: 1
+K_velocity: 1
+K_eos: 1

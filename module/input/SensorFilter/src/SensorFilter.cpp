@@ -177,14 +177,6 @@ namespace module::input {
     }
 
     void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state) {
-        // Compute torso pose in world space using kinematics from anchor frame
-        if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
-            Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
-        }
-        else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
-            Hwt = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
-        }
-
         // Update the anchor {a} frame if a support phase switch just occurred (could be done with foot down sensors)
         if (walk_state.support_phase != current_support_phase) {
             current_support_phase = walk_state.support_phase;
@@ -197,10 +189,20 @@ namespace module::input {
                 Hwa = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
             }
         }
+
+        // Compute torso pose in world space using kinematics from anchor frame
+        if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
+            Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+        }
+        else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
+            Hwt = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+        }
+
         // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on flat ground
         Hwa.translation().z() = 0;
         Hwa.linear() =
             Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwa.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        sensors->Hat = Hwa.inverse() * Hwt;
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {

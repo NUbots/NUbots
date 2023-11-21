@@ -28,8 +28,8 @@ message ControlLeftFoot {
     iso3 Htf = 1;
     // Time to complete the motion
     google.protobuf.Timestamp time = 2;
-    // Bool to indicate whether or not to attempt to keep foot level with ground
-    bool keep_level = 3;
+    // Bool to indicate whether or not foot is planted foot
+    bool is_planted_foot = 3;
 }
 
 message ControlRightFoot {
@@ -37,6 +37,6 @@ message ControlRightFoot {
     iso3 Htf = 1;
     // Time to complete the motion
     google.protobuf.Timestamp time = 2;
-    // Bool to indicate whether or not to attempt to keep foot level with ground
-    bool keep_level = 3;
+    // Bool to indicate whether or not foot is planted foot
+    bool is_planted_foot = 3;
 }

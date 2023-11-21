@@ -94,11 +94,12 @@ namespace module::skill {
 
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
+           With<Sensors>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk_task) {
+            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)

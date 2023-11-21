@@ -4,3 +4,10 @@ log_level: INFO
 servo_gain: 6.64
 
 keep_level: false
+
+K_com: 75
+K_zmp: 1
+K_velocity: 1
+K_eos: 1
+
+alpha: 0.003

@@ -30,6 +30,12 @@ walk:
 
 gains:
   arms: 1
+  legs: 15
+  alpha: 0.03
+  K_com: 0.5
+  K_zmp: 1
+  K_velocity: 1
+  K_eos: 1
 
 # Fixed position of the arm joints during walking
 arms:

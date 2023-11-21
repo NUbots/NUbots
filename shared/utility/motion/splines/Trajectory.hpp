@@ -94,6 +94,16 @@ namespace utility::motion::splines {
             return pose;
         }
 
+        /// @brief Get 6D velocity at a given time
+        Eigen::Matrix<Scalar, 3, 1> velocity(Scalar time) const {
+            return Eigen::Matrix<Scalar, 6, 1>(eval_velocity(X, time),
+                                               eval_velocity(Y, time),
+                                               eval_velocity(Z, time),
+                                               eval_velocity(ROLL, time),
+                                               eval_velocity(PITCH, time),
+                                               eval_velocity(YAW, time));
+        }
+
         /// @brief Clear all splines, waypoints, and timepoints for all dimensions
         void clear() {
             for (auto& spline : splines) {
@@ -141,6 +151,24 @@ namespace utility::motion::splines {
             else {
                 // If time is beyond the end of the trajectory, return the end value.
                 return splines[dimension].back().position(timepoints[dimension].back());
+            }
+        }
+
+        /// @brief Evaluate the velocity of a specific dimension at the given time
+        Scalar eval_velocity(TrajectoryDimension dimension, Scalar time) const {
+            // Determine which segment the time falls into
+            size_t segment_idx = 0;
+            while (segment_idx < timepoints[dimension].size() && time > timepoints[dimension][segment_idx + 1]) {
+                segment_idx++;
+            }
+
+            if (segment_idx < timepoints[dimension].size()) {
+                Scalar segment_start_time = timepoints[dimension][segment_idx];
+                return splines[dimension][segment_idx].velocity(time - segment_start_time);
+            }
+            else {
+                // If time is beyond the end of the trajectory, return 0 as the velocity.
+                return 0;
             }
         }
 
