@@ -217,8 +217,8 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Kinematics information
-        const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htr(sensors->Htx[FrameID::R_ANKLE_ROLL]);
+        const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_FOOT_BASE]);
+        const Eigen::Isometry3d Htr(sensors->Htx[FrameID::R_FOOT_BASE]);
         Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
         Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
         Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();
