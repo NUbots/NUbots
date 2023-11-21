@@ -9,10 +9,10 @@ namespace utility::math::control {
     class PID {
     private:
         Scalar Kp, Ki, Kd;
-        Eigen::Matrix<Scalar, N, 1> integral_error;
-        Eigen::Matrix<Scalar, N, 1> prev_error;
-        Scalar max_integral = std::numeric_limits<Scalar>::max();
-        Scalar min_integral = std::numeric_limits<Scalar>::lowest();
+        Eigen::Matrix<Scalar, N, 1> integral_error = Eigen::Matrix<Scalar, N, 1>::Zero();
+        Eigen::Matrix<Scalar, N, 1> prev_error     = Eigen::Matrix<Scalar, N, 1>::Zero();
+        Scalar max_integral                        = std::numeric_limits<Scalar>::max();
+        Scalar min_integral                        = std::numeric_limits<Scalar>::lowest();
 
     public:
         PID() : Kp(0), Ki(0), Kd(0) {

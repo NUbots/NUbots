@@ -54,6 +54,7 @@ namespace module::skill {
             cfg.walk_generator_parameters.step_width      = config["walk"]["step"]["width"].as<double>();
             cfg.walk_generator_parameters.torso_height    = config["walk"]["torso"]["height"].as<double>();
             cfg.walk_generator_parameters.torso_pitch     = config["walk"]["torso"]["pitch"].as<Expression>();
+            cfg.desired_torso_pitch = Eigen::Matrix<double, 1, 1>(cfg.walk_generator_parameters.torso_pitch);
             cfg.walk_generator_parameters.torso_position_offset =
                 config["walk"]["torso"]["position_offset"].as<Expression>();
             cfg.walk_generator_parameters.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
@@ -71,6 +72,8 @@ namespace module::skill {
             cfg.leg_servo_gain   = config["gains"]["leg_servo_gain"].as<double>();
             cfg.torso_pid_gains  = config["gains"]["torso_pid_gains"].as<Expression>();
             cfg.torso_antiwindup = config["gains"]["torso_antiwindup"].as<Expression>();
+            cfg.pitch_pid_gains  = config["gains"]["pitch_pid_gains"].as<Expression>();
+            cfg.pitch_antiwindup = config["gains"]["pitch_antiwindup"].as<Expression>();
 
             // Configure torso PID controller
             torso_controller = utility::math::control::PID<double, 2>(cfg.torso_pid_gains[0],
@@ -78,6 +81,12 @@ namespace module::skill {
                                                                       cfg.torso_pid_gains[2],
                                                                       cfg.torso_antiwindup[0],
                                                                       cfg.torso_antiwindup[1]);
+            // Configure pitch PID controller
+            pitch_controller = utility::math::control::PID<double, 1>(cfg.pitch_pid_gains[0],
+                                                                      cfg.pitch_pid_gains[1],
+                                                                      cfg.pitch_pid_gains[2],
+                                                                      cfg.pitch_antiwindup[0],
+                                                                      cfg.pitch_antiwindup[1]);
 
             // Configure the arms
             for (auto id : utility::input::LimbID::servos_for_arms()) {
@@ -123,6 +132,19 @@ namespace module::skill {
                         .count();
                 last_update_time = NUClear::clock::now();
 
+                // Update torso pitch controller
+                pitch_controller.set_Kp(cfg.pitch_pid_gains[0] * time_delta);
+                auto actual_pitch =
+                    Eigen::Matrix<double, 1, 1>(MatrixToEulerIntrinsic(sensors.Htw.inverse().rotation()).y());
+                auto pitch_offset = pitch_controller.update(cfg.desired_torso_pitch, actual_pitch, time_delta)(0, 0);
+                cfg.walk_generator_parameters.torso_pitch = cfg.walk_generator_parameters.torso_pitch + pitch_offset;
+                walk_generator.set_parameters(cfg.walk_generator_parameters);
+                log<NUClear::DEBUG>("actual_torso_pitch : ", actual_pitch);
+                log<NUClear::DEBUG>("desired_torso_pitch : ", cfg.desired_torso_pitch);
+                emit(graph("actual_torso_pitch : ", actual_pitch));
+                emit(graph("desired_torso_pitch : ", cfg.desired_torso_pitch));
+                emit(graph("pitch_offset : ", pitch_offset));
+
                 // Update the walk engine and emit the stability state
                 switch (walk_generator.update(time_delta, walk_task.velocity_target).value) {
                     case WalkState::State::WALKING:
@@ -163,6 +185,7 @@ namespace module::skill {
                     Eigen::Vector2d torso_position_actual  = Htl_actual.inverse().translation().head<2>();
                     Eigen::Vector2d torso_offset =
                         torso_controller.update(torso_position_desired, torso_position_actual, time_delta);
+                    emit(graph("torso offset", torso_offset.x(), torso_offset.y()));
                     auto Hlt = Htl.inverse();
                     Hlt.translation().head<2>() += torso_offset;
                     left_leg->Htl  = Hlt.inverse();
@@ -175,12 +198,12 @@ namespace module::skill {
                     Eigen::Vector2d torso_position_actual  = Htr_actual.inverse().translation().head<2>();
                     Eigen::Vector2d torso_offset =
                         torso_controller.update(torso_position_desired, torso_position_actual, time_delta);
+                    emit(graph("torso offset", torso_offset.x(), torso_offset.y()));
                     auto Hrt = Htr.inverse();
                     Hrt.translation().head<2>() += torso_offset;
                     right_leg->Htr = Hrt.inverse();
                     left_leg->Htl  = Htl;
                 }
-
 
                 emit<Task>(left_leg);
                 emit<Task>(right_leg);

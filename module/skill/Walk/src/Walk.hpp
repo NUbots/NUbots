@@ -40,11 +40,20 @@ namespace module::skill {
             /// @brief P gain for the arm servos
             double arm_servo_gain = 0.0;
 
+            /// @brief Desired torso pitch
+            Eigen::Matrix<double, 1, 1> desired_torso_pitch = Eigen::Matrix<double, 1, 1>::Zero();
+
             /// @brief Torso position controller PID gains
             Eigen::Vector3d torso_pid_gains = Eigen::Vector3d::Zero();
 
             /// @brief Torso anti-windup limits
             Eigen::Vector2d torso_antiwindup = Eigen::Vector2d::Zero();
+
+            /// @brief Torso pitch controller PID gains
+            Eigen::Vector3d pitch_pid_gains = Eigen::Vector3d::Zero();
+
+            /// @brief Torso pitch anti-windup limits
+            Eigen::Vector2d pitch_antiwindup = Eigen::Vector2d::Zero();
         } cfg;
 
         /// @brief Last time we updated the walk engine
@@ -55,6 +64,9 @@ namespace module::skill {
 
         /// @brief Torso X-Y position PID controller
         utility::math::control::PID<double, 2> torso_controller{};
+
+        /// @brief Torso pitch PID controller
+        utility::math::control::PID<double, 1> pitch_controller{};
     };
 }  // namespace module::skill
 

@@ -81,7 +81,7 @@ initial_anchor_frame: "left_foot_base"
 
 # Kalman/Mahony filter initial pose
 initial_rTWw: [0, 0, 0.49]
-initial_rpy: [0, 0.3839, 0]
+initial_rpy: [0, 0.2, 0]
 
 # Specify which filtering method to use, either UKF, KF, MAHONY or GROUND_TRUTH
 filtering_method: MAHONY
