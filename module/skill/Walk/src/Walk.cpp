@@ -65,10 +65,17 @@ namespace module::skill {
             last_update_time = NUClear::clock::now();
 
             // Controller gains
-            cfg.arm_servo_gain = config["gains"]["arm_servo_gain"].as<double>();
-            cfg.leg_servo_gain = config["gains"]["leg_servo_gain"].as<double>();
-            cfg.K_torso        = config["gains"]["K_torso"].as<double>();
-            cfg.Ki_torso       = config["gains"]["Ki_torso"].as<double>();
+            cfg.arm_servo_gain   = config["gains"]["arm_servo_gain"].as<double>();
+            cfg.leg_servo_gain   = config["gains"]["leg_servo_gain"].as<double>();
+            cfg.torso_pid_gains  = config["gains"]["torso_pid_gains"].as<Expression>();
+            cfg.torso_antiwindup = config["gains"]["torso_antiwindup"].as<Expression>();
+
+            // Configure torso PID controller
+            torso_controller = utility::math::control::PID<double, 2>(cfg.torso_pid_gains[0],
+                                                                      cfg.torso_pid_gains[1],
+                                                                      cfg.torso_pid_gains[2],
+                                                                      cfg.torso_antiwindup[0],
+                                                                      cfg.torso_antiwindup[1]);
 
             // Configure the arms
             for (auto id : utility::input::LimbID::servos_for_arms()) {

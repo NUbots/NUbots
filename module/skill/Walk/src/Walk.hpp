@@ -9,6 +9,7 @@
 #include "message/actuation/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/math/control/pid.hpp"
 #include "utility/skill/WalkGenerator.hpp"
 
 namespace module::skill {
@@ -39,11 +40,11 @@ namespace module::skill {
             /// @brief P gain for the arm servos
             double arm_servo_gain = 0.0;
 
-            /// @brief Torso position controller P gain
-            double K_torso = 0.0;
+            /// @brief Torso position controller PID gains
+            Eigen::Vector3d torso_pid_gains = Eigen::Vector3d::Zero();
 
-            /// @brief Torso position controller I gain
-            double Ki_torso = 0.0;
+            /// @brief Torso anti-windup limits
+            Eigen::Vector2d torso_antiwindup = Eigen::Vector2d::Zero();
         } cfg;
 
         /// @brief Last time we updated the walk engine
@@ -52,8 +53,8 @@ namespace module::skill {
         /// @brief Generates swing foot and torso trajectories for given walk velocity target
         utility::skill::WalkGenerator<double> walk_generator{};
 
-        /// @brief Torso X-Y offset computed from the PI controller
-        Eigen::Vector2d torso_offset{};
+        /// @brief Torso X-Y position PID controller
+        utility::math::control::PID<double, 2> torso_controller{};
     };
 }  // namespace module::skill
 
