@@ -96,6 +96,59 @@ namespace utility::math::filter {
         Eigen::Matrix<Scalar, Size, 1> filtered_value = Eigen::Matrix<Scalar, Size, 1>::Zero();
     };
 
+    // Specialization for when Size is 1
+    template <typename Scalar>
+    class ExponentialFilter<Scalar, 1> {
+    public:
+        /// @brief Default constructor for ExponentialFilter
+        ExponentialFilter() = default;
+
+        /**
+         * @brief Construct an ExponentialFilter with the given alpha and zero initial value
+         *
+         * @param alpha Smoothing factor
+         */
+        explicit ExponentialFilter(Scalar alpha)
+            : alpha(std::clamp(alpha, Scalar(0), Scalar(1))), filtered_value(Scalar(0)) {}
+
+        /**
+         * @brief Construct an ExponentialFilter with the given parameters
+         *
+         * @param alpha Smoothing factor
+         * @param initial_value Initial value for the filter
+         */
+        ExponentialFilter(Scalar alpha, Scalar initial_value)
+            : alpha(std::clamp(alpha, Scalar(0), Scalar(1))), filtered_value(initial_value) {}
+
+        /**
+         * @brief Update the filter with a new measurement and return the smoothed value.
+         *
+         * @param measurement The new measurement to incorporate.
+         * @return The smoothed value after the update.
+         */
+        Scalar update(const Scalar& measurement) {
+            filtered_value = alpha * measurement + (1 - alpha) * filtered_value;
+            return filtered_value;
+        }
+
+        /// @brief Get the current filtered value
+        Scalar get_value() const {
+            return filtered_value;
+        }
+
+        /// @brief Set the smoothing factor (alpha)
+        void set_alpha(const Scalar& new_alpha) {
+            alpha = std::clamp(new_alpha, Scalar(0), Scalar(1));
+        }
+
+    private:
+        /// @brief Smoothing factor
+        Scalar alpha = Scalar(0.1);
+
+        /// @brief Current filtered value
+        Scalar filtered_value = Scalar(0);
+    };
+
 }  // namespace utility::math::filter
 
 #endif
