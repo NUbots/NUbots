@@ -54,10 +54,11 @@ namespace module::skill {
 
         on<Configuration>("Look.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Look.yaml
-            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.smoothing_factor = config["smoothing_factor"].as<float>();
-            cfg.head_gain        = config["head_gain"].as<float>();
-            cfg.head_torque      = config["head_torque"].as<float>();
+            log_level       = config["log_level"].as<NUClear::LogLevel>();
+            cfg.head_gain   = config["head_gain"].as<float>();
+            cfg.head_torque = config["head_torque"].as<float>();
+            // Configure exponential filter
+            uPCt_filter.set_alpha(config["smoothing_factor"].as<float>());
         });
 
         on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
@@ -67,17 +68,16 @@ namespace module::skill {
             // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
             // locking on to the target
             if (smooth == false && look.smooth == true) {
-                uPCt = req_uPCt;
+                uPCt_filter.set_value(req_uPCt);
             }
             smooth = look.smooth;
-
-            // If smoothing requested, smooth requested angles with exponential filter
-            uPCt = smooth ? (cfg.smoothing_factor * req_uPCt + (1 - cfg.smoothing_factor) * uPCt) : req_uPCt;
 
             // Create the HeadIK message
             auto head_ik  = std::make_unique<HeadIK>();
             head_ik->time = NUClear::clock::now();
-            head_ik->uPCt = uPCt;
+
+            // If smoothing requested, smooth requested angles with exponential filter
+            head_ik->uPCt = smooth ? uPCt_filter.update(req_uPCt) : req_uPCt;
 
             head_ik->servos[ServoID::HEAD_YAW]   = ServoState(cfg.head_gain, cfg.head_torque);
             head_ik->servos[ServoID::HEAD_PITCH] = ServoState(cfg.head_gain, cfg.head_torque);
