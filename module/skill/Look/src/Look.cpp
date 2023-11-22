@@ -63,12 +63,12 @@ namespace module::skill {
 
         on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
             // Normalise the look vector
-            Eigen::Vector3d req_uPCt = look.rPCt.normalized();
+            Eigen::Vector3d requested_uPCt = look.rPCt.normalized();
 
             // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
             // locking on to the target
             if (smooth == false && look.smooth == true) {
-                uPCt_filter.set_value(req_uPCt);
+                uPCt_filter.set_value(requested_uPCt);
             }
             smooth = look.smooth;
 
@@ -77,7 +77,7 @@ namespace module::skill {
             head_ik->time = NUClear::clock::now();
 
             // If smoothing requested, smooth requested angles with exponential filter
-            head_ik->uPCt = smooth ? uPCt_filter.update(req_uPCt) : req_uPCt;
+            head_ik->uPCt = smooth ? uPCt_filter.update(requested_uPCt) : requested_uPCt;
 
             head_ik->servos[ServoID::HEAD_YAW]   = ServoState(cfg.head_gain, cfg.head_torque);
             head_ik->servos[ServoID::HEAD_PITCH] = ServoState(cfg.head_gain, cfg.head_torque);
