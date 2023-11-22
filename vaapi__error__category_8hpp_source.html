@@ -170,88 +170,114 @@ $(document).ready(function(){initNavTree('vaapi__error__category_8hpp_source.htm
 <div class="title">vaapi_error_category.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_ERROR_CATEGORY_HPP</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_ERROR_CATEGORY_HPP</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;system_error&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;va/va.h&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi {</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;    <span class="keyword">enum class</span> vaapi_error_code {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;        SUCCESS                  = VA_STATUS_SUCCESS,</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;        OPERATION_FAILED         = VA_STATUS_ERROR_OPERATION_FAILED,</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;        ALLOCATION_FAILED        = VA_STATUS_ERROR_ALLOCATION_FAILED,</div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;        INVALID_DISPLAY          = VA_STATUS_ERROR_INVALID_DISPLAY,</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;        INVALID_CONFIG           = VA_STATUS_ERROR_INVALID_CONFIG,</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;        INVALID_CONTEXT          = VA_STATUS_ERROR_INVALID_CONTEXT,</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        INVALID_SURFACE          = VA_STATUS_ERROR_INVALID_SURFACE,</div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;        INVALID_BUFFER           = VA_STATUS_ERROR_INVALID_BUFFER,</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;        INVALID_IMAGE            = VA_STATUS_ERROR_INVALID_IMAGE,</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;        INVALID_SUBPICTURE       = VA_STATUS_ERROR_INVALID_SUBPICTURE,</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;        ATTR_NOT_SUPPORTED       = VA_STATUS_ERROR_ATTR_NOT_SUPPORTED,</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;        MAX_NUM_EXCEEDED         = VA_STATUS_ERROR_MAX_NUM_EXCEEDED,</div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;        UNSUPPORTED_PROFILE      = VA_STATUS_ERROR_UNSUPPORTED_PROFILE,</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;        UNSUPPORTED_ENTRYPOINT   = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT,</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        UNSUPPORTED_RT_FORMAT    = VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT,</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;        UNSUPPORTED_BUFFERTYPE   = VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE,</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        SURFACE_BUSY             = VA_STATUS_ERROR_SURFACE_BUSY,</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        FLAG_NOT_SUPPORTED       = VA_STATUS_ERROR_FLAG_NOT_SUPPORTED,</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        INVALID_PARAMETER        = VA_STATUS_ERROR_INVALID_PARAMETER,</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        RESOLUTION_NOT_SUPPORTED = VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED,</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        UNIMPLEMENTED            = VA_STATUS_ERROR_UNIMPLEMENTED,</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        SURFACE_IN_DISPLAYING    = VA_STATUS_ERROR_SURFACE_IN_DISPLAYING,</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        INVALID_IMAGE_FORMAT     = VA_STATUS_ERROR_INVALID_IMAGE_FORMAT,</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        DECODING_ERROR           = VA_STATUS_ERROR_DECODING_ERROR,</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        ENCODING_ERROR           = VA_STATUS_ERROR_ENCODING_ERROR,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        INVALID_VALUE            = VA_STATUS_ERROR_INVALID_VALUE,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        UNSUPPORTED_FILTER       = VA_STATUS_ERROR_UNSUPPORTED_FILTER,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        INVALID_FILTER_CHAIN     = VA_STATUS_ERROR_INVALID_FILTER_CHAIN,</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        HW_BUSY                  = VA_STATUS_ERROR_HW_BUSY,</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        UNSUPPORTED_MEMORY_TYPE  = VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        NOT_ENOUGH_BUFFER        = VA_STATUS_ERROR_NOT_ENOUGH_BUFFER,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        UNKNOWN</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    };</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="keyword">namespace </span>std {</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00047"></a><span class="lineno"><a class="line" href="structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html">   47</a></span>&#160;    <span class="keyword">struct </span>is_error_condition_enum&lt;module::output::compressor::vaapi::vaapi_error_code&gt; : <span class="keyword">public</span> true_type {};</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160; </div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;}  <span class="comment">// namespace std</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi {</div>
-<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">   52</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">vaapi_error_category_t</a> : <span class="keyword">public</span> std::error_category {</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <span class="keywordtype">char</span>* name() <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        [[nodiscard]] std::error_condition default_error_condition(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        [[nodiscard]] <span class="keywordtype">bool</span> equivalent(<span class="keyword">const</span> std::error_code&amp; code, <span class="keywordtype">int</span> condition) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        [[nodiscard]] std::string message(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    };</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keyword">inline</span> <span class="keyword">const</span> std::error_category&amp; vaapi_error_category() {</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keyword">static</span> <a class="code" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">vaapi_error_category_t</a> instance;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keywordflow">return</span> instance;</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    }</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keyword">inline</span> std::error_condition make_error_condition(vaapi_error_code e) {</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="keywordflow">return</span> {<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(e), vaapi_error_category()};</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    }</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi</span></div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160; </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_ERROR_CATEGORY_HPP</span></div>
-<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">module::output::compressor::vaapi::vaapi_error_category_t</a></div><div class="ttdef"><b>Definition:</b> vaapi_error_category.hpp:52</div></div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2020 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_ERROR_CATEGORY_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_ERROR_CATEGORY_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;system_error&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;va/va.h&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi {</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">enum class</span> vaapi_error_code {</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        SUCCESS                  = VA_STATUS_SUCCESS,</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        OPERATION_FAILED         = VA_STATUS_ERROR_OPERATION_FAILED,</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        ALLOCATION_FAILED        = VA_STATUS_ERROR_ALLOCATION_FAILED,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        INVALID_DISPLAY          = VA_STATUS_ERROR_INVALID_DISPLAY,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        INVALID_CONFIG           = VA_STATUS_ERROR_INVALID_CONFIG,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        INVALID_CONTEXT          = VA_STATUS_ERROR_INVALID_CONTEXT,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        INVALID_SURFACE          = VA_STATUS_ERROR_INVALID_SURFACE,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        INVALID_BUFFER           = VA_STATUS_ERROR_INVALID_BUFFER,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        INVALID_IMAGE            = VA_STATUS_ERROR_INVALID_IMAGE,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        INVALID_SUBPICTURE       = VA_STATUS_ERROR_INVALID_SUBPICTURE,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        ATTR_NOT_SUPPORTED       = VA_STATUS_ERROR_ATTR_NOT_SUPPORTED,</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        MAX_NUM_EXCEEDED         = VA_STATUS_ERROR_MAX_NUM_EXCEEDED,</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        UNSUPPORTED_PROFILE      = VA_STATUS_ERROR_UNSUPPORTED_PROFILE,</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        UNSUPPORTED_ENTRYPOINT   = VA_STATUS_ERROR_UNSUPPORTED_ENTRYPOINT,</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        UNSUPPORTED_RT_FORMAT    = VA_STATUS_ERROR_UNSUPPORTED_RT_FORMAT,</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        UNSUPPORTED_BUFFERTYPE   = VA_STATUS_ERROR_UNSUPPORTED_BUFFERTYPE,</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        SURFACE_BUSY             = VA_STATUS_ERROR_SURFACE_BUSY,</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        FLAG_NOT_SUPPORTED       = VA_STATUS_ERROR_FLAG_NOT_SUPPORTED,</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        INVALID_PARAMETER        = VA_STATUS_ERROR_INVALID_PARAMETER,</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        RESOLUTION_NOT_SUPPORTED = VA_STATUS_ERROR_RESOLUTION_NOT_SUPPORTED,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        UNIMPLEMENTED            = VA_STATUS_ERROR_UNIMPLEMENTED,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        SURFACE_IN_DISPLAYING    = VA_STATUS_ERROR_SURFACE_IN_DISPLAYING,</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        INVALID_IMAGE_FORMAT     = VA_STATUS_ERROR_INVALID_IMAGE_FORMAT,</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        DECODING_ERROR           = VA_STATUS_ERROR_DECODING_ERROR,</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        ENCODING_ERROR           = VA_STATUS_ERROR_ENCODING_ERROR,</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        INVALID_VALUE            = VA_STATUS_ERROR_INVALID_VALUE,</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        UNSUPPORTED_FILTER       = VA_STATUS_ERROR_UNSUPPORTED_FILTER,</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        INVALID_FILTER_CHAIN     = VA_STATUS_ERROR_INVALID_FILTER_CHAIN,</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        HW_BUSY                  = VA_STATUS_ERROR_HW_BUSY,</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        UNSUPPORTED_MEMORY_TYPE  = VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        NOT_ENOUGH_BUFFER        = VA_STATUS_ERROR_NOT_ENOUGH_BUFFER,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        UNKNOWN</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    };</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="keyword">namespace </span>std {</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html">   73</a></span>&#160;    <span class="keyword">struct </span>is_error_condition_enum&lt;module::output::compressor::vaapi::vaapi_error_code&gt; : <span class="keyword">public</span> true_type {};</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;}  <span class="comment">// namespace std</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi {</div>
+<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">   78</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">vaapi_error_category_t</a> : <span class="keyword">public</span> std::error_category {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <span class="keywordtype">char</span>* name() <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160; </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        [[nodiscard]] std::error_condition default_error_condition(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        [[nodiscard]] <span class="keywordtype">bool</span> equivalent(<span class="keyword">const</span> std::error_code&amp; code, <span class="keywordtype">int</span> condition) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        [[nodiscard]] std::string message(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    };</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <span class="keyword">inline</span> <span class="keyword">const</span> std::error_category&amp; vaapi_error_category() {</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        <span class="keyword">static</span> <a class="code" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">vaapi_error_category_t</a> instance;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="keywordflow">return</span> instance;</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    }</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keyword">inline</span> std::error_condition make_error_condition(vaapi_error_code e) {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <span class="keywordflow">return</span> {<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(e), vaapi_error_category()};</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    }</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi</span></div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_ERROR_CATEGORY_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html">module::output::compressor::vaapi::vaapi_error_category_t</a></div><div class="ttdef"><b>Definition:</b> vaapi_error_category.hpp:78</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_207690c18237c73fdaff6f98bdb9393b.html">output</a></li><li class="navelem"><a class="el" href="dir_35ddddf25a0fdba6abe927263350c53c.html">ImageCompressor</a></li><li class="navelem"><a class="el" href="dir_e9d7f4f4c998f67ec133eae7fe491975.html">src</a></li><li class="navelem"><a class="el" href="dir_e639606d2263a0b38a84509fdf78de2c.html">compressor</a></li><li class="navelem"><a class="el" href="dir_d85b5eeaa979f1e1856735ec162b03af.html">vaapi</a></li><li class="navelem"><b>vaapi_error_category.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 19 2023 23:53:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 22 2023 05:06:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

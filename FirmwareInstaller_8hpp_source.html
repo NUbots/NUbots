@@ -170,53 +170,79 @@ $(document).ready(function(){initNavTree('FirmwareInstaller_8hpp_source.html',''
 <div class="title">FirmwareInstaller.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef MODULE_TOOLS_FIRMWAREINSTALLER_HPP</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define MODULE_TOOLS_FIRMWAREINSTALLER_HPP</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span>module::tools {</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="classmodule_1_1tools_1_1FirmwareInstaller.html">    9</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1tools_1_1FirmwareInstaller.html">FirmwareInstaller</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the FirmwareInstaller</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment">        /// reactor.</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1tools_1_1FirmwareInstaller.html#adccf9735f699d7069746ac92a1b6bd6e">FirmwareInstaller</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160; </div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;    <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;        std::string device;</div>
-<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">   17</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">Firmware</a> {</div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;            std::vector&lt;uint8_t&gt; firmware;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;            uint8_t checksum = 0;</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;        };</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;        std::map&lt;std::pair&lt;std::string, std::string&gt;, <a class="code" href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">Firmware</a>&gt; firmwares;</div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;        <span class="keyword">enum</span> MenuState { NO_MENU, DEVICE_MENU, BATTERY_MENU };</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;        <span class="keyword">enum</span> Device { NO_DEVICE, CM730, CM740, DYNAMIXEL, OPENCR };</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        <span class="keyword">enum</span> Battery { NO_BATTERY, BATTERY3, BATTERY4 };</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        MenuState menu_state;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        Device selected_device;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        Battery selected_battery;</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> showDeviceMenu();</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> showBatteryMenu();</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    };</div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2017 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_TOOLS_FIRMWAREINSTALLER_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_TOOLS_FIRMWAREINSTALLER_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;string&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">namespace </span>module::tools {</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;}  <span class="comment">// namespace module::tools</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_TOOLS_FIRMWAREINSTALLER_HPP</span></div>
-<div class="ttc" id="aclassmodule_1_1tools_1_1FirmwareInstaller_html"><div class="ttname"><a href="classmodule_1_1tools_1_1FirmwareInstaller.html">module::tools::FirmwareInstaller</a></div><div class="ttdef"><b>Definition:</b> FirmwareInstaller.hpp:9</div></div>
-<div class="ttc" id="aclassmodule_1_1tools_1_1FirmwareInstaller_html_adccf9735f699d7069746ac92a1b6bd6e"><div class="ttname"><a href="classmodule_1_1tools_1_1FirmwareInstaller.html#adccf9735f699d7069746ac92a1b6bd6e">module::tools::FirmwareInstaller::FirmwareInstaller</a></div><div class="ttdeci">FirmwareInstaller(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the FirmwareInstaller reactor.</div><div class="ttdef"><b>Definition:</b> FirmwareInstaller.cpp:21</div></div>
-<div class="ttc" id="astructmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware_html"><div class="ttname"><a href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">module::tools::FirmwareInstaller::Firmware</a></div><div class="ttdef"><b>Definition:</b> FirmwareInstaller.hpp:17</div></div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classmodule_1_1tools_1_1FirmwareInstaller.html">   35</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1tools_1_1FirmwareInstaller.html">FirmwareInstaller</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the FirmwareInstaller</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">        /// reactor.</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1tools_1_1FirmwareInstaller.html#adccf9735f699d7069746ac92a1b6bd6e">FirmwareInstaller</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        std::string device;</div>
+<div class="line"><a name="l00043"></a><span class="lineno"><a class="line" href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">   43</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">Firmware</a> {</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            std::vector&lt;uint8_t&gt; firmware;</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;            uint8_t checksum = 0;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        };</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        std::map&lt;std::pair&lt;std::string, std::string&gt;, <a class="code" href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">Firmware</a>&gt; firmwares;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <span class="keyword">enum</span> MenuState { NO_MENU, DEVICE_MENU, BATTERY_MENU };</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="keyword">enum</span> Device { NO_DEVICE, CM730, CM740, DYNAMIXEL, OPENCR };</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keyword">enum</span> Battery { NO_BATTERY, BATTERY3, BATTERY4 };</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        MenuState menu_state;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        Device selected_device;</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        Battery selected_battery;</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> showDeviceMenu();</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">void</span> showBatteryMenu();</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    };</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160; </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;}  <span class="comment">// namespace module::tools</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160; </div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_TOOLS_FIRMWAREINSTALLER_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1tools_1_1FirmwareInstaller_html"><div class="ttname"><a href="classmodule_1_1tools_1_1FirmwareInstaller.html">module::tools::FirmwareInstaller</a></div><div class="ttdef"><b>Definition:</b> FirmwareInstaller.hpp:35</div></div>
+<div class="ttc" id="aclassmodule_1_1tools_1_1FirmwareInstaller_html_adccf9735f699d7069746ac92a1b6bd6e"><div class="ttname"><a href="classmodule_1_1tools_1_1FirmwareInstaller.html#adccf9735f699d7069746ac92a1b6bd6e">module::tools::FirmwareInstaller::FirmwareInstaller</a></div><div class="ttdeci">FirmwareInstaller(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the FirmwareInstaller reactor.</div><div class="ttdef"><b>Definition:</b> FirmwareInstaller.cpp:47</div></div>
+<div class="ttc" id="astructmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware_html"><div class="ttname"><a href="structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html">module::tools::FirmwareInstaller::Firmware</a></div><div class="ttdef"><b>Definition:</b> FirmwareInstaller.hpp:43</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_b1f156987e7118d2205c2e877bcf56b0.html">tools</a></li><li class="navelem"><a class="el" href="dir_795a28be0f0927fd2ab6b86c0a7def2b.html">FirmwareInstaller</a></li><li class="navelem"><a class="el" href="dir_87c73d1f1cead977c5c8634c4ecb6953.html">src</a></li><li class="navelem"><b>FirmwareInstaller.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 19 2023 23:53:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 22 2023 05:06:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

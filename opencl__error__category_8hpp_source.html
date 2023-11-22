@@ -171,131 +171,141 @@ $(document).ready(function(){initNavTree('opencl__error__category_8hpp_source.ht
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * Copyright (C) 2017-2018 Trent Houliston &lt;trent@houliston.me&gt;</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> * documentation files (the &quot;Software&quot;), to deal in the Software without restriction, including without limitation the</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * permit persons to whom the Software is furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2020 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * Software.</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="preprocessor">#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_OPENCL_ERROR_CATEGORY_HPP</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="preprocessor">#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_OPENCL_ERROR_CATEGORY_HPP</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#include &lt;CL/cl.h&gt;</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#include &lt;CL/cl_va_api_media_sharing_intel.h&gt;</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="preprocessor">#include &lt;system_error&gt;</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi::cl {</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    <span class="keyword">enum class</span> opencl_error_code {</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;        SUCCESS                                     = CL_SUCCESS,</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;        DEVICE_NOT_FOUND                            = CL_DEVICE_NOT_FOUND,</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;        DEVICE_NOT_AVAILABLE                        = CL_DEVICE_NOT_AVAILABLE,</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        COMPILER_NOT_AVAILABLE                      = CL_COMPILER_NOT_AVAILABLE,</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        MEM_OBJECT_ALLOCATION_FAILURE               = CL_MEM_OBJECT_ALLOCATION_FAILURE,</div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        OUT_OF_RESOURCES                            = CL_OUT_OF_RESOURCES,</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        OUT_OF_HOST_MEMORY                          = CL_OUT_OF_HOST_MEMORY,</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        PROFILING_INFO_NOT_AVAILABLE                = CL_PROFILING_INFO_NOT_AVAILABLE,</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        MEM_COPY_OVERLAP                            = CL_MEM_COPY_OVERLAP,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        IMAGE_FORMAT_MISMATCH                       = CL_IMAGE_FORMAT_MISMATCH,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        IMAGE_FORMAT_NOT_SUPPORTED                  = CL_IMAGE_FORMAT_NOT_SUPPORTED,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        BUILD_PROGRAM_FAILURE                       = CL_BUILD_PROGRAM_FAILURE,</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        MAP_FAILURE                                 = CL_MAP_FAILURE,</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        MISALIGNED_SUB_BUFFER_OFFSET                = CL_MISALIGNED_SUB_BUFFER_OFFSET,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST   = CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        COMPILE_PROGRAM_FAILURE                     = CL_COMPILE_PROGRAM_FAILURE,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        LINKER_NOT_AVAILABLE                        = CL_LINKER_NOT_AVAILABLE,</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        LINK_PROGRAM_FAILURE                        = CL_LINK_PROGRAM_FAILURE,</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        DEVICE_PARTITION_FAILED                     = CL_DEVICE_PARTITION_FAILED,</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        KERNEL_ARG_INFO_NOT_AVAILABLE               = CL_KERNEL_ARG_INFO_NOT_AVAILABLE,</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        INVALID_VALUE                               = CL_INVALID_VALUE,</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        INVALID_DEVICE_TYPE                         = CL_INVALID_DEVICE_TYPE,</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        INVALID_PLATFORM                            = CL_INVALID_PLATFORM,</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        INVALID_DEVICE                              = CL_INVALID_DEVICE,</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        INVALID_CONTEXT                             = CL_INVALID_CONTEXT,</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        INVALID_QUEUE_PROPERTIES                    = CL_INVALID_QUEUE_PROPERTIES,</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        INVALID_COMMAND_QUEUE                       = CL_INVALID_COMMAND_QUEUE,</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        INVALID_HOST_PTR                            = CL_INVALID_HOST_PTR,</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        INVALID_MEM_OBJECT                          = CL_INVALID_MEM_OBJECT,</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        INVALID_IMAGE_FORMAT_DESCRIPTOR             = CL_INVALID_IMAGE_FORMAT_DESCRIPTOR,</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        INVALID_IMAGE_SIZE                          = CL_INVALID_IMAGE_SIZE,</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        INVALID_SAMPLER                             = CL_INVALID_SAMPLER,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        INVALID_BINARY                              = CL_INVALID_BINARY,</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        INVALID_BUILD_OPTIONS                       = CL_INVALID_BUILD_OPTIONS,</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        INVALID_PROGRAM                             = CL_INVALID_PROGRAM,</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        INVALID_PROGRAM_EXECUTABLE                  = CL_INVALID_PROGRAM_EXECUTABLE,</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        INVALID_KERNEL_NAME                         = CL_INVALID_KERNEL_NAME,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        INVALID_KERNEL_DEFINITION                   = CL_INVALID_KERNEL_DEFINITION,</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        INVALID_KERNEL                              = CL_INVALID_KERNEL,</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        INVALID_ARG_INDEX                           = CL_INVALID_ARG_INDEX,</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        INVALID_ARG_VALUE                           = CL_INVALID_ARG_VALUE,</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        INVALID_ARG_SIZE                            = CL_INVALID_ARG_SIZE,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        INVALID_KERNEL_ARGS                         = CL_INVALID_KERNEL_ARGS,</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        INVALID_WORK_DIMENSION                      = CL_INVALID_WORK_DIMENSION,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        INVALID_WORK_GROUP_SIZE                     = CL_INVALID_WORK_GROUP_SIZE,</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        INVALID_WORK_ITEM_SIZE                      = CL_INVALID_WORK_ITEM_SIZE,</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        INVALID_GLOBAL_OFFSET                       = CL_INVALID_GLOBAL_OFFSET,</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        INVALID_EVENT_WAIT_LIST                     = CL_INVALID_EVENT_WAIT_LIST,</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        INVALID_EVENT                               = CL_INVALID_EVENT,</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        INVALID_OPERATION                           = CL_INVALID_OPERATION,</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        INVALID_GL_OBJECT                           = CL_INVALID_GL_OBJECT,</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        INVALID_BUFFER_SIZE                         = CL_INVALID_BUFFER_SIZE,</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        INVALID_MIP_LEVEL                           = CL_INVALID_MIP_LEVEL,</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        INVALID_GLOBAL_WORK_SIZE                    = CL_INVALID_GLOBAL_WORK_SIZE,</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        INVALID_PROPERTY                            = CL_INVALID_PROPERTY,</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        INVALID_IMAGE_DESCRIPTOR                    = CL_INVALID_IMAGE_DESCRIPTOR,</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        INVALID_COMPILER_OPTIONS                    = CL_INVALID_COMPILER_OPTIONS,</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        INVALID_LINKER_OPTIONS                      = CL_INVALID_LINKER_OPTIONS,</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        INVALID_DEVICE_PARTITION_COUNT              = CL_INVALID_DEVICE_PARTITION_COUNT,</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        INVALID_VA_API_MEDIA_ADAPTER_INTEL          = CL_INVALID_VA_API_MEDIA_ADAPTER_INTEL,</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        INVALID_VA_API_MEDIA_SURFACE_INTEL          = CL_INVALID_VA_API_MEDIA_SURFACE_INTEL,</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL = CL_VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL,</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL     = CL_VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL,</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        UNKNOWN</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    };</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi::cl</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160; </div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="keyword">namespace </span>std {</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
-<div class="line"><a name="l00096"></a><span class="lineno"><a class="line" href="structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__code_01_4.html">   96</a></span>&#160;    <span class="keyword">struct </span>is_error_condition_enum&lt;module::output::compressor::vaapi::cl::opencl_error_code&gt; : <span class="keyword">public</span> true_type {};</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;}  <span class="comment">// namespace std</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi::cl {</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160; </div>
-<div class="line"><a name="l00101"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html">  101</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html">opencl_error_category_t</a> : <span class="keyword">public</span> std::error_category {</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <span class="keywordtype">char</span>* name() <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        [[nodiscard]] std::error_condition default_error_condition(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        [[nodiscard]] <span class="keywordtype">bool</span> equivalent(<span class="keyword">const</span> std::error_code&amp; code, <span class="keywordtype">int</span> condition) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_OPENCL_ERROR_CATEGORY_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_OPENCL_ERROR_CATEGORY_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;CL/cl.h&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;CL/cl_va_api_media_sharing_intel.h&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;system_error&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi::cl {</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">enum class</span> opencl_error_code {</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        SUCCESS                                     = CL_SUCCESS,</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        DEVICE_NOT_FOUND                            = CL_DEVICE_NOT_FOUND,</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        DEVICE_NOT_AVAILABLE                        = CL_DEVICE_NOT_AVAILABLE,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        COMPILER_NOT_AVAILABLE                      = CL_COMPILER_NOT_AVAILABLE,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        MEM_OBJECT_ALLOCATION_FAILURE               = CL_MEM_OBJECT_ALLOCATION_FAILURE,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        OUT_OF_RESOURCES                            = CL_OUT_OF_RESOURCES,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        OUT_OF_HOST_MEMORY                          = CL_OUT_OF_HOST_MEMORY,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        PROFILING_INFO_NOT_AVAILABLE                = CL_PROFILING_INFO_NOT_AVAILABLE,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        MEM_COPY_OVERLAP                            = CL_MEM_COPY_OVERLAP,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        IMAGE_FORMAT_MISMATCH                       = CL_IMAGE_FORMAT_MISMATCH,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        IMAGE_FORMAT_NOT_SUPPORTED                  = CL_IMAGE_FORMAT_NOT_SUPPORTED,</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        BUILD_PROGRAM_FAILURE                       = CL_BUILD_PROGRAM_FAILURE,</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        MAP_FAILURE                                 = CL_MAP_FAILURE,</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        MISALIGNED_SUB_BUFFER_OFFSET                = CL_MISALIGNED_SUB_BUFFER_OFFSET,</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST   = CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST,</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        COMPILE_PROGRAM_FAILURE                     = CL_COMPILE_PROGRAM_FAILURE,</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        LINKER_NOT_AVAILABLE                        = CL_LINKER_NOT_AVAILABLE,</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        LINK_PROGRAM_FAILURE                        = CL_LINK_PROGRAM_FAILURE,</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        DEVICE_PARTITION_FAILED                     = CL_DEVICE_PARTITION_FAILED,</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        KERNEL_ARG_INFO_NOT_AVAILABLE               = CL_KERNEL_ARG_INFO_NOT_AVAILABLE,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        INVALID_VALUE                               = CL_INVALID_VALUE,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        INVALID_DEVICE_TYPE                         = CL_INVALID_DEVICE_TYPE,</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        INVALID_PLATFORM                            = CL_INVALID_PLATFORM,</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        INVALID_DEVICE                              = CL_INVALID_DEVICE,</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        INVALID_CONTEXT                             = CL_INVALID_CONTEXT,</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        INVALID_QUEUE_PROPERTIES                    = CL_INVALID_QUEUE_PROPERTIES,</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        INVALID_COMMAND_QUEUE                       = CL_INVALID_COMMAND_QUEUE,</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        INVALID_HOST_PTR                            = CL_INVALID_HOST_PTR,</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        INVALID_MEM_OBJECT                          = CL_INVALID_MEM_OBJECT,</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        INVALID_IMAGE_FORMAT_DESCRIPTOR             = CL_INVALID_IMAGE_FORMAT_DESCRIPTOR,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        INVALID_IMAGE_SIZE                          = CL_INVALID_IMAGE_SIZE,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        INVALID_SAMPLER                             = CL_INVALID_SAMPLER,</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        INVALID_BINARY                              = CL_INVALID_BINARY,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        INVALID_BUILD_OPTIONS                       = CL_INVALID_BUILD_OPTIONS,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        INVALID_PROGRAM                             = CL_INVALID_PROGRAM,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        INVALID_PROGRAM_EXECUTABLE                  = CL_INVALID_PROGRAM_EXECUTABLE,</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        INVALID_KERNEL_NAME                         = CL_INVALID_KERNEL_NAME,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        INVALID_KERNEL_DEFINITION                   = CL_INVALID_KERNEL_DEFINITION,</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        INVALID_KERNEL                              = CL_INVALID_KERNEL,</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        INVALID_ARG_INDEX                           = CL_INVALID_ARG_INDEX,</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        INVALID_ARG_VALUE                           = CL_INVALID_ARG_VALUE,</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        INVALID_ARG_SIZE                            = CL_INVALID_ARG_SIZE,</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        INVALID_KERNEL_ARGS                         = CL_INVALID_KERNEL_ARGS,</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        INVALID_WORK_DIMENSION                      = CL_INVALID_WORK_DIMENSION,</div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        INVALID_WORK_GROUP_SIZE                     = CL_INVALID_WORK_GROUP_SIZE,</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        INVALID_WORK_ITEM_SIZE                      = CL_INVALID_WORK_ITEM_SIZE,</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        INVALID_GLOBAL_OFFSET                       = CL_INVALID_GLOBAL_OFFSET,</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        INVALID_EVENT_WAIT_LIST                     = CL_INVALID_EVENT_WAIT_LIST,</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        INVALID_EVENT                               = CL_INVALID_EVENT,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        INVALID_OPERATION                           = CL_INVALID_OPERATION,</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        INVALID_GL_OBJECT                           = CL_INVALID_GL_OBJECT,</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        INVALID_BUFFER_SIZE                         = CL_INVALID_BUFFER_SIZE,</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        INVALID_MIP_LEVEL                           = CL_INVALID_MIP_LEVEL,</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        INVALID_GLOBAL_WORK_SIZE                    = CL_INVALID_GLOBAL_WORK_SIZE,</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        INVALID_PROPERTY                            = CL_INVALID_PROPERTY,</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        INVALID_IMAGE_DESCRIPTOR                    = CL_INVALID_IMAGE_DESCRIPTOR,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        INVALID_COMPILER_OPTIONS                    = CL_INVALID_COMPILER_OPTIONS,</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        INVALID_LINKER_OPTIONS                      = CL_INVALID_LINKER_OPTIONS,</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        INVALID_DEVICE_PARTITION_COUNT              = CL_INVALID_DEVICE_PARTITION_COUNT,</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        INVALID_VA_API_MEDIA_ADAPTER_INTEL          = CL_INVALID_VA_API_MEDIA_ADAPTER_INTEL,</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        INVALID_VA_API_MEDIA_SURFACE_INTEL          = CL_INVALID_VA_API_MEDIA_SURFACE_INTEL,</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL = CL_VA_API_MEDIA_SURFACE_ALREADY_ACQUIRED_INTEL,</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL     = CL_VA_API_MEDIA_SURFACE_NOT_ACQUIRED_INTEL,</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        UNKNOWN</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    };</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160; </div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi::cl</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="keyword">namespace </span>std {</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;    <span class="keyword">template</span> &lt;&gt;</div>
+<div class="line"><a name="l00106"></a><span class="lineno"><a class="line" href="structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__code_01_4.html">  106</a></span>&#160;    <span class="keyword">struct </span>is_error_condition_enum&lt;module::output::compressor::vaapi::cl::opencl_error_code&gt; : <span class="keyword">public</span> true_type {};</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;}  <span class="comment">// namespace std</span></div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        [[nodiscard]] std::string message(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    };</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keyword">const</span> std::error_category&amp; opencl_error_category();</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160; </div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    std::error_condition make_error_condition(opencl_error_code e);</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160; </div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi::cl</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160; </div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_OPENCL_ERROR_CATEGORY_HPP</span></div>
-<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html">module::output::compressor::vaapi::cl::opencl_error_category_t</a></div><div class="ttdef"><b>Definition:</b> opencl_error_category.hpp:101</div></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="keyword">namespace </span>module::output::compressor::vaapi::cl {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160; </div>
+<div class="line"><a name="l00111"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html">  111</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html">opencl_error_category_t</a> : <span class="keyword">public</span> std::error_category {</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        [[nodiscard]] <span class="keyword">const</span> <span class="keywordtype">char</span>* name() <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        [[nodiscard]] std::error_condition default_error_condition(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160; </div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        [[nodiscard]] <span class="keywordtype">bool</span> equivalent(<span class="keyword">const</span> std::error_code&amp; code, <span class="keywordtype">int</span> condition) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160; </div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        [[nodiscard]] std::string message(<span class="keywordtype">int</span> code) <span class="keyword">const</span> noexcept <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    };</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    <span class="keyword">const</span> std::error_category&amp; opencl_error_category();</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;    std::error_condition make_error_condition(opencl_error_code e);</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;}  <span class="comment">// namespace module::output::compressor::vaapi::cl</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160; </div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_CL_OPENCL_ERROR_CATEGORY_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html">module::output::compressor::vaapi::cl::opencl_error_category_t</a></div><div class="ttdef"><b>Definition:</b> opencl_error_category.hpp:111</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_207690c18237c73fdaff6f98bdb9393b.html">output</a></li><li class="navelem"><a class="el" href="dir_35ddddf25a0fdba6abe927263350c53c.html">ImageCompressor</a></li><li class="navelem"><a class="el" href="dir_e9d7f4f4c998f67ec133eae7fe491975.html">src</a></li><li class="navelem"><a class="el" href="dir_e639606d2263a0b38a84509fdf78de2c.html">compressor</a></li><li class="navelem"><a class="el" href="dir_d85b5eeaa979f1e1856735ec162b03af.html">vaapi</a></li><li class="navelem"><a class="el" href="dir_4d69d3ea5c5025f3c71ba2e417aa73f7.html">cl</a></li><li class="navelem"><b>opencl_error_category.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 19 2023 23:53:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 22 2023 05:06:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -170,40 +170,66 @@ $(document).ready(function(){initNavTree('output_2ImageCompressor_2src_2compress
 <div class="title">Factory.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_FACTORY_HPP</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_FACTORY_HPP</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;../CompressorFactory.hpp&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;Compressor.hpp&quot;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span>module::output::compressor::turbojpeg {</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">    9</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">Factory</a> : <span class="keyword">public</span> <a class="code" href="classmodule_1_1output_1_1compressor_1_1CompressorFactory.html">CompressorFactory</a> {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;        <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">Factory</a>(<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>) : <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>(<a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>){};</div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160; </div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;        std::shared_ptr&lt;compressor::Compressor&gt; make_compressor(<span class="keyword">const</span> uint32_t&amp; width,</div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;                                                                <span class="keyword">const</span> uint32_t&amp; height,</div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;                                                                <span class="keyword">const</span> uint32_t&amp; format) <span class="keyword">override</span>;</div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160; </div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">        /// The quality that this compressor is configured for</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">   19</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">int</span> <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>{0};</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;    };</div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160; </div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;}  <span class="comment">// namespace module::output::compressor::turbojpeg</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160; </div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">//  MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_FACTORY_HPP</span></div>
-<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1CompressorFactory_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1CompressorFactory.html">module::output::compressor::CompressorFactory</a></div><div class="ttdef"><b>Definition:</b> CompressorFactory.hpp:11</div></div>
-<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">module::output::compressor::turbojpeg::Factory</a></div><div class="ttdef"><b>Definition:</b> Factory.hpp:9</div></div>
-<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory_html_a00348b4f16e95b3cef2f5b535ff89e82"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">module::output::compressor::turbojpeg::Factory::quality</a></div><div class="ttdeci">int quality</div><div class="ttdoc">The quality that this compressor is configured for.</div><div class="ttdef"><b>Definition:</b> Factory.hpp:19</div></div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2020 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_FACTORY_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_FACTORY_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &quot;../CompressorFactory.hpp&quot;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &quot;Compressor.hpp&quot;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="keyword">namespace </span>module::output::compressor::turbojpeg {</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">   35</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">Factory</a> : <span class="keyword">public</span> <a class="code" href="classmodule_1_1output_1_1compressor_1_1CompressorFactory.html">CompressorFactory</a> {</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">Factory</a>(<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>) : <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>(<a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>){};</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160; </div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        std::shared_ptr&lt;compressor::Compressor&gt; make_compressor(<span class="keyword">const</span> uint32_t&amp; width,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;                                                                <span class="keyword">const</span> uint32_t&amp; height,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                                                                <span class="keyword">const</span> uint32_t&amp; format) <span class="keyword">override</span>;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">        /// The quality that this compressor is configured for</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">   45</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">int</span> <a class="code" href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">quality</a>{0};</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    };</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;}  <span class="comment">// namespace module::output::compressor::turbojpeg</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">//  MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_FACTORY_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1CompressorFactory_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1CompressorFactory.html">module::output::compressor::CompressorFactory</a></div><div class="ttdef"><b>Definition:</b> CompressorFactory.hpp:37</div></div>
+<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory_html"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html">module::output::compressor::turbojpeg::Factory</a></div><div class="ttdef"><b>Definition:</b> Factory.hpp:35</div></div>
+<div class="ttc" id="aclassmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory_html_a00348b4f16e95b3cef2f5b535ff89e82"><div class="ttname"><a href="classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html#a00348b4f16e95b3cef2f5b535ff89e82">module::output::compressor::turbojpeg::Factory::quality</a></div><div class="ttdeci">int quality</div><div class="ttdoc">The quality that this compressor is configured for.</div><div class="ttdef"><b>Definition:</b> Factory.hpp:45</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_207690c18237c73fdaff6f98bdb9393b.html">output</a></li><li class="navelem"><a class="el" href="dir_35ddddf25a0fdba6abe927263350c53c.html">ImageCompressor</a></li><li class="navelem"><a class="el" href="dir_e9d7f4f4c998f67ec133eae7fe491975.html">src</a></li><li class="navelem"><a class="el" href="dir_e639606d2263a0b38a84509fdf78de2c.html">compressor</a></li><li class="navelem"><a class="el" href="dir_4b5a2bfe8e5c8817b47993e189f78cf4.html">turbojpeg</a></li><li class="navelem"><b>Factory.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 19 2023 23:53:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 22 2023 05:06:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

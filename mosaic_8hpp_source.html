@@ -170,116 +170,142 @@ $(document).ready(function(){initNavTree('mosaic_8hpp_source.html',''); initResi
 <div class="title">mosaic.hpp</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef UTILITY_VISION_MOSAIC_HPP</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define UTILITY_VISION_MOSAIC_HPP</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;cstdint&gt;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &quot;utility/vision/fourcc.hpp&quot;</span></div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="keyword">namespace </span>utility::vision {</div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment">    /**</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment">     * This class is used to convert images from a permuted mosaic form to a regular mosaic form.</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment">     * The use case for this is to make bayer mosaic patterns more compressable for format like JPEG by removing the</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment">     * hard edges that occur on colour transitions in a mosaiced image. For example it would be able to perform the</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">     * conversion between the following image permutations.</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          RRRRRRRRRRGGGGGGGGGG</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          RRRRRRRRRRGGGGGGGGGG</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          RRRRRRRRRRGGGGGGGGGG</span></div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          RRRRRRRRRRGGGGGGGGGG</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG    -&gt;    RRRRRRRRRRGGGGGGGGGG</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          GGGGGGGGGGBBBBBBBBBB</span></div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          GGGGGGGGGGBBBBBBBBBB</span></div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          GGGGGGGGGGBBBBBBBBBB</span></div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          GGGGGGGGGGBBBBBBBBBB</span></div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          GGGGGGGGGGBBBBBBBBBB</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">     * Each of the four components in the bayer are spread out into a distinct corner of the image.</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classutility_1_1vision_1_1Mosaic.html">   31</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classutility_1_1vision_1_1Mosaic.html">Mosaic</a> {</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        <a class="code" href="classutility_1_1vision_1_1Mosaic.html">Mosaic</a>();</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        <a class="code" href="classutility_1_1vision_1_1Mosaic.html">Mosaic</a>(<span class="keyword">const</span> uint32_t&amp; width, <span class="keyword">const</span> uint32_t&amp; height, <span class="keyword">const</span> uint32_t&amp; format);</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">         * @brief Permute the data from its standard mosaic into a separated mosaic</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">         * Note that the destination buffer must be the same size as the input buffer.</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">         * Both of these buffers must be width * height that was set when creating this mosaic instance.</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">         *</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">         * @param src   the pointer to the source buffer to permute</span></div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="comment">         * @param dst   the pointer to the destination buffer to permute</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">         * @param size  the number of bytes in the source and destination buffers</span></div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1vision_1_1Mosaic.html#ab6433eaaf2506c7798f7591d7fe432c3">permute</a>(<span class="keyword">const</span> uint8_t* src, uint8_t* dst) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">         * @brief Unpermute the data from its separated mosaic into a standard mosaic</span></div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">         * Note that the destination buffer must be the same size as the input buffer.</span></div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">         * Both of these buffers must be width * height that was set when creating this mosaic instance.</span></div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment">         *</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">         * @param src   the pointer to the source buffer to unpermute</span></div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">         * @param dst   the pointer to the destination buffer to unpermute</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">         * @param size  the number of bytes in the source and destination buffers</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a4419f66cc50baa9b02f8c021bfd75e01">unpermute</a>(<span class="keyword">const</span> uint8_t* src, uint8_t* dst) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment">         * @brief Permute the data from its standard mosaic into a separated mosaic</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment">         *</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">         * @param data the input data to permute</span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">         * @return a new std::vector object containing the permuted image</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        [[nodiscard]] std::vector&lt;uint8_t&gt; <a class="code" href="classutility_1_1vision_1_1Mosaic.html#ab6433eaaf2506c7798f7591d7fe432c3">permute</a>(<span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; data) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">         * @brief Unpermute the data from its separated mosaic into a standard mosaic</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment">         *</span></div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment">         * @param data the input data to unpermute</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment">         * @return a new std::vector object containing the unpermuted image</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        [[nodiscard]] std::vector&lt;uint8_t&gt; <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a4419f66cc50baa9b02f8c021bfd75e01">unpermute</a>(<span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; data) <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment">         * @brief Gets the mosaic size of a type from its fourcc code</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">         *</span></div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">         * @param format the fourcc type that we are getting the mosaic size for</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">         *</span></div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">         * @return the dimensionality of the mosaic size (e.g. 1 for no mosaic, 2 for bayer, 4 for polarized bayer)</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a1993578307d88e50c76a6e429866b262">size</a>(<span class="keyword">const</span> uint32_t&amp; format);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">         * @brief Returns true if this mosaic has been initialised with a type that requires demosaicking</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">         *</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">         * @return true if the mosaic instance is valid</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">         * @return false if the mosaic instance is invalid</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="keyword">operator</span> bool() <span class="keyword">const</span>;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment">        /// The permutation table used to rearrange the data</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno"><a class="line" href="classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75">   93</a></span>&#160;<span class="comment"></span>        std::vector&lt;uint32_t&gt; <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75">table</a>;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    };</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160; </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;}  <span class="comment">// namespace utility::vision</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160; </div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_VISION_MOSAIC_HPP</span></div>
-<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html">utility::vision::Mosaic</a></div><div class="ttdoc">This class is used to convert images from a permuted mosaic form to a regular mosaic form.</div><div class="ttdef"><b>Definition:</b> mosaic.hpp:31</div></div>
-<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_a152bce03e090903f55c3cf5de957df75"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75">utility::vision::Mosaic::table</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; table</div><div class="ttdoc">The permutation table used to rearrange the data.</div><div class="ttdef"><b>Definition:</b> mosaic.hpp:93</div></div>
-<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_a1993578307d88e50c76a6e429866b262"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#a1993578307d88e50c76a6e429866b262">utility::vision::Mosaic::size</a></div><div class="ttdeci">static int size(const uint32_t &amp;format)</div><div class="ttdoc">Gets the mosaic size of a type from its fourcc code.</div><div class="ttdef"><b>Definition:</b> mosaic.cpp:55</div></div>
-<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_a4419f66cc50baa9b02f8c021bfd75e01"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#a4419f66cc50baa9b02f8c021bfd75e01">utility::vision::Mosaic::unpermute</a></div><div class="ttdeci">void unpermute(const uint8_t *src, uint8_t *dst) const</div><div class="ttdoc">Unpermute the data from its separated mosaic into a standard mosaic Note that the destination buffer ...</div><div class="ttdef"><b>Definition:</b> mosaic.cpp:31</div></div>
-<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_ab6433eaaf2506c7798f7591d7fe432c3"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#ab6433eaaf2506c7798f7591d7fe432c3">utility::vision::Mosaic::permute</a></div><div class="ttdeci">void permute(const uint8_t *src, uint8_t *dst) const</div><div class="ttdoc">Permute the data from its standard mosaic into a separated mosaic Note that the destination buffer mu...</div><div class="ttdef"><b>Definition:</b> mosaic.cpp:25</div></div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2021 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef UTILITY_VISION_MOSAIC_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define UTILITY_VISION_MOSAIC_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;cstdint&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &quot;utility/vision/fourcc.hpp&quot;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">namespace </span>utility::vision {</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">     * This class is used to convert images from a permuted mosaic form to a regular mosaic form.</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="comment">     * The use case for this is to make bayer mosaic patterns more compressable for format like JPEG by removing the</span></div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="comment">     * hard edges that occur on colour transitions in a mosaiced image. For example it would be able to perform the</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">     * conversion between the following image permutations.</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          RRRRRRRRRRGGGGGGGGGG</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          RRRRRRRRRRGGGGGGGGGG</span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          RRRRRRRRRRGGGGGGGGGG</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          RRRRRRRRRRGGGGGGGGGG</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG    -&gt;    RRRRRRRRRRGGGGGGGGGG</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          GGGGGGGGGGBBBBBBBBBB</span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          GGGGGGGGGGBBBBBBBBBB</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          GGGGGGGGGGBBBBBBBBBB</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment">     * RGRGRGRGRGRGRGRGRGRG          GGGGGGGGGGBBBBBBBBBB</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">     * GBGBGBGBGBGBGBGBGBGB          GGGGGGGGGGBBBBBBBBBB</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">     * Each of the four components in the bayer are spread out into a distinct corner of the image.</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="classutility_1_1vision_1_1Mosaic.html">   57</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classutility_1_1vision_1_1Mosaic.html">Mosaic</a> {</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <a class="code" href="classutility_1_1vision_1_1Mosaic.html">Mosaic</a>();</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <a class="code" href="classutility_1_1vision_1_1Mosaic.html">Mosaic</a>(<span class="keyword">const</span> uint32_t&amp; width, <span class="keyword">const</span> uint32_t&amp; height, <span class="keyword">const</span> uint32_t&amp; format);</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment">         * @brief Permute the data from its standard mosaic into a separated mosaic</span></div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">         * Note that the destination buffer must be the same size as the input buffer.</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment">         * Both of these buffers must be width * height that was set when creating this mosaic instance.</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">         * @param src   the pointer to the source buffer to permute</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment">         * @param dst   the pointer to the destination buffer to permute</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment">         * @param size  the number of bytes in the source and destination buffers</span></div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1vision_1_1Mosaic.html#ab6433eaaf2506c7798f7591d7fe432c3">permute</a>(<span class="keyword">const</span> uint8_t* src, uint8_t* dst) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment">         * @brief Unpermute the data from its separated mosaic into a standard mosaic</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment">         * Note that the destination buffer must be the same size as the input buffer.</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">         * Both of these buffers must be width * height that was set when creating this mosaic instance.</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">         * @param src   the pointer to the source buffer to unpermute</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">         * @param dst   the pointer to the destination buffer to unpermute</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">         * @param size  the number of bytes in the source and destination buffers</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a4419f66cc50baa9b02f8c021bfd75e01">unpermute</a>(<span class="keyword">const</span> uint8_t* src, uint8_t* dst) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">         * @brief Permute the data from its standard mosaic into a separated mosaic</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">         * @param data the input data to permute</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">         * @return a new std::vector object containing the permuted image</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        [[nodiscard]] std::vector&lt;uint8_t&gt; <a class="code" href="classutility_1_1vision_1_1Mosaic.html#ab6433eaaf2506c7798f7591d7fe432c3">permute</a>(<span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; data) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;<span class="comment">         * @brief Unpermute the data from its separated mosaic into a standard mosaic</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;<span class="comment">         * @param data the input data to unpermute</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment">         * @return a new std::vector object containing the unpermuted image</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        [[nodiscard]] std::vector&lt;uint8_t&gt; <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a4419f66cc50baa9b02f8c021bfd75e01">unpermute</a>(<span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; data) <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="comment">         * @brief Gets the mosaic size of a type from its fourcc code</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment">         * @param format the fourcc type that we are getting the mosaic size for</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="comment">         * @return the dimensionality of the mosaic size (e.g. 1 for no mosaic, 2 for bayer, 4 for polarized bayer)</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a1993578307d88e50c76a6e429866b262">size</a>(<span class="keyword">const</span> uint32_t&amp; format);</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="comment">         * @brief Returns true if this mosaic has been initialised with a type that requires demosaicking</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="comment">         * @return true if the mosaic instance is valid</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="comment">         * @return false if the mosaic instance is invalid</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="keyword">operator</span> bool() <span class="keyword">const</span>;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160; </div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="comment">        /// The permutation table used to rearrange the data</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno"><a class="line" href="classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75">  119</a></span>&#160;<span class="comment"></span>        std::vector&lt;uint32_t&gt; <a class="code" href="classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75">table</a>;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    };</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;}  <span class="comment">// namespace utility::vision</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160; </div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_VISION_MOSAIC_HPP</span></div>
+<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html">utility::vision::Mosaic</a></div><div class="ttdoc">This class is used to convert images from a permuted mosaic form to a regular mosaic form.</div><div class="ttdef"><b>Definition:</b> mosaic.hpp:57</div></div>
+<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_a152bce03e090903f55c3cf5de957df75"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#a152bce03e090903f55c3cf5de957df75">utility::vision::Mosaic::table</a></div><div class="ttdeci">std::vector&lt; uint32_t &gt; table</div><div class="ttdoc">The permutation table used to rearrange the data.</div><div class="ttdef"><b>Definition:</b> mosaic.hpp:119</div></div>
+<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_a1993578307d88e50c76a6e429866b262"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#a1993578307d88e50c76a6e429866b262">utility::vision::Mosaic::size</a></div><div class="ttdeci">static int size(const uint32_t &amp;format)</div><div class="ttdoc">Gets the mosaic size of a type from its fourcc code.</div><div class="ttdef"><b>Definition:</b> mosaic.cpp:81</div></div>
+<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_a4419f66cc50baa9b02f8c021bfd75e01"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#a4419f66cc50baa9b02f8c021bfd75e01">utility::vision::Mosaic::unpermute</a></div><div class="ttdeci">void unpermute(const uint8_t *src, uint8_t *dst) const</div><div class="ttdoc">Unpermute the data from its separated mosaic into a standard mosaic Note that the destination buffer ...</div><div class="ttdef"><b>Definition:</b> mosaic.cpp:57</div></div>
+<div class="ttc" id="aclassutility_1_1vision_1_1Mosaic_html_ab6433eaaf2506c7798f7591d7fe432c3"><div class="ttname"><a href="classutility_1_1vision_1_1Mosaic.html#ab6433eaaf2506c7798f7591d7fe432c3">utility::vision::Mosaic::permute</a></div><div class="ttdeci">void permute(const uint8_t *src, uint8_t *dst) const</div><div class="ttdoc">Permute the data from its standard mosaic into a separated mosaic Note that the destination buffer mu...</div><div class="ttdef"><b>Definition:</b> mosaic.cpp:51</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_0732c0f32685034b3208add2f1dba931.html">vision</a></li><li class="navelem"><b>mosaic.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 19 2023 23:53:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 22 2023 05:06:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

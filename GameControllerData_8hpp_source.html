@@ -171,193 +171,201 @@ $(document).ready(function(){initNavTree('GameControllerData_8hpp_source.html','
 </div><!--header-->
 <div class="contents">
 <div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * This file is part of the NUbots Codebase.</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
 <div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * The NUbots Codebase is free software: you can redistribute it and/or modify</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> * it under the terms of the GNU General Public License as published by</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * the Free Software Foundation, either version 3 of the License, or</span></div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * (at your option) any later version.</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2014 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
 <div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * The NUbots Codebase is distributed in the hope that it will be useful,</span></div>
-<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span></div>
-<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></div>
-<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * GNU General Public License for more details.</span></div>
-<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * You should have received a copy of the GNU General Public License</span></div>
-<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> * along with the NUbots Codebase.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span></div>
-<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> *</span></div>
-<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * Copyright 2013 NUbots &lt;nubots@nubots.net&gt;</span></div>
-<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#ifndef MODULES_INPUT_GAMECONTROLLERDATA_HPP</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#define MODULES_INPUT_GAMECONTROLLERDATA_HPP</span></div>
-<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
-<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="keyword">namespace </span>module::input::gamecontroller {</div>
-<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">size_t</span> MAX_NUM_PLAYERS        = 11;</div>
-<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">size_t</span> SPL_COACH_MESSAGE_SIZE = 253;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">char</span> RECEIVE_HEADER[4]        = {<span class="charliteral">&#39;R&#39;</span>, <span class="charliteral">&#39;G&#39;</span>, <span class="charliteral">&#39;m&#39;</span>, <span class="charliteral">&#39;e&#39;</span>};</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">char</span> RETURN_HEADER[4]         = {<span class="charliteral">&#39;R&#39;</span>, <span class="charliteral">&#39;G&#39;</span>, <span class="charliteral">&#39;r&#39;</span>, <span class="charliteral">&#39;t&#39;</span>};</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">size_t</span> RETURN_VERSION         = 2;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#pragma pack(push, 1)</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;    <span class="keyword">enum class</span> State : uint8_t { INITIAL = 0, READY = 1, SET = 2, PLAYING = 3, FINISHED = 4 };</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    <span class="keyword">enum class</span> Mode : uint8_t {</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;        NORMAL            = 0,</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;        PENALTY_SHOOTOUT  = 1,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;        OVERTIME          = 2,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        TIMEOUT           = 3,</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        DIRECT_FREEKICK   = 4,</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        INDIRECT_FREEKICK = 5,</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        PENALTYKICK       = 6,</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        CORNER_KICK       = 7,</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        GOAL_KICK         = 8,</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        THROW_IN          = 9,</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    };</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keyword">enum class</span> GameType : uint8_t { ROUND_ROBIN = 0, PLAYOFF = 1, DROPIN = 2 };</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160; </div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keyword">enum class</span> TeamColour : uint8_t { CYAN = 0, MAGENTA = 1, DROPBALL = 255 };</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    <span class="keyword">enum class</span> ReplyMessage : uint8_t { PENALISED = 0, UNPENALISED = 1, ALIVE = 2 };</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keyword">enum class</span> PenaltyState : uint8_t {</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="comment">// General??</span></div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        UNPENALISED = 0,</div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#ifndef MODULES_INPUT_GAMECONTROLLERDATA_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#define MODULES_INPUT_GAMECONTROLLERDATA_HPP</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="keyword">namespace </span>module::input::gamecontroller {</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">size_t</span> MAX_NUM_PLAYERS        = 11;</div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">size_t</span> SPL_COACH_MESSAGE_SIZE = 253;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">char</span> RECEIVE_HEADER[4]        = {<span class="charliteral">&#39;R&#39;</span>, <span class="charliteral">&#39;G&#39;</span>, <span class="charliteral">&#39;m&#39;</span>, <span class="charliteral">&#39;e&#39;</span>};</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">char</span> RETURN_HEADER[4]         = {<span class="charliteral">&#39;R&#39;</span>, <span class="charliteral">&#39;G&#39;</span>, <span class="charliteral">&#39;r&#39;</span>, <span class="charliteral">&#39;t&#39;</span>};</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    constexpr <span class="keyword">const</span> <span class="keywordtype">size_t</span> RETURN_VERSION         = 2;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#pragma pack(push, 1)</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;    <span class="keyword">enum class</span> State : uint8_t { INITIAL = 0, READY = 1, SET = 2, PLAYING = 3, FINISHED = 4 };</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">enum class</span> Mode : uint8_t {</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        NORMAL            = 0,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        PENALTY_SHOOTOUT  = 1,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        OVERTIME          = 2,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        TIMEOUT           = 3,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        DIRECT_FREEKICK   = 4,</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        INDIRECT_FREEKICK = 5,</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        PENALTYKICK       = 6,</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        CORNER_KICK       = 7,</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        GOAL_KICK         = 8,</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        THROW_IN          = 9,</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    };</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160; </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    <span class="keyword">enum class</span> GameType : uint8_t { ROUND_ROBIN = 0, PLAYOFF = 1, DROPIN = 2 };</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160; </div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        <span class="comment">// SPL</span></div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        ILLEGAL_BALL_CONTACT   = 1,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        PLAYER_PUSHING         = 2,</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        ILLEGAL_MOTION_IN_SET  = 3,</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        INACTIVE_PLAYER        = 4,</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        ILLEGAL_DEFENDER       = 5,</div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        LEAVING_THE_FIELD      = 6,</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        KICK_OFF_GOAL          = 7,</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        SPL_REQUEST_FOR_PICKUP = 8,</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        COACH_MOTION           = 9,</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        <span class="comment">// General??</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        SUBSTITUTE = 14,</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        MANUAL     = 15,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160; </div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="comment">// HL</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        BALL_MANIPULATION   = 30,</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        PHYSICAL_CONTACT    = 31,</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        ILLEGAL_ATTACK      = 32,</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        ILLEGAL_DEFENSE     = 33,</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        REQUEST_FOR_PICKUP  = 34,</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        REQUEST_FOR_SERVICE = 35,</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    <span class="keyword">enum class</span> TeamColour : uint8_t { CYAN = 0, MAGENTA = 1, DROPBALL = 255 };</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">enum class</span> ReplyMessage : uint8_t { PENALISED = 0, UNPENALISED = 1, ALIVE = 2 };</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    <span class="keyword">enum class</span> PenaltyState : uint8_t {</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="comment">// General??</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        UNPENALISED = 0,</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="comment">// SPL</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        ILLEGAL_BALL_CONTACT   = 1,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        PLAYER_PUSHING         = 2,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        ILLEGAL_MOTION_IN_SET  = 3,</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        INACTIVE_PLAYER        = 4,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        ILLEGAL_DEFENDER       = 5,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        LEAVING_THE_FIELD      = 6,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        KICK_OFF_GOAL          = 7,</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        SPL_REQUEST_FOR_PICKUP = 8,</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        COACH_MOTION           = 9,</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="comment">// General??</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        SUBSTITUTE = 14,</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        MANUAL     = 15,</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="comment">// General??</span></div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        UNKNOWN = 255</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    };</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
-<div class="line"><a name="l00083"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">   83</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">Robot</a> {</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        PenaltyState penaltyState;  <span class="comment">// penalty state of the player</span></div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        uint8_t penalisedTimeLeft;  <span class="comment">// estimate of time till unpenalised (seconds)</span></div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        uint8_t numberOfWarnings;   <span class="comment">// number of warnings</span></div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        uint8_t yellowCardCount;    <span class="comment">// number of yellow cards</span></div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        uint8_t redCardCount;       <span class="comment">// number of red cards</span></div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="keywordtype">bool</span> goalKeeper;            <span class="comment">// flags if robot is goal keeper</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;    };</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160; </div>
-<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">   92</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">Team</a> {</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        uint8_t teamId;                                         <span class="comment">// unique team number</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        TeamColour teamColour;                                  <span class="comment">// colour of the team</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        uint8_t score;                                          <span class="comment">// team&#39;s score</span></div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        uint8_t penaltyShot;                                    <span class="comment">// penalty shot counter</span></div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        uint16_t singleShots;                                   <span class="comment">// bits represent penalty shot success</span></div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        uint8_t coachSequence;                                  <span class="comment">// sequence number of the coach&#39;s message</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        std::array&lt;char, SPL_COACH_MESSAGE_SIZE&gt; coachMessage;  <span class="comment">// the coach&#39;s message to the team</span></div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">Robot</a> coach;                                            <span class="comment">// the coach</span></div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        std::array&lt;Robot, MAX_NUM_PLAYERS&gt; players;             <span class="comment">// the team&#39;s players</span></div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    };</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160; </div>
-<div class="line"><a name="l00104"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">  104</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">GameControllerPacket</a> {</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        std::array&lt;char, 4&gt; header;  <span class="comment">// header to identify the structure</span></div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        uint16_t version;            <span class="comment">// version of the data structure</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        uint8_t packetNumber;        <span class="comment">// number incremented with each packet sent (with wraparound)</span></div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        uint8_t playersPerTeam;      <span class="comment">// the number of players on a team</span></div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        GameType gameType;           <span class="comment">// type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)</span></div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        State state;                 <span class="comment">// state of the game (STATE_READY, STATE_PLAYING, etc)</span></div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        <span class="keywordtype">bool</span> firstHalf;              <span class="comment">// 1 = game in first half, 0 otherwise</span></div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;        uint8_t kickOffTeam;         <span class="comment">// the team number of the next team to kick off or DROPBALL</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        Mode mode;                   <span class="comment">// extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        std::array&lt;uint8_t, 4&gt; secondaryStateInfo;  <span class="comment">// Extra info on the secondary state</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        TeamColour dropInTeam;                      <span class="comment">// number of team that caused last drop in</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        int16_t dropInTime;      <span class="comment">// number of seconds passed since the last drop in. -1 (0xffff) before first dropin</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        uint16_t secsRemaining;  <span class="comment">// estimate of number of seconds remaining in the half</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        uint16_t secondaryTime;  <span class="comment">// number of seconds shown as secondary time (remaining ready, until free ball, etc)</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        std::array&lt;Team, 2&gt; teams;</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    };</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160; </div>
-<div class="line"><a name="l00122"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html">  122</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html">GameControllerReplyPacket</a> {</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        std::array&lt;char, 4&gt; header;</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        uint8_t version;</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        uint8_t team;          <span class="comment">// team number</span></div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        uint8_t player;        <span class="comment">// player number starts with 1</span></div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        ReplyMessage message;  <span class="comment">// one of the three messages defined above</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="comment">// HL</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        BALL_MANIPULATION   = 30,</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        PHYSICAL_CONTACT    = 31,</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        ILLEGAL_ATTACK      = 32,</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        ILLEGAL_DEFENSE     = 33,</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        REQUEST_FOR_PICKUP  = 34,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        REQUEST_FOR_SERVICE = 35,</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="comment">// General??</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        UNKNOWN = 255</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    };</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
+<div class="line"><a name="l00091"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">   91</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">Robot</a> {</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        PenaltyState penaltyState;  <span class="comment">// penalty state of the player</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        uint8_t penalisedTimeLeft;  <span class="comment">// estimate of time till unpenalised (seconds)</span></div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        uint8_t numberOfWarnings;   <span class="comment">// number of warnings</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        uint8_t yellowCardCount;    <span class="comment">// number of yellow cards</span></div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        uint8_t redCardCount;       <span class="comment">// number of red cards</span></div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keywordtype">bool</span> goalKeeper;            <span class="comment">// flags if robot is goal keeper</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    };</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00100"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">  100</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">Team</a> {</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        uint8_t teamId;                                         <span class="comment">// unique team number</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        TeamColour teamColour;                                  <span class="comment">// colour of the team</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        uint8_t score;                                          <span class="comment">// team&#39;s score</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        uint8_t penaltyShot;                                    <span class="comment">// penalty shot counter</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        uint16_t singleShots;                                   <span class="comment">// bits represent penalty shot success</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        uint8_t coachSequence;                                  <span class="comment">// sequence number of the coach&#39;s message</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        std::array&lt;char, SPL_COACH_MESSAGE_SIZE&gt; coachMessage;  <span class="comment">// the coach&#39;s message to the team</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">Robot</a> coach;                                            <span class="comment">// the coach</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        std::array&lt;Robot, MAX_NUM_PLAYERS&gt; players;             <span class="comment">// the team&#39;s players</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    };</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160; </div>
+<div class="line"><a name="l00112"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">  112</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">GameControllerPacket</a> {</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;        std::array&lt;char, 4&gt; header;  <span class="comment">// header to identify the structure</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;        uint16_t version;            <span class="comment">// version of the data structure</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        uint8_t packetNumber;        <span class="comment">// number incremented with each packet sent (with wraparound)</span></div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        uint8_t playersPerTeam;      <span class="comment">// the number of players on a team</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        GameType gameType;           <span class="comment">// type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)</span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        State state;                 <span class="comment">// state of the game (STATE_READY, STATE_PLAYING, etc)</span></div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keywordtype">bool</span> firstHalf;              <span class="comment">// 1 = game in first half, 0 otherwise</span></div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        uint8_t kickOffTeam;         <span class="comment">// the team number of the next team to kick off or DROPBALL</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        Mode mode;                   <span class="comment">// extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)</span></div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        std::array&lt;uint8_t, 4&gt; secondaryStateInfo;  <span class="comment">// Extra info on the secondary state</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        TeamColour dropInTeam;                      <span class="comment">// number of team that caused last drop in</span></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        int16_t dropInTime;      <span class="comment">// number of seconds passed since the last drop in. -1 (0xffff) before first dropin</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        uint16_t secsRemaining;  <span class="comment">// estimate of number of seconds remaining in the half</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        uint16_t secondaryTime;  <span class="comment">// number of seconds shown as secondary time (remaining ready, until free ball, etc)</span></div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        std::array&lt;Team, 2&gt; teams;</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;    };</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="preprocessor">#pragma pack(pop)</span></div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160; </div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    <span class="keyword">inline</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">Robot</a>&amp; robot) {</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;        os &lt;&lt; <span class="stringliteral">&quot;\t\tPenalty state......: &quot;</span> &lt;&lt; uint(robot.penaltyState) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tPenalised time left: &quot;</span> &lt;&lt; uint(robot.penalisedTimeLeft) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tNumber of warnings: &quot;</span> &lt;&lt; uint(robot.numberOfWarnings) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tYellow Card Count..: &quot;</span> &lt;&lt; uint(robot.yellowCardCount) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tRed Card Count.....: &quot;</span> &lt;&lt; uint(robot.redCardCount) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tGoalkeeper: &quot;</span> &lt;&lt; std::boolalpha &lt;&lt; robot.goalKeeper &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        <span class="keywordflow">return</span> os;</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    }</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160; </div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;    <span class="keyword">inline</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">Team</a>&amp; team) {</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        os &lt;&lt; <span class="stringliteral">&quot;Team id: &quot;</span> &lt;&lt; uint(team.teamId) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tTeam colour...: &quot;</span> &lt;&lt; uint(team.teamColour) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tScore.........: &quot;</span> &lt;&lt; uint(team.score) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tPenalty shot..: &quot;</span> &lt;&lt; uint(team.penaltyShot) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tSingle shots..: &quot;</span> &lt;&lt; uint(team.singleShots) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tCoach Sequence: &quot;</span> &lt;&lt; uint(team.coachSequence) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tCoach message.: &quot;</span> &lt;&lt; std::string(team.coachMessage.data()) &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160; </div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        <span class="keywordflow">for</span> (uint i = 0; i &lt; team.players.size(); i++) {</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;            os &lt;&lt; <span class="stringliteral">&quot;\tRobot &quot;</span> &lt;&lt; i + 1 &lt;&lt; <span class="stringliteral">&quot;:&quot;</span> &lt;&lt; std::endl &lt;&lt; team.players[i] &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;        }</div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        <span class="keywordflow">return</span> os;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    }</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160; </div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    <span class="keyword">inline</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> GameControllerPacket&amp; packet) {</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;        os &lt;&lt; <span class="stringliteral">&quot;Version.............: &quot;</span> &lt;&lt; uint(packet.version) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Packet number.......: &quot;</span> &lt;&lt; uint(packet.packetNumber) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Players per team....: &quot;</span> &lt;&lt; uint(packet.playersPerTeam) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Game Type...........: &quot;</span> &lt;&lt; uint(packet.gameType) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;State...............: &quot;</span> &lt;&lt; uint(packet.state) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;First half..........: &quot;</span> &lt;&lt; std::boolalpha &lt;&lt; packet.firstHalf &lt;&lt; std::endl</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Kick off team.......: &quot;</span> &lt;&lt; uint(packet.kickOffTeam) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Mode................: &quot;</span> &lt;&lt; uint(packet.mode) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Secondary State Info: &quot;</span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;           &lt;&lt; std::string(packet.secondaryStateInfo.begin(), packet.secondaryStateInfo.end()) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Drop in team........: &quot;</span> &lt;&lt; uint(packet.dropInTeam) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Drop in time........: &quot;</span> &lt;&lt; uint(packet.dropInTime) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Seconds remaining...: &quot;</span> &lt;&lt; uint(packet.secsRemaining) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Secondary time......: &quot;</span> &lt;&lt; uint(packet.secondaryTime) &lt;&lt; std::endl</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;           &lt;&lt; packet.teams[0] &lt;&lt; std::endl</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;           &lt;&lt; packet.teams[1] &lt;&lt; std::endl;</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;        <span class="keywordflow">return</span> os;</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;    }</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;}  <span class="comment">// namespace module::input::gamecontroller</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160; </div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULES_INPUT_GAMECONTROLLERDATA_HPP</span></div>
-<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">module::input::gamecontroller::GameControllerPacket</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:104</div></div>
-<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html">module::input::gamecontroller::GameControllerReplyPacket</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:122</div></div>
-<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1Robot_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">module::input::gamecontroller::Robot</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:83</div></div>
-<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1Team_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">module::input::gamecontroller::Team</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:92</div></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160; </div>
+<div class="line"><a name="l00130"></a><span class="lineno"><a class="line" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html">  130</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html">GameControllerReplyPacket</a> {</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;        std::array&lt;char, 4&gt; header;</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;        uint8_t version;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        uint8_t team;          <span class="comment">// team number</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        uint8_t player;        <span class="comment">// player number starts with 1</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        ReplyMessage message;  <span class="comment">// one of the three messages defined above</span></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    };</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="preprocessor">#pragma pack(pop)</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    <span class="keyword">inline</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">Robot</a>&amp; robot) {</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;        os &lt;&lt; <span class="stringliteral">&quot;\t\tPenalty state......: &quot;</span> &lt;&lt; uint(robot.penaltyState) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tPenalised time left: &quot;</span> &lt;&lt; uint(robot.penalisedTimeLeft) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tNumber of warnings: &quot;</span> &lt;&lt; uint(robot.numberOfWarnings) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tYellow Card Count..: &quot;</span> &lt;&lt; uint(robot.yellowCardCount) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tRed Card Count.....: &quot;</span> &lt;&lt; uint(robot.redCardCount) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\t\tGoalkeeper: &quot;</span> &lt;&lt; std::boolalpha &lt;&lt; robot.goalKeeper &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;        <span class="keywordflow">return</span> os;</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;    }</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160; </div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;    <span class="keyword">inline</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> <a class="code" href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">Team</a>&amp; team) {</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        os &lt;&lt; <span class="stringliteral">&quot;Team id: &quot;</span> &lt;&lt; uint(team.teamId) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tTeam colour...: &quot;</span> &lt;&lt; uint(team.teamColour) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tScore.........: &quot;</span> &lt;&lt; uint(team.score) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tPenalty shot..: &quot;</span> &lt;&lt; uint(team.penaltyShot) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tSingle shots..: &quot;</span> &lt;&lt; uint(team.singleShots) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tCoach Sequence: &quot;</span> &lt;&lt; uint(team.coachSequence) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;\tCoach message.: &quot;</span> &lt;&lt; std::string(team.coachMessage.data()) &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160; </div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;        <span class="keywordflow">for</span> (uint i = 0; i &lt; team.players.size(); i++) {</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;            os &lt;&lt; <span class="stringliteral">&quot;\tRobot &quot;</span> &lt;&lt; i + 1 &lt;&lt; <span class="stringliteral">&quot;:&quot;</span> &lt;&lt; std::endl &lt;&lt; team.players[i] &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;        }</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;        <span class="keywordflow">return</span> os;</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    }</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160; </div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;    <span class="keyword">inline</span> std::ostream&amp; operator&lt;&lt;(std::ostream&amp; os, <span class="keyword">const</span> GameControllerPacket&amp; packet) {</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;        os &lt;&lt; <span class="stringliteral">&quot;Version.............: &quot;</span> &lt;&lt; uint(packet.version) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Packet number.......: &quot;</span> &lt;&lt; uint(packet.packetNumber) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Players per team....: &quot;</span> &lt;&lt; uint(packet.playersPerTeam) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Game Type...........: &quot;</span> &lt;&lt; uint(packet.gameType) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;State...............: &quot;</span> &lt;&lt; uint(packet.state) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;First half..........: &quot;</span> &lt;&lt; std::boolalpha &lt;&lt; packet.firstHalf &lt;&lt; std::endl</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Kick off team.......: &quot;</span> &lt;&lt; uint(packet.kickOffTeam) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Mode................: &quot;</span> &lt;&lt; uint(packet.mode) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Secondary State Info: &quot;</span></div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;           &lt;&lt; std::string(packet.secondaryStateInfo.begin(), packet.secondaryStateInfo.end()) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Drop in team........: &quot;</span> &lt;&lt; uint(packet.dropInTeam) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Drop in time........: &quot;</span> &lt;&lt; uint(packet.dropInTime) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Seconds remaining...: &quot;</span> &lt;&lt; uint(packet.secsRemaining) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;           &lt;&lt; <span class="stringliteral">&quot;Secondary time......: &quot;</span> &lt;&lt; uint(packet.secondaryTime) &lt;&lt; std::endl</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;           &lt;&lt; packet.teams[0] &lt;&lt; std::endl</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;           &lt;&lt; packet.teams[1] &lt;&lt; std::endl;</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        <span class="keywordflow">return</span> os;</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;    }</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;}  <span class="comment">// namespace module::input::gamecontroller</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160; </div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULES_INPUT_GAMECONTROLLERDATA_HPP</span></div>
+<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html">module::input::gamecontroller::GameControllerPacket</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:112</div></div>
+<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html">module::input::gamecontroller::GameControllerReplyPacket</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:130</div></div>
+<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1Robot_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1Robot.html">module::input::gamecontroller::Robot</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:91</div></div>
+<div class="ttc" id="astructmodule_1_1input_1_1gamecontroller_1_1Team_html"><div class="ttname"><a href="structmodule_1_1input_1_1gamecontroller_1_1Team.html">module::input::gamecontroller::Team</a></div><div class="ttdef"><b>Definition:</b> GameControllerData.hpp:100</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_4d10c6a6480147e17a39ec31ce05eab6.html">input</a></li><li class="navelem"><a class="el" href="dir_0963710d67a5dff2eb9a67dd21d0ed1f.html">GameController</a></li><li class="navelem"><a class="el" href="dir_05850918ca416851b8e368145e1c8638.html">src</a></li><li class="navelem"><b>GameControllerData.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 19 2023 23:53:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 22 2023 05:06:48 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
