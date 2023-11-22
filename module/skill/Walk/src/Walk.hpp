@@ -36,9 +36,14 @@
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/control/pid.hpp"
+#include "utility/math/filter/ExponentialFilter.hpp"
 #include "utility/skill/WalkGenerator.hpp"
 
 namespace module::skill {
+
+    using utility::math::control::PID;
+    using utility::math::filter::ExponentialFilter;
+    using utility::skill::WalkGenerator;
 
     class Walk : public ::extension::behaviour::BehaviourReactor {
 
@@ -86,13 +91,21 @@ namespace module::skill {
         NUClear::clock::time_point last_update_time{};
 
         /// @brief Generates swing foot and torso trajectories for given walk velocity target
-        utility::skill::WalkGenerator<double> walk_generator{};
+        WalkGenerator<double> walk_generator{};
 
         /// @brief Torso X-Y position PID controller
-        utility::math::control::PID<double, 2> torso_controller{};
+        PID<double, 2> torso_controller{};
+
+        /// @brief Exponential filter for torso X-Y position control input (position offset)
+        ExponentialFilter<double, 2> torso_controller_filter{};
 
         /// @brief Torso pitch PID controller
         utility::math::control::PID<double, 1> pitch_controller{};
+
+        /// @brief Compute torso position offset to keep the robot balanced
+        Eigen::Isometry3d compute_torso_offset(const Eigen::Isometry3d& Htp_desired,
+                                               const Eigen::Isometry3d& Htp_measured,
+                                               const double time_delta);
     };
 }  // namespace module::skill
 

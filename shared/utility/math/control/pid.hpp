@@ -13,6 +13,7 @@ namespace utility::math::control {
         Eigen::Matrix<Scalar, N, 1> prev_error     = Eigen::Matrix<Scalar, N, 1>::Zero();
         Scalar max_integral                        = std::numeric_limits<Scalar>::max();
         Scalar min_integral                        = std::numeric_limits<Scalar>::lowest();
+        Eigen::Matrix<Scalar, N, 1> u              = Eigen::Matrix<Scalar, N, 1>::Zero();
 
     public:
         PID() : Kp(0), Ki(0), Kd(0) {
@@ -46,8 +47,12 @@ namespace utility::math::control {
             Eigen::Matrix<Scalar, N, 1> D          = Kd * derivative;
 
             prev_error = error;
+            u          = P + I + D;
+            return u;
+        }
 
-            return P + I + D;
+        Eigen::Matrix<Scalar, N, 1> get_control() const {
+            return u;
         }
 
         void set_gains(Scalar Kp, Scalar Ki, Scalar Kd) {
