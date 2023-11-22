@@ -35,49 +35,44 @@
 #include "message/skill/Look.hpp"
 
 #include "utility/input/ServoID.hpp"
-#include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
     using message::actuation::HeadIK;
-    using message::actuation::LimbsSequence;
     using message::actuation::ServoState;
     using utility::input::ServoID;
-    using utility::math::coordinates::screen_angular_from_object_direction;
-    using utility::math::coordinates::sphericalToCartesian;
-    using utility::nusight::graph;
     using LookTask = message::skill::Look;
 
     Look::Look(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("Look.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Look.yaml
-            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.smoothing_factor = config["smoothing_factor"].as<float>();
-            cfg.head_gain        = config["head_gain"].as<float>();
-            cfg.head_torque      = config["head_torque"].as<float>();
+            log_level       = config["log_level"].as<NUClear::LogLevel>();
+            cfg.head_gain   = config["head_gain"].as<float>();
+            cfg.head_torque = config["head_torque"].as<float>();
+            // Configure exponential filter
+            uPCt_filter.set_alpha(config["smoothing_factor"].as<float>());
         });
 
         on<Provide<LookTask>, Needs<HeadIK>, Every<90, Per<std::chrono::seconds>>>().then([this](const LookTask& look) {
             // Normalise the look vector
-            Eigen::Vector3d req_uPCt = look.rPCt.normalized();
+            Eigen::Vector3d requested_uPCt = look.rPCt.normalized();
 
             // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help
             // locking on to the target
             if (smooth == false && look.smooth == true) {
-                uPCt = req_uPCt;
+                uPCt_filter.set_value(requested_uPCt);
             }
             smooth = look.smooth;
-
-            // If smoothing requested, smooth requested angles with exponential filter
-            uPCt = smooth ? (cfg.smoothing_factor * req_uPCt + (1 - cfg.smoothing_factor) * uPCt) : req_uPCt;
 
             // Create the HeadIK message
             auto head_ik  = std::make_unique<HeadIK>();
             head_ik->time = NUClear::clock::now();
-            head_ik->uPCt = uPCt;
+
+            // If smoothing requested, smooth requested angles with exponential filter
+            head_ik->uPCt = smooth ? uPCt_filter.update(requested_uPCt) : requested_uPCt;
 
             head_ik->servos[ServoID::HEAD_YAW]   = ServoState(cfg.head_gain, cfg.head_torque);
             head_ik->servos[ServoID::HEAD_PITCH] = ServoState(cfg.head_gain, cfg.head_torque);

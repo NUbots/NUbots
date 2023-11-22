@@ -28,15 +28,18 @@
 #include <Eigen/Core>
 #include <array>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <utility>
 
 #include "VanDerPolModel.hpp"
 
+#include "utility/math/filter/ExponentialFilter.hpp"
 #include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/math/filter/ParticleFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+using Catch::Matchers::WithinRel;
 using utility::support::Expression;
 using utility::support::resolve_expression;
 
@@ -278,4 +281,24 @@ TEST_CASE("Test the KalmanFilter", "[utility][math][filter][KalmanFilter]") {
     INFO("The final state is: " << kf.get_state().transpose());
 
     REQUIRE(average_error < 1e-2);
+}
+
+TEST_CASE("Test the ExponentialFilter", "[utility][math][filter][ExponentialFilter]") {
+    // Initialize the filter with a smoothing factor (alpha) and an initial value
+    double alpha         = 0.5;
+    double initial_value = 0.0;
+    utility::math::filter::ExponentialFilter<double, 1> filter(alpha, initial_value);
+
+    // Test data
+    std::vector<double> measurements     = {10.0, 20.0, 15.0, 5.0, 10.0};
+    std::vector<double> expected_results = {5.0, 12.5, 13.75, 9.375, 9.6875};
+
+    // Iterate over measurements and update the filter
+    for (std::size_t i = 0; i < measurements.size(); ++i) {
+        double smoothed_value = filter.update(measurements[i]);
+
+        INFO("Measurement: " << measurements[i] << ", Expected: " << expected_results[i]
+                             << ", Filtered: " << smoothed_value);
+        REQUIRE_THAT(smoothed_value, WithinRel(expected_results[i], 1e-3));
+    }
 }
