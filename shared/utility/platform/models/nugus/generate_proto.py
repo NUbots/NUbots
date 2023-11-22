@@ -1,3 +1,29 @@
+#
+# MIT License
+#
+# Copyright (c) 2023 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 import os
 import re
 import sys
@@ -37,7 +63,8 @@ for file in mesh_files:
     ms.save_current_mesh(file)
 
 # Find all collision STL files
-collision_files = [file for file in mesh_files if file.endswith("_collision.stl")]
+collision_files = [
+    file for file in mesh_files if file.endswith("_collision.stl")]
 
 # Process collision elements
 for collision in root.findall(".//collision"):
@@ -114,7 +141,8 @@ urdf_file_path = "robot.urdf"
 proto_file_path = "nugus.proto"
 
 # Convert URDF to PROTO using urdf2webots library
-convertUrdfFile(input=urdf_file_path, output=proto_file_path, boxCollision=False, normal=False)
+convertUrdfFile(input=urdf_file_path, output=proto_file_path,
+                boxCollision=False, normal=False)
 
 # Read the existing proto file
 with open(proto_file_path, "r") as file:
@@ -191,7 +219,8 @@ filedata = filedata.replace(
     "HingeJointParameters {",
     "HingeJointParameters {\n                    dampingConstant IS MX106-damping\n                    staticFriction IS MX106-friction",
 )
-filedata = filedata.replace("PositionSensor {", "PositionSensor {\n                 resolution IS DYNAMIXEL-RESOLUTION")
+filedata = filedata.replace(
+    "PositionSensor {", "PositionSensor {\n                 resolution IS DYNAMIXEL-RESOLUTION")
 
 # Add gyro and accelerometer to torso
 filedata = filedata.replace(
@@ -480,10 +509,14 @@ filedata = filedata.replace(
                                         name "left_foot [foot]"''',
 )
 # Rename limbs
-filedata = filedata.replace('''name "right_shoulder_pitch"''', '''name "right_shoulder_pitch [shoulder]"''')
-filedata = filedata.replace('''name "left_shoulder_pitch"''', '''name "left_shoulder_pitch [shoulder]"''')
-filedata = filedata.replace('''name "right_hip_roll"''', '''name "right_hip_roll [hip]"''')
-filedata = filedata.replace('''name "left_hip_roll"''', '''name "left_hip_roll [hip]"''')
+filedata = filedata.replace(
+    '''name "right_shoulder_pitch"''', '''name "right_shoulder_pitch [shoulder]"''')
+filedata = filedata.replace(
+    '''name "left_shoulder_pitch"''', '''name "left_shoulder_pitch [shoulder]"''')
+filedata = filedata.replace(
+    '''name "right_hip_roll"''', '''name "right_hip_roll [hip]"''')
+filedata = filedata.replace(
+    '''name "left_hip_roll"''', '''name "left_hip_roll [hip]"''')
 
 # Fix naming issue of bounding object caused by urdf2webots tool
 filedata = filedata.replace("boundingObject Pose", "boundingObject Transform")
@@ -493,7 +526,8 @@ filedata = filedata.replace("mass 0.000000", "mass 1e-8")
 filedata = filedata.replace("mass -1", "mass 1e-8")
 
 # Update colours
-filedata = filedata.replace("baseColor 0.286275 0.286275 0.286275", "baseColor 0.125 0.125 0.125")
+filedata = filedata.replace(
+    "baseColor 0.286275 0.286275 0.286275", "baseColor 0.125 0.125 0.125")
 
 # Write the update proto file
 with open(proto_file_path, "w") as file:
