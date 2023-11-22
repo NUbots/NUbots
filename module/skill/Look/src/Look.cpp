@@ -35,19 +35,14 @@
 #include "message/skill/Look.hpp"
 
 #include "utility/input/ServoID.hpp"
-#include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
     using message::actuation::HeadIK;
-    using message::actuation::LimbsSequence;
     using message::actuation::ServoState;
     using utility::input::ServoID;
-    using utility::math::coordinates::screen_angular_from_object_direction;
-    using utility::math::coordinates::sphericalToCartesian;
-    using utility::nusight::graph;
     using LookTask = message::skill::Look;
 
     Look::Look(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
