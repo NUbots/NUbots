@@ -31,11 +31,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "utility/math/filter/ExponentialFilter.hpp"
-
 namespace module::planning {
-
-    using utility::math::filter::ExponentialFilter;
 
     class FallingRelaxPlanner : public ::extension::behaviour::BehaviourReactor {
     private:
@@ -49,6 +45,8 @@ namespace module::planning {
                 double unstable;
                 /// @brief The threshold for this sensor to be considered falling
                 double falling;
+                /// @brief The smoothing factor for this sensor
+                double smoothing;
             };
 
             /// @brief The configuration for the gyroscope magnitude check
@@ -66,12 +64,12 @@ namespace module::planning {
         explicit FallingRelaxPlanner(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        /// @brief Exponential fitler for the gyroscope magnitude
-        ExponentialFilter<double, 1> gyro_mag_filter;
-        /// @brief Exponential fitler for the accelerometer magnitude
-        ExponentialFilter<double, 1> acc_mag_filter;
-        /// @brief Exponential fitler for the accelerometer angle from upright
-        ExponentialFilter<double, 1> acc_angle_filter;
+        /// @brief the current smoothed value of the gyroscope magnitude
+        double gyro_mag = 0.0;
+        /// @brief the current smoothed value of the accelerometer magnitude
+        double acc_mag = 0.0;
+        /// @brief the current smoothed value of the accelerometer angle from upright
+        double acc_angle = 0.0;
     };
 
 }  // namespace module::planning

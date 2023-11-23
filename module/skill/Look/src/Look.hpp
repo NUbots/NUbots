@@ -32,24 +32,23 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "utility/math/filter/ExponentialFilter.hpp"
-
 namespace module::skill {
 
     class Look : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
-            float head_gain   = 0.0;
-            float head_torque = 0.0;
+            float smoothing_factor = 0.0;
+            float head_gain        = 0.0;
+            float head_torque      = 0.0;
         } cfg;
 
         /// @brief Store whether we are smoothing the head movements from the previous run, to help with transitioning
         /// between smoothing and not smoothing. Smoothing is given by the message.
         bool smooth = false;
 
-        /// @brief Exponential filter for smoothing the head movements
-        utility::math::filter::ExponentialFilter<double, 3> uPCt_filter;
+        /// @brief Last goal vector, used for smoothing
+        Eigen::Vector3d uPCt = Eigen::Vector3d::Zero();
 
     public:
         /// @brief Called by the powerplant to build and setup the Look reactor.

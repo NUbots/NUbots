@@ -47,6 +47,10 @@ namespace module::planning {
     using utility::skill::load_script;
     using utility::support::Expression;
 
+    double smooth(double value, double new_value, double alpha) {
+        return alpha * value + (1.0 - alpha) * new_value;
+    }
+
     /// @brief A state to categorise each of the properties we are monitoring
     enum class State {
         /// @brief This sensor believes the robot is stable
@@ -63,19 +67,19 @@ namespace module::planning {
         on<Configuration>("FallingRelaxPlanner.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.gyro_mag.mean     = config["gyroscope_magnitude"]["mean"].as<Expression>();
-            cfg.gyro_mag.unstable = config["gyroscope_magnitude"]["unstable"].as<Expression>();
-            cfg.gyro_mag.falling  = config["gyroscope_magnitude"]["falling"].as<Expression>();
-            gyro_mag_filter.set_alpha(config["gyroscope_magnitude"]["smoothing"].as<double>());
-            cfg.acc_mag.mean     = config["accelerometer_magnitude"]["mean"].as<Expression>();
-            cfg.acc_mag.unstable = config["accelerometer_magnitude"]["unstable"].as<Expression>();
-            cfg.acc_mag.falling  = config["accelerometer_magnitude"]["falling"].as<Expression>();
-            acc_mag_filter.set_alpha(config["accelerometer_magnitude"]["smoothing"].as<double>());
-            cfg.acc_angle.mean     = config["accelerometer_angle"]["mean"].as<Expression>();
-            cfg.acc_angle.unstable = config["accelerometer_angle"]["unstable"].as<Expression>();
-            cfg.acc_angle.falling  = config["accelerometer_angle"]["falling"].as<Expression>();
-            acc_angle_filter.set_alpha(config["accelerometer_angle"]["smoothing"].as<double>());
-            cfg.fall_script = config["fall_script"].as<std::string>();
+            cfg.gyro_mag.mean       = config["gyroscope_magnitude"]["mean"].as<Expression>();
+            cfg.gyro_mag.unstable   = config["gyroscope_magnitude"]["unstable"].as<Expression>();
+            cfg.gyro_mag.falling    = config["gyroscope_magnitude"]["falling"].as<Expression>();
+            cfg.gyro_mag.smoothing  = config["gyroscope_magnitude"]["smoothing"].as<Expression>();
+            cfg.acc_mag.mean        = config["accelerometer_magnitude"]["mean"].as<Expression>();
+            cfg.acc_mag.unstable    = config["accelerometer_magnitude"]["unstable"].as<Expression>();
+            cfg.acc_mag.falling     = config["accelerometer_magnitude"]["falling"].as<Expression>();
+            cfg.acc_mag.smoothing   = config["accelerometer_magnitude"]["smoothing"].as<Expression>();
+            cfg.acc_angle.mean      = config["accelerometer_angle"]["mean"].as<Expression>();
+            cfg.acc_angle.unstable  = config["accelerometer_angle"]["unstable"].as<Expression>();
+            cfg.acc_angle.falling   = config["accelerometer_angle"]["falling"].as<Expression>();
+            cfg.acc_angle.smoothing = config["accelerometer_angle"]["smoothing"].as<Expression>();
+            cfg.fall_script         = config["fall_script"].as<std::string>();
         });
 
         on<Provide<RelaxWhenFalling>, Uses<BodySequence>, Trigger<Sensors>>().then(
@@ -86,22 +90,26 @@ namespace module::planning {
                     auto& g = sensors.gyroscope;
 
                     // Smooth the values we use to determine if we are falling
-                    gyro_mag_filter.update(
-                        std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean));
-                    acc_mag_filter.update(std::abs(a.norm() - cfg.acc_mag.mean));
-                    acc_angle_filter.update(
-                        std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean));
+                    gyro_mag  = smooth(gyro_mag,
+                                      std::abs(std::abs(g.x()) + std::abs(g.y()) + std::abs(g.z()) - cfg.gyro_mag.mean),
+                                      cfg.gyro_mag.smoothing);
+                    acc_mag   = smooth(acc_mag,  //
+                                     std::abs(a.norm() - cfg.acc_mag.mean),
+                                     cfg.acc_mag.smoothing);
+                    acc_angle = smooth(acc_angle,
+                                       std::acos(std::min(1.0, std::abs(a.normalized().z())) - cfg.acc_angle.mean),
+                                       cfg.acc_angle.smoothing);
 
                     // Check if we are stable according to each sensor
-                    State gyro_mag_state  = gyro_mag_filter.get_value() < cfg.gyro_mag.unstable  ? State::STABLE
-                                            : gyro_mag_filter.get_value() < cfg.gyro_mag.falling ? State::UNSTABLE
-                                                                                                 : State::FALLING;
-                    State acc_mag_state   = acc_mag_filter.get_value() < cfg.acc_mag.unstable  ? State::STABLE
-                                            : acc_mag_filter.get_value() < cfg.acc_mag.falling ? State::UNSTABLE
-                                                                                               : State::FALLING;
-                    State acc_angle_state = acc_angle_filter.get_value() < cfg.acc_angle.unstable ? State::STABLE
-                                            : acc_mag_filter.get_value() < cfg.acc_angle.falling  ? State::UNSTABLE
-                                                                                                  : State::FALLING;
+                    State gyro_mag_state  = gyro_mag < cfg.gyro_mag.unstable  ? State::STABLE
+                                            : gyro_mag < cfg.gyro_mag.falling ? State::UNSTABLE
+                                                                              : State::FALLING;
+                    State acc_mag_state   = acc_mag < cfg.acc_mag.unstable  ? State::STABLE
+                                            : acc_mag < cfg.acc_mag.falling ? State::UNSTABLE
+                                                                            : State::FALLING;
+                    State acc_angle_state = acc_angle < cfg.acc_angle.unstable  ? State::STABLE
+                                            : acc_angle < cfg.acc_angle.falling ? State::UNSTABLE
+                                                                                : State::FALLING;
 
                     // Falling if at least two of the three checks are unstable or if any one of them is falling
                     bool falling = (gyro_mag_state == State::FALLING || acc_mag_state == State::FALLING
@@ -115,17 +123,17 @@ namespace module::planning {
                         // We are falling! Relax the limbs!
                         log<NUClear::DEBUG>("Falling:",
                                             "Gyroscope Magnitude:",
-                                            gyro_mag_filter.get_value(),
+                                            gyro_mag,
                                             gyro_mag_state == State::FALLING    ? "FALLING"
                                             : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
                                                                                 : "STABLE",
                                             "Accelerometer Magnitude:",
-                                            acc_mag_filter.get_value(),
+                                            acc_mag,
                                             acc_mag_state == State::FALLING    ? "FALLING"
                                             : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
                                                                                : "STABLE",
                                             "Accelerometer Angle:",
-                                            acc_angle_filter.get_value(),
+                                            acc_angle,
                                             acc_angle_state == State::FALLING    ? "FALLING"
                                             : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
                                                                                  : "STABLE");
