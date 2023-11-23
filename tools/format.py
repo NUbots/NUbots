@@ -66,6 +66,7 @@ formatters["licence"] = {
         "*.py",
         "*.sh",
         "*.cmake",
+        "*.proto",
         "CMakeLists.txt",
         "**/CMakeLists.txt",
         "Dockerfile",
