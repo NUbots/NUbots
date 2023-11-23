@@ -31,8 +31,8 @@ walk:
 gains:
   arm_servo_gain: 1  # P gain for arm servo PID controllers
   leg_servo_gain: 30 # P gain for leg servo PID controllers
-  torso_pid_gains: [200, 0.0, 0.0]       # PID gain for torso position controller
-  torso_controller_alpha: 0.1          # Smoothing factor on P controller output
+  torso_pid_gains: [50, 0.0, 0.0]       # PID gain for torso position controller
+  torso_filter_alpha: 0.1          # Smoothing factor on P controller output
   torso_antiwindup: [-0.1, 0.1] # Lower and upper limit of integrator in torso position controller
   pitch_pid_gains: [1, 0.0, 0.0]
   pitch_antiwindup: [-0.05, 0.05]
