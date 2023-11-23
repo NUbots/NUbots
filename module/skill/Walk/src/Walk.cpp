@@ -102,12 +102,12 @@ namespace module::skill {
             cfg.pitch_antiwindup = config["gains"]["pitch_antiwindup"].as<Expression>();
 
             // Configure torso PID controller
-            torso_controller = utility::math::control::PID<double, 2>(cfg.torso_pid_gains[0],
+            torso_controller       = utility::math::control::PID<double, 2>(cfg.torso_pid_gains[0],
                                                                       cfg.torso_pid_gains[1],
                                                                       cfg.torso_pid_gains[2],
                                                                       cfg.torso_antiwindup[0],
                                                                       cfg.torso_antiwindup[1]);
-            torso_controller_filter.set_alpha(config["gains"]["torso_controller_alpha"].as<double>());
+            cfg.torso_filter_alpha = config["gains"]["torso_filter_alpha"].as<double>();
             // Configure pitch PID controller
             pitch_controller = utility::math::control::PID<double, 1>(cfg.pitch_pid_gains[0],
                                                                       cfg.pitch_pid_gains[1],
@@ -208,9 +208,7 @@ namespace module::skill {
                                      : Htr_desired;
 
                 emit(graph("control", torso_controller.get_control().x(), torso_controller.get_control().y()));
-                emit(graph("control_filter",
-                           torso_controller_filter.get_value().x(),
-                           torso_controller_filter.get_value().y()));
+                emit(graph("control_filter", filtered_torso_offset.x(), filtered_torso_offset.y()));
 
                 emit<Task>(left_leg);
                 emit<Task>(right_leg);
@@ -289,10 +287,10 @@ namespace module::skill {
         // TODO: Add ZMP error
 
         // Filter controller using exponential filter (leaky integrator)
-        // u = alpha * (u * dt) + (1 - alpha) * u_prev
-        torso_controller_filter.update(torso_controller.get_control() * time_delta);
+        filtered_torso_offset = cfg.torso_filter_alpha * (torso_controller.get_control() * time_delta)
+                                + (1 - cfg.torso_filter_alpha) * filtered_torso_offset;
         auto Hpt_offset = Htp_desired.inverse();
-        Hpt_offset.translation().head<2>() += torso_controller_filter.get_value();
+        Hpt_offset.translation().head<2>() += filtered_torso_offset;
         return Hpt_offset.inverse();
     }
 

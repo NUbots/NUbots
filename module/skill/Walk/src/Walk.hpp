@@ -36,13 +36,11 @@
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/control/pid.hpp"
-#include "utility/math/filter/ExponentialFilter.hpp"
 #include "utility/skill/WalkGenerator.hpp"
 
 namespace module::skill {
 
     using utility::math::control::PID;
-    using utility::math::filter::ExponentialFilter;
     using utility::skill::WalkGenerator;
 
     class Walk : public ::extension::behaviour::BehaviourReactor {
@@ -80,6 +78,9 @@ namespace module::skill {
             /// @brief Torso anti-windup limits
             Eigen::Vector2d torso_antiwindup = Eigen::Vector2d::Zero();
 
+            /// @brief Torso position exponential filter alpha
+            double torso_filter_alpha = 0.0;
+
             /// @brief Torso pitch controller PID gains
             Eigen::Vector3d pitch_pid_gains = Eigen::Vector3d::Zero();
 
@@ -96,8 +97,8 @@ namespace module::skill {
         /// @brief Torso X-Y position PID controller
         PID<double, 2> torso_controller{};
 
-        /// @brief Exponential filter for torso X-Y position control input (position offset)
-        ExponentialFilter<double, 2> torso_controller_filter{};
+        /// @brief Exponential filtered torso X-Y position position offset
+        Eigen::Vector2d filtered_torso_offset{};
 
         /// @brief Torso pitch PID controller
         utility::math::control::PID<double, 1> pitch_controller{};
