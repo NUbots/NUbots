@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03":[2,0,3,3,4,4],
 "classmodule_1_1localisation_1_1OccupancyMap.html#a15c1432dc72c7ec98ff12b1fc689d0d8":[2,0,3,3,4,10],
 "classmodule_1_1localisation_1_1OccupancyMap.html#a2ce98900abdb784a2478820dd69ee47d":[2,0,3,3,4,7],
 "classmodule_1_1localisation_1_1OccupancyMap.html#a3b4ead5da00d9640976cfaebbd989a7f":[2,0,3,3,4,2],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a2e0125bf8db4c85e8ad3cdd27d90a370":[2,0,3,8,0,9,15],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a32e951fd51fe728424c5b8809be2117f":[2,0,3,8,0,9,27],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a368186b2dc5dbac4f70f911708323b3e":[2,0,3,8,0,9,24],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a482e434121bc4317870ad2d1876915c3":[2,0,3,8,0,9,18],
-"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a59f53def6aa2dc25a47c5da862bb81e0":[2,0,3,8,0,9,10]
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a482e434121bc4317870ad2d1876915c3":[2,0,3,8,0,9,18]
 };

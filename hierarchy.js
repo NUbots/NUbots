@@ -158,6 +158,7 @@ var hierarchy =
     [ "module::localisation::MeasurementType::BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ],
     [ "module::localisation::OccupancyMap< Scalar >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],
     [ "module::localisation::Particle", "structmodule_1_1localisation_1_1Particle.html", null ],
+    [ "module::localisation::StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", null ],
     [ "module::motion::Animator", "classmodule_1_1motion_1_1Animator.html", null ],
     [ "module::motion::ExecuteKick", "structmodule_1_1motion_1_1ExecuteKick.html", null ],
     [ "module::motion::FinishKick", "structmodule_1_1motion_1_1FinishKick.html", null ],

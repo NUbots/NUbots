@@ -239,6 +239,7 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1FieldLocalisation.html#a35229f8d5231986b2607375de9450558":[2,0,3,3,3,12],
 "classmodule_1_1localisation_1_1FieldLocalisation.html#a45bd53aeb8a3cdadbbcca05e5715ad27":[2,0,3,3,3,1],
 "classmodule_1_1localisation_1_1FieldLocalisation.html#a5dab2151b6930ffdc66d21c11f7e1af0":[2,0,3,3,3,3],
+"classmodule_1_1localisation_1_1FieldLocalisation.html#a6b219938714c034f0697574533a13585":[2,0,3,3,3,15],
 "classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de":[2,0,3,3,3,7],
 "classmodule_1_1localisation_1_1FieldLocalisation.html#a89d7cb30ff43910bba580191eef78bdd":[2,0,3,3,3,11],
 "classmodule_1_1localisation_1_1FieldLocalisation.html#a9088430d15da9aa140452f3ae2ff35ba":[2,0,3,3,3,13],
@@ -247,7 +248,6 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1FieldLocalisation.html#adb67cee9e176d77a01368f3d28cfa480":[2,0,3,3,3,2],
 "classmodule_1_1localisation_1_1FieldLocalisation.html#adf5d1af90cac7a1c998dcaa5f4adbb08":[2,0,3,3,3,9],
 "classmodule_1_1localisation_1_1FieldLocalisation.html#ae1ee5b507145d9c986f1e706b637489a":[2,0,3,3,3,14],
-"classmodule_1_1localisation_1_1FieldLocalisation.html#ae366bcd7d0c2925f0e90958c40c23b13":[2,0,3,3,3,15],
-"classmodule_1_1localisation_1_1OccupancyMap.html":[2,0,3,3,4],
-"classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03":[2,0,3,3,4,4]
+"classmodule_1_1localisation_1_1FieldLocalisation.html#ae366bcd7d0c2925f0e90958c40c23b13":[2,0,3,3,3,16],
+"classmodule_1_1localisation_1_1OccupancyMap.html":[2,0,3,3,4]
 };

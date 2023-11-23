@@ -261,6 +261,7 @@ var namespaces_dup =
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
         [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
         [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ],
+        [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ],
         [ "Ball", "BallLocalisation_8cpp.html#a166ffc812dedb579bbb1dcbf0c921d8a", null ],
         [ "VisionBall", "BallLocalisation_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
         [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ]

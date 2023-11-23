@@ -134,7 +134,8 @@ var annotated_dup =
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
         [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
-        [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ]
+        [ "Particle", "structmodule_1_1localisation_1_1Particle.html", "structmodule_1_1localisation_1_1Particle" ],
+        [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ]
       ] ],
       [ "motion", null, [
         [ "Animator", "classmodule_1_1motion_1_1Animator.html", "classmodule_1_1motion_1_1Animator" ],

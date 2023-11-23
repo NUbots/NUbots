@@ -9,5 +9,7 @@ var structmodule_1_1localisation_1_1FieldLocalisation_1_1Config =
     [ "n_particles", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab1e7f3b79690f9e0095edf4aebbb4c07", null ],
     [ "outside_map_penalty_factor", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab6083f90b5f87a9031c93032a76761f2", null ],
     [ "process_noise", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#aafebc0f5c8962cec8b52f9d7787bf7d6", null ],
-    [ "save_map", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5ab7059ddff8e0eafa08690c8fd35582", null ]
+    [ "save_map", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5ab7059ddff8e0eafa08690c8fd35582", null ],
+    [ "start_time_delay", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#afafb8c72629fb15549b336f527824b00", null ],
+    [ "starting_side", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ad058f69ba5667093c7ec93c001e95500", null ]
 ];

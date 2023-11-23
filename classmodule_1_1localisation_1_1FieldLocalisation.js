@@ -15,5 +15,6 @@ var classmodule_1_1localisation_1_1FieldLocalisation =
     [ "fieldline_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#a35229f8d5231986b2607375de9450558", null ],
     [ "last_time_update_time", "classmodule_1_1localisation_1_1FieldLocalisation.html#a9088430d15da9aa140452f3ae2ff35ba", null ],
     [ "particles", "classmodule_1_1localisation_1_1FieldLocalisation.html#ae1ee5b507145d9c986f1e706b637489a", null ],
+    [ "startup_time", "classmodule_1_1localisation_1_1FieldLocalisation.html#a6b219938714c034f0697574533a13585", null ],
     [ "state", "classmodule_1_1localisation_1_1FieldLocalisation.html#ae366bcd7d0c2925f0e90958c40c23b13", null ]
 ];

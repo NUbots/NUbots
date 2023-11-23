@@ -1,5 +1,6 @@
 var NAVTREEINDEX6 =
 {
+"classutility_1_1math_1_1filter_1_1UKF.html#a32425791859741f957b6f5d27181603e":[2,0,6,4,0,2,13],
 "classutility_1_1math_1_1filter_1_1UKF.html#a378f47acfb9fd06badaa087380294b46":[2,0,6,4,0,2,27],
 "classutility_1_1math_1_1filter_1_1UKF.html#a3ef11beeb4fb7b57dd6f2d7bd6d1eb95":[2,0,6,4,0,2,6],
 "classutility_1_1math_1_1filter_1_1UKF.html#a4df26fd7c04354c032361e98e2b5146c":[2,0,6,4,0,2,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX6 =
 "classutility_1_1skill_1_1KickGenerator.html#af31cbf3fdab6b4de00c2ffa6b39115cf":[2,0,6,8,1,11],
 "classutility_1_1skill_1_1QuinticWalkEngine.html":[2,0,6,8,2],
 "classutility_1_1skill_1_1QuinticWalkEngine.html#a089fd1a5ae0d3173b9cd96bc51ef821b":[2,0,6,8,2,0],
-"classutility_1_1skill_1_1QuinticWalkEngine.html#a0ca29f617f37bcbc17e3f5538cbf1b4d":[2,0,6,8,2,33],
-"classutility_1_1skill_1_1QuinticWalkEngine.html#a1285e56c352e64e2ebba2ed350c7204f":[2,0,6,8,2,25]
+"classutility_1_1skill_1_1QuinticWalkEngine.html#a0ca29f617f37bcbc17e3f5538cbf1b4d":[2,0,6,8,2,33]
 };

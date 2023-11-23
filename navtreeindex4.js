@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a59f53def6aa2dc25a47c5da862bb81e0":[2,0,3,8,0,9,10],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a5c4a09b37dbba30c768649d83cf6ed52":[2,0,3,8,0,9,25],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a5d6a70cfa8fd7336a94b456dfc55f41c":[2,0,3,8,0,9,2],
 "classmodule_1_1platform_1_1OpenCR_1_1NUgus.html#a65e40f3b1b1488fe285dbfd0aa7faf62":[2,0,3,8,0,9,17],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1skill_1_1QuinticWalk.html#a8bc99bf1355b0564f17b6c3981ca412e":[2,0,3,10,3,12],
 "classmodule_1_1skill_1_1QuinticWalk.html#a8bcb1808d5007e0fd9733cace2dca523":[2,0,3,10,3,5],
 "classmodule_1_1skill_1_1QuinticWalk.html#a94e86a48ca1a3f861f4f11b439dab2d0":[2,0,3,10,3,14],
-"classmodule_1_1skill_1_1QuinticWalk.html#aac93a3b146aebc490ee6e79732d9f2a7":[2,0,3,10,3,7],
-"classmodule_1_1skill_1_1QuinticWalk.html#ac18654b75a1933b92dd0c67a8130de97":[2,0,3,10,3,4]
+"classmodule_1_1skill_1_1QuinticWalk.html#aac93a3b146aebc490ee6e79732d9f2a7":[2,0,3,10,3,7]
 };
