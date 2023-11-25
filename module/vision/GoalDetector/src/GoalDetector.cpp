@@ -40,6 +40,7 @@
 
 #include "utility/math/coordinates.hpp"
 #include "utility/math/geometry/ConvexHull.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
@@ -55,6 +56,7 @@ namespace module::vision {
 
     using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -69,6 +71,7 @@ namespace module::vision {
             config.goal_projection_covariance = Eigen::Vector3f(cfg["goal_projection_covariance"].as<Expression>());
             config.use_median                 = cfg["use_median"].as<bool>();
             config.max_goal_distance          = cfg["max_goal_distance"].as<float>();
+            config.max_benchmark_error        = cfg["max_benchmark_error"].as<float>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
@@ -280,7 +283,7 @@ namespace module::vision {
                              ***********************************************/
 
 
-                            bool keep = true;  // if false then we will not consider this as a valid goal post
+                            bool keep = true;  // if false then we will not consider this as a good_post goal post
 
                             // If the goal is too far away, get rid of it!
                             if (distance > config.max_goal_distance) {
@@ -297,7 +300,7 @@ namespace module::vision {
                             }
 
                             if (keep) {
-                                // Passed the tests, this post can go onto the next round as a valid goal post!
+                                // Passed the tests, this post can go onto the next round as a good_post goal post!
                                 goals->goals.push_back(std::move(g));
                             }
                         }
@@ -363,7 +366,7 @@ namespace module::vision {
                         }
                     }
 
-                    // We now have all the valid goal post pairs, determine left and right
+                    // We now have all the good_post goal post pairs, determine left and right
                     for (const auto& pair : pairs) {
                         // Divide by distance to get back to unit vectors
                         const Eigen::Vector3f& rGCc0 = pair.first->post.bottom;
@@ -380,10 +383,124 @@ namespace module::vision {
                         }
                     }
 
+                    if (horizon.vision_ground_truth.exists) {
+
+                        benchmark_goals(field, horizon, goals);
+                    }
+
                     log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
 
                     emit(std::move(goals));
                 }
             });
+    }
+
+    void GoalDetector::benchmark_goals(const FieldDescription& field,
+                                       const GreenHorizon& horizon,
+                                       std::unique_ptr<Goals>& goals) {
+
+
+        // Calculate error for detected goals using groundtruth
+        auto calc_error = [&](const Eigen::Vector3f& post1, const Eigen::Vector3f& post2) {
+            return (post1 - post2).norm();
+        };
+
+        // Calculate goal post positons using field dimensions
+        auto calc_goal_pos = [&](const Eigen::Vector3f& rFWw, const int& x_sign, const int& y_sign) {
+            return Eigen::Vector3f(
+                rFWw.x() + (field.dimensions.field_length / 2 * x_sign),
+                rFWw.y() + (((field.dimensions.goal_width / 2) + (field.dimensions.goalpost_width / 2)) * y_sign),
+                rFWw.z());
+        };
+
+        const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+        const Eigen::Vector3f rFWw = horizon.vision_ground_truth.rFWw;
+
+        // Get both goal posts for both teams
+        const Eigen::Vector3f rGWw_own_l = calc_goal_pos(rFWw, -1, -1);
+        const Eigen::Vector3f rGWw_own_r = calc_goal_pos(rFWw, -1, +1);
+        const Eigen::Vector3f rGWw_opp_l = calc_goal_pos(rFWw, +1, +1);
+        const Eigen::Vector3f rGWw_opp_r = calc_goal_pos(rFWw, +1, -1);
+
+        // Transform goal post positions into camera space
+        const Eigen::Vector3f rGCc_own_l = (Hcw * rGWw_own_l).normalized();
+        const Eigen::Vector3f rGCc_own_r = (Hcw * rGWw_own_r).normalized();
+        const Eigen::Vector3f rGCc_opp_l = (Hcw * rGWw_opp_l).normalized();
+        const Eigen::Vector3f rGCc_opp_r = (Hcw * rGWw_opp_r).normalized();
+
+        int bad_posts                    = 0;
+        float goal_error                 = 0.0;
+        Eigen::Vector3f goal_error3f     = Eigen::Vector3f::Zero();
+        float goal_error_bad             = 0.0;
+        Eigen::Vector3f goal_error3f_bad = Eigen::Vector3f::Zero();
+
+        // Loop through all detected goal posts
+        for (auto it = goals->goals.begin(); it != goals->goals.end(); it = std::next(it)) {
+
+            bool good_post        = false;
+            float min_error       = 1.0;
+            Eigen::Vector3f error = Eigen::Vector3f::Zero();
+
+            const float dist_own_l = calc_error(it->post.bottom, rGCc_own_l);
+            const float dist_own_r = calc_error(it->post.bottom, rGCc_own_r);
+            const float dist_opp_l = calc_error(it->post.bottom, rGCc_opp_l);
+            const float dist_opp_r = calc_error(it->post.bottom, rGCc_opp_r);
+
+            // If a detected post has less error than the max_benchmark_error set in the yaml file,
+            // we says it is a good post.
+            if (dist_own_l < config.max_benchmark_error || dist_own_r < config.max_benchmark_error
+                || dist_opp_l < config.max_benchmark_error || dist_opp_r < config.max_benchmark_error) {
+                good_post = true;
+            }
+
+            // Record error for the posts closest match
+            if (dist_own_l < min_error) {
+                min_error = dist_own_l;
+                error     = (it->post.bottom - rGCc_own_l).cwiseAbs();
+            }
+            if (dist_own_r < min_error) {
+                min_error = dist_own_r;
+                error     = (it->post.bottom - rGCc_own_r).cwiseAbs();
+            }
+            if (dist_opp_l < min_error) {
+                min_error = dist_opp_l;
+                error     = (it->post.bottom - rGCc_opp_l).cwiseAbs();
+            }
+            if (dist_opp_r < min_error) {
+                min_error = dist_opp_r;
+                error     = (it->post.bottom - rGCc_opp_r).cwiseAbs();
+            }
+
+            if (good_post) {
+                goal_error += min_error;
+                goal_error3f = error;
+            }
+
+            goal_error_bad += min_error;
+            goal_error3f_bad = error;
+
+            if (!good_post) {
+                bad_posts++;
+            }
+        }
+
+        // Avoid dividing by 0
+        if (goals->goals.size() > bad_posts) {
+            goal_error   = (goal_error / ((goals->goals.size() - bad_posts)));
+            goal_error3f = (goal_error3f / ((goals->goals.size() - bad_posts)));
+        }
+
+        goal_error_bad   = (goal_error_bad / (goals->goals.size()));
+        goal_error3f_bad = (goal_error3f_bad / (goals->goals.size()));
+
+        emit(graph("Vector Goal Error without Bad Goals", goal_error3f.x(), goal_error3f.y(), goal_error3f.z()));
+        emit(graph("Scalar Goal Error without Bad Goals", goal_error));
+
+        emit(graph("Vector Goal Error with Bad Goals",
+                   goal_error3f_bad.x(),
+                   goal_error3f_bad.y(),
+                   goal_error3f_bad.z()));
+        emit(graph("Scalar Goal Error with Bad Goals", goal_error_bad));
+        emit(graph("Bad Goal Posts", bad_posts));
     }
 }  // namespace module::vision
