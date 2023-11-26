@@ -29,25 +29,21 @@
 
 #include <nuclear>
 
+#include "FieldModel.hpp"
+
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
 
 #include "utility/localisation/OccupancyMap.hpp"
+#include "utility/math/filter/ParticleFilter.hpp"
 #include "utility/math/stats/multivariate.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 
 namespace module::localisation {
-
-    // Particle struct
-    struct Particle {
-        Eigen::Vector3d state = Eigen::Vector3d::Zero();  // (x, y, theta) of world space in field space
-        double weight         = 1.0;
-    };
-
 
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3 };
@@ -115,20 +111,11 @@ namespace module::localisation {
 
         NUClear::clock::time_point last_time_update_time;
 
+        /// @brief Particle filter
+        utility::math::filter::ParticleFilter<double, FieldModel> filter;
+
         /// @brief Occupancy grid map of the field lines
         OccupancyMap<double> fieldline_map;
-
-        /// @brief State (x,y,theta) of the robot
-        Eigen::Vector3d state = Eigen::Vector3d::Zero();
-
-        /// @brief Covariance matrix of the robot's state
-        Eigen::Matrix3d covariance = Eigen::Matrix3d::Identity();
-
-        /// @brief Status of if the robot is falling
-        bool falling = false;
-
-        /// @brief Particles used in the particle filter
-        std::vector<Particle> particles{};
 
         /// @brief The time of startup
         NUClear::clock::time_point startup_time;
@@ -148,29 +135,6 @@ namespace module::localisation {
         /// @param observations The observations (x, y) in the robot's coordinate frame [m]
         /// @return The weight of the particle
         double calculate_weight(const Eigen::Vector3d particle, const std::vector<Eigen::Vector3d>& observations);
-
-        /// @brief Get the current mean (state) of the robot
-        // @return The current mean (state) of the robot
-        Eigen::Vector3d compute_mean();
-
-        /// @brief Get the current covariance matrix of the robot's state
-        // @return The current covariance matrix of the robot's state
-        Eigen::Matrix3d compute_covariance();
-
-        /// @brief Perform a time update on the particles
-        /// @param walk_command The walk command (dx, dy, dtheta)
-        /// @param dt The time since the last time update
-        void time_update();
-
-        /// @brief Resample the particles based on their weights
-        /// @param particles Vector of particles to be resampled
-        /// @return The resampled particles
-        void resample();
-
-        /// @brief Add some noise to the particles to compensate for the fact that we don't have a perfect model
-        /// @param particles Vector of particles to be resampled
-        /// @return The particles with noise added
-        void add_noise();
     };
 }  // namespace module::localisation
 

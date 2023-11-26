@@ -26,7 +26,7 @@
 namespace module::localisation {
 
     template <typename Scalar>
-    class RobotModel {
+    class FieldModel {
     public:
         /// @brief Size of the state vector (x, y, theta)
         static constexpr size_t size = 3;
@@ -57,7 +57,7 @@ namespace module::localisation {
         /// @brief Diagonal for 3x3 noise matrix (which is diagonal)
         Eigen::Matrix<Scalar, 3, 1> process_noise_diagonal;
 
-        RobotModel()
+        FieldModel()
             : reset_range(Eigen::Matrix<Scalar, 3, 1>::Zero())
             , process_noise_diagonal(Eigen::Matrix<Scalar, 3, 1>::Ones()) {}
 
