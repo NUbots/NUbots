@@ -31,7 +31,7 @@ import "message/platform/webots/messages.proto";
 
 message GreenHorizon {
     /// A set of rays in world space, projected to the ground. They comprise the points in the convex hull
-    repeated fvec3 horizon = 1;
+    repeated vec3 horizon = 1;
     /// Isometry3d transform from world space to camera space at the time that the image was taken
     iso3 Hcw = 2;
     /// ID of the camera that took the image containing the green horizon

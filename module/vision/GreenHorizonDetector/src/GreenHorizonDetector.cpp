@@ -35,7 +35,6 @@
 #include "message/vision/GreenHorizon.hpp"
 #include "message/vision/VisualMesh.hpp"
 
-#include "utility/math/geometry/ChanConvexHull.hpp"
 #include "utility/math/geometry/ConvexHull.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
@@ -43,9 +42,9 @@
 namespace module::vision {
 
     using extension::Configuration;
+    using message::vision::GreenHorizon;
     using message::vision::VisualMesh;
     using utility::nusight::graph;
-    using GreenHorizonMsg = message::vision::GreenHorizon;
 
     GreenHorizonDetector::GreenHorizonDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -99,6 +98,8 @@ namespace module::vision {
                 }
             }
 
+            // The boundary points may be from multiple clusters of points
+            // Find the cluster that is closest to the robot, as this is most likely to be the field
             std::vector<std::vector<int>> clusters;
             utility::vision::visualmesh::cluster_points(indices.begin(),
                                                         indices.end(),
@@ -108,7 +109,7 @@ namespace module::vision {
 
             log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-            // Lambda to get the closest distance of a cluster
+            // Get the closest distance of a cluster
             auto get_closest_distance = [&](const std::vector<int>& cluster) {
                 // Find the cluster that is closest to the robot
                 int closest_point = 0;
@@ -125,7 +126,7 @@ namespace module::vision {
             double closest_distance = get_closest_distance(clusters[0]);
 
             // Find the cluster that is closest to the robot
-            for (int i = 1; i < clusters.size(); i++) {
+            for (size_t i = 1; i < clusters.size(); i++) {
                 double distance = get_closest_distance(clusters[i]);
                 if (distance < closest_distance) {
                     closest_cluster  = i;
@@ -197,19 +198,18 @@ namespace module::vision {
             //     emit(graph("Field point", points.col(idx).x(), points.col(idx).y()));
             // }
 
-            log<NUClear::DEBUG>("Calculating convex hull");
-
             // Find the convex hull of the field points
             auto hull_indices = utility::math::geometry::chans_convex_hull(field_cluster, rPWw);
             // auto hull_indices = utility::math::geometry::chans_convex_hull(indices2, points);
 
-            log<NUClear::DEBUG>("Calculated a convex hull");
-
-            for (int idx : hull_indices) {
-                emit(graph("Convex hull point", rPWw.col(idx).x(), rPWw.col(idx).y()));
+            // Graph the convex hull if debugging
+            if (log_level <= NUClear::DEBUG) {
+                for (int idx : hull_indices) {
+                    emit(graph("Convex hull point", rPWw.col(idx).x(), rPWw.col(idx).y()));
+                }
             }
 
-            auto msg = std::make_unique<GreenHorizonMsg>();
+            auto msg = std::make_unique<GreenHorizon>();
 
             // Preserve mesh so that anyone using the GreenHorizon can access the original data
             msg->mesh = const_cast<VisualMesh*>(&mesh)->shared_from_this();
@@ -219,6 +219,7 @@ namespace module::vision {
             msg->timestamp = mesh.timestamp;
             msg->class_map = mesh.class_map;
 
+            // If using ground truth, add it to the message
             if (mesh.vision_ground_truth.exists) {
                 msg->vision_ground_truth = mesh.vision_ground_truth;
             }
@@ -231,7 +232,7 @@ namespace module::vision {
                 Eigen::Vector3d ray_projection = ray * d;
                 const double norm              = ray_projection.head<2>().norm();
                 ray_projection.head<2>() *= 1.0f + cfg.distance_offset / norm;
-                msg->horizon.emplace_back(ray_projection.normalized().cast<float>());
+                msg->horizon.emplace_back(ray_projection.normalized());
             }
             log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
                                             hull_indices.size(),
