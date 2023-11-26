@@ -5,9 +5,13 @@ log_level: INFO
 grid_size: 0.01
 
 # Number of particles
-n_particles: 100
+n_particles: 50
 
+# Number of rogue particles
 n_rogues: 0
+
+# Reset range (for rogue particles)
+reset_range: [2, 2, 0]
 
 # Our confidence in the initial guess of where the robot starts on the field
 initial_covariance: [0.5, 0.5, 0.5]
@@ -22,7 +26,7 @@ measurement_noise: 0.01
 max_range: 11
 
 # Bool to save a csv file of the generated occupancy grid map
-save_map: true
+save_map: false
 
 # Minimum number of field line points for a measurement update
 min_observations: 50
@@ -34,4 +38,4 @@ outside_map_penalty_factor: 1
 start_time_delay: 5
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT or EITHER)
-starting_side: RIGHT
+starting_side: EITHER
