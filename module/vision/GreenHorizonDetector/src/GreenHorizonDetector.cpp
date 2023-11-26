@@ -154,53 +154,8 @@ namespace module::vision {
                 return;
             }
 
-            // Eigen::Matrix<double, 3, Eigen::Dynamic> points(3, 10);
-            // // Create a scatter of point representing a square
-            // points.col(0) << 0, 0, 0;
-            // points.col(1) << 0, 1, 0;
-            // points.col(2) << 1, 1, 0;
-            // points.col(3) << 1, 0, 0;
-            // points.col(4) << 0, 0.5, 0;
-            // points.col(5) << 0.5, 1, 0;
-            // points.col(6) << 1, 0.5, 0;
-            // points.col(7) << 0.5, 0, 0;
-            // points.col(8) << 0.5, 0.5, 0;
-            // points.col(9) << 0.5, 0.3, 0;
-
-            // Triangle test
-            // points.col(0) << 0, 0, 0;
-            // points.col(1) << 0.4, 0.8, 0;
-            // points.col(2) << 0.1, 0.8, 0;
-            // points.col(3) << 0.2, 0.4, 0;
-            // points.col(4) << 0, 1, 0;
-            // points.col(5) << 0.0, 0.5, 0;
-            // points.col(6) << 0.5, 0.5, 0;
-            // points.col(7) << 1, 1, 0;
-            // points.col(8) << 0.7, 0.9, 0;
-            // points.col(9) << 0.1, 0.1, 0;
-
-            // points.col(0) << 0, 0, 0;
-            // points.col(1) << 0.4, 0.8, 0;
-            // points.col(2) << 0.35, -0.15, 0;
-            // points.col(3) << 0.2, 0.4, 0;
-            // points.col(4) << 0, 1, 0;
-            // points.col(5) << 0.0, 0.5, 0;
-            // points.col(6) << 0.5, 0.5, 0;
-            // points.col(7) << 1, 1, 0;
-            // points.col(8) << 0.7, 0.9, 0;
-            // points.col(9) << 0.1, 0.1, 0;
-
-
-            // std::vector<int> indices2(points.cols());
-            // std::iota(indices2.begin(), indices2.end(), 0);
-
-            // for (int idx : indices2) {
-            //     emit(graph("Field point", points.col(idx).x(), points.col(idx).y()));
-            // }
-
             // Find the convex hull of the field points
             auto hull_indices = utility::math::geometry::chans_convex_hull(field_cluster, rPWw);
-            // auto hull_indices = utility::math::geometry::chans_convex_hull(indices2, points);
 
             // Graph the convex hull if debugging
             if (log_level <= NUClear::DEBUG) {

@@ -276,7 +276,6 @@ namespace utility::math::geometry {
             merged_hull.push_back(*it);
         }
 
-        merged_hull.push_back(leftmost);
         return merged_hull;
     }
 
