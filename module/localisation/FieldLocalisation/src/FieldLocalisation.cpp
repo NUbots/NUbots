@@ -26,13 +26,11 @@
  */
 #include "FieldLocalisation.hpp"
 
-#include <Eigen/Dense>
 #include <fstream>
 
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
-#include "message/support/FieldDescription.hpp"
 
 namespace module::localisation {
 
@@ -41,11 +39,8 @@ namespace module::localisation {
     using message::behaviour::state::Stability;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
-    using message::support::FieldDescription;
     using message::vision::FieldLines;
 
-    using utility::math::stats::MultivariateNormal;
-    using utility::nusight::graph;
     using utility::support::Expression;
 
     using namespace std::chrono;
@@ -72,24 +67,16 @@ namespace module::localisation {
             cfg.start_time_delay                = config["start_time_delay"].as<double>();
         });
 
-        // on<Trigger<ResetFieldLocalisation>>().then([this] {
-        //     // Reset the particles to the initial state
-        //     state      = cfg.initial_state[0];
-        //     covariance = cfg.initial_covariance;
-        //     particles.clear();
-
-        //     int n_particles_each = cfg.n_particles / cfg.initial_state.size();
-
-        //     // Loop over initial states and evenly distribute particles
-        //     for (auto& s : cfg.initial_state) {
-        //         MultivariateNormal<double, 3> multivariate(s, covariance);
-        //         for (int i = 0; i < n_particles_each; i++) {
-        //             particles.push_back(Particle(multivariate.sample(), 1.0));
-        //         }
-        //     }
-        // });
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
+            std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> hypotheses;
+            for (const auto& state : cfg.initial_state) {
+                hypotheses.emplace_back(std::make_pair(state, cfg.initial_covariance));
+            }
+            filter.set_state(hypotheses);
+        });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
+            // Generate the field line map
             // Resize map to the field dimensions
             int map_width  = (fd.dimensions.field_width + 2 * fd.dimensions.border_strip_min_width) / cfg.grid_size;
             int map_length = (fd.dimensions.field_length + 2 * fd.dimensions.border_strip_min_width) / cfg.grid_size;
@@ -214,8 +201,7 @@ namespace module::localisation {
                 file.close();
             }
 
-            // Intialise the particles to be distrbuted along either sides of the positive half of the field, facing
-            // towards the field
+            // Initialise the particle filter
             if (cfg.starting_side == StartingSide::LEFT || cfg.starting_side == StartingSide::EITHER) {
                 cfg.initial_state.emplace_back((fd.dimensions.field_length / 4.0),
                                                (fd.dimensions.field_width / 2.0),
@@ -232,14 +218,10 @@ namespace module::localisation {
                 hypotheses.emplace_back(std::make_pair(state, cfg.initial_covariance));
             }
 
-            // Initialise the particles with a multivariate normal distribution
             filter.set_state(hypotheses);
 
-            // Set the time update time to now
             last_time_update_time = NUClear::clock::now();
-
-            // Set the startup time to now
-            startup_time = NUClear::clock::now();
+            startup_time          = NUClear::clock::now();
         });
 
         on<Trigger<FieldLines>, With<Stability>>().then(
@@ -247,51 +229,44 @@ namespace module::localisation {
             [this](const FieldLines& field_lines, const Stability& stability) {
                 auto time_since_startup =
                     std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
-                log<NUClear::DEBUG>("Time since startup: ", time_since_startup);
                 bool fallen = stability == Stability::FALLEN || stability == Stability::FALLING;
                 if (!fallen && field_lines.rPWw.size() > cfg.min_observations
                     && time_since_startup > cfg.start_time_delay) {
-                    // ********************* Time update *********************
-
-                    // Compute the time since the last time update
-                    const double dt =
-                        duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
-                    last_time_update_time = NUClear::clock::now();
-
-                    // Perform the time update
-                    filter.time(dt);
 
                     // ********************* Measurement update *********************
 
-                    // Calculate the weight of each particle based on the observations occupancy values
+                    // Perform particle weight update using field line observations
                     for (int i = 0; i < cfg.n_particles; i++) {
                         auto weight = calculate_weight(filter.get_particle(i), field_lines.rPWw);
                         filter.set_particle_weight(weight, i);
                     }
 
-                    // Resample the particles based on the weights
-                    filter.resample();
+                    // ********************* Time update *********************
+
+                    const double dt =
+                        duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
+                    last_time_update_time = NUClear::clock::now();
+
+                    filter.time(dt);
 
                     // ********************* Emit field message *********************
 
                     auto field(std::make_unique<Field>());
-                    Eigen::Isometry3d Hfw(Eigen::Isometry3d::Identity());
-                    Hfw.translation() = Eigen::Vector3d(filter.get_state().x(), filter.get_state().y(), 0);
-                    Hfw.linear() =
-                        Eigen::AngleAxisd(filter.get_state().z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-                    field->Hfw        = Hfw.matrix();
+                    field->Hfw        = compute_Hfw(filter.get_state());
                     field->covariance = filter.get_covariance();
                     emit(field);
                 }
             });
     }
 
-    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d particle, const Eigen::Vector3d rPWw) {
+    Eigen::Isometry3d FieldLocalisation::compute_Hfw(const Eigen::Vector3d& particle) {
+        return Eigen::Translation<double, 3>(particle.x(), particle.y(), 0)
+               * Eigen::AngleAxis<double>(particle.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
+    }
+
+    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw) {
         // Transform observations from world {w} to field {f} space
-        Eigen::Isometry3d Hfw;
-        Hfw.translation()    = Eigen::Vector3d(particle(0), particle(1), 0.0);
-        Hfw.linear()         = Eigen::AngleAxisd(particle(2), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Eigen::Vector3d rPFf = Hfw * rPWw;
+        Eigen::Vector3d rPFf = compute_Hfw(particle) * rPWw;
 
         // Get the associated position/index in the map [x, y]
         int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
@@ -299,24 +274,17 @@ namespace module::localisation {
         return Eigen::Vector2i(x_map, y_map);
     }
 
-    double FieldLocalisation::calculate_weight(const Eigen::Vector3d particle,
+    double FieldLocalisation::calculate_weight(const Eigen::Vector3d& particle,
                                                const std::vector<Eigen::Vector3d>& observations) {
         double weight = 0;
         for (auto rORr : observations) {
-            // Get the position of the observation in the map for this
-            // particle [x, y]
+            // Get the position [x, y] of the observation in the map for this particle
             Eigen::Vector2i map_position = position_in_map(particle, rORr);
             // Get the distance to the closest field line point in the map
             double occupancy_value = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
-            // Check if the observation is within the max range and within
-            // the field
+            // Check if the observation is within the max range and within the field
             if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
-                weight += std::exp(-0.5 * std::pow(occupancy_value / cfg.measurement_noise, 2))
-                          / (2 * M_PI * std::pow(cfg.measurement_noise, 2));
-            }
-            // If the observation is outside the max range, penalise it
-            else {
-                weight *= cfg.outside_map_penalty_factor;
+                weight += std::exp(-0.5 * std::pow(occupancy_value, 2));
             }
         }
 

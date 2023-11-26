@@ -9,13 +9,11 @@ n_particles: 100
 
 n_rogues: 0
 
-reset_range: [2, 2, 0]
-
 # Our confidence in the initial guess of where the robot starts on the field
-initial_covariance: [1.0, 1.0, 0.5]
+initial_covariance: [0.5, 0.5, 0.5]
 
 # Amount of noise added to the particles (how much world can move to adjust for drift) at each time update
-process_noise: [0.01, 0.01, 0.001]
+process_noise:  [0.01, 0.01, 0.01]
 
 # Amount of uncertainty in our field line measurements
 measurement_noise: 0.01
@@ -24,10 +22,10 @@ measurement_noise: 0.01
 max_range: 11
 
 # Bool to save a csv file of the generated occupancy grid map
-save_map: false
+save_map: true
 
 # Minimum number of field line points for a measurement update
-min_observations: 100
+min_observations: 50
 
 # Penalty factor for observations being outside map
 outside_map_penalty_factor: 1
@@ -36,4 +34,4 @@ outside_map_penalty_factor: 1
 start_time_delay: 5
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT or EITHER)
-starting_side: EITHER
+starting_side: RIGHT

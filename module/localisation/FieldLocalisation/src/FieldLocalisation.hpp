@@ -27,6 +27,7 @@
 #ifndef MODULE_LOCALISATION_FIELDLOCALISATION_HPP
 #define MODULE_LOCALISATION_FIELDLOCALISATION_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "FieldModel.hpp"
@@ -44,6 +45,8 @@
 
 
 namespace module::localisation {
+
+    using message::support::FieldDescription;
 
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3 };
@@ -124,17 +127,36 @@ namespace module::localisation {
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
         explicit FieldLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief Transform a point in the robot's coordinate frame into an index in the map
-        /// @param particle The state of the particle (x,y,theta)
-        /// @param rPWw The field point (x, y) in world space {w} [m]
-        /// @return The observation location (x, y) in the map
-        Eigen::Vector2i position_in_map(const Eigen::Vector3d particle, const Eigen::Vector3d rPWw);
+        /**
+         * @brief Compute Hfw, homogenous transformation from world to field space from state vector (x,y,theta)
+         * @param state The state vector (x,y,theta)
+         * @return Hfw, the homogenous transformation matrix from world to field space
+         */
+        Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& particle);
 
-        /// @brief Get the weight of a particle given a set of observations
-        /// @param particle The state of the particle (x,y,theta)
-        /// @param observations The observations (x, y) in the robot's coordinate frame [m]
-        /// @return The weight of the particle
-        double calculate_weight(const Eigen::Vector3d particle, const std::vector<Eigen::Vector3d>& observations);
+        /**
+         * @brief Transform a point in the robot's coordinate frame into an index in the map
+         *
+         * @param particle The state of the particle (x,y,theta)
+         * @param rPWw The field point (x, y) in world space {w} [m]
+         * @return Eigen::Vector2i
+         */
+        Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
+
+        /**
+         * @brief Calculates the weight of a particle given a set of observations
+         *
+         * @param particle The state of the particle (x,y,theta)
+         * @param observations The observations (x, y) in the robot's coordinate frame [m]
+         * @return Weight of the particle
+         */
+        double calculate_weight(const Eigen::Vector3d& particle, const std::vector<Eigen::Vector3d>& observations);
+
+        /**
+         * @brief Setup occupancy grid map of the field lines
+         * @param fd The field dimensions
+         */
+        void setup_fieldline_map(const FieldDescription& fd);
     };
 }  // namespace module::localisation
 
