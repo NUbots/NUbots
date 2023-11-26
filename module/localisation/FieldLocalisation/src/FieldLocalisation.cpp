@@ -116,24 +116,19 @@ namespace module::localisation {
                 if (!fallen && field_lines.rPWw.size() > cfg.min_observations
                     && time_since_startup > cfg.start_time_delay) {
 
-                    // ********************* Measurement update *********************
-
-                    // Perform particle weight update using field line observations
+                    // Measurement update (using field line observations)
                     for (int i = 0; i < cfg.n_particles; i++) {
                         auto weight = calculate_weight(filter.get_particle(i), field_lines.rPWw);
                         filter.set_particle_weight(weight, i);
                     }
 
-                    // ********************* Time update *********************
-
+                    // Time update (includes resampling)
                     const double dt =
                         duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
                     last_time_update_time = NUClear::clock::now();
-
                     filter.time(dt);
 
-                    // ********************* Emit field message *********************
-
+                    // Emit field message
                     auto field(std::make_unique<Field>());
                     field->Hfw        = compute_Hfw(filter.get_state());
                     field->covariance = filter.get_covariance();
