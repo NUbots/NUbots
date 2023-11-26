@@ -303,6 +303,7 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8
 # Alsa and espeak
 RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
     --without-debug
+RUN install-package alsa-utils
 RUN install-from-source https://github.com/espeak-ng/pcaudiolib/releases/download/1.2/pcaudiolib-1.2.tar.gz
 # Need to run ldconfig before building eSpeak because ...... ¯\_(ツ)_/¯
 RUN ldconfig && \
@@ -351,6 +352,7 @@ RUN pip install \
     stringcase \
     Pillow \
     protobuf==4.21.2 \
+    mycroft-mimic3-tts \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools

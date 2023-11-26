@@ -102,3 +102,6 @@ tags
 \.vscode/ipch
 .ccls-cache
 .vscode/launch.json
+
+# OpenAI api key
+module/skill/GPT/data/config/OPENAI_API_KEY.yaml
