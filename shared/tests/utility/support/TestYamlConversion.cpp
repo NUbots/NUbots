@@ -1,25 +1,34 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2021 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 
 #include <Eigen/Core>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <string>
 #include <utility>
 #include <yaml-cpp/yaml.h>
@@ -27,6 +36,7 @@
 #include "utility/support/yaml_expression.hpp"
 
 
+using Catch::Matchers::WithinRel;
 using utility::support::Expression;
 using utility::support::resolve_expression;
 
@@ -63,8 +73,8 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
             THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["floats"].size(); i++) {
-                    Approx epsilon_result = Approx(float_vector.at(i)).epsilon(ERROR_THRESHOLD);
-                    REQUIRE(test_values["floats"][i].as<float>() == epsilon_result);
+                    REQUIRE_THAT(test_values["floats"][i].as<float>(),
+                                 WithinRel(float_vector.at(i), float(ERROR_THRESHOLD)));
                 }
             }
         }
@@ -77,8 +87,8 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
             THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["doubles"].size(); i++) {
-                    Approx epsilon_result = Approx(double_vector.at(i)).epsilon(ERROR_THRESHOLD);
-                    REQUIRE(test_values["doubles"][i].as<double>() == epsilon_result);
+                    REQUIRE_THAT(test_values["doubles"][i].as<double>(),
+                                 WithinRel(double_vector.at(i), ERROR_THRESHOLD));
                 }
             }
         }
@@ -91,11 +101,11 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
             THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector2"].size(); i++) {
-                    Approx epsilon_x = Approx(v2d_vec.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(v2d_vec.at(i).y()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xy values
-                    REQUIRE(test_values["vector2"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(test_values["vector2"][i][1].as<double>() == epsilon_y);
+                    REQUIRE_THAT(test_values["vector2"][i][0].as<double>(),
+                                 WithinRel(v2d_vec.at(i).x(), ERROR_THRESHOLD));
+                    REQUIRE_THAT(test_values["vector2"][i][1].as<double>(),
+                                 WithinRel(v2d_vec.at(i).y(), ERROR_THRESHOLD));
                 }
             }
         }
@@ -108,13 +118,13 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
             THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector3"].size(); i++) {
-                    Approx epsilon_x = Approx(v3d_vec.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(v3d_vec.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_z = Approx(v3d_vec.at(i).z()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xyz values
-                    REQUIRE(test_values["vector3"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(test_values["vector3"][i][1].as<double>() == epsilon_y);
-                    REQUIRE(test_values["vector3"][i][2].as<double>() == epsilon_z);
+                    REQUIRE_THAT(test_values["vector3"][i][0].as<double>(),
+                                 WithinRel(v3d_vec.at(i).x(), ERROR_THRESHOLD));
+                    REQUIRE_THAT(test_values["vector3"][i][1].as<double>(),
+                                 WithinRel(v3d_vec.at(i).y(), ERROR_THRESHOLD));
+                    REQUIRE_THAT(test_values["vector3"][i][2].as<double>(),
+                                 WithinRel(v3d_vec.at(i).z(), ERROR_THRESHOLD));
                 }
             }
         }
@@ -142,8 +152,8 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Values at each index should be equivalent") {
                 // Check values at each index
                 for (size_t i = 0; i < test_values["floats"].size(); i++) {
-                    Approx epsilon_result = Approx(float_array.at(i)).epsilon(ERROR_THRESHOLD);
-                    REQUIRE(test_values["floats"][i].as<float>() == epsilon_result);
+                    REQUIRE_THAT(test_values["floats"][i].as<float>(),
+                                 WithinRel(float_array.at(i), float(ERROR_THRESHOLD)));
                 }
             }
         }
@@ -156,8 +166,8 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Values at each index should be equivalent") {
                 // Check values at each index
                 for (size_t i = 0; i < test_values["doubles"].size(); i++) {
-                    Approx epsilon_result = Approx(double_array.at(i)).epsilon(ERROR_THRESHOLD);
-                    REQUIRE(test_values["doubles"][i].as<double>() == epsilon_result);
+                    REQUIRE_THAT(test_values["doubles"][i].as<double>(),
+                                 WithinRel(double_array.at(i), ERROR_THRESHOLD));
                 }
             }
         }
@@ -169,13 +179,13 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
             THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector3"].size(); i++) {
-                    Approx epsilon_x = Approx(v3d_array.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(v3d_array.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_z = Approx(v3d_array.at(i).z()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xyz values
-                    REQUIRE(test_values["vector3"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(test_values["vector3"][i][1].as<double>() == epsilon_y);
-                    REQUIRE(test_values["vector3"][i][2].as<double>() == epsilon_z);
+                    REQUIRE_THAT(test_values["vector3"][i][0].as<double>(),
+                                 WithinRel(v3d_array.at(i).x(), ERROR_THRESHOLD));
+                    REQUIRE_THAT(test_values["vector3"][i][1].as<double>(),
+                                 WithinRel(v3d_array.at(i).y(), ERROR_THRESHOLD));
+                    REQUIRE_THAT(test_values["vector3"][i][2].as<double>(),
+                                 WithinRel(v3d_array.at(i).z(), ERROR_THRESHOLD));
                 }
             }
         }
@@ -187,11 +197,11 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
             THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector2"].size(); i++) {
-                    Approx epsilon_x = Approx(v2d_array.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(v2d_array.at(i).y()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xy values
-                    REQUIRE(test_values["vector2"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(test_values["vector2"][i][1].as<double>() == epsilon_y);
+                    REQUIRE_THAT(test_values["vector2"][i][0].as<double>(),
+                                 WithinRel(v2d_array.at(i).x(), ERROR_THRESHOLD));
+                    REQUIRE_THAT(test_values["vector2"][i][1].as<double>(),
+                                 WithinRel(v2d_array.at(i).y(), ERROR_THRESHOLD));
                 }
             }
         }

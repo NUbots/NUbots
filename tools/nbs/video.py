@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2019 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 import multiprocessing
 import os
@@ -19,7 +45,7 @@ for gpu in gpus:
 
 
 def register(command):
-    command.help = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
+    command.description = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
 
     # Command arguments
     command.add_argument("files", metavar="files", nargs="+", help="The nbs files to extract the videos from")
@@ -47,10 +73,9 @@ def process_frame(item):
 
 
 def packetise_stream(decoder):
-
     for packet in decoder:
         # Check for compressed images
-        if packet.type in ("message.output.CompressedImage", "message.input.Image"):
+        if packet.type.name in ("message.output.CompressedImage", "message.input.Image"):
             # Get some useful info into a pickleable format
             yield {
                 "camera_name": packet.msg.name,
@@ -61,7 +86,6 @@ def packetise_stream(decoder):
 
 
 def run(files, output, encoder, quality, **kwargs):
-
     os.makedirs(output, exist_ok=True)
 
     recorders = {}
@@ -85,7 +109,12 @@ def run(files, output, encoder, quality, **kwargs):
 
         results = []
         for msg in packetise_stream(
-            tqdm(LinearDecoder(*files, show_progress=True), unit="packet", unit_scale=True, dynamic_ncols=True)
+            tqdm(
+                LinearDecoder(*files, show_progress=True),
+                unit="packet",
+                unit_scale=True,
+                dynamic_ncols=True,
+            )
         ):
             # Add a task to the pool to process
             results.append(pool.apply_async(process_frame, (msg,)))

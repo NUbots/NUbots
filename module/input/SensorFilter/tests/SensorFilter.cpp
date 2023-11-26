@@ -1,26 +1,34 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <cmath>
 #include <fstream>
 #include <iostream>
@@ -34,12 +42,12 @@
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
 
-#include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/filter/UKF.hpp"
 #include "utility/math/quaternion.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+using Catch::Matchers::WithinAbs;
 using module::input::MotionModel;
 using utility::math::filter::UKF;
 using utility::support::Expression;
@@ -248,9 +256,9 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
     INFO("Mean Angular Error: " << mean_angular_error);
-    REQUIRE(mean_error.w() == Approx(1.0).margin(0.01));
-    REQUIRE(mean_error.x() == Approx(0.0).margin(0.01));
-    REQUIRE(mean_error.y() == Approx(0.0).margin(0.01));
-    REQUIRE(mean_error.z() == Approx(0.0).margin(0.01));
-    REQUIRE(mean_angular_error == Approx(0.0).margin(0.02));
+    REQUIRE_THAT(mean_error.w(), WithinAbs(1.0, 0.01));
+    REQUIRE_THAT(mean_error.x(), WithinAbs(0.0, 0.01));
+    REQUIRE_THAT(mean_error.y(), WithinAbs(0.0, 0.01));
+    REQUIRE_THAT(mean_error.z(), WithinAbs(0.0, 0.01));
+    REQUIRE_THAT(mean_angular_error, WithinAbs(0.0, 0.02));
 }

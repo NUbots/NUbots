@@ -1,9 +1,38 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2016 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 import argparse
 import os
 import pkgutil
 import re
+import subprocess
 import sys
+
+from dependencies import find_dependency, install_dependency
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
@@ -85,55 +114,77 @@ if __name__ == "__main__":
     )
     subcommands.required = True
 
-    # Look through the various tools to see if we can find one that matches our arguments
-    # If we do we don't need to load all the tools and can just trigger this one directly
-    # This saves importing things we don't need
+    # Look thorough our tools directories and find all the files and folders that could be a command
+    candidates = []
     for path in [user_tools_path, nuclear_tools_path]:
         for dirpath, dnames, fnames in os.walk(path):
-            for f in fnames:
-                if f != "__init__.py" and f.endswith(".py"):
 
-                    # Check if this is the tool for the job
-                    components = os.path.relpath(os.path.join(dirpath, f[:-3]), path).split(os.sep)
-                    if sys.argv[1 : len(components) + 1] == components:
+            # Get all the possible commands they might want to run based on folders and python files
+            candidates.extend(
+                [
+                    os.path.relpath(os.path.join(dirpath, os.path.splitext(f)[0]), path).split(os.sep)
+                    for f in fnames
+                    if f != "__init__.py" and os.path.splitext(f)[1] == ".py"
+                ]
+            )
+            candidates.extend(
+                [
+                    os.path.relpath(os.path.join(dirpath, d), path).split(os.sep)
+                    for d in dnames
+                    if os.path.isfile(os.path.join(dirpath, d, "__init__.py"))
+                ]
+            )
 
-                        # Load the module
-                        module = pkgutil.find_loader(".".join(components)).load_module()
-                        if hasattr(module, "register") and hasattr(module, "run"):
+    # See if we can find a command that matches what we want to do and sort so the longest match is first
+    useable = [c for c in candidates if sys.argv[1 : len(c) + 1] == c]
+    useable.sort(key=lambda x: len(x), reverse=True)
 
-                            # Build up the base subcommands to this point
-                            subcommand = subcommands
-                            for c in components[:-1]:
-                                subcommand = subcommand.add_parser(c).add_subparsers(
-                                    dest="{}_command".format(c),
-                                    help="Commands related to working with {} functionality".format(c),
-                                )
+    for components in useable:
+        if sys.argv[1 : len(components) + 1] == components:
+            loader = pkgutil.find_loader(".".join(components))
+            if loader:
+                try:
+                    module = loader.load_module()
+                    if hasattr(module, "register") and hasattr(module, "run"):
 
-                            module.register(subcommand.add_parser(components[-1]))
-                            # Try to provide completion
-                            try:
-                                import argcomplete
+                        # Build up the base subcommands to this point
+                        subcommand = subcommands
+                        for c in components[:-1]:
+                            subcommand = subcommand.add_parser(c).add_subparsers(
+                                dest="{}_command".format(c),
+                                help="Commands related to working with {} functionality".format(c),
+                            )
+                        subcommand.required = True
 
-                                argcomplete.autocomplete(command)
-                            except ImportError:
-                                pass
-                            module.run(**vars(command.parse_args()))
+                        module.register(subcommand.add_parser(components[-1]))
+                        module.run(**vars(command.parse_args()))
 
-                            # We're done, exit
-                            exit(0)
+                        # We're done, exit
+                        exit(0)
+
+                except ModuleNotFoundError as e:
+                    print(f'missing command dependency "{e.name}"')
+
+                    dependency = find_dependency(e.name, user_tools_path)
+                    package = dependency["version"]
+
+                    print(f'installing missing dependency "{package}"...')
+                    print()
+
+                    install_dependency(package)
+
+                    # Try re-running the current command now that the library exists
+                    sys.exit(subprocess.call([sys.executable, *sys.argv]))
 
     # If we reach this point, we couldn't find a tool to use.
     # In this case we need to look through all the tools so we can register them all.
     # This will provide a complete help for the function call so the user can try again
     tools = {}
-    for importer, modname, ispkg in pkgutil.walk_packages([user_tools_path, nuclear_tools_path]):
-        # Tools aren't in packages
-        if not ispkg:
-
-            # Load the modules and check it's a tool
-            components = modname.split(".")
-            try:
-                module = pkgutil.find_loader(modname).load_module()
+    for components in candidates:
+        try:
+            loader = pkgutil.find_loader(".".join(components))
+            if loader:
+                module = loader.load_module()
                 if hasattr(module, "register") and hasattr(module, "run"):
 
                     subcommand = subcommands
@@ -151,17 +202,10 @@ if __name__ == "__main__":
                             tool = tool[c][0]
 
                     module.register(subcommand.add_parser(components[-1]))
-            except ModuleNotFoundError as e:
-                print("Could not load the tool '{}': {}".format(modname.replace(".", " "), e))
-            except BaseException as e:
-                pass
+        except ModuleNotFoundError as e:
+            pass
+        except BaseException as e:
+            pass
 
-    # Try to provide completion
-    try:
-        import argcomplete
-
-        argcomplete.autocomplete(command)
-    except ImportError:
-        pass
     # Given what we know, this will fail here and give the user some help
     command.parse_args()

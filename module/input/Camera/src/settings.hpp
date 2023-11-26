@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MODULE_INPUT_CAMERA_SETTINGS_HPP
 #define MODULE_INPUT_CAMERA_SETTINGS_HPP
 
@@ -40,11 +66,7 @@ namespace module::input {
             return true;
         }
         static std::string unit(ArvGcInteger* setting) {
-            GError* error = nullptr;
-            const char* u = arv_gc_integer_get_unit(setting, &error);
-            if (error != nullptr) {
-                g_error_free(error);
-            }
+            const char* u = arv_gc_integer_get_unit(setting);
             return u == nullptr ? "" : u;
         }
     };
@@ -76,11 +98,7 @@ namespace module::input {
             return true;
         }
         static std::string unit(ArvGcFloat* setting) {
-            GError* error = nullptr;
-            const char* u = arv_gc_float_get_unit(setting, &error);
-            if (error != nullptr) {
-                g_error_free(error);
-            }
+            const char* u = arv_gc_float_get_unit(setting);
             return u == nullptr ? "" : u;
         }
     };
@@ -113,7 +131,7 @@ namespace module::input {
         static bool valid(ArvGcEnumeration* setting, const std::string& v) {
             GError* error       = nullptr;
             unsigned int len    = 0;
-            const char** values = arv_gc_enumeration_get_available_string_values(setting, &len, &error);
+            const char** values = arv_gc_enumeration_dup_available_string_values(setting, &len, &error);
             if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;

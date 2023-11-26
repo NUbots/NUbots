@@ -1,8 +1,33 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2016 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 import glob
 import os
-import re
 import subprocess
 
 from termcolor import cprint
@@ -13,7 +38,7 @@ from utility.dockerise import run_on_docker
 
 @run_on_docker
 def register(command):
-    command.help = "Install the system onto the target system"
+    command.description = "Install the system onto the target system"
 
     command.add_argument("target", help="The target host or directory to install the packages to")
 
@@ -49,10 +74,6 @@ def run(target, local, user, config, toolchain, **kwargs):
 
         user = getpass.getuser()
 
-    # Make sure ssh keys are installed on the target
-    # This will ask the user for a password if the key does not already exist on the target
-    subprocess.Popen("ssh-copy-id -i $HOME/.ssh/id_rsa.pub {}@{}".format(user, target), shell=True)
-
     # Target location to install to
     if local:
         target_binaries_dir = os.path.abspath(os.path.join(target, f"binaries{os.sep}"))
@@ -73,7 +94,7 @@ def run(target, local, user, config, toolchain, **kwargs):
     files = glob.glob(os.path.join(build_dir, "bin", "**", "*"), recursive=True)
 
     # Add a /./ to files so rsync --relative/-R behaves how we want it to
-    # For example, /home/fourtel/build/bin/horus will become /home/fourtel/build/bin/./horus
+    # For example, /home/NUbots/build/bin/binary will become /home/NUbots/build/bin/./binary
     common_path = os.path.commonpath(files)
     files = [os.path.join(common_path, f.replace(common_path, ".")) for f in files]
     subprocess.call(["rsync", "-avPlR", "--checksum", "-e ssh"] + files + [target_binaries_dir])
@@ -98,6 +119,8 @@ def run(target, local, user, config, toolchain, **kwargs):
                 "--include=local/sbin/**",
                 "--include=local/share",
                 "--include=local/share/**",
+                "--include=local/man",
+                "--include=local/man/**",
                 "--exclude=*",
                 "--checksum",
                 "--delete",
@@ -113,9 +136,16 @@ def run(target, local, user, config, toolchain, **kwargs):
             cprint("Running ldconfig on {}".format(target), "blue", attrs=["bold"])
             subprocess.run(["ssh", "{}@{}".format(user, target), "sudo ldconfig"])
 
+    # Get list of different config files for concatenation
+    script_files = b.cmake_cache["SCRIPT_FILES"]
+    model_files = b.cmake_cache["MODEL_FILES"]
+    data_files = b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]
+
     # If there is only a single file then the b script returns this as a string rather than a list
-    config_files = b.cmake_cache["NUCLEAR_MODULE_DATA_FILES"]
-    config_files += b.cmake_cache["SCRIPT_FILES"]
+    # Handle this by forcing into a list if it is not already
+    config_files = [data_files] if not isinstance(data_files, list) else data_files
+    config_files += [script_files] if not isinstance(script_files, list) else script_files
+    config_files += [model_files] if not isinstance(model_files, list) else model_files
     config_files = config_files if isinstance(config_files, list) else [config_files]
 
     # Get list of config files
@@ -145,6 +175,6 @@ def run(target, local, user, config, toolchain, **kwargs):
     version_file = os.path.join(build_dir, "version.txt")
     with open(version_file, "w") as f:
         os.chdir(b.project_dir)
-        subprocess.run(["git", "log", "-1"], stdout=f)
+        subprocess.run(["git", "log", "-1", "--pretty=format:'%H'"], stdout=f)
 
     subprocess.run(["scp", version_file, target_binaries_dir])

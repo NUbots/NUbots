@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MODULE_PURPOSE_KEYBOARDWALK_HPP
 #define MODULE_PURPOSE_KEYBOARDWALK_HPP
 
@@ -32,25 +58,25 @@ namespace module::purpose {
     class KeyboardWalk : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Increments the value of walk command (dx, dy) by this amount when a key is pressed
-        static constexpr const float DIFF = 0.01f;
+        static constexpr const double DIFF = 0.01f;
 
         /// @brief Increments the value of walk command (dtheta) by this amount when a key is pressed
-        static constexpr const float ROT_DIFF = 0.1f;
+        static constexpr const double ROT_DIFF = 0.1f;
 
         /// @brief Increments the value of head yaw/pitch by this amount when a key is pressed
-        static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
+        static constexpr const double HEAD_DIFF = 1.0f * double(M_PI) / 180.0f;
 
         /// @brief Whether or not the walk is enabled
         bool walk_enabled = false;
 
         /// @brief Walk command (dx, dy, dtheta)
-        Eigen::Vector3f walk_command = Eigen::Vector3f::Zero();
+        Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Desired head yaw
-        float head_yaw = 0.0f;
+        double head_yaw = 0.0f;
 
         /// @brief Desired head pitch
-        float head_pitch = 0.0f;
+        double head_pitch = 0.0f;
 
         /// @brief Command window
         std::shared_ptr<WINDOW> command_window;

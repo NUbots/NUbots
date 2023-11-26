@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2015 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 import os
 import sys
@@ -10,7 +36,7 @@ import b
 def register(command):
 
     # Module help
-    command.help = "Generate a new NUClear Roles module at the provided location"
+    command.description = "Generate a new NUClear Roles module at the provided location"
 
     # Module subcommands
     command.add_argument("path", metavar="path", help="a path to the new module (from the module directory)")
@@ -27,7 +53,6 @@ def run(path, **kwargs):
     # Calculate all of our file paths
     path = os.path.join(module_path, path)
     src_path = os.path.join(path, "src")
-    tests_path = os.path.join(path, "tests")
     module_name = os.path.split(path)[-1]
 
     # Check if the path already exists
@@ -44,8 +69,6 @@ def run(path, **kwargs):
     print("\t", path)
     os.makedirs(src_path)
     print("\t", src_path)
-    os.makedirs(tests_path)
-    print("\t", tests_path)
 
     # Split our provided path
     parts = ["module"] + os.path.relpath(path, module_path).split(os.sep)
@@ -68,10 +91,6 @@ def run(path, **kwargs):
     with open(os.path.join(src_path, "{}.cpp".format(module_name)), "w") as output:
         output.write(generate_cpp(parts))
         print("\t", os.path.join(src_path, "{}.cpp".format(module_name)))
-
-    with open(os.path.join(tests_path, "{}.cpp".format(module_name)), "w") as output:
-        output.write(generate_test(parts))
-        print("\t", os.path.join(tests_path, "{}.cpp".format(module_name)))
 
 
 def generate_cmake(parts):
@@ -158,18 +177,3 @@ def generate_readme(parts):
     return template.format(
         className=parts[-1], classNameTitle=len(parts[-1]) * "=", closeNamespace="\n".join(["}" for x in parts[:-1]])
     )
-
-
-def generate_test(parts):
-    template = textwrap.dedent(
-        """\
-        // Uncomment this line when other test files are added
-        //#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-        //#include <catch.hpp>
-
-        // Remove this line when test files are added
-        int main() {{ return 0; }}
-        """
-    )
-
-    return template.format()

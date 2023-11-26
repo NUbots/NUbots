@@ -15,7 +15,7 @@ jobs:
     name: "Remove extra DockerHub container"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # We need `jq` for the script, so we run in a container with it installed
     container:
@@ -25,12 +25,12 @@ jobs:
     steps:
       # Checks-out the repo under $GITHUB_WORKSPACE so we can access the delete script
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Run our script which calls the dockerhub API to delete the PR's tag
       - name: Delete DockerHub image tag
         run: |
           DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
           DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
-          TAG=pull-request-${{ github.event.number }} \
+          TAG=PR-${{ github.event.number }} \
           .github/workflows/scripts/remove_dockerhub_tag.sh

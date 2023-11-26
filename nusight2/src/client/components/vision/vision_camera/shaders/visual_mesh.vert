@@ -9,6 +9,7 @@ uniform float focalLength;
 uniform vec2 centre;
 uniform vec2 k;
 uniform int projection;
+uniform float imageAspectRatio;
 
 attribute vec3 position;
 
@@ -16,12 +17,14 @@ attribute float ball;
 attribute float goal;
 attribute float field;
 attribute float fieldLine;
+attribute float robot;
 attribute float environment;
 
 varying float vBall;
 varying float vGoal;
 varying float vFieldLine;
 varying float vField;
+varying float vRobot;
 varying float vEnvironment;
 
 #include "../../../camera/objects/shaders/projection.glsl"
@@ -36,8 +39,16 @@ void main() {
     vBall        = ball;
     vGoal        = goal;
     vFieldLine   = fieldLine;
+    vRobot       = robot;
     vField       = field;
     vEnvironment = environment;
 
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 0.0, 1.0);
+    // Aspect ratio of GL view
+    float viewRatio = viewSize.x / viewSize.y;
+
+    // In the case where the GL view's aspect ratio is wider than the image's,
+    // the point should be scaled to align with the image.
+    float scale = (viewRatio > imageAspectRatio) ? (imageAspectRatio / viewRatio) : 1.0;
+
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos * scale, 0.0, 1.0);
 }

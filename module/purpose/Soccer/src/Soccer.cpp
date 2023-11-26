@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Soccer.hpp"
 
 #include <string>
@@ -6,6 +32,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -22,8 +49,9 @@ namespace module::purpose {
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
     using message::input::GameEvents;
-    using message::localisation::ResetRobotLocalisation;
+    using message::localisation::ResetFieldLocalisation;
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
     using message::purpose::Defender;
@@ -47,8 +75,9 @@ namespace module::purpose {
         // Start the Director graph for the soccer scenario!
         on<Startup>().then([this] {
             // At the start of the program, we should be standing
-            // Without this emit, modules that need a Stability message may not run
+            // Without these emis, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
+            emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>());
             // The robot should always try to recover from falling, if applicable, regardless of purpose
@@ -70,7 +99,7 @@ namespace module::purpose {
             if (self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
-                emit(std::make_unique<ResetRobotLocalisation>());
+                emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
                 // emit<Task>(std::make_unique<StandStill>());
             }

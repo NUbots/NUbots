@@ -1,20 +1,28 @@
 /*
- * This file is part of NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "GoalDetector.hpp"
@@ -249,8 +257,8 @@ namespace module::vision {
 
                             Eigen::Vector3f top_point(bottom_point * distance);
                             top_point.z() += field.dimensions.goal_crossbar_height;
-                            g.post.top    = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * top_point.normalized();
-                            g.post.bottom = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * bottom_point.normalized();
+                            g.post.top      = horizon.Hcw.rotation().cast<float>() * top_point.normalized();
+                            g.post.bottom   = horizon.Hcw.rotation().cast<float>() * bottom_point.normalized();
                             g.post.distance = distance;
 
                             // Attach the measurement to the object (distance from camera to bottom center of post)
@@ -298,7 +306,7 @@ namespace module::vision {
                     // Returns true if rGCc0 is to the left of rGCc1, with respect to camera z
                     // The vectors are assumed to have unit norm
                     auto is_left_of = [&](const Eigen::Vector3f& rGCc0, const Eigen::Vector3f& rGCc1) {
-                        const Eigen::Vector3f cam_space_z = horizon.Hcw.block<3, 1>(0, 2).cast<float>();
+                        const Eigen::Vector3f cam_space_z = horizon.Hcw.matrix().block<3, 1>(0, 2).cast<float>();
 
                         // Direction (determined by RHR) needed to turn to get from one post to the other
                         // Anti-clockwise (negative) turn from rGCc0 to rGCc1 around cam_space_z

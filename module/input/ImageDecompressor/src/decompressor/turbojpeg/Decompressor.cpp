@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Decompressor.hpp"
 
 #include <fmt/format.h>
@@ -37,7 +63,6 @@ namespace module::input::decompressor::turbojpeg {
             mosaic = utility::vision::Mosaic(width, height, output_fourcc);
         }
     }
-    Decompressor::~Decompressor() = default;
 
     std::pair<std::vector<uint8_t>, int> Decompressor::decompress(const std::vector<uint8_t>& data) {
 
@@ -54,10 +79,10 @@ namespace module::input::decompressor::turbojpeg {
         tjDecompressHeader2(decompressor, const_cast<uint8_t*>(data.data()), data.size(), &width, &height, &subsamp);
 
         // Work out what we decode as
-        TJPF code = mosaic || subsamp == TJSAMP::TJSAMP_GRAY ? TJPF::TJPF_GRAY : TJPF::TJPF_RGBA;
+        TJPF code = mosaic || subsamp == TJSAMP::TJSAMP_GRAY ? TJPF::TJPF_GRAY : TJPF::TJPF_RGB;
 
         // Decode the image
-        std::vector<uint8_t> output(width * height * (code == TJPF::TJPF_GRAY ? 1 : 4));
+        std::vector<uint8_t> output(width * height * (code == TJPF::TJPF_GRAY ? 1 : 3));
         tjDecompress2(decompressor,
                       data.data(),
                       data.size(),
@@ -76,7 +101,7 @@ namespace module::input::decompressor::turbojpeg {
         // Work out what the fourcc of the image should be
         uint32_t fourcc =
             output_fourcc == utility::vision::fourcc("JPEG")
-                ? subsamp == TJSAMP::TJSAMP_GRAY ? utility::vision::fourcc("GREY") : utility::vision::fourcc("RGBA")
+                ? subsamp == TJSAMP::TJSAMP_GRAY ? utility::vision::fourcc("GREY") : utility::vision::fourcc("RGB3")
                 : output_fourcc;
 
         return std::make_pair(output, fourcc);

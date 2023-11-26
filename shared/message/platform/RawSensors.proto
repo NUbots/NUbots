@@ -26,96 +26,117 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 
 /**
- * @author Trent Houliston
+ * @author Alex Biddulph
  */
 message RawSensors {
     /// Set of error flags/statuses.
     /// bitmask values.
-    /// See https://emanual.robotis.com/docs/en/dxl/protocol1/#protocol
-    enum Error {
-        OK            = 0;  // not really a flag but the lack of any other flag
-        INPUT_VOLTAGE = 1;
-        ANGLE_LIMIT   = 2;
-        OVERHEATING   = 4;
-        RANGE         = 8;
-        CHECKSUM      = 16;
-        OVERLOAD      = 32;
-        INSTRUCTION   = 64;
-        CORRUPT_DATA  = 128;
-        TIMEOUT       = 256;
+
+    // See https://emanual.robotis.com/docs/en/dxl/protocol2/#error
+    enum PacketError {
+        PACKET_OK   = 0;
+        RESULT_FAIL = 1;  // Failed to process the sent Instruction Packet
+        INSTRUCTION = 2;  // Undefined Instruction has been used OR Action has been used without Reg Write
+        CRC         = 4;  // CRC of the sent Packet does not match
+        DATA_RANGE =
+            8;  // Data to be written in the corresponding Address is outside the range of the minimum/maximum value
+        DATA_LENGTH = 16;  // Attempt to write Data that is shorter than the data length of the corresponding Address
+        DATA_LIMIT  = 32;  // Data to be written in the corresponding Address is outside of the Limit value
+        ACCESS = 64;   // Attempt to read/write a value in an Address that is Write/Read Only or has not been defined
+        ALERT  = 128;  // Error with device, check the Hardware Error Status of the control table
     }
+
+    // See https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#hardware-error-status70
+    // Same for all servo types (MX64(2), MX106(2), XH540)
+    enum HardwareError {
+        HARDWARE_OK      = 0;
+        INPUT_VOLTAGE    = 1;
+        UNUSED_BIT_1     = 2;  // Unused, Always 0
+        OVERHEATING      = 4;
+        MOTOR_ENCODER    = 8;
+        ELECTRICAL_SHOCK = 16;
+        OVERLOAD         = 32;
+    }
+
     message LEDPanel {
         bool led2 = 1;
         bool led3 = 2;
         bool led4 = 3;
     }
+
     message HeadLED {
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
+
     message EyeLED {
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
+
     message Buttons {
         bool left   = 1;
         bool middle = 2;
+        bool right  = 3;
     }
+
+    message Accelerometer {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+    }
+
+    message Gyroscope {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+    }
+
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
-        float  fsr1        = 1;
-        float  fsr2        = 2;
-        float  fsr3        = 3;
-        float  fsr4        = 4;
-        float  centre_x    = 5;
-        float  centre_y    = 6;
-        uint32 error_flags = 7;
+        float  fsr1           = 1;
+        float  fsr2           = 2;
+        float  fsr3           = 3;
+        float  fsr4           = 4;
+        float  centre_x       = 5;
+        float  centre_y       = 6;
+        uint32 hardware_error = 7;
     }
+
     message FSRs {
         /// Left foot
         FSR left = 1;
         /// Right foot
         FSR right = 2;
     }
-    /// Full set of information to use a given servo.
-    /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
+
+    // Full set of information to use for servos using Dynamixel v2 firmware
     message Servo {
-        /// Set of things which can or have gone wrong.
-        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
-        uint32 error_flags    = 1;
-        bool   torque_enabled = 2;
-        /// Proportional gain. In proportion to the servo's position error. Gain values are in range 0~100
-        float p_gain = 3;
-        /// Integral gain. Increases in relation to the error, and how long the error has persisted. Gain values are in
-        /// range 0~100
-        float i_gain = 4;
-        /// Derivative gain. Does not consider error, just dampens forces to reduce derivatives. Gain values are in
-        /// range 0~100
-        float d_gain = 5;
-        /// In radians
-        /// (FROM https://emanual.robotis.com/docs/en/dxl/mx/mx-64/#specifications):
-        /// If Goal Position is out of the range, Angle Limit Error Bit (Bit1) of Status Packet is returned as ‘1’ and
-        /// Alarm is triggered as set in Alarm LED/Shutdown
-        float goal_position = 6;
-        /// What dynamixel servos call velocity. In radians per second
-        float moving_speed = 7;
-        /// Used to set the servo on or off. Typically either 0 (off) or 100 (on). Not really in any unit
-        float torque = 8;
-        /// In radians
-        float present_position = 9;
-        /// In radians per second
-        float present_speed = 10;
-        /// A percentage load between -1 and 1. The sign depends on the rotation direction - negative is CCW, positive
-        /// is clockwise
-        float load = 11;
-        /// The unit is Volts
-        /// If Present Voltage(42) value is out of range, Voltage Range Error Bit (Bit0) of Status Packet is
-        /// returned as ‘1’ and Alarm is triggered and set the address 17 and set 1 to the Bit 0 of the address 18
-        float voltage = 12;
-        /// In degrees Celsius
-        float temperature = 13;
+        uint32 hardware_error  = 1;  // components of type RawSensors::HardwareError (but can have multiple bits set)
+        bool   torque_enabled  = 2;
+        float  velocity_i_gain = 3;
+        float  velocity_p_gain = 4;
+        float  position_d_gain = 5;
+        float  position_i_gain = 6;
+        float  position_p_gain = 7;
+        float  feed_forward_1st_Gain = 8;
+        float  feed_forward_2nd_Gain = 9;
+        float  present_PWM           = 10;
+        float  present_current       = 11;
+        float  present_velocity      = 12;
+        float  present_position      = 13;
+        float  goal_PWM              = 14;
+        float  goal_current          = 15;
+        float  goal_velocity         = 16;
+        float  goal_position         = 17;
+        float  voltage               = 18;
+        float  temperature           = 19;
+        float  profile_acceleration  = 20;
+        // Replaces "Moving speed" from v1 protocol, basically just the set speed.
+        float profile_velocity = 21;
     };
+
     /// Set of all the servos on the robot
     message Servos {
         Servo r_shoulder_pitch = 1;
@@ -139,25 +160,21 @@ message RawSensors {
         Servo head_pan         = 19;
         Servo head_tilt        = 20;
     }
-    /// Timestamp when our data were taken
-    google.protobuf.Timestamp timestamp = 1;
-    /// Holds the error code (if any) from the CM740
-    /// The list of errors is here: https://emanual.robotis.com/docs/en/dxl/protocol1/#status-packetreturn-packet
-    uint32   platform_error_flags = 2;
-    LEDPanel led_panel            = 3;
-    HeadLED  head_led             = 4;
-    EyeLED   eye_led              = 5;
-    Buttons  buttons              = 6;
-    /// Voltage for the whole robot, from the main battery, in Volts
-    float voltage = 7;
-    /// In m/s^2. Each axis is bounded between -4g and 4g, according to the datasheet
-    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#acc_x-acc_y-acc_z
-    fvec3 accelerometer = 8;
-    /// In radians per second. Each axis bounded between -500 and 500 degrees per second, according to the datasheet
-    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#gyro_x-gyro_y-gyro_z
-    fvec3  gyroscope = 9;
-    FSRs   fsr       = 10;
-    Servos servo     = 11;
+
+    google.protobuf.Timestamp timestamp = 1;  // Timestamp when our data were taken
+
+    uint32 subcontroller_error = 2;  // components of type RawSensors::PacketError (but can have multiple bits set)
+
+    LEDPanel led_panel     = 3;
+    HeadLED  head_led      = 4;
+    EyeLED   eye_led       = 5;
+    Buttons  buttons       = 6;
+    fvec3    accelerometer = 7;
+    fvec3    gyroscope     = 8;
+    Servos   servo         = 9;
+    float    battery       = 10;
+    FSRs     fsr           = 11;
+
     /// Ground truth from a simulator
     webots.OdometryGroundTruth odometry_ground_truth = 12;
 }

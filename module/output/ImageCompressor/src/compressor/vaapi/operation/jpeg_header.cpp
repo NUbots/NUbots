@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "jpeg_header.hpp"
 
 #include <cstring>
@@ -11,7 +37,6 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-#pragma pack(push, 1)
     namespace markers {
 
         /// htons is used throughout the code to fix the endian issue
@@ -22,7 +47,7 @@ namespace module::output::compressor::vaapi::operation {
         struct SOI {
             uint8_t marker = 0xFF;
             uint8_t type   = 0xD8;
-        };
+        } __attribute__((packed));
 
         // Application Data
         struct AppData {
@@ -37,7 +62,7 @@ namespace module::output::compressor::vaapi::operation {
             uint16_t y_density         = htons(72);
             uint8_t thumbnail_width    = 0;
             uint8_t thumbnail_height   = 0;
-        };
+        } __attribute__((packed));
 
         // Define quantisation table
         struct DQT {
@@ -55,7 +80,7 @@ namespace module::output::compressor::vaapi::operation {
                     quant[i] = std::max(1, std::min(255, v));
                 }
             }
-        };
+        } __attribute__((packed));
 
         // Define huffman table
         template <int Entries>
@@ -70,7 +95,7 @@ namespace module::output::compressor::vaapi::operation {
             std::array<uint8_t, 1 + 16 + Entries> table;
 
             DHT(const std::array<uint8_t, 1 + 16 + Entries>& table) : table(table) {}
-        };
+        } __attribute__((packed));
 
         struct SOS_Monochrome {
             uint8_t marker       = 0xFF;
@@ -82,7 +107,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t start        = 0x00;
             uint8_t end          = 0x3F;
             uint8_t sp           = 0x00;
-        };
+        } __attribute__((packed));
 
         struct SOS_Colour {
             uint8_t marker       = 0xFF;
@@ -98,7 +123,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t start        = 0x00;
             uint8_t end          = 0x3F;
             uint8_t sp           = 0x00;
-        };
+        } __attribute__((packed));
 
         // Start of frame
         struct SOF0_Monochrome {
@@ -115,7 +140,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t y_quant_table_no = 0;
 
             SOF0_Monochrome(uint16_t width, uint16_t height) : height(htons(height)), width(htons(width)) {}
-        };
+        } __attribute__((packed));
 
         struct SOF0_Colour {
             uint8_t marker    = 0xFF;
@@ -139,10 +164,9 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t v_quant_table_no = 1;
 
             SOF0_Colour(uint16_t width, uint16_t height) : height(height), width(width) {}
-        };
+        } __attribute__((packed));
 
     }  // namespace markers
-#pragma pack(pop)
 
     template <typename T, typename... Args>
     void emplace_bytes(std::vector<uint8_t>& v, Args&&... args) {

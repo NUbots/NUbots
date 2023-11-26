@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef MODULES_INPUT_SENSORFILTER_HPP
@@ -23,13 +31,16 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
+#include "message/behaviour/state/Stability.hpp"
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 
@@ -40,7 +51,8 @@ using extension::Configuration;
 
 namespace module::input {
 
-    using message::actuation::KinematicsModel;
+    using message::behaviour::state::Stability;
+    using message::behaviour::state::WalkState;
     using message::input::Sensors;
     using message::platform::RawSensors;
 
@@ -51,6 +63,12 @@ namespace module::input {
     class SensorFilter : public NUClear::Reactor {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Number of actuatable joints in the NUgus robot
+        static const int n_joints = 20;
+
+        /// @brief tinyrobotics NUgus model used for kinematics
+        tinyrobotics::Model<double, n_joints> nugus_model;
 
         /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};
@@ -102,7 +120,7 @@ namespace module::input {
         };
 
         struct FilteringMethod {
-            enum Value { UNKNOWN = 0, UKF = 1, KF = 2, MAHONY = 3 };
+            enum Value { UNKNOWN = 0, UKF = 1, KF = 2, MAHONY = 3, GROUND_TRUTH = 4 };
             Value value = Value::UNKNOWN;
 
             // Constructors
@@ -114,6 +132,7 @@ namespace module::input {
                         if      (str == "UKF") { value = Value::UKF; }
                         else if (str == "KF") { value = Value::KF; }
                         else if (str == "MAHONY")  { value = Value::MAHONY; }
+                        else if (str == "GROUND_TRUTH")  { value = Value::GROUND_TRUTH; }
                         else {
                             value = Value::UNKNOWN;
                             throw std::runtime_error("String " + str + " did not match any enum for FilteringMethod");
@@ -130,6 +149,7 @@ namespace module::input {
                     case Value::UKF: return "UKF";
                     case Value::KF: return "KF";
                     case Value::MAHONY: return "MAHONY";
+                    case Value::GROUND_TRUTH: return "GROUND_TRUTH";
                     default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
                 }
             }
@@ -137,6 +157,9 @@ namespace module::input {
 
 
         struct Config {
+            /// @brief Path to NUgus URDF file
+            std::string urdf_path = "";
+
             /// @brief Config for the button debouncer
             struct Button {
                 Button() = default;
@@ -266,17 +289,17 @@ namespace module::input {
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
-        /// @param kinematics_model The kinematics model to use for calculations
-        void update_kinematics(std::unique_ptr<Sensors>& sensors,
-                               const KinematicsModel& kinematics_model,
-                               const RawSensors& raw_sensors);
+        /// @param raw_sensors The raw sensor data
+        void update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
-        /// @param sensors The sensors message to update
-        /// @param previous_sensors The previous sensors message
-        /// @param raw_sensors The raw sensor data
         /// @param dt The time since the last update
-        void integrate_walkcommand(const double dt);
+        /// @param walk_state Current state of walk engine
+        void integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state);
+
+        /// @brief Updates translational and yaw components of odometry using the anchor method
+        /// @param walk_state Current state of walk engine
+        void anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state);
 
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
@@ -303,7 +326,9 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry_kf(std::unique_ptr<Sensors>& sensors,
                                 const std::shared_ptr<const Sensors>& previous_sensors,
-                                const RawSensors& raw_sensors);
+                                const RawSensors& raw_sensors,
+                                const std::shared_ptr<const Stability>& stability,
+                                const std::shared_ptr<const WalkState>& walk_state);
 
 
         /// @brief Updates the sensors message with odometry data filtered using MahonyFilter. This includes the
@@ -313,7 +338,15 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
-                                    const RawSensors& raw_sensors);
+                                    const RawSensors& raw_sensors,
+                                    const std::shared_ptr<const WalkState>& walk_state);
+
+        /// @brief Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes
+        /// the position, orientation, velocity and rotational velocity of the torso in world space.
+        /// @param sensors The sensors message to update
+        /// @param previous_sensors The previous sensors message
+        /// @param raw_sensors The raw sensor data
+        void update_odometry_ground_truth(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
@@ -321,20 +354,23 @@ namespace module::input {
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
+        /// @brief Transform from anchor {a} to world {w} space
+        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+
+        /// @brief Current support phase of the robot
+        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+
         /// @brief Dead reckoning yaw orientation of the robot in world space
         double yaw = 0;
 
-        /// @brief Transform of torso from world space
+        /// @brief Transform from torso {t} to world {w} space
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+
+        // @brief Transform from torso {t} to world {w} space using mahony filter (only roll and pitch estimation)
+        Eigen::Isometry3d Hwt_mahony = Eigen::Isometry3d::Identity();
 
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
-
-        /// @brief Bool to indicate if the robot is falling
-        bool falling = false;
-
-        /// @brief Bool to indicate if the robot is walking
-        bool walk_engine_enabled = false;
 
         /// @brief Current state of the left button
         bool left_down = false;

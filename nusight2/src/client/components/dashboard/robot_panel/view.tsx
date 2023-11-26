@@ -12,7 +12,6 @@ export type LastStatus = "okay" | "warning" | "danger";
 export type RobotPanelProps = {
   connected: boolean;
   batteryValue?: string;
-  behaviour: string;
   lastCameraImage: LastStatus;
   lastSeenBall: LastStatus;
   lastSeenGoal: LastStatus;
@@ -59,10 +58,6 @@ export const RobotPanel = (props: RobotPanelProps) => {
           <div className={style.row}>
             <span className={style.label}>Phase</span>
             {props.phase}
-          </div>
-          <div className={style.row}>
-            <span className={style.label}>Behaviour</span>
-            {props.behaviour}
           </div>
           <div className={style.row}>
             <span className={style.label}>Penalty</span>

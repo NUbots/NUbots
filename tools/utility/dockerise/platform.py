@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2021 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 import json
 import os
 import re
@@ -14,21 +40,16 @@ from utility.shell import WrapPty
 from . import defaults
 
 
-def selected(repository):
+def selected(image, username):
     # Get information about the selected image
     try:
+        selected_img = defaults.image_name("selected", image, username)
+        prefix = "{}:".format(selected_img.split(":")[0])
         img_info = json.loads(
-            subprocess.Popen(
-                ["docker", "image", "inspect", "{}:selected".format(repository)], stdout=subprocess.PIPE
-            ).communicate()[0],
+            subprocess.Popen(["docker", "image", "inspect", selected_img], stdout=subprocess.PIPE).communicate()[0]
         )
 
-        # Obtain only the tag of the image, so from nubots:generic we only obtain generic
-        names = [
-            tag.split(":")[-1]
-            for tag in img_info[0]["RepoTags"]
-            if tag != "{}:selected".format(repository) and tag.startswith("{}:".format(repository))
-        ]
+        names = [tag.split(":")[1] for tag in img_info[0]["RepoTags"] if tag != selected_img and tag.startswith(prefix)]
         if len(names) == 0:
             print("ERROR the currently selected platform is a dangling tag.")
             print("      The system is unable to work out what platform this was and will need to be reset")
@@ -39,8 +60,8 @@ def selected(repository):
         else:
             print("WARNING There are multiple platforms with the same image tag.")
             print("        The possible tags are [{}]".format(", ".join(names)))
-            platform = sorted(names)[0]
-            print("        The platform chosen will be {}".format(platform))
+            platform = list(sorted(names))[0]
+            print(f"        The platform chosen will be {platform}")
             return platform
 
     except subprocess.CalledProcessError:
@@ -59,40 +80,61 @@ def list():
     ]
 
 
-def build(repository, platform):
+def build(image, platform, username, uid, reset):
     pty = WrapPty()
 
     # If we are building the selected platform we need to work out what that refers to
     _selected = platform == "selected"
-    platform = selected(repository) if _selected else platform
+    platform = selected(image) if _selected else platform
 
-    remote_tag = "{0}/{0}:{1}".format(repository, platform)
-    local_tag = "{0}:{1}".format(repository, platform)
-    selected_tag = "{}:selected".format(repository)
+    local_tag = defaults.image_name(platform, image, username)
     dockerdir = os.path.join(b.project_dir, "docker")
 
     # Go through all the files and try to ensure that their permissions are correct
     # Otherwise caching will not work properly
-    for dir_name, subdirs, files in os.walk(dockerdir):
-        for f in files:
-            p = os.path.join(dir_name, f)
+    for dir_name, dirs, files in os.walk(dockerdir):
+        for path in files + dirs:
+            p = os.path.join(dir_name, path)
             current = stat.S_IMODE(os.lstat(p).st_mode)
             os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
 
-    # Create a buildx instance for building this image
-    builder_name = "{}_{}".format(defaults.image, platform)
-    if subprocess.run(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
-        subprocess.run(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
-    subprocess.run(["docker", "buildx", "use", builder_name])
+    # Create a buildx instance for building images (for this user)
+    builder_name = defaults.image
 
-    # Get docker host IP from bridge network
-    docker_gateway = (
-        subprocess.check_output(
-            ["docker", "network", "inspect", "bridge", "--format", "{{range .IPAM.Config}}{{.Gateway}}{{end}}"],
-        )
-        .strip()
-        .decode("ascii")
+    # Check to see if the buildx instance has already been created
+    buildx_exists = (
+        subprocess.run(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode == 0
     )
+
+    # Remove the buildx instance if it exists and a reset was requested
+    if buildx_exists and reset:
+        err = subprocess.run(["docker", "buildx", "rm", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode
+        if err != 0:
+            cprint(f"Docker buildx rm returned exit code {err}", "red", attrs=["bold"])
+            exit(err)
+        buildx_exists = False
+
+    # Create the buildx instance if it doesn't exist
+    if not buildx_exists:
+        subprocess.run(
+            [
+                "docker",
+                "buildx",
+                "create",
+                "--name",
+                builder_name,
+                # Disable clipping of the output logs
+                "--driver-opt",
+                "env.BUILDKIT_STEP_LOG_MAX_SIZE=-1",
+                "--driver-opt",
+                "env.BUILDKIT_STEP_LOG_MAX_SPEED=-1",
+            ],
+            stderr=DEVNULL,
+            stdout=DEVNULL,
+        )
+
+    # Make sure buildx will use the correct buildx instance
+    subprocess.run(["docker", "buildx", "use", builder_name])
 
     # Build the image!
     err = pty.spawn(
@@ -103,34 +145,31 @@ def build(repository, platform):
             "-t",
             local_tag,
             "--pull",
-            "--cache-from=type=registry,ref={}/{}:{}".format(defaults.repository, defaults.image, platform),
-            "--cache-to=type=inline,mode=max",
             "--build-arg",
-            "platform={}".format(platform),
+            f"platform={platform}",
             "--build-arg",
-            "user_uid={}".format(os.getuid()),
+            f"user_uid={uid}",
             "--output=type=docker",
-            "--add-host=host.docker.internal:{}".format(docker_gateway),
+            f"--cache-from=type=registry,ref={defaults.cache_registry}/{image}:{platform}",
+            f"--cache-to=type=inline",
             dockerdir,
         ]
     )
     if err != 0:
-        cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
+        cprint(f"Docker build returned exit code {err}", "red", attrs=["bold"])
         exit(err)
 
-
-def pull(repository, platform):
-    # Define our tag strings
-    remote_tag = "{0}/{0}:{1}".format(repository, platform)
-    local_tag = "{0}:{1}".format(repository, platform)
-    selected_tag = "{}:selected".format(repository)
-
-    print("Pulling remote image", remote_tag)
-    err = subprocess.run(["docker", "pull", remote_tag]).returncode
-    if err != 0:
-        raise RuntimeError("docker image pull returned a non-zero exit code")
-
-    print("Tagging ", remote_tag, "as", local_tag)
-    err = subprocess.run(["docker", "tag", remote_tag, local_tag]).returncode
-    if err != 0:
-        raise RuntimeError("docker image tag returned a non-zero exit code")
+    # If we were building the selected platform then update our selected tag
+    if _selected:
+        err = subprocess.call(
+            [
+                "docker",
+                "image",
+                "tag",
+                defaults.image_name(platform, image, username),
+                defaults.image_name("selected", image, username),
+            ],
+            stdout=subprocess.DEVNULL,
+        )
+        if err != 0:
+            raise RuntimeError("docker image tag returned a non-zero exit code")

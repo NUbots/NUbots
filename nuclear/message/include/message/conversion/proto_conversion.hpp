@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MESSAGE_CONVERSION_PROTO_CONVERSION_HPP
 #define MESSAGE_CONVERSION_PROTO_CONVERSION_HPP
 
@@ -6,6 +32,7 @@
 #include <google/protobuf/timestamp.pb.h>
 #include <nuclear_bits/clock.hpp>
 
+#include "math_types.hpp"
 #include "neutron_type_map.hpp"
 #include "proto_neutron_map.hpp"
 #include "proto_neutron_sfinae.hpp"
@@ -283,6 +310,66 @@ namespace message::conversion {
             Eigen::Map<::message::conversion::math::cmat>(reinterpret_cast<uint8_t*>(proto.mutable_v()->data()),
                                                           matrix.rows(),
                                                           matrix.cols()) = matrix;
+
+            return proto;
+        }
+    };
+
+    /**
+     * @brief Specialisation for converting to/from Eigen::Isometry types
+     *
+     * @tparam Neutron Expected to be Eigen::Isometry<....>
+     * @tparam Proto Expected to be one of ::iso2/3 of ::fiso2/3
+     */
+    template <typename Neutron, typename Proto>
+    struct Convert<Isometry, Neutron, Proto> {
+        static Neutron call(const Proto& proto) {
+            Neutron isometry{};
+
+            set_matrix_from_protobuf::x(isometry.matrix(), proto);
+            set_matrix_from_protobuf::y(isometry.matrix(), proto);
+            set_matrix_from_protobuf::z(isometry.matrix(), proto);
+            set_matrix_from_protobuf::t(isometry.matrix(), proto);
+
+            return isometry;
+        }
+        static Proto call(const Neutron& neutron) {
+            Proto proto{};
+
+            set_protobuf_from_matrix::x(proto, neutron.matrix());
+            set_protobuf_from_matrix::y(proto, neutron.matrix());
+            set_protobuf_from_matrix::z(proto, neutron.matrix());
+            set_protobuf_from_matrix::t(proto, neutron.matrix());
+
+            return proto;
+        }
+    };
+
+    /**
+     * @brief Specialisation for converting to/from Eigen::Quaternion types
+     *
+     * @tparam Neutron Expected to be Eigen::Quaternion<....>
+     * @tparam Proto Expected to be one of ::quat of ::fquat
+     */
+    template <typename Neutron, typename Proto>
+    struct Convert<Quaternion, Neutron, Proto> {
+        static Neutron call(const Proto& proto) {
+            Neutron quaternion{};
+
+            quaternion.x() = proto.x();
+            quaternion.y() = proto.y();
+            quaternion.z() = proto.z();
+            quaternion.w() = proto.w();
+
+            return quaternion;
+        }
+        static Proto call(const Neutron& neutron) {
+            Proto proto{};
+
+            proto.set_x(neutron.x());
+            proto.set_y(neutron.y());
+            proto.set_z(neutron.z());
+            proto.set_w(neutron.w());
 
             return proto;
         }

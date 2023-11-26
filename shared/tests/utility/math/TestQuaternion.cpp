@@ -1,29 +1,39 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2019 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include <Eigen/Core>
 #include <array>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <utility>
 
 #include "utility/math/quaternion.hpp"
 
+using Catch::Matchers::WithinAbs;
 
 static const std::array<Eigen::Quaterniond, 200> Q = {
     Eigen::Quaterniond(0.812886533020004, -0.185088524394760, -0.548059268662397, -0.0677403912398385),
@@ -232,7 +242,7 @@ static const Eigen::Quaterniond Qavg_true(-0.614272845931959, 0.779235109150709,
 
 TEST_CASE("Test Quaternion", "[utility][math][Quaternion]") {
 
-    INFO("Calculating average quaternion")
+    INFO("Calculating average quaternion");
     Eigen::Quaterniond Qavg = utility::math::quaternion::mean(Q.begin(), Q.end());
 
     Eigen::Quaterniond diff_f = utility::math::quaternion::difference(Qavg, Qavg_true);
@@ -245,8 +255,8 @@ TEST_CASE("Test Quaternion", "[utility][math][Quaternion]") {
     INFO("The norm of the imaginary part of the backward difference: " << diff_b.vec().norm()
                                                                        << ". This should be small.");
 
-    REQUIRE(diff_f.w() == Approx(1.0).margin(1e-6));
-    REQUIRE(diff_b.w() == Approx(1.0).margin(1e-6));
+    REQUIRE_THAT(diff_f.w(), WithinAbs(1.0, 1e-6));
+    REQUIRE_THAT(diff_b.w(), WithinAbs(1.0, 1e-6));
     REQUIRE(diff_f.vec().norm() <= 1e-6);
     REQUIRE(diff_b.vec().norm() <= 1e-6);
 }

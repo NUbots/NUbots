@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2014 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "GameController.hpp"
@@ -51,7 +59,7 @@ namespace module::input {
     using TeamColourEvent = message::input::GameEvents::TeamColour;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), recieve_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), mode() {
+        : Reactor(std::move(environment)), receive_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), mode() {
 
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
@@ -66,20 +74,20 @@ namespace module::input {
                       udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
-                      if (config["receive_port"].as<uint>() != recieve_port) {
+                      if (config["receive_port"].as<uint>() != receive_port) {
 
                           // If we have an old binding, then unbind it
                           // The port starts at 0 so this should work
-                          if (recieve_port != 0) {
+                          if (receive_port != 0) {
                               listenHandle.unbind();
                           }
 
                           // Update our port
-                          recieve_port = config["receive_port"].as<uint>();
+                          receive_port = config["receive_port"].as<uint>();
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
-                              on<UDP::Broadcast, With<GameState>, Single>(recieve_port)
+                              on<UDP::Broadcast, With<GameState>, Single>(receive_port)
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
                                       std::string remoteAddr = ipAddressIntToString(p.remote.address);
 
@@ -130,9 +138,9 @@ namespace module::input {
     void GameController::sendReplyMessage(const ReplyMessage& message) {
         auto packet     = std::make_unique<GameControllerReplyPacket>();
         packet->header  = {gamecontroller::RETURN_HEADER[0],
-                          gamecontroller::RETURN_HEADER[1],
-                          gamecontroller::RETURN_HEADER[2],
-                          gamecontroller::RETURN_HEADER[3]};
+                           gamecontroller::RETURN_HEADER[1],
+                           gamecontroller::RETURN_HEADER[2],
+                           gamecontroller::RETURN_HEADER[3]};
         packet->version = gamecontroller::RETURN_VERSION;
         packet->team    = TEAM_ID;
         packet->player  = PLAYER_ID;
@@ -436,6 +444,7 @@ namespace module::input {
         /*******************************************************************************************
          * Process state/mode changes
          ******************************************************************************************/
+
         if (newPacket.mode != mode && oldPacket.mode != gamecontroller::Mode::TIMEOUT
             && newPacket.mode != gamecontroller::Mode::TIMEOUT) {
 
@@ -458,10 +467,53 @@ namespace module::input {
                     stateChanges.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::OVERTIME)); });
                     break;
+                case gamecontroller::Mode::DIRECT_FREEKICK:
+                    state->data.mode = GameState::Data::Mode::DIRECT_FREEKICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::DIRECT_FREEKICK)); });
+                    break;
+                case gamecontroller::Mode::INDIRECT_FREEKICK:
+                    state->data.mode = GameState::Data::Mode::INDIRECT_FREEKICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::INDIRECT_FREEKICK)); });
+                    break;
+                case gamecontroller::Mode::PENALTYKICK:
+                    state->data.mode = GameState::Data::Mode::PENALTYKICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::PENALTYKICK)); });
+                    break;
+                case gamecontroller::Mode::CORNER_KICK:
+                    state->data.mode = GameState::Data::Mode::CORNER_KICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::CORNER_KICK)); });
+                    break;
+                case gamecontroller::Mode::GOAL_KICK:
+                    state->data.mode = GameState::Data::Mode::GOAL_KICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::GOAL_KICK)); });
+                    break;
+                case gamecontroller::Mode::THROW_IN:
+                    state->data.mode = GameState::Data::Mode::THROW_IN;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::THROW_IN)); });
+                    break;
                 default:
                     throw std::runtime_error("Invalid mode change");
                     emit(std::make_unique<GameState::Data::Mode>(state->data.mode));
             }
+        }
+
+        if ((state->data.mode != GameState::Data::Mode::NORMAL
+             && state->data.mode != GameState::Data::Mode::PENALTY_SHOOTOUT
+             && state->data.mode != GameState::Data::Mode::OVERTIME)
+            && (newPacket.secondaryStateInfo[0] != state->data.secondary_state.team_performing
+                || newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode)
+            && newPacket.secondaryStateInfo[0] != 0) {
+            if (newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode) {
+                stateChanges.emplace_back([] {});
+            }
+            state->data.secondary_state.team_performing = newPacket.secondaryStateInfo[0];
+            state->data.secondary_state.sub_mode        = newPacket.secondaryStateInfo[1];
         }
 
         if (oldPacket.mode != gamecontroller::Mode::TIMEOUT && newPacket.mode == gamecontroller::Mode::TIMEOUT) {

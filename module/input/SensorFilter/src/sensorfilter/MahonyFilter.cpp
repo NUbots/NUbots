@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2023 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "utility/math/filter/MahonyFilter.hpp"
@@ -25,6 +33,7 @@
 
 #include "message/actuation/BodySide.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -35,77 +44,67 @@ namespace module::input {
 
     using extension::Configuration;
 
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::math::filter::MahonyUpdate;
     using utility::support::Expression;
 
-    void SensorFilter::integrate_walkcommand(const double dt) {
-        // Check if we are not currently falling and walking
-        if (!falling && walk_engine_enabled) {
-            // Integrate the walk command to estimate the change in position and yaw orientation
-            double dx = walk_command.x() * dt * cfg.deadreckoning_scale.x();
-            double dy = walk_command.y() * dt * cfg.deadreckoning_scale.y();
-            yaw += walk_command.z() * dt * cfg.deadreckoning_scale.z();
-            // Rotate the change in position into world coordinates before adding it to the current position
-            Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
-            Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
-        }
-    }
-
     void SensorFilter::configure_mahony(const Configuration& config) {
         // Mahony Filter Config
         cfg.Ki            = config["mahony"]["Ki"].as<Expression>();
         cfg.Kp            = config["mahony"]["Kp"].as<Expression>();
         cfg.bias          = Eigen::Vector3d(config["mahony"]["bias"].as<Expression>());
-        Hwt.translation() = Eigen::VectorXd(config["mahony"]["initial_rTWw"].as<Expression>());
+        Hwt.translation() = Eigen::VectorXd(config["initial_rTWw"].as<Expression>());
+        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3d(config["initial_rpy"].as<Expression>()));
+        Hwt_mahony        = Hwt;
     }
 
     void SensorFilter::update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                               const std::shared_ptr<const Sensors>& previous_sensors,
-                                              const RawSensors& raw_sensors) {
-        // **************** Time Update ****************
-        // Calculate our time offset from the last read then update the filter's time
+                                              const RawSensors& raw_sensors,
+                                              const std::shared_ptr<const WalkState>& walk_state) {
+
+        // Perform anchor update (translation and yaw measurement update)
+        if (walk_state != nullptr) {
+            anchor_update(sensors, *walk_state);
+        }
+
+        //  Perform Mahony update (roll and pitch measurement update)
         const double dt = std::max(
             std::chrono::duration_cast<std::chrono::duration<double>>(
                 raw_sensors.timestamp - (previous_sensors ? previous_sensors->timestamp : raw_sensors.timestamp))
                 .count(),
             0.0);
-
-        // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
-        integrate_walkcommand(dt);
-
-        // **************** Roll/Pitch Orientation Measurement Update ****************
         utility::math::filter::MahonyUpdate(sensors->accelerometer,
                                             sensors->gyroscope,
-                                            Hwt,
+                                            Hwt_mahony,
                                             dt,
                                             cfg.Ki,
                                             cfg.Kp,
                                             cfg.bias);
-        // Extract the roll and pitch from the orientation quaternion
-        Eigen::Vector3d rpy = MatrixToEulerIntrinsic(Hwt.rotation());
 
-        // Compute the height of the torso using the kinematics from a foot which is on the ground
-        if (sensors->feet[BodySide::LEFT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
-        }
-        else if (sensors->feet[BodySide::RIGHT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
-        }
+        // Convert the rotation matrices from anchor and mahony method into euler angles
+        Eigen::Vector3d rpy_mahony = MatrixToEulerIntrinsic(Hwt_mahony.linear());
+        Eigen::Vector3d rpy_anchor = MatrixToEulerIntrinsic(Hwt.linear());
 
-        // **************** Construct Odometry Output ****************
-        // Use the roll and pitch from the Mahony filter and the yaw from the dead reckoning of walk command
-        const double roll  = rpy(0);
-        const double pitch = rpy(1);
-        Hwt.linear()       = EulerIntrinsicToMatrix(Eigen::Vector3d(roll, pitch, yaw));
-        sensors->Htw       = Hwt.inverse().matrix();
+        // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
+        Hwt_mahony.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0));
 
+
+        // Fuse roll and pitch of mahony filter with yaw of anchor method
+        sensors->Htw.linear() =
+            EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z())).inverse();
+
+        // Update translation of odometry with translation from anchor method
+        sensors->Htw.translation() = Hwt.inverse().translation();
+
+        // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
         Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-        Hwr.linear()          = Eigen::AngleAxisd(yaw, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwr.linear()          = Eigen::AngleAxisd(rpy_anchor.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
         Hwr.translation()     = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
-        sensors->Hrw          = Hwr.inverse().matrix();
+        sensors->Hrw          = Hwr.inverse();
         update_loop.enable();
     }
 }  // namespace module::input

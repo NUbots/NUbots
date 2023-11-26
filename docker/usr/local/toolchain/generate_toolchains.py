@@ -1,17 +1,43 @@
 #! /usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2019 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
+import json
 import os
 from textwrap import dedent
 
 
 def generate_cmake_toolchain(target, prefix):
-
     template = dedent(
         """\
         set(CMAKE_SYSTEM_NAME Linux)
         set(CMAKE_SYSTEM_PROCESSOR x86_64)
-        set(CMAKE_C_COMPILER gcc)
-        set(CMAKE_CXX_COMPILER g++)
+        set(CMAKE_C_COMPILER /usr/bin/gcc)
+        set(CMAKE_CXX_COMPILER /usr/bin/g++)
         set(CMAKE_FIND_ROOT_PATH
                {prefix}
                "/usr/local"
@@ -58,7 +84,6 @@ def generate_cmake_toolchain(target, prefix):
 
 
 def generate_meson_cross_file(target):
-
     template = dedent(
         """\
         [host_machine]
@@ -93,8 +118,24 @@ def generate_meson_cross_file(target):
     )
 
 
-def generate_toolchain_script(target):
+def generate_json_env(target, prefix):
+    flags = " ".join(target["release_flags"] + target["flags"])
+    return json.dumps(
+        {
+            # Set our compilers
+            "CC": "/usr/bin/gcc",
+            "CXX": "/usr/bin/g++",
+            # Set our package config so it finds things in the toolchain
+            "PKG_CONFIG_PATH": f"{prefix}/lib/pkgconfig",
+            # Set our optimisation flags
+            "CFLAGS": flags,
+            "CXXFLAGS": flags,
+            "CPPFLAGS": flags,
+        }
+    )
 
+
+def generate_toolchain_script(target):
     template = dedent(
         """\
         #!/bin/sh
@@ -102,8 +143,6 @@ def generate_toolchain_script(target):
         # Set our compilers
         export CC=/usr/bin/gcc
         export CXX=/usr/bin/g++
-        export FC=/usr/bin/gfortran
-        export F77=/usr/bin/gfortran
 
         # Set our package config so it finds things in the toolchain
         export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
@@ -112,8 +151,6 @@ def generate_toolchain_script(target):
         export CFLAGS="${{CFLAGS}} {flags}"
         export CXXFLAGS="${{CXXFLAG}} ${{CFLAGS}}"
         export CPPFLAGS="${{CPPFLAGS}} ${{CFLAGS}}"
-        export FFLAGS="${{FFLAGS}} ${{CFLAGS}}"
-        export FCFLAGS="${{FCFLAGS}} ${{CFLAGS}}"
         """
     )
 
@@ -121,6 +158,10 @@ def generate_toolchain_script(target):
 
 
 def generate(prefix, toolchain, target):
+    print("Generating json toolchain script for {} in {}".format(toolchain, prefix))
+    with open(os.path.join(prefix, "toolchain.json"), "w") as f:
+        f.write(generate_json_env(target, prefix))
+
     print("Generating toolchain script for {} in {}".format(toolchain, prefix))
     with open(os.path.join(prefix, "toolchain.sh"), "w") as f:
         f.write(generate_toolchain_script(target))

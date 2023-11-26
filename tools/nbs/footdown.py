@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2019 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 import os
 import re
@@ -36,7 +62,6 @@ SERVO_ID = {
 
 
 def displacement(fk):
-
     # Sometimes the matrix is transposed so if x, y and z translation are 0, it's the bottom rather than the translation
     Htf = (
         np.array(
@@ -65,46 +90,50 @@ def dataset(path, left_state, right_state, servos, fields, lr_duplicate, foot_de
     xs = []
     ys = []
 
-    for packet in tqdm(LinearDecoder(path, show_progress=True), unit="packet", unit_scale=True, dynamic_ncols=True):
-        if packet.type == "message.input.Sensors":
-            msg = packet.msg
+    for packet in tqdm(
+        LinearDecoder(path, types=["message.input.Sensors"], show_progress=True),
+        unit="packet",
+        unit_scale=True,
+        dynamic_ncols=True,
+    ):
+        msg = packet.msg
 
-            # Work out how far the foot is from the torso
-            l_height = displacement(msg.Htx[SERVO_ID["L_ANKLE_ROLL"]])
-            r_height = displacement(msg.Htx[SERVO_ID["R_ANKLE_ROLL"]])
-            delta = abs(l_height - r_height)
+        # Work out how far the foot is from the torso
+        l_height = displacement(msg.Htx[SERVO_ID["L_ANKLE_ROLL"]])
+        r_height = displacement(msg.Htx[SERVO_ID["R_ANKLE_ROLL"]])
+        delta = abs(l_height - r_height)
 
-            # Calculate what our foot down should be for each foot based on the state
-            y = {
-                "R_": {"up": 0, "down": 1, "mixed": 1 if r_height - foot_delta < l_height else 0}[right_state],
-                "L_": {"up": 0, "down": 1, "mixed": 1 if l_height - foot_delta < r_height else 0}[left_state],
-            }
+        # Calculate what our foot down should be for each foot based on the state
+        y = {
+            "R_": {"up": 0, "down": 1, "mixed": 1 if r_height - foot_delta < l_height else 0}[right_state],
+            "L_": {"up": 0, "down": 1, "mixed": 1 if l_height - foot_delta < r_height else 0}[left_state],
+        }
 
-            # If we are duplicating left right/right left do that here
-            for sides in [("R_", "L_"), ("L_", "R_")] if lr_duplicate else [("R_", "L_")]:
-                x = []
-                for servo in servos:
-                    for s in sides:
-                        s = msg.servo[SERVO_ID[s + servo]]
-                        values = {"LOAD": s.load, "POSITION": s.present_position, "VELOCITY": s.present_velocity}
+        # If we are duplicating left right/right left do that here
+        for sides in [("R_", "L_"), ("L_", "R_")] if lr_duplicate else [("R_", "L_")]:
+            x = []
+            for servo in servos:
+                for s in sides:
+                    s = msg.servo[SERVO_ID[s + servo]]
+                    values = {"LOAD": s.load, "POSITION": s.present_position, "VELOCITY": s.present_velocity}
 
-                        for field in fields:
-                            x.append(values[field])
-                if accelerometer:
-                    # If we mirror the robot, it means we mirror the y axis
-                    x.extend(
-                        [
-                            msg.accelerometer.x,
-                            msg.accelerometer.y if sides[0] == "R_" else -msg.accelerometer.y,
-                            msg.accelerometer.z,
-                        ]
-                    )
-                if gryoscope:
-                    x.extend([msg.gyroscope.x, msg.gyroscope.y, msg.gyroscope.z])
+                    for field in fields:
+                        x.append(values[field])
+            if accelerometer:
+                # If we mirror the robot, it means we mirror the y axis
+                x.extend(
+                    [
+                        msg.accelerometer.x,
+                        msg.accelerometer.y if sides[0] == "R_" else -msg.accelerometer.y,
+                        msg.accelerometer.z,
+                    ]
+                )
+            if gryoscope:
+                x.extend([msg.gyroscope.x, msg.gyroscope.y, msg.gyroscope.z])
 
-                # Swap the truth values if we are swap
-                ys.append((y[sides[0]], y[sides[1]]))
-                xs.append(x)
+            # Swap the truth values if we are swap
+            ys.append((y[sides[0]], y[sides[1]]))
+            xs.append(x)
 
     return np.array(xs), np.array(ys)
 
@@ -117,7 +146,6 @@ def register(command):
 
 
 def run(data_dir, **kwargs):
-
     # Load configuration file for the FootDownNetwork
     config_path = os.path.join(
         os.path.dirname(__file__),
@@ -154,7 +182,6 @@ def run(data_dir, **kwargs):
                 for group in tqdm(os.listdir(state_dir), dynamic_ncols=True, unit="group"):
                     group_dir = os.path.join(state_dir, group)
                     if os.path.isdir(group_dir):
-
                         # Gather all groups into a single dataset for this specific type
                         xs = []
                         ys = []
@@ -162,7 +189,6 @@ def run(data_dir, **kwargs):
                         for nbs in tqdm(os.listdir(group_dir), dynamic_ncols=True, unit="file"):
                             nbs_path = os.path.join(group_dir, nbs)
                             if nbs_path.endswith((".nbs.gz", ".nbs", ".nbz")):
-
                                 # Load the file
                                 x, y = dataset(
                                     nbs_path,

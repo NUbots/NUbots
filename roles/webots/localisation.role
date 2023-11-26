@@ -20,10 +20,6 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::PlotJuggler
-  # Motion
-  motion::QuinticWalk
-  motion::HeadController
-  motion::ScriptEngine
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
@@ -32,16 +28,17 @@ nuclear_role(
   vision::FieldLineDetector
   output::ImageCompressor
   # Localisation
-  localisation::BallFilter
-  localisation::RobotLocalisation
+  localisation::BallLocalisation
+  localisation::FieldLocalisation
   # Director
   extension::Director
   # Servos
   actuation::Kinematics
   actuation::Servos
+  actuation::FootController
   # Skills
-  skill::QuinticWalk
-  skill::ScriptKick
+  skill::Walk
+  skill::SplineKick
   skill::GetUp
   skill::Look
   # Planners

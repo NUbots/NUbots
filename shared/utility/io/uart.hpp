@@ -1,7 +1,34 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef UTILITY_IO_UART_HPP
 #define UTILITY_IO_UART_HPP
 
 #include <string>
+#include <unistd.h>
 
 namespace utility::io {
 
@@ -42,14 +69,14 @@ namespace utility::io {
         /**
          * @brief We can't copy these because otherwise we might close the device twice
          */
-        uart(const uart& uart) = delete;
+        uart(const uart& uart)            = delete;
         uart& operator=(const uart& uart) = delete;
 
         /**
          * @brief Moving these will call the destructors, closing the fd before trying to use it again
          * TODO(KipHamiltons) implement an RAII fd utility, which would allow the uarts to be moved without that issue
          */
-        uart(uart&&)  = delete;
+        uart(uart&&)                 = delete;
         uart& operator=(uart&& uart) = delete;
 
 
@@ -83,6 +110,20 @@ namespace utility::io {
         ssize_t read(void* buf, size_t count);
 
         /**
+         * @brief Read from the device into a structure
+         *
+         * @param data the structure to read in to
+         *
+         * @return the number of bytes that were actually read, or -1 if fail. See ::read
+         *
+         * @note Implementation in header file to stop the compiler from optimising it away
+         */
+        template <typename T>
+        ssize_t read(T& data) {
+            return ::read(fd, static_cast<void*>(&data), sizeof(T));
+        }
+
+        /**
          * @brief Write bytes to the uart
          *
          * @param buf the buffer to write bytes from
@@ -91,6 +132,20 @@ namespace utility::io {
          * @return the number of bytes that were written
          */
         ssize_t write(const void* buf, size_t count);
+
+        /**
+         * @brief Write bytes to the uart
+         *
+         * @param data the data to write
+         *
+         * @return the number of bytes that were written
+         *
+         * @note Implementation in header file to stop the compiler from optimising it away
+         */
+        template <typename T>
+        ssize_t write(const T& data) {
+            return ::write(fd, static_cast<const void*>(&data), sizeof(T));
+        }
 
         /**
          * @brief Open the uart for the given file descriptor. Closes any currently open file.

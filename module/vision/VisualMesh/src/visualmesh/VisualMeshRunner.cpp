@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "VisualMeshRunner.hpp"
 
 #include <filesystem>
@@ -98,8 +124,8 @@ namespace module::vision::visualmesh {
                 lens.fov          = img.lens.fov;
                 lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
                 lens.k            = std::array<float, 2>{
-                    float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
-                    float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
+                               float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
+                               float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
                 };
                 switch (img.lens.projection.value) {
                     case Image::Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;
@@ -207,8 +233,7 @@ namespace module::vision::visualmesh {
                                        const double& max_distance,
                                        const double& intersection_tolerance,
                                        const std::string& path,
-                                       const std::string& cache_directory)
-        : active(std::make_unique<std::atomic<bool>>()) {
+                                       const std::string& cache_directory) {
 
         // Add the configuration properties we were passed
         VisualMeshModelConfig cfg;

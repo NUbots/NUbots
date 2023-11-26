@@ -29,7 +29,7 @@ jobs:
   # Detects changes to NUsight related files, for conditionally running other jobs
   check_for_changes:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Output the detected changes for conditionally running other jobs
     outputs:
@@ -38,7 +38,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check for NUsight Changes
         uses: dorny/paths-filter@v2
@@ -63,7 +63,7 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Run on the Node container
     container:
@@ -73,7 +73,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Get our yarn cache if it exists
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
@@ -93,7 +93,11 @@ jobs:
       # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        run: yarn --prefer-offline
+        run: yarn global add node-gyp && yarn --prefer-offline
+
+      - name: Type Check NUsight
+        working-directory: nusight2
+        run: yarn tscheck
 
       - name: Build NUsight
         working-directory: nusight2
@@ -110,7 +114,7 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Run on the Node container
     container:
@@ -120,7 +124,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Get our yarn cache if it exists
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
@@ -140,7 +144,7 @@ jobs:
       # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        run: yarn --prefer-offline
+        run: yarn global add node-gyp && yarn --prefer-offline
 
       - name: Build NUsight
         working-directory: nusight2
@@ -157,7 +161,7 @@ jobs:
       needs.check_for_changes.outputs.has_nusight_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Run on the Node container
     container:
@@ -167,7 +171,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Get our yarn cache if it exists
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
@@ -187,7 +191,7 @@ jobs:
       # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        run: yarn --prefer-offline
+        run: yarn global add node-gyp && yarn --prefer-offline
 
       - name: Build NUsight
         working-directory: nusight2

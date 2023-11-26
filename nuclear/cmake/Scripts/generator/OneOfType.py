@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+#
+# MIT License
+#
+# Copyright (c) 2018 NUbots
+#
+# This file is part of the NUbots codebase.
+# See https://github.com/NUbots/NUbots for further info.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
 
 import stringcase
 from generator.Field import Field
@@ -15,6 +41,8 @@ class OneOfType:
 
         self.fields = [Field(f, context) for f in fields]
 
+        self.enum_values = [(f.name.upper(), f.number) for f in self.fields]
+
     def generate_cpp(self):
 
         header_template = dedent(
@@ -22,22 +50,30 @@ class OneOfType:
             class {oneof_name} {{
             public:
                 {oneof_name}() : {initialiser_list} {{}}
-                {oneof_name}(const {oneof_name}& rhs) noexcept : {initialiser_list}, val_index(rhs.val_index), data(rhs.data) {{}}
-                {oneof_name}({oneof_name}&& rhs) noexcept : {initialiser_list}, val_index(std::exchange(rhs.val_index, 0)), data(std::move(rhs.data)) {{}}
+                {oneof_name}(const {oneof_name}& rhs) noexcept : {initialiser_list}, val_index(rhs.val_index), value(rhs.value), data(rhs.data) {{}}
+                {oneof_name}({oneof_name}&& rhs) noexcept : {initialiser_list}, val_index(std::exchange(rhs.val_index, {default_enum_index})), value(std::exchange(rhs.value, {{Value::{default_enum_value}}})), data(std::move(rhs.data)) {{}}
                 ~{oneof_name}() = default;
 
                 {oneof_name}& operator=(const {oneof_name}& rhs) noexcept {{
                     if (&rhs != this) {{
                         data = rhs.data;
                         val_index = rhs.val_index;
+                        value = rhs.value;
                     }}
                     return *this;
                 }}
                 {oneof_name}& operator=({oneof_name}&& rhs) noexcept {{
-                    data = std::move(rhs.data);
-                    val_index = std::exchange(rhs.val_index, 0);
+                    if (&rhs != this) {{
+                        data = std::move(rhs.data);
+                        val_index = std::exchange(rhs.val_index, {default_enum_index});
+                        value = std::exchange(rhs.value, {{Value::{default_enum_value}}});
+                    }}
                     return *this;
                 }}
+
+                enum Value {{
+            {enum_values}
+                }};
 
                 template <typename T, size_t index>
                 class Proxy {{
@@ -53,6 +89,7 @@ class OneOfType:
                     Proxy& operator=(U&& t) {{
                         oneof->data      = std::make_shared<T>(std::forward<U>(t));
                         oneof->val_index = index;
+                        oneof->value = static_cast<Value>(index);
                         return *this;
                     }}
 
@@ -93,13 +130,15 @@ class OneOfType:
                 }}
 
                 void reset() {{
-                    val_index = 0;
+                    val_index = {default_enum_index};
+                    value = {{Value::{default_enum_value}}};
                     data.reset();
                 }}
 
             {member_list}
 
-                size_t val_index{{0}};
+                size_t val_index{{{default_enum_index}}};
+                Value value{{Value::{default_enum_value}}};
 
             private:
                 std::shared_ptr<void> data{{nullptr}};
@@ -148,6 +187,10 @@ class OneOfType:
         member_list = ["Proxy<{}, {}> {};".format(v.cpp_type, v.number, v.name) for v in self.fields]
         initialiser_list = ["{}(this)".format(v.name) for v in self.fields]
         cases = ["case {0}: return {1} == rhs.{1};".format(v.number, v.name) for v in self.fields]
+        enum_values = indent("\n".join(["{} = {}".format(v[0], v[1]) for v in self.enum_values]), 8)
+        enum_values = ",\n".join([v for v in enum_values.splitlines()])
+        default_enum_value = self.enum_values[0][0]
+        default_enum_index = self.enum_values[0][1]
 
         return (
             header_template.format(
@@ -155,6 +198,9 @@ class OneOfType:
                 member_list=indent("\n".join(member_list), 4),
                 initialiser_list=", ".join(initialiser_list),
                 cases=indent("\n".join(cases), 16),
+                enum_values=enum_values,
+                default_enum_value=default_enum_value,
+                default_enum_index=default_enum_index,
             ),
             impl_template,
             python_template.format(

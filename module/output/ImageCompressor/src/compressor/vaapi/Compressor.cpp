@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2020 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Compressor.hpp"
 
 #include <cstring>
@@ -30,15 +56,16 @@ namespace module::output::compressor::vaapi {
                            const uint32_t& height,
                            const uint32_t& format,
                            const int& quality)
-        : cctx(cctx), surface{}, context{}, encoded{}, buffers{}, width(width), height(height), format(format) {
+        : cctx(cctx)
+        , surface{operation::create_surface(cctx.va.dpy, width, height, format)}
+        , width(width)
+        , height(height)
+        , format(format) {
 
         VAStatus va_status = 0;
 
         // If we are storing in a YUV400 it is a monochrome image
         bool monochrome = operation::va_render_target_type_from_format(format) == VA_RT_FORMAT_YUV400;
-
-        // Create a new surface to store the image
-        surface = operation::create_surface(cctx.va.dpy, width, height, format);
 
         // If we have a mosaic pattern we need to setup OpenCL to do the mosaic permutation
         if (utility::vision::Mosaic::size(format) > 1) {
@@ -75,7 +102,14 @@ namespace module::output::compressor::vaapi {
         }
 
         // Create Context for the encode pipe
-        va_status = vaCreateContext(cctx.va.dpy, cctx.va.config, width, height, VA_PROGRESSIVE, &surface, 1, &context);
+        va_status = vaCreateContext(cctx.va.dpy,
+                                    cctx.va.config,
+                                    int(width),
+                                    int(height),
+                                    VA_PROGRESSIVE,
+                                    &surface,
+                                    1,
+                                    &context);
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error while creating a context");
         }
@@ -129,7 +163,7 @@ namespace module::output::compressor::vaapi {
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error beginning picture rendering");
         }
-        va_status = vaRenderPicture(cctx.va.dpy, context, buffers.data(), buffers.size());
+        va_status = vaRenderPicture(cctx.va.dpy, context, buffers.data(), int(buffers.size()));
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error pushing buffers to the render context");
         }

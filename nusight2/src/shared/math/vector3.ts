@@ -1,5 +1,6 @@
 import * as THREE from "three";
 
+import { Matrix4 } from "./matrix4";
 import { Vector } from "./vector";
 
 export class Vector3 extends Vector {
@@ -49,6 +50,10 @@ export class Vector3 extends Vector {
 
   dot(v: Vector3): number {
     return this.x * v.x + this.y * v.y + this.z * v.z;
+  }
+
+  applyMatrix4(m: Matrix4): Vector3 {
+    return Vector3.from(this.toThree().applyMatrix4(m.toThree()));
   }
 
   static fromThree(vec3: THREE.Vector3 | THREE.Euler): Vector3 {

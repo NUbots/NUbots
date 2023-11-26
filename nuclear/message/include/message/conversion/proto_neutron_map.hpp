@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MESSAGE_CONVERSION_PROTO_NEUTRON_MAP_HPP
 #define MESSAGE_CONVERSION_PROTO_NEUTRON_MAP_HPP
 
@@ -7,6 +33,7 @@
 #include <nuclear_bits/clock.hpp>
 
 #include "Matrix.pb.h"
+#include "Transform.pb.h"
 #include "Vector.pb.h"
 #include "math_types.hpp"
 
@@ -149,6 +176,12 @@ namespace message::conversion {
     template <> struct NeutronToProtobufMap<::message::conversion::math::fmat>   { using type = ::fmat; };
     template <> struct NeutronToProtobufMap<::message::conversion::math::imat>   { using type = ::imat; };
     template <> struct NeutronToProtobufMap<::message::conversion::math::umat>   { using type = ::umat; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::iso2>   { using type = ::iso2; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::fiso2>  { using type = ::fiso2; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::iso3>   { using type = ::iso3; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::fiso3>  { using type = ::fiso3; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::quat>   { using type = ::quat; };
+    template <> struct NeutronToProtobufMap<::message::conversion::math::fquat>  { using type = ::fquat; };
     template <> struct NeutronToProtobufMap<NUClear::clock::time_point>  { using type = ::google::protobuf::Timestamp; };
     template <> struct NeutronToProtobufMap<NUClear::clock::duration>  { using type = ::google::protobuf::Duration; };
     // clang-format on

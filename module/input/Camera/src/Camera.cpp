@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Camera.hpp"
 
 extern "C" {
@@ -6,6 +32,8 @@ extern "C" {
 
 #include <cmath>
 #include <fmt/format.h>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "aravis_wrap.hpp"
 #include "description_to_fourcc.hpp"
@@ -15,6 +43,7 @@ extern "C" {
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -25,6 +54,7 @@ namespace module::input {
     using extension::Configuration;
     using message::input::Image;
     using message::input::Sensors;
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::support::Expression;
 
@@ -82,7 +112,7 @@ namespace module::input {
                 // Open the camera: Store as shared pointer
                 std::string device_description = arv_get_device_id(device_no);
                 auto camera =
-                    std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
+                    std::shared_ptr<ArvCamera>(arv::camera_new(device_description.c_str()), [](ArvCamera* ptr) {
                         if (ptr) {
                             g_object_unref(ptr);
                         }
@@ -93,7 +123,7 @@ namespace module::input {
                 }
                 else {
                     // Create a new stream object: Store as shared pointer
-                    auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
+                    auto stream = std::shared_ptr<ArvStream>(arv::camera_create_stream(camera.get(), nullptr, nullptr),
                                                              [](ArvStream* ptr) {
                                                                  if (ptr) {
                                                                      g_object_unref(ptr);
@@ -143,7 +173,7 @@ namespace module::input {
 
             // Stop the video stream so we can apply the settings
             arv::camera_stop_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), 0);
+            arv::stream_set_emit_signals(stream.get(), 0);
 
             // Synchronise the clocks
             context.time = sync_clocks(device);
@@ -151,8 +181,22 @@ namespace module::input {
             // Get the fourcc code from the pixel format
             context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
 
-            // Load Hpc from configuration
-            context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
+            // Compute Hpc, the transform from the camera to the head pitch space
+            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
+
+            auto camera_frame =
+                config["is_left_camera"].as<bool>() ? std::string("left_camera") : std::string("right_camera");
+
+            auto Hpc = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
+                                                                    nugus_model.home_configuration(),
+                                                                    camera_frame,
+                                                                    std::string("head"));
+
+            // Apply roll and pitch offsets
+            double roll_offset  = config["roll_offset"].as<Expression>();
+            double pitch_offset = config["pitch_offset"].as<Expression>();
+            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             // Apply image offsets to lens_centre, optical axis:
             int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
@@ -285,7 +329,7 @@ namespace module::input {
                              &it->second);
             // Start aquisition
             arv::camera_start_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), 1);
+            arv::stream_set_emit_signals(stream.get(), 1);
         });
 
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
@@ -296,7 +340,7 @@ namespace module::input {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htp(sensors.Htx[FrameID::HEAD_PITCH]);
             Eigen::Isometry3d Htw(sensors.Htw);
             Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
@@ -307,7 +351,7 @@ namespace module::input {
             for (auto& camera : cameras) {
                 // Stop the video stream.
                 arv::camera_stop_acquisition(camera.second.camera.get());
-                arv_stream_set_emit_signals(camera.second.stream.get(), 0);
+                arv::stream_set_emit_signals(camera.second.stream.get(), 0);
             }
             arv_shutdown();
             cameras.clear();
@@ -381,9 +425,9 @@ namespace module::input {
                                 timesync.drift.max_clock_drift / 1e6));
 
                             arv::camera_stop_acquisition(context->camera.get());
-                            arv_stream_set_emit_signals(context->stream.get(), 0);
+                            arv::stream_set_emit_signals(context->stream.get(), 0);
                             context->time = sync_clocks(arv_camera_get_device(context->camera.get()));
-                            arv_stream_set_emit_signals(context->stream.get(), 1);
+                            arv::stream_set_emit_signals(context->stream.get(), 1);
                             arv::camera_start_acquisition(context->camera.get());
                         }
                     }
@@ -416,7 +460,7 @@ namespace module::input {
                         auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
                                                        reactor.Hwps.end(),
                                                        std::make_pair(msg->timestamp, Eigen::Isometry3d::Identity()),
-                                                       [](const auto& a, const auto& b) { return a.first > b.first; });
+                                                       [](const auto& a, const auto& b) { return a.first < b.first; });
 
                         if (Hwp_it == reactor.Hwps.end()) {
                             // Image is newer than most recent sensors
@@ -439,7 +483,7 @@ namespace module::input {
                 }
 
                 msg->lens = context->lens;
-                msg->Hcw  = Hcw.matrix();
+                msg->Hcw  = Hcw;
 
                 reactor.emit(msg);
 

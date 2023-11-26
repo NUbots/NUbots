@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2014 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef MODULES_INPUT_GAMECONTROLLERDATA_HPP
@@ -31,12 +39,16 @@ namespace module::input::gamecontroller {
     enum class State : uint8_t { INITIAL = 0, READY = 1, SET = 2, PLAYING = 3, FINISHED = 4 };
 
     enum class Mode : uint8_t {
-        NORMAL           = 0,
-        PENALTY_SHOOTOUT = 1,
-        OVERTIME         = 2,
-        TIMEOUT          = 3,
-        FREEKICK         = 4,
-        PENALTYKICK      = 5
+        NORMAL            = 0,
+        PENALTY_SHOOTOUT  = 1,
+        OVERTIME          = 2,
+        TIMEOUT           = 3,
+        DIRECT_FREEKICK   = 4,
+        INDIRECT_FREEKICK = 5,
+        PENALTYKICK       = 6,
+        CORNER_KICK       = 7,
+        GOAL_KICK         = 8,
+        THROW_IN          = 9,
     };
 
     enum class GameType : uint8_t { ROUND_ROBIN = 0, PLAYOFF = 1, DROPIN = 2 };
@@ -98,17 +110,17 @@ namespace module::input::gamecontroller {
     };
 
     struct GameControllerPacket {
-        std::array<char, 4> header;              // header to identify the structure
-        uint16_t version;                        // version of the data structure
-        uint8_t packetNumber;                    // number incremented with each packet sent (with wraparound)
-        uint8_t playersPerTeam;                  // the number of players on a team
-        GameType gameType;                       // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
-        State state;                             // state of the game (STATE_READY, STATE_PLAYING, etc)
-        bool firstHalf;                          // 1 = game in first half, 0 otherwise
-        uint8_t kickOffTeam;                     // the team number of the next team to kick off or DROPBALL
-        Mode mode;                               // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
-        std::array<char, 4> secondaryStateInfo;  // Extra info on the secondary state
-        TeamColour dropInTeam;                   // number of team that caused last drop in
+        std::array<char, 4> header;  // header to identify the structure
+        uint16_t version;            // version of the data structure
+        uint8_t packetNumber;        // number incremented with each packet sent (with wraparound)
+        uint8_t playersPerTeam;      // the number of players on a team
+        GameType gameType;           // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
+        State state;                 // state of the game (STATE_READY, STATE_PLAYING, etc)
+        bool firstHalf;              // 1 = game in first half, 0 otherwise
+        uint8_t kickOffTeam;         // the team number of the next team to kick off or DROPBALL
+        Mode mode;                   // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
+        std::array<uint8_t, 4> secondaryStateInfo;  // Extra info on the secondary state
+        TeamColour dropInTeam;                      // number of team that caused last drop in
         int16_t dropInTime;      // number of seconds passed since the last drop in. -1 (0xffff) before first dropin
         uint16_t secsRemaining;  // estimate of number of seconds remaining in the half
         uint16_t secondaryTime;  // number of seconds shown as secondary time (remaining ready, until free ball, etc)

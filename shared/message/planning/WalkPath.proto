@@ -25,9 +25,9 @@ import "Vector.proto";
 /// Plan a path to walk to the specified point
 message WalkTo {
     /// Point {P} to walk to from robot {R} in robot {r} space
-    fvec3 rPRr = 1;
+    vec3 rPRr = 1;
     /// Desired heading in robot {r} space (radians)
-    float heading = 2;
+    double heading = 2;
 }
 
 /// Turn on the spot in the given direction

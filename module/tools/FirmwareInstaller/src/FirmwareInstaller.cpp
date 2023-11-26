@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "FirmwareInstaller.hpp"
 
 #include <algorithm>
@@ -87,6 +113,14 @@ namespace module::tools {
                         showDeviceMenu();
                     }
 
+                    else if (input == "OPENCR") {
+                        selected_device  = OPENCR;
+                        selected_battery = NO_BATTERY;
+                        menu_state       = DEVICE_MENU;  // This will change when we implement this feature.
+                        std::cout << "Not yet implemented, please use Arduino IDE to flash firmware" << std::endl;
+                        showDeviceMenu();
+                    }
+
                     else if (input == "QUIT") {
                         selected_device  = NO_DEVICE;
                         selected_battery = NO_BATTERY;
@@ -104,6 +138,7 @@ namespace module::tools {
                     break;
 
                 case BATTERY_MENU:
+                    // TODO once OpenCR fw added, include check that battery type selected is valid
                     if (input == "1") {
                         selected_battery = BATTERY3;
                         menu_state       = NO_MENU;
@@ -286,6 +321,7 @@ namespace module::tools {
         std::cout << "\tType \"CM730\" to flash CM730 firmware." << std::endl;
         std::cout << "\tType \"CM740\" to flash CM740 firmware." << std::endl;
         std::cout << "\tType \"DYNXL\" to flash Dynamixel firmware." << std::endl;
+        std::cout << "\tType \"OPENCR\" to flash OpenCR firmware." << std::endl;
         std::cout << "\tType \"QUIT\" to quit." << std::endl;
         std::cout << "Choice: " << std::flush;
     }

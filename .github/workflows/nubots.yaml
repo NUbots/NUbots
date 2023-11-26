@@ -25,31 +25,30 @@ jobs:
   # Detects changes to NUbots related files, for conditionally running other jobs
   check_for_changes:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Output the detected changes for conditionally running other jobs
     outputs:
       has_workflow_changes: ${{ steps.filter.outputs.workflow_changes }}
       has_docker_changes: ${{ steps.filter.outputs.docker_changes }}
-      has_code_changes: ${{ steps.filter.outputs.code_changes }}
+      has_cpp_changes: ${{ steps.filter.outputs.cpp_changes }}
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Check for NUbots Changes
+      - name: Check for c++ changes
         uses: dorny/paths-filter@v2
         id: filter
         with:
-          # Considers any non-NUsight and non-VSCode config change to be a NUbots change
+          # Considers any non-NUsight and non-VSCode config change to be a c++ change
           filters: |
             workflow_changes:
-              - '.github/workflows/nubots.yaml'
+              - '.github/workflows/horus.yaml'
             docker_changes:
               - 'docker/**'
-            code_changes:
-              - '{module,shared,nuclear}/**'
-              - 'CMakeLists.txt'
+            cpp_changes:
+              - '!{nusight2,.vscode,tools}/**'
 
   # Build the docker image. This job is not conditional since we don't want it skipped
   # because other jobs depend on it. The actual building of the image is cached, so it
@@ -58,7 +57,7 @@ jobs:
     name: "Build docker image"
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # We output the image tag that we create so the other jobs can use it
     outputs:
@@ -66,54 +65,83 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Figure out the tag to use for the Docker image
+      - name: Set Docker tag
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]
+          then
+            branch="${{ github.ref_name }}"
+            # Replace forward slashes with dashes to avoid special characters
+            echo "DOCKER_TAG=${branch////-}" >> "${GITHUB_ENV}";
+          elif [[ "${{ github.event_name }}" == "pull_request" ]]
+          then
+            echo "DOCKER_TAG=PR-${{ github.event.number }}" >> "${GITHUB_ENV}";
+          elif [[ "${{ github.event_name }}" == "merge_group" ]]
+          then
+            pr=$(echo "${{ github.ref_name }}" | grep -iEo 'pr-[[:digit:]]+' | head -1)
+            echo DOCKER_TAG=PR-${pr:3} >> "${GITHUB_ENV}";
+          fi
+
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Setup docker buildx
       - name: 🐳 Set up docker buildx 🐳
         uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: |
+            env.BUILDKIT_STEP_LOG_MAX_SIZE=-1
+            env.BUILDKIT_STEP_LOG_MAX_SPEED=-1
 
-      - name: Login to DockerHub
+      # Login to the docker repository
+      - name: Login to the docker repository
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      # Build the docker image
+      # Ensure write permissions for group and other are NOT set
+      # This is done to ensure consistency with the b script across all systems
+      - name: Enforce file permissions
+        run: chmod -Rv g-w,o-w docker/
+
+      # Build and push the docker image
       - name: 🐳 Build the docker image 🐳
-        uses: docker/build-push-action@v3.1.0
+        uses: docker/build-push-action@v4
         with:
           pull: true
-          tags: "nubots/nubots:pull-request-${{ github.event.number }}"
+          tags: "nubots/nubots:${{ env.DOCKER_TAG }}"
           file: docker/Dockerfile
           context: docker
-          build-args: |
-            platform=generic
-            BUILDKIT_INLINE_CACHE=1
-          push: true
           cache-from: |
-            type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
+            type=registry,ref=nubots/nubots:${{ env.DOCKER_TAG }}
             type=registry,ref=nubots/nubots:generic
-            type=inline
+          cache-to: type=inline
+          build-args: platform=generic
+          push: true
 
       - id: image_output
         name: Output the created image
-        run: echo "::set-output name=image::nubots/nubots:pull-request-${{ github.event.number }}"
+        run: echo "image=nubots/nubots:${{ env.DOCKER_TAG }}" >> $GITHUB_OUTPUT
 
-  # Build the codebase
+  # Build the codebase as well as run clang-tidy
   build_nubots:
-    name: "Build and test NUbots"
+    name: "Build and test code"
     needs: [check_for_changes, build_docker]
 
-    # Run only if the workflow or NUbots related code files have changed
-    if: >
+    # Run only if the workflow or c++ related code files have changed
+    if: |
       needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
       needs.check_for_changes.outputs.has_docker_changes == 'true' ||
-      needs.check_for_changes.outputs.has_code_changes == 'true'
+      needs.check_for_changes.outputs.has_cpp_changes == 'true'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
+    env:
+      CTEST_OUTPUT_ON_FAILURE: 1
+      # CCache to the tools cache
+      CCACHE_DIR: /__w/_tool/ccache
 
     # Run on the container we just built
     container:
@@ -124,27 +152,40 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Prepare Build Directory
-        run: mkdir -p ../build
+      - name: CCache Directory
+        run: ccache -k cache_dir
 
       - name: Configure the code
-        run: ./b configure -- -DBUILD_TESTS=ON # -DCI_BUILD=ON
+        run: |
+          mkdir -p build
+          cd build
+          cmake .. -GNinja \
+                   -DCMAKE_BUILD_TYPE=Release \
+                   -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
+                   -DCMAKE_C_COMPILER_LAUNCHER=/usr/bin/ccache \
+                   -DCMAKE_CXX_COMPILER_LAUNCHER=/usr/bin/ccache \
+                   -DCI_BUILD=ON \
+                   -DBUILD_TESTS=ON
 
       - name: Build the code
-        run: ./b build
+        run: |
+          cd build
+          ninja
 
       - name: Test the code
-        run: ./b tests run
+        run: |
+          cd build
+          ninja test
 
-  # Check that the code is formatted correctly
+  # Check the code is formatted correctly
   check-format:
     name: "Check Code Formatting"
     needs: [check_for_changes, build_docker]
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Run on the container we just built
     container:
@@ -155,7 +196,16 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        # Need to fetch everything in order to know when files were added/updated
+        with:
+          fetch-depth: 0
+
+      - name: Set Git Security
+        run: git config --global --add safe.directory '*'
+
+      - name: Install NUsight dependencies for formatting
+        run: ./b yarn
 
       - name: Check formatting
         run: ./b format --check --all --verbose

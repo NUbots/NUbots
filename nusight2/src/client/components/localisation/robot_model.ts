@@ -1,8 +1,7 @@
 import { observable } from "mobx";
 import { computed } from "mobx";
-import { Matrix4 } from "../../../shared/math/matrix4";
-import * as THREE from "three";
 
+import { Matrix4 } from "../../../shared/math/matrix4";
 import { Quaternion } from "../../../shared/math/quaternion";
 import { Vector3 } from "../../../shared/math/vector3";
 import { memoize } from "../../base/memoize";
@@ -120,6 +119,8 @@ export class LocalisationRobotModel {
   @observable Hfw: Matrix4; // World to field
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
+  @observable fieldLinePoints: { rPWw: Vector3[] };
+  @observable ball?: { rBWw: Vector3 };
 
   constructor({
     model,
@@ -129,6 +130,8 @@ export class LocalisationRobotModel {
     Hfw,
     Rwt,
     motors,
+    fieldLinePoints,
+    ball,
   }: {
     model: RobotModel;
     name: string;
@@ -137,6 +140,8 @@ export class LocalisationRobotModel {
     Hfw: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
+    fieldLinePoints: { rPWw: Vector3[] };
+    ball?: { rBWw: Vector3 };
   }) {
     this.model = model;
     this.name = name;
@@ -145,6 +150,8 @@ export class LocalisationRobotModel {
     this.Hfw = Hfw;
     this.Rwt = Rwt;
     this.motors = motors;
+    this.fieldLinePoints = fieldLinePoints;
+    this.ball = ball;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -155,8 +162,13 @@ export class LocalisationRobotModel {
       Hfw: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
+      fieldLinePoints: { rPWw: [] },
     });
   });
+
+  @computed get id() {
+    return this.model.id;
+  }
 
   @computed get visible() {
     return this.model.enabled;
@@ -166,5 +178,17 @@ export class LocalisationRobotModel {
   @computed
   get Hft(): Matrix4 {
     return this.Hfw.multiply(this.Htw.invert());
+  }
+
+  /** Field line points in field space */
+  @computed
+  get rPFf(): Vector3[] {
+    return this.fieldLinePoints.rPWw.map((rPWw) => rPWw.applyMatrix4(this.Hfw));
+  }
+
+  /** Ball position in field space */
+  @computed
+  get rBFf(): Vector3 | undefined {
+    return this.ball?.rBWw.applyMatrix4(this.Hfw);
   }
 }

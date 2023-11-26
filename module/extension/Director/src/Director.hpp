@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2021 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2022 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef MODULE_EXTENSION_DIRECTOR_HPP
@@ -322,12 +330,14 @@ namespace module::extension {
          * Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution
          * that can execute, or a blocked solution if none of the solutions can execute.
          *
-         * @param solutions the set of solutions that we are trying to find an OkSolution for
+         * @param solutions  the set of solutions that we are trying to find an OkSolution for
+         * @param used_types types that have already been used higher in the solution tree that are blocked to us
          *
          * @return a list of OkSolutions that represents the first solution that can execute, or a blocked solution if
          *         none of the solutions can execute.
          */
-        std::vector<OkSolution> find_ok_solutions(const std::vector<Solution>& solutions);
+        std::vector<OkSolution> find_ok_solutions(const std::vector<Solution>& solutions,
+                                                  const std::set<std::type_index>& used_types);
 
         /**
          * Runs the passed task on the passed provider.
@@ -353,6 +363,16 @@ namespace module::extension {
         };
 
         /**
+         * The result of running a set of tasks
+         */
+        struct RunResult {
+            /// The level of execution that we were able to do
+            RunLevel run_level;
+            /// The set of provider groups that we used
+            std::set<std::type_index> used;
+        };
+
+        /**
          * Tries to execute tasks in the pack, but only up to the passed run level.
          *
          * The passed run level will limit what types of execution are open to us. For example, if the required pack was
@@ -362,10 +382,14 @@ namespace module::extension {
          * @param group     the provider group that created this pack
          * @param pack      the pack of tasks that we are trying to execute
          * @param run_level the level of execution that we are allowed to do
+         * @param used      the set of provider groups that are already used that we can't use again
          *
-         * @return the run level that we were able to execute up to
+         * @return the run level that we were able to execute up to and the set of provider groups that we used
          */
-        RunLevel run_tasks(component::ProviderGroup& group, const TaskList& pack, const RunLevel& run_level);
+        RunResult run_tasks(component::ProviderGroup& group,
+                            const TaskList& pack,
+                            const RunLevel& run_level,
+                            const std::set<std::type_index>& used);
 
         /**
          * Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.

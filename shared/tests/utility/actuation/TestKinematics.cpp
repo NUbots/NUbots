@@ -1,25 +1,34 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2019 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <catch.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "message/actuation/BodySide.hpp"
 #include "message/actuation/KinematicsModel.hpp"
@@ -30,10 +39,10 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 
+using Catch::Matchers::WithinAbs;
 using message::actuation::BodySide;
 using message::actuation::KinematicsModel;
 using message::input::Sensors;
-
 using utility::input::LimbID;
 using utility::input::ServoID;
 
@@ -57,7 +66,7 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
         INFO("Testing with the random vector, " << camera_vector.transpose());
 
         std::vector<std::pair<ServoID, double>> angles =
-            utility::actuation::kinematics::calculateHeadJoints(camera_vector);
+            utility::actuation::kinematics::calculate_head_joints(camera_vector);
 
         // Make our sensors object
         Sensors sensors;
@@ -80,9 +89,9 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
                                                               ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
-        REQUIRE(double(Htc(0, 0) - camera_vector[0]) == Approx(0.0).margin(ERROR_THRESHOLD));
-        REQUIRE(double(Htc(1, 0) - camera_vector[1]) == Approx(0.0).margin(ERROR_THRESHOLD));
-        REQUIRE(double(Htc(2, 0) - camera_vector[2]) == Approx(0.0).margin(ERROR_THRESHOLD));
+        REQUIRE_THAT(double(Htc(0, 0) - camera_vector[0]), WithinAbs(0.0, ERROR_THRESHOLD));
+        REQUIRE_THAT(double(Htc(1, 0) - camera_vector[1]), WithinAbs(0.0, ERROR_THRESHOLD));
+        REQUIRE_THAT(double(Htc(2, 0) - camera_vector[2]), WithinAbs(0.0, ERROR_THRESHOLD));
     }
 }
 
@@ -104,7 +113,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         sensors.servo = std::vector<Sensors::Servo>(20);
 
         std::vector<std::pair<ServoID, double>> left_leg_joints =
-            utility::actuation::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::LEFT_LEG);
+            utility::actuation::kinematics::calculate_leg_joints(kinematics_model, ik_request, LimbID::LEFT_LEG);
         for (const auto& leg_joint : left_leg_joints) {
             ServoID servoID;
             double position;
@@ -115,7 +124,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         }
 
         std::vector<std::pair<ServoID, double>> right_leg_joints =
-            utility::actuation::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
+            utility::actuation::kinematics::calculate_leg_joints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
         for (const auto& leg_joint : right_leg_joints) {
             ServoID servoID;
             double position;
@@ -144,7 +153,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         double lerror = (left_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
         double rerror = (right_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
 
-        REQUIRE(lerror == Approx(0.0).margin(ERROR_THRESHOLD));
-        REQUIRE(rerror == Approx(0.0).margin(ERROR_THRESHOLD));
+        REQUIRE_THAT(lerror, WithinAbs(0.0, ERROR_THRESHOLD));
+        REQUIRE_THAT(rerror, WithinAbs(0.0, ERROR_THRESHOLD));
     }
 }

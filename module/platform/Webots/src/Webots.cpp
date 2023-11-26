@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2021 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "Webots.hpp"
@@ -34,6 +42,7 @@
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -71,6 +80,7 @@ namespace module::platform {
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
 
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::platform::getRawServo;
     using utility::support::Expression;
@@ -260,7 +270,19 @@ namespace module::platform {
             CameraContext context;
             context.name = name;
             context.id   = num_cameras++;
-            context.Hpc  = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());  // Load Hpc from configuration
+
+            // Compute Hpc, the transform from the camera to the head pitch space
+            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
+            auto Hpc         = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
+                                                                    nugus_model.home_configuration(),
+                                                                    std::string("left_camera"),
+                                                                    std::string("head"));
+
+            // Apply roll and pitch offsets
+            double roll_offset  = config["roll_offset"].as<Expression>();
+            double pitch_offset = config["pitch_offset"].as<Expression>();
+            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
@@ -306,7 +328,7 @@ namespace module::platform {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htp(sensors.Htx[FrameID::HEAD_PITCH]);
             Eigen::Isometry3d Htw(sensors.Htw);
             Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
@@ -805,7 +827,7 @@ namespace module::platform {
             image->data           = camera.image;
 
             image->id        = camera_context[camera.name].id;
-            image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
+            image->timestamp = NUClear::clock::now();
 
             Eigen::Isometry3d Hcw;
 
@@ -819,7 +841,7 @@ namespace module::platform {
                     auto Hwp_it = std::lower_bound(Hwps.begin(),
                                                    Hwps.end(),
                                                    std::make_pair(image->timestamp, Eigen::Isometry3d::Identity()),
-                                                   [](const auto& a, const auto& b) { return a.first > b.first; });
+                                                   [](const auto& a, const auto& b) { return a.first < b.first; });
 
                     if (Hwp_it == Hwps.end()) {
                         // Image is newer than most recent sensors
@@ -842,7 +864,7 @@ namespace module::platform {
             }
 
             image->lens = camera_context[camera.name].lens;
-            image->Hcw  = Hcw.matrix();
+            image->Hcw  = Hcw;
 
             // If we got ground truth data, send it through with the image
             if (sensor_measurements.vision_ground_truth.exists) {

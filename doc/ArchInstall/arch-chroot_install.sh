@@ -1,4 +1,31 @@
 #! /bin/bash
+##
+## MIT License
+##
+## Copyright (c) 2019 NUbots
+##
+## This file is part of the NUbots codebase.
+## See https://github.com/NUbots/NUbots for further info.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy
+## of this software and associated documentation files (the "Software"), to deal
+## in the Software without restriction, including without limitation the rights
+## to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+## copies of the Software, and to permit persons to whom the Software is
+## furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all
+## copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+## SOFTWARE.
+##
+
 
 # Prepare useful variables
 USER="nubots"
@@ -7,8 +34,8 @@ HOME="/home/${USER}"
 HOST="nugus"
 HOSTNAME="${HOST}${ROBOT_NUMBER}"
 IP_ADDR="10.1.1.${ROBOT_NUMBER}"
-ETHERNET_INTERFACE=${ETHERNET_INTERFACE:-"eno1"}
-WIFI_INTERFACE=${WIFI_INTERFACE:-"wlp58s0"}
+ETHERNET_INTERFACE=${ETHERNET_INTERFACE:-"enp86s0"}
+WIFI_INTERFACE=${WIFI_INTERFACE:-"wlan0"}
 WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/${WIFI_INTERFACE} 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
 
 # Setup timezone information
@@ -97,7 +124,7 @@ NUgus ${ROBOT_NUMBER}
 EOF
 
 # Setup the fallback ethernet static connection
-cat << EOF > /etc/systemd/network/99-${ETHERNET_INTERFACE}-static.network
+cat << EOF > /etc/systemd/network/99-ethernet-static.network
 [Match]
 Name=${ETHERNET_INTERFACE}
 
@@ -109,7 +136,7 @@ DNS=8.8.8.8
 EOF
 
 # Setup the fallback wireless static connection
-cat << EOF > /etc/systemd/network/99-${WIFI_INTERFACE}-static.network
+cat << EOF > /etc/systemd/network/99-wifi-static.network
 [Match]
 Name=${WIFI_INTERFACE}
 
@@ -121,7 +148,7 @@ DNS=8.8.8.8
 EOF
 
 # Provide udevd configuration for network interfaces
-cat << EOF > /etc/systemd/99-default.link
+cat << EOF > /etc/systemd/network/99-default.link
 [Match]
 OriginalName=*
 
