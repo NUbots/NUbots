@@ -104,5 +104,4 @@ tags
 .vscode/launch.json
 
 # OpenAI api key
-/home/nubots/NUbots/modules/skill/GPT/data/config/OPENAI_API_KEY.yaml
 module/skill/GPT/data/config/OPENAI_API_KEY.yaml
