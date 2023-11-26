@@ -1,0 +1,3 @@
+# The OpenAI API costs $$$ to use, so we need to use a key to access it. This must be filled before compiling.
+# DO NOT COMMIT THE KEY IN THE REPOSITORY.
+openai_api_key: ""

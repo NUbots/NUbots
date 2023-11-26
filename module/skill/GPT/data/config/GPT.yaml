@@ -1,5 +1,11 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-# The OpenAI API costs $$$ to use, so we need to use a key to access it. DO NOT COMMIT THIS
-openai_api_key: ""
+# Model
+model: "gpt-3.5-turbo"
+
+# Maximum tokens to generate
+max_tokens: 100
+
+# Temperature
+temperature: 0

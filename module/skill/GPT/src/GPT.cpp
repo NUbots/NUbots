@@ -17,7 +17,13 @@ namespace module::skill {
 
         on<Configuration>("GPT.yaml").then([this](const Configuration& config) {
             // Use configuration here from file GPT.yaml
-            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.model       = config["model"].as<std::string>();
+            cfg.max_tokens  = config["max_tokens"].as<int>();
+            cfg.temperature = config["temperature"].as<double>();
+        });
+
+        on<Configuration>("OPENAI_API_KEY.yaml").then([this](const Configuration& config) {
             cfg.openai_api_key = config["openai_api_key"].as<std::string>();
         });
 
@@ -30,10 +36,10 @@ namespace module::skill {
             if (info.run_reason == RunInfo::NEW_TASK) {
                 // Send request to OpenAI API
                 nlohmann::json request = {
-                    {"model", "gpt-3.5-turbo"},
+                    {"model", cfg.model},
                     {"messages", nlohmann::json::array({{{"role", "user"}, {"content", gpt_request.text}}})},
-                    {"max_tokens", 100},
-                    {"temperature", 0}};
+                    {"max_tokens", cfg.max_tokens},
+                    {"temperature", cfg.temperature}};
                 auto chat = utility::openai::chat().create(request);
 
                 std::string response = chat["choices"][0]["message"]["content"].get<std::string>();

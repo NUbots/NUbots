@@ -13,6 +13,12 @@ namespace module::skill {
         struct Config {
             /// @brief OpenAI API key
             std::string openai_api_key = "";
+            /// @brief Model
+            std::string model = "gpt-3.5-turbo";
+            /// @brief Maximum tokens to generate
+            int max_tokens = 100;
+            /// @brief Temperature of the model
+            double temperature = 0;
         } cfg;
 
     public:
