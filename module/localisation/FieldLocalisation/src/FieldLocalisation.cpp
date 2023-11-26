@@ -49,11 +49,9 @@ namespace module::localisation {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("FieldLocalisation.yaml").then([this](const Configuration& config) {
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.grid_size   = config["grid_size"].as<double>();
-            cfg.save_map    = config["save_map"].as<bool>();
-
-            // Initialise the particle filter
+            this->log_level                     = config["log_level"].as<NUClear::LogLevel>();
+            cfg.grid_size                       = config["grid_size"].as<double>();
+            cfg.save_map                        = config["save_map"].as<bool>();
             cfg.n_particles                     = config["n_particles"].as<int>();
             cfg.initial_covariance.diagonal()   = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
             cfg.process_noise.diagonal()        = Eigen::Vector3d(config["process_noise"].as<Expression>());
@@ -76,123 +74,8 @@ namespace module::localisation {
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
-            // Generate the field line map
-            // Resize map to the field dimensions
-            int map_width  = (fd.dimensions.field_width + 2 * fd.dimensions.border_strip_min_width) / cfg.grid_size;
-            int map_length = (fd.dimensions.field_length + 2 * fd.dimensions.border_strip_min_width) / cfg.grid_size;
-            fieldline_map.resize(map_width, map_length);
-
-            // Calculate line width in grid cells
-            int line_width = fd.dimensions.line_width / cfg.grid_size;
-
-            // Add outer field lines
-            int field_x0     = (fd.dimensions.border_strip_min_width) / cfg.grid_size;
-            int field_y0     = (fd.dimensions.border_strip_min_width) / cfg.grid_size;
-            int field_width  = (fd.dimensions.field_width) / cfg.grid_size;
-            int field_length = (fd.dimensions.field_length) / cfg.grid_size;
-            fieldline_map.add_rectangle(field_x0, field_y0, field_length, field_width, line_width);
-
-            // Add left goal area box
-            int left_goal_box_x0 = (fd.dimensions.border_strip_min_width) / cfg.grid_size;
-            int left_goal_box_y0 =
-                (fd.dimensions.border_strip_min_width + (fd.dimensions.field_width - fd.dimensions.goal_area_width) / 2)
-                / cfg.grid_size;
-            int left_goal_box_width  = (fd.dimensions.goal_area_length) / cfg.grid_size;
-            int left_goal_box_length = (fd.dimensions.goal_area_width) / cfg.grid_size;
-            fieldline_map.add_rectangle(left_goal_box_x0,
-                                        left_goal_box_y0,
-                                        left_goal_box_width,
-                                        left_goal_box_length,
-                                        line_width);
-
-            // Add right goal area box
-            int right_goal_box_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length - fd.dimensions.goal_area_length)
-                / cfg.grid_size;
-            int right_goal_box_y0     = left_goal_box_y0;
-            int right_goal_box_width  = left_goal_box_width;
-            int right_goal_box_length = left_goal_box_length;
-            fieldline_map.add_rectangle(right_goal_box_x0,
-                                        right_goal_box_y0,
-                                        right_goal_box_width,
-                                        right_goal_box_length,
-                                        line_width);
-
-            // Add left penalty area box
-            int left_penalty_box_x0 = (fd.dimensions.border_strip_min_width) / cfg.grid_size;
-            int left_penalty_box_y0 = (fd.dimensions.border_strip_min_width
-                                       + (fd.dimensions.field_width - fd.dimensions.penalty_area_width) / 2)
-                                      / cfg.grid_size;
-            int left_penalty_box_width  = (fd.dimensions.penalty_area_width) / cfg.grid_size;
-            int left_penalty_box_length = (fd.dimensions.penalty_area_length) / cfg.grid_size;
-            fieldline_map.add_rectangle(left_penalty_box_x0,
-                                        left_penalty_box_y0,
-                                        left_penalty_box_length,
-                                        left_penalty_box_width,
-                                        line_width);
-
-            // Add right penalty area box
-            int right_penalty_box_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length - fd.dimensions.penalty_area_length)
-                / cfg.grid_size;
-            int right_penalty_box_y0     = left_penalty_box_y0;
-            int right_penalty_box_width  = left_penalty_box_width;
-            int right_penalty_box_length = left_penalty_box_length;
-            fieldline_map.add_rectangle(right_penalty_box_x0,
-                                        right_penalty_box_y0,
-                                        right_penalty_box_length,
-                                        right_penalty_box_width,
-                                        line_width);
-
-            // Add centre line
-            int centre_line_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size;
-            int centre_line_y0     = (fd.dimensions.border_strip_min_width) / cfg.grid_size;
-            int centre_line_width  = (fd.dimensions.field_width) / cfg.grid_size;
-            int centre_line_length = (fd.dimensions.line_width) / cfg.grid_size;
-            fieldline_map.add_rectangle(centre_line_x0,
-                                        centre_line_y0,
-                                        centre_line_length,
-                                        centre_line_width,
-                                        line_width);
-
-            // Add left penalty cross in centre of penalty area
-            int left_penalty_cross_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.penalty_mark_distance) / cfg.grid_size;
-            int left_penalty_cross_y0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_width / 2) / cfg.grid_size;
-            int left_penalty_cross_width = 0.1 / cfg.grid_size;
-            fieldline_map.add_cross(left_penalty_cross_x0, left_penalty_cross_y0, left_penalty_cross_width, line_width);
-
-            // Add right penalty cross in centre of penalty area
-            int right_penalty_cross_x0 = (fd.dimensions.border_strip_min_width + fd.dimensions.field_length
-                                          - fd.dimensions.penalty_mark_distance)
-                                         / cfg.grid_size;
-            int right_penalty_cross_y0    = left_penalty_cross_y0;
-            int right_penalty_cross_width = 0.1 / cfg.grid_size;
-            fieldline_map.add_cross(right_penalty_cross_x0,
-                                    right_penalty_cross_y0,
-                                    right_penalty_cross_width,
-                                    line_width);
-
-            // Add centre cross in centre of field
-            int centre_cross_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size
-                + line_width / 2;
-            int centre_cross_y0    = left_penalty_cross_y0;
-            int centre_cross_width = 0.1 / cfg.grid_size;
-            fieldline_map.add_cross(centre_cross_x0, centre_cross_y0, centre_cross_width, line_width);
-
-            // Add centre circle
-            int centre_circle_x0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size;
-            int centre_circle_y0 =
-                (fd.dimensions.border_strip_min_width + fd.dimensions.field_width / 2) / cfg.grid_size;
-            int centre_circle_r = (fd.dimensions.center_circle_diameter / 2) / cfg.grid_size;
-            fieldline_map.add_circle(centre_circle_x0, centre_circle_y0, centre_circle_r, line_width);
-
-            // Precompute the distance map
-            fieldline_map.create_distance_map(cfg.grid_size);
+            // Generate the field line occupancy map
+            setup_fieldline_map(fd);
 
             // Save the map to a csv file
             if (cfg.save_map) {
@@ -201,7 +84,7 @@ namespace module::localisation {
                 file.close();
             }
 
-            // Initialise the particle filter
+            // Set the initial state of the particle filter as either left, right or both sides of the field
             if (cfg.starting_side == StartingSide::LEFT || cfg.starting_side == StartingSide::EITHER) {
                 cfg.initial_state.emplace_back((fd.dimensions.field_length / 4.0),
                                                (fd.dimensions.field_width / 2.0),
@@ -282,8 +165,8 @@ namespace module::localisation {
             Eigen::Vector2i map_position = position_in_map(particle, rORr);
             // Get the distance to the closest field line point in the map
             double occupancy_value = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
-            // Check if the observation is within the max range and within the field
-            if (occupancy_value != -1 && rORr.norm() < cfg.max_range) {
+            // Check if the observation is within the max range
+            if (rORr.norm() < cfg.max_range) {
                 weight += std::exp(-0.5 * std::pow(occupancy_value, 2));
             }
         }
