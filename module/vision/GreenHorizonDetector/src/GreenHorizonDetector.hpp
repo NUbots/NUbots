@@ -41,9 +41,8 @@ namespace module::vision {
 
     private:
         struct {
-            float confidence_threshold;
-            uint cluster_points;
-            float distance_offset;
+            double confidence_threshold = 0.0;
+            uint cluster_points         = 0;
         } cfg{};
     };
 

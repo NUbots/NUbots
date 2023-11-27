@@ -55,7 +55,6 @@ namespace module::vision {
 
             cfg.confidence_threshold = config["confidence_threshold"].as<double>();
             cfg.cluster_points       = config["cluster_points"].as<uint>();
-            cfg.distance_offset      = config["distance_offset"].as<double>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
@@ -185,8 +184,6 @@ namespace module::vision {
                 const Eigen::Vector3d ray      = uPCw.col(idx);
                 const double d                 = mesh.Hcw(2, 3) / ray.z();
                 Eigen::Vector3d ray_projection = ray * d;
-                const double norm              = ray_projection.head<2>().norm();
-                ray_projection.head<2>() *= 1.0f + cfg.distance_offset / norm;
                 msg->horizon.emplace_back(ray_projection.normalized());
             }
             log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
