@@ -1,3 +1,4 @@
 *.json
 *.npy
 !configs/*
+processed-outputs/
