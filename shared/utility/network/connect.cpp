@@ -5,13 +5,12 @@
 #include <fmt/format.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <nuclear>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <system_error>
 #include <unistd.h>
-
-#include "utility/network/resolve.hpp"
 
 
 namespace utility::network {
@@ -19,7 +18,7 @@ namespace utility::network {
     utility::file::FileDescriptor connect(const std::string& host, const uint16_t& port) {
 
         // Work out what type of connection to make
-        auto sock = resolve(host, port);
+        auto sock = NUClear::util::network::resolve(host, port);
 
         // Open a TCP socket
         utility::file::FileDescriptor fd(::socket(sock.sock.sa_family, SOCK_STREAM, IPPROTO_TCP),
