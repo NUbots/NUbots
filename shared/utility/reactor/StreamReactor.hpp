@@ -33,183 +33,52 @@ namespace utility::reactor {
         /// @brief Called by the powerplant to build and setup the StreamReactor.
         explicit StreamReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Trigger<ConnectTCP>, Single, Sync<T>>().then("Initiate a TCP Connection", [this](const ConnectTCP& c) {
-                // Disconnect if a connection is already established
-                if (!std::holds_alternative<std::monostate>(connection)) {
-                    emit<Scope::DIRECT>(std::make_unique<Disconnect>());
-                }
+            /**************************
+             *   USER TRIGGER HOOKS   *
+             **************************/
+            on<ConnectTCP>().then("Initiate a TCP Connection", [this](const ConnectTCP& c) {
+                // Setup the connection details
+                remote = c;
 
-                // Allow pre-connection settings to be applied
-                emit<Scope::DIRECT>(std::make_unique<PreConnect>());
-
-                try {
-                    // Connect the tcp socket
-                    connection = TCPConnection{c.host, c.port};
-                    auto& tcp  = std::get<TCPConnection>(connection);
-                    tcp.fd     = utility::network::connect(tcp.host, tcp.port);
-
-                    // Recreate the IO reaction
-                    auto flags = IO::READ | IO::CLOSE | IO::ERROR;
-                    io_handle  = on<IO>(tcp.fd.get(), flags).then("Read Stream", [this](const IO::Event& event) {
-                        if ((event.events & IO::READ) != 0) {
-                            process(event.fd);
-                        }
-                        if ((event.events & IO::ERROR) != 0) {
-                            emit(std::make_unique<Reconnect>("An invalid state occurred"));
-                        }
-                        if ((event.events & IO::CLOSE) != 0) {
-                            emit(std::make_unique<Reconnect>("The device hung up"));
-                        }
-                        if ((event.events & ~(IO::READ | IO::ERROR | IO::CLOSE)) != 0) {
-                            auto& tcp = std::get<TCPConnection>(connection);
-                            log<NUClear::ERROR>(utility::strutil::dedent(fmt::format(R"(
-                                Unknown IO event: {}
-                                    FD Valid.......? {}
-                                    Bytes Available: {}
-                                )",
-                                                                                     event.events,
-                                                                                     tcp.fd.valid(),
-                                                                                     tcp.fd.available())));
-                        }
-                    });
-                    log<NUClear::INFO>(fmt::format("Successfully connected to the device at {}", device_description()));
-                }
-                catch (const std::runtime_error& ex) {
-                    log<NUClear::WARN>(fmt::format("Failed to reconnect to the device at {}\nError: {}",
-                                                   device_description(),
-                                                   ex.what()));
-                }
-
-                // Allow post-connection settings to be applied
-                emit(std::make_unique<PostConnect>(++connection_attempt));
+                emit(std::make_unique<Reconnect>());
             });
 
-            on<Trigger<ConnectSerial>, Single, Sync<T>>().then(
-                "Initiate a Serial Connection",
-                [this](const ConnectSerial& c) {
-                    // Disconnect if a connection is already established
-                    if (!std::holds_alternative<std::monostate>(connection)) {
-                        emit<Scope::DIRECT>(std::make_unique<Disconnect>());
-                    }
+            on<ConnectSerial>().then("Initiate a Serial Connection", [this](const ConnectSerial& c) {
+                // Setup the connection details
+                remote = c;
 
-                    // Allow pre-connection settings to be applied
-                    emit<Scope::DIRECT>(std::make_unique<PreConnect>());
+                emit(std::make_unique<Reconnect>());
+            });
 
-                    try {
-                        // Connect the serial device
-                        connection   = SerialConnection{c.device, c.baud_rate};
-                        auto& serial = std::get<SerialConnection>(connection);
-                        serial.uart  = utility::io::uart(serial.device, serial.baud_rate);
-
-                        // Recreate the IO reaction
-                        auto flags = IO::READ | IO::CLOSE | IO::ERROR;
-                        io_handle  = on<IO>(serial.uart.native_handle(), flags)
-                                        .then("Read Stream", [this](const IO::Event& event) {
-                                            if ((event.events & IO::READ) != 0) {
-                                                process(event.fd);
-                                            }
-                                            if ((event.events & IO::ERROR) != 0) {
-                                                emit(std::make_unique<Reconnect>("An invalid state occurred"));
-                                            }
-                                            if ((event.events & IO::CLOSE) != 0) {
-                                                emit(std::make_unique<Reconnect>("The device hung up"));
-                                            }
-                                            if ((event.events & ~(IO::READ | IO::ERROR | IO::CLOSE)) != 0) {
-                                                auto& serial = std::get<SerialConnection>(connection);
-                                                log<NUClear::ERROR>(
-                                                    utility::strutil::dedent(fmt::format(R"(
-                                                        Unknown IO event: {}
-                                                            FD Valid.......? {}
-                                                            Bytes Available: {}
-                                                        )",
-                                                                                         event.events,
-                                                                                         serial.uart.connected(),
-                                                                                         serial.uart.available())));
-                                            }
-                                        });
-                        log<NUClear::INFO>(
-                            fmt::format("Successfully connected to the device at {}", device_description()));
-                    }
-                    catch (const std::runtime_error& ex) {
-                        log<NUClear::WARN>(fmt::format("Failed to reconnect to the device at {}\nError: {}",
-                                                       device_description(),
-                                                       ex.what()));
-                    }
-
-                    // Allow post-connection settings to be applied
-                    emit(std::make_unique<PostConnect>(++connection_attempt));
-                });
-
-            on<Trigger<Disconnect>, Single, Sync<T>>().then("Teardown Connection", [this] {
+            on<Disconnect>().then("Disconnecting", [this] {
                 // Allow pre-disconnection settings to be applied
-                emit<Scope::DIRECT>(std::make_unique<PreDisconnect>());
-
-                // Unbind the reaction handle if it is bound
-                if (io_handle) {
-                    io_handle.unbind();
-                }
-
-                // Reset the connection part of the variant
-                if (std::holds_alternative<SerialConnection>(connection)) {
-                    auto& serial = std::get<SerialConnection>(connection);
-                    serial.uart  = utility::io::uart{};
-                }
-                else if (std::holds_alternative<TCPConnection>(connection)) {
-                    auto& tcp = std::get<TCPConnection>(connection);
-                    tcp.fd    = utility::file::FileDescriptor{};
-                }
-
-                // Allow post-disconnection settings to be applied
-                emit<Scope::DIRECT>(std::make_unique<PostDisconnect>());
+                emit(std::make_unique<PreDisconnect>(false));
+                emit(std::make_unique<Do<PreDisconnect>>(false));
             });
 
-            on<Trigger<Reconnect>, Single, Sync<T>>().then("Reconnecting", [this](const Reconnect& rc) {
-                // If there is not already a connection established, then calling reconnect is an error
-                if (std::holds_alternative<std::monostate>(connection)) {
-                    throw std::runtime_error("Can't reconnect if there is no established connection");
-                }
-
+            on<Reconnect>().then("Reconnecting", [this](const Reconnect& rc) {
                 // Log the reason we are reconnecting if it's not an empty string.
                 // empty string means we are just starting up
                 if (!rc.reason.empty()) {
                     log<NUClear::WARN>(rc.reason);
                 }
 
-                if (std::holds_alternative<TCPConnection>(connection)) {
-                    auto& tcp = std::get<TCPConnection>(connection);
-                    emit(std::make_unique<ConnectTCP>(tcp.host, tcp.port));
+                if (connection_valid()) {
+                    // Initiate the reconnection
+                    emit(std::make_unique<PreDisconnect>(true));
+                    emit(std::make_unique<Do<PreDisconnect>>(true));
                 }
-                else if (std::holds_alternative<SerialConnection>(connection)) {
-                    auto& serial = std::get<SerialConnection>(connection);
-                    emit(std::make_unique<ConnectSerial>(serial.device, serial.baud_rate));
+                else {
+                    // Initiate the connection
+                    emit(std::make_unique<PreConnect>());
+                    emit(std::make_unique<Do<PreConnect>>());
                 }
             });
 
-            // Watchdog to ensure we are getting data from the device
-            on<Watchdog<StreamReactor<T, Parser>, TimeoutTicks, TimeoutPeriod>, Single>().then([this] {
-                auto s = double(TimeoutTicks) * double(TimeoutPeriod::period::num) / double(TimeoutPeriod::period::den);
-                auto [si, unit] = utility::support::si_time(s);
-                emit(std::make_unique<Reconnect>(fmt::format("No activity from the Device at {} in {}{}. Reconnecting",
-                                                             device_description(),
-                                                             si,
-                                                             unit)));
-            });
-
-            on<Trigger<TransmitData>, Single, Sync<T>>().then("Transmit data to device", [this](const TransmitData& t) {
+            on<TransmitData>().then("Transmit data to device", [this](const TransmitData& t) {
                 // If there is not already a connection established, then calling reconnect is an error
-                if (std::holds_alternative<std::monostate>(connection)) {
-                    throw std::runtime_error("Can't transmit to no one");
-                }
-
-                // Find the file descriptor to write to
-                int fd = -1;
-                if (std::holds_alternative<TCPConnection>(connection)) {
-                    auto& tcp = std::get<TCPConnection>(connection);
-                    fd        = tcp.fd.get();
-                }
-                if (std::holds_alternative<SerialConnection>(connection)) {
-                    auto& serial = std::get<SerialConnection>(connection);
-                    fd           = serial.uart.native_handle();
+                if (std::holds_alternative<std::monostate>(connection) || fd < 0) {
+                    throw std::runtime_error("Can't transmit to no one.");
                 }
 
                 // Write data to the device
@@ -226,18 +95,140 @@ namespace utility::reactor {
                     bytes_written += written;
                 }
             });
+
+
+            /**************************
+             * INTERNAL TRIGGER CHAIN *
+             **************************/
+            on<Do<PreConnect>>().then([this] { emit(std::make_unique<DoConnect>()); });
+
+            on<DoConnect>().then([this] {
+                // Increase the connection attempt number to stop any existing configuration loops
+                ++connection_attempt;
+
+                try {
+                    // Initiate the connection and get the file descriptor for the IO handle
+                    if (std::holds_alternative<ConnectTCP>(remote)) {
+                        const auto& r = std::get<ConnectTCP>(remote);
+                        connection    = TCPConnection(r.host, r.port);
+
+                        auto& tcp = std::get<TCPConnection>(connection);
+                        tcp.fd    = utility::network::connect(tcp.host, tcp.port);
+                        fd        = tcp.fd.get();
+                    }
+                    else if (std::holds_alternative<ConnectSerial>(remote)) {
+                        const auto& r = std::get<ConnectSerial>(remote);
+                        connection    = SerialConnection(r.device, r.baud_rate);
+
+                        auto& serial = std::get<SerialConnection>(connection);
+                        serial.uart  = utility::io::uart(serial.device, serial.baud_rate);
+                        fd           = serial.uart.native_handle();
+                    }
+                    else {
+                        remote     = std::monostate();
+                        connection = std::monostate();
+                        fd         = -1;
+                        throw std::runtime_error("No valid connection settings found.");
+                    }
+
+                    // Something must have gone wrong and we are not connected
+                    if (!connection_valid()) {
+                        throw std::runtime_error("Failed to connect to device");
+                    }
+
+                    // Recreate the IO reaction
+                    auto flags = IO::READ | IO::CLOSE | IO::ERROR;
+                    io_handle  = on<IO>(fd, flags).then("Read Stream", [this](const IO::Event& event) {
+                        if ((event.events & IO::READ) != 0) {
+                            process(event.fd);
+                        }
+                        if ((event.events & IO::ERROR) != 0) {
+                            emit(std::make_unique<Reconnect>("An invalid state occurred"));
+                        }
+                        if ((event.events & IO::CLOSE) != 0) {
+                            emit(std::make_unique<Reconnect>("The device hung up"));
+                        }
+                        if ((event.events & ~(IO::READ | IO::ERROR | IO::CLOSE)) != 0) {
+                            log<NUClear::ERROR>(
+                                utility::strutil::dedent(fmt::format("Unknown IO event on {}valid connection: {}",
+                                                                     connection_valid() ? "" : "in",
+                                                                     event.events)));
+                        }
+                    });
+
+                    // Allow post-connection settings to be applied
+                    emit(std::make_unique<PostConnect>(connection_attempt));
+
+                    log<NUClear::INFO>(fmt::format("Successfully connected to the device at {}", device_description()));
+                }
+                catch (const std::runtime_error& ex) {
+                    log<NUClear::WARN>(fmt::format("Failed to connect to the device at {}\nError: {}",
+                                                   device_description(),
+                                                   ex.what()));
+                }
+            });
+
+            on<Do<PreDisconnect>>().then([this](const Do<PreDisconnect>& pd) {
+                // Allow post-disconnection settings to be applied
+                emit(std::make_unique<DoDisconnect>(pd.reconnect));
+            });
+
+            on<DoDisconnect>().then("Disconnect from device", [this](const DoDisconnect& d) {
+                // Unbind the reaction handle if it is bound
+                if (io_handle) {
+                    io_handle.unbind();
+                }
+
+                // Reset the connection part of the variant
+                if (!std::holds_alternative<std::monostate>(connection)) {
+                    connection = std::monostate();
+                }
+
+                // Clear old file descriptor
+                fd = -1;
+
+                // Allow post-disconnection settings to be applied
+                emit(std::make_unique<PostDisconnect>(d.reconnect));
+                emit(std::make_unique<Do<PostDisconnect>>(d.reconnect));
+            });
+
+            on<Do<PostDisconnect>>().then([this](const Do<PostDisconnect>& pd) {
+                // If a reconnect has been initiated then kick off the connection attempt now
+                if (pd.reconnect) {
+                    emit(std::make_unique<PreConnect>());
+                    emit(std::make_unique<Do<PreConnect>>());
+                }
+            });
+
+            // Watchdog to ensure we are getting data from the device
+            on<Watchdog<StreamReactor<T, Parser>, TimeoutTicks, TimeoutPeriod>, Single>().then([this] {
+                auto s = double(TimeoutTicks) * double(TimeoutPeriod::period::num) / double(TimeoutPeriod::period::den);
+                auto [si, unit] = utility::support::si_time(s);
+                emit(std::make_unique<Reconnect>(fmt::format("No activity from the Device at {} in {}{}. Reconnecting",
+                                                             device_description(),
+                                                             si,
+                                                             unit)));
+            });
         }
 
     protected:
         /**
+         * @brief Common inheritance for all StreamReactor steps
+         */
+        template <typename U>
+        struct NUClearArgs
+            : public Trigger<U>
+            , Sync<T> {};
+
+        /**
          * A message struct that is emitted immediately before a connection is established
          */
-        struct PreConnect {};
+        struct PreConnect : public NUClearArgs<PreConnect> {};
 
         /**
          * A message struct that is emitted immediately after a connection is established
          */
-        struct PostConnect {
+        struct PostConnect : public NUClearArgs<PostConnect> {
             PostConnect(const int& attempt) : attempt(attempt) {}
             /// The attempt number of the connection
             int attempt;
@@ -246,17 +237,27 @@ namespace utility::reactor {
         /**
          * A message struct that is emitted immediately before a connection is torn down
          */
-        struct PreDisconnect {};
+        struct PreDisconnect : public NUClearArgs<PreDisconnect> {
+            explicit PreDisconnect(const bool& reconnect) : reconnect(reconnect) {}
+
+            /// Set to true if a new connection should be established after disconnection is complete
+            bool reconnect{false};
+        };
 
         /**
          * A message struct that is emitted immediately after a connection is torn down
          */
-        struct PostDisconnect {};
+        struct PostDisconnect : public NUClearArgs<PostDisconnect> {
+            explicit PostDisconnect(const bool& reconnect) : reconnect(reconnect) {}
+
+            /// Set to true if a new connection should be established after disconnection is complete
+            bool reconnect{false};
+        };
 
         /**
          * A message to tell the system to establish a connection to a TCP server
          */
-        struct ConnectTCP {
+        struct ConnectTCP : public NUClearArgs<ConnectTCP> {
             ConnectTCP(std::string host, const uint16_t& port) : host(std::move(host)), port(port) {}
             std::string host{};
             uint16_t port{0};
@@ -265,7 +266,7 @@ namespace utility::reactor {
         /**
          * A message to tell the system to establish a connection to a serial device
          */
-        struct ConnectSerial {
+        struct ConnectSerial : public NUClearArgs<ConnectSerial> {
             ConnectSerial(std::string device, const int& baud_rate) : device(std::move(device)), baud_rate(baud_rate) {}
             std::string device{};
             int baud_rate{0};
@@ -274,12 +275,12 @@ namespace utility::reactor {
         /**
          * A message to tell the system to disconnect from a device
          */
-        struct Disconnect {};
+        struct Disconnect : public NUClearArgs<Disconnect> {};
 
         /**
          * A message struct to tell the system to reconnect to the device
          */
-        struct Reconnect {
+        struct Reconnect : public NUClearArgs<Reconnect> {
             Reconnect() = default;
 
             /**
@@ -297,13 +298,29 @@ namespace utility::reactor {
         /**
          * A message struct to tell the system to transmit data to the device
          */
-        struct TransmitData {
+        struct TransmitData : public NUClearArgs<TransmitData> {
+            explicit TransmitData(const std::vector<uint8_t>& source) : data(source) {}
+            explicit TransmitData(std::vector<uint8_t>&& source) noexcept : data(std::move(source)) {}
             template <typename SourceType>
             explicit TransmitData(const SourceType& source)
                 : data(NUClear::util::serialise::Serialise<SourceType>::serialise(source)) {}
+
+            TransmitData& operator=(const std::vector<uint8_t>& rhs) {
+                data = rhs;
+                return *this;
+            }
+            TransmitData& operator=(std::vector<uint8_t>&& rhs) noexcept {
+                data = std::move(rhs);
+                return *this;
+            }
+
+            /// The data to be transferred
             std::vector<uint8_t> data{};
         };
 
+        /**
+         * @brief Returns true if there is a currently established connection, false otherwise
+         */
         [[nodiscard]] inline bool connection_valid() const {
             if (std::holds_alternative<SerialConnection>(connection)) {
                 auto& serial = std::get<SerialConnection>(connection);
@@ -321,9 +338,42 @@ namespace utility::reactor {
 
     private:
         /**
+         * @brief Internal message used to perform connection logic
+         */
+        struct DoConnect : public NUClearArgs<DoConnect> {};
+
+        /**
+         * @brief Internal message used to perform disconnection logic
+         */
+        struct DoDisconnect : public NUClearArgs<DoDisconnect> {
+            explicit DoDisconnect(const bool& reconnect) : reconnect(reconnect) {}
+
+            /// Set to true if a new connection should be established after disconnection is complete
+            bool reconnect{false};
+        };
+
+        /**
+         * @brief Aliasing type for sanity and brevity purposes
+         */
+        template <typename Step>
+        struct Do
+            : public Step
+            , NUClearArgs<Do<Step>> {
+            // Inherit constructors from Step
+            using Step::Step;
+
+            // Disambiguate inherited NUClear fusion functions
+            using NUClearArgs<Do<Step>>::bind;   // For the triggering
+            using NUClearArgs<Do<Step>>::get;    // For the caching
+            using NUClearArgs<Do<Step>>::group;  // For the syncing
+        };
+
+        /**
          * Holds the information about a serial connection
          */
         struct SerialConnection {
+            explicit SerialConnection(std::string device, const int& baud_rate)
+                : device(std::move(device)), baud_rate(baud_rate) {}
             /// The path to the serial device
             std::string device{};
             /// The baud rate to connect at
@@ -336,6 +386,7 @@ namespace utility::reactor {
          * Holds the information about a TCP connection
          */
         struct TCPConnection {
+            explicit TCPConnection(std::string host, const uint16_t& port) : host(std::move(host)), port(port) {}
             /// The host to connect to
             std::string host{};
             /// The port to connect to
@@ -349,14 +400,14 @@ namespace utility::reactor {
          *
          * @return the description of the device
          */
-        std::string device_description() {
-            if (std::holds_alternative<SerialConnection>(connection)) {
-                auto& serial = std::get<SerialConnection>(connection);
+        [[nodiscard]] std::string device_description() {
+            if (std::holds_alternative<ConnectSerial>(remote)) {
+                auto& serial = std::get<ConnectSerial>(remote);
                 return fmt::format("Serial Device: {} @ {}baud", serial.device, serial.baud_rate);
             }
 
-            if (std::holds_alternative<TCPConnection>(connection)) {
-                auto& tcp = std::get<TCPConnection>(connection);
+            if (std::holds_alternative<ConnectTCP>(remote)) {
+                auto& tcp = std::get<ConnectTCP>(remote);
                 return fmt::format("{}:{}", tcp.host, tcp.port);
             }
 
@@ -392,8 +443,12 @@ namespace utility::reactor {
         Parser parser;
         /// Holds the information about the connection for the stream reactor
         std::variant<std::monostate, SerialConnection, TCPConnection> connection{};
+        /// Holds details about the remote device
+        std::variant<std::monostate, ConnectSerial, ConnectTCP> remote{};
         /// The handle attached to the IO reaction
         ReactionHandle io_handle{};
+        /// The file descriptor for the currently active connection
+        int fd = -1;
     };
 
 }  // namespace utility::reactor
