@@ -30,7 +30,6 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <algorithm>
-#include <iostream>
 #include <stack>
 #include <utility>
 #include <vector>
