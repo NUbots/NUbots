@@ -131,7 +131,7 @@ TEST_CASE(
 
     INFO("Start Test");
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant plant(config);
     plant.install<module::extension::FileWatcher>();

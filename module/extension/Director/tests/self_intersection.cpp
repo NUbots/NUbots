@@ -117,7 +117,7 @@ namespace {
 TEST_CASE("Test that when a task has self intersection it applies priority correctly",
           "[director][priority][optional][self_intersection]") {
     // Run the module
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

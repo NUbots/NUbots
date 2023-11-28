@@ -106,7 +106,7 @@ namespace {
 
 TEST_CASE("Test that a done task removes a root task if it was the next in the chain", "[director][done]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
