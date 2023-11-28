@@ -59,16 +59,16 @@ namespace module::localisation {
         int n_particles = 100;
 
         /// @brief Range of reset particles
-        Eigen::Matrix<Scalar, 3, 1> reset_range;
+        Eigen::Matrix<Scalar, 3, 1> reset_range = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
         /// @brief Diagonal for 3x3 noise matrix (which is diagonal)
-        Eigen::Matrix<Scalar, 3, 1> process_noise_diagonal;
+        Eigen::Matrix<Scalar, 3, 1> process_noise_diagonal = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
         FieldModel()
             : reset_range(Eigen::Matrix<Scalar, 3, 1>::Zero())
             , process_noise_diagonal(Eigen::Matrix<Scalar, 3, 1>::Ones()) {}
 
-        StateVec time(const StateVec& state, double /*deltaT*/) {
+        StateVec time(const StateVec& state, double /*dt*/) {
             return state;
         }
 
@@ -76,8 +76,8 @@ namespace module::localisation {
             return state;
         }
 
-        StateMat noise(const Scalar& deltaT) {
-            return process_noise_diagonal.asDiagonal() * deltaT;
+        StateMat noise(const Scalar& dt) {
+            return process_noise_diagonal.asDiagonal() * dt;
         }
 
         // Getters

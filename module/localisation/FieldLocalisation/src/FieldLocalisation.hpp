@@ -88,39 +88,42 @@ namespace module::localisation {
         struct Config {
             /// @brief Size of the grid cells in the occupancy grid [m]
             double grid_size = 0.0;
+
             /// @brief Number of particles to use in the particle filter
             int n_particles = 0;
+
             /// @brief Uncertainty in the process model
             Eigen::Matrix3d process_noise = Eigen::Matrix3d::Zero();
-            /// @brief Uncertainty in the measurement model
-            double measurement_noise = 0;
-            /// @brief Maximum distance a field line can be from a particle to be considered an observation [m]
-            double max_range = 0;
+
             /// @brief Initial state (x,y,theta) of the robot, saved for resetting
             std::vector<Eigen::Vector3d> initial_state{};
+
             /// @brief Initial covariance matrix of the robot's state, saved for resetting
             Eigen::Matrix3d initial_covariance = Eigen::Matrix3d::Identity();
+
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
+
             /// @brief Minimum number of field line points for a measurement update
             size_t min_observations = 0;
-            /// @brief Penalty factor for observations being outside map
-            double outside_map_penalty_factor = 0.0;
+
             /// @brief Start time delay for the particle filter
             double start_time_delay = 0.0;
+
             /// @brief Starting side of the field (left, right, or either)
             StartingSide starting_side = StartingSide::UNKNOWN;
         } cfg;
 
+        /// @brief Last time filter was updated
         NUClear::clock::time_point last_time_update_time;
 
-        /// @brief Particle filter
+        /// @brief Particle filter class
         utility::math::filter::ParticleFilter<double, FieldModel> filter;
 
-        /// @brief Occupancy grid map of the field lines
-        OccupancyMap<double> fieldline_map;
+        /// @brief Field line distance map (encodes the minimum distance to a field line)
+        OccupancyMap<double> fieldline_distance_map;
 
-        /// @brief The time of startup
+        /// @brief Time at startup
         NUClear::clock::time_point startup_time;
 
     public:
@@ -128,14 +131,15 @@ namespace module::localisation {
         explicit FieldLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
         /**
-         * @brief Compute Hfw, homogenous transformation from world to field space from state vector (x,y,theta)
+         * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
+         *
          * @param state The state vector (x,y,theta)
-         * @return Hfw, the homogenous transformation matrix from world to field space
+         * @return Hfw, the homogenous transformation matrix from world {w} to field {f} space
          */
         Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& particle);
 
         /**
-         * @brief Transform a point in the robot's coordinate frame into an index in the map
+         * @brief Transform a field line point from world {w} to position in the distance map {m}
          *
          * @param particle The state of the particle (x,y,theta)
          * @param rPWw The field point (x, y) in world space {w} [m]
@@ -144,7 +148,7 @@ namespace module::localisation {
         Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
         /**
-         * @brief Calculates the weight of a particle given a set of observations
+         * @brief Calculate the weight of a particle given a set of observations
          *
          * @param particle The state of the particle (x,y,theta)
          * @param observations The observations (x, y) in the robot's coordinate frame [m]
@@ -153,10 +157,11 @@ namespace module::localisation {
         double calculate_weight(const Eigen::Vector3d& particle, const std::vector<Eigen::Vector3d>& observations);
 
         /**
-         * @brief Setup occupancy grid map of the field lines
+         * @brief Setup field line distance map
+         *
          * @param fd The field dimensions
          */
-        void setup_fieldline_map(const FieldDescription& fd);
+        void setup_fieldline_distance_map(const FieldDescription& fd);
     };
 }  // namespace module::localisation
 

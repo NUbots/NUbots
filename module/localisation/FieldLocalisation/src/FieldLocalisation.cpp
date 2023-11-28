@@ -55,14 +55,10 @@ namespace module::localisation {
             cfg.n_particles                     = config["n_particles"].as<int>();
             cfg.initial_covariance.diagonal()   = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
             cfg.process_noise.diagonal()        = Eigen::Vector3d(config["process_noise"].as<Expression>());
-            cfg.measurement_noise               = config["measurement_noise"].as<double>();
-            cfg.max_range                       = config["max_range"].as<double>();
-            filter.model.process_noise_diagonal = config["process_noise"].as<Expression>();
-            filter.model.n_rogues               = config["n_rogues"].as<int>();
-            filter.model.reset_range            = config["reset_range"].as<Expression>();
-            filter.model.n_particles            = config["n_particles"].as<int>();
             cfg.starting_side                   = config["starting_side"].as<std::string>();
             cfg.start_time_delay                = config["start_time_delay"].as<double>();
+            filter.model.process_noise_diagonal = config["process_noise"].as<Expression>();
+            filter.model.n_particles            = config["n_particles"].as<int>();
         });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
@@ -74,13 +70,13 @@ namespace module::localisation {
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
-            // Generate the field line occupancy map
-            setup_fieldline_map(fd);
+            // Generate the field line distance map which discretises the field into a grid which encodes the minimum
+            // distance to a field line
+            setup_fieldline_distance_map(fd);
 
-            // Save the map to a csv file
             if (cfg.save_map) {
                 std::ofstream file("recordings/fieldline_map.csv");
-                file << fieldline_map.get_map();
+                file << fieldline_distance_map.get_map();
                 file.close();
             }
 
@@ -128,7 +124,6 @@ namespace module::localisation {
                     last_time_update_time = NUClear::clock::now();
                     filter.time(dt);
 
-                    // Emit field message
                     auto field(std::make_unique<Field>());
                     field->Hfw        = compute_Hfw(filter.get_state());
                     field->covariance = filter.get_covariance();
@@ -146,10 +141,11 @@ namespace module::localisation {
         // Transform observations from world {w} to field {f} space
         Eigen::Vector3d rPFf = compute_Hfw(particle) * rPWw;
 
-        // Get the associated position/index in the map [x, y]
-        int x_map = fieldline_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size);
-        int y_map = fieldline_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size);
-        return Eigen::Vector2i(x_map, y_map);
+        // Get the associated index in the field line map [x, y]
+        // Note: field space is placed in centre of the field, whereas the field line map origin (x,y) is top left
+        // corner of discretised field
+        return Eigen::Vector2i(fieldline_distance_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size),
+                               fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
     }
 
     double FieldLocalisation::calculate_weight(const Eigen::Vector3d& particle,
@@ -158,15 +154,9 @@ namespace module::localisation {
         for (auto rORr : observations) {
             // Get the position [x, y] of the observation in the map for this particle
             Eigen::Vector2i map_position = position_in_map(particle, rORr);
-            // Get the distance to the closest field line point in the map
-            double occupancy_value = fieldline_map.get_occupancy_value(map_position.x(), map_position.y());
-            // Check if the observation is within the max range
-            if (rORr.norm() < cfg.max_range) {
-                weight += std::exp(-0.5 * std::pow(occupancy_value, 2));
-            }
+            weight += std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
         }
-
-        return std::max(weight, 0.0);
+        return 1.0 / (weight + std::numeric_limits<double>::epsilon());
     }
 
 }  // namespace module::localisation
