@@ -2,7 +2,7 @@
 log_level: INFO
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
-grid_size: 0.01
+grid_size: 1e-2
 
 # Number of particles
 n_particles: 300
@@ -17,7 +17,7 @@ initial_state: [0.0, 0.0, 0.0]
 initial_covariance: [0.5, 0.5, 0.5]
 
 # Amount of noise added to the particles (how much world can move to adjust for drift) at each time update
-process_noise:  [0.01, 0.01, 0.01]
+process_noise: [1e-2, 1e-2, 1e-2]
 
 # Bool to save a csv file of the generated occupancy grid map
 save_map: false
