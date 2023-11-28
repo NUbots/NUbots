@@ -10,7 +10,7 @@ var classmodule_1_1input_1_1NatNet =
     [ "RigidBodyModel", "structmodule_1_1input_1_1NatNet_1_1RigidBodyModel.html", "structmodule_1_1input_1_1NatNet_1_1RigidBodyModel" ],
     [ "SkeletonModel", "structmodule_1_1input_1_1NatNet_1_1SkeletonModel.html", "structmodule_1_1input_1_1NatNet_1_1SkeletonModel" ],
     [ "NatNet", "classmodule_1_1input_1_1NatNet.html#af91ccca272638d23211dd7eb8e69c461", null ],
-    [ "process", "classmodule_1_1input_1_1NatNet.html#abb19bfa3257394f86e4d3c8a93dd8a25", null ],
+    [ "process", "classmodule_1_1input_1_1NatNet.html#a2d858a097e3f17f6296ff0bb2051afac", null ],
     [ "process_frame", "classmodule_1_1input_1_1NatNet.html#add85a441e29e769cd026575e050ce2e3", null ],
     [ "process_model", "classmodule_1_1input_1_1NatNet.html#a39b30fd19737a0dbdbbb5346b69c42ee", null ],
     [ "process_ping", "classmodule_1_1input_1_1NatNet.html#a94ba4249111b56326234f1fca07cca88", null ],
@@ -25,7 +25,7 @@ var classmodule_1_1input_1_1NatNet =
     [ "device_models", "classmodule_1_1input_1_1NatNet.html#a4390ad14ade079210062706ab7a33dd5", null ],
     [ "force_plate_models", "classmodule_1_1input_1_1NatNet.html#a1aa2fba80b110702b5414100ef13720e", null ],
     [ "marker_set_models", "classmodule_1_1input_1_1NatNet.html#a277ce4a4d71126a9e04487b44984076a", null ],
-    [ "remote", "classmodule_1_1input_1_1NatNet.html#a9557e8295d54c52590790a9b2e76a410", null ],
+    [ "remote", "classmodule_1_1input_1_1NatNet.html#abea412ed3021a33acd2d0499d583c817", null ],
     [ "rigid_body_models", "classmodule_1_1input_1_1NatNet.html#a88064bf494fd71f4bf113b90fa11a61b", null ],
     [ "skeleton_models", "classmodule_1_1input_1_1NatNet.html#a21803c369f8192d21d17f08e3a13309f", null ],
     [ "version", "classmodule_1_1input_1_1NatNet.html#aae4553bb114c1aa6f31497fa9d95fd98", null ]

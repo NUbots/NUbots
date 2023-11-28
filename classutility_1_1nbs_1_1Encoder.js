@@ -7,7 +7,7 @@ var classutility_1_1nbs_1_1Encoder =
     [ "get_bytes_written", "classutility_1_1nbs_1_1Encoder.html#af7ffae45ec7c9863c1c897a53fb3e08f", null ],
     [ "is_open", "classutility_1_1nbs_1_1Encoder.html#a5c831b7529083e10cb45073a78486c3d", null ],
     [ "open", "classutility_1_1nbs_1_1Encoder.html#a7a5e58d7ca8f4ad6b0a64353df3dd41e", null ],
-    [ "write", "classutility_1_1nbs_1_1Encoder.html#a96045b0f1dbc20604bf7d9a6bcb95e95", null ],
+    [ "write", "classutility_1_1nbs_1_1Encoder.html#ab8e1bc8e837ced5fcdfd8ef14bb769fe", null ],
     [ "write", "classutility_1_1nbs_1_1Encoder.html#afa47332567825131f4f5661520ba235c", null ],
     [ "bytes_written", "classutility_1_1nbs_1_1Encoder.html#a6dc18d96400ed6f4c0b3fbdee0bb3a3c", null ],
     [ "HEADER_SIZE", "classutility_1_1nbs_1_1Encoder.html#ac341f6230c70d84ebdad4f088267af5e", null ],

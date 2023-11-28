@@ -216,7 +216,7 @@ $(document).ready(function(){initNavTree('DataPlayback_8hpp_source.html',''); in
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
 <div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html">   45</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html">Player</a> {</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            <span class="comment">// The function that will queue this message to be emitted</span></div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            std::function&lt;void(<span class="keyword">const</span> NUClear::clock::time_point&amp;, <span class="keyword">const</span> std::vector&lt;char&gt;&amp;)&gt; emit;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;            std::function&lt;void(<span class="keyword">const</span> NUClear::clock::time_point&amp;, <span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp;)&gt; emit;</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            <span class="comment">// If this player should execute and send messages</span></div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;            <span class="keywordtype">bool</span> enabled = <span class="keyword">false</span>;</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        };</div>
@@ -225,7 +225,7 @@ $(document).ready(function(){initNavTree('DataPlayback_8hpp_source.html',''); in
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keywordtype">void</span> add_player() {</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;            uint64_t hash = NUClear::util::serialise::Serialise&lt;T&gt;::hash();</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            <a class="code" href="structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html">Player</a> p;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            p.emit = [<span class="keyword">this</span>](<span class="keyword">const</span> NUClear::clock::time_point&amp; emit_time, <span class="keyword">const</span> std::vector&lt;char&gt;&amp; payload) {</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;            p.emit = [<span class="keyword">this</span>](<span class="keyword">const</span> NUClear::clock::time_point&amp; emit_time, <span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; payload) {</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                <span class="comment">// Deserialise our type</span></div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;                <span class="keyword">auto</span> msg = std::make_unique&lt;T&gt;(NUClear::util::serialise::Serialise&lt;T&gt;::deserialise(payload));</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160; </div>
@@ -284,7 +284,7 @@ $(document).ready(function(){initNavTree('DataPlayback_8hpp_source.html',''); in
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_SUPPORT_LOGGING_DATAPLAYBACK_HPP</span></div>
 <div class="ttc" id="aclassmodule_1_1support_1_1logging_1_1DataPlayback_html"><div class="ttname"><a href="classmodule_1_1support_1_1logging_1_1DataPlayback.html">module::support::logging::DataPlayback</a></div><div class="ttdef"><b>Definition:</b> DataPlayback.hpp:36</div></div>
 <div class="ttc" id="aclassmodule_1_1support_1_1logging_1_1DataPlayback_html_a3b42599b5ebada4a64c3d1b4ecfbf2e1"><div class="ttname"><a href="classmodule_1_1support_1_1logging_1_1DataPlayback.html#a3b42599b5ebada4a64c3d1b4ecfbf2e1">module::support::logging::DataPlayback::register_players</a></div><div class="ttdeci">void register_players()</div><div class="ttdoc">Register the functions that will decode and emit the message types.</div></div>
-<div class="ttc" id="aclassmodule_1_1support_1_1logging_1_1DataPlayback_html_a5f890307185b64f98f4656674caa63df"><div class="ttname"><a href="classmodule_1_1support_1_1logging_1_1DataPlayback.html#a5f890307185b64f98f4656674caa63df">module::support::logging::DataPlayback::DataPlayback</a></div><div class="ttdeci">DataPlayback(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the DataPlayback reactor.</div><div class="ttdef"><b>Definition:</b> DataPlayback.cpp:39</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1logging_1_1DataPlayback_html_a5f890307185b64f98f4656674caa63df"><div class="ttname"><a href="classmodule_1_1support_1_1logging_1_1DataPlayback.html#a5f890307185b64f98f4656674caa63df">module::support::logging::DataPlayback::DataPlayback</a></div><div class="ttdeci">DataPlayback(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the DataPlayback reactor.</div><div class="ttdef"><b>Definition:</b> DataPlayback.cpp:40</div></div>
 <div class="ttc" id="astructmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player_html"><div class="ttname"><a href="structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html">module::support::logging::DataPlayback::Player</a></div><div class="ttdef"><b>Definition:</b> DataPlayback.hpp:45</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -292,7 +292,7 @@ $(document).ready(function(){initNavTree('DataPlayback_8hpp_source.html',''); in
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_28d3ea03ae757061a3b72d8f4c630bc4.html">support</a></li><li class="navelem"><a class="el" href="dir_d8491fb05bfa4132cbcf7925b95cfb8d.html">logging</a></li><li class="navelem"><a class="el" href="dir_e132fcf91c264da1fdddc15a9c8ac08d.html">DataPlayback</a></li><li class="navelem"><a class="el" href="dir_004b9327aeebc5e9468c484ab8249c20.html">src</a></li><li class="navelem"><b>DataPlayback.hpp</b></li>
-    <li class="footer">Generated on Tue Nov 28 2023 05:29:44 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Nov 28 2023 06:29:12 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
