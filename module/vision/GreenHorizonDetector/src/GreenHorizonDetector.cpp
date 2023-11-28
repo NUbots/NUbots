@@ -103,11 +103,20 @@ namespace module::vision {
                 return;
             }
 
+            // Get points from the camera since we want to measure the distance from the robot
+            Eigen::Matrix<double, 3, Eigen::Dynamic> rPCc(3, rPWw.cols());
+
+            // Loop over each position and change the coordinate space
+            for (int idx = 0; idx < rPWw.cols(); idx++) {
+                rPCc.col(idx) = Hwc.inverse() * rPWw.col(idx);
+            }
+
             // Get the closest distance to the robot from all points in the cluster
             auto get_closest_distance = [&](const std::vector<int>& cluster) {
-                return *std::min_element(cluster.begin(), cluster.end(), [&](int a, int b) {
-                    return rPWw.col(a).norm() < rPWw.col(b).norm();
+                int closest_index = *std::min_element(cluster.begin(), cluster.end(), [&](int a, int b) {
+                    return rPCc.col(a).norm() < rPCc.col(b).norm();
                 });
+                return rPCc.col(closest_index).norm();
             };
 
             // Find the cluster closest to the robot
@@ -116,6 +125,14 @@ namespace module::vision {
                                                        [&](const std::vector<int>& a, const std::vector<int>& b) {
                                                            return get_closest_distance(a) < get_closest_distance(b);
                                                        });
+
+            for (const auto& cluster : clusters) {
+                log<NUClear::DEBUG>(fmt::format("Cluster with {} points and distance {}",
+                                                cluster.size(),
+                                                get_closest_distance(cluster)));
+            }
+
+            log<NUClear::DEBUG>(fmt::format("Closest cluster has {} points", closest_cluster_it->size()));
 
             // The closest cluster to the robot is the field cluster
             auto field_cluster = *closest_cluster_it;
