@@ -230,6 +230,7 @@ var annotated_dup =
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
+        [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
         [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ]

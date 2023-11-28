@@ -584,12 +584,14 @@ var namespaces_dup =
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
+        [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
         [ "ScriptKick", "classmodule_1_1skill_1_1ScriptKick.html", "classmodule_1_1skill_1_1ScriptKick" ],
         [ "SplineKick", "classmodule_1_1skill_1_1SplineKick.html", "classmodule_1_1skill_1_1SplineKick" ],
         [ "Walk", "classmodule_1_1skill_1_1Walk.html", "classmodule_1_1skill_1_1Walk" ],
         [ "DiveTask", "Dive_8cpp.html#aab4cff4ad6c87765b3bf727736fd547f", null ],
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
         [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ],
+        [ "SayTask", "Say_8cpp.html#a52cce32b085db46104fee4406a26e9ac", null ],
         [ "WalkTask", "Walk_8cpp.html#aed1b3430e296f2d58d0ddc7e02a06020", null ]
       ] ],
       [ "strategy", null, [
