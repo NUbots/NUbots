@@ -49,7 +49,7 @@ namespace module::localisation {
     using message::support::FieldDescription;
 
     struct StartingSide {
-        enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3 };
+        enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
         Value value = Value::UNKNOWN;
 
         // Constructors
@@ -61,6 +61,7 @@ namespace module::localisation {
                         if      (str == "LEFT") { value = Value::LEFT; }
                         else if (str == "RIGHT") { value = Value::RIGHT; }
                         else if (str == "EITHER")  { value = Value::EITHER; }
+                        else if (str == "CUSTOM") { value = Value::CUSTOM; }
                         else {
                             value = Value::UNKNOWN;
                             throw std::runtime_error("String " + str + " did not match any enum for StartingSide");
@@ -77,6 +78,7 @@ namespace module::localisation {
                 case Value::LEFT: return "LEFT";
                 case Value::RIGHT: return "RIGHT";
                 case Value::EITHER: return "EITHER";
+                case Value::CUSTOM: return "CUSTOM";
                 default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
             }
         }
@@ -92,14 +94,17 @@ namespace module::localisation {
             /// @brief Number of particles to use in the particle filter
             int n_particles = 0;
 
-            /// @brief Uncertainty in the process model
+            /// @brief Uncertainty in the process model (adds noise to the particles}
             Eigen::Matrix3d process_noise = Eigen::Matrix3d::Zero();
 
             /// @brief Initial state (x,y,theta) of the robot, saved for resetting
-            std::vector<Eigen::Vector3d> initial_state{};
+            Eigen::Vector3d initial_state{};
 
             /// @brief Initial covariance matrix of the robot's state, saved for resetting
             Eigen::Matrix3d initial_covariance = Eigen::Matrix3d::Identity();
+
+            /// @brief Initial hypothesis of the robot's state (x,y,theta) and covariance, saved for resetting
+            std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> initial_hypotheses{};
 
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
@@ -110,7 +115,7 @@ namespace module::localisation {
             /// @brief Start time delay for the particle filter
             double start_time_delay = 0.0;
 
-            /// @brief Starting side of the field (left, right, or either)
+            /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
         } cfg;
 

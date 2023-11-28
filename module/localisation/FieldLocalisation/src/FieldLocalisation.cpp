@@ -53,6 +53,7 @@ namespace module::localisation {
             cfg.grid_size                       = config["grid_size"].as<double>();
             cfg.save_map                        = config["save_map"].as<bool>();
             cfg.n_particles                     = config["n_particles"].as<int>();
+            cfg.initial_state                   = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.initial_covariance.diagonal()   = Eigen::Vector3d(config["initial_covariance"].as<Expression>());
             cfg.process_noise.diagonal()        = Eigen::Vector3d(config["process_noise"].as<Expression>());
             cfg.starting_side                   = config["starting_side"].as<std::string>();
@@ -61,47 +62,43 @@ namespace module::localisation {
             filter.model.n_particles            = config["n_particles"].as<int>();
         });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this] {
-            std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> hypotheses;
-            for (const auto& state : cfg.initial_state) {
-                hypotheses.emplace_back(std::make_pair(state, cfg.initial_covariance));
-            }
-            filter.set_state(hypotheses);
-        });
-
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
-            // Generate the field line distance map which discretises the field into a grid which encodes the minimum
-            // distance to a field line
+            // Generate the field line distance map
             setup_fieldline_distance_map(fd);
-
             if (cfg.save_map) {
                 std::ofstream file("recordings/fieldline_map.csv");
                 file << fieldline_distance_map.get_map();
                 file.close();
             }
 
-            // Set the initial state of the particle filter as either left, right or both sides of the field
-            if (cfg.starting_side == StartingSide::LEFT || cfg.starting_side == StartingSide::EITHER) {
-                cfg.initial_state.emplace_back((fd.dimensions.field_length / 4.0),
-                                               (fd.dimensions.field_width / 2.0),
-                                               -M_PI_2);
+            // Set the initial state as either left, right, both sides of the field or manually specified inital state
+            auto left_side =
+                Eigen::Vector3d((fd.dimensions.field_length / 4), (fd.dimensions.field_width / 2), -M_PI_2);
+            auto right_side =
+                Eigen::Vector3d((fd.dimensions.field_length / 4), (-fd.dimensions.field_width / 2), M_PI_2);
+            switch (cfg.starting_side) {
+                case StartingSide::LEFT:
+                    cfg.initial_hypotheses.emplace_back(std::make_pair(left_side, cfg.initial_covariance));
+                    break;
+                case StartingSide::RIGHT:
+                    cfg.initial_hypotheses.emplace_back(std::make_pair(right_side, cfg.initial_covariance));
+                    break;
+                case StartingSide::EITHER:
+                    cfg.initial_hypotheses.emplace_back(std::make_pair(left_side, cfg.initial_covariance));
+                    cfg.initial_hypotheses.emplace_back(std::make_pair(right_side, cfg.initial_covariance));
+                    break;
+                case StartingSide::CUSTOM:
+                    cfg.initial_hypotheses.emplace_back(std::make_pair(cfg.initial_state, cfg.initial_covariance));
+                    break;
+                default: log<NUClear::ERROR>("Invalid starting_side specified"); break;
             }
-            if (cfg.starting_side == StartingSide::RIGHT || cfg.starting_side == StartingSide::EITHER) {
-                cfg.initial_state.emplace_back((fd.dimensions.field_length / 4.0),
-                                               (-fd.dimensions.field_width / 2.0),
-                                               M_PI_2);
-            }
-
-            std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> hypotheses;
-            for (const auto& state : cfg.initial_state) {
-                hypotheses.emplace_back(std::make_pair(state, cfg.initial_covariance));
-            }
-
-            filter.set_state(hypotheses);
+            filter.set_state(cfg.initial_hypotheses);
 
             last_time_update_time = NUClear::clock::now();
             startup_time          = NUClear::clock::now();
         });
+
+        on<Trigger<ResetFieldLocalisation>>().then([this] { filter.set_state(cfg.initial_hypotheses); });
 
         on<Trigger<FieldLines>, With<Stability>>().then(
             "Particle Filter",
