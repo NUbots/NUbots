@@ -1,7 +1,7 @@
 log_level: INFO
 
 output:
-  directory: log
+  directory: recordings
   split_size: 5 * GiB
 
 # You can put any messages that is emitted in the system here and it will be logged
