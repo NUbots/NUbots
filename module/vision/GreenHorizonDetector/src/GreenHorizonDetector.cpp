@@ -190,17 +190,16 @@ namespace module::vision {
                 msg->vision_ground_truth = mesh.vision_ground_truth;
             }
 
-            // Find the convex hull of the cluster
+            // Add the unit vectors of the convex hull to the green horizon message
             msg->horizon.reserve(hull_indices.size());
             for (const auto& idx : hull_indices) {
-                const Eigen::Vector3d ray      = uPCw.col(idx);
-                const double d                 = mesh.Hcw(2, 3) / ray.z();
-                Eigen::Vector3d ray_projection = ray * d;
-                msg->horizon.emplace_back(ray_projection.normalized());
+                msg->horizon.emplace_back(uPCw.col(idx));
             }
+
             log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
                                             hull_indices.size(),
                                             field_cluster.size()));
+
             emit(std::move(msg));
         });
     }
