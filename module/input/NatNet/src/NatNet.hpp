@@ -132,7 +132,7 @@ namespace module::input {
 
         // The version of NatNet we are running with
         std::string remote;
-        uint32_t version   = 0;
+        uint32_t version = 0;
 
         ReactionHandle command_handle;
         ReactionHandle data_handle;
