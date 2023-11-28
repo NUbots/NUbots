@@ -167,8 +167,8 @@ $(document).ready(function(){initNavTree('classutility_1_1io_1_1uart.html',''); 
 
 <div class="header">
   <div class="summary">
-<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classutility_1_1io_1_1uart-members.html">List of all members</a>  </div>
@@ -182,13 +182,6 @@ $(document).ready(function(){initNavTree('classutility_1_1io_1_1uart.html',''); 
 
 <p><code>#include &lt;<a class="el" href="uart_8hpp_source.html">uart.hpp</a>&gt;</code></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
-Public Types</h2></td></tr>
-<tr class="memitem:a7b642ecd9f398b3c149e2049190999d2"><td class="memItemLeft" align="right" valign="top"><a id="a7b642ecd9f398b3c149e2049190999d2"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a7b642ecd9f398b3c149e2049190999d2">char_type</a> = char</td></tr>
-<tr class="memdesc:a7b642ecd9f398b3c149e2049190999d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The type that is read by this device. <br /></td></tr>
-<tr class="separator:a7b642ecd9f398b3c149e2049190999d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a4b64a29a05078f63330e0610f78d1025"><td class="memItemLeft" align="right" valign="top"><a id="a4b64a29a05078f63330e0610f78d1025"></a>
@@ -199,50 +192,37 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a93a1196c7db582ed70a5a095aa39837c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Create a new uart class that is connected to the device <code>device</code>  <a href="classutility_1_1io_1_1uart.html#a93a1196c7db582ed70a5a095aa39837c">More...</a><br /></td></tr>
 <tr class="separator:a93a1196c7db582ed70a5a095aa39837c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab0855a5f5657cb2cb0604d400c00f737"><td class="memItemLeft" align="right" valign="top"><a id="ab0855a5f5657cb2cb0604d400c00f737"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#ab0855a5f5657cb2cb0604d400c00f737">uart</a> (const <a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;<a class="el" href="classutility_1_1io_1_1uart.html">uart</a>)=delete</td></tr>
-<tr class="memdesc:ab0855a5f5657cb2cb0604d400c00f737"><td class="mdescLeft">&#160;</td><td class="mdescRight">We can't copy these because otherwise we might close the device twice. <br /></td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>uart</b> (const <a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;<a class="el" href="classutility_1_1io_1_1uart.html">uart</a>)=delete</td></tr>
 <tr class="separator:ab0855a5f5657cb2cb0604d400c00f737"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac243011d992751019819f26bde7f23dc"><td class="memItemLeft" align="right" valign="top"><a id="ac243011d992751019819f26bde7f23dc"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#ac243011d992751019819f26bde7f23dc">uart</a> (<a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&amp;)=delete</td></tr>
-<tr class="memdesc:ac243011d992751019819f26bde7f23dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Moving these will call the destructors, closing the fd before trying to use it again TODO(KipHamiltons) implement an RAII fd utility, which would allow the uarts to be moved without that issue. <br /></td></tr>
-<tr class="separator:ac243011d992751019819f26bde7f23dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa44beb67b10ef67a0caa9e61f18c744f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#aa44beb67b10ef67a0caa9e61f18c744f">uart</a> (<a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&amp;other) noexcept</td></tr>
+<tr class="memdesc:aa44beb67b10ef67a0caa9e61f18c744f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move construct a new uart class.  <a href="classutility_1_1io_1_1uart.html#aa44beb67b10ef67a0caa9e61f18c744f">More...</a><br /></td></tr>
+<tr class="separator:aa44beb67b10ef67a0caa9e61f18c744f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adad0e0c79fc9b2f58572ba64df373769"><td class="memItemLeft" align="right" valign="top"><a id="adad0e0c79fc9b2f58572ba64df373769"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#adad0e0c79fc9b2f58572ba64df373769">~uart</a> ()</td></tr>
 <tr class="memdesc:adad0e0c79fc9b2f58572ba64df373769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor, close the device on destruction. <br /></td></tr>
 <tr class="separator:adad0e0c79fc9b2f58572ba64df373769"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a228598d0165d9952402efded6e1a3e05"><td class="memItemLeft" align="right" valign="top"><a id="a228598d0165d9952402efded6e1a3e05"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05">close</a> ()</td></tr>
-<tr class="memdesc:a228598d0165d9952402efded6e1a3e05"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the open file descriptor then reset fd = -1. <br /></td></tr>
-<tr class="separator:a228598d0165d9952402efded6e1a3e05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a191683ecb6d0e0c828b5e77f7b9063c5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5">connected</a> () const</td></tr>
 <tr class="memdesc:a191683ecb6d0e0c828b5e77f7b9063c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the connection is valid.  <a href="classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5">More...</a><br /></td></tr>
 <tr class="separator:a191683ecb6d0e0c828b5e77f7b9063c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a583cecd2d46723b9f6dc0e0f63955039"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a583cecd2d46723b9f6dc0e0f63955039">native_handle</a> () const</td></tr>
 <tr class="memdesc:a583cecd2d46723b9f6dc0e0f63955039"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the native file descriptor used by this class.  <a href="classutility_1_1io_1_1uart.html#a583cecd2d46723b9f6dc0e0f63955039">More...</a><br /></td></tr>
 <tr class="separator:a583cecd2d46723b9f6dc0e0f63955039"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a575335d772428e6cac047da73fc15c90"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a575335d772428e6cac047da73fc15c90">open</a> (const std::string &amp;device, const unsigned int &amp;baud_rate=57600)</td></tr>
-<tr class="memdesc:a575335d772428e6cac047da73fc15c90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Open the uart for the given file descriptor.  <a href="classutility_1_1io_1_1uart.html#a575335d772428e6cac047da73fc15c90">More...</a><br /></td></tr>
-<tr class="separator:a575335d772428e6cac047da73fc15c90"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83ddf4c5b2eb447a4f409da82262e8b4"><td class="memItemLeft" align="right" valign="top"><a id="a83ddf4c5b2eb447a4f409da82262e8b4"></a>
 <a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;<a class="el" href="classutility_1_1io_1_1uart.html">uart</a>)=delete</td></tr>
 <tr class="separator:a83ddf4c5b2eb447a4f409da82262e8b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adf4728cbc36031cb3d14549b144b2133"><td class="memItemLeft" align="right" valign="top"><a id="adf4728cbc36031cb3d14549b144b2133"></a>
-<a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&amp;<a class="el" href="classutility_1_1io_1_1uart.html">uart</a>)=delete</td></tr>
-<tr class="separator:adf4728cbc36031cb3d14549b144b2133"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa054f62d6603f56da4b8628c89a465d1"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:aa054f62d6603f56da4b8628c89a465d1"><td class="memTemplItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#aa054f62d6603f56da4b8628c89a465d1">read</a> (T &amp;data)</td></tr>
-<tr class="memdesc:aa054f62d6603f56da4b8628c89a465d1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read from the device into a structure.  <a href="classutility_1_1io_1_1uart.html#aa054f62d6603f56da4b8628c89a465d1">More...</a><br /></td></tr>
-<tr class="separator:aa054f62d6603f56da4b8628c89a465d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0169a92d12650bf5d6701d7efae3a887"><td class="memItemLeft" align="right" valign="top"><a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a0169a92d12650bf5d6701d7efae3a887">operator=</a> (<a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&amp;rhs) noexcept</td></tr>
+<tr class="memdesc:a0169a92d12650bf5d6701d7efae3a887"><td class="mdescLeft">&#160;</td><td class="mdescRight">Move assign a new uart class.  <a href="classutility_1_1io_1_1uart.html#a0169a92d12650bf5d6701d7efae3a887">More...</a><br /></td></tr>
+<tr class="separator:a0169a92d12650bf5d6701d7efae3a887"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9746ed9646023eb5f7d1df4746e607bb"><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a9746ed9646023eb5f7d1df4746e607bb">read</a> (void *buf, size_t count)</td></tr>
 <tr class="memdesc:a9746ed9646023eb5f7d1df4746e607bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read from the device into a buffer.  <a href="classutility_1_1io_1_1uart.html#a9746ed9646023eb5f7d1df4746e607bb">More...</a><br /></td></tr>
 <tr class="separator:a9746ed9646023eb5f7d1df4746e607bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7e72ef83228a60b020a0d13630681d0c"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a7e72ef83228a60b020a0d13630681d0c"><td class="memTemplItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a7e72ef83228a60b020a0d13630681d0c">write</a> (const T &amp;data)</td></tr>
-<tr class="memdesc:a7e72ef83228a60b020a0d13630681d0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write bytes to the uart.  <a href="classutility_1_1io_1_1uart.html#a7e72ef83228a60b020a0d13630681d0c">More...</a><br /></td></tr>
-<tr class="separator:a7e72ef83228a60b020a0d13630681d0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdcf291d53486048af03fd3b4180247e"><td class="memItemLeft" align="right" valign="top">ssize_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#abdcf291d53486048af03fd3b4180247e">write</a> (const void *buf, size_t count)</td></tr>
-<tr class="memdesc:abdcf291d53486048af03fd3b4180247e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Write bytes to the uart.  <a href="classutility_1_1io_1_1uart.html#abdcf291d53486048af03fd3b4180247e">More...</a><br /></td></tr>
-<tr class="separator:abdcf291d53486048af03fd3b4180247e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a98af9ac4d5d01170f1c4b7c57b90be5b"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a98af9ac4d5d01170f1c4b7c57b90be5b"><td class="memTemplItemLeft" align="right" valign="top">ssize_t <a class="el" href="classutility_1_1io_1_1uart.html#a9746ed9646023eb5f7d1df4746e607bb">read</a>(T &amp;data) requires std ssize_t write(const T &amp;data) requires std void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a98af9ac4d5d01170f1c4b7c57b90be5b">close</a> ()</td></tr>
+<tr class="memdesc:a98af9ac4d5d01170f1c4b7c57b90be5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read from the device into a structure.  <a href="classutility_1_1io_1_1uart.html#a98af9ac4d5d01170f1c4b7c57b90be5b">More...</a><br /></td></tr>
+<tr class="separator:a98af9ac4d5d01170f1c4b7c57b90be5b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -253,7 +233,7 @@ Private Member Functions</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a28face5c2423de44135feff13a911302"><td class="memItemLeft" align="right" valign="top"><a id="a28face5c2423de44135feff13a911302"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>device</b></td></tr>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>device</b> {}</td></tr>
 <tr class="separator:a28face5c2423de44135feff13a911302"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a234ce99884102680eb4e26ab7dbb12c7"><td class="memItemLeft" align="right" valign="top"><a id="a234ce99884102680eb4e26ab7dbb12c7"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
@@ -263,7 +243,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
 <div class="textblock"><p>Class for managing a connection to a serial device. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a93a1196c7db582ed70a5a095aa39837c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a93a1196c7db582ed70a5a095aa39837c">&#9670;&nbsp;</a></span>uart()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a93a1196c7db582ed70a5a095aa39837c">&#9670;&nbsp;</a></span>uart() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -293,6 +273,40 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
   <table class="params">
     <tr><td class="paramname">device</td><td>the file path of the device to connect to </td></tr>
     <tr><td class="paramname">int</td><td>the baud rate to connect to </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="aa44beb67b10ef67a0caa9e61f18c744f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa44beb67b10ef67a0caa9e61f18c744f">&#9670;&nbsp;</a></span>uart() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">utility::io::uart::uart </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&amp;&#160;</td>
+          <td class="paramname"><em>other</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Move construct a new uart class. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">other</td><td>the uart class to move from </td></tr>
   </table>
   </dd>
 </dl>
@@ -341,84 +355,42 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
 
 </div>
 </div>
-<a id="a575335d772428e6cac047da73fc15c90"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a575335d772428e6cac047da73fc15c90">&#9670;&nbsp;</a></span>open()</h2>
+<a id="a0169a92d12650bf5d6701d7efae3a887"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0169a92d12650bf5d6701d7efae3a887">&#9670;&nbsp;</a></span>operator=()</h2>
 
 <div class="memitem">
 <div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void utility::io::uart::open </td>
-          <td>(</td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>device</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const unsigned int &amp;&#160;</td>
-          <td class="paramname"><em>baud_rate</em> = <code>57600</code>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Open the uart for the given file descriptor. </p>
-<p>Closes any currently open file.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">device</td><td>the path to the device to open </td></tr>
-    <tr><td class="paramname">int</td><td>the baud rate to open with </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="aa054f62d6603f56da4b8628c89a465d1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa054f62d6603f56da4b8628c89a465d1">&#9670;&nbsp;</a></span>read() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename T &gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">ssize_t utility::io::uart::read </td>
+          <td class="memname"><a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp; utility::io::uart::operator= </td>
           <td>(</td>
-          <td class="paramtype">T &amp;&#160;</td>
-          <td class="paramname"><em>data</em></td><td>)</td>
+          <td class="paramtype"><a class="el" href="classutility_1_1io_1_1uart.html">uart</a> &amp;&amp;&#160;</td>
+          <td class="paramname"><em>rhs</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Read from the device into a structure. </p>
+<p>Move assign a new uart class. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">data</td><td>the structure to read in to</td></tr>
+    <tr><td class="paramname">rhs</td><td>the uart class to move from </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were actually read, or -1 if fail. See ::read</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Implementation in header file to stop the compiler from optimising it away </dd></dl>
 
 </div>
 </div>
 <a id="a9746ed9646023eb5f7d1df4746e607bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9746ed9646023eb5f7d1df4746e607bb">&#9670;&nbsp;</a></span>read() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9746ed9646023eb5f7d1df4746e607bb">&#9670;&nbsp;</a></span>read()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -489,71 +461,30 @@ template&lt;typename T &gt; </div>
 
 </div>
 </div>
-<a id="a7e72ef83228a60b020a0d13630681d0c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7e72ef83228a60b020a0d13630681d0c">&#9670;&nbsp;</a></span>write() <span class="overload">[1/2]</span></h2>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="a98af9ac4d5d01170f1c4b7c57b90be5b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a98af9ac4d5d01170f1c4b7c57b90be5b">&#9670;&nbsp;</a></span>close</h2>
 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
 template&lt;typename T &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">ssize_t utility::io::uart::write </td>
-          <td>(</td>
-          <td class="paramtype">const T &amp;&#160;</td>
-          <td class="paramname"><em>data</em></td><td>)</td>
-          <td></td>
+          <td class="memname">void utility::io::uart::close</td>
         </tr>
       </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
 </div><div class="memdoc">
 
-<p>Write bytes to the uart. </p>
+<p>Read from the device into a structure. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">data</td><td>the data to write</td></tr>
+    <tr><td class="paramname">data</td><td>the structure to read in to</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were written</dd></dl>
-<dl class="section note"><dt>Note</dt><dd>Implementation in header file to stop the compiler from optimising it away </dd></dl>
-
-</div>
-</div>
-<a id="abdcf291d53486048af03fd3b4180247e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abdcf291d53486048af03fd3b4180247e">&#9670;&nbsp;</a></span>write() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">ssize_t utility::io::uart::write </td>
-          <td>(</td>
-          <td class="paramtype">const void *&#160;</td>
-          <td class="paramname"><em>buf</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>count</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Write bytes to the uart. </p>
+<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were actually read, or -1 if fail. See ::read</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Implementation in header file to stop the compiler from optimising it away Write bytes to the uart</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">buf</td><td>the buffer to write bytes from </td></tr>
@@ -561,7 +492,17 @@ template&lt;typename T &gt; </div>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were written </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were written</dd></dl>
+<p>Write bytes to the uart</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">data</td><td>the data to write</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of bytes that were written</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Implementation in header file to stop the compiler from optimising it away Read a single character from the uart device, returning -1 if there is no data</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the character read from the device, or -1 if there is no data Close the open file descriptor then reset fd = -1 </dd></dl>
 
 </div>
 </div>
@@ -575,7 +516,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>io</b></li><li class="navelem"><a class="el" href="classutility_1_1io_1_1uart.html">uart</a></li>
-    <li class="footer">Generated on Tue Nov 28 2023 06:29:12 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Nov 28 2023 06:33:43 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

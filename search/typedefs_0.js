@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['char_5ftype_2233',['char_type',['../classutility_1_1io_1_1uart.html#a7b642ecd9f398b3c149e2049190999d2',1,'utility::io::uart']]]
+  ['pair_2232',['Pair',['../classutility_1_1motion_1_1splines_1_1Combination.html#a24afbfbcaaf1c7a365e7c02c36e51e54',1,'utility::motion::splines::Combination']]]
 ];
