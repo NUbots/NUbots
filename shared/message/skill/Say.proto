@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2016 NUbots
+ * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,27 +24,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ReactionTimer.hpp"
+syntax = "proto3";
 
-#include "extension/Configuration.hpp"
+package message.skill;
 
-namespace module::support {
-
-    using extension::Configuration;
-    using NUClear::message::ReactionStatistics;
-
-    ReactionTimer::ReactionTimer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-
-        on<Configuration>("ReactionTimer.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file ReactionTimer.yaml
-        });
-
-        on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
-            log(stats.identifiers.name,
-                1000.0
-                    * (double((stats.finished - stats.started).count())
-                       / double(NUClear::clock::duration::period::den)),
-                "ms");
-        });
-    }
-}  // namespace module::support
+message Say {
+    /// Text for robot to say
+    string text = 1;
+    /// Whether or not to nod while saying text
+    bool nod = 2;
+}

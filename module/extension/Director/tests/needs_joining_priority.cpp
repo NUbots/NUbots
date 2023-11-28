@@ -99,7 +99,7 @@ namespace {
 TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
           "[director][needs][joining][priority][!mayfail]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2016 NUbots
+ * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,27 +24,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#include "ReactionTimer.hpp"
+#ifndef MODULE_SKILL_SAY_HPP
+#define MODULE_SKILL_SAY_HPP
 
+#include <nuclear>
+
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-namespace module::support {
+namespace module::skill {
 
-    using extension::Configuration;
-    using NUClear::message::ReactionStatistics;
+    class Say : public ::extension::behaviour::BehaviourReactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            /// @brief Mimic3 voice to use
+            std::string voice = "en_US/vctk_low";
+            /// @brief Device name to play audio to
+            std::string device_name = "default";
+            /// @brief Text to say on startup
+            std::string startup_text = "";
+        } cfg;
 
-    ReactionTimer::ReactionTimer(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    public:
+        /// @brief Called by the powerplant to build and setup the Say reactor.
+        explicit Say(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-        on<Configuration>("ReactionTimer.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file ReactionTimer.yaml
-        });
+}  // namespace module::skill
 
-        on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
-            log(stats.identifiers.name,
-                1000.0
-                    * (double((stats.finished - stats.started).count())
-                       / double(NUClear::clock::duration::period::den)),
-                "ms");
-        });
-    }
-}  // namespace module::support
+#endif  // MODULE_SKILL_SAY_HPP

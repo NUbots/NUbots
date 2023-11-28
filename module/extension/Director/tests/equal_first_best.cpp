@@ -96,7 +96,7 @@ namespace {
 TEST_CASE("Test when two tasks of equal priority are emitted the one that was emitted first wins",
           "[director][priority][equal]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
