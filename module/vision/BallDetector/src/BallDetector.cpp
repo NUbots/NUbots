@@ -175,7 +175,7 @@ namespace module::vision {
                     // largest angular radius possible from the edge points available. Equal to cos(theta), where theta
                     // is the angle between the central ball axis (uBCw) and the edge of the ball. This helps to find
                     // the approximate distance to the ball.
-                    float radius = 1.0;
+                    double radius = 1.0;
                     for (const auto& idx : cluster) {
                         // Unit vector from the camera to the ball edge, in world space
                         const Eigen::Vector3d& uECw(uPCw.col(idx));
