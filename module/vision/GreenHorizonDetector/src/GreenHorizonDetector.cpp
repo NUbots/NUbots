@@ -78,27 +78,13 @@ namespace module::vision {
             std::vector<int> indices(mesh.indices.size());
             std::iota(indices.begin(), indices.end(), 0);
 
-            // Partition the indices such that we only have the field points that dont have field surrounding them
-            auto boundary = utility::vision::visualmesh::partition_points(
-                indices.begin(),
-                indices.end(),
-                neighbours,
-                [&](const int& idx) {
-                    return cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= cfg.confidence_threshold;
-                });
+            // Partition the indices such that we only have the field points
+            auto field_points = std::partition(indices.begin(), indices.end(), [&](const int& idx) {
+                return cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= cfg.confidence_threshold;
+            });
+            indices.resize(std::distance(indices.begin(), field_points));
 
-            // Discard indices that are not on the boundary
-            indices.resize(std::distance(indices.begin(), boundary));
-
-            // Graph the remaining points if debugging
-            if (log_level <= NUClear::DEBUG) {
-                for (int idx : indices) {
-                    emit(graph("Field point", rPWw.col(idx).x(), rPWw.col(idx).y()));
-                }
-            }
-
-            // The boundary points may be from multiple clusters of points
-            // Find the cluster that is closest to the robot, as this is most likely to be the field
+            // Cluster the points and find the closest to the robot, as this is most likely to be the field
             std::vector<std::vector<int>> clusters;
             utility::vision::visualmesh::cluster_points(indices.begin(),
                                                         indices.end(),
@@ -134,6 +120,18 @@ namespace module::vision {
             }
 
             auto field_cluster = clusters[closest_cluster];
+
+            // Partition the cluster such that we only have the boundary points of the cluster
+            auto boundary = utility::vision::visualmesh::partition_points(
+                field_cluster.begin(),
+                field_cluster.end(),
+                neighbours,
+                [&](const int& idx) {
+                    return cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= cfg.confidence_threshold;
+                });
+
+            // Discard points from the cluster that are not on the boundary
+            field_cluster.resize(std::distance(field_cluster.begin(), boundary));
 
             // Graph the remaining points if debugging
             if (log_level <= NUClear::DEBUG) {
