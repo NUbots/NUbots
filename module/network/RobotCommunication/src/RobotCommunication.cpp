@@ -1,6 +1,7 @@
 #include "RobotCommunication.hpp"
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <nuclear>
 
 #include "extension/Configuration.hpp"
 #include "message/skill/Kick.hpp"
@@ -13,7 +14,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
-// add includes
 
 namespace module::network {
 
@@ -53,10 +53,17 @@ namespace module::network {
 
                 // Bind our new handle
                 // TODO: check send_port is the correct thing to use here
-                // std::tie(listen_handle, std::ignore, std::ignore) =
-                //     on<UDP::Broadcast, Single>(cfg.send_port).then([this](const UDP::Packet& p) {
-                //         emit(NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(p));
-                //     });
+                std::tie(listen_handle, std::ignore, std::ignore) =
+                    on<UDP::Broadcast, Single>(cfg.receive_port)
+                        .then([this](const UDP::Packet& p) {
+                            const std::vector<char>& payload = p.payload;
+
+                            RoboCup deserializedData = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                            log<NUClear::DEBUG>("check received ", deserializedData.current_pose.position.z);
+
+                            std::unique_ptr<RoboCup> dataPtr = std::make_unique<RoboCup>(std::move(deserializedData));
+                            emit(dataPtr);
+                        });
             }
         });
 
@@ -128,7 +135,7 @@ namespace module::network {
                             msg->current_pose.team = config->team_id;
 
                             // Debug to deletePENALTY_REASON
-                            log<NUClear::DEBUG>("current pose z ", msg->current_pose.position.z);
+                            log<NUClear::DEBUG>("check sent ", msg->current_pose.position.z);
                             // TODO: maybe test covariance here
                         }
                     }
@@ -151,7 +158,7 @@ namespace module::network {
                     kick_target.x = kick->target.x();
                     kick_target.y = kick->target.y();
                     msg->kick_target = kick_target;
-                    log<NUClear::DEBUG>("kick_target ", kick_target.x);
+                    // log<NUClear::DEBUG>("kick_target ", kick_target.x);
                 }
 
                 // Ball
@@ -174,7 +181,7 @@ namespace module::network {
                     };
 
                     msg->ball.velocity = {static_cast<float>(loc_ball->vBw.x()), static_cast<float>(loc_ball->vBw.y()), static_cast<float>(loc_ball->vBw.z())};
-                    log<NUClear::DEBUG>("Ball velocity vBw: ", loc_ball->vBw);
+                    // log<NUClear::DEBUG>("Ball velocity vBw: ", loc_ball->vBw);
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
