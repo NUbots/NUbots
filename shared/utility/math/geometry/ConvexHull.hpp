@@ -30,8 +30,6 @@
 #include <Eigen/Core>
 #include <Eigen/Dense>
 #include <algorithm>
-#include <stack>
-#include <utility>
 #include <vector>
 
 namespace utility::math::geometry {

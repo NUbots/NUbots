@@ -28,7 +28,6 @@
 
 #include <fmt/format.h>
 #include <numeric>
-#include <set>
 
 #include "extension/Configuration.hpp"
 

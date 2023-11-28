@@ -34,7 +34,6 @@
 #include "utility/support/yaml_expression.hpp"
 
 using utility::math::geometry::chans_convex_hull;
-using utility::support::Expression;
 using utility::support::resolve_expression;
 
 static const YAML::Node test_values = YAML::LoadFile("tests/TestConvexHull.yaml");
