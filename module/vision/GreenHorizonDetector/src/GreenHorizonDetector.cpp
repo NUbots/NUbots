@@ -78,10 +78,13 @@ namespace module::vision {
             std::vector<int> indices(mesh.indices.size());
             std::iota(indices.begin(), indices.end(), 0);
 
-            // Partition the indices such that we only have the field points
-            auto field_points = std::partition(indices.begin(), indices.end(), [&](const int& idx) {
+            // Set up the check for if a point is on the field
+            auto is_on_field = [&](const int& idx) {
                 return cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= cfg.confidence_threshold;
-            });
+            };
+
+            // Partition the indices such that we only have the field points
+            auto field_points = std::partition(indices.begin(), indices.end(), is_on_field);
             indices.resize(std::distance(indices.begin(), field_points));
 
             // Cluster the points and find the closest to the robot, as this is most likely to be the field
@@ -94,46 +97,39 @@ namespace module::vision {
 
             log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-            // Get the closest distance of a cluster
-            auto get_closest_distance = [&](const std::vector<int>& cluster) {
-                // Find the cluster that is closest to the robot
-                int closest_point = 0;
-                for (const auto& idx : cluster) {
-                    if (rPWw.col(closest_point).norm() > rPWw.col(idx).norm()) {
-                        closest_point = idx;
-                    }
-                }
-                return rPWw.col(closest_point).norm();
-            };
-
-            // Set the closest cluster to the first cluster
-            int closest_cluster     = 0;
-            double closest_distance = get_closest_distance(clusters[0]);
-
-            // Find the cluster that is closest to the robot
-            for (size_t i = 1; i < clusters.size(); i++) {
-                double distance = get_closest_distance(clusters[i]);
-                if (distance < closest_distance) {
-                    closest_cluster  = i;
-                    closest_distance = distance;
-                }
+            // Prevent issues if there are no clusters
+            if (clusters.size() == 0) {
+                log<NUClear::DEBUG>("No clusters found, cannot form a green horizon");
+                return;
             }
 
-            auto field_cluster = clusters[closest_cluster];
+            // Get the closest distance to the robot from all points in the cluster
+            auto get_closest_distance = [&](const std::vector<int>& cluster) {
+                return *std::min_element(cluster.begin(), cluster.end(), [&](int a, int b) {
+                    return rPWw.col(a).norm() < rPWw.col(b).norm();
+                });
+            };
+
+            // Find the cluster closest to the robot
+            auto closest_cluster_it = std::min_element(clusters.begin(),
+                                                       clusters.end(),
+                                                       [&](const std::vector<int>& a, const std::vector<int>& b) {
+                                                           return get_closest_distance(a) < get_closest_distance(b);
+                                                       });
+
+            // The closest cluster to the robot is the field cluster
+            auto field_cluster = *closest_cluster_it;
 
             // Partition the cluster such that we only have the boundary points of the cluster
-            auto boundary = utility::vision::visualmesh::partition_points(
-                field_cluster.begin(),
-                field_cluster.end(),
-                neighbours,
-                [&](const int& idx) {
-                    return cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= cfg.confidence_threshold;
-                });
+            auto boundary = utility::vision::visualmesh::boundary_points(field_cluster.begin(),
+                                                                         field_cluster.end(),
+                                                                         neighbours,
+                                                                         is_on_field);
 
             // Discard points from the cluster that are not on the boundary
             field_cluster.resize(std::distance(field_cluster.begin(), boundary));
 
-            // Graph the remaining points if debugging
+            // Graph the field cluster points if debugging
             if (log_level <= NUClear::DEBUG) {
                 for (int idx : field_cluster) {
                     emit(graph("Field cluster point", rPWw.col(idx).x(), rPWw.col(idx).y()));
@@ -142,8 +138,9 @@ namespace module::vision {
 
             // The remaining points are on the boundary of the field
             // They may also appear around other objects such as the ball
-            log<NUClear::DEBUG>(fmt::format("Found {} points on the boundary of the field to create a convex hull with",
-                                            field_cluster.size()));
+            log<NUClear::DEBUG>(
+                fmt::format("Found {} points on the boundary of the cluster to create a convex hull with",
+                            field_cluster.size()));
 
             // Convex hull algorithms require at least three points
             if (field_cluster.size() < 3) {

@@ -44,7 +44,6 @@ namespace utility::vision::visualmesh {
                               const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 
-
         return std::partition(first, last, [&](const value_type& idx) {
             // Check if this index satisfies our confidence requirements
             bool prediction = pred(idx);
@@ -57,6 +56,24 @@ namespace utility::vision::visualmesh {
             return prediction && check;
         });
     }
+
+    template <typename Iterator, typename Func>
+    Iterator boundary_points(Iterator first,
+                             Iterator last,
+                             const Eigen::MatrixXi& neighbours,
+                             Func&& pred,  // function determining if the index has a high enough confidence to use
+                             const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
+        using value_type = typename std::iterator_traits<Iterator>::value_type;
+
+        // Check if any of the required neighbours satisfy our confidence requirements
+        // Required neighbours are from the search space list
+        return std::partition(first, last, [&](const value_type& idx) {
+            return std::any_of(search_space.begin(), search_space.end(), [&](const auto& n) {
+                return !pred(neighbours(n, idx));
+            });
+        });
+    }
+
 
     template <typename Iterator>
     void cluster_points(Iterator first,
