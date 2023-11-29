@@ -133,10 +133,6 @@ namespace module::network {
                             };
 
                             msg->current_pose.team = config->team_id;
-
-                            // Debug to deletePENALTY_REASON
-                            log<NUClear::DEBUG>("check sent ", msg->current_pose.position.z);
-                            // TODO: maybe test covariance here
                         }
                     }
                 }
@@ -158,7 +154,6 @@ namespace module::network {
                     kick_target.x = kick->target.x();
                     kick_target.y = kick->target.y();
                     msg->kick_target = kick_target;
-                    // log<NUClear::DEBUG>("kick_target ", kick_target.x);
                 }
 
                 // Ball
