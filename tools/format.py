@@ -151,7 +151,6 @@ def _get_history_dates(path):
 # For example the year the file was added and the year it was last modified for a licence header
 def _get_args(path):
     modified, added = _get_history_dates(path)
-    print(modified, added)
     return {"added": f"{added}", "modified": f"{modified}"}
 
 
