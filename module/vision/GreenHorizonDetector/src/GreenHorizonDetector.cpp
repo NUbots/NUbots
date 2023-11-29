@@ -28,7 +28,6 @@
 
 #include <fmt/format.h>
 #include <numeric>
-#include <set>
 
 #include "extension/Configuration.hpp"
 
@@ -36,173 +35,171 @@
 #include "message/vision/VisualMesh.hpp"
 
 #include "utility/math/geometry/ConvexHull.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::vision {
 
     using extension::Configuration;
-
+    using message::vision::GreenHorizon;
     using message::vision::VisualMesh;
-    using GreenHorizonMsg = message::vision::GreenHorizon;
+    using utility::nusight::graph;
 
     GreenHorizonDetector::GreenHorizonDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& config) {
             // Use configuration here from file GreenHorizonDetector.yaml
-            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            config.confidence_threshold = cfg["confidence_threshold"].as<float>();
-            config.cluster_points       = cfg["cluster_points"].as<uint>();
-            config.distance_offset      = cfg["distance_offset"].as<float>();
+            cfg.confidence_threshold = config["confidence_threshold"].as<double>();
+            cfg.cluster_points       = config["cluster_points"].as<uint>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
             // Convenience variables
-            const auto& cls                                     = mesh.classifications;
-            const auto& neighbours                              = mesh.neighbourhood;
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
-            const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
-            const uint32_t LINE_INDEX                           = mesh.class_map.at("line");
-            const uint32_t FIELD_INDEX                          = mesh.class_map.at("field");
+            const auto& cls                                      = mesh.classifications;
+            const auto& neighbours                               = mesh.neighbourhood;
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = mesh.rays.cast<double>();
+            const Eigen::Isometry3d Hwc                          = mesh.Hcw.inverse();
+            const uint32_t LINE_INDEX                            = mesh.class_map.at("line");
+            const uint32_t FIELD_INDEX                           = mesh.class_map.at("field");
+
+            // Convert rays to world space
+            Eigen::Matrix<double, 3, Eigen::Dynamic> rPWw(3, uPCw.cols());
+
+            // Loop over each position and add the transformed ray
+            for (int idx = 0; idx < uPCw.cols(); idx++) {
+                rPWw.col(idx) = uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + Hwc.translation();
+            }
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
             std::iota(indices.begin(), indices.end(), 0);
 
-            // Partition the indices such that we only have the field points that dont have field surrounding them
-            // Only check the top two neighbours of each point
-            auto boundary = utility::vision::visualmesh::partition_points(
-                indices.begin(),
-                indices.end(),
-                neighbours,
-                [&](const int& idx) {
-                    return idx == int(indices.size()) || cls(FIELD_INDEX, idx) >= config.confidence_threshold
-                           || cls(LINE_INDEX, idx) >= config.confidence_threshold;
-                },
-                {1, 2});
+            // Set up the check for if a point is on the field
+            auto is_on_field = [&](const int& idx) {
+                return cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= cfg.confidence_threshold;
+            };
 
+            // Partition the indices such that we only have the field points
+            auto field_points = std::partition(indices.begin(), indices.end(), is_on_field);
+            indices.resize(std::distance(indices.begin(), field_points));
 
-            // Discard indices that are not on the boundary
-            indices.resize(std::distance(indices.begin(), boundary));
-
-            log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
-
-            // Cluster the points
-            // Points are clustered based on their connectivity to other field points
-            // Clustering is down in two steps
-            // 1) We take the set of field points found above and partition them into potential clusters by
-            //    a) Add the first point and its field neighbours to a cluster
-            //    b) Find all other field points who are neighbours of the points in the cluster
-            //    c) Partition all of the indices that are in the cluster
-            //    d) Repeat a-c for all points that were not partitioned
-            //    e) Delete all partitions smaller than a given threshold
-            // 2) Merge the clusters down into a single cluster
-            //    Clusters are merged when they are not overlapping
-            //    If the clusters do overlap then we keep the largest one
+            // Cluster the points and find the closest to the robot, as this is most likely to be the field
             std::vector<std::vector<int>> clusters;
             utility::vision::visualmesh::cluster_points(indices.begin(),
                                                         indices.end(),
                                                         neighbours,
-                                                        config.cluster_points,
+                                                        cfg.cluster_points,
                                                         clusters);
 
             log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-            // Merge clusters until only 1 remains
-            while (clusters.size() > 1) {
-                for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
-                    // Get the largest and smallest theta values
-                    auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const int& a, const int& b) {
-                        return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
-                    });
+            // Prevent issues if there are no clusters
+            if (clusters.size() == 0) {
+                log<NUClear::DEBUG>("No clusters found, cannot form a green horizon");
+                return;
+            }
 
-                    const float min_a = std::atan2(rays(1, *range_a.first), rays(0, *range_a.first));
-                    const float max_a = std::atan2(rays(1, *range_a.second), rays(0, *range_a.second));
+            // Get points from the camera since we want to measure the distance from the robot
+            Eigen::Matrix<double, 3, Eigen::Dynamic> rPCc(3, rPWw.cols());
 
-                    for (auto it2 = std::next(it); it2 != clusters.end();) {
-                        // Get the largest and smallest theta values
-                        auto range_b =
-                            std::minmax_element(it2->begin(), it2->end(), [&rays](const int& a, const int& b) {
-                                return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
-                            });
+            // Loop over each position and change the coordinate space
+            for (int idx = 0; idx < rPWw.cols(); idx++) {
+                rPCc.col(idx) = Hwc.inverse() * rPWw.col(idx);
+            }
 
-                        const float min_b = std::atan2(rays(1, *range_b.first), rays(0, *range_b.first));
-                        const float max_b = std::atan2(rays(1, *range_b.second), rays(0, *range_b.second));
+            // Get the closest distance to the robot from all points in the cluster
+            auto get_closest_distance = [&](const std::vector<int>& cluster) {
+                int closest_index = *std::min_element(cluster.begin(), cluster.end(), [&](int a, int b) {
+                    return rPCc.col(a).norm() < rPCc.col(b).norm();
+                });
+                return rPCc.col(closest_index).norm();
+            };
 
-                        // Ranges do not overlap
-                        // Merge the clusters
-                        if ((max_a < min_b) || (max_b < min_a)) {
-                            // Append the second cluster on to the first
-                            it->insert(it->end(), it2->begin(), it2->end());
-                            // Delete the second cluster
-                            it2 = clusters.erase(it2);
-                        }
-                        // Second cluster is overlapping first cluster either on the left or the right
-                        // Keep the largest cluster
-                        else if (((min_a <= min_b) && (min_b <= max_a)) || ((min_b <= min_a) && (min_a <= max_b))) {
-                            // Delete the second cluster
-                            it2 = clusters.erase(it2);
-                        }
-                        else {
-                            log<NUClear::DEBUG>(
-                                "The clusters are neither overlapping, nor are they not overlapping. What have "
-                                "you "
-                                "done???");
-                            log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
-                                                            *range_a.first,
-                                                            *range_a.second,
-                                                            min_a,
-                                                            max_a,
-                                                            *range_b.first,
-                                                            *range_b.second,
-                                                            min_b,
-                                                            max_b));
-                        }
-                    }
+            // Find the cluster closest to the robot
+            auto closest_cluster_it = std::min_element(clusters.begin(),
+                                                       clusters.end(),
+                                                       [&](const std::vector<int>& a, const std::vector<int>& b) {
+                                                           return get_closest_distance(a) < get_closest_distance(b);
+                                                       });
+
+            for (const auto& cluster : clusters) {
+                log<NUClear::DEBUG>(fmt::format("Cluster with {} points and distance {}",
+                                                cluster.size(),
+                                                get_closest_distance(cluster)));
+            }
+
+            log<NUClear::DEBUG>(fmt::format("Closest cluster has {} points", closest_cluster_it->size()));
+
+            // The closest cluster to the robot is the field cluster
+            auto field_cluster = *closest_cluster_it;
+
+            // Partition the cluster such that we only have the boundary points of the cluster
+            auto boundary = utility::vision::visualmesh::boundary_points(field_cluster.begin(),
+                                                                         field_cluster.end(),
+                                                                         neighbours,
+                                                                         is_on_field);
+
+            // Discard points from the cluster that are not on the boundary
+            field_cluster.resize(std::distance(field_cluster.begin(), boundary));
+
+            // Graph the field cluster points if debugging
+            if (log_level <= NUClear::DEBUG) {
+                for (int idx : field_cluster) {
+                    emit(graph("Field cluster point", rPWw.col(idx).x(), rPWw.col(idx).y()));
                 }
             }
 
-            if (clusters.empty()) {
-                log<NUClear::DEBUG>("Found no clusters to make a convex hull from");
+            // The remaining points are on the boundary of the field
+            // They may also appear around other objects such as the ball
+            log<NUClear::DEBUG>(
+                fmt::format("Found {} points on the boundary of the cluster to create a convex hull with",
+                            field_cluster.size()));
+
+            // Convex hull algorithms require at least three points
+            if (field_cluster.size() < 3) {
+                log<NUClear::DEBUG>("Not enough points to make a convex hull");
+                return;
             }
-            else if (clusters.front().size() < 3) {
-                log<NUClear::DEBUG>("Unable to make a convex hull with less than 3 points");
-            }
-            else {
-                log<NUClear::DEBUG>(fmt::format("Making a convex hull from {} points", clusters.front().size()));
-                // Find the convex hull of the cluster
-                auto hull_indices = utility::math::geometry::upper_convex_hull(clusters.front(), rays, world_offset);
 
-                auto msg = std::make_unique<GreenHorizonMsg>();
+            // Find the convex hull of the field points
+            auto hull_indices = utility::math::geometry::chans_convex_hull(field_cluster, rPWw);
 
-                // Preserve mesh so that anyone using the GreenHorizon can access the original data
-                msg->mesh = const_cast<VisualMesh*>(&mesh)->shared_from_this();
-
-                msg->id        = mesh.id;
-                msg->Hcw       = mesh.Hcw;
-                msg->timestamp = mesh.timestamp;
-                msg->class_map = mesh.class_map;
-
-                if (mesh.vision_ground_truth.exists) {
-                    msg->vision_ground_truth = mesh.vision_ground_truth;
+            // Graph the convex hull if debugging
+            if (log_level <= NUClear::DEBUG) {
+                for (int idx : hull_indices) {
+                    emit(graph("Convex hull point", rPWw.col(idx).x(), rPWw.col(idx).y()));
                 }
-
-                // Find the convex hull of the cluster
-                msg->horizon.reserve(hull_indices.size());
-                for (const auto& idx : hull_indices) {
-                    const Eigen::Vector3f ray      = rays.col(idx);
-                    const float d                  = mesh.Hcw(2, 3) / ray.z();
-                    Eigen::Vector3f ray_projection = ray * d;
-                    const float norm               = ray_projection.head<2>().norm();
-                    ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
-                    msg->horizon.emplace_back(ray_projection.normalized());
-                }
-                log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
-                                                hull_indices.size(),
-                                                clusters.front().size()));
-                emit(std::move(msg));
             }
+
+            auto msg = std::make_unique<GreenHorizon>();
+
+            // Preserve mesh so that anyone using the GreenHorizon can access the original data
+            msg->mesh = const_cast<VisualMesh*>(&mesh)->shared_from_this();
+
+            msg->id        = mesh.id;
+            msg->Hcw       = mesh.Hcw;
+            msg->timestamp = mesh.timestamp;
+            msg->class_map = mesh.class_map;
+
+            // If using ground truth, add it to the message
+            if (mesh.vision_ground_truth.exists) {
+                msg->vision_ground_truth = mesh.vision_ground_truth;
+            }
+
+            // Add the unit vectors of the convex hull to the green horizon message
+            msg->horizon.reserve(hull_indices.size());
+            for (const auto& idx : hull_indices) {
+                msg->horizon.emplace_back(uPCw.col(idx));
+            }
+
+            log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
+                                            hull_indices.size(),
+                                            field_cluster.size()));
+
+            emit(std::move(msg));
         });
     }
 }  // namespace module::vision

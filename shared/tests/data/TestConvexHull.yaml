@@ -1,0 +1,46 @@
+# A simple square with some points on the interior and boundary
+square:
+  input:
+    - [0, 0]
+    - [0, 1]
+    - [1, 1]
+    - [1, 0]
+    - [0, 0.5]
+    - [0.5, 1]
+    - [1, 0.5]
+    - [0.5, 0]
+    - [0.5, 0.5]
+    - [0.5, 0.3]
+  hull: [0, 1, 2, 3, 0]
+
+# A simple triangle with points on the interior and boundary
+triangle:
+  input:
+    - [0, 0]
+    - [0.4, 0.8]
+    - [0.1, 0.8]
+    - [0.2, 0.4]
+    - [0, 1]
+    - [0.0, 0.5]
+    - [0.5, 0.5]
+    - [1, 1]
+    - [0.7, 0.9]
+    - [0.1, 0.1]
+  hull: [0, 4, 7, 0]
+
+# A more complex polygon where the leftmost and rightmost are not also the highest and lowest points
+# Based on the triangle
+polygon:
+  input:
+    - [0, 0]
+    - [0.4, 0.8]
+    - [0.35, -0.15]
+    - [0.2, 0.4]
+    - [0, 1]
+    - [0.0, 0.5]
+    - [0.5, 0.5]
+    - [1, 1]
+    - [0.7, 0.9]
+    - [0.1, 0.1]
+    - [0.5, 1.5]
+  hull: [4, 10, 7, 2, 0, 4]
