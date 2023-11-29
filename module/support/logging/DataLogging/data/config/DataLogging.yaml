@@ -20,3 +20,5 @@ messages:
   message.vision.VisualMesh: false
   message.localisation.Ball: false
   message.localisation.Field: false
+  message.nuclear.LogMessage: false
+  message.nuclear.ReactionStatistics: false
