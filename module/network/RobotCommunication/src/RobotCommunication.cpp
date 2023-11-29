@@ -2,7 +2,6 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <nuclear>
 
 #include "extension/Configuration.hpp"
 
