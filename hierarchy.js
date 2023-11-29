@@ -327,6 +327,7 @@ var hierarchy =
       [ "module::support::logging::DataLogging", "classmodule_1_1support_1_1logging_1_1DataLogging.html", null ],
       [ "module::support::logging::DataPlayback", "classmodule_1_1support_1_1logging_1_1DataPlayback.html", null ],
       [ "module::support::logging::FileLogHandler", "classmodule_1_1support_1_1logging_1_1FileLogHandler.html", null ],
+      [ "module::support::logging::MessageLogHandler", "classmodule_1_1support_1_1logging_1_1MessageLogHandler.html", null ],
       [ "module::tools::FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", null ],
       [ "module::tools::SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", null ],
       [ "module::vision::BallDetector", "classmodule_1_1vision_1_1BallDetector.html", null ],

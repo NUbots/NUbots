@@ -1,7 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="5,853,240,895"/>
 <area shape="rect" id="node2" href="$classmodule_1_1extension_1_1Director.html" title=" " alt="" coords="340,853,491,895"/>
-<area shape="rect" id="node3" title=" " alt="" coords="55,1945,190,1971"/>
+<area shape="rect" id="node3" title=" " alt="" coords="55,1974,190,2001"/>
 <area shape="rect" id="node4" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="336,919,495,960"/>
 <area shape="rect" id="node40" href="$classmodule_1_1actuation_1_1KinematicsConfiguration.html" title=" " alt="" coords="324,984,507,1025"/>
 <area shape="rect" id="node41" href="$classmodule_1_1extension_1_1FileWatcher.html" title=" " alt="" coords="340,1049,491,1091"/>
@@ -33,13 +33,14 @@
 <area shape="rect" id="node67" href="$classmodule_1_1support_1_1logging_1_1DataLogging.html" title=" " alt="" coords="323,2549,507,2591"/>
 <area shape="rect" id="node68" href="$classmodule_1_1support_1_1logging_1_1DataPlayback.html" title=" " alt="" coords="323,2615,507,2656"/>
 <area shape="rect" id="node69" href="$classmodule_1_1support_1_1logging_1_1FileLogHandler.html" title=" " alt="" coords="323,2680,507,2721"/>
-<area shape="rect" id="node70" href="$classmodule_1_1tools_1_1FirmwareInstaller.html" title=" " alt="" coords="299,2746,532,2773"/>
-<area shape="rect" id="node71" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="288,2797,543,2823"/>
-<area shape="rect" id="node72" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="312,2847,519,2874"/>
-<area shape="rect" id="node73" href="$classmodule_1_1vision_1_1FieldLineDetector.html" title=" " alt="" coords="323,2899,507,2940"/>
-<area shape="rect" id="node74" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="309,2965,521,2991"/>
-<area shape="rect" id="node75" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="308,3016,523,3057"/>
-<area shape="rect" id="node76" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,3082,516,3109"/>
+<area shape="rect" id="node70" href="$classmodule_1_1support_1_1logging_1_1MessageLogHandler.html" title=" " alt="" coords="323,2745,507,2787"/>
+<area shape="rect" id="node71" href="$classmodule_1_1tools_1_1FirmwareInstaller.html" title=" " alt="" coords="299,2811,532,2838"/>
+<area shape="rect" id="node72" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="288,2862,543,2889"/>
+<area shape="rect" id="node73" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="312,2913,519,2939"/>
+<area shape="rect" id="node74" href="$classmodule_1_1vision_1_1FieldLineDetector.html" title=" " alt="" coords="323,2964,507,3005"/>
+<area shape="rect" id="node75" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="309,3030,521,3057"/>
+<area shape="rect" id="node76" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="308,3081,523,3123"/>
+<area shape="rect" id="node77" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,3147,516,3174"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="635,5,783,47"/>
 <area shape="rect" id="node6" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="635,71,783,112"/>
 <area shape="rect" id="node7" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="635,136,783,177"/>

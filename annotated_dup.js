@@ -258,6 +258,7 @@ var annotated_dup =
           [ "DataLogging", "classmodule_1_1support_1_1logging_1_1DataLogging.html", "classmodule_1_1support_1_1logging_1_1DataLogging" ],
           [ "DataPlayback", "classmodule_1_1support_1_1logging_1_1DataPlayback.html", "classmodule_1_1support_1_1logging_1_1DataPlayback" ],
           [ "FileLogHandler", "classmodule_1_1support_1_1logging_1_1FileLogHandler.html", "classmodule_1_1support_1_1logging_1_1FileLogHandler" ],
+          [ "MessageLogHandler", "classmodule_1_1support_1_1logging_1_1MessageLogHandler.html", "classmodule_1_1support_1_1logging_1_1MessageLogHandler" ],
           [ "Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", "structmodule_1_1support_1_1logging_1_1Packet" ]
         ] ],
         [ "LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", "classmodule_1_1support_1_1LocalisationSimulator" ],

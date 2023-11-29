@@ -629,6 +629,7 @@ var namespaces_dup =
           [ "DataLogging", "classmodule_1_1support_1_1logging_1_1DataLogging.html", "classmodule_1_1support_1_1logging_1_1DataLogging" ],
           [ "DataPlayback", "classmodule_1_1support_1_1logging_1_1DataPlayback.html", "classmodule_1_1support_1_1logging_1_1DataPlayback" ],
           [ "FileLogHandler", "classmodule_1_1support_1_1logging_1_1FileLogHandler.html", "classmodule_1_1support_1_1logging_1_1FileLogHandler" ],
+          [ "MessageLogHandler", "classmodule_1_1support_1_1logging_1_1MessageLogHandler.html", "classmodule_1_1support_1_1logging_1_1MessageLogHandler" ],
           [ "Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", "structmodule_1_1support_1_1logging_1_1Packet" ],
           [ "formatted_time", "DataLogging_8cpp.html#a31101356c34dad13c8d4985675f0dcb9", null ],
           [ "read_packet", "read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e", null ]
