@@ -1,11 +1,11 @@
 var classmodule_1_1vision_1_1BallDetector =
 [
     [ "BallDetector", "classmodule_1_1vision_1_1BallDetector.html#a1d11876da2dc92451e94f4344028e9c3", null ],
-    [ "ball_angular_cov", "classmodule_1_1vision_1_1BallDetector.html#acf5627528f8b85dba93c938a064ce65c", null ],
+    [ "ball_angular_cov", "classmodule_1_1vision_1_1BallDetector.html#a07542e3c009cdbda8b747dae65de0443", null ],
     [ "cfg", "classmodule_1_1vision_1_1BallDetector.html#ad66c87be951753254646e1ab4196c466", null ],
     [ "cluster_points", "classmodule_1_1vision_1_1BallDetector.html#af27571cebdabe6fd96ca31df77a22d3a", null ],
-    [ "confidence_threshold", "classmodule_1_1vision_1_1BallDetector.html#a2519d88b77f7cf6cadbd00a2d6ffd0ad", null ],
-    [ "distance_disagreement", "classmodule_1_1vision_1_1BallDetector.html#a3c71262b721a63d157a5c6f258bfcad7", null ],
-    [ "maximum_deviation", "classmodule_1_1vision_1_1BallDetector.html#ad4acc293ec65745618f524c175b42a8d", null ],
-    [ "minimum_ball_distance", "classmodule_1_1vision_1_1BallDetector.html#a2c4e394ad29d20d31c901b286676d74b", null ]
+    [ "confidence_threshold", "classmodule_1_1vision_1_1BallDetector.html#ae1cf5e0a55fdd2aa990fa856a6eaf9b9", null ],
+    [ "distance_disagreement", "classmodule_1_1vision_1_1BallDetector.html#a13c93d4c232967260da96066fa09aaa7", null ],
+    [ "maximum_deviation", "classmodule_1_1vision_1_1BallDetector.html#a074f9906f5c203c67397ba469cea4869", null ],
+    [ "minimum_ball_distance", "classmodule_1_1vision_1_1BallDetector.html#aa2ccc4afe38b2c1772bd5fe532b0aa3b", null ]
 ];

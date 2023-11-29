@@ -676,8 +676,7 @@ var namespaces_dup =
         [ "FieldLineDetector", "classmodule_1_1vision_1_1FieldLineDetector.html", "classmodule_1_1vision_1_1FieldLineDetector" ],
         [ "GoalDetector", "classmodule_1_1vision_1_1GoalDetector.html", "classmodule_1_1vision_1_1GoalDetector" ],
         [ "GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", "classmodule_1_1vision_1_1GreenHorizonDetector" ],
-        [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ],
-        [ "GreenHorizonMsg", "GreenHorizonDetector_8cpp.html#aa1933eec41ade576cd35a7e42b0bfb82", null ]
+        [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ]
       ] ]
     ] ],
     [ "NUClear", null, [
@@ -826,14 +825,25 @@ var namespaces_dup =
         ] ],
         [ "geometry", null, [
           [ "Quad", "classutility_1_1math_1_1geometry_1_1Quad.html", "classutility_1_1math_1_1geometry_1_1Quad" ],
-          [ "graham_scan", "ConvexHull_8hpp.html#a1daf76efb18da429c41ae71707e2cf9e", null ],
-          [ "point_in_convex_hull", "ConvexHull_8hpp.html#a52c1c4f3120419540e546ee980a6556f", null ],
-          [ "point_under_hull", "ConvexHull_8hpp.html#a39fd4ddcf0fd9a3a1c5bedc0878bdc00", null ],
-          [ "project_vector", "ConvexHull_8hpp.html#a60b6e2ff29dd1f35708bbe78a18a23eb", null ],
-          [ "sort_by_theta", "ConvexHull_8hpp.html#a4720d419de2a0fdd3f0a90202002982b", null ],
-          [ "turn_direction", "ConvexHull_8hpp.html#a42704ddcb23db7f1ceaf80c407f69d25", null ],
-          [ "upper_convex_hull", "ConvexHull_8hpp.html#ac6dd22ce51e4b45e6024177d43b34790", null ],
-          [ "upper_convex_hull", "ConvexHull_8hpp.html#a6c4b934cb4f3f6664ea1b55299f5d40d", null ]
+          [ "Direction", "ConvexHull_8hpp.html#ad3868d6c9b9a55cad53368250418e159", [
+            [ "COLLINEAR", "ConvexHull_8hpp.html#ad3868d6c9b9a55cad53368250418e159a7423d6e1f3661ac3871767c2d0eeff20", null ],
+            [ "CLOCKWISE", "ConvexHull_8hpp.html#ad3868d6c9b9a55cad53368250418e159ad652c4a2cf6e53c8bd5324d3d50f4f24", null ],
+            [ "COUNTERCLOCKWISE", "ConvexHull_8hpp.html#ad3868d6c9b9a55cad53368250418e159af7080807b107c95b55e1c2517d6a4bb9", null ]
+          ] ],
+          [ "chans_convex_hull", "ConvexHull_8hpp.html#a32d8376b895ab09a01227ac45d231462", null ],
+          [ "chans_convex_hull", "ConvexHull_8hpp.html#a0c3cd7c9059e7f17d0b35de8fe4053de", null ],
+          [ "direction", "ConvexHull_8hpp.html#a29a7ab7292f11dc2cddafd3120969709", null ],
+          [ "find_extreme_point", "ConvexHull_8hpp.html#a6d099121f3b60dfec3e14c7578530414", null ],
+          [ "find_lower_tangent", "ConvexHull_8hpp.html#a3834008ae24c0efe35b215f35de1fb0b", null ],
+          [ "find_upper_tangent", "ConvexHull_8hpp.html#abdca9af2b646b9e2da4cc64bb9942c5d", null ],
+          [ "graham_scan", "ConvexHull_8hpp.html#aee1c31cd032fa65f68c83674699d416c", null ],
+          [ "lower_point", "ConvexHull_8hpp.html#a16089399363842b2fe986f8718dd55fc", null ],
+          [ "merge_hulls", "ConvexHull_8hpp.html#a8a8d6a936864652ba6eb38b16176fc8e", null ],
+          [ "partition_points", "ConvexHull_8hpp.html#a05545cab3af6457a484a4d4fbfe74102", null ],
+          [ "point_under_hull", "ConvexHull_8hpp.html#a2d2fdb4a819e84bbf8c6c2bd6409fba8", null ],
+          [ "project_vector", "ConvexHull_8hpp.html#a12733384621daf7950799d6c8cbf084b", null ],
+          [ "sort_by_theta", "ConvexHull_8hpp.html#a96d0e1bc050cf208cf72d5d0cd8d0792", null ],
+          [ "sort_polar", "ConvexHull_8hpp.html#a1b667241fd0c110224eb2ca771066bce", null ]
         ] ],
         [ "quaternion", null, [
           [ "difference", "quaternion_8hpp.html#a125dc8461b108045bb8763abaf1019ff", null ],
@@ -968,7 +978,8 @@ var namespaces_dup =
       ] ],
       [ "vision", null, [
         [ "visualmesh", null, [
-          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a728b371609010badaf77626e23d5a3d6", null ],
+          [ "boundary_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aefa8fd21888715d12dba230e3fd4d637", null ],
+          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a7a99256c41749e5dfd2e880e18cea04f", null ],
           [ "cluster_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a01b125faf9b79a6d584f8feee218a4c4", null ],
           [ "partition_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959", null ]
         ] ],

@@ -208,12 +208,12 @@ $(document).ready(function(){initNavTree('GoalDetector_8hpp_source.html',''); in
 <div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="classmodule_1_1vision_1_1GoalDetector.html">   36</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1vision_1_1GoalDetector.html">GoalDetector</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
 <div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">private</span>:</div>
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        <span class="keyword">struct </span>{</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;            <span class="keywordtype">float</span> confidence_threshold                 = 0.0f;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;            <span class="keywordtype">double</span> confidence_threshold                = 0.0f;</div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;            <span class="keywordtype">int</span> cluster_points                         = 0;</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            <span class="keywordtype">float</span> disagreement_ratio                   = 0.0f;</div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;            Eigen::Vector3f goal_projection_covariance = Eigen::Vector3f::Zero();</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;            <span class="keywordtype">double</span> disagreement_ratio                  = 0.0f;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;            Eigen::Vector3d goal_projection_covariance = Eigen::Vector3d::Zero();</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;            <span class="keywordtype">bool</span> use_median                            = <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            <span class="keywordtype">float</span> max_goal_distance                    = 0;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            <span class="keywordtype">double</span> max_goal_distance                   = 0;</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        } config{};</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
 <div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
@@ -232,7 +232,7 @@ $(document).ready(function(){initNavTree('GoalDetector_8hpp_source.html',''); in
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_82d602288a07dc2e458933cf1709fafe.html">vision</a></li><li class="navelem"><a class="el" href="dir_75cc6f78e2e0c0b11058c63b1675b6a5.html">GoalDetector</a></li><li class="navelem"><a class="el" href="dir_b0d66c8c7e19d301122e830e9fe98c93.html">src</a></li><li class="navelem"><b>GoalDetector.hpp</b></li>
-    <li class="footer">Generated on Tue Nov 28 2023 22:28:16 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 29 2023 02:55:40 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

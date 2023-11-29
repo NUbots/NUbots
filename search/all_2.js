@@ -3,7 +3,7 @@ var searchData=
   ['b_69',['B',['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#ad8fc648944e0dd12eaf8d2d1320ee41c',1,'utility::math::filter::KalmanFilter']]],
   ['back_70',['back',['../classmodule_1_1purpose_1_1KeyboardWalk.html#ae51528edde1dfe10f6ebc3e560d60234',1,'module::purpose::KeyboardWalk']]],
   ['balancer_71',['Balancer',['../classutility_1_1motion_1_1Balancer.html',1,'utility::motion']]],
-  ['ball_5fangular_5fcov_72',['ball_angular_cov',['../classmodule_1_1vision_1_1BallDetector.html#acf5627528f8b85dba93c938a064ce65c',1,'module::vision::BallDetector']]],
+  ['ball_5fangular_5fcov_72',['ball_angular_cov',['../classmodule_1_1vision_1_1BallDetector.html#a07542e3c009cdbda8b747dae65de0443',1,'module::vision::BallDetector']]],
   ['ball_5fdistance_5fthreshold_73',['ball_distance_threshold',['../structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#a9071a554cc6a41123f346fd865f32b18',1,'module::strategy::AlignBallToGoal::Config']]],
   ['ball_5fposition_74',['BALL_POSITION',['../structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html',1,'module::localisation::MeasurementType']]],
   ['ball_5fsearch_5ftimeout_75',['ball_search_timeout',['../structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb',1,'module::strategy::WalkToBall::Config::ball_search_timeout()'],['../structmodule_1_1strategy_1_1StrategiseLook_1_1Config.html#a4cd02dbcd5643a13be818d587cf70ae3',1,'module::strategy::StrategiseLook::Config::ball_search_timeout()']]],
