@@ -1,17 +1,19 @@
 #include "RobotCommunication.hpp"
+
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
 
 #include "extension/Configuration.hpp"
-#include "message/skill/Kick.hpp"
+
+#include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/RoboCup.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
-#include "message/behaviour/state/WalkState.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/webots/messages.hpp"
-#include "message/input/Sensors.hpp"
+#include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 
@@ -19,21 +21,21 @@ namespace module::network {
 
     // add usings
     using extension::Configuration;
+    using message::behaviour::state::WalkState;
+    using message::input::GameState;
     using message::input::RoboCup;
+    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::input::GameState;
-    using message::skill::Kick;
-    using message::input::Sensors;
     using message::platform::webots::SensorMeasurements;
-    using message::behaviour::state::WalkState;
+    using message::skill::Kick;
     using message::support::GlobalConfig;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Configuration, Trigger<GlobalConfig>>("RobotCommunication.yaml")
-            .then([this](const Configuration& config,  const GlobalConfig& globalConfig) {
+            .then([this](const Configuration& config, const GlobalConfig& globalConfig) {
                 // Use configuration here from file RobotCommunication.yaml
                 log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -55,29 +57,34 @@ namespace module::network {
                     // Bind our new handle
                     // TODO: check send_port is the correct thing to use here
                     std::tie(listen_handle, std::ignore, std::ignore) =
-                        on<UDP::Broadcast, Single>(cfg.receive_port)
-                            .then([this, &globalConfig](const UDP::Packet& p) {
-                                const std::vector<char>& payload = p.payload;
-                                RoboCup incomingMsg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                        on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &globalConfig](const UDP::Packet& p) {
+                            const std::vector<char>& payload = p.payload;
+                            RoboCup incomingMsg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
-                                if (static_cast<int>(globalConfig.player_id) != incomingMsg.current_pose.player_id) {
-                                    emit(std::make_unique<RoboCup>(std::move(incomingMsg)));
-                                }
-                            });
+                            if (globalConfig.player_id != incomingMsg.current_pose.player_id) {
+                                emit(std::make_unique<RoboCup>(std::move(incomingMsg)));
+                            }
+                        });
                 }
-        });
+            });
 
         // walk command should be updated to director
         // determine way to do this where we don't require a filtered loc_ball trigger (optional triggers, every...)
-        on<Every<2, Per<std::chrono::seconds>>, Optional<With<Ball>>, Optional<With<WalkState>>, Optional<With<Kick>>, Optional<With<Sensors>>, Optional<With<Field>>, Optional<With<GameState>>, Optional<With<GlobalConfig>>>()
-            .then([this](const std::shared_ptr<const  Ball>& loc_ball,
-                        const std::shared_ptr<const  WalkState>& walk_state,
-                        const std::shared_ptr<const  Kick>& kick,
-                        const std::shared_ptr<const  Sensors>& sensors,
-                        const std::shared_ptr<const  Field>& field,
-                        const std::shared_ptr<const  GameState>& game_state,
-                        const std::shared_ptr<const  GlobalConfig>& config) {
-
+        on<Every<2, Per<std::chrono::seconds>>,
+           Optional<With<Ball>>,
+           Optional<With<WalkState>>,
+           Optional<With<Kick>>,
+           Optional<With<Sensors>>,
+           Optional<With<Field>>,
+           Optional<With<GameState>>,
+           Optional<With<GlobalConfig>>>()
+            .then([this](const std::shared_ptr<const Ball>& loc_ball,
+                         const std::shared_ptr<const WalkState>& walk_state,
+                         const std::shared_ptr<const Kick>& kick,
+                         const std::shared_ptr<const Sensors>& sensors,
+                         const std::shared_ptr<const Field>& field,
+                         const std::shared_ptr<const GameState>& game_state,
+                         const std::shared_ptr<const GlobalConfig>& config) {
                 log<NUClear::DEBUG>("Send robocup msg!");
 
                 auto msg = std::make_unique<RoboCup>();
@@ -86,13 +93,11 @@ namespace module::network {
                 msg->timestamp = NUClear::clock::now();
 
                 // State
-                int state;
-
                 int penaltyReason = game_state->data.self.penalty_reason;
                 switch (penaltyReason) {
-                    case 0: state = 0; break;
-                    case 1: state = 1; break;
-                    default: state = 2; break;
+                    case 0: msg->state = 0; break;
+                    case 1: msg->state = 1; break;
+                    default: msg->state = 2; break;
                 }
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
@@ -110,7 +115,7 @@ namespace module::network {
 
                             // Get our torso in field space
                             Eigen::Isometry3d Hft = Hfw * Htw.inverse();
-                            Eigen::Vector3d rTFf = Hft.translation();
+                            Eigen::Vector3d rTFf  = Hft.translation();
 
                             // Store our position from field to torso
                             msg->current_pose.position.x = rTFf.x();
@@ -119,11 +124,9 @@ namespace module::network {
 
                             Eigen::Matrix<float, 3, 3> covariance = field->covariance.cast<float>();
 
-                            msg->current_pose.covariance = {
-                                { covariance(0, 0), covariance(1, 0), covariance(2, 0) },
-                                { covariance(0, 1), covariance(1, 1), covariance(2, 1) },
-                                { covariance(0, 2), covariance(1, 2), covariance(2, 2) }
-                            };
+                            msg->current_pose.covariance = {{covariance(0, 0), covariance(1, 0), covariance(2, 0)},
+                                                            {covariance(0, 1), covariance(1, 1), covariance(2, 1)},
+                                                            {covariance(0, 2), covariance(1, 2), covariance(2, 2)}};
 
                             msg->current_pose.team = config->team_id;
                         }
@@ -132,11 +135,9 @@ namespace module::network {
 
                 // Walk command
                 if (walk_state != nullptr) {
-                    msg->walk_command = {
-                        static_cast<float>(walk_state->velocity_target.x()),
-                        static_cast<float>(walk_state->velocity_target.y()),
-                        static_cast<float>(walk_state->velocity_target.z())
-                    };
+                    msg->walk_command = {static_cast<float>(walk_state->velocity_target.x()),
+                                         static_cast<float>(walk_state->velocity_target.y()),
+                                         static_cast<float>(walk_state->velocity_target.z())};
                 }
 
                 // TODO: target pose
@@ -144,8 +145,8 @@ namespace module::network {
                 // Kick target
                 if (kick) {
                     message::input::fvec2 kick_target;
-                    kick_target.x = kick->target.x();
-                    kick_target.y = kick->target.y();
+                    kick_target.x    = kick->target.x();
+                    kick_target.y    = kick->target.y();
                     msg->kick_target = kick_target;
                 }
 
@@ -156,29 +157,28 @@ namespace module::network {
                         Eigen::Vector3d rBWw = loc_ball->rBWw;
                         // Transform the field state into Hfw
                         Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
-                        Eigen::Vector3d rBFf = Hfw * rBWw;
+                        Eigen::Vector3d rBFf  = Hfw * rBWw;
                         // Store our position from field to ball
                         msg->ball.position.x = rBFf.x();
                         msg->ball.position.y = rBFf.y();
                         msg->ball.position.z = rBFf.z();
                     }
 
-                    //TODO: Check if correct, copied from Overview
+                    // TODO: Check if correct, copied from Overview
                     Eigen::Matrix<float, 3, 3> covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
-                    msg->ball.covariance = {
-                        { covariance(0, 0), covariance(1, 0), covariance(2, 0) },
-                        { covariance(0, 1), covariance(1, 1), covariance(2, 1) },
-                        { covariance(0, 2), covariance(1, 2), covariance(2, 2) }
-                    };
+                    msg->ball.covariance                  = {{covariance(0, 0), covariance(1, 0), covariance(2, 0)},
+                                                             {covariance(0, 1), covariance(1, 1), covariance(2, 1)},
+                                                             {covariance(0, 2), covariance(1, 2), covariance(2, 2)}};
 
-                    msg->ball.velocity = {static_cast<float>(loc_ball->vBw.x()), static_cast<float>(loc_ball->vBw.y()), static_cast<float>(loc_ball->vBw.z())};
+                    msg->ball.velocity = {static_cast<float>(loc_ball->vBw.x()),
+                                          static_cast<float>(loc_ball->vBw.y()),
+                                          static_cast<float>(loc_ball->vBw.z())};
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
-            }
-        );
+            });
     }
 
 }  // namespace module::network
