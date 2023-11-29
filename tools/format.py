@@ -133,11 +133,11 @@ def _get_history_dates(path):
 
     dates = []
     for i in range(len(all_dates)):
-        sha, file, date = all_dates[i]
+        file, sha, date = all_dates[i]
         dates.append(date)
 
         if i + 1 != len(all_dates):
-            _, next_file, __ = all_dates[i + 1]
+            next_file, _, __ = all_dates[i + 1]
             if (
                 file != next_file
                 and 0 != sp_run(["git", "show", f"{sha}:{next_file}"], stderr=STDOUT, stdout=DEVNULL).returncode
@@ -151,6 +151,7 @@ def _get_history_dates(path):
 # For example the year the file was added and the year it was last modified for a licence header
 def _get_args(path):
     modified, added = _get_history_dates(path)
+    print(modified, added)
     return {"added": f"{added}", "modified": f"{modified}"}
 
 
