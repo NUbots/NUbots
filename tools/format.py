@@ -127,19 +127,24 @@ def _get_history_dates(path):
     )
     all_dates = [(f, *info.split()) for f, info in zip(all_dates[2::3], all_dates[::3])]
 
-    dates = []
-    for (f1, hash1, d1), (f2, hash2, d2) in zip(all_dates[:-1], all_dates[1:]):
-        dates.append(d1)
-        # If the next file still exists in the current commit then it's a copy don't continue
-        if f1 != f2 and 0 != sp_run(["git", "show", f"{hash1}:{f2}"], stderr=STDOUT, stdout=DEVNULL).returncode:
-            break
-
     # File was never added use the current year
-    return (
-        (datetime.date.today().year, datetime.date.today().year)
-        if len(dates) == 0
-        else (dates[0].split("-")[0], dates[-1].split("-")[0])
-    )
+    if len(all_dates) == 0:
+        return (datetime.date.today().year, datetime.date.today().year)
+
+    dates = []
+    for i in range(len(all_dates)):
+        sha, file, date = all_dates[i]
+        dates.append(date)
+
+        if i + 1 != len(all_dates):
+            _, next_file, __ = all_dates[i + 1]
+            if (
+                file != next_file
+                and 0 != sp_run(["git", "show", f"{sha}:{next_file}"], stderr=STDOUT, stdout=DEVNULL).returncode
+            ):
+                break
+
+    return dates[0].split("-")[0], dates[-1].split("-")[0]
 
 
 # This function is used to get details of a file that might be needed in the arguments of a formatter
