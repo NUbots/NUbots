@@ -35,7 +35,7 @@ import tempfile
 from collections import OrderedDict
 from fnmatch import fnmatch
 from functools import partial
-from subprocess import PIPE, STDOUT, CalledProcessError
+from subprocess import DEVNULL, PIPE, STDOUT, CalledProcessError
 from subprocess import run as sp_run
 
 import b
@@ -105,23 +105,47 @@ formatters["prettier"] = {
 }
 
 
-# This function is used to get details of a file that might be needed in the arguments of a formatter
-# For example the year the file was added and the year it was last modified for a licence header
-def _get_args(path):
-    dates = (
-        sp_run(["git", "log", "--follow", "--format=%ad", "--date=short", path], stdout=PIPE)
+def _get_history_dates(path):
+    # Get the files and dates from git, however this will follow copies as well not just renames so we need to filter
+    all_dates = (
+        sp_run(
+            [
+                "git",
+                "-c",
+                "diff.renames=true",
+                "log",
+                "--name-only",
+                "--follow",
+                "--format=%H %ad",
+                "--date=short",
+                path,
+            ],
+            stdout=PIPE,
+        )
         .stdout.decode("utf-8")
         .splitlines()
     )
+    all_dates = [(f, *info.split()) for f, info in zip(all_dates[2::3], all_dates[::3])]
+
+    dates = []
+    for (f1, hash1, d1), (f2, hash2, d2) in zip(all_dates[:-1], all_dates[1:]):
+        dates.append(d1)
+        # If the next file still exists in the current commit then it's a copy don't continue
+        if f1 != f2 and 0 != sp_run(["git", "show", f"{hash1}:{f2}"], stderr=STDOUT, stdout=DEVNULL).returncode:
+            break
 
     # File was never added use the current year
-    if len(dates) == 0:
-        modified = datetime.date.today().year
-        added = datetime.date.today().year
-    else:
-        modified = dates[0].split("-")[0]
-        added = dates[-1].split("-")[0]
+    return (
+        (datetime.date.today().year, datetime.date.today().year)
+        if len(dates) == 0
+        else (dates[0].split("-")[0], dates[-1].split("-")[0])
+    )
 
+
+# This function is used to get details of a file that might be needed in the arguments of a formatter
+# For example the year the file was added and the year it was last modified for a licence header
+def _get_args(path):
+    modified, added = _get_history_dates(path)
     return {"added": f"{added}", "modified": f"{modified}"}
 
 
