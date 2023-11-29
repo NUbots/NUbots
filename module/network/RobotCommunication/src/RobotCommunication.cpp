@@ -32,39 +32,39 @@ namespace module::network {
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
-        on<Configuration>("RobotCommunication.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file RobotCommunication.yaml
-            log_level = config["log_level"].as<NUClear::LogLevel>();
+        on<Configuration, Trigger<GlobalConfig>>("RobotCommunication.yaml")
+            .then([this](const Configuration& config,  const GlobalConfig& globalConfig) {
+                // Use configuration here from file RobotCommunication.yaml
+                log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // need to determine send and receive ports
-            cfg.send_port = config["send_port"].as<uint>();
-            // need to determine broadcast ip
-            cfg.broadcast_ip = config["broadcast_ip"].as<std::string>("");
+                // need to determine send and receive ports
+                cfg.send_port = config["send_port"].as<uint>();
+                // need to determine broadcast ip
+                cfg.broadcast_ip = config["broadcast_ip"].as<std::string>("");
 
-            // If we are changing ports (the port starts at 0 so this should start it the first time)
-            if (config["receive_port"].as<uint>() != cfg.receive_port) {
-                // If we have an old binding, then unbind it
-                // The port starts at 0 so this should work
-                if (cfg.receive_port != 0) {
-                    listen_handle.unbind();
+                // If we are changing ports (the port starts at 0 so this should start it the first time)
+                if (config["receive_port"].as<uint>() != cfg.receive_port) {
+                    // If we have an old binding, then unbind it
+                    // The port starts at 0 so this should work
+                    if (cfg.receive_port != 0) {
+                        listen_handle.unbind();
+                    }
+
+                    cfg.receive_port = config["receive_port"].as<uint>();
+
+                    // Bind our new handle
+                    // TODO: check send_port is the correct thing to use here
+                    std::tie(listen_handle, std::ignore, std::ignore) =
+                        on<UDP::Broadcast, Single>(cfg.receive_port)
+                            .then([this, &globalConfig](const UDP::Packet& p) {
+                                const std::vector<char>& payload = p.payload;
+                                RoboCup incomingMsg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+
+                                if (static_cast<int>(globalConfig.player_id) != incomingMsg.current_pose.player_id) {
+                                    emit(std::make_unique<RoboCup>(std::move(incomingMsg)));
+                                }
+                            });
                 }
-
-                cfg.receive_port = config["receive_port"].as<uint>();
-
-                // Bind our new handle
-                // TODO: check send_port is the correct thing to use here
-                std::tie(listen_handle, std::ignore, std::ignore) =
-                    on<UDP::Broadcast, Single>(cfg.receive_port)
-                        .then([this](const UDP::Packet& p) {
-                            const std::vector<char>& payload = p.payload;
-
-                            RoboCup deserializedData = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
-                            log<NUClear::DEBUG>("check received ", deserializedData.current_pose.position.z);
-
-                            std::unique_ptr<RoboCup> dataPtr = std::make_unique<RoboCup>(std::move(deserializedData));
-                            emit(dataPtr);
-                        });
-            }
         });
 
         // walk command should be updated to director
@@ -80,27 +80,20 @@ namespace module::network {
 
                 log<NUClear::DEBUG>("Send robocup msg!");
 
-                // log<NUClear::DEBUG>("game_state->data.self.penalty_reason: ", game_state->data.self.penalty_reason);
-                int penaltyReason = game_state->data.self.penalty_reason;
-
-                int phase = game_state->data.phase;
-                // log<NUClear::DEBUG>("game_state->data.phase: ", game_state->data.phase);
-
                 auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
                 msg->timestamp = NUClear::clock::now();
 
                 // State
-                int state = 0;
+                int state;
 
+                int penaltyReason = game_state->data.self.penalty_reason;
                 switch (penaltyReason) {
                     case 0: state = 0; break;
                     case 1: state = 1; break;
                     default: state = 2; break;
                 }
-
-                Eigen::Isometry3d Hfw;
 
                 // Current pose (Position, orientation, and covariance of the player on the field)
                 if (config) {
@@ -159,13 +152,16 @@ namespace module::network {
                 // Ball
                 if (loc_ball) {
                     // convert position of ball from world to field space
-                    Eigen::Vector3d rBWw = loc_ball->rBWw;
-                    Eigen::Vector3d rBFf = Hfw * rBWw;
-
-                    // Store our position from field to ball
-                    msg->ball.position.x = rBFf.x();
-                    msg->ball.position.y = rBFf.y();
-                    msg->ball.position.z = rBFf.z();
+                    if (field) {
+                        Eigen::Vector3d rBWw = loc_ball->rBWw;
+                        // Transform the field state into Hfw
+                        Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
+                        Eigen::Vector3d rBFf = Hfw * rBWw;
+                        // Store our position from field to ball
+                        msg->ball.position.x = rBFf.x();
+                        msg->ball.position.y = rBFf.y();
+                        msg->ball.position.z = rBFf.z();
+                    }
 
                     //TODO: Check if correct, copied from Overview
                     Eigen::Matrix<float, 3, 3> covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
@@ -176,7 +172,6 @@ namespace module::network {
                     };
 
                     msg->ball.velocity = {static_cast<float>(loc_ball->vBw.x()), static_cast<float>(loc_ball->vBw.y()), static_cast<float>(loc_ball->vBw.z())};
-                    // log<NUClear::DEBUG>("Ball velocity vBw: ", loc_ball->vBw);
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
@@ -185,6 +180,5 @@ namespace module::network {
             }
         );
     }
-
 
 }  // namespace module::network
