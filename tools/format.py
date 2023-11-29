@@ -38,8 +38,12 @@ from functools import partial
 from subprocess import DEVNULL, PIPE, STDOUT, CalledProcessError
 from subprocess import run as sp_run
 
+import pygit2
+
 import b
 from utility.dockerise import run_on_docker
+
+repo = pygit2.Repository(b.project_dir)
 
 # The extensions that are handled by the various formatters
 formatters = OrderedDict()
@@ -106,45 +110,49 @@ formatters["prettier"] = {
 
 
 def _get_history_dates(path):
-    # Get the files and dates from git, however this will follow copies as well not just renames so we need to filter
-    all_dates = (
-        sp_run(
-            [
-                "git",
-                "-c",
-                "diff.renames=true",
-                "log",
-                "--name-only",
-                "--follow",
-                "--format=%H %ad",
-                "--date=short",
-                path,
-            ],
-            stdout=PIPE,
-        )
-        .stdout.decode("utf-8")
-        .splitlines()
-    )
-    all_dates = [(f, *info.split()) for f, info in zip(all_dates[2::3], all_dates[::3])]
+    years = []
 
-    # File was never added use the current year
-    if len(all_dates) == 0:
-        return (datetime.date.today().year, datetime.date.today().year)
+    # Keep track of the name of the file we are looking for for each commit
+    path_for_commit = {repo[repo.head.target].id: path}
 
-    dates = []
-    for i in range(len(all_dates)):
-        file, sha, date = all_dates[i]
-        dates.append(date)
+    for commit in (walker := repo.walk(repo[repo.head.target].id, pygit2.GIT_SORT_TOPOLOGICAL)):
+        if commit.id not in path_for_commit:
+            continue
 
-        if i + 1 != len(all_dates):
-            next_file, _, __ = all_dates[i + 1]
-            if (
-                file != next_file
-                and 0 != sp_run(["git", "show", f"{sha}:{next_file}"], stderr=STDOUT, stdout=DEVNULL).returncode
-            ):
-                break
+        search_path = path_for_commit[commit.id]
+        relevant = len(commit.parents) == 0
 
-    return dates[0].split("-")[0], dates[-1].split("-")[0]
+        for p in commit.parents:
+            # Initially keep the path the same
+            path_for_commit[p.id] = search_path
+
+            diff = p.tree.diff_to_tree(commit.tree)
+
+            # Only bother doing a similarity search if the file was modified
+            if any(delta.new_file.path == search_path for delta in diff.deltas):
+                diff.find_similar(
+                    flags=pygit2.GIT_DIFF_FIND_RENAMES
+                    | pygit2.GIT_DIFF_FIND_RENAMES_FROM_REWRITES
+                    | pygit2.GIT_DIFF_FIND_IGNORE_WHITESPACE
+                )
+                for delta in diff.deltas:
+                    if delta.new_file.path == search_path:
+                        relevant = True
+
+                    # The file was added here, stop looking
+                    if delta.status == pygit2.GIT_DELTA_ADDED and delta.new_file.path == search_path:
+                        del path_for_commit[p.id]
+                        walker.hide(p.id)
+                    # The file was renamed, update where we are looking
+                    elif delta.status == pygit2.GIT_DELTA_RENAMED and delta.new_file.path == search_path:
+                        path_for_commit[p.id] = delta.old_file.path
+
+        if relevant:
+            tzinfo = datetime.timezone(datetime.timedelta(minutes=commit.author.offset))
+            dt = datetime.datetime.fromtimestamp(float(commit.author.time), tzinfo)
+            years.append(dt.year)
+
+    return max(years), min(years)
 
 
 # This function is used to get details of a file that might be needed in the arguments of a formatter
