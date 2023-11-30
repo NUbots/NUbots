@@ -33,6 +33,7 @@ export const LogsView = observer(function LogsView(props: LogsViewProps) {
       </Menu>
       {selectedLogsRobot ? (
         <div className="flex-grow border-t border-gray-300 flex flex-col">
+          <Toolbar model={selectedLogsRobot} controller={controller} />
           <div className="relative h-full w-full">
             <LogLines model={selectedLogsRobot} />
           </div>
@@ -60,6 +61,65 @@ const logLevelToIcon: Record<LogLevel, string> = {
   fatal: "report",
 };
 
+interface ToolbarProps {
+  model: LogsRobotModel;
+  controller: LogsController;
+}
+
+const Toolbar = observer(function Toolbar(props: ToolbarProps) {
+  const { model, controller } = props;
+
+  return (
+    <div className="bg-gray-100 px-2 py-1.5 border-b border-gray-300 flex">
+      <div className="flex gap-1">
+        <ToggleButton on={model.filters.levels.trace} onClick={(on) => controller.setFilter(model, "trace", !on)}>
+          <Icon size={20}>{logLevelToIcon.trace}</Icon>
+          Trace
+        </ToggleButton>
+        <ToggleButton on={model.filters.levels.debug} onClick={(on) => controller.setFilter(model, "debug", !on)}>
+          <Icon size={20}>{logLevelToIcon.debug}</Icon>
+          Debug
+        </ToggleButton>
+        <ToggleButton on={model.filters.levels.info} onClick={(on) => controller.setFilter(model, "info", !on)}>
+          <Icon size={20}>{logLevelToIcon.info}</Icon>
+          Info
+        </ToggleButton>
+        <ToggleButton on={model.filters.levels.warn} onClick={(on) => controller.setFilter(model, "warn", !on)}>
+          <Icon size={20}>{logLevelToIcon.warn}</Icon>
+          Warn
+        </ToggleButton>
+        <ToggleButton on={model.filters.levels.error} onClick={(on) => controller.setFilter(model, "error", !on)}>
+          <Icon size={20}>{logLevelToIcon.error}</Icon>
+          Error
+        </ToggleButton>
+        <ToggleButton on={model.filters.levels.fatal} onClick={(on) => controller.setFilter(model, "fatal", !on)}>
+          <Icon size={20}>{logLevelToIcon.fatal}</Icon>
+          Fatal
+        </ToggleButton>
+      </div>
+    </div>
+  );
+});
+
+interface ToggleButtonProps {
+  on: boolean;
+  children: React.ReactNode;
+  onClick: (enabled: boolean) => void;
+}
+
+function ToggleButton(props: ToggleButtonProps) {
+  return (
+    <button
+      className={`h-7 px-2 inline-flex items-center border rounded ${
+        props.on ? "bg-nusight-500 border-nusight-500 text-white" : "bg-white border-gray-300"
+      }`}
+      onClick={() => props.onClick(props.on)}
+    >
+      {props.children}
+    </button>
+  );
+}
+
 interface LogLinesProps {
   model: LogsRobotModel;
 }
@@ -75,13 +135,17 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
     }
   });
 
-  if (model.messages.length === 0) {
-    return <div className="text-center py-4 text-lg text-gray-400">Waiting for log messages</div>;
+  if (model.messagesFilteredByLevel.length === 0) {
+    if (model.messages.length === 0) {
+      return <div className="text-center py-4 text-lg text-gray-400">No log messages yet</div>;
+    } else {
+      return <div className="text-center py-4 text-lg text-gray-400">No messages match your filters</div>;
+    }
   }
 
   return (
     <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto font-mono min-h-0 overflow-y-auto">
-      {model.messages.map((message, index) => (
+      {model.messagesFilteredByLevel.map((message, index) => (
         <LogLine key={index} message={message} />
       ))}
     </div>

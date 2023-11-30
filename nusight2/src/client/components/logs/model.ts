@@ -41,16 +41,48 @@ export class LogsModel {
   }
 }
 
+export interface FilterLevels {
+  unknown: boolean;
+  trace: boolean;
+  debug: boolean;
+  info: boolean;
+  warn: boolean;
+  error: boolean;
+  fatal: boolean;
+}
+
 export class LogsRobotModel {
   robotModel: RobotModel;
 
   @observable.shallow messages: LogMessage[] = [];
 
+  @observable filters: {
+    levels: FilterLevels;
+  };
+
   constructor(robotModel: RobotModel) {
     this.robotModel = robotModel;
+    this.filters = {
+      levels: {
+        unknown: true,
+        trace: false,
+        debug: true,
+        info: true,
+        warn: true,
+        error: true,
+        fatal: true,
+      },
+    };
   }
 
   static of = memoize((robot: RobotModel): LogsRobotModel => {
     return new LogsRobotModel(robot);
   });
+
+  @computed
+  get messagesFilteredByLevel(): LogMessage[] {
+    return this.messages.filter((message) => {
+      return this.filters.levels[message.level];
+    });
+  }
 }

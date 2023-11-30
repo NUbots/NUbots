@@ -1,6 +1,6 @@
 import { action } from "mobx";
 
-import { LogsModel } from "./model";
+import { FilterLevels, LogsModel, LogsRobotModel } from "./model";
 import { RobotModel } from "../robot/model";
 
 export class LogsController {
@@ -17,5 +17,10 @@ export class LogsController {
   @action.bound
   onSelectRobot(robot?: RobotModel) {
     this.model.selectedRobot = robot;
+  }
+
+  @action.bound
+  setFilter(model: LogsRobotModel, filter: keyof FilterLevels, value: boolean) {
+    model.filters.levels[filter] = value;
   }
 }
