@@ -4,6 +4,10 @@ import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 import { AppModel } from "../app/model";
 
+export interface LogMessage {
+  message: string;
+}
+
 export class LogsModel {
   private appModel: AppModel;
 
@@ -35,6 +39,8 @@ export class LogsModel {
 
 export class LogsRobotModel {
   robotModel: RobotModel;
+
+  @observable.shallow messages: LogMessage[] = [];
 
   constructor(robotModel: RobotModel) {
     this.robotModel = robotModel;

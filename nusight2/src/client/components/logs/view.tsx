@@ -1,8 +1,8 @@
-import React, { ComponentType, PropsWithChildren } from "react";
+import React, { ComponentType, PropsWithChildren, useEffect } from "react";
 import { observer } from "mobx-react";
 
 import { LogsController } from "./controller";
-import { LogsModel } from "./model";
+import { LogMessage, LogsModel, LogsRobotModel } from "./model";
 import { LogsNetwork } from "./network";
 import { Icon } from "../icon/view";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
@@ -34,7 +34,7 @@ export const LogsView = observer(function LogsView(props: LogsViewProps) {
       {selectedLogsRobot ? (
         <div className="flex-grow border-t border-gray-300 flex flex-col">
           <div className="relative h-full w-full">
-            Show the logs for "{selectedLogsRobot.robotModel.name}" robot here!
+            <LogLines model={selectedLogsRobot} />
           </div>
         </div>
       ) : (
@@ -46,6 +46,48 @@ export const LogsView = observer(function LogsView(props: LogsViewProps) {
           <p className="text-sm opacity-80 mt-2">Connect a robot or load an NBS file to view logs</p>
         </div>
       )}
+    </div>
+  );
+});
+
+interface LogLinesProps {
+  model: LogsRobotModel;
+}
+
+const LogLines = observer(function LogLines(props: LogLinesProps) {
+  const { model } = props;
+
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+  });
+
+  if (model.messages.length === 0) {
+    return <div className="text-center py-4 text-lg text-gray-400">Waiting for log messages</div>;
+  }
+
+  return (
+    <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto font-mono min-h-0 overflow-y-auto">
+      {model.messages.map((message, index) => (
+        <LogLine key={index} message={message} />
+      ))}
+    </div>
+  );
+});
+
+interface LogLineProps {
+  message: LogMessage;
+}
+
+const LogLine = observer(function LogLine(props: LogLineProps) {
+  const { message } = props;
+
+  return (
+    <div className="flex items-center py-0.5 border-b border-black/10">
+      <div className="flex-grow px-2 whitespace-pre-wrap">{message.message}</div>
     </div>
   );
 });
