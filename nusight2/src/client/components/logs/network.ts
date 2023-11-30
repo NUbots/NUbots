@@ -30,6 +30,7 @@ export class LogsNetwork {
 
     robot.messages.push({
       level: nuclearLogLevelToLogLevel(message.level),
+      timestamp: protobufTimestampToDate(message.timestamp!),
       message: message.message,
       reactor: message.reactionStatistics!.identifiers!.reactor!,
     });

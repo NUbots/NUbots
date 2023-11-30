@@ -9,6 +9,7 @@ export type LogLevel = "unknown" | "trace" | "debug" | "info" | "warn" | "error"
 
 export interface LogMessage {
   level: LogLevel;
+  timestamp: Date;
   message: string;
   reactor: string;
 }
@@ -57,6 +58,7 @@ export class LogsRobotModel {
 
   @observable.shallow messages: LogMessage[] = [];
 
+  @observable showTimestamps = false;
   @observable filters: {
     search: string;
     levels: FilterLevels;

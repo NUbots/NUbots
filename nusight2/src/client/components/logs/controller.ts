@@ -28,4 +28,9 @@ export class LogsController {
   setSearch(model: LogsRobotModel, search: string) {
     model.filters.search = search;
   }
+
+  @action.bound
+  setShowTimestamps(model: LogsRobotModel, showTimestamps: boolean) {
+    model.showTimestamps = showTimestamps;
+  }
 }

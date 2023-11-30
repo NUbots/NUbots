@@ -99,6 +99,13 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
           Fatal
         </ToggleButton>
       </div>
+
+      <div>
+        <ToggleButton on={model.showTimestamps} onClick={(on) => controller.setShowTimestamps(model, !on)}>
+          <Icon size={20}>{model.showTimestamps ? "check_box" : "check_box_outline_blank"}</Icon>
+          Show timestamps
+        </ToggleButton>
+      </div>
     </div>
   );
 });
@@ -170,7 +177,7 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
   return (
     <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto font-mono min-h-0 overflow-y-auto">
       {model.messagesFilteredBySearch.map((message, index) => (
-        <LogLine key={index} message={message} />
+        <LogLine key={index} model={model} message={message} />
       ))}
     </div>
   );
@@ -187,11 +194,12 @@ const logLevelToTextColor: Record<LogLevel, string> = {
 };
 
 interface LogLineProps {
+  model: LogsRobotModel;
   message: LogMessage;
 }
 
 const LogLine = observer(function LogLine(props: LogLineProps) {
-  const { message } = props;
+  const { model, message } = props;
 
   return (
     <div className={`flex gap-3 items-center py-0.5 border-b border-black/10 ${logLevelToTextColor[message.level]}`}>
@@ -201,6 +209,7 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
           {logLevelToIcon[message.level]}
         </Icon>
       </div>
+      {model.showTimestamps ? <div className="text-gray-500">{message.timestamp.toLocaleTimeString()}</div> : null}
       <div>{message.reactor.split("::").at(-1)}</div>
       <div className="flex-grow whitespace-pre-wrap">{message.message}</div>
     </div>
