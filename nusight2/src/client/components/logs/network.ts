@@ -1,6 +1,6 @@
 import { action } from "mobx";
 
-import { message } from "../../../shared/messages";
+import { message, google } from "../../../shared/messages";
 import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
@@ -54,4 +54,11 @@ function nuclearLogLevelToLogLevel(level: NUClearLogLevel): LogLevel {
     default:
       return "unknown";
   }
+}
+
+/** Convert the given protobuf timestamp to a Date object */
+function protobufTimestampToDate(timestamp: google.protobuf.ITimestamp) {
+  const seconds = timestamp.seconds as number;
+  const nanos = timestamp.nanos as number;
+  return new Date(seconds * 1000 + nanos / 1000000);
 }
