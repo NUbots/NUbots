@@ -57,12 +57,14 @@ export class LogsRobotModel {
   @observable.shallow messages: LogMessage[] = [];
 
   @observable filters: {
+    search: string;
     levels: FilterLevels;
   };
 
   constructor(robotModel: RobotModel) {
     this.robotModel = robotModel;
     this.filters = {
+      search: "",
       levels: {
         unknown: true,
         trace: false,
@@ -83,6 +85,14 @@ export class LogsRobotModel {
   get messagesFilteredByLevel(): LogMessage[] {
     return this.messages.filter((message) => {
       return this.filters.levels[message.level];
+    });
+  }
+
+  @computed
+  get messagesFilteredBySearch(): LogMessage[] {
+    const search = this.filters.search.toLowerCase();
+    return this.messagesFilteredByLevel.filter((message) => {
+      return message.message.toLowerCase().includes(search);
     });
   }
 }

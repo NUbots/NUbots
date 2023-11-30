@@ -23,4 +23,9 @@ export class LogsController {
   setFilter(model: LogsRobotModel, filter: keyof FilterLevels, value: boolean) {
     model.filters.levels[filter] = value;
   }
+
+  @action.bound
+  setSearch(model: LogsRobotModel, search: string) {
+    model.filters.search = search;
+  }
 }

@@ -71,7 +71,9 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
 
   return (
     <div className="bg-gray-100 px-2 py-1.5 border-b border-gray-300 flex">
-      <div className="flex gap-1">
+      <SearchBox model={model} controller={controller} />
+
+      <div className="flex gap-1 border-x px-2 mx-2">
         <ToggleButton on={model.filters.levels.trace} onClick={(on) => controller.setFilter(model, "trace", !on)}>
           <Icon size={20}>{logLevelToIcon.trace}</Icon>
           Trace
@@ -97,6 +99,28 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
           Fatal
         </ToggleButton>
       </div>
+    </div>
+  );
+});
+
+interface SearchBoxProps {
+  model: LogsRobotModel;
+  controller: LogsController;
+}
+
+const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
+  const { model, controller } = props;
+
+  return (
+    <div className="relative">
+      <Icon className="absolute left-1 top-1 text-icon pointer-events-none">search</Icon>
+      <input
+        type="search"
+        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 rounded bg-white focus:outline-none focus:border-transparent focus:ring-2 focus:ring-nusight-500"
+        placeholder="Filter logs"
+        value={model.filters.search}
+        onChange={(e) => controller.setSearch(model, e.target.value)}
+      />
     </div>
   );
 });
@@ -135,17 +159,17 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
     }
   });
 
-  if (model.messagesFilteredByLevel.length === 0) {
+  if (model.messagesFilteredBySearch.length === 0) {
     if (model.messages.length === 0) {
       return <div className="text-center py-4 text-lg text-gray-400">No log messages yet</div>;
     } else {
-      return <div className="text-center py-4 text-lg text-gray-400">No messages match your filters</div>;
+      return <div className="text-center py-4 text-lg text-gray-400">No messages match your filters and search</div>;
     }
   }
 
   return (
     <div ref={scrollContainerRef} className="absolute inset-0 overflow-auto font-mono min-h-0 overflow-y-auto">
-      {model.messagesFilteredByLevel.map((message, index) => (
+      {model.messagesFilteredBySearch.map((message, index) => (
         <LogLine key={index} message={message} />
       ))}
     </div>
