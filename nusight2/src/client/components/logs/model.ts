@@ -4,7 +4,11 @@ import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
 import { AppModel } from "../app/model";
 
+/** The log levels that NUsight supports */
+export type LogLevel = "unknown" | "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+
 export interface LogMessage {
+  level: LogLevel;
   message: string;
 }
 

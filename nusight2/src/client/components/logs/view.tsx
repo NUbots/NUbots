@@ -2,7 +2,7 @@ import React, { ComponentType, PropsWithChildren, useEffect } from "react";
 import { observer } from "mobx-react";
 
 import { LogsController } from "./controller";
-import { LogMessage, LogsModel, LogsRobotModel } from "./model";
+import { LogLevel, LogMessage, LogsModel, LogsRobotModel } from "./model";
 import { LogsNetwork } from "./network";
 import { Icon } from "../icon/view";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
@@ -50,6 +50,16 @@ export const LogsView = observer(function LogsView(props: LogsViewProps) {
   );
 });
 
+const logLevelToIcon: Record<LogLevel, string> = {
+  unknown: "help",
+  trace: "arrow_right_alt",
+  debug: "bug_report",
+  info: "info",
+  warn: "warning",
+  error: "error",
+  fatal: "report",
+};
+
 interface LogLinesProps {
   model: LogsRobotModel;
 }
@@ -78,6 +88,16 @@ const LogLines = observer(function LogLines(props: LogLinesProps) {
   );
 });
 
+const logLevelToTextColor: Record<LogLevel, string> = {
+  unknown: "text-gray-800",
+  trace: "text-gray-800",
+  debug: "text-green-800",
+  info: "text-blue-800",
+  warn: "text-yellow-800",
+  error: "text-red-800",
+  fatal: "text-red-800",
+};
+
 interface LogLineProps {
   message: LogMessage;
 }
@@ -86,8 +106,14 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
   const { message } = props;
 
   return (
-    <div className="flex items-center py-0.5 border-b border-black/10">
-      <div className="flex-grow px-2 whitespace-pre-wrap">{message.message}</div>
+    <div className={`flex gap-3 items-center py-0.5 border-b border-black/10 ${logLevelToTextColor[message.level]}`}>
+      <div className="inline-flex items-end self-start gap-1">
+        <div className="w-12 uppercase text-right">{message.level}</div>
+        <Icon fill className="text-lg/none">
+          {logLevelToIcon[message.level]}
+        </Icon>
+      </div>
+      <div className="flex-grow whitespace-pre-wrap">{message.message}</div>
     </div>
   );
 });

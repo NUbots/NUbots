@@ -5,9 +5,10 @@ import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
-import { LogsRobotModel } from "./model";
+import { LogLevel, LogsRobotModel } from "./model";
 
 import LogMessage = message.nuclear.LogMessage;
+import NUClearLogLevel = message.nuclear.LogLevel;
 
 export class LogsNetwork {
   constructor(private network: Network) {
@@ -28,7 +29,28 @@ export class LogsNetwork {
     const robot = LogsRobotModel.of(robotModel);
 
     robot.messages.push({
+      level: nuclearLogLevelToLogLevel(message.level),
       message: message.message,
     });
+  }
+}
+
+/** Convert the given NUClear log level to a NUsight log level. */
+function nuclearLogLevelToLogLevel(level: NUClearLogLevel): LogLevel {
+  switch (level - 1) {
+    case NUClearLogLevel.TRACE:
+      return "trace";
+    case NUClearLogLevel.DEBUG:
+      return "debug";
+    case NUClearLogLevel.INFO:
+      return "info";
+    case NUClearLogLevel.WARN:
+      return "warn";
+    case NUClearLogLevel.ERROR:
+      return "error";
+    case NUClearLogLevel.FATAL:
+      return "fatal";
+    default:
+      return "unknown";
   }
 }
