@@ -10,6 +10,7 @@ export type LogLevel = "unknown" | "trace" | "debug" | "info" | "warn" | "error"
 export interface LogMessage {
   level: LogLevel;
   message: string;
+  reactor: string;
 }
 
 export class LogsModel {

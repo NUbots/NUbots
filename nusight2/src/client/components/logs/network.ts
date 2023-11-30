@@ -31,6 +31,7 @@ export class LogsNetwork {
     robot.messages.push({
       level: nuclearLogLevelToLogLevel(message.level),
       message: message.message,
+      reactor: message.reactionStatistics!.identifiers!.reactor!,
     });
   }
 }

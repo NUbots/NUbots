@@ -201,6 +201,7 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
           {logLevelToIcon[message.level]}
         </Icon>
       </div>
+      <div>{message.reactor.split("::").at(-1)}</div>
       <div className="flex-grow whitespace-pre-wrap">{message.message}</div>
     </div>
   );
