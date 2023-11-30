@@ -91,7 +91,7 @@ namespace module::support::logging {
         });
 
         std::vector<std::string> songs = {
-            "Last Night I Had A Dream About A Hummingbird"};  //, "Strange Game", "Non-Stop"};
+            "Never Gonna Give You Up"};  // "Last Night I Had A Dream About A Hummingbird", "Strange Game", "Non-Stop"};
 
         // Setup individual reactions for each song
         for (auto& song_title : songs) {

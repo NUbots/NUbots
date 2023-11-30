@@ -2,6 +2,137 @@
 log_level: TRACE
 
 songs:
+  - title: Never Gonna Give You Up
+    artist: Rick Astley
+    lines:
+      - start_time_ms: 19680
+        section: "[Verse 1]"
+        words: We're no strangers to love
+      - start_time_ms: 23530
+        words: You know the rules and so do I (do I)
+      - start_time_ms: 27990
+        words: A full commitment's what I'm thinking of
+      - start_time_ms: 32150
+        words: You wouldn't get this from any other guy
+      - start_time_ms: 36060
+        section: "[Pre-Chorus]"
+        words: I just wanna tell you how I'm feeling
+      - start_time_ms: 41310
+        words: Gotta make you understand
+      - start_time_ms: 43180
+        section: "[Chorus]"
+        words: Never gonna give you up
+      - start_time_ms: 45270
+        words: Never gonna let you down
+      - start_time_ms: 47290
+        words: Never gonna run around and desert you
+      - start_time_ms: 51510
+        words: Never gonna make you cry
+      - start_time_ms: 53700
+        words: Never gonna say goodbye
+      - start_time_ms: 55720
+        words: Never gonna tell a lie and hurt you
+      - start_time_ms: 60990
+        section: "[Verse 2]"
+        words: We've known each other for so long
+      - start_time_ms: 64970
+        words: Your heart's been aching, but you're too shy to say it (say it)
+      - start_time_ms: 69220
+        words: Inside, we both know what's been going on (going on)
+      - start_time_ms: 73630
+        words: We know the game and we're gonna play it
+      - start_time_ms: 77550
+        section: "[Pre-Chorus]"
+        words: And if you ask me how I'm feeling
+      - start_time_ms: 82400
+        words: Don't tell me you're too blind to see
+      - start_time_ms: 85410
+        section: "[Chorus]"
+        words: Never gonna give you up
+      - start_time_ms: 87540
+        words: Never gonna let you down
+      - start_time_ms: 89700
+        words: Never gonna run around and desert you
+      - start_time_ms: 93940
+        words: Never gonna make you cry
+      - start_time_ms: 96220
+        words: Never gonna say goodbye
+      - start_time_ms: 98270
+        words: Never gonna tell a lie and hurt you
+      - start_time_ms: 102310
+        words: Never gonna give you up
+      - start_time_ms: 104430
+        words: Never gonna let you down
+      - start_time_ms: 106620
+        words: Never gonna run around and desert you
+      - start_time_ms: 110930
+        words: Never gonna make you cry
+      - start_time_ms: 112810
+        words: Never gonna say goodbye
+      - start_time_ms: 115150
+        words: Never gonna tell a lie and hurt you
+      - start_time_ms: 119890
+        section: "[Post-Chorus]"
+        words: "(Ooh, give you up)"
+      - start_time_ms: 124010
+        words: "(Ooh, give you up)"
+      - start_time_ms: 128580
+        words: "(Ooh) Never gonna give, never gonna give (give you up)"
+      - start_time_ms: 132590
+        words: "(Ooh) Never gonna give, never gonna give (give you up)"
+      - start_time_ms: 137050
+        section: "[Bridge]"
+        words: We've known each other for so long
+      - start_time_ms: 141240
+        words: Your heart's been aching, but you're too shy to say it (to say it)
+      - start_time_ms: 145590
+        words: Inside, we both know what's been going on (going on)
+      - start_time_ms: 149840
+        words: We know the game and we're gonna play it
+      - start_time_ms: 153820
+        section: "[Pre-Chorus]"
+        words: I just wanna tell you how I'm feeling
+      - start_time_ms: 159190
+        words: Gotta make you understand
+      - start_time_ms: 161750
+        section: "[Chorus]"
+        words: Never gonna give you up
+      - start_time_ms: 163920
+        words: Never gonna let you down
+      - start_time_ms: 165920
+        words: Never gonna run around and desert you
+      - start_time_ms: 170240
+        words: Never gonna make you cry
+      - start_time_ms: 172280
+        words: Never gonna say goodbye
+      - start_time_ms: 174340
+        words: Never gonna tell a lie and hurt you
+      - start_time_ms: 178580
+        words: Never gonna give you up
+      - start_time_ms: 180740
+        words: Never gonna let you down
+      - start_time_ms: 182840
+        words: Never gonna run around and desert you
+      - start_time_ms: 187290
+        words: Never gonna make you cry
+      - start_time_ms: 189290
+        words: Never gonna say goodbye
+      - start_time_ms: 191350
+        words: Never gonna tell a lie and hurt you
+      - start_time_ms: 195540
+        words: Never gonna give you up
+      - start_time_ms: 197610
+        words: Never gonna let you down
+      - start_time_ms: 199830
+        words: Never gonna run around and desert you
+      - start_time_ms: 204060
+        words: Never gonna make you cry
+      - start_time_ms: 206250
+        words: Never gonna say goodbye
+      - start_time_ms: 208360
+        words: Never gonna tell a lie and hurt you
+      - start_time_ms: 211000
+        words: ""
   - title: Last Night I Had A Dream About A Hummingbird
     artist: M.I. Abaga
     lines:
