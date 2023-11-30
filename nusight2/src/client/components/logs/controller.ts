@@ -1,4 +1,7 @@
+import { action } from "mobx";
+
 import { LogsModel } from "./model";
+import { RobotModel } from "../robot/model";
 
 export class LogsController {
   private model: LogsModel;
@@ -9,5 +12,10 @@ export class LogsController {
 
   static of(model: LogsModel): LogsController {
     return new LogsController(model);
+  }
+
+  @action.bound
+  onSelectRobot(robot?: RobotModel) {
+    this.model.selectedRobot = robot;
   }
 }

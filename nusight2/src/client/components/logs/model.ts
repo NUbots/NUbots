@@ -1,4 +1,4 @@
-import { computed } from "mobx";
+import { computed, observable } from "mobx";
 
 import { memoize } from "../../base/memoize";
 import { RobotModel } from "../robot/model";
@@ -6,6 +6,8 @@ import { AppModel } from "../app/model";
 
 export class LogsModel {
   private appModel: AppModel;
+
+  @observable.ref selectedRobot?: RobotModel;
 
   constructor(appModel: AppModel) {
     this.appModel = appModel;
@@ -19,4 +21,26 @@ export class LogsModel {
   get robots(): RobotModel[] {
     return this.appModel.robots.filter((robot) => robot.enabled);
   }
+
+  @computed
+  get logsRobots(): LogsRobotModel[] {
+    return this.robots.map(LogsRobotModel.of);
+  }
+
+  @computed
+  get selectedLogsRobot(): LogsRobotModel | undefined {
+    return this.selectedRobot ? LogsRobotModel.of(this.selectedRobot) : undefined;
+  }
+}
+
+export class LogsRobotModel {
+  robotModel: RobotModel;
+
+  constructor(robotModel: RobotModel) {
+    this.robotModel = robotModel;
+  }
+
+  static of = memoize((robot: RobotModel): LogsRobotModel => {
+    return new LogsRobotModel(robot);
+  });
 }
