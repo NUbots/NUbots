@@ -533,7 +533,7 @@ namespace module::platform {
                                 for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
                                      length          = read_length(buffer)) {
                                     // Decode the protocol buffer and emit it as a message
-                                    char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
+                                    uint8_t* payload = buffer.data() + sizeof(length);
                                     translate_and_emit_sensor(
                                         NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload,
                                                                                                              length));
@@ -591,7 +591,7 @@ namespace module::platform {
                     }
 
                     // Serialise ActuatorRequests
-                    std::vector<char> data =
+                    std::vector<uint8_t> data =
                         NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
                     // Size of the message, in network endian

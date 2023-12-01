@@ -56,9 +56,14 @@ namespace module::purpose {
             int look_around_priority = 0;
             /// @brief Priority of StandStill task
             int stand_still_priority = 0;
+            /// @brief Priority of Say task
+            int say_priority = 0;
 
             /// @brief Position to walk to when emitting WalkToFieldPosition task
             Eigen::Vector3f walk_to_field_position_position = Eigen::Vector3f::Zero();
+
+            /// @brief Text to say when emitting Say task
+            std::string say_text = "";
         } cfg;
 
     public:

@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package message.nuclear;
+
+import "google/protobuf/timestamp.proto";
+import "message/nuclear/ReactionStatistics.proto";
+
+/**
+ * Replicates the LogLevel enum from NUClear
+ */
+enum LogLevel {
+    UNKNOWN = 0;
+    TRACE   = 1;
+    DEBUG   = 2;
+    INFO    = 3;
+    WARN    = 4;
+    ERROR   = 5;
+    FATAL   = 6;
+}
+
+/**
+ * Replicates a NUClear::LogMessage type as a protobuf message
+ */
+message LogMessage {
+
+    /// The timestamp of the log message
+    google.protobuf.Timestamp timestamp = 1;
+    /// The log level of the message
+    LogLevel level = 2;
+    /// The level that the emitting reactor wanted to display at
+    LogLevel display_level = 3;
+    /// The message to be logged
+    string message = 4;
+    /// The information about the reaction that logged this message
+    ReactionStatistics reaction_statistics = 5;
+}

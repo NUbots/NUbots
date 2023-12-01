@@ -31,6 +31,7 @@
 
 #include "message/planning/KickTo.hpp"
 #include "message/planning/LookAround.hpp"
+#include "message/skill/Say.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
@@ -48,6 +49,7 @@ namespace module::purpose {
 
     using message::planning::KickTo;
     using message::planning::LookAround;
+    using message::skill::Say;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
@@ -73,7 +75,9 @@ namespace module::purpose {
             cfg.kick_to_priority                = config["tasks"]["kick_to_priority"].as<int>();
             cfg.look_around_priority            = config["tasks"]["look_around_priority"].as<int>();
             cfg.stand_still_priority            = config["tasks"]["stand_still_priority"].as<int>();
+            cfg.say_priority                    = config["tasks"]["say_priority"].as<int>();
             cfg.walk_to_field_position_position = config["walk_to_field_position_position"].as<Expression>();
+            cfg.say_text                        = config["say_text"].as<std::string>();
         });
 
         on<Startup>().then([this] {
@@ -109,6 +113,9 @@ namespace module::purpose {
             }
             if (cfg.stand_still_priority > 0) {
                 emit<Task>(std::make_unique<StandStill>(), cfg.stand_still_priority);
+            }
+            if (cfg.say_priority > 0) {
+                emit<Task>(std::make_unique<Say>(cfg.say_text, true), cfg.say_priority);
             }
         });
     }

@@ -46,20 +46,20 @@ message Ball {
         MeasurementType type = 1;
         /// Spherical Reciprocal Coordinates (1/distance, phi, theta)
         /// Gives a better representation of the error of the measurement, since error comes from the angular position
-        fvec3 srBCc = 2;
+        vec3 srBCc = 2;
         /// Confidence of this measurement, for localisation
-        fmat3 covariance = 3;
+        mat3 covariance = 3;
     }
     /// Central axis unit vector of the ball from the camera in camera space
-    fvec3 uBCc = 1;
+    vec3 uBCc = 1;
     /// Angular radius of the ball
     /// Cosine of the angle from the centre of the ball to the edge of the ball
-    float radius = 2;
+    double radius = 2;
     /// Different methods of measurements are taken to help ball localisation determine the true position
     repeated Measurement measurements = 4;
     /// Colour of the ball for NUsight. In debug mode, discarded balls are emitted in different colours depending on
     /// the reason it was discarded
-    fvec4 colour = 5;
+    vec4 colour = 5;
 }
 message Balls {
     /// ID of the camera that took the image containing the balls
