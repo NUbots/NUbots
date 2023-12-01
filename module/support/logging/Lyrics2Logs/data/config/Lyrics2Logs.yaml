@@ -5,6 +5,9 @@ songs:
   - title: Never Gonna Give You Up
     artist: Rick Astley
     lines:
+      - start_time_ms: 100
+        section: "[Instrumental Interlude]"
+        words: "♪"
       - start_time_ms: 19680
         section: "[Verse 1]"
         words: We're no strangers to love
