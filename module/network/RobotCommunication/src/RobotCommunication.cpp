@@ -11,7 +11,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/platform/webots/messages.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
 
@@ -26,7 +25,6 @@ namespace module::network {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::platform::webots::SensorMeasurements;
     using message::skill::Kick;
     using message::support::GlobalConfig;
 
@@ -34,7 +32,7 @@ namespace module::network {
         : Reactor(std::move(environment)) {
 
         on<Configuration, Trigger<GlobalConfig>>("RobotCommunication.yaml")
-            .then([this](const Configuration& config, const GlobalConfig& globalConfig) {
+            .then([this](const Configuration& config, const GlobalConfig& global_config) {
                 // Use configuration here from file RobotCommunication.yaml
                 log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -56,12 +54,12 @@ namespace module::network {
                     // Bind our new handle
                     // TODO: check send_port is the correct thing to use here
                     std::tie(listen_handle, std::ignore, std::ignore) =
-                        on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &globalConfig](const UDP::Packet& p) {
+                        on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
                             const std::vector<char>& payload = p.payload;
-                            RoboCup incomingMsg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                            RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
-                            if (globalConfig.player_id != incomingMsg.current_pose.player_id) {
-                                emit(std::make_unique<RoboCup>(std::move(incomingMsg)));
+                            if (global_config.player_id != incoming_msg.current_pose.player_id) {
+                                emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
                             }
                         });
                 }
@@ -92,8 +90,8 @@ namespace module::network {
                 msg->timestamp = NUClear::clock::now();
 
                 // State
-                int penaltyReason = game_state->data.self.penalty_reason;
-                switch (penaltyReason) {
+                int penalty_reason = game_state->data.self.penalty_reason;
+                switch (penalty_reason) {
                     case 0: msg->state = 0; break;
                     case 1: msg->state = 1; break;
                     default: msg->state = 2; break;
