@@ -61,8 +61,8 @@ target_include_directories(nusense PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(nusense PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 # Link in the arduino core library and SrcWrapper to get the appropriate HAL
-target_link_arduino_libraries(nusense PRIVATE core SrcWrapper)
-# target_link_arduino_libraries(nusense PRIVATE MPU6050)
+target_link_arduino_libraries(nusense PRIVATE core)
+target_link_arduino_libraries(nusense PRIVATE SrcWrapper)
 
 # Enable generation of the hex file
 target_enable_arduino_upload(nusense)
