@@ -59,6 +59,7 @@ namespace module::platform::NUsense {
             }
         });
 
+        // TODO use the file descriptor stuff in nusense to handle this
         // When we receive data back from NUsense it will arrive here
         on<IO>(nusense.native_handle(), IO::READ).then([this] {
             // TODO Fill this properly below, receive protobuf bytes and parse them to our NUsense message
@@ -74,41 +75,34 @@ namespace module::platform::NUsense {
 
 
         on <Trigger<ServoTargets>>().then([this](const ServoTargets& commands){
+            // Write the command as one vector. ServoTargets messages are usually greater than 512 bytes but less than 1024
+            // This means that the USB2.0 protocol will split this up and will be received on the nusense side as chunks of 512
+            // as 512 bytes is the maximum bulk size that 2.0 allows. This also implies that the read callback in the nusense side
+            // will be triggered twice.
+            std::array<char, 3> header = {(char)0xE2, (char)0x98, (char)0xA2};
+
+            std::vector<char> payload  = NUClear::util::serialise::Serialise<ServoTargets>::serialise(commands);
+
+            int payload_length = payload.size();
+            uint8_t high_byte = (payload_length >> 8) & 0xFF;
+            uint8_t low_byte = payload_length & 0xFF;
+            std::array<uint8_t, 2> byte_lengths = {high_byte, low_byte};
+
+            std::vector<char> full_msg;
+            full_msg.insert(full_msg.end(), header.begin(), header.end());
+            full_msg.insert(full_msg.end(), byte_lengths.begin(), byte_lengths.end());
+            full_msg.insert(full_msg.end(), payload.begin(), payload.end());
+
+            nusense.write(full_msg.data(), full_msg.size());
+
+            // Logging
             log<NUClear::INFO>("Servo targets received");
 
-            // std::vector<char> serialised_msg = msg_to_nbs(commands);
-            // // Must split the packets up by 512 bytes before sending
-            // // If not split, we will lose data because the STM32 buffer is circular by nature
-            // float max_split_size = 512.0;
-            // float n_split = serialised_msg.size() / max_split_size;
-            // int splits = (int)std::ceil(n_split);
-            // // Check packet before writing
-            // log<NUClear::INFO>(fmt::format("length: {}", serialised_msg.size()));
-            // int start_index = 0;
-            // for (int i = 0; i < splits; ++i) {
-            //     int chunk_size = static_cast<int>(std::min(max_split_size, static_cast<float>(serialised_msg.size() - start_index)));
-            //     std::vector<char> ith_split(serialised_msg.begin() + start_index, serialised_msg.begin() + start_index + chunk_size);
-            //     // Send the ith split to nusense then update our indices
-            //     nusense.write(ith_split.data(), ith_split.size());
-            //     start_index += chunk_size;
-            //     log<NUClear::INFO>(fmt::format("ith split size {}", ith_split.size()));
-            // }
-            // uint8_t high_byte = static_cast<uint8_t>(serialised_msg[3]);
-            // uint8_t low_byte = static_cast<uint8_t>(serialised_msg[4]);
-            // log<NUClear::INFO>(high_byte);
-            // log<NUClear::INFO>(low_byte);
-            // uint16_t total_length = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
-            // log<NUClear::INFO>(total_length);
-            // log<NUClear::INFO>((int16_t)total_length);
-            std::array<uint8_t, 3> header = {0xE2, 0x98, 0xA2};
-            uint32_t length               = uint32_t(sizeof(uint64_t) + sizeof(uint64_t) + commands.size());
-            std::vector<uint8_t> payload  = NUClear::util::serialise::Serialise<ServoTargets>::serialise(commands);
+            uint16_t total_length = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 
-            nusense.write(header.data(), header.size());
-            nusense.write(reinterpret_cast<const uint8_t*>(&length), sizeof(length));
-            nusense.write(payload.data(), payload.size());
+            log<NUClear::INFO>(total_length);
+            log<NUClear::INFO>(fmt::format("header length: {}  length length: {}  payload length: {}", header.size(), byte_lengths.size(), payload.size()));
 
-            log<NUClear::INFO>(fmt::format("total length: {}", header.size() + sizeof(length) + payload.size()))
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
