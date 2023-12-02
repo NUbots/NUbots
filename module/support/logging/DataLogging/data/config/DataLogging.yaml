@@ -1,7 +1,7 @@
 log_level: INFO
 
 output:
-  directory: log
+  directory: recordings
   split_size: 5 * GiB
 
 # You can put any messages that is emitted in the system here and it will be logged
@@ -20,3 +20,5 @@ messages:
   message.vision.VisualMesh: false
   message.localisation.Ball: false
   message.localisation.Field: false
+  message.nuclear.LogMessage: false
+  message.nuclear.ReactionStatistics: false
