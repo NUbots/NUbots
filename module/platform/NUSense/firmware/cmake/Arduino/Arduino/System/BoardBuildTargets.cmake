@@ -655,7 +655,11 @@ function(_get_auto_link_libs target_name src_list_var ignore_list_var override_l
       list(FIND ${ignore_list_var} "${inc}" _idx)
       # Check if to be ignored
       if(_idx LESS 0 AND NOT "${_target_ard_lib_name}" STREQUAL "${inc}")
-        if(inc STREQUAL "Arduino")
+        if(inc STREQUAL "Arduino"
+           OR inc STREQUAL "board"
+           OR inc STREQUAL "pins_arduino"
+           OR inc STREQUAL "variant"
+        )
           set(_lib "core")
         else()
           set(_lib "${inc}")
