@@ -29,7 +29,6 @@ set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Arduino/Arduino-tool
 include(${CMAKE_TOOLCHAIN_FILE})
 
 # ######################################################################################################################
-
 project(NUSense CXX)
 
 # Always MinSizeRel for the firmware
@@ -42,18 +41,7 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 add_compile_options(-fdiagnostics-color=always)
 
 # Glob all the source files
-file(
-  GLOB
-  src
-  "src/*.cpp"
-  "src/**/*.cpp"
-  "src/*.hpp"
-  "src/*/**.hpp"
-  "/usr/share/arduino/packages/STMicroelectronics/hardware/stm32/2.6.0/system/Drivers/STM32H7xx_HAL_Driver/**/*.c"
-  "/usr/share/arduino/packages/STMicroelectronics/hardware/stm32/2.6.0/system/Drivers/CMSIS/Device/ST/STM32H7xx/**/*.c"
-)
-
-list(FILTER src EXCLUDE REGEX ".*template.c$")
+file(GLOB src "src/*.cpp" "src/**/*.cpp" "src/*.hpp" "src/*/**.hpp")
 
 # run generate.py to generate the git version file
 find_package(PythonInterp 3 REQUIRED)
@@ -72,8 +60,8 @@ add_executable(nusense ${src})
 target_include_directories(nusense PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(nusense PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-# Link in the arduino core library
-target_link_arduino_libraries(nusense PRIVATE core)
+# Link in the arduino core library and SrcWrapper to get the appropriate HAL
+target_link_arduino_libraries(nusense PRIVATE core SrcWrapper)
 # target_link_arduino_libraries(nusense PRIVATE MPU6050)
 
 # Enable generation of the hex file
