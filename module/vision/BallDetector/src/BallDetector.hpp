@@ -38,18 +38,18 @@ namespace module::vision {
         /// Configuration values
         struct {
             /// @brief Minimum confidence required for a ball point to be a ball point
-            float confidence_threshold = 0.0f;
+            double confidence_threshold = 0.0f;
             /// @brief Minimum number of points for a cluster to be a viable ball
             int cluster_points = 0;
             /// @brief Minimum distance for a cluster to be a viable ball
-            float minimum_ball_distance = 0.0f;
+            double minimum_ball_distance = 0.0f;
             /// @brief Percentage difference between width and projection based distances. 0.0 means that the distance
             /// measurements must match perfectly
-            float distance_disagreement = 0.0f;
+            double distance_disagreement = 0.0f;
             /// @brief A threshold on how large the standard deviation of the angle between ray and cone axis can be
-            float maximum_deviation = 0.0f;
+            double maximum_deviation = 0.0f;
             /// @brief Measurement certainties for ball localisation
-            Eigen::Vector3f ball_angular_cov = Eigen::Vector3f::Zero();
+            Eigen::Vector3d ball_angular_cov = Eigen::Vector3d::Zero();
         } cfg{};
 
     public:

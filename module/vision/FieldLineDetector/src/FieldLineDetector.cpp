@@ -94,7 +94,7 @@ namespace module::vision {
                                                                                         clusters.end(),
                                                                                         horizon.horizon.begin(),
                                                                                         horizon.horizon.end(),
-                                                                                        uPCw.cast<float>(),
+                                                                                        uPCw,
                                                                                         false,
                                                                                         true);
             clusters.resize(std::distance(clusters.begin(), green_boundary));
