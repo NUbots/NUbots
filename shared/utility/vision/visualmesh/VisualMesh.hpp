@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2019 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef UTILITY_MATH_VISION_VISUALMESH_VISUALMESH_HPP
@@ -32,15 +40,40 @@ namespace utility::vision::visualmesh {
     Iterator partition_points(Iterator first,
                               Iterator last,
                               const Eigen::MatrixXi& neighbours,
-                              Func&& pred,
+                              Func&& pred,  // function determining if the index has a high enough confidence to use
                               const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
+
         return std::partition(first, last, [&](const value_type& idx) {
-            return pred(idx) && std::any_of(search_space.begin(), search_space.end(), [&](const auto& n) {
-                       return !pred(neighbours(n, idx));
-                   });
+            // Check if this index satisfies our confidence requirements
+            bool prediction = pred(idx);
+            // Check if any of the required neighbours satisfy our confidence requirements
+            // Required neighbours are from the search space list
+            bool check = std::any_of(search_space.begin(), search_space.end(), [&](const auto& n) {
+                return !pred(neighbours(n, idx));
+            });
+
+            return prediction && check;
         });
     }
+
+    template <typename Iterator, typename Func>
+    Iterator boundary_points(Iterator first,
+                             Iterator last,
+                             const Eigen::MatrixXi& neighbours,
+                             Func&& pred,  // function determining if the index has a high enough confidence to use
+                             const std::initializer_list<int>& search_space = {0, 1, 2, 3, 4, 5}) {
+        using value_type = typename std::iterator_traits<Iterator>::value_type;
+
+        // Check if any of the required neighbours satisfy our confidence requirements
+        // Required neighbours are from the search space list
+        return std::partition(first, last, [&](const value_type& idx) {
+            return std::any_of(search_space.begin(), search_space.end(), [&](const auto& n) {
+                return !pred(neighbours(n, idx));
+            });
+        });
+    }
+
 
     template <typename Iterator>
     void cluster_points(Iterator first,
@@ -97,7 +130,7 @@ namespace utility::vision::visualmesh {
                                       Iterator last,
                                       HorizonIt horizon_first,
                                       HorizonIt horizon_last,
-                                      const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays,
+                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
                                       const bool& up   = true,
                                       const bool& down = true) {
 

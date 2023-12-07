@@ -36,6 +36,7 @@ nuclear_role(
   skill::GetUp
   skill::Look
   skill::Dive
+  skill::Say
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
