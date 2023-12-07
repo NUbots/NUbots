@@ -104,7 +104,7 @@ namespace {
 TEST_CASE("Test a provider can replace its task when the new task overlaps in dependencies with the old task",
           "[director][needs][self]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();
