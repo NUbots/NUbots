@@ -11,11 +11,14 @@ namespace module::network {
         /// @brief Stores configuration values
         struct Config {
             /// @brief The port to communicate over
-            uint send_port    = 0;
+            uint send_port = 0;
+            /// @brief The port to communicate over (should match receive port)
             uint receive_port = 0;
+            /// @brief The IP address used for broadcasting data
             std::string broadcast_ip = "";
         } cfg;
 
+        /// @brief Handle for incoming UDP message. This will be bound/unbound during (re)connection
         ReactionHandle listen_handle;
 
 

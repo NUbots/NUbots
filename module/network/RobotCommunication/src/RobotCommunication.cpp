@@ -52,12 +52,12 @@ namespace module::network {
                     cfg.receive_port = config["receive_port"].as<uint>();
 
                     // Bind our new handle
-                    // TODO: check send_port is the correct thing to use here
                     std::tie(listen_handle, std::ignore, std::ignore) =
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
+                            // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
                             }
@@ -65,8 +65,6 @@ namespace module::network {
                 }
             });
 
-        // walk command should be updated to director
-        // determine way to do this where we don't require a filtered loc_ball trigger (optional triggers, every...)
         on<Every<2, Per<std::chrono::seconds>>,
            Optional<With<Ball>>,
            Optional<With<WalkState>>,
@@ -135,7 +133,7 @@ namespace module::network {
                                          static_cast<float>(walk_state->velocity_target.z())};
                 }
 
-                // TODO: target pose
+                // TODO: target pose (Position and orientation of the players target on the field specified)
 
                 // Kick target
                 if (kick) {
@@ -159,7 +157,6 @@ namespace module::network {
                         msg->ball.position.z = rBFf.z();
                     }
 
-                    // TODO: Check if correct, copied from Overview
                     Eigen::Matrix<float, 3, 3> covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
                     msg->ball.covariance                  = {{covariance(0, 0), covariance(1, 0), covariance(2, 0)},
                                                              {covariance(0, 1), covariance(1, 1), covariance(2, 1)},
