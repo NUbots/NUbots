@@ -55,7 +55,7 @@ namespace module::network {
                     // TODO: check send_port is the correct thing to use here
                     std::tie(listen_handle, std::ignore, std::ignore) =
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
-                            const std::vector<char>& payload = p.payload;
+                            const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
@@ -82,8 +82,6 @@ namespace module::network {
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
                          const std::shared_ptr<const GlobalConfig>& config) {
-                log<NUClear::DEBUG>("Send robocup msg!");
-
                 auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
