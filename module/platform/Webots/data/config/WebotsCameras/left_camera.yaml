@@ -33,7 +33,7 @@ settings:
   # BalanceWhiteAuto: Contsinuous
 
 # Camera kinematics
-urdf_path: "models/nugus.urdf"
+urdf_path: "models/robot.urdf"
 
 roll_offset: 0.0 * pi / 180
 

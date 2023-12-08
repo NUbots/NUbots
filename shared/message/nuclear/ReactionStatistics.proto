@@ -1,0 +1,69 @@
+// MIT License
+//
+// Copyright (c) 2023 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+syntax = "proto3";
+
+package message.nuclear;
+
+import "google/protobuf/timestamp.proto";
+
+/**
+ * Replicates the ReactionStatistics class from NUClear as a protobuf message
+ */
+message ReactionStatistics {
+
+    /**
+     * The identifiers of the reaction
+     */
+    message Identifiers {
+        /// The name of the reaction provided by the user
+        string name = 1;
+        /// The name of the reactor that this reaction belongs to
+        string reactor = 2;
+        /// The DSL that this reaction was created from
+        string dsl = 3;
+        /// The callback function that this reaction is bound to
+        string function = 4;
+    }
+
+    /// The identifiers of the reaction
+    Identifiers identifiers = 1;
+    /// The id of the reaction
+    uint64 reaction_id = 2;
+    /// The id of the task
+    uint64 task_id = 3;
+    /// The id of the reaction that caused this task to be run
+    uint64 cause_reaction_id = 4;
+    /// The id of the task that caused this task to be run
+    uint64 cause_task_id = 5;
+    /// The time that this reaction was emitted
+    google.protobuf.Timestamp emitted = 6;
+    /// The time that this reaction started processing
+    google.protobuf.Timestamp started = 7;
+    /// The time that this reaction finished processing
+    google.protobuf.Timestamp finished = 8;
+    /// The exception that was thrown by this reaction (if any)
+    string exception = 9;
+}
