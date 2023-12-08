@@ -70,12 +70,17 @@ formatters["licence"] = {
         "*.py",
         "*.sh",
         "*.cmake",
+        "*.proto",
         "CMakeLists.txt",
         "**/CMakeLists.txt",
         "Dockerfile",
         "**/Dockerfile",
     ],
-    "exclude": ["shared/utility/motion/splines/*"],  # TODO exclude files that are not ours
+    "exclude": [
+        "shared/utility/motion/splines/*",
+        "shared/utility/platform/models/nugus/nugus.proto",
+        "nusight2/src/assets/robot-models/nugus/nugus.proto",
+    ],  # TODO exclude files that are not ours
 }
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
