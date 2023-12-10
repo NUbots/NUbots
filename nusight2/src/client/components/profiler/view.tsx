@@ -2,12 +2,14 @@ import { PropsWithChildren } from "react";
 import React from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react";
+
+import { Icon } from "../icon/view";
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
+
 import { ProfilerController } from "./controller";
 import { ProfilerModel, ProfilerRobotModel } from "./model";
 import style from "./style.module.css";
-import { Icon } from "../icon/view";
 
 @observer
 export class ProfilerView extends React.Component<{
@@ -104,7 +106,6 @@ export class ProfilerView extends React.Component<{
   private onSelectRobot(robot?: RobotModel) {
     this.props.controller.onSelectRobot(this.props.model, robot);
   }
-
 }
 
 interface SearchBoxProps {
@@ -138,9 +139,7 @@ export type RobotStatsProps = {
 export const RobotStats = (props: RobotStatsProps) => {
   return (
     <div className="w-full border rounded-lg">
-      <header className={style.header}>
-        Totals
-      </header>
+      <header className={style.header}>Totals</header>
       <div className={style.details}>
         <div className={style.group}>
           <div className={style.row}>
