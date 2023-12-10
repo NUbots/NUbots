@@ -69,4 +69,10 @@ message ReactionProfile {
 message ReactionProfiles {
     /// List of reaction profiles
     repeated ReactionProfile reaction_profiles = 1;
+
+    /// Total time for all reactions
+    double total_time = 2;
+
+    /// Total number of reactions
+    uint64 total_count = 3;
 }

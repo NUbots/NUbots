@@ -37,7 +37,10 @@ export type ProfileSort = {
 export class ProfilerRobotModel {
   robotModel: RobotModel;
   @observable profiles: Profile[] = [];
+  @observable totalTime: number;
+  @observable totalCount: number;
   @observable sortProfile: ProfileSort;
+  @observable search: string;
 
   constructor(robotModel: RobotModel) {
     this.robotModel = robotModel;
@@ -45,6 +48,9 @@ export class ProfilerRobotModel {
       column: "name",
       direction: "asc",
     };
+    this.totalTime = 0;
+    this.totalCount = 0;
+    this.search = "";
   }
 
   static of = memoize((robotModel: RobotModel) => {
@@ -52,8 +58,16 @@ export class ProfilerRobotModel {
   });
 
   @computed
+  get profiledFilteredBySearch(): Profile[] {
+    const search = this.search.toLowerCase();
+    return this.profiles.filter((profile) => {
+      return profile.name.toLowerCase().includes(search) || profile.reactor.toLowerCase().includes(search);
+    });
+  }
+
+  @computed
   get sortedProfiles() {
-    return this.profiles.slice().sort((a, b) => {
+    return this.profiledFilteredBySearch.slice().sort((a, b) => {
       if (a[this.sortProfile.column] < b[this.sortProfile.column]) {
         return this.sortProfile.direction === "asc" ? -1 : 1;
       }

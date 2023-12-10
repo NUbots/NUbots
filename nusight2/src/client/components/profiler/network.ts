@@ -43,6 +43,8 @@ export class ProfilerNetwork {
         p.percentage!,
       );
       robot.profiles.push(newProfile);
+      robot.totalTime = profiles.totalTime!;
+      robot.totalCount = profiles.totalCount!;
     });
   }
 }

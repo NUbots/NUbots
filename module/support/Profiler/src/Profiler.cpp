@@ -71,8 +71,10 @@ namespace module::support {
 
             // Compute the total time (sum of all reactions total time)
             double total_time_all = 0;
+            double total_count    = 0;
             for (auto& profile : reaction_profiles) {
                 total_time_all += profile.second.total_time;
+                total_count += profile.second.count;
             }
 
             // Update all the profiles percentages based on new total time
@@ -85,6 +87,8 @@ namespace module::support {
             for (auto& profile : reaction_profiles) {
                 profiles->reaction_profiles.push_back(profile.second);
             }
+            profiles->total_time  = total_time_all;
+            profiles->total_count = total_count;
             emit(profiles);
         });
     }

@@ -2,13 +2,12 @@ import { PropsWithChildren } from "react";
 import React from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react";
-
 import { RobotModel } from "../robot/model";
 import { RobotSelectorSingle } from "../robot_selector_single/view";
-
 import { ProfilerController } from "./controller";
-import { ProfilerModel } from "./model";
-import styles from "./style.module.css";
+import { ProfilerModel, ProfilerRobotModel } from "./model";
+import style from "./style.module.css";
+import { Icon } from "../icon/view";
 
 @observer
 export class ProfilerView extends React.Component<{
@@ -24,9 +23,9 @@ export class ProfilerView extends React.Component<{
     } = this.props;
 
     return (
-      <div className={styles.Profiler}>
+      <div className={style.Profiler}>
         <Menu>
-          <div className={styles.selector}>
+          <div className={style.selector}>
             <RobotSelectorSingle
               autoSelect={true}
               robots={robots}
@@ -36,7 +35,10 @@ export class ProfilerView extends React.Component<{
           </div>
         </Menu>
         {selectedRobot && (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto p-2">
+            <div className="flex-col m-2">
+              <SearchBox model={selectedRobot} controller={controller} />
+            </div>
             <table className="min-w-full table-auto border-collapse border border-gray-200">
               <thead>
                 <tr>
@@ -89,6 +91,9 @@ export class ProfilerView extends React.Component<{
                 ))}
               </tbody>
             </table>
+            <div className="flex-col border border-gray-200 w-full">
+              <RobotStats totalCount={selectedRobot.totalCount} totalTime={selectedRobot.totalTime} />
+            </div>
           </div>
         )}
       </div>
@@ -99,4 +104,55 @@ export class ProfilerView extends React.Component<{
   private onSelectRobot(robot?: RobotModel) {
     this.props.controller.onSelectRobot(this.props.model, robot);
   }
+
 }
+
+interface SearchBoxProps {
+  model: ProfilerRobotModel;
+  controller: ProfilerController;
+}
+
+const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
+  const { model, controller } = props;
+
+  return (
+    <div className="relative w-64">
+      <Icon className="absolute left-1 top-1 text-icon pointer-events-none">search</Icon>
+      <input
+        type="search"
+        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 rounded bg-white focus:outline-none focus:border-transparent focus:ring-2 focus:ring-nusight-500"
+        placeholder="Filter profiles"
+        value={model.search}
+        onChange={(e) => controller.setSearch(model, e.target.value)}
+      />
+    </div>
+  );
+});
+
+export type RobotStatsProps = {
+  totalTime: number;
+  totalCount: number;
+  // TODO: Add device stats, CPU usage, memory usage, etc.
+};
+
+export const RobotStats = (props: RobotStatsProps) => {
+  return (
+    <div className="w-full border rounded-lg">
+      <header className={style.header}>
+        Totals
+      </header>
+      <div className={style.details}>
+        <div className={style.group}>
+          <div className={style.row}>
+            <span className={style.label}>Total Time (ms)</span>
+            {props.totalTime.toFixed(1)}
+          </div>
+          <div className={style.row}>
+            <span className={style.label}>Total Reactions</span>
+            {props.totalCount}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

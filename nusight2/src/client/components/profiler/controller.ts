@@ -25,6 +25,11 @@ export class ProfilerController {
     }
   }
 
+  @action.bound
+  setSearch(model: ProfilerRobotModel, search: string) {
+    model.search = search;
+  }
+
   getSortIcon(model: ProfilerRobotModel, column: string) {
     if (model.sortProfile.column === column) {
       return model.sortProfile.direction === "asc" ? "↑" : "↓";
