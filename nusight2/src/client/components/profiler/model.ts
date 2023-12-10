@@ -21,7 +21,16 @@ export class ProfilerModel {
 }
 
 export type ProfileSort = {
-  column: "name" | "reactionId" | "reactor" | "total_time" | "count" | "min_time" | "max_time" | "avg_time" | "percentage";
+  column:
+    | "name"
+    | "reactionId"
+    | "reactor"
+    | "total_time"
+    | "count"
+    | "min_time"
+    | "max_time"
+    | "avg_time"
+    | "percentage";
   direction: "asc" | "desc";
 };
 
@@ -76,7 +85,7 @@ export class Profile {
     min_time = Number.MAX_VALUE,
     max_time = 0,
     avg_time = 0,
-    percentage = 0
+    percentage = 0,
   ) {
     this.name = name;
     this.reactionId = reactionId;
@@ -95,6 +104,6 @@ export class Profile {
     this.min_time = Math.min(this.min_time, newTime);
     this.max_time = Math.max(this.max_time, newTime);
     this.avg_time = this.total_time / this.count;
-    this.percentage = 100.0 * this.total_time / total_time_all;
+    this.percentage = (100.0 * this.total_time) / total_time_all;
   }
 }

@@ -1,10 +1,9 @@
+import { action } from "mobx";
+
 import { RobotModel } from "../robot/model";
 
 import { ProfilerRobotModel } from "./model";
 import { ProfilerModel } from "./model";
-
-import { action, observable } from "mobx";
-
 import { ProfileSort } from "./model";
 
 export class ProfilerController {
@@ -42,5 +41,4 @@ export class ProfilerController {
       height: "100%",
     };
   }
-
 }

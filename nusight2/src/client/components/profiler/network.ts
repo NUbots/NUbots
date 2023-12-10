@@ -5,7 +5,7 @@ import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
-import { ProfilerRobotModel, Profile } from "./model";
+import { Profile, ProfilerRobotModel } from "./model";
 import ReactionProfiles = message.support.nuclear.ReactionProfiles;
 
 export class ProfilerNetwork {
@@ -30,7 +30,7 @@ export class ProfilerNetwork {
     robot.profiles = [];
 
     // Update with new profiles
-    profiles.reactionProfiles!.forEach(p => {
+    profiles.reactionProfiles!.forEach((p) => {
       const newProfile = new Profile(
         p.name!,
         p.reactionId!,
@@ -40,7 +40,7 @@ export class ProfilerNetwork {
         p.minTime!,
         p.maxTime!,
         p.avgTime!,
-        p.percentage!
+        p.percentage!,
       );
       robot.profiles.push(newProfile);
     });
