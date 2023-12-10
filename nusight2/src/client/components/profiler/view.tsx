@@ -21,6 +21,7 @@ export class ProfilerView extends React.Component<{
     const {
       model: { selectedRobot, robots },
       Menu,
+      controller,
     } = this.props;
 
     return (
@@ -40,19 +41,19 @@ export class ProfilerView extends React.Component<{
             <table className="min-w-full table-auto border-collapse border border-gray-200">
               <thead>
                 <tr>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "reactionId")}>Reaction ID {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "reactionId")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "reactor")}>Reactor Name {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "reactor")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "name")}>Reaction Name {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "name")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "total_time")}>Total Time (ms) {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "total_time")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "count")}>Count {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "count")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "min_time")}>Min Time (ms) {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "min_time")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "max_time")}>Max Time (ms) {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "max_time")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "avg_time")}>Average Time (ms) {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "avg_time")}</th>
-                  <th onClick={() => this.props.controller.setSort(this.props.model.selectedRobot!, "percentage")}>Time % {this.props.controller.getSortIcon(this.props.model.selectedRobot!, "percentage")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "reactionId")}>Reaction ID {controller.getSortIcon(selectedRobot!, "reactionId")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "reactor")}>Reactor Name {controller.getSortIcon(selectedRobot!, "reactor")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "name")}>Reaction Name {controller.getSortIcon(selectedRobot!, "name")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "total_time")}>Total Time (ms) {controller.getSortIcon(selectedRobot!, "total_time")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "count")}>Count {controller.getSortIcon(selectedRobot!, "count")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "min_time")}>Min Time (ms) {controller.getSortIcon(selectedRobot!, "min_time")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "max_time")}>Max Time (ms) {controller.getSortIcon(selectedRobot!, "max_time")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "avg_time")}>Average Time (ms) {controller.getSortIcon(selectedRobot!, "avg_time")}</th>
+                  <th onClick={() => controller.setSort(selectedRobot!, "percentage")}>Time % {controller.getSortIcon(selectedRobot!, "percentage")}</th>
                 </tr>
               </thead>
               <tbody>
-                {this.props.model.selectedRobot!.sortedProfiles.map((profile) => (
+                {selectedRobot!.sortedProfiles.map((profile) => (
                   <tr key={profile.reactionId}>
                     <td>{profile.reactionId}</td>
                     <td>{profile.reactor}</td>
@@ -63,7 +64,7 @@ export class ProfilerView extends React.Component<{
                     <td>{profile.max_time.toFixed(1)}</td>
                     <td>{profile.avg_time.toFixed(1)}</td>
                     <td>
-                      <div style={this.props.controller.getPercentageStyle(profile.percentage)}>
+                      <div style={controller.getPercentageStyle(profile.percentage)}>
                         <span>{profile.percentage.toFixed(1)} %</span>
                       </div>
                     </td>

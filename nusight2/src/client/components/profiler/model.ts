@@ -26,10 +26,12 @@ export type ProfileSort = {
 };
 
 export class ProfilerRobotModel {
+  robotModel: RobotModel;
   @observable profiles: Profile[] = [];
   @observable sortProfile: ProfileSort;
 
-  constructor(private robotModel: RobotModel) {
+  constructor(robotModel: RobotModel) {
+    this.robotModel = robotModel;
     this.sortProfile = {
       column: "name",
       direction: "asc",
