@@ -41,3 +41,8 @@ message ReactionProfile {
     /// Percentage of time spent in the reaction (total_time / total time since start)
     double percentage = 9;
 }
+
+message ReactionProfiles {
+    /// List of reaction profiles
+    repeated ReactionProfile reaction_profiles = 1;
+}
