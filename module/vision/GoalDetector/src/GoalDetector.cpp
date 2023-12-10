@@ -1,20 +1,28 @@
 /*
- * This file is part of NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "GoalDetector.hpp"
@@ -112,7 +120,7 @@ namespace module::vision {
                                                                                             clusters.end(),
                                                                                             horizon.horizon.begin(),
                                                                                             horizon.horizon.end(),
-                                                                                            rays.cast<float>(),
+                                                                                            rays,
                                                                                             true,
                                                                                             true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
@@ -196,11 +204,8 @@ namespace module::vision {
 
                             // Find the median of the left side and the right side
                             if (cfg.use_median) {
-                                utility::math::geometry::sort_by_theta(cluster.begin(),
-                                                                       right,
-                                                                       rays.cast<float>(),
-                                                                       world_offset);
-                                utility::math::geometry::sort_by_theta(right, other, rays.cast<float>(), world_offset);
+                                utility::math::geometry::sort_by_theta(cluster.begin(), right, rays, world_offset);
+                                utility::math::geometry::sort_by_theta(right, other, rays, world_offset);
                                 left_side =
                                     rays.col(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
                                 right_side = rays.col(*std::next(right, std::distance(right, other) / 2));
