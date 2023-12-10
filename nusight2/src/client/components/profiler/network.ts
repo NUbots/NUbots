@@ -5,14 +5,12 @@ import { Network } from "../../network/network";
 import { NUsightNetwork } from "../../network/nusight_network";
 import { RobotModel } from "../robot/model";
 
-import { ProfilerRobotModel } from "./model";
-import { Profile } from "./model";
-
-import ReactionProfile = message.support.nuclear.ReactionProfile;
+import { ProfilerRobotModel, Profile } from "./model";
+import ReactionStatistics = message.nuclear.ReactionStatistics;
 
 export class ProfilerNetwork {
   constructor(private network: Network) {
-    this.network.on(ReactionProfile, this.onReactionProfile);
+    this.network.on(ReactionStatistics, this.onReactionStatistics);
   }
 
   static of(nusightNetwork: NUsightNetwork): ProfilerNetwork {
@@ -25,42 +23,42 @@ export class ProfilerNetwork {
   };
 
   @action.bound
-  private onReactionProfile(robotModel: RobotModel, profileData: ReactionProfile) {
-    console.log("onReactionProfile");
+  private onReactionStatistics(robotModel: RobotModel, stats: ReactionStatistics) {
+    console.log("onReactionStatistics");
 
     const robot = ProfilerRobotModel.of(robotModel);
 
+    // Compute the time of the reaction
+    const startTime = stats.started!.seconds * 1000 + stats.started!.nanos! / 1000000;
+    const finishTime = stats.finished!.seconds * 1000 + stats.finished!.nanos! / 1000000;
+    const time = finishTime - startTime; // Time in milliseconds
+
     // Find the index of the existing profile with the same reactionId
-    const profileIndex = robot.profiles.findIndex((p) => p.reactionId === profileData.reactionId);
+    const profileIndex = robot.profiles.findIndex(p => p.reactionId === stats.reactionId);
 
     if (profileIndex !== -1) {
       // Profile exists, update it
-      robot.profiles[profileIndex] = new Profile(
-        profileData.name,
-        profileData.reactionId,
-        profileData.reactor,
-        profileData.totalTime,
-        profileData.count,
-        profileData.minTime,
-        profileData.maxTime,
-        profileData.avgTime,
-        profileData.percentage,
-      );
+      robot.profiles[profileIndex].updateProfile(time, robot.profiles[profileIndex].total_time);
     } else {
-      // Profile does not exist, add it
-      robot.profiles.push(
-        new Profile(
-          profileData.name,
-          profileData.reactionId,
-          profileData.reactor,
-          profileData.totalTime,
-          profileData.count,
-          profileData.minTime,
-          profileData.maxTime,
-          profileData.avgTime,
-          profileData.percentage,
-        ),
+      // Profile does not exist, create and add it
+      const newProfile = new Profile(
+        stats.identifiers!.name!,
+        stats.reactionId,
+        stats.identifiers!.reactor!,
+        time,
+        1,
+        time,
+        time,
+        time,
+        0 // Initial percentage, will be recalculated
       );
+      robot.profiles.push(newProfile);
     }
+
+    // Recalculate percentages for all profiles
+    let total_time_all = robot.profiles.reduce((acc, p) => acc + p.total_time, 0);
+    robot.profiles.forEach(p => {
+      p.percentage = 100.0 * p.total_time / total_time_all;
+    });
   }
 }
