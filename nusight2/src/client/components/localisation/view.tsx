@@ -227,7 +227,7 @@ const Goals = ({ model }: { model: LocalisationModel }) => (
   <>
     {model.robots.map(
       (robot) =>
-        robot.visible && (
+        robot.visible && robot.rGFf && (
           <object3D key={robot.id}>
             {robot.rGFf.map((goal, i) => {
               return (

@@ -52,10 +52,11 @@ export class LocalisationNetwork {
   @action.bound
   private onGoals(robotModel: RobotModel, goalsMessage: message.vision.Goals) {
     const { id, timestamp, Hcw, goals } = goalsMessage;
+    const Hwc = Matrix4.from(Hcw).invert();
     const robot = LocalisationRobotModel.of(robotModel);
     robot.goals.points = goals.map((goal) => ({
-      bottom: Vector3.from(goal.post?.bottom),
-      top: Vector3.from(goal.post?.top)
+      bottom: Vector3.from(goal.post?.bottom).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+      top: Vector3.from(goal.post?.top).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc)
     }));
   }
 

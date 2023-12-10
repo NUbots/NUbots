@@ -187,8 +187,9 @@ namespace module::vision {
                         auto rCWw = Hwc.translation();
                         auto rGCw = rGWw - rCWw;
 
-                        g.post.bottom   = rGWw;
-                        g.post.top      = rGWw + Eigen::Vector3d(0, 0, field.goalpost_top_height);
+                        g.post.bottom = (horizon.Hcw * rGWw).normalized();
+                        g.post.top =
+                            (horizon.Hcw * (rGWw + Eigen::Vector3d(0, 0, field.goalpost_top_height))).normalized();
                         auto distance   = rGCw.norm();
                         g.post.distance = distance;
 
