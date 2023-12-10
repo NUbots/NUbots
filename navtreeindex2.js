@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classmodule_1_1input_1_1FakeCamera.html#a2c8b3ab4d99e4c5e6e7a0680c1c13862":[2,0,3,2,5,6],
 "classmodule_1_1input_1_1FakeCamera.html#a3953354c65a90c30409d1dfbbaf1f9b4":[2,0,3,2,5,0],
 "classmodule_1_1input_1_1FakeCamera.html#a65b15e89b4306d140dece4d6fab23542":[2,0,3,2,5,7],
 "classmodule_1_1input_1_1FakeCamera.html#a7f18884a71a309207684c808506a6994":[2,0,3,2,5,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1motion_1_1Kicker.html#aaa2fbb7903febb05b27478f6ee3ca94b":[2,0,3,4,5,13],
 "classmodule_1_1motion_1_1Kicker.html#aab24e457de3bbfdc3b760b163cf0f07f":[2,0,3,4,5,4],
 "classmodule_1_1motion_1_1Kicker.html#aad9c98d70c3bdc81cc4bd386f56e64ff":[2,0,3,4,5,10],
-"classmodule_1_1motion_1_1Kicker.html#ab1447b89ef85abcc558d9fcc18e81b42":[2,0,3,4,5,12],
-"classmodule_1_1motion_1_1Kicker.html#acaec4a1c320816df6810f82eb0251f44":[2,0,3,4,5,8]
+"classmodule_1_1motion_1_1Kicker.html#ab1447b89ef85abcc558d9fcc18e81b42":[2,0,3,4,5,12]
 };

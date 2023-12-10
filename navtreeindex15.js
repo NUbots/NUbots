@@ -1,5 +1,6 @@
 var NAVTREEINDEX15 =
 {
+"structutility_1_1input_1_1LimbID.html#a1a75bcf9c4f4a265c5466511868671e3":[2,0,6,2,1,9],
 "structutility_1_1input_1_1LimbID.html#a1b8ceef8ab1b5d27458db30bb03f7769":[2,0,6,2,1,15],
 "structutility_1_1input_1_1LimbID.html#a21819812d643abaa43fbddbd70b78eb6":[2,0,6,2,1,22],
 "structutility_1_1input_1_1LimbID.html#a2447f2f9c8ec4ba0d6d35bd9e8db05f3":[2,0,6,2,1,20],
@@ -248,6 +249,5 @@ var NAVTREEINDEX15 =
 "structutility_1_1skill_1_1WalkingParameter.html#aa16a4af6b7ab7c9cbf51f27c29594426":[2,0,6,8,7,11],
 "structutility_1_1skill_1_1WalkingParameter.html#aaa0cacbe190f1a2527bfed9e2893214d":[2,0,6,8,7,1],
 "structutility_1_1skill_1_1WalkingParameter.html#aac61a3d66c2820f6975aa481d6bd8312":[2,0,6,8,7,10],
-"structutility_1_1skill_1_1WalkingParameter.html#aac6ac2331db61852b3532ad397c32ab5":[2,0,6,8,7,25],
-"structutility_1_1skill_1_1WalkingParameter.html#ab02b861da5307c8b787b0b7f5644fbd3":[2,0,6,8,7,18]
+"structutility_1_1skill_1_1WalkingParameter.html#aac6ac2331db61852b3532ad397c32ab5":[2,0,6,8,7,25]
 };

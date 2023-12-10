@@ -1,5 +1,6 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a96ea5bb09158697b04d59c7f652fa051a06ea9fd93b8be28aa09573f4fd008904":[2,0,3,2,27,1,0,4],
 "structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a96ea5bb09158697b04d59c7f652fa051a0e3c720db0773c692bd68bc1a73ff1d0":[2,0,3,2,27,1,0,2],
 "structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a96ea5bb09158697b04d59c7f652fa051a44c271f6924bbbcc650d1bf0fa9ffc57":[2,0,3,2,27,1,0,0],
 "structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a96ea5bb09158697b04d59c7f652fa051a628926a924d40af68403959f33c1a78e":[2,0,3,2,27,1,0,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#aa63766df0c8cbab584b053e572c730d2":[2,0,3,6,0,1,1,0,3,8],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#aa82862f3a7d49c7525375ed3936aef0d":[2,0,3,6,0,1,1,0,3,12],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#ae461a34b7ba5272036252dd79101e4cc":[2,0,3,6,0,1,1,0,3,15],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#af3b5d6048e03e99b42156db90b0cae5f":[2,0,3,6,0,1,1,0,3,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html":[2,0,3,6,0,1,1,0,4]
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Colour.html#af3b5d6048e03e99b42156db90b0cae5f":[2,0,3,6,0,1,1,0,3,0]
 };

@@ -1,5 +1,6 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da91851315680ccafe92ee60b85ac58650":[2,0,3,8,0,1,0,243],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9430e0fab8c36cd75400e9500c178ad1":[2,0,3,8,0,1,0,182],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da94c8689d46814561c8a4281d23395ea1":[2,0,3,8,0,1,0,105],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da94cb47ac7db3f08237acbf2d737e7941":[2,0,3,8,0,1,0,65],
@@ -248,6 +249,5 @@ var NAVTREEINDEX13 =
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a9919fe0002c80a18ca07861701279156":[2,0,3,8,2,1,3],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a9fc7e19c27a3246634979ef75c0273d0":[2,0,3,8,2,1,2],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#aa696d83e83b19c24b7b4627ed37bdf72":[2,0,3,8,2,1,4],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html#af6e7f671e77fb21da5fc2098d3335bf6":[2,0,3,8,2,1,10],
-"structmodule_1_1purpose_1_1Defender_1_1Config.html":[2,0,3,9,0,0]
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html#af6e7f671e77fb21da5fc2098d3335bf6":[2,0,3,8,2,1,10]
 };

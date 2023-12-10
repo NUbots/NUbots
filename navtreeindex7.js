@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"classutility_1_1skill_1_1WalkGenerator.html#a851daf84b801e7794ae9f2aadbe62c09":[2,0,6,8,5,29],
 "classutility_1_1skill_1_1WalkGenerator.html#a912962aa7e7a1e4d9f64784569eafb38":[2,0,6,8,5,2],
 "classutility_1_1skill_1_1WalkGenerator.html#a95923ba2ff3676ad3fdb275f93a0e0ae":[2,0,6,8,5,1],
 "classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476":[2,0,6,8,5,3],
@@ -117,8 +118,8 @@ var NAVTREEINDEX7 =
 "functions_type.html":[2,3,3],
 "functions_u.html":[2,3,0,21],
 "functions_v.html":[2,3,0,22],
-"functions_vars.html":[2,3,2],
 "functions_vars.html":[2,3,2,0],
+"functions_vars.html":[2,3,2],
 "functions_vars_b.html":[2,3,2,1],
 "functions_vars_c.html":[2,3,2,2],
 "functions_vars_d.html":[2,3,2,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "namespaceutility_1_1skill.html#a1c69be2789c1bfd44720674788c5357aaba1002977676dba63f0cb10d32e8f685":[1,0,6,12,8,2],
 "namespaceutility_1_1skill.html#a53142677645a7166736a733b2096b67b":[1,0,6,12,12],
 "namespaceutility_1_1skill.html#a5d1ce6757ddb8c5386c3da34f1d185db":[1,0,6,12,13],
-"namespaceutility_1_1skill.html#a73510cc3b1b8dfa1de8a0f8fb3b98330":[1,0,6,12,15],
-"namespaceutility_1_1skill.html#a917b6229cb1233389f832c2abf62378b":[1,0,6,12,14]
+"namespaceutility_1_1skill.html#a73510cc3b1b8dfa1de8a0f8fb3b98330":[1,0,6,12,15]
 };

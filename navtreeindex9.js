@@ -1,5 +1,6 @@
 var NAVTREEINDEX9 =
 {
+"structdynamixel_1_1v2_1_1RebootCommand.html#af5c923f6d5e9f5d48a2b2318787a7a54":[2,0,0,0,8,4],
 "structdynamixel_1_1v2_1_1RegWriteCommand.html":[2,0,0,0,9],
 "structdynamixel_1_1v2_1_1RegWriteCommand.html#a035479392b1efcb30fe4f0606fa0904e":[2,0,0,0,9,5],
 "structdynamixel_1_1v2_1_1RegWriteCommand.html#a0498d3a6147725d06983f57bf65375f1":[2,0,0,0,9,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a5632196a74e477663fb9feb1edd388b7":[2,0,3,1,0,2,10],
 "structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a6425eec5b47f8e4b97d3fc9410808219":[2,0,3,1,0,2,1],
 "structmodule_1_1extension_1_1component_1_1ProviderGroup.html#a75f28d0f267552774e706d100342e7b2":[2,0,3,1,0,2,14],
-"structmodule_1_1extension_1_1component_1_1ProviderGroup.html#aa48ec0dea2e16b764bbf55cb3c67395d":[2,0,3,1,0,2,13],
-"structmodule_1_1extension_1_1component_1_1ProviderGroup.html#ab2e6c89dcfb6123484c22110dcf5e539":[2,0,3,1,0,2,12]
+"structmodule_1_1extension_1_1component_1_1ProviderGroup.html#aa48ec0dea2e16b764bbf55cb3c67395d":[2,0,3,1,0,2,13]
 };

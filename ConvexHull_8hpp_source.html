@@ -527,81 +527,90 @@ $(document).ready(function(){initNavTree('ConvexHull_8hpp_source.html',''); init
 <div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160; </div>
 <div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;        <span class="keywordflow">return</span> chans_convex_hull(indices, points_2d);</div>
 <div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;    }</div>
-<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;<span class="comment">    /// @brief Projects a three-dimensional vector onto the x-y plane</span></div>
-<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;<span class="comment">    /// @param v A three-dimensional vector</span></div>
-<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;<span class="comment">    /// @return The two-dimensional projection of v</span></div>
-<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;<span class="comment"></span>    <span class="keyword">inline</span> Eigen::Vector2d project_vector(<span class="keyword">const</span> Eigen::Vector3d&amp; v) {</div>
-<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;        <span class="keywordflow">return</span> Eigen::Vector2d(v.x() / v.z(), v.y() / v.z());</div>
-<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;    }</div>
-<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;<span class="comment">    /// @brief Checks if a point is under the convex hull</span></div>
-<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;<span class="comment">    /// @tparam Iterator Iterator type for the rays</span></div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;<span class="comment">    /// @param point The point to check if it is under the convex hull</span></div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;<span class="comment">    /// @param rays_begin The beginning of the convex hull points</span></div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;<span class="comment">    /// @param rays_end The end of the convex hull points</span></div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;<span class="comment">    /// @param allow_boundary If true, then the point is considered under the hull if it is on the boundary</span></div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;<span class="comment">    /// @return True if the point is under the convex hull, false otherwise</span></div>
-<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;<span class="comment"></span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator&gt;</div>
-<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> point_under_hull(<span class="keyword">const</span> Eigen::Vector3d&amp; point,</div>
-<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;                                 <span class="keyword">const</span> Iterator rays_begin,</div>
-<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;                                 <span class="keyword">const</span> Iterator rays_end,</div>
-<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;                                 <span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; allow_boundary = <span class="keyword">false</span>) {</div>
-<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;        <span class="keyword">const</span> <span class="keywordtype">double</span> theta = std::atan2(point.y(), point.x());</div>
-<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;        <span class="keyword">auto</span> lower_it = std::lower_bound(rays_begin, rays_end, theta, [&amp;](<span class="keyword">const</span> Eigen::Vector3d&amp; p0, <span class="keyword">const</span> <span class="keywordtype">double</span>&amp; b) {</div>
-<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;            <span class="keywordflow">return</span> std::atan2(p0.y(), p0.x()) &lt; b;</div>
-<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;        });</div>
-<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;        <span class="keyword">auto</span> upper_it = std::upper_bound(rays_begin, rays_end, theta, [&amp;](<span class="keyword">const</span> <span class="keywordtype">double</span>&amp; b, <span class="keyword">const</span> Eigen::Vector3d&amp; p0) {</div>
-<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;            <span class="keywordflow">return</span> b &lt; std::atan2(p0.y(), p0.x());</div>
-<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;        });</div>
+<div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160; </div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;<span class="comment">    /// @brief Calculates the angle between three points</span></div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;<span class="comment">    /// @param p1</span></div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;<span class="comment">    /// @param p2</span></div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;<span class="comment">    /// @param p3</span></div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;<span class="comment">    /// @return</span></div>
+<div class="line"><a name="l00365"></a><span class="lineno">  365</span>&#160;<span class="comment"></span>    <span class="keywordtype">double</span> calculate_angle(<span class="keyword">const</span> Eigen::Vector3d&amp; p1, <span class="keyword">const</span> Eigen::Vector3d&amp; p2, <span class="keyword">const</span> Eigen::Vector3d&amp; p3) {</div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;        Eigen::Vector3d v1 = p2 - p1;</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;        Eigen::Vector3d v2 = p3 - p1;</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;        <span class="keywordflow">return</span> std::atan2(v1.x() * v2.y() - v1.y() * v2.x(), v1.x() * v2.x() + v1.y() * v2.y());</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;    }</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;<span class="comment">    /// @brief Determine if point is in the convex hull</span></div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;<span class="comment">    /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`, ordered</span></div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;<span class="comment">    /// @param point The point to check if it is in the convex hull</span></div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;<span class="comment">    /// @return True if the point is in the convex hull, false otherwise</span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;<span class="comment"></span>    <span class="keywordtype">bool</span> point_in_convex_hull(<span class="keyword">const</span> std::vector&lt;Eigen::Vector3d&gt;&amp; hull, <span class="keyword">const</span> Eigen::Vector3d&amp; point) {</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;        <span class="keywordtype">double</span> winding_number = 0.0;</div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160; </div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;        <span class="comment">// Loop over each pair of consecutive points in the hull to find the total angle across the hull with the point</span></div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;        <span class="comment">// If the point is outside, the angles should cancel out as it goes around the hull</span></div>
+<div class="line"><a name="l00380"></a><span class="lineno">  380</span>&#160;        <span class="comment">// If the point is inside, the angles should add up to +-2pi, ie a full circle</span></div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;        <span class="keywordflow">for</span> (<span class="keywordtype">size_t</span> i = 0; i &lt; hull.size(); ++i) {</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;            <span class="comment">// Get the current point and the next point in the hull</span></div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;            Eigen::Vector3d p1 = hull[i];</div>
+<div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;            Eigen::Vector3d p2 = hull[(i + 1) % hull.size()];</div>
 <div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160; </div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;        <span class="keywordflow">if</span> ((lower_it == rays_end) || (upper_it == rays_end)) {</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;        }</div>
-<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;        <span class="comment">// lower_bound returns the first ray that has a theta value that is &gt;= our point_theta value</span></div>
-<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;        <span class="comment">// taking the ray immediately before the lower_bound should give us a ray with theta &lt; point_theta</span></div>
-<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        <span class="comment">// upper_bound returns the first ray that has a theta value that is &gt; our point_theta value</span></div>
-<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        <span class="keyword">const</span> Eigen::Vector2d p0 = project_vector(lower_it == rays_begin ? *lower_it : *std::prev(lower_it));</div>
-<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;        <span class="keyword">const</span> Eigen::Vector2d p1 = project_vector(point);</div>
-<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;        <span class="keyword">const</span> Eigen::Vector2d p2 = project_vector(*upper_it);</div>
-<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160; </div>
-<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;        <span class="comment">// Point should make a clockwise turn if it is under the convex hull.</span></div>
-<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;        <span class="comment">// It should be colinear if it is on the convex hull</span></div>
-<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;        <span class="comment">// If we allow the boundary then we only care that it isn&#39;t counter-clockwise</span></div>
-<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;        <span class="comment">// If we don&#39;t allow the boundary then we only care that it is clockwise</span></div>
-<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;        <span class="keywordflow">return</span> (allow_boundary ? direction(p0, p1, p2) != Direction::COUNTERCLOCKWISE</div>
-<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                               : direction(p0, p1, p2) == Direction::CLOCKWISE);  <span class="comment">// Check for colinearity</span></div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;    }</div>
-<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;<span class="comment">    /// @brief Sort the indices by theta</span></div>
-<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;<span class="comment">    /// @tparam Iterator Iterator type for the indices</span></div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;<span class="comment">    /// @param first The first index to sort</span></div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;<span class="comment">    /// @param last The last index to sort</span></div>
-<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;<span class="comment">    /// @param rays The rays that the indices correspond to</span></div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;<span class="comment">    /// @param world_offset The offset to apply to the theta values</span></div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;<span class="comment"></span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator&gt;</div>
-<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;    <span class="keywordtype">void</span> sort_by_theta(Iterator first,</div>
-<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;                       Iterator last,</div>
-<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;                       <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; rays,</div>
-<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">double</span>&amp; world_offset) {</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;        std::sort(first, last, [&amp;](<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; a, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; b) {</div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;            <span class="keyword">const</span> Eigen::Vector3d&amp; p0(rays.col(a));</div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;            <span class="keyword">const</span> Eigen::Vector3d&amp; p1(rays.col(b));</div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160; </div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;            <span class="keywordtype">double</span> theta0 = std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, 2.0 * M_PI);</div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;            <span class="keywordtype">double</span> theta1 = std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, 2.0 * M_PI);</div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;            <span class="keywordflow">return</span> theta0 &lt; theta1;</div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;        });</div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    }</div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;}  <span class="comment">// namespace utility::math::geometry</span></div>
-<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_MATH_GEOMETRY_CONVEXHULL_HPP</span></div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;            <span class="comment">// Calculate the angle between the point and the current pair of hull points and add to the total</span></div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;            <span class="keywordtype">double</span> angle = calculate_angle(point, p1, p2);</div>
+<div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;            winding_number += angle;</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;        }</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160; </div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;        <span class="comment">// Approximately zero as the angles cancel out</span></div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;        <span class="keywordflow">if</span> (std::abs(winding_number) &lt; 1e-6) {</div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00394"></a><span class="lineno">  394</span>&#160;        }</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;        <span class="keywordflow">else</span> {  <span class="comment">// Approximately +-2pi as the angles add up to a circle</span></div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a name="l00397"></a><span class="lineno">  397</span>&#160;        }</div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;    }</div>
+<div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;<span class="comment">    /// @brief Determine if point is in the convex hull. Converts to 3D and calls the 3D version.</span></div>
+<div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;<span class="comment">    /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`, ordered</span></div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;<span class="comment">    /// @param point The point to check if it is in the convex hull</span></div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;<span class="comment">    /// @return True if the point is in the convex hull, false otherwise</span></div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;<span class="comment"></span>    <span class="keywordtype">bool</span> point_in_convex_hull(<span class="keyword">const</span> std::vector&lt;Eigen::Vector2d&gt;&amp; hull, <span class="keyword">const</span> Eigen::Vector2d&amp; point) {</div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;        std::vector&lt;Eigen::Vector3d&gt; hull_3d;</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; p : hull) {</div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;            hull_3d.emplace_back(p.x(), p.y(), 0.0);</div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;        }</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;        <span class="keywordflow">return</span> point_in_convex_hull(hull_3d, Eigen::Vector3d(point.x(), point.y(), 0.0));</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;    }</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;<span class="comment">    /// @brief Sort the indices by theta</span></div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;<span class="comment">    /// @tparam Iterator Iterator type for the indices</span></div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160;<span class="comment">    /// @param first The first index to sort</span></div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;<span class="comment">    /// @param last The last index to sort</span></div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;<span class="comment">    /// @param rays The rays that the indices correspond to</span></div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;<span class="comment">    /// @param world_offset The offset to apply to the theta values</span></div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;<span class="comment"></span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Iterator&gt;</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="keywordtype">void</span> sort_by_theta(Iterator first,</div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;                       Iterator last,</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;                       <span class="keyword">const</span> Eigen::Matrix&lt;double, 3, Eigen::Dynamic&gt;&amp; rays,</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;                       <span class="keyword">const</span> <span class="keywordtype">double</span>&amp; world_offset) {</div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;        std::sort(first, last, [&amp;](<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; a, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; b) {</div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;            <span class="keyword">const</span> Eigen::Vector3d&amp; p0(rays.col(a));</div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;            <span class="keyword">const</span> Eigen::Vector3d&amp; p1(rays.col(b));</div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160; </div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;            <span class="keywordtype">double</span> theta0 = std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, 2.0 * M_PI);</div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;            <span class="keywordtype">double</span> theta1 = std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, 2.0 * M_PI);</div>
+<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;            <span class="keywordflow">return</span> theta0 &lt; theta1;</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;        });</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;    }</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160; </div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;}  <span class="comment">// namespace utility::math::geometry</span></div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_MATH_GEOMETRY_CONVEXHULL_HPP</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_5224ab8e38918af5170b4d41508acb75.html">math</a></li><li class="navelem"><a class="el" href="dir_d60f45e6cf8faf0c581e0aefaaa1437f.html">geometry</a></li><li class="navelem"><b>ConvexHull.hpp</b></li>
-    <li class="footer">Generated on Sun Dec 3 2023 04:10:47 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Dec 10 2023 22:53:05 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

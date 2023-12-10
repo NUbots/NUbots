@@ -831,6 +831,7 @@ var namespaces_dup =
             [ "CLOCKWISE", "ConvexHull_8hpp.html#ad3868d6c9b9a55cad53368250418e159ad652c4a2cf6e53c8bd5324d3d50f4f24", null ],
             [ "COUNTERCLOCKWISE", "ConvexHull_8hpp.html#ad3868d6c9b9a55cad53368250418e159af7080807b107c95b55e1c2517d6a4bb9", null ]
           ] ],
+          [ "calculate_angle", "ConvexHull_8hpp.html#ae267a478eea9012c8ab2d23347c8e9e8", null ],
           [ "chans_convex_hull", "ConvexHull_8hpp.html#a32d8376b895ab09a01227ac45d231462", null ],
           [ "chans_convex_hull", "ConvexHull_8hpp.html#a0c3cd7c9059e7f17d0b35de8fe4053de", null ],
           [ "direction", "ConvexHull_8hpp.html#a29a7ab7292f11dc2cddafd3120969709", null ],
@@ -841,8 +842,8 @@ var namespaces_dup =
           [ "lower_point", "ConvexHull_8hpp.html#a16089399363842b2fe986f8718dd55fc", null ],
           [ "merge_hulls", "ConvexHull_8hpp.html#a8a8d6a936864652ba6eb38b16176fc8e", null ],
           [ "partition_points", "ConvexHull_8hpp.html#a05545cab3af6457a484a4d4fbfe74102", null ],
-          [ "point_under_hull", "ConvexHull_8hpp.html#a2d2fdb4a819e84bbf8c6c2bd6409fba8", null ],
-          [ "project_vector", "ConvexHull_8hpp.html#a12733384621daf7950799d6c8cbf084b", null ],
+          [ "point_in_convex_hull", "ConvexHull_8hpp.html#a5f9a1933b2502786b48c68d6709e9c7c", null ],
+          [ "point_in_convex_hull", "ConvexHull_8hpp.html#ac065f432b15356ba40000677bbe7426f", null ],
           [ "sort_by_theta", "ConvexHull_8hpp.html#a96d0e1bc050cf208cf72d5d0cd8d0792", null ],
           [ "sort_polar", "ConvexHull_8hpp.html#a1b667241fd0c110224eb2ca771066bce", null ]
         ] ],
@@ -980,7 +981,7 @@ var namespaces_dup =
       [ "vision", null, [
         [ "visualmesh", null, [
           [ "boundary_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aefa8fd21888715d12dba230e3fd4d637", null ],
-          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a7a99256c41749e5dfd2e880e18cea04f", null ],
+          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a2174498ccb46bcff2e58bb731502aaea", null ],
           [ "cluster_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a01b125faf9b79a6d584f8feee218a4c4", null ],
           [ "partition_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959", null ]
         ] ],

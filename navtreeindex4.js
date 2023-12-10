@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a7dde650ec913ac7f289ebe05196e4a0a":[2,0,3,8,0,10,0,1],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a97c8132ec550742c0e0369afc2605c72":[2,0,3,8,0,10,0,6],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a98b7c904158707aa5e6eab60a3b51677":[2,0,3,8,0,10,0,15],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a9fe5f1c89d2792dd4b2186fa3e2f4617":[2,0,3,8,0,10,0,25],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1support_1_1ReactionTimer.html#ac87535eae4b269f9b8ef9b67d9c89ba1":[2,0,3,12,4,0],
 "classmodule_1_1support_1_1SignalCatcher.html":[2,0,3,12,5],
 "classmodule_1_1support_1_1SignalCatcher.html#a20e7527f75bbe921123c826b05813513":[2,0,3,12,5,0],
-"classmodule_1_1support_1_1configuration_1_1GlobalConfig.html":[2,0,3,12,0,0],
-"classmodule_1_1support_1_1configuration_1_1GlobalConfig.html#a76d0d347591b68d8156527389ec9d15a":[2,0,3,12,0,0,0]
+"classmodule_1_1support_1_1configuration_1_1GlobalConfig.html":[2,0,3,12,0,0]
 };

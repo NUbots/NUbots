@@ -1,5 +1,6 @@
 var NAVTREEINDEX1 =
 {
+"StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893a557e440b4bd99850a7eaea8de32d21fc":[1,0,0,0,15,1],
 "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893ad306b6fdee05fe87455110ddf6501e6c":[1,0,0,0,15,0],
 "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893ae1435d7f366c537097b73e89e39a3b59":[1,0,0,0,15,7],
 "StatusReturn_8hpp.html#a8713159e23cad8ab6717da16dec06893afde7dcbac92720d696e3ef02bf6435db":[1,0,0,0,15,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "classmodule_1_1input_1_1Camera.html#a81af0369c1dfff43949f94131bbbce7c":[2,0,3,2,3,0],
 "classmodule_1_1input_1_1Camera.html#afe17fd4379fe7adeef32bb26e307e401":[2,0,3,2,3,2],
 "classmodule_1_1input_1_1FakeCamera.html":[2,0,3,2,5],
-"classmodule_1_1input_1_1FakeCamera.html#a1fc5c8feb289885618e190ef2a394929":[2,0,3,2,5,1],
-"classmodule_1_1input_1_1FakeCamera.html#a2c8b3ab4d99e4c5e6e7a0680c1c13862":[2,0,3,2,5,6]
+"classmodule_1_1input_1_1FakeCamera.html#a1fc5c8feb289885618e190ef2a394929":[2,0,3,2,5,1]
 };

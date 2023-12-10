@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1motion_1_1Kicker.html#acaec4a1c320816df6810f82eb0251f44":[2,0,3,4,5,8],
 "classmodule_1_1motion_1_1Kicker.html#aece8d1c9e961e045802211f1521c4575":[2,0,3,4,5,2],
 "classmodule_1_1motion_1_1Kicker.html#afdd481eb1b0e6986c13da4ceb1099215":[2,0,3,4,5,9],
 "classmodule_1_1motion_1_1SixDOFFootController.html":[2,0,3,4,6],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a5a619f7694797486d89b9670ccefff1e":[2,0,3,8,0,10,0,21],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a5fc8de992cb54e07b7143d0b4b3858df":[2,0,3,8,0,10,0,33],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a671440047e7bb4dbea819b9d59458b22":[2,0,3,8,0,10,0,18],
-"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a728e9ab25aa9556f8edbcda00c31a8c1":[2,0,3,8,0,10,0,16],
-"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a7dde650ec913ac7f289ebe05196e4a0a":[2,0,3,8,0,10,0,1]
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7a728e9ab25aa9556f8edbcda00c31a8c1":[2,0,3,8,0,10,0,16]
 };

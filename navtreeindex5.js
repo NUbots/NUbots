@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classmodule_1_1support_1_1configuration_1_1GlobalConfig.html#a76d0d347591b68d8156527389ec9d15a":[2,0,3,12,0,0,0],
 "classmodule_1_1support_1_1configuration_1_1SoccerConfig.html":[2,0,3,12,0,1],
 "classmodule_1_1support_1_1configuration_1_1SoccerConfig.html#a815f708c1e69398e58f907edfef23f75":[2,0,3,12,0,1,0],
 "classmodule_1_1support_1_1logging_1_1ConsoleLogHandler.html":[2,0,3,12,1,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classutility_1_1math_1_1geometry_1_1Quad.html#aebaa773056ea3f3e16362b2f3367beab":[2,0,6,4,1,0,31],
 "classutility_1_1math_1_1geometry_1_1Quad.html#aefe3f4b3e6136d895e0bc3cd68f6689f":[2,0,6,4,1,0,15],
 "classutility_1_1math_1_1geometry_1_1Quad.html#af00fe52317376789e0bbd44a622a4d0b":[2,0,6,4,1,0,22],
-"classutility_1_1math_1_1geometry_1_1Quad.html#afd2e9302e57a1b53d0a41e2b62d28a4d":[2,0,6,4,1,0,9],
-"classutility_1_1motion_1_1Balancer.html":[2,0,6,5,1]
+"classutility_1_1math_1_1geometry_1_1Quad.html#afd2e9302e57a1b53d0a41e2b62d28a4d":[2,0,6,4,1,0,9]
 };

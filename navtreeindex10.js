@@ -1,5 +1,6 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1extension_1_1component_1_1ProviderGroup.html#ab2e6c89dcfb6123484c22110dcf5e539":[2,0,3,1,0,2,12],
 "structmodule_1_1extension_1_1component_1_1ProviderGroup.html#abd7076392778f38c24f3019ac0ebe247":[2,0,3,1,0,2,7],
 "structmodule_1_1extension_1_1component_1_1ProviderGroup.html#ac75a1aea7aa188b1fb54c95bd4206b1f":[2,0,3,1,0,2,4],
 "structmodule_1_1extension_1_1component_1_1ProviderGroup.html#adb6a16adde9a2fa04087a7c82098e6f2":[2,0,3,1,0,2,5],
@@ -248,6 +249,5 @@ var NAVTREEINDEX10 =
 "structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a07ab3c9e3cb128156332994f8f7d05d4":[2,0,3,2,27,1,4],
 "structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a17877596f067c121af9e882f854f9a87":[2,0,3,2,27,1,6],
 "structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a466ff684230d0fbadddf7d67f40a74ad":[2,0,3,2,27,1,2],
-"structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a96ea5bb09158697b04d59c7f652fa051":[2,0,3,2,27,1,0],
-"structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a96ea5bb09158697b04d59c7f652fa051a06ea9fd93b8be28aa09573f4fd008904":[2,0,3,2,27,1,0,4]
+"structmodule_1_1input_1_1SensorFilter_1_1FilteringMethod.html#a96ea5bb09158697b04d59c7f652fa051":[2,0,3,2,27,1,0]
 };

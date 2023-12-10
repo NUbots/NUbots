@@ -1,5 +1,6 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1purpose_1_1Defender_1_1Config.html":[2,0,3,9,0,0],
 "structmodule_1_1purpose_1_1Defender_1_1Config.html#a7068d9443583c2b146dc8c1263debf46":[2,0,3,9,0,0,0],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html":[2,0,3,9,1,0],
 "structmodule_1_1purpose_1_1Goalie_1_1Config.html#a25f90d291540e1dd4df4883739a509d0":[2,0,3,9,1,0,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX14 =
 "structutility_1_1input_1_1FrameID.html#ae2def854bf02a895d7d075fe6251f617":[2,0,6,2,0,21],
 "structutility_1_1input_1_1FrameID.html#aee04270f877056bca918d66b30469c64":[2,0,6,2,0,16],
 "structutility_1_1input_1_1FrameID.html#af628c8dee81947926a614aa0fe63a407":[2,0,6,2,0,6],
-"structutility_1_1input_1_1LimbID.html":[2,0,6,2,1],
-"structutility_1_1input_1_1LimbID.html#a1a75bcf9c4f4a265c5466511868671e3":[2,0,6,2,1,9]
+"structutility_1_1input_1_1LimbID.html":[2,0,6,2,1]
 };
