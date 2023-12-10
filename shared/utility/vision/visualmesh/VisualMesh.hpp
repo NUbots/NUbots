@@ -143,24 +143,18 @@ namespace utility::vision::visualmesh {
             }
         };
 
-        // Move any clusters that dont intersect the green horizon to the end of the list
+        // Move any clusters that don't intersect the green horizon to the end of the list
         // We need to find one point above the green horizon and one below it
         return std::partition(clusters.begin(), clusters.end(), [&](const std::vector<int>& cluster) {
             bool out = false;
             bool in  = false;
 
             for (unsigned int idx = 0; idx < cluster.size(); ++idx) {
-                auto position = utility::math::geometry::point_in_convex_hull(horizon,
-                                                                              rays,
-                                                                              Eigen::Vector3d(rays.col(cluster[idx])));
-                NUClear::log<NUClear::INFO>("Point in convex hull: ", position);
-
-                if (position == utility::math::geometry::PointLocation::INSIDE) {
-                    in = true;
-                }
-                else {
-                    out = true;
-                }
+                bool position =
+                    utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));
+                // Only set if it is in or out as we want to find across the cluster
+                in  = position ? true : in;
+                out = !position ? true : out;
             }
             return success(out, in);
         });

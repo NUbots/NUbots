@@ -368,38 +368,45 @@ namespace utility::math::geometry {
         return std::atan2(v1.x() * v2.y() - v1.y() * v2.x(), v1.x() * v2.x() + v1.y() * v2.y());
     }
 
-    /// @brief The position of a point relative to a convex hull
-    enum PointLocation {
-        ON_BOUNDARY,
-        OUTSIDE,
-        INSIDE,
-    };
-
     /// @brief Determine if point is in the convex hull
     /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`, ordered
-    /// @param points All the points in our space, including points not to be used in the convex hull algorithm
     /// @param point The point to check if it is in the convex hull
-    /// @return The location of the point relative to the convex hull
-    PointLocation point_in_convex_hull(const std::vector<Eigen::Vector3d>& hull,
-                                       const Eigen::Matrix<double, 3, Eigen::Dynamic>& points,
-                                       const Eigen::Vector3d& point) {
+    /// @return True if the point is in the convex hull, false otherwise
+    bool point_in_convex_hull(const std::vector<Eigen::Vector3d>& hull, const Eigen::Vector3d& point) {
         double winding_number = 0.0;
 
+        // Loop over each pair of consecutive points in the hull to find the total angle across the hull with the point
+        // If the point is outside, the angles should cancel out as it goes around the hull
+        // If the point is inside, the angles should add up to +-2pi, ie a full circle
         for (size_t i = 0; i < hull.size(); ++i) {
+            // Get the current point and the next point in the hull
             Eigen::Vector3d p1 = hull[i];
             Eigen::Vector3d p2 = hull[(i + 1) % hull.size()];
 
+            // Calculate the angle between the point and the current pair of hull points and add to the total
             double angle = calculate_angle(point, p1, p2);
-
             winding_number += angle;
         }
 
+        // Approximately zero as the angles cancel out
         if (std::abs(winding_number) < 1e-6) {
-            return PointLocation::OUTSIDE;
+            return false;
         }
-        else {
-            return PointLocation::INSIDE;
+        else {  // Approximately +-2pi as the angles add up to a circle
+            return true;
         }
+    }
+
+    /// @brief Determine if point is in the convex hull. Converts to 3D and calls the 3D version.
+    /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`, ordered
+    /// @param point The point to check if it is in the convex hull
+    /// @return True if the point is in the convex hull, false otherwise
+    bool point_in_convex_hull(const std::vector<Eigen::Vector2d>& hull, const Eigen::Vector2d& point) {
+        std::vector<Eigen::Vector3d> hull_3d;
+        for (const auto& p : hull) {
+            hull_3d.emplace_back(p.x(), p.y(), 0.0);
+        }
+        return point_in_convex_hull(hull_3d, Eigen::Vector3d(point.x(), point.y(), 0.0));
     }
 
     /// @brief Sort the indices by theta
