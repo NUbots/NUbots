@@ -376,7 +376,7 @@ namespace utility::math::geometry {
     };
 
     /// @brief Determine if point is in the convex hull
-    /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`
+    /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`, ordered
     /// @param points All the points in our space, including points not to be used in the convex hull algorithm
     /// @param point The point to check if it is in the convex hull
     /// @return The location of the point relative to the convex hull
@@ -389,18 +389,9 @@ namespace utility::math::geometry {
             Eigen::Vector3d p1 = hull[i];
             Eigen::Vector3d p2 = hull[(i + 1) % hull.size()];
 
-            // if ((point - p1).dot(p2 - p1) >= 0 && (point - p2).dot(p1 - p2) >= 0) {
-            //     return PointLocation::ON_BOUNDARY;
-            // }
-
             double angle = calculate_angle(point, p1, p2);
 
-            if ((p2 - p1).y() >= 0) {
-                winding_number -= angle;
-            }
-            else {
-                winding_number += angle;
-            }
+            winding_number += angle;
         }
 
         if (std::abs(winding_number) < 1e-6) {
