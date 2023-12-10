@@ -227,11 +227,16 @@ const Goals = ({ model }: { model: LocalisationModel }) => (
   <>
     {model.robots.map(
       (robot) =>
-        robot.visible && robot.rGFf && (
+        robot.visible &&
+        robot.rGFf && (
           <object3D key={robot.id}>
             {robot.rGFf.map((goal, i) => {
               return (
-                <mesh key={String(i)} position={goal.bottom.add(new Vector3(0, 0, goal.top.z / 2)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                <mesh
+                  key={String(i)}
+                  position={goal.bottom.add(new Vector3(0, 0, goal.top.z / 2)).toArray()}
+                  rotation={[Math.PI / 2, 0, 0]}
+                >
                   <cylinderBufferGeometry args={[0.05, 0.05, goal.top.z, 20]} />
                   <meshStandardMaterial color="yellow" />
                 </mesh>
