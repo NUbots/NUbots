@@ -6,10 +6,3 @@ cluster_points: 35 # How many points do we need to claim this cluster is a viabl
 disagreement_ratio:
   0.5 # How much can the measured goal width vary from actual goal width before we
   # treat the posts as part of separate goals
-goal_projection_covariance: [0.01, 0.01, 0.01] # Measurement certainties for {1/distance, theta, phi}
-use_median:
-  false # Use median rather than mean when determining position of left and right goal
-  # post edges
-max_goal_distance:
-  12 # maximum distance that a goal may be from the robot to be a real goal,
-  # measured as diagonal of the field (furthest two points)

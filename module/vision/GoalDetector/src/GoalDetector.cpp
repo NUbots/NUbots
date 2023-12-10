@@ -38,10 +38,7 @@
 #include "message/vision/Goal.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
-#include "utility/math/coordinates.hpp"
-#include "utility/math/geometry/ConvexHull.hpp"
 #include "utility/support/yaml_expression.hpp"
-#include "utility/vision/Vision.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::vision {
@@ -54,19 +51,17 @@ namespace module::vision {
     using message::vision::GreenHorizon;
 
     using utility::support::Expression;
+    using utility::vision::visualmesh::cluster_points;
+    using utility::vision::visualmesh::partition_points;
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        // Trigger the same function when either update
         on<Configuration>("GoalDetector.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.confidence_threshold       = config["confidence_threshold"].as<double>();
-            cfg.cluster_points             = config["cluster_points"].as<int>();
-            cfg.disagreement_ratio         = config["disagreement_ratio"].as<double>();
-            cfg.goal_projection_covariance = Eigen::Vector3d(config["goal_projection_covariance"].as<Expression>());
-            cfg.use_median                 = config["use_median"].as<bool>();
-            cfg.max_goal_distance          = config["max_goal_distance"].as<double>();
+            cfg.confidence_threshold = config["confidence_threshold"].as<double>();
+            cfg.cluster_points       = config["cluster_points"].as<int>();
+            cfg.disagreement_ratio   = config["disagreement_ratio"].as<double>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
@@ -83,22 +78,14 @@ namespace module::vision {
                 std::iota(indices.begin(), indices.end(), 0);
 
                 // Partition the indices such that we only have the goal points that dont have goal surrounding them
-                auto boundary = utility::vision::visualmesh::partition_points(
-                    indices.begin(),
-                    indices.end(),
-                    neighbours,
-                    [&](const int& idx) {
-                        return idx == int(indices.size()) || (cls(GOAL_INDEX, idx) >= cfg.confidence_threshold);
-                    });
+                auto boundary = partition_points(indices.begin(), indices.end(), neighbours, [&](const int& idx) {
+                    return cls(GOAL_INDEX, idx) >= cfg.confidence_threshold;
+                });
                 indices.resize(std::distance(indices.begin(), boundary));
 
                 // Cluster all points into goal post candidates
                 std::vector<std::vector<int>> clusters;
-                utility::vision::visualmesh::cluster_points(indices.begin(),
-                                                            indices.end(),
-                                                            neighbours,
-                                                            cfg.cluster_points,
-                                                            clusters);
+                cluster_points(indices.begin(), indices.end(), neighbours, cfg.cluster_points, clusters);
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
@@ -128,30 +115,14 @@ namespace module::vision {
                         Eigen::Vector3d rGCw = rGWw - rCWw;
                         g.post.distance      = rGCw.norm();
 
-                        // Create unit vectors pointing to the top and bottom of the post in camera space
+                        // Create unit vectors pointing to the top and bottom of the post in camera {c} space
                         g.post.bottom = (horizon.Hcw * rGWw).normalized();
                         g.post.top =
                             (horizon.Hcw * (rGWw + Eigen::Vector3d(0, 0, field.goalpost_top_height))).normalized();
                         g.measurements.emplace_back();  // Emplaces default constructed object
-                        g.measurements.back().type       = Goal::MeasurementType::CENTRE;
-                        g.measurements.back().rGCc       = horizon.Hcw * rGWw;
-                        g.measurements.back().covariance = cfg.goal_projection_covariance.asDiagonal();
-
-                        // If the goal is too far away, get rid of it!
-                        if (g.post.distance > cfg.max_goal_distance) {
-                            log<NUClear::DEBUG>("**************************************************");
-                            log<NUClear::DEBUG>("*                    THROWOUTS                   *");
-                            log<NUClear::DEBUG>("**************************************************");
-
-                            log<NUClear::DEBUG>(
-                                fmt::format("Goal discarded: goal distance ({}) > maximum_goal_distance ({})",
-                                            g.post.distance,
-                                            cfg.max_goal_distance));
-                            log<NUClear::DEBUG>("--------------------------------------------------");
-                        }
-                        else {
-                            goals->goals.push_back(std::move(g));
-                        }
+                        g.measurements.back().type = Goal::MeasurementType::CENTRE;
+                        g.measurements.back().rGCc = horizon.Hcw * rGWw;
+                        goals->goals.push_back(std::move(g));
                     }
 
                     // Returns true if uGCc0 is to the left of uGCc1, with respect to camera z
@@ -160,7 +131,7 @@ namespace module::vision {
                         return uGCc0.cross(uGCc1).dot(cam_space_z) < 0.0f;
                     };
 
-                    // Calculate the distance between 2 goal posts using the law of cosines
+                    // Calculates the distance between 2 goal posts using the law of cosines
                     auto distance_between = [&](const Eigen::Vector3d& uGCc0,
                                                 const double& rGCc0_norm,
                                                 const Eigen::Vector3d& uGCc1,
@@ -170,6 +141,7 @@ namespace module::vision {
                         return std::sqrt(a2 + b2 - 2.0f * rGCc0_norm * rGCc1_norm * uGCc0.dot(uGCc1));
                     };
 
+                    // Find goal post pairs
                     std::map<std::vector<Goal>::iterator, std::pair<std::vector<Goal>::iterator, double>> pairs;
                     const double actual_width = field.dimensions.goal_width;
                     for (auto uGCc0 = goals->goals.begin(); uGCc0 != goals->goals.end(); uGCc0 = std::next(uGCc0)) {
