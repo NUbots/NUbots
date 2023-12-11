@@ -125,37 +125,38 @@ namespace utility::vision::visualmesh {
         }
     }
 
-    template <typename Iterator, typename HorizonIt>
-    Iterator check_green_horizon_side(Iterator first,
-                                      Iterator last,
-                                      HorizonIt horizon_first,
-                                      HorizonIt horizon_last,
-                                      const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
-                                      const bool& up   = true,
-                                      const bool& down = true) {
+    auto check_green_horizon_side(std::vector<std::vector<int>>& clusters,
+                                  const std::vector<Eigen::Vector3d>& horizon,
+                                  const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
+                                  const bool& outside = true,
+                                  const bool& inside  = true) {
 
-        using value_type = typename std::iterator_traits<Iterator>::value_type;
-
-        auto success = [&](const bool& a, const bool& b) {
-            return (up && a && !down)     // We were looking for above and found them, we weren't looking for below
-                   || (down && b && !up)  // We were looking for below and found them, we weren't looking for above
-                   || ((up && a) || (down && b));  // We were looking for everything and we found it
+        auto success = [&](const bool& cluster_outside, const bool& cluster_inside) {
+            if (outside && inside) {
+                return cluster_outside && cluster_inside;
+            }
+            else if (outside) {
+                return cluster_outside && !cluster_inside;
+            }
+            else {
+                return cluster_inside && !cluster_outside;
+            }
         };
 
-        // Move any clusters that dont intersect the green horizon to the end of the list
+        // Move any clusters that don't intersect the green horizon to the end of the list
         // We need to find one point above the green horizon and one below it
-        return std::partition(first, last, [&](const value_type& cluster) {
-            bool above = false;
-            bool below = false;
-            for (unsigned int idx = 0; idx < cluster.size() && !success(above, below); ++idx) {
-                if (utility::math::geometry::point_under_hull(rays.col(cluster[idx]), horizon_first, horizon_last)) {
-                    above = true;
-                }
-                else {
-                    below = true;
-                }
+        return std::partition(clusters.begin(), clusters.end(), [&](const std::vector<int>& cluster) {
+            bool out = false;
+            bool in  = false;
+
+            for (unsigned int idx = 0; idx < cluster.size(); ++idx) {
+                bool position =
+                    utility::math::geometry::point_in_convex_hull(horizon, Eigen::Vector3d(rays.col(cluster[idx])));
+                // Only set if it is in or out as we want to find across the cluster
+                in  = position ? true : in;
+                out = !position ? true : out;
             }
-            return success(above, below);
+            return success(out, in);
         });
     }
 }  // namespace utility::vision::visualmesh
