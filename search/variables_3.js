@@ -10,7 +10,7 @@ var searchData=
   ['decompressor_5fmutex_1899',['decompressor_mutex',['../classmodule_1_1input_1_1ImageDecompressor.html#afbb5f8370772edca197b0816fda56d98',1,'module::input::ImageDecompressor']]],
   ['decompressors_1900',['decompressors',['../structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext.html#a4063951f9080844378e75773218c84cb',1,'module::input::ImageDecompressor::DecompressorContext']]],
   ['default_5fduration_1901',['default_duration',['../classmodule_1_1purpose_1_1ScriptTuner.html#a1bebb7648a33300bab7ac42397f5e444',1,'module::purpose::ScriptTuner']]],
-  ['default_5fgain_1902',['default_gain',['../classmodule_1_1purpose_1_1ScriptTuner.html#aeba1cce7254d97122005cc23d4eef467',1,'module::purpose::ScriptTuner']]],
+  ['default_5fgain_1902',['default_gain',['../classmodule_1_1purpose_1_1ScriptTuner.html#ae2c32e85f5044aaf4c26a03cb50d085d',1,'module::purpose::ScriptTuner']]],
   ['device_1903',['device',['../structmodule_1_1output_1_1compressor_1_1vaapi_1_1CompressionContext_1_1OpenCLContext.html#a32e70ed94da5ef965b86b9a6b9154204',1,'module::output::compressor::vaapi::CompressionContext::OpenCLContext']]],
   ['device_5fname_1904',['device_name',['../structmodule_1_1skill_1_1Say_1_1Config.html#aa09089b09d518621e02011e648efdae6',1,'module::skill::Say::Config']]],
   ['devices_1905',['devices',['../structdynamixel_1_1v2_1_1SyncReadCommand.html#a0609ee5cbe7767bf6583a6cbbb4a849b',1,'dynamixel::v2::SyncReadCommand']]],

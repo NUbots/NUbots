@@ -19,7 +19,7 @@ var searchData=
   ['decompressorfactory_208',['DecompressorFactory',['../classmodule_1_1input_1_1decompressor_1_1DecompressorFactory.html',1,'module::input::decompressor']]],
   ['decompressors_209',['decompressors',['../structmodule_1_1input_1_1ImageDecompressor_1_1DecompressorContext.html#a4063951f9080844378e75773218c84cb',1,'module::input::ImageDecompressor::DecompressorContext']]],
   ['default_5fduration_210',['default_duration',['../classmodule_1_1purpose_1_1ScriptTuner.html#a1bebb7648a33300bab7ac42397f5e444',1,'module::purpose::ScriptTuner']]],
-  ['default_5fgain_211',['default_gain',['../classmodule_1_1purpose_1_1ScriptTuner.html#aeba1cce7254d97122005cc23d4eef467',1,'module::purpose::ScriptTuner']]],
+  ['default_5fgain_211',['default_gain',['../classmodule_1_1purpose_1_1ScriptTuner.html#ae2c32e85f5044aaf4c26a03cb50d085d',1,'module::purpose::ScriptTuner']]],
   ['defender_212',['Defender',['../classmodule_1_1purpose_1_1Defender.html#a244d12e5f7b668c076e58d811835accd',1,'module::purpose::Defender::Defender()'],['../classmodule_1_1purpose_1_1Defender.html',1,'module::purpose::Defender']]],
   ['degree_213',['degree',['../classutility_1_1motion_1_1splines_1_1Polynom.html#a7fc40b9b5229003847d20777e265abf1',1,'utility::motion::splines::Polynom']]],
   ['delete_5fframe_214',['delete_frame',['../classmodule_1_1purpose_1_1ScriptTuner.html#aca74bd25a5339ba473d81d5f2e9d3cf6',1,'module::purpose::ScriptTuner']]],

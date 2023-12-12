@@ -22,7 +22,7 @@ var classmodule_1_1purpose_1_1ScriptTuner =
     [ "user_input_to_gain", "classmodule_1_1purpose_1_1ScriptTuner.html#a91a69e5e3105be7acd63940c2f633c17", null ],
     [ "angle_or_gain", "classmodule_1_1purpose_1_1ScriptTuner.html#abe21098e5c8895bd186b4b0347c7d3f9", null ],
     [ "default_duration", "classmodule_1_1purpose_1_1ScriptTuner.html#a1bebb7648a33300bab7ac42397f5e444", null ],
-    [ "default_gain", "classmodule_1_1purpose_1_1ScriptTuner.html#aeba1cce7254d97122005cc23d4eef467", null ],
+    [ "default_gain", "classmodule_1_1purpose_1_1ScriptTuner.html#ae2c32e85f5044aaf4c26a03cb50d085d", null ],
     [ "frame", "classmodule_1_1purpose_1_1ScriptTuner.html#a31600ca9b917d01fd56a34e0cdae152f", null ],
     [ "script", "classmodule_1_1purpose_1_1ScriptTuner.html#ad20608adb0c1c9e701617cf00e49784f", null ],
     [ "script_path", "classmodule_1_1purpose_1_1ScriptTuner.html#abc8fa2ed65ebe13655d2fd0ddbc951ae", null ],
