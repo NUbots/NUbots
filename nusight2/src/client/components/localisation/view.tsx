@@ -15,7 +15,7 @@ import { ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
-import {GridView} from "./grid/view";
+import { GridView } from "./grid/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
@@ -61,14 +61,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     return (
       <div className={style.localisation}>
         <LocalisationMenuBar
-        model={this.props.model}
-        Menu={this.props.Menu}
-        onHawkEyeClick={this.onHawkEyeClick}
-        toggleGridVisibility={this.toggleGridVisibility}
-        toggleFieldVisibility={this.toggleFieldVisibility}
-        toggleRobotVisibility={this.toggleRobotVisibility}
-        toggleBallVisibility={this.toggleBallVisibility}
-        toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+          model={this.props.model}
+          Menu={this.props.Menu}
+          onHawkEyeClick={this.onHawkEyeClick}
+          toggleGridVisibility={this.toggleGridVisibility}
+          toggleFieldVisibility={this.toggleFieldVisibility}
+          toggleRobotVisibility={this.toggleRobotVisibility}
+          toggleBallVisibility={this.toggleBallVisibility}
+          toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
         ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -126,24 +126,23 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 
   private toggleGridVisibility = () => {
     this.props.controller.toggleGridVisibility(this.props.model);
-  }
+  };
 
   private toggleFieldVisibility = () => {
     this.props.controller.toggleFieldVisibility(this.props.model);
-  }
+  };
 
   private toggleRobotVisibility = () => {
     this.props.controller.toggleRobotVisibility(this.props.model);
-  }
+  };
 
   private toggleBallVisibility = () => {
     this.props.controller.toggleBallVisibility(this.props.model);
-  }
+  };
 
   private toggleFieldLinePointsVisibility = () => {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
-  }
-
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -159,14 +158,14 @@ interface LocalisationMenuBarProps {
   toggleFieldLinePointsVisibility(): void;
 }
 
-const MenuItem = ({ label,  isVisible, onClick }) => {
+const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
   return (
     <li className={style.localisation__menuItem}>
-      <button className={style.localisation__menuButton} onClick={onClick}>
+      <button className={style.localisation__menuButton} onClick={props.onClick}>
         <div className="flex items-center justify-center">
           <div className="flex items-center rounded">
-            <span className="mx-2">{label}</span>
-            <Icon size={24}>{isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
+            <span className="mx-2">{props.label}</span>
+            <Icon size={24}>{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
           </div>
         </div>
       </button>
@@ -184,26 +183,10 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
             Hawk Eye
           </button>
         </li>
-        <MenuItem
-          label="Grid"
-          isVisible={model.gridVisible}
-          onClick={props.toggleGridVisibility}
-        />
-        <MenuItem
-          label="Field"
-          isVisible={model.fieldVisible}
-          onClick={props.toggleFieldVisibility}
-        />
-        <MenuItem
-          label="Robots"
-          isVisible={model.robotVisible}
-          onClick={props.toggleRobotVisibility}
-        />
-        <MenuItem
-          label="Balls"
-          isVisible={model.ballVisible}
-          onClick={props.toggleBallVisibility}
-        />
+        <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
+        <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
+        <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
+        <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
         <MenuItem
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
@@ -258,9 +241,10 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       <hemisphereLight args={["#fff", "#fff", 0.6]} />
       {model.fieldVisible && <FieldView model={model.field} />}
       {model.gridVisible && <GridView />}
-      {model.robotVisible && model.robots.map((robotModel) => {
-        return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
-      })}
+      {model.robotVisible &&
+        model.robots.map((robotModel) => {
+          return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
+        })}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
     </object3D>

@@ -284,21 +284,20 @@ export class LocalisationController {
   @action
   toggleGridVisibility = (model: LocalisationModel) => {
     model.gridVisible = !model.gridVisible;
-  }
+  };
 
   @action
   toggleBallVisibility = (model: LocalisationModel) => {
     model.ballVisible = !model.ballVisible;
-  }
+  };
 
   @action
   toggleRobotVisibility = (model: LocalisationModel) => {
     model.robotVisible = !model.robotVisible;
-  }
+  };
 
   @action
   toggleFieldLinePointsVisibility = (model: LocalisationModel) => {
     model.fieldLinePointsVisible = !model.fieldLinePointsVisible;
-  }
-
+  };
 }

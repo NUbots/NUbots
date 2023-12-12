@@ -4,9 +4,7 @@ import * as THREE from "three";
 import { Matrix4 } from "three";
 
 @observer
-export class GridView extends React.Component<{
-}> {
-
+export class GridView extends React.Component<{}> {
   render() {
     return (
       <object3D>
@@ -32,11 +30,11 @@ export class GridView extends React.Component<{
   private createGrids() {
     const size = 20;
 
-    const smallGrid = this.buildGrid(size, 0.1, new THREE.Color('#CCCCCA'), 0.005);
-    const largeGrid = this.buildGrid(size, 1, new THREE.Color('#BEBEBC'), 0.01);
+    const smallGrid = this.buildGrid(size, 0.1, new THREE.Color("#F7F8F7"), 0.005);
+    const largeGrid = this.buildGrid(size, 1, new THREE.Color("#E3E3E3"), 0.01);
     const whiteBackground = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(size, size),
-      new THREE.MeshBasicMaterial({ color: '#F7F8F7' }),
+      new THREE.MeshBasicMaterial({ color: "#FFFFFF" }),
     );
     // Prevent z-fighting
     smallGrid.translateZ(-0.002);
@@ -74,7 +72,4 @@ export class GridView extends React.Component<{
 
     return grid;
   }
-
-
-
 }
