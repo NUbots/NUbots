@@ -14,6 +14,7 @@ import { ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
+import {GridView} from "./grid/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
@@ -176,6 +177,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         <pointLight color="white" />
       </PerspectiveCamera>
       <FieldView model={model.field} />
+      <GridView />
       <SkyboxView model={model.skybox} />
       <hemisphereLight args={["#fff", "#fff", 0.6]} />
       {model.robots.map((robotModel) => {
