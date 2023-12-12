@@ -51,8 +51,8 @@ message VisualMesh {
     /// The classification for each pixel/ray. Each row corresponds to a pixel. Each column corresponds to a
     /// class. The mapping from columns to classes is dependant on how the classes were presented during training
     fmat classifications = 8;
-    /// Unit vectors pointing from the camera to each node in the mesh
-    fmat rays = 9;
+    /// Vectors pointing from the camera to each node in the mesh, assuming each point is on the ground
+    mat rays = 9;
     /// A mapping from class names to column indices (for accessing the corresponding classification column)
     map<string, uint32> class_map = 10;
     /// Ground truth data from webots

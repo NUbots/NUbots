@@ -109,13 +109,25 @@ namespace module::vision {
                             log<NUClear::TRACE>("Hcw resulted in no mesh points being on-screen.");
                         }
                         else {
+                            // Convert rays to world space
+                            Eigen::Matrix<double, 3, Eigen::Dynamic> rPWw(3, result.rays.cols());
+                            Eigen::Isometry3d Hwc = Hcw.inverse();
+
+                            // Compute these values once outside the loop
+                            Eigen::Vector3d Hwc_translation = Hwc.translation();
+
+                            // Use Eigen's operations to perform the calculations on the entire matrix at once
+                            rPWw = (result.rays.array().rowwise() * Hwc_translation.z() / result.rays.row(2).array())
+                                       .matrix()
+                                   + Hwc_translation.replicate(1, result.rays.cols());
+
                             // Move stuff into the emit message
                             auto msg             = std::make_unique<message::vision::VisualMesh>();
                             msg->timestamp       = image.timestamp;
                             msg->id              = image.id;
                             msg->name            = image.name;
                             msg->Hcw             = image.Hcw;
-                            msg->rays            = result.rays;
+                            msg->rays            = rPWw;
                             msg->coordinates     = result.coordinates;
                             msg->neighbourhood   = std::move(result.neighbourhood);
                             msg->indices         = std::move(result.indices);
