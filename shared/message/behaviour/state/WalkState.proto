@@ -37,7 +37,7 @@ message WalkState {
         STOPPED  = 3;
     }
 
-    enum SupportPhase {
+    enum Phase {
         DOUBLE = 0;
         LEFT   = 1;
         RIGHT  = 2;
@@ -49,8 +49,8 @@ message WalkState {
     /// Current requested velocity target (dx, dy, dtheta)
     vec3 velocity_target = 2;
 
-    /// Support phase
-    SupportPhase support_phase = 3;
+    /// Walk phase
+    Phase phase = 3;
 
     /// Set of swing foot trajectory points rSPp for duration of step
     repeated vec3 swing_foot_trajectory = 4;

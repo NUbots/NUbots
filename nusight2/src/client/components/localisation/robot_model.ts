@@ -123,7 +123,10 @@ export class LocalisationRobotModel {
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
   @observable swingFootTrajectory: { rSPp: Vector3[] };
+  @observable swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[], walkPhase: number }[] };
   @observable torsoTrajectory: { rTPp: Vector3[] };
+  @observable torsoTrajectoryHistory: { trajectories: Vector3[][] };
+  @observable walkPhase: number;
 
   constructor({
     model,
@@ -137,7 +140,10 @@ export class LocalisationRobotModel {
     fieldLinePoints,
     ball,
     swingFootTrajectory,
+    swingFootTrajectoryHistory,
     torsoTrajectory,
+    torsoTrajectoryHistory,
+    walkPhase,
   }: {
     model: RobotModel;
     name: string;
@@ -150,7 +156,10 @@ export class LocalisationRobotModel {
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
     swingFootTrajectory: { rSPp: Vector3[] };
+    swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[], walkPhase: number }[] };
     torsoTrajectory: { rTPp: Vector3[] };
+    torsoTrajectoryHistory : { trajectories: Vector3[][] };
+    walkPhase: number;
   }) {
     this.model = model;
     this.name = name;
@@ -163,7 +172,10 @@ export class LocalisationRobotModel {
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
     this.swingFootTrajectory = swingFootTrajectory;
+    this.swingFootTrajectoryHistory = swingFootTrajectoryHistory;
     this.torsoTrajectory = torsoTrajectory;
+    this.torsoTrajectoryHistory = torsoTrajectoryHistory;
+    this.walkPhase = walkPhase;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -177,7 +189,10 @@ export class LocalisationRobotModel {
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
       swingFootTrajectory: { rSPp: [] },
+      swingFootTrajectoryHistory : { trajectories: [] },
       torsoTrajectory: { rTPp: [] },
+      torsoTrajectoryHistory : { trajectories: [] },
+      walkPhase: 0,
     });
   });
 
@@ -224,5 +239,7 @@ export class LocalisationRobotModel {
   get rTFf(): Vector3[] {
     return this.torsoTrajectory.rTPp.map((rTPp) => rTPp.applyMatrix4(this.Hfp));
   }
+
+
 
 }

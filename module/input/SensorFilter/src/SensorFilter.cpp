@@ -186,21 +186,21 @@ namespace module::input {
 
     void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state) {
         // Compute torso pose in world space using kinematics from anchor frame
-        if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
+        if (current_phase.value == WalkState::Phase::LEFT) {
             Hwt = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
         }
-        else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
+        else if (current_phase.value == WalkState::Phase::RIGHT) {
             Hwt = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
         }
 
         // Update the anchor {a} frame if a support phase switch just occurred (could be done with foot down sensors)
-        if (walk_state.support_phase != current_support_phase) {
-            current_support_phase = walk_state.support_phase;
-            if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
+        if (walk_state.phase != current_phase) {
+            current_phase = walk_state.phase;
+            if (current_phase.value == WalkState::Phase::LEFT) {
                 // Update the anchor frame to the base of left foot
                 Hwp = Hwt * sensors->Htx[FrameID::L_FOOT_BASE];
             }
-            else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
+            else if (current_phase.value == WalkState::Phase::RIGHT) {
                 // Update the anchor frame to the base of right foot
                 Hwp = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
             }
