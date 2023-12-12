@@ -346,6 +346,7 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 
 # Install python libraries
 RUN pip install \
+    pygit2==1.13.3 \
     xxhash \
     pylint \
     termcolor \
