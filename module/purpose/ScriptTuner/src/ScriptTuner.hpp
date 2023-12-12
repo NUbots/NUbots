@@ -62,7 +62,7 @@ namespace module::purpose {
         bool angle_or_gain;
 
         /// @brief Default gain for new frames
-        const size_t default_gain = 10;
+        const double default_gain = 6.64;
 
         /// @brief Default duration for new frames
         const size_t default_duration = 1000;
