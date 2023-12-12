@@ -30,7 +30,7 @@ export class GridView extends React.Component<{}> {
   private createGrids() {
     const size = 20;
 
-    const smallGrid = this.buildGrid(size, 0.1, new THREE.Color("#F7F8F7"), 0.005);
+    const smallGrid = this.buildGrid(size, 0.1, new THREE.Color("#F7F7F7"), 0.0075);
     const largeGrid = this.buildGrid(size, 1, new THREE.Color("#E3E3E3"), 0.01);
     const whiteBackground = new THREE.Mesh(
       new THREE.PlaneBufferGeometry(size, size),
