@@ -51,7 +51,7 @@ export class LocalisationNetwork {
 
   @action.bound
   private onGoals(robotModel: RobotModel, goalsMessage: message.vision.Goals) {
-    const { id, timestamp, Hcw, goals } = goalsMessage;
+    const { Hcw, goals } = goalsMessage;
     const Hwc = Matrix4.from(Hcw).invert();
     const robot = LocalisationRobotModel.of(robotModel);
     robot.goals.points = goals.map((goal) => ({
