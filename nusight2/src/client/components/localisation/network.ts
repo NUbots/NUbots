@@ -47,8 +47,8 @@ export class LocalisationNetwork {
   private onWalkState(robotModel: RobotModel, walkState: message.behaviour.state.WalkState) {
     const robot = LocalisationRobotModel.of(robotModel);
     // Add trajectory points to history if support switch occurred
-    if(robot.walkPhase != walkState.phase){
-      robot.swingFootTrajectoryHistory.trajectories.push({trajectory: robot.rSFf, walkPhase: robot.walkPhase});
+    if (robot.walkPhase != walkState.phase) {
+      robot.swingFootTrajectoryHistory.trajectories.push({ trajectory: robot.rSFf, walkPhase: robot.walkPhase });
       robot.torsoTrajectoryHistory.trajectories.push(robot.rTFf);
     }
     robot.walkPhase = walkState.phase;

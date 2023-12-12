@@ -187,14 +187,14 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.robots.map((robotModel) => {
         const swingFootTrajectory = robotModel.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
         if (swingFootTrajectory.length > 0 && robotModel.visible) {
-          const color = (robotModel.walkPhase == 1) ? 'blue' : 'green';
-          return <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} lineColor={color}/>
+          const color = robotModel.walkPhase == 1 ? "blue" : "green";
+          return <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} lineColor={color} />;
         }
       })}
       {model.robots.map((robotModel) => {
         const torsoTrajectory = robotModel.rTFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
         if (torsoTrajectory.length > 0 && robotModel.visible) {
-          return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} lineColor="orange"/>
+          return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} lineColor="orange" />;
         }
       })}
       {/* History of walking trajectories */}
@@ -202,9 +202,15 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         if (robotModel.visible && robotModel.swingFootTrajectoryHistory.trajectories.length > 0) {
           return robotModel.swingFootTrajectoryHistory.trajectories.map((traj, index) => {
             const swingFootTrajectory = traj.trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-            if (swingFootTrajectory.length > 0){
-              const color = (traj.walkPhase == 1) ? 'blue' : 'green';
-              return <Trajectory trajectory={swingFootTrajectory} key={`${robotModel.id}-trajectory-${index}`} lineColor={color}/>
+            if (swingFootTrajectory.length > 0) {
+              const color = traj.walkPhase == 1 ? "blue" : "green";
+              return (
+                <Trajectory
+                  trajectory={swingFootTrajectory}
+                  key={`${robotModel.id}-trajectory-${index}`}
+                  lineColor={color}
+                />
+              );
             }
           });
         }
@@ -212,14 +218,19 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.robots.map((robotModel) => {
         if (robotModel.visible && robotModel.torsoTrajectoryHistory.trajectories.length > 0) {
           return robotModel.torsoTrajectoryHistory.trajectories.map((trajectory, index) => {
-            const torsoTrajectory = trajectory.map(d => new THREE.Vector3(d.x, d.y, d.z));
-            if (torsoTrajectory.length > 0){
-              return <Trajectory trajectory={torsoTrajectory} key={`${robotModel.id}-trajectory-${index}`} lineColor="orange"/>
+            const torsoTrajectory = trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+            if (torsoTrajectory.length > 0) {
+              return (
+                <Trajectory
+                  trajectory={torsoTrajectory}
+                  key={`${robotModel.id}-trajectory-${index}`}
+                  lineColor="orange"
+                />
+              );
             }
           });
         }
       })}
-
     </object3D>
   );
 });
@@ -259,7 +270,7 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
   </>
 );
 
-const Trajectory = ({ trajectory, lineColor }: { trajectory: THREE.Vector3[], lineColor: any }) => {
+const Trajectory = ({ trajectory, lineColor }: { trajectory: THREE.Vector3[]; lineColor: any }) => {
   // Create ref
   const trajectoryRef = React.useRef<THREE.Line>(null);
 

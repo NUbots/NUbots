@@ -123,7 +123,7 @@ export class LocalisationRobotModel {
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
   @observable swingFootTrajectory: { rSPp: Vector3[] };
-  @observable swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[], walkPhase: number }[] };
+  @observable swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[]; walkPhase: number }[] };
   @observable torsoTrajectory: { rTPp: Vector3[] };
   @observable torsoTrajectoryHistory: { trajectories: Vector3[][] };
   @observable walkPhase: number;
@@ -156,9 +156,9 @@ export class LocalisationRobotModel {
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
     swingFootTrajectory: { rSPp: Vector3[] };
-    swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[], walkPhase: number }[] };
+    swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[]; walkPhase: number }[] };
     torsoTrajectory: { rTPp: Vector3[] };
-    torsoTrajectoryHistory : { trajectories: Vector3[][] };
+    torsoTrajectoryHistory: { trajectories: Vector3[][] };
     walkPhase: number;
   }) {
     this.model = model;
@@ -189,9 +189,9 @@ export class LocalisationRobotModel {
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
       swingFootTrajectory: { rSPp: [] },
-      swingFootTrajectoryHistory : { trajectories: [] },
+      swingFootTrajectoryHistory: { trajectories: [] },
       torsoTrajectory: { rTPp: [] },
-      torsoTrajectoryHistory : { trajectories: [] },
+      torsoTrajectoryHistory: { trajectories: [] },
       walkPhase: 0,
     });
   });
@@ -239,7 +239,4 @@ export class LocalisationRobotModel {
   get rTFf(): Vector3[] {
     return this.torsoTrajectory.rTPp.map((rTPp) => rTPp.applyMatrix4(this.Hfp));
   }
-
-
-
 }
