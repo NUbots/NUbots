@@ -7,6 +7,7 @@ import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
+import { Icon } from "../icon/view";
 
 import { Vector3 } from "../../../shared/math/vector3";
 import { PerspectiveCamera } from "../three/three_fiber";
@@ -59,7 +60,16 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   render(): JSX.Element {
     return (
       <div className={style.localisation}>
-        <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
+        <LocalisationMenuBar
+        model={this.props.model}
+        Menu={this.props.Menu}
+        onHawkEyeClick={this.onHawkEyeClick}
+        toggleGridVisibility={this.toggleGridVisibility}
+        toggleFieldVisibility={this.toggleFieldVisibility}
+        toggleRobotVisibility={this.toggleRobotVisibility}
+        toggleBallVisibility={this.toggleBallVisibility}
+        toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+        ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
@@ -113,16 +123,59 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     e.preventDefault();
     this.props.controller.onWheel(this.props.model, e.deltaY);
   };
+
+  private toggleGridVisibility = () => {
+    this.props.controller.toggleGridVisibility(this.props.model);
+  }
+
+  private toggleFieldVisibility = () => {
+    this.props.controller.toggleFieldVisibility(this.props.model);
+  }
+
+  private toggleRobotVisibility = () => {
+    this.props.controller.toggleRobotVisibility(this.props.model);
+  }
+
+  private toggleBallVisibility = () => {
+    this.props.controller.toggleBallVisibility(this.props.model);
+  }
+
+  private toggleFieldLinePointsVisibility = () => {
+    this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
+  }
+
 }
 
 interface LocalisationMenuBarProps {
   Menu: ComponentType<PropsWithChildren>;
 
+  model: LocalisationModel;
+
   onHawkEyeClick(): void;
+  toggleGridVisibility(): void;
+  toggleFieldVisibility(): void;
+  toggleRobotVisibility(): void;
+  toggleBallVisibility(): void;
+  toggleFieldLinePointsVisibility(): void;
 }
 
+const MenuItem = ({ label,  isVisible, onClick }) => {
+  return (
+    <li className={style.localisation__menuItem}>
+      <button className={style.localisation__menuButton} onClick={onClick}>
+        <div className="flex items-center justify-center">
+          <div className="flex items-center rounded">
+            <span className="mx-2">{label}</span>
+            <Icon size={24}>{isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
+          </div>
+        </div>
+      </button>
+    </li>
+  );
+};
+
 const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
-  const { Menu } = props;
+  const { Menu, model } = props;
   return (
     <Menu>
       <ul className={style.localisation__menu}>
@@ -131,6 +184,31 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
             Hawk Eye
           </button>
         </li>
+        <MenuItem
+          label="Grid"
+          isVisible={model.gridVisible}
+          onClick={props.toggleGridVisibility}
+        />
+        <MenuItem
+          label="Field"
+          isVisible={model.fieldVisible}
+          onClick={props.toggleFieldVisibility}
+        />
+        <MenuItem
+          label="Robots"
+          isVisible={model.robotVisible}
+          onClick={props.toggleRobotVisibility}
+        />
+        <MenuItem
+          label="Balls"
+          isVisible={model.ballVisible}
+          onClick={props.toggleBallVisibility}
+        />
+        <MenuItem
+          label="Field Line Points"
+          isVisible={model.fieldLinePointsVisible}
+          onClick={props.toggleFieldLinePointsVisibility}
+        />
       </ul>
     </Menu>
   );
@@ -176,15 +254,15 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       >
         <pointLight color="white" />
       </PerspectiveCamera>
-      <FieldView model={model.field} />
-      <GridView />
       <SkyboxView model={model.skybox} />
       <hemisphereLight args={["#fff", "#fff", 0.6]} />
-      {model.robots.map((robotModel) => {
+      {model.fieldVisible && <FieldView model={model.field} />}
+      {model.gridVisible && <GridView />}
+      {model.robotVisible && model.robots.map((robotModel) => {
         return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
       })}
-      <FieldLinePoints model={model} />
-      <Balls model={model} />
+      {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
+      {model.ballVisible && <Balls model={model} />}
     </object3D>
   );
 });
