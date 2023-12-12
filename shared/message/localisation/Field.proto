@@ -28,6 +28,7 @@ syntax = "proto3";
 package message.localisation;
 
 import "Matrix.proto";
+import "Vector.proto";
 import "Transform.proto";
 
 message Field {
@@ -37,6 +38,8 @@ message Field {
     mat3 covariance = 2;
     /// Sum of the covariance matrix diagonals to quantify the filters uncertainty as a single value
     double uncertainty = 3;
+    /// Vector of particles representing the robots pose hypothesis (x, y, theta)
+    repeated vec3 particles = 4;
 }
 
 message ResetFieldLocalisation {}
