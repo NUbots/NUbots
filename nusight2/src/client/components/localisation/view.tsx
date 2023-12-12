@@ -182,6 +182,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
       })}
       <FieldLinePoints model={model} />
+      <Particles model={model} />
       <Balls model={model} />
     </object3D>
   );
@@ -198,6 +199,26 @@ const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
                 <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
                   <circleBufferGeometry args={[0.02, 20]} />
                   <meshBasicMaterial color="blue" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Particles = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible && (
+          <object3D key={robot.id}>
+            {robot.particles.particle.map((particle, i) => {
+              return (
+                <mesh key={String(i)} position={new Vector3(particle.x, particle.y, 0.005).toArray()}>
+                  <circleBufferGeometry args={[0.02, 20]} />
+                  <meshBasicMaterial color="red" />
                 </mesh>
               );
             })}

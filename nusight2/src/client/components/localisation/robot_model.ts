@@ -120,6 +120,7 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
+  @observable particles: { particle: Vector3[] }; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
 
   constructor({
@@ -131,6 +132,7 @@ export class LocalisationRobotModel {
     Rwt,
     motors,
     fieldLinePoints,
+    particles,
     ball,
   }: {
     model: RobotModel;
@@ -141,6 +143,7 @@ export class LocalisationRobotModel {
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
+    particles: { particle: Vector3[] };
     ball?: { rBWw: Vector3 };
   }) {
     this.model = model;
@@ -151,6 +154,7 @@ export class LocalisationRobotModel {
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
+    this.particles = particles;
     this.ball = ball;
   }
 
@@ -163,6 +167,7 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
+      particles: { particle: [] },
     });
   });
 
