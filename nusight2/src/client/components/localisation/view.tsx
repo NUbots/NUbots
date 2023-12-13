@@ -187,14 +187,16 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.robots.map((robotModel) => {
         const swingFootTrajectory = robotModel.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
         if (swingFootTrajectory.length > 0 && robotModel.visible) {
-          const color = robotModel.walkPhase == 1 ? "blue" : "green";
-          return <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} lineColor={color} />;
+          const color = robotModel.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
+          return (
+            <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} lineColor={color} tubeRadius={0.005} />
+          );
         }
       })}
       {model.robots.map((robotModel) => {
         const torsoTrajectory = robotModel.rTFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
         if (torsoTrajectory.length > 0 && robotModel.visible) {
-          return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} lineColor="orange" />;
+          return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} lineColor="grey" tubeRadius={0.005} />;
         }
       })}
       {/* History of walking trajectories */}
@@ -203,12 +205,13 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
           return robotModel.swingFootTrajectoryHistory.trajectories.map((traj, index) => {
             const swingFootTrajectory = traj.trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
             if (swingFootTrajectory.length > 0) {
-              const color = traj.walkPhase == 1 ? "blue" : "green";
+              const color = traj.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
               return (
                 <Trajectory
                   trajectory={swingFootTrajectory}
                   key={`${robotModel.id}-trajectory-${index}`}
                   lineColor={color}
+                  tubeRadius={0.005}
                 />
               );
             }
@@ -224,7 +227,8 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
                 <Trajectory
                   trajectory={torsoTrajectory}
                   key={`${robotModel.id}-trajectory-${index}`}
-                  lineColor="orange"
+                  lineColor="grey"
+                  tubeRadius={0.005}
                 />
               );
             }
@@ -270,9 +274,17 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
   </>
 );
 
-const Trajectory = ({ trajectory, lineColor }: { trajectory: THREE.Vector3[]; lineColor: any }) => {
+const Trajectory = ({
+  trajectory,
+  lineColor,
+  tubeRadius,
+}: {
+  trajectory: THREE.Vector3[];
+  lineColor: any;
+  tubeRadius: number;
+}) => {
   // Create ref
-  const trajectoryRef = React.useRef<THREE.Line>(null);
+  const trajectoryRef = React.useRef<THREE.Mesh>(null);
 
   // React effect
   React.useEffect(() => {
@@ -280,19 +292,16 @@ const Trajectory = ({ trajectory, lineColor }: { trajectory: THREE.Vector3[]; li
       // Generate spline
       const curve = new THREE.CatmullRomCurve3(trajectory);
 
-      // Get points
-      const points = curve.getPoints(50);
-
-      // Create the new line
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const material = new THREE.LineBasicMaterial({ color: lineColor, linewidth: 10 });
-      const newTrajectory = new THREE.Line(geometry, material);
+      // Create the tube geometry along the spline
+      const geometry = new THREE.TubeGeometry(curve, 50, tubeRadius, 8, false);
+      const material = new THREE.MeshStandardMaterial({ color: lineColor });
+      const newTrajectory = new THREE.Mesh(geometry, material);
 
       // Clear the old trajectory and add the new one
       trajectoryRef.current?.clear();
       trajectoryRef.current?.add(newTrajectory);
     }
-  }, [trajectory]);
+  }, [trajectory, tubeRadius]);
 
   return <object3D ref={trajectoryRef} />;
 };

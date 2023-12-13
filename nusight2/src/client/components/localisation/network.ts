@@ -53,6 +53,7 @@ export class LocalisationNetwork {
     }
     robot.walkPhase = walkState.phase;
     // Add current trajectory points
+    robot.Hwp = Matrix4.from(walkState.Hwp);
     robot.swingFootTrajectory.rSPp = walkState.swingFootTrajectory.map((rSPp) => Vector3.from(rSPp));
     robot.torsoTrajectory.rTPp = walkState.torsoTrajectory.map((rTPp) => Vector3.from(rTPp));
   }
@@ -74,7 +75,6 @@ export class LocalisationNetwork {
     const robot = LocalisationRobotModel.of(robotModel);
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
-    robot.Hwp = Matrix4.from(sensors.Hwp);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);
 
     robot.motors.rightShoulderPitch.angle = sensors.servo[0].presentPosition!;

@@ -28,6 +28,7 @@ syntax = "proto3";
 package message.behaviour.state;
 
 import "Vector.proto";
+import "Transform.proto";
 
 message WalkState {
     enum State {
@@ -57,4 +58,6 @@ message WalkState {
 
     /// Set of torso trajectory points rTPp for duration of step
     repeated vec3 torso_trajectory = 5;
+
+    iso3 Hwp = 6;
 }
