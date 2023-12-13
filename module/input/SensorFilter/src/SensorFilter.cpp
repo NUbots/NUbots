@@ -41,6 +41,7 @@ namespace module::input {
     using message::actuation::BodySide;
     using utility::input::FrameID;
     using utility::input::ServoID;
+    using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -187,11 +188,28 @@ namespace module::input {
     void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state) {
         // Compute torso pose in world space using kinematics from anchor frame
         if (current_phase.value == WalkState::Phase::LEFT) {
-            Hwt = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+            auto current_translation       = Hwt.translation();
+            auto current_rotation          = MatrixToEulerIntrinsic(Hwt.rotation());
+            Eigen::Isometry3d measured_Hwt = Hwp * Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
+            auto measured_translation      = measured_Hwt.translation();
+            auto measured_rotation         = MatrixToEulerIntrinsic(measured_Hwt.rotation());
+            // Apply exponential filter to the translation and rotation
+            double alpha      = 0.9;
+            Hwt.translation() = alpha * measured_translation + (1 - alpha) * current_translation;
+            Hwt.linear()      = EulerIntrinsicToMatrix(alpha * measured_rotation + (1 - alpha) * current_rotation);
         }
         else if (current_phase.value == WalkState::Phase::RIGHT) {
-            Hwt = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+            auto current_translation       = Hwt.translation();
+            auto current_rotation          = MatrixToEulerIntrinsic(Hwt.rotation());
+            Eigen::Isometry3d measured_Hwt = Hwp * Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse());
+            auto measured_translation      = measured_Hwt.translation();
+            auto measured_rotation         = MatrixToEulerIntrinsic(measured_Hwt.rotation());
+            // Apply exponential filter to the translation and rotation
+            double alpha      = 0.9;
+            Hwt.translation() = alpha * measured_translation + (1 - alpha) * current_translation;
+            Hwt.linear()      = EulerIntrinsicToMatrix(alpha * measured_rotation + (1 - alpha) * current_rotation);
         }
+
 
         // Update the anchor {a} frame if a support phase switch just occurred (could be done with foot down sensors)
         if (walk_state.phase != current_phase) {
