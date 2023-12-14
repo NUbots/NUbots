@@ -21,12 +21,6 @@ lens:
   k: [0, 0]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
   fov: 2.0944
-  # The homogenous transform from the rigid platform this camera is attached to to its optical location
-  Hpc:
-    - [1.0, 0.0, 0.0, 0.0889361]
-    - [0.0, 1.0, 0.0, 0.0352991]
-    - [0.0, 0.0, 1.0, 0.0713675]
-    - [0.0, 0.0, 0.0, 1.0]
 
 settings:
   # PixelFormat: BayerRG8
@@ -37,3 +31,10 @@ settings:
   # ExposureAuto: Continuous
   # GainAuto: Continuous
   # BalanceWhiteAuto: Contsinuous
+
+# Camera kinematics
+urdf_path: "models/robot.urdf"
+
+roll_offset: 0.0 * pi / 180
+
+pitch_offset: 0.0 * pi / 180

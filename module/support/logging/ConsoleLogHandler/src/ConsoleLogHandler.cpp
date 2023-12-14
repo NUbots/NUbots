@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "ConsoleLogHandler.hpp"
@@ -36,7 +44,7 @@ namespace module::support::logging {
                 std::lock_guard<std::mutex> lock(mutex);
 
                 // Get our reactor name
-                std::string reactor = stats.identifier[1];
+                std::string reactor = stats.identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
@@ -56,7 +64,8 @@ namespace module::support::logging {
                 }
 
                 // Print our exception details
-                std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                std::cerr << reactor << " "
+                          << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                           << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
                           << " " << Colour::brightred << utility::support::evil::exception_name << " " << exception_what
                           << std::endl;
@@ -74,14 +83,16 @@ namespace module::support::logging {
 
                     std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
 
-                    std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                    std::cerr << reactor << " "
+                              << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                               << Colour::brightred << "(╯°□°）╯︵ ┻━┻ "
                               << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
                 }
                 // We don't actually want to crash
                 catch (...) {
 
-                    std::cerr << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                    std::cerr << reactor << " "
+                              << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                               << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻" << std::endl;
                 }
 #endif
@@ -90,6 +101,10 @@ namespace module::support::logging {
 
 
         on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+            // Only display messages that are above the display level of the reactor that made the log
+            if (message.level < message.display_level) {
+                return;
+            };
             std::lock_guard<std::mutex> lock(mutex);
 
             // Where this message came from
@@ -98,7 +113,7 @@ namespace module::support::logging {
             // If we know where this log message came from, we display that
             if (message.task != nullptr) {
                 // Get our reactor name
-                std::string reactor = message.task->identifier[1];
+                std::string reactor = message.task->identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t lastC = reactor.find_last_of(':');
@@ -106,7 +121,7 @@ namespace module::support::logging {
 
                 // This is our source
                 source = reactor + " "
-                         + (message.task->identifier[0].empty() ? "" : "- " + message.task->identifier[0] + " ");
+                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
             }
 
             // Output the level
@@ -116,6 +131,7 @@ namespace module::support::logging {
                 case NUClear::INFO: std::cerr << source << Colour::brightblue << "INFO: "; break;
                 case NUClear::WARN: std::cerr << source << Colour::yellow << "WARN: "; break;
                 case NUClear::ERROR: std::cerr << source << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
+                case NUClear::UNKNOWN:;
                 case NUClear::FATAL: std::cerr << source << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
             }
 

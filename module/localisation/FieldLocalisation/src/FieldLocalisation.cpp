@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "FieldLocalisation.hpp"
 
 #include <Eigen/Dense>
@@ -46,6 +72,8 @@ namespace module::localisation {
             cfg.max_range                     = config["max_range"].as<double>();
             cfg.min_observations              = config["min_observations"].as<size_t>();
             cfg.outside_map_penalty_factor    = config["outside_map_penalty_factor"].as<double>();
+            cfg.start_time_delay              = config["start_time_delay"].as<double>();
+            cfg.starting_side                 = config["starting_side"].as<std::string>();
 
             cfg.buzzer.localisation_reset_frequency = config["buzzer"]["localisation_reset_frequency"].as<float>();
             cfg.buzzer.duration                     = config["buzzer"]["duration"].as<int>();
@@ -59,6 +87,7 @@ namespace module::localisation {
 
             // Use the ButtonLeftUp message to silence the buzzer after a busy wait
             emit<Scope::DELAY>(std::make_unique<ButtonLeftUp>(), std::chrono::milliseconds(cfg.buzzer.duration));
+
         });
 
         // Silence the buzzer after the user lets go of the left (black) pin
@@ -221,14 +250,16 @@ namespace module::localisation {
 
             // Intialise the particles to be distrbuted along either sides of the positive half of the field, facing
             // towards the field
-            cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
-                                           (fd.dimensions.field_width / 2.0),
-                                           -M_PI_2);
-
-            cfg.initial_state.emplace_back((fd.dimensions.field_length / 2.0),
-                                           (-fd.dimensions.field_width / 2.0),
-                                           M_PI_2);
-
+            if (cfg.starting_side == StartingSide::LEFT || cfg.starting_side == StartingSide::EITHER) {
+                cfg.initial_state.emplace_back((fd.dimensions.field_length / 4.0),
+                                               (fd.dimensions.field_width / 2.0),
+                                               -M_PI_2);
+            }
+            if (cfg.starting_side == StartingSide::RIGHT || cfg.starting_side == StartingSide::EITHER) {
+                cfg.initial_state.emplace_back((fd.dimensions.field_length / 4.0),
+                                               (-fd.dimensions.field_width / 2.0),
+                                               M_PI_2);
+            }
 
             // Initialise the particles with a multivariate normal distribution
             state      = cfg.initial_state[0];
@@ -247,6 +278,9 @@ namespace module::localisation {
 
             // Set the time update time to now
             last_time_update_time = NUClear::clock::now();
+
+            // Set the startup time to now
+            startup_time = NUClear::clock::now();
         });
 
         on<Trigger<Stability>>().then([this](const Stability& stability) {
@@ -260,7 +294,11 @@ namespace module::localisation {
 
         on<Trigger<FieldLines>>().then("Particle Filter", [this](const FieldLines& field_lines) {
             Eigen::Isometry3d Hcw = Eigen::Isometry3d(field_lines.Hcw);
-            if (!falling && field_lines.rPWw.size() > cfg.min_observations) {
+            auto time_since_startup =
+                std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
+            log<NUClear::DEBUG>("Time since startup: ", time_since_startup);
+            if (!falling && field_lines.rPWw.size() > cfg.min_observations
+                && time_since_startup > cfg.start_time_delay) {
                 // Add noise to the particles
                 add_noise();
 
