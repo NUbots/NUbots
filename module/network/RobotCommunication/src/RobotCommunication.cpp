@@ -40,6 +40,8 @@
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
 
+#include "utility/math/euler.hpp"
+
 
 namespace module::network {
 
@@ -53,6 +55,7 @@ namespace module::network {
     using message::localisation::Field;
     using message::skill::Kick;
     using message::support::GlobalConfig;
+    using utility::math::euler::MatrixToEulerIntrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -137,15 +140,11 @@ namespace module::network {
                             Eigen::Vector3d rTFf  = Hft.translation();
 
                             // Store our position from field to torso
-                            msg->current_pose.position.x = rTFf.x();
-                            msg->current_pose.position.y = rTFf.y();
-                            msg->current_pose.position.z = Hft.rotation().matrix().eulerAngles(0, 1, 2).z();
+                            msg->current_pose.position.x() = rTFf.x();
+                            msg->current_pose.position.y() = rTFf.y();
+                            msg->current_pose.position.z() = MatrixToEulerIntrinsic(Hft.rotation()).z();
 
-                            Eigen::Matrix<float, 3, 3> covariance = field->covariance.cast<float>();
-
-                            msg->current_pose.covariance = {{covariance(0, 0), covariance(1, 0), covariance(2, 0)},
-                                                            {covariance(0, 1), covariance(1, 1), covariance(2, 1)},
-                                                            {covariance(0, 2), covariance(1, 2), covariance(2, 2)}};
+                            msg->current_pose.covariance = field->covariance.cast<float>();
 
                             msg->current_pose.team = config->team_id;
                         }
@@ -154,19 +153,15 @@ namespace module::network {
 
                 // Walk command
                 if (walk_state != nullptr) {
-                    msg->walk_command = {static_cast<float>(walk_state->velocity_target.x()),
-                                         static_cast<float>(walk_state->velocity_target.y()),
-                                         static_cast<float>(walk_state->velocity_target.z())};
+                    msg->walk_command = walk_state->velocity_target.cast<float>();
                 }
 
                 // TODO: target pose (Position and orientation of the players target on the field specified)
 
                 // Kick target
                 if (kick) {
-                    message::input::fvec2 kick_target;
-                    kick_target.x    = kick->target.x();
-                    kick_target.y    = kick->target.y();
-                    msg->kick_target = kick_target;
+                    msg->kick_target.x() = kick->target.x();
+                    msg->kick_target.y() = kick->target.y();
                 }
 
                 // Ball
@@ -178,19 +173,14 @@ namespace module::network {
                         Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
                         Eigen::Vector3d rBFf  = Hfw * rBWw;
                         // Store our position from field to ball
-                        msg->ball.position.x = rBFf.x();
-                        msg->ball.position.y = rBFf.y();
-                        msg->ball.position.z = rBFf.z();
+                        msg->ball.position.x() = rBFf.x();
+                        msg->ball.position.y() = rBFf.y();
+                        msg->ball.position.z() = rBFf.z();
                     }
 
-                    Eigen::Matrix<float, 3, 3> covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
-                    msg->ball.covariance                  = {{covariance(0, 0), covariance(1, 0), covariance(2, 0)},
-                                                             {covariance(0, 1), covariance(1, 1), covariance(2, 1)},
-                                                             {covariance(0, 2), covariance(1, 2), covariance(2, 2)}};
+                    msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
 
-                    msg->ball.velocity = {static_cast<float>(loc_ball->vBw.x()),
-                                          static_cast<float>(loc_ball->vBw.y()),
-                                          static_cast<float>(loc_ball->vBw.z())};
+                    msg->ball.velocity = (loc_ball->vBw).cast<float>();
                 }
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
@@ -198,5 +188,4 @@ namespace module::network {
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
     }
-
 }  // namespace module::network

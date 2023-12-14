@@ -27,27 +27,8 @@ syntax = "proto3";
 package message.input;
 
 import "google/protobuf/timestamp.proto";
-
-/// A column vector of two floats
-message fvec2 {
-    float x = 1;
-    float y = 2;
-}
-
-/// A column vector of three floats
-message fvec3 {
-    float x = 1;
-    float y = 2;
-    float z = 3;
-}
-
-/// A matrix of three vectors
-/// Specified as column vectors
-message fmat3 {
-    fvec3 x = 1;
-    fvec3 y = 2;
-    fvec3 z = 3;
-}
+import "Vector.proto";
+import "Matrix.proto";
 
 /// The detected team of the robot
 enum Team {
