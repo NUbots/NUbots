@@ -52,7 +52,7 @@ namespace module::platform::OpenCR {
         // Button Left = 0x04
         opencr_state.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
-        // If the left (black) button is pressed trigger field localisation reset
+        // Let the system know that the left button has been pressed
         if (opencr_state.buttons.left) {
             emit(std::make_unique<ButtonLeftDown>());
         }
