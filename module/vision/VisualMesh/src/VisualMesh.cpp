@@ -129,7 +129,7 @@ namespace module::vision {
                             msg->name            = image.name;
                             msg->Hcw             = image.Hcw;
                             msg->rPWw            = rPWw;
-                            msg->rays            = result.rays;
+                            msg->uPCw            = result.rays;
                             msg->coordinates     = result.coordinates;
                             msg->neighbourhood   = std::move(result.neighbourhood);
                             msg->indices         = std::move(result.indices);

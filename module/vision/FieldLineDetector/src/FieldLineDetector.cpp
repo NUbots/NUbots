@@ -60,7 +60,7 @@ namespace module::vision {
             // Convenience variables
             const auto& cls                                      = horizon.mesh->classifications;
             const auto& neighbours                               = horizon.mesh->neighbourhood;
-            const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rays.cast<double>();
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw.cast<double>();
             const int LINE_INDEX                                 = horizon.class_map.at("line");
 
             // PARTITION INDICES AND CLUSTER

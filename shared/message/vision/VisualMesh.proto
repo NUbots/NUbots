@@ -54,9 +54,9 @@ message VisualMesh {
     /// Full vector from the world to each point in the mesh, assuming the point is on the ground
     fmat rPWw = 9;
     /// Unit vector pointing from the camera to each node in the mesh, in world space
-    fmat uPCw = 9;
+    fmat uPCw = 10;
     /// A mapping from class names to column indices (for accessing the corresponding classification column)
-    map<string, uint32> class_map = 10;
+    map<string, uint32> class_map = 11;
     /// Ground truth data from webots
-    platform.webots.VisionGroundTruth vision_ground_truth = 11;
+    platform.webots.VisionGroundTruth vision_ground_truth = 12;
 }
