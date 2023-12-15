@@ -110,14 +110,15 @@ namespace module::vision {
                         }
                         else {
                             // Convert rays to world space
-                            Eigen::Matrix<double, 3, Eigen::Dynamic> rPWw(3, result.rays.cols());
-                            Eigen::Isometry3d Hwc = Hcw.inverse();
+                            Eigen::Matrix<float, 3, Eigen::Dynamic> rPWw(3, result.rays.cols());
+                            Eigen::Isometry3f Hwc = Hcw.inverse().cast<float>();
 
                             // Compute these values once outside the loop
-                            Eigen::Vector3d Hwc_translation = Hwc.translation();
+                            Eigen::Vector3f Hwc_translation = Hwc.translation();
 
                             // Use Eigen's operations to perform the calculations on the entire matrix at once
-                            rPWw = (result.rays.array().rowwise() * Hwc_translation.z() / result.rays.row(2).array())
+                            rPWw = (result.rays.array() * Hwc_translation.z()
+                                    / result.rays.row(2).replicate(1, result.rays.cols()).array())
                                        .matrix()
                                    + Hwc_translation.replicate(1, result.rays.cols());
 
@@ -127,7 +128,8 @@ namespace module::vision {
                             msg->id              = image.id;
                             msg->name            = image.name;
                             msg->Hcw             = image.Hcw;
-                            msg->rays            = rPWw;
+                            msg->rPWw            = rPWw;
+                            msg->rays            = result.rays;
                             msg->coordinates     = result.coordinates;
                             msg->neighbourhood   = std::move(result.neighbourhood);
                             msg->indices         = std::move(result.indices);

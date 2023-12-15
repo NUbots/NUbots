@@ -60,7 +60,7 @@ namespace module::vision {
             // Convenience variables
             const auto& cls                                      = mesh.classifications;
             const auto& neighbours                               = mesh.neighbourhood;
-            const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = mesh.rays;
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = mesh.rPWw.cast<double>();
             const Eigen::Isometry3d Hcw                          = mesh.Hcw;
             const uint32_t LINE_INDEX                            = mesh.class_map.at("line");
             const uint32_t FIELD_INDEX                           = mesh.class_map.at("field");
