@@ -81,7 +81,8 @@ namespace module::vision {
                 const auto& cls        = horizon.mesh->classifications;
                 const auto& neighbours = horizon.mesh->neighbourhood;
                 // Unit vectors from camera to a point in the mesh, in world space
-                const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays.cast<double>();
+                const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->uPCw.cast<double>();
+                const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw.cast<double>();
                 const int BALL_INDEX                                 = horizon.class_map.at("ball");
 
                 // PARTITION INDICES AND CLUSTER
@@ -125,7 +126,7 @@ namespace module::vision {
                 // Partition the clusters such that clusters above the green horizons are removed,
                 // and then resize the vector to remove them
                 auto green_boundary =
-                    utility::vision::visualmesh::check_green_horizon_side(clusters, horizon.horizon, uPCw, false, true);
+                    utility::vision::visualmesh::check_green_horizon_side(clusters, horizon.horizon, rPWw, false, true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
@@ -204,7 +205,7 @@ namespace module::vision {
                     // Coordinates (1/distance, phi, theta)
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::ANGULAR;
-                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * angular_distance);
+                    b.measurements.back().rBCc       = b.uBCc * angular_distance;
                     b.measurements.back().covariance = cfg.ball_angular_cov.asDiagonal();
 
                     // Projection-based distance
@@ -221,7 +222,7 @@ namespace module::vision {
                     // Create a ball measurement message for this calculation
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * projection_distance);
+                    b.measurements.back().rBCc       = b.uBCc * projection_distance;
                     b.measurements.back().covariance = cfg.ball_angular_cov.asDiagonal();
 
 
@@ -317,10 +318,10 @@ namespace module::vision {
                     log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
                     log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
                     log<NUClear::DEBUG>(
-                        fmt::format("Distance {} - srBCc {}", angular_distance, b.measurements[0].srBCc.transpose()));
-                    log<NUClear::DEBUG>(fmt::format("Projection Distance {} - srBCc",
+                        fmt::format("Distance {} - rBCc {}", angular_distance, b.measurements[0].rBCc.transpose()));
+                    log<NUClear::DEBUG>(fmt::format("Projection Distance {} - rBCc",
                                                     projection_distance,
-                                                    b.measurements[1].srBCc.transpose()));
+                                                    b.measurements[1].rBCc.transpose()));
                     log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
                                                     std::abs(projection_distance - angular_distance) / max_distance));
                     log<NUClear::DEBUG>("**************************************************");
