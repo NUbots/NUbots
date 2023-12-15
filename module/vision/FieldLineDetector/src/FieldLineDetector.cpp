@@ -97,11 +97,11 @@ namespace module::vision {
 
             // The FieldLines message contains a FieldLine for every cluster that is a valid field
             // line
-            auto lines            = std::make_unique<FieldLines>();
-            lines->id             = horizon.id;         // camera id
-            lines->timestamp      = horizon.timestamp;  // time when the image was taken
-            lines->Hcw            = horizon.Hcw;        // world to camera transform at the time the image was taken
-            Eigen::Isometry3d Hwc = horizon.Hcw.inverse();
+            auto lines       = std::make_unique<FieldLines>();
+            lines->id        = horizon.id;         // camera id
+            lines->timestamp = horizon.timestamp;  // time when the image was taken
+            lines->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
+
             for (auto& cluster : clusters) {
                 for (const auto& idx : cluster) {
                     lines->rPWw.push_back(rPWw.col(idx));
