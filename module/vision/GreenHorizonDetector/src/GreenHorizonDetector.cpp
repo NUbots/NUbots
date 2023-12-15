@@ -179,7 +179,7 @@ namespace module::vision {
             // Add the unit vectors of the convex hull to the green horizon message
             msg->horizon.reserve(hull_indices.size());
             for (const auto& idx : hull_indices) {
-                msg->horizon.emplace_back(Hcw * rPWw.col(idx));
+                msg->horizon.emplace_back(rPWw.col(idx));
             }
 
             log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",
