@@ -109,7 +109,7 @@ export class VisionNetwork {
         axis: Vector3.from(ball.uBCc),
         radius: ball.radius!,
       },
-      distance: Math.abs(ball.measurements?.[0].srBCc?.x!),
+      distance: Math.hypot(ball.measurements?.[0].rBCc?.x!, ball.measurements?.[0].rBCc?.y!, ball.measurements?.[0].rBCc?.z!),
       colour: Vector4.from(ball.colour),
     }));
   }
@@ -148,7 +148,7 @@ export class VisionNetwork {
       return;
     }
     const greenHorizon = new GreenHorizonModel({
-      horizon: horizon?.map((v) => Vector3.from(v)),
+      horizon: horizon?.map((v) => Matrix4.from(Hcw).invert().decompose().translation.subtract(Vector3.from(v))),
       Hcw: Matrix4.from(Hcw),
     });
     camera.greenHorizon = camera.greenHorizon?.copy(greenHorizon) || greenHorizon;
