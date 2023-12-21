@@ -39,7 +39,7 @@ export class LogsNetwork {
 
 /** Convert the given NUClear log level to a NUsight log level. */
 function nuclearLogLevelToLogLevel(level: NUClearLogLevel): LogLevel {
-  switch (level - 1) {
+  switch (level) {
     case NUClearLogLevel.TRACE:
       return "trace";
     case NUClearLogLevel.DEBUG:
