@@ -38,9 +38,13 @@ export class ProfilerView extends React.Component<{
         </Menu>
         {selectedRobot && (
           <div className="overflow-x-auto p-2">
+            <div>
+              <RobotStats totalCount={selectedRobot.totalCount} totalTime={selectedRobot.totalTime} />
+            </div>
             <div className="flex-col m-2">
               <SearchBox model={selectedRobot} controller={controller} />
             </div>
+
             <table className="min-w-full table-auto border-collapse border border-gray-200">
               <thead>
                 <tr>
@@ -93,9 +97,6 @@ export class ProfilerView extends React.Component<{
                 ))}
               </tbody>
             </table>
-            <div className="flex-col border border-gray-200 w-full">
-              <RobotStats totalCount={selectedRobot.totalCount} totalTime={selectedRobot.totalTime} />
-            </div>
           </div>
         )}
       </div>
@@ -138,17 +139,17 @@ export type RobotStatsProps = {
 
 export const RobotStats = (props: RobotStatsProps) => {
   return (
-    <div className="w-full border rounded-lg">
-      <header className={style.header}>Totals</header>
-      <div className={style.details}>
-        <div className={style.group}>
-          <div className={style.row}>
-            <span className={style.label}>Total Time (ms)</span>
-            {props.totalTime.toFixed(1)}
+    <div>
+      <div>
+        <div className="flex justify-center">
+          <div className="px-12 py-8 border rounded-md mx-12">
+            <div className="text-lg text-gray-500">Total Time (s)</div>
+            <div className="text-3xl">{(props.totalTime / 1e3).toFixed(1)}</div>
           </div>
-          <div className={style.row}>
-            <span className={style.label}>Total Reactions</span>
-            {props.totalCount}
+
+          <div className="px-12 py-8 border rounded-md ">
+            <div className="text-lg text-gray-500">Total Reactions</div>
+            <div className="text-3xl">{props.totalCount}</div>
           </div>
         </div>
       </div>

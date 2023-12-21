@@ -30,7 +30,7 @@ export class ProfilerNetwork {
     robot.profiles = [];
 
     // Update with new profiles
-    profiles.reactionProfiles!.forEach((p) => {
+    profiles.reactionProfiles.forEach((p) => {
       const newProfile = new Profile(
         p.name!,
         p.reactionId!,
