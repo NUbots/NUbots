@@ -33,4 +33,4 @@ targets:
 
     # Log messages
     message.nuclear.LogMessage: true
-    message.nuclear.ReactionStatistics: true
+    message.nuclear.ReactionStatistics: false
