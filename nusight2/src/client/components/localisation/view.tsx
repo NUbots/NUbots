@@ -7,9 +7,9 @@ import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
 import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
-import { Icon } from "../icon/view";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
 
