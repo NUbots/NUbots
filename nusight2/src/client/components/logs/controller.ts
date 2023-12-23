@@ -1,7 +1,8 @@
 import { action } from "mobx";
 
-import { FilterLevels, LogsModel, LogsRobotModel } from "./model";
 import { RobotModel } from "../robot/model";
+
+import { FilterLevels, LogsModel, LogsRobotModel } from "./model";
 
 export class LogsController {
   private model: LogsModel;

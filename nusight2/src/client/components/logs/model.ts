@@ -1,8 +1,8 @@
 import { computed, observable } from "mobx";
 
 import { memoize } from "../../base/memoize";
-import { RobotModel } from "../robot/model";
 import { AppModel } from "../app/model";
+import { RobotModel } from "../robot/model";
 
 /** The log levels that NUsight supports */
 export type LogLevel = "unknown" | "trace" | "debug" | "info" | "warn" | "error" | "fatal";

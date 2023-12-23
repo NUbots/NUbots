@@ -1,11 +1,12 @@
 import React, { ComponentType, PropsWithChildren, useEffect } from "react";
 import { observer } from "mobx-react";
 
+import { Icon } from "../icon/view";
+import { RobotSelectorSingle } from "../robot_selector_single/view";
+
 import { LogsController } from "./controller";
 import { LogLevel, LogMessage, LogsModel, LogsRobotModel } from "./model";
 import { LogsNetwork } from "./network";
-import { Icon } from "../icon/view";
-import { RobotSelectorSingle } from "../robot_selector_single/view";
 
 export interface LogsViewProps {
   controller: LogsController;
