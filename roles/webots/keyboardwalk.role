@@ -23,7 +23,6 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
-  actuation::FootController
   # Skills
   skill::Walk
   skill::SplineKick

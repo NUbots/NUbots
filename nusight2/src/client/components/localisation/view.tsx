@@ -183,6 +183,18 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       })}
       <FieldLinePoints model={model} />
       <Balls model={model} />
+      {model.robots.map((robotModel) => {
+        const swingFootTrajectory = robotModel.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+        if (swingFootTrajectory.length > 0 && robotModel.visible) {
+          return <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} />;
+        }
+      })}
+      {model.robots.map((robotModel) => {
+        const torsoTrajectory = robotModel.rTFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+        if (torsoTrajectory.length > 0 && robotModel.visible) {
+          return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} />;
+        }
+      })}
     </object3D>
   );
 });
@@ -221,6 +233,33 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
     )}
   </>
 );
+
+const Trajectory = ({ trajectory }: { trajectory: THREE.Vector3[] }) => {
+  // Create ref
+  const trajectoryRef = React.useRef<THREE.Line>(null);
+
+  // React effect
+  React.useEffect(() => {
+    if (trajectoryRef.current) {
+      // Generate spline
+      const curve = new THREE.CatmullRomCurve3(trajectory);
+
+      // Get points
+      const points = curve.getPoints(50);
+
+      // Create the new line
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({ color: 0xff0000, linewidth: 10 });
+      const newTrajectory = new THREE.Line(geometry, material);
+
+      // Clear the old trajectory and add the new one
+      trajectoryRef.current?.clear();
+      trajectoryRef.current?.add(newTrajectory);
+    }
+  }, [trajectory]);
+
+  return <object3D ref={trajectoryRef} />;
+};
 
 const Robot = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);

@@ -35,9 +35,13 @@
 #include "message/actuation/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/math/control/pid.hpp"
 #include "utility/skill/WalkGenerator.hpp"
 
 namespace module::skill {
+
+    using utility::math::control::PID;
+    using utility::skill::WalkGenerator;
 
     class Walk : public ::extension::behaviour::BehaviourReactor {
 
@@ -55,13 +59,54 @@ namespace module::skill {
 
             /// @brief Desired arm positions while walking
             std::vector<std::pair<utility::input::ServoID, double>> arm_positions{};
+
+            /// @brief Walk engine parameters
+            utility::skill::WalkParameters<double> walk_generator_parameters{};
+
+            /// @brief P gain for the leg servos
+            double leg_servo_gain = 0.0;
+
+            /// @brief P gain for the arm servos
+            double arm_servo_gain = 0.0;
+
+            /// @brief Desired torso pitch
+            Eigen::Matrix<double, 1, 1> desired_torso_pitch = Eigen::Matrix<double, 1, 1>::Zero();
+
+            /// @brief Torso position controller PID gains
+            Eigen::Vector3d torso_pid_gains = Eigen::Vector3d::Zero();
+
+            /// @brief Torso anti-windup limits
+            Eigen::Vector2d torso_antiwindup = Eigen::Vector2d::Zero();
+
+            /// @brief Torso position exponential filter alpha
+            double torso_filter_alpha = 0.0;
+
+            /// @brief Torso pitch controller PID gains
+            Eigen::Vector3d pitch_pid_gains = Eigen::Vector3d::Zero();
+
+            /// @brief Torso pitch anti-windup limits
+            Eigen::Vector2d pitch_antiwindup = Eigen::Vector2d::Zero();
         } cfg;
 
         /// @brief Last time we updated the walk engine
         NUClear::clock::time_point last_update_time{};
 
         /// @brief Generates swing foot and torso trajectories for given walk velocity target
-        utility::skill::WalkGenerator<double> walk_generator{};
+        WalkGenerator<double> walk_generator{};
+
+        /// @brief Torso X-Y position PID controller
+        PID<double, 2> torso_controller{};
+
+        /// @brief Exponential filtered torso X-Y position position offset
+        Eigen::Vector2d filtered_torso_offset{};
+
+        /// @brief Torso pitch PID controller
+        utility::math::control::PID<double, 1> pitch_controller{};
+
+        /// @brief Compute torso position offset to keep the robot balanced
+        Eigen::Isometry3d compute_torso_offset(const Eigen::Isometry3d& Htp_desired,
+                                               const Eigen::Isometry3d& Htp_measured,
+                                               const double time_delta);
     };
 }  // namespace module::skill
 

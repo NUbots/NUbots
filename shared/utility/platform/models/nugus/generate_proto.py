@@ -162,7 +162,7 @@ filedata = filedata.replace(
     """
 EXTERNPROTO "JerseyBack.proto"
 EXTERNPROTO "JerseyFront.proto"
-PROTO nugus 
+PROTO nugus
 [
     field  SFVec3f     translation          0 0 0
     field  SFRotation  rotation             0 1 0 0
@@ -405,7 +405,7 @@ filedata = filedata.replace(
                                             # Bumper returns a 1 when collision is detected
                                             type "bumper"
                                           }
-                                          
+
                                           # Back left touch sensor on right foot
                                           TouchSensor {
                                             translation 0.0379995 0.0548465  -0.0867505

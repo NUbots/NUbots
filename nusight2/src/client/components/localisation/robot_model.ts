@@ -117,10 +117,13 @@ export class LocalisationRobotModel {
   @observable color?: string;
   @observable Htw: Matrix4; // World to torso
   @observable Hfw: Matrix4; // World to field
+  @observable Hwp: Matrix4; // Anchor point (planted foot) to world
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
+  @observable swingFootTrajectory: { rSPp: Vector3[] };
+  @observable torsoTrajectory: { rTPp: Vector3[] };
 
   constructor({
     model,
@@ -128,30 +131,39 @@ export class LocalisationRobotModel {
     color,
     Htw,
     Hfw,
+    Hwp,
     Rwt,
     motors,
     fieldLinePoints,
     ball,
+    swingFootTrajectory,
+    torsoTrajectory,
   }: {
     model: RobotModel;
     name: string;
     color?: string;
     Htw: Matrix4;
     Hfw: Matrix4;
+    Hwp: Matrix4;
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
+    swingFootTrajectory: { rSPp: Vector3[] };
+    torsoTrajectory: { rTPp: Vector3[] };
   }) {
     this.model = model;
     this.name = name;
     this.color = color;
     this.Htw = Htw;
     this.Hfw = Hfw;
+    this.Hwp = Hwp;
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
+    this.swingFootTrajectory = swingFootTrajectory;
+    this.torsoTrajectory = torsoTrajectory;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -160,9 +172,12 @@ export class LocalisationRobotModel {
       name: model.name,
       Htw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      Hwp: Matrix4.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
+      swingFootTrajectory: { rSPp: [] },
+      torsoTrajectory: { rTPp: [] },
     });
   });
 
@@ -180,6 +195,12 @@ export class LocalisationRobotModel {
     return this.Hfw.multiply(this.Htw.invert());
   }
 
+  /** Anchor point to field transformation */
+  @computed
+  get Hfp(): Matrix4 {
+    return this.Hfw.multiply(this.Hwp);
+  }
+
   /** Field line points in field space */
   @computed
   get rPFf(): Vector3[] {
@@ -191,4 +212,17 @@ export class LocalisationRobotModel {
   get rBFf(): Vector3 | undefined {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
   }
+
+  /** Swing foot trajectory in field space */
+  @computed
+  get rSFf(): Vector3[] {
+    return this.swingFootTrajectory.rSPp.map((rSPp) => rSPp.applyMatrix4(this.Hfp));
+  }
+
+  /** Torso trajectory in field space */
+  @computed
+  get rTFf(): Vector3[] {
+    return this.torsoTrajectory.rTPp.map((rTPp) => rTPp.applyMatrix4(this.Hfp));
+  }
+
 }
