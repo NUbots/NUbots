@@ -74,7 +74,19 @@ namespace module::localisation {
             /// @brief Initial covariance of the for the UKF filter
             BallModel<double>::StateVec initial_covariance;
 
+            /// @brief Acceptance radius for a ball measurement
+            double acceptance_radius = 0.0;
+
+            /// @brief Maximum number of detections of a ball not being accepted before it is accepted
+            int max_rejections = 0;
+
         } cfg;
+
+        /// @brief Rejection count
+        int rejection_count = 0;
+
+        /// @brief Whether or not this is the first time we have seen a ball
+        bool first_ball_seen = true;
 
         /// @brief The time of the last time update
         NUClear::clock::time_point last_time_update;
