@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "HardwareIO.hpp"
 
 #include <fmt/format.h>
@@ -21,6 +47,7 @@ namespace module::platform::OpenCR {
     using message::actuation::ServoTargets;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using utility::input::ServoID;
     using utility::support::Expression;
 
     using message::output::Buzzer;
@@ -45,21 +72,45 @@ namespace module::platform::OpenCR {
                     }
 
                     // Check what the hangup was
-                    bool packet_dropped = false;
+
+                    int num_packets_dropped        = 0;                 // keep track of how many we dropped
+                    NUgus::ID first_dropped_packet = NUgus::ID::NO_ID;  // keep track in case we have a chain
+
                     // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
                     // any packets, otherwise is the nonzero ID of the timed out device
                     for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
+
                         // Delete the packet we're waiting on
                         packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
-                        // Set flag
-                        packet_dropped = true;
+
+                        // notify with ID and servo name
+                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
+                                                       int(dropout_id),
+                                                       nugus.device_name(dropout_id)));
+
+                        // if this is the first packet, set our flag
+                        if (num_packets_dropped == 0) {
+                            first_dropped_packet = dropout_id;
+                        }
+
+                        // increment our counter
+                        num_packets_dropped++;
+                    }
+
+                    // if this is the first packet then send a warning
+                    if (num_packets_dropped > 1) {
+                        log<NUClear::WARN>(
+                            fmt::format("NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE "
+                                        "chain will cause all later packets (of higher ID) to be dropped. Consider "
+                                        "checking cables for ID {} ({})",
+                                        int(first_dropped_packet),
+                                        nugus.device_name(first_dropped_packet)));
                     }
 
                     // Send a request for all servo packets, only if there were packets dropped
                     // In case the system stops for some other reason, we don't want the watchdog
                     // to make it automatically restart
-                    if (packet_dropped) {
+                    if (num_packets_dropped > 0) {
                         log<NUClear::WARN>("Requesting servo packets to restart system");
                         send_servo_request();
                     }
@@ -81,12 +132,7 @@ namespace module::platform::OpenCR {
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Make sure OpenCR is operating at the correct baud rate (based on config params)
-            if (opencr.connected()) {
-                opencr.close();
-            }
-
-            opencr.open(config["opencr"]["device"], config["opencr"]["baud"]);
+            opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
             byte_wait   = config["opencr"]["byte_wait"];
             packet_wait = config["opencr"]["packet_wait"];
 
@@ -107,8 +153,14 @@ namespace module::platform::OpenCR {
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
 
+            // populate alarm config levels
             cfg.alarms.temperature.level            = config["alarms"]["temperature"]["level"].as<float>();
             cfg.alarms.temperature.buzzer_frequency = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
+
+            // populate battery config levels
+            battery_state.charged_voltage = config["battery"]["charged_voltage"].as<float>();
+            battery_state.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
+            battery_state.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
@@ -179,6 +231,7 @@ namespace module::platform::OpenCR {
 
                         // Stop the model watchdog since we have it now
                         // Start the packet watchdog since the main loop is now starting
+                        model_watchdog.disable();
                         model_watchdog.unbind();
                         log<NUClear::WARN>("Packet watchdog enabled");
                         packet_watchdog.enable();

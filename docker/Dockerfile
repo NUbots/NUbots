@@ -1,3 +1,30 @@
+##
+## MIT License
+##
+## Copyright (c) 2019 NUbots
+##
+## This file is part of the NUbots codebase.
+## See https://github.com/NUbots/NUbots for further info.
+##
+## Permission is hereby granted, free of charge, to any person obtaining a copy
+## of this software and associated documentation files (the "Software"), to deal
+## in the Software without restriction, including without limitation the rights
+## to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+## copies of the Software, and to permit persons to whom the Software is
+## furnished to do so, subject to the following conditions:
+##
+## The above copyright notice and this permission notice shall be included in all
+## copies or substantial portions of the Software.
+##
+## THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+## IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+## FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+## AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+## LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+## OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+## SOFTWARE.
+##
+
 # syntax=docker/dockerfile:1.3
 # For information on "RUN --mount ..." syntax
 # See https://github.com/moby/buildkit/blob/master/frontend/dockerfile/docs/syntax.md
@@ -264,7 +291,7 @@ RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/e682ea6224bee18034bed24d37403ca922c421e7.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/f6704a1f049c7a30e1b92f4cd70af219d28a4697.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
@@ -276,6 +303,7 @@ RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/8
 # Alsa and espeak
 RUN install-from-source https://github.com/alsa-project/alsa-lib/archive/refs/tags/v1.2.7.2.tar.gz \
     --without-debug
+RUN install-package alsa-utils
 RUN install-from-source https://github.com/espeak-ng/pcaudiolib/releases/download/1.2/pcaudiolib-1.2.tar.gz
 # Need to run ldconfig before building eSpeak because ...... ¯\_(ツ)_/¯
 RUN ldconfig && \
@@ -302,18 +330,30 @@ RUN install-from-source https://github.com/NUbots/VisualMesh/archive/64c49fce3a1
 # JSON for modern C++ (https://github.com/nlohmann/json)
 RUN install-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
 
+# TinyXML
+RUN install-from-source https://github.com/leethomason/tinyxml2/archive/refs/tags/9.0.0.tar.gz
+
+# NLopt
+RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7.1.tar.gz
+
+# tinyrobotics
+RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
+    -DBUILD_TESTS=OFF
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
 # Install python libraries
 RUN pip install \
+    pygit2==1.13.3 \
     xxhash \
     pylint \
     termcolor \
     stringcase \
     Pillow \
     protobuf==4.21.2 \
+    mycroft-mimic3-tts \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
@@ -326,7 +366,8 @@ RUN install-package \
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.10.1 \
-    black==22.6.0
+    black==22.6.0 \
+    licenseheaders==0.8.8
 
 RUN install-package \
     yarn \

@@ -27,13 +27,13 @@ jobs:
     # Run once for each of the platforms
     strategy:
       matrix:
-        platform: ["generic", "nuc8i7beh", "nuc7i7bnh", "nuc12wshi7"]
+        platform: ["generic", "nuc12wshi7"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Setup docker buildx
       - name: 🐳 Set up docker buildx 🐳

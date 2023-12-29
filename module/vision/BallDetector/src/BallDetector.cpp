@@ -1,20 +1,28 @@
 /*
- * This file is part of NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2014 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2022 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "BallDetector.hpp"
@@ -58,12 +66,12 @@ namespace module::vision {
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.confidence_threshold  = config["confidence_threshold"].as<float>();
+            cfg.confidence_threshold  = config["confidence_threshold"].as<double>();
             cfg.cluster_points        = config["cluster_points"].as<int>();
-            cfg.minimum_ball_distance = config["minimum_ball_distance"].as<float>();
-            cfg.distance_disagreement = config["distance_disagreement"].as<float>();
-            cfg.maximum_deviation     = config["maximum_deviation"].as<float>();
-            cfg.ball_angular_cov      = Eigen::Vector3f(config["ball_angular_cov"].as<Expression>());
+            cfg.minimum_ball_distance = config["minimum_ball_distance"].as<double>();
+            cfg.distance_disagreement = config["distance_disagreement"].as<double>();
+            cfg.maximum_deviation     = config["maximum_deviation"].as<double>();
+            cfg.ball_angular_cov      = Eigen::Vector3d(config["ball_angular_cov"].as<Expression>());
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
@@ -73,8 +81,8 @@ namespace module::vision {
                 const auto& cls        = horizon.mesh->classifications;
                 const auto& neighbours = horizon.mesh->neighbourhood;
                 // Unit vectors from camera to a point in the mesh, in world space
-                const Eigen::Matrix<float, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays;
-                const int BALL_INDEX                                = horizon.class_map.at("ball");
+                const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays.cast<double>();
+                const int BALL_INDEX                                 = horizon.class_map.at("ball");
 
                 // PARTITION INDICES AND CLUSTER
 
@@ -116,13 +124,8 @@ namespace module::vision {
 
                 // Partition the clusters such that clusters above the green horizons are removed,
                 // and then resize the vector to remove them
-                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters.begin(),
-                                                                                            clusters.end(),
-                                                                                            horizon.horizon.begin(),
-                                                                                            horizon.horizon.end(),
-                                                                                            uPCw,
-                                                                                            false,
-                                                                                            true);
+                auto green_boundary =
+                    utility::vision::visualmesh::check_green_horizon_side(clusters, horizon.horizon, uPCw, false, true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
@@ -146,7 +149,7 @@ namespace module::vision {
                 balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
 
                 // World to camera transform, to be used in for loop below
-                const Eigen::Isometry3f Hcw(horizon.Hcw.cast<float>());
+                const Eigen::Isometry3d Hcw(horizon.Hcw.cast<double>());
 
                 // CHECK EACH CLUSTER FOR VALID BALL
                 for (auto& cluster : clusters) {
@@ -156,7 +159,7 @@ namespace module::vision {
                     // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find
                     // an average vector, which represents the central cone axis
                     // uBCw: unit vector from camera to ball central axis in world space
-                    Eigen::Vector3f uBCw = Eigen::Vector3f::Zero();
+                    Eigen::Vector3d uBCw = Eigen::Vector3d::Zero();
                     for (const auto& idx : cluster) {
                         uBCw += uPCw.col(idx);
                     }
@@ -167,10 +170,10 @@ namespace module::vision {
                     // largest angular radius possible from the edge points available. Equal to cos(theta), where theta
                     // is the angle between the central ball axis (uBCw) and the edge of the ball. This helps to find
                     // the approximate distance to the ball.
-                    float radius = 1.0f;
+                    double radius = 1.0;
                     for (const auto& idx : cluster) {
                         // Unit vector from the camera to the ball edge, in world space
-                        const Eigen::Vector3f& uECw(uPCw.col(idx));
+                        const Eigen::Vector3d& uECw(uPCw.col(idx));
                         // Find the vector that gives the largest angle between the central axis and ball edge
                         // Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.
                         radius = uBCw.dot(uECw) < radius ? uBCw.dot(uECw) : radius;
@@ -196,7 +199,7 @@ namespace module::vision {
                     //      distance = (field.ball_radius) / (sin(arccos(radius)))
                     // Using sin(arccos(x)) = sqrt(1 - x^2)
                     //      distance = field.ball_radius / sqrt(1 - radius^2)
-                    const float angular_distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
+                    const double angular_distance = field.ball_radius / std::sqrt(1.0 - radius * radius);
                     // Convert uBCc into a position vector (rBCc) and then convert it into Spherical Reciprocal
                     // Coordinates (1/distance, phi, theta)
                     b.measurements.emplace_back();
@@ -214,7 +217,7 @@ namespace module::vision {
                     //      Point on line: (0, 0, 0)
                     // Since the plane normal zeros out x and y, only consider z
                     // rWCw = -Hcw.inverse().translation().z()
-                    const float projection_distance = (field.ball_radius - Hcw.inverse().translation().z()) / uBCw.z();
+                    const double projection_distance = (field.ball_radius - Hcw.inverse().translation().z()) / uBCw.z();
                     // Create a ball measurement message for this calculation
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::PROJECTION;
@@ -232,24 +235,24 @@ namespace module::vision {
                     log<NUClear::DEBUG>("*                    THROWOUTS                   *");
                     log<NUClear::DEBUG>("**************************************************");
                     bool keep = true;
-                    b.colour.fill(1.0f);  // a valid ball has a white colour in NUsight
+                    b.colour.fill(1.0);  // a valid ball has a white colour in NUsight
 
                     // DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE - CALCULATE DEGREE OF FIT TO CIRCLE
                     // Degree of fit defined as the standard deviation of angle between every rays on the
                     // cluster / and the cone axis (uBCw). If the standard deviation exceeds a given threshold then
                     // it is a bad fit
-                    std::vector<float> angles;
-                    float mean             = 0.0f;
-                    const float max_radius = std::acos(radius);  // largest angle between vectors
+                    std::vector<double> angles;
+                    double mean             = 0.0;
+                    const double max_radius = std::acos(radius);  // largest angle between vectors
                     // Get mean of all the angles in the cluster to then find the standard deviation
                     for (const auto& idx : cluster) {
-                        const float angle = std::acos(uBCw.dot(uPCw.col(idx))) / max_radius;
+                        const double angle = std::acos(uBCw.dot(uPCw.col(idx))) / max_radius;
                         angles.emplace_back(angle);
                         mean += angle;
                     }
                     mean /= angles.size();
                     // Calculate standard deviation of angles in cluster
-                    float deviation = 0.0f;
+                    double deviation = 0.0;
                     for (const auto& angle : angles) {
                         deviation += (mean - angle) * (mean - angle);
                     }
@@ -263,12 +266,12 @@ namespace module::vision {
                                                         cfg.maximum_deviation));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate degree of fit will show as green in NUsight
-                        b.colour = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
+                        b.colour = keep ? message::conversion::math::vec4(0.0, 1.0, 0.0, 1.0) : b.colour;
                         keep     = false;
                     }
 
                     // DISCARD IF PROJECTION_DISTANCE AND ANGULAR_DISTANCE ARE TOO FAR APART
-                    const float max_distance = std::max(projection_distance, angular_distance);
+                    const double max_distance = std::max(projection_distance, angular_distance);
 
                     if ((std::abs(projection_distance - angular_distance) / max_distance) > cfg.distance_disagreement) {
 
@@ -279,7 +282,7 @@ namespace module::vision {
                                         projection_distance));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as blue in NUsight
-                        b.colour = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                        b.colour = keep ? message::conversion::math::vec4(0.0, 0.0, 1.0, 1.0) : b.colour;
                         keep     = false;
                     }
 
@@ -292,7 +295,7 @@ namespace module::vision {
                                                         cfg.minimum_ball_distance));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as red in NUsight
-                        b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
+                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 0.0, 1.0) : b.colour;
                         keep     = false;
                     }
 
@@ -306,7 +309,7 @@ namespace module::vision {
                                         field.dimensions.field_length));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as yellow in NUsight
-                        b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                        b.colour = keep ? message::conversion::math::vec4(1.0, 0.0, 1.0, 1.0) : b.colour;
                         keep     = false;
                     }
 
@@ -332,15 +335,15 @@ namespace module::vision {
                     }
 
                     if (horizon.vision_ground_truth.exists) {
-                        Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+                        Eigen::Affine3d Hcw(horizon.Hcw);
 
-                        const Eigen::Vector3f rBCc = Hcw * horizon.vision_ground_truth.rBWw;
-                        const Eigen::Vector3f rBWw = horizon.vision_ground_truth.rBWw;
+                        const Eigen::Vector3d rBCc = Hcw * horizon.vision_ground_truth.rBWw.cast<double>();
+                        const Eigen::Vector3d rBWw = horizon.vision_ground_truth.rBWw.cast<double>();
 
-                        Eigen::Vector3f ball_position_projection = uBCw * projection_distance;
-                        Eigen::Vector3f ball_position_angular    = uBCw * angular_distance;
-                        Eigen::Vector3f ball_error_projection    = (ball_position_projection - rBCc).cwiseAbs();
-                        Eigen::Vector3f ball_error_angular       = (ball_position_angular - rBCc).cwiseAbs();
+                        Eigen::Vector3d ball_position_projection = uBCw * projection_distance;
+                        Eigen::Vector3d ball_position_angular    = uBCw * angular_distance;
+                        Eigen::Vector3d ball_error_projection    = (ball_position_projection - rBCc).cwiseAbs();
+                        Eigen::Vector3d ball_error_angular       = (ball_position_angular - rBCc).cwiseAbs();
 
                         emit(graph("True rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
                         emit(graph("True rBWw", rBWw.x(), rBWw.y(), rBWw.z()));

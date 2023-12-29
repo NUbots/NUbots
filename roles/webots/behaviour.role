@@ -7,10 +7,11 @@ nuclear_role(
   support::configuration::SoccerConfig
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
-  # Network
-  network::PlotJuggler
+  # NUsight
   network::NUClearNet
   network::NetworkForwarder
+  output::Overview
+  output::ImageCompressor
   # Sensors
   input::GameController
   input::SensorFilter
@@ -35,6 +36,7 @@ nuclear_role(
   skill::GetUp
   skill::Look
   skill::Dive
+  skill::Say
   # Planners
   planning::PlanWalkPath
   planning::PlanLook
