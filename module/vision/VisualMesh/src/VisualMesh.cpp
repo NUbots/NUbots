@@ -116,7 +116,8 @@ namespace module::vision {
                             Eigen::Vector3f Hwc_translation = Hcw.inverse().cast<float>().translation();
 
                             // Use Eigen's operations to perform the calculations on the entire matrix at once
-                            // rPCw * (abs(rCWw.z) / rPCw.z) + rCWw
+                            // Full vector assuming the point is on the ground/observation plane
+                            // rPCw * abs(rCWw.z) / rPCw.z) + rCWw
                             rPWw =
                                 (result.rays.array()
                                  * (Hwc_translation.z() / result.rays.row(2).replicate(1, result.rays.cols()).array())
