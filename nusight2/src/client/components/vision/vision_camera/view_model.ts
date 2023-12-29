@@ -5,6 +5,7 @@ import { VisionRobotModel } from "../model";
 
 import { BallsViewModel } from "./balls";
 import { GoalsViewModel } from "./goals";
+import { OtherRobotsViewModel } from "./other_robots";
 import { GreenHorizonViewModel } from "./green_horizon";
 import { VisionCameraModel } from "./model";
 import { VisualMeshViewModel } from "./visual_mesh";
@@ -25,6 +26,7 @@ export class VisionCameraViewModel extends CameraViewModel {
       drawOptions.drawGreenHorizon && this.greenHorizon?.greenHorizon(),
       drawOptions.drawBalls && this.balls?.balls(),
       drawOptions.drawGoals && this.goals?.goals(),
+      drawOptions.drawRobots && this.robots?.robots(),
     ];
   };
 
@@ -50,6 +52,13 @@ export class VisionCameraViewModel extends CameraViewModel {
   private get goals(): GoalsViewModel | undefined {
     return (
       this.model.goals && GoalsViewModel.of(this.model.goals, this.model.params, this.canvas, this.imageAspectRatio)
+    );
+  }
+
+  @computed
+  private get robots(): OtherRobotsViewModel | undefined {
+    return (
+      this.model.robots && OtherRobotsViewModel.of(this.model.robots, this.model.params, this.canvas, this.imageAspectRatio)
     );
   }
 
