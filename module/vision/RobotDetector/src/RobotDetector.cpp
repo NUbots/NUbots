@@ -59,10 +59,8 @@ namespace module::vision {
             const auto& cls        = horizon.mesh->classifications;
             const auto& neighbours = horizon.mesh->neighbourhood;
             // Unit vectors from camera to a point in the mesh, in world space
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw;
-            const int ROBOT_INDEX                               = horizon.class_map.at("robot");
-
-            // PARTITION INDICES AND CLUSTER
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw.cast<double>();
+            const int ROBOT_INDEX                                = horizon.class_map.at("robot");
 
             // Get indices to partition
             std::vector<int> indices(horizon.mesh->indices.size());
@@ -89,14 +87,13 @@ namespace module::vision {
             for (auto& cluster : clusters) {
                 auto boundary =
                     utility::vision::visualmesh::boundary_points(cluster.begin(), cluster.end(), neighbours, is_robot);
+                cluster.resize(std::distance(cluster.begin(), boundary));
             }
 
-            // Partition the clusters such that clusters above the green horizons are removed,
-            // and then resize the vector to remove them
-            auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters.begin(),
-                                                                                        clusters.end(),
-                                                                                        horizon.horizon.begin(),
-                                                                                        horizon.horizon.end(),
+            // Partition the clusters such that clusters outside the hull are removed, but the ones that are inside or
+            // intersect are kept
+            auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
+                                                                                        horizon.horizon,
                                                                                         rPWw,
                                                                                         false,
                                                                                         true,
@@ -112,83 +109,40 @@ namespace module::vision {
             robots->Hcw       = horizon.mesh->Hcw;
 
             // World to camera transform, to be used in for loop below
-            const Eigen::Isometry3d Hcw(horizon.Hcw);
+            const Eigen::Isometry3d Hwc(horizon.Hcw.inverse());
 
             // Process each robot cluster, and emit a message with each
             for (const auto& cluster : clusters) {
                 // Create the robot message - only add to robots when confirmed to be okay
-                auto robot = std::make_unique<Robot>();
+                Robot robot;
 
-                // The lowest point on the robot cluster will be at the base of the robot, at its feet. This can be
-                // used to determine the distance, by intersecting the camera vector with the ground plane
+                // We assume the closest point to the camera is the base of the detected robot
+                // Compare with rPCw
+                auto closest_element =
+                    std::min_element(cluster.begin(), cluster.end(), [&](const int& a, const int& b) {
+                        return (rPWw.col(a) - Hwc.translation()).norm() < (rPWw.col(b) - Hwc.translation()).norm();
+                    });
 
-                // Find the lowest point in the cluster, camera to lowest in world space
-                auto uLCw = std::min_element(cluster.begin(), cluster.end(), [&](const int& a, const int& b) {
-                    return uPCw(2, a) < uPCw(2, b);
-                });
+                // Transform the point so it is from the camera
+                robot.rRCc = horizon.Hcw * rPWw.col(*closest_element);
 
-                // Projection-based distance
-                // Given a flat X-Y plane on the ground, find the point where the lowest point of the robot (uLCw)
-                // intersects with this plane. Get the distance from the camera to this point.
-                // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
-                //      Plane normal: (0, 0, 1)
-                //      Point on plane: (0, 0, rWCw.z())
-                //      Line direction: uLCw
-                //      Point on line: (0, 0, 0)
-                // Since the plane normal zeros out x and y, only consider z
-                // rWCw = -Hcw.inverse().translation().z()
-                const double projection_distance = -Hcw.inverse().translation().z() / uLCw.z();
-
-                // This should be the center middle, not the lowest point
-                robot->rRCc  = Hcw.linear() * (uLCw * projection_distance);
-                robot->srRCc = cartesianToReciprocalSpherical(robot->rRCc);
-
-                // Robots that are too close are unlikely to be other robots
-                if (projection_distance < cfg.minimum_robot_distance) {
+                // Robots that are too close to us are unlikely to be other robots
+                if (robot.rRCc.norm() < cfg.minimum_robot_distance) {
                     log<NUClear::DEBUG>(fmt::format("Cluster rejected due to distance: {}. Min allowed distance {}.",
-                                                    projection_distance,
+                                                    robot.rRCc.norm(),
                                                     cfg.minimum_robot_distance));
                     continue;
                 }
 
-                // Find highest point in the cluster, camera to highest in world space
-                auto uHCw = std::max_element(cluster.begin(), cluster.end(), [&](const int& a, const int& b) {
-                    return uPCw(2, a) < uPCw(2, b);
-                });
-
-                // Find the distance between the highest and lowest points
-                const float robot_height = (uHCw - uLCw).norm() * projection_distance;
-
-                // Robots have to be within height bounds for the league - test that this cluster is a legitimate
-                // robot height
-                if (robot_height < cfg.minimum_robot_height || robot_height > cfg.maximum_robot_height) {
-                    log<NUClear::DEBUG>(
-                        fmt::format("Cluster rejected due to height: {}. Max allowed height {}, min allowed height {}.",
-                                    robot_height,
-                                    cfg.maximum_robot_height,
-                                    cfg.minimum_robot_height));
-                    continue;
-                }
-
-                // Find the leftmost and rightmost points on the robot and determine the width of the robot
-                auto uLLCw = std::min_element(cluster.begin(), cluster.end(), [&](const int& a, const int& b) {
-                    return uPCw(0, a) < uPCw(0, b);
-                });
-                auto uRRCw = std::max_element(cluster.begin(), cluster.end(), [&](const int& a, const int& b) {
-                    return uPCw(0, a) < uPCw(0, b);
-                });
-
-                // Find the width of the robot using only the x and y values of the vectors
-                robot->width = (uRRCw.head<2>() - uLLCw.head<2>()).norm() * projection_distance;
-
                 // Should be changed to the average confidence of the robot
-                robot->covariance = Eigen::Matrix3f::Ones();
+                robot.covariance = Eigen::Matrix3d::Ones();
+                robot.radius     = 0.05;
                 robots->robots.push_back(std::move(robot));
             }
 
             log<NUClear::DEBUG>(fmt::format("Found {} robots", robots->robots.size()));
 
-            emit(std::move(robots));
+            emit(robots);
         });
     }
 }  // namespace module::vision

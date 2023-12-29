@@ -29,13 +29,10 @@
  message Robot {
     /// Vector from the camera to the point on the robot's feet, most in the center of the robot
     vec3 rRCc = 1;
-    /// Approximate width of the robot, in meters
-    double width = 2;
-    /// Spherical Reciprocal Coordinates (1/distance, phi, theta)
-    /// Gives a better representation of the error of the measurement, since error comes from the angular position
-    vec3 srRCc = 3;
     /// Confidence of this measurement, for localisation
-    mat3 covariance = 4;
+    mat3 covariance = 2;
+    /// Radius of the robot
+    double radius = 3;
  }
  message Robots {
      /// ID of the camera that took the image containing the robots
@@ -45,5 +42,5 @@
      /// Isometry3d transform from world space to camera space at the time that the image was taken
      iso3 Hcw = 3;
      /// Could be empty, if there were no robots detected in the image
-     repeated Robots robots = 4;
+     repeated Robot robots = 4;
  }
