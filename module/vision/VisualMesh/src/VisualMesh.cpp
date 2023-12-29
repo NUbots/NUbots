@@ -111,16 +111,18 @@ namespace module::vision {
                         else {
                             // Convert rays to world space
                             Eigen::Matrix<float, 3, Eigen::Dynamic> rPWw(3, result.rays.cols());
-                            Eigen::Isometry3f Hwc = Hcw.inverse().cast<float>();
 
-                            // Compute these values once outside the loop
-                            Eigen::Vector3f Hwc_translation = Hwc.translation();
+                            // Compute once before to improve computational speed in next line
+                            Eigen::Vector3f Hwc_translation = Hcw.inverse().cast<float>().translation();
 
                             // Use Eigen's operations to perform the calculations on the entire matrix at once
-                            rPWw = (result.rays.array() * Hwc_translation.z()
-                                    / result.rays.row(2).replicate(1, result.rays.cols()).array())
-                                       .matrix()
-                                   + Hwc_translation.replicate(1, result.rays.cols());
+                            // rPCw * (abs(rCWw.z) / rPCw.z) + rCWw
+                            rPWw =
+                                (result.rays.array()
+                                 * (Hwc_translation.z() / result.rays.row(2).replicate(1, result.rays.cols()).array())
+                                       .abs())
+                                    .matrix()
+                                + Hwc_translation.replicate(1, result.rays.cols());
 
                             // Move stuff into the emit message
                             auto msg             = std::make_unique<message::vision::VisualMesh>();

@@ -61,6 +61,7 @@ namespace module::vision {
             const auto& cls                                      = horizon.mesh->classifications;
             const auto& neighbours                               = horizon.mesh->neighbourhood;
             const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw.cast<double>();
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->uPCw.cast<double>();
             const int LINE_INDEX                                 = horizon.class_map.at("line");
 
             // PARTITION INDICES AND CLUSTER
@@ -104,6 +105,7 @@ namespace module::vision {
 
             for (auto& cluster : clusters) {
                 for (const auto& idx : cluster) {
+                    lines->points.push_back(uPCw.col(idx));
                     lines->rPWw.push_back(rPWw.col(idx));
                 }
             }
