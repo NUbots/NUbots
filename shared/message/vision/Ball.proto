@@ -44,7 +44,7 @@ message Ball {
     /// and the certainty of the measurement
     message Measurement {
         MeasurementType type = 1;
-        vec3 rBCc = 2;
+        vec3            rBCc = 2;
         /// Confidence of this measurement, for localisation
         mat3 covariance = 3;
     }

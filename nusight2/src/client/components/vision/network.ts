@@ -109,7 +109,11 @@ export class VisionNetwork {
         axis: Vector3.from(ball.uBCc),
         radius: ball.radius!,
       },
-      distance: Math.hypot(ball.measurements?.[0].rBCc?.x!, ball.measurements?.[0].rBCc?.y!, ball.measurements?.[0].rBCc?.z!),
+      distance: Math.hypot(
+        ball.measurements?.[0].rBCc?.x!,
+        ball.measurements?.[0].rBCc?.y!,
+        ball.measurements?.[0].rBCc?.z!,
+      ),
       colour: Vector4.from(ball.colour),
     }));
   }
