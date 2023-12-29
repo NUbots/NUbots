@@ -53,22 +53,24 @@ namespace module::vision {
                 cv::Rect box     = detection.box;
                 cv::Scalar color = detection.color;
 
-                // Detection box
-                cv::rectangle(frame, box, color, 2);
+                // Detection box with thinner line
+                cv::rectangle(frame, box, color, 1);  // Thickness reduced to 1
 
-                // Detection box text
+                // Detection box text with smaller font
                 std::string classString = detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4);
-                cv::Size textSize       = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 1, 1, 0);
-                cv::Rect textBox(box.x, box.y - 40, textSize.width + 10, textSize.height + 20);
+                float fontScale         = 0.5;  // Reduced font scale
+                int thickness           = 1;    // Thickness for text, can be reduced if needed
+                cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, fontScale, thickness, 0);
+                cv::Rect textBox(box.x, box.y - 20, textSize.width + 10, textSize.height + 10);  // Adjusted size
 
                 cv::rectangle(frame, textBox, color, cv::FILLED);
                 cv::putText(frame,
                             classString,
                             cv::Point(box.x + 5, box.y - 10),
                             cv::FONT_HERSHEY_DUPLEX,
-                            1,
+                            fontScale,
                             cv::Scalar(0, 0, 0),
-                            1,
+                            thickness,
                             0);
             }
 
