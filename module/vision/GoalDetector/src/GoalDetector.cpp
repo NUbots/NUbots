@@ -77,7 +77,8 @@ namespace module::vision {
                 // Convenience variables
                 const auto& cls                                      = horizon.mesh->classifications;
                 const auto& neighbours                               = horizon.mesh->neighbourhood;
-                const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays = horizon.mesh->rays.cast<double>();
+                const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->uPCw.cast<double>();
+                const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw.cast<double>();
                 const double world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
                 const int GOAL_INDEX                                 = horizon.class_map.at("goal");
 
@@ -118,7 +119,7 @@ namespace module::vision {
 
                 auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
                                                                                             horizon.horizon,
-                                                                                            rays,
+                                                                                            rPWw,
                                                                                             false,
                                                                                             false,
                                                                                             true);
@@ -129,22 +130,22 @@ namespace module::vision {
                 // Find overlapping clusters and merge them
                 for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
                     // Get the largest and smallest theta values
-                    auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const int& a, const int& b) {
-                        return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
+                    auto range_a = std::minmax_element(it->begin(), it->end(), [&uPCw](const int& a, const int& b) {
+                        return std::atan2(uPCw(1, a), uPCw(0, a)) < std::atan2(uPCw(1, b), uPCw(0, b));
                     });
 
-                    const double min_a = std::atan2(rays(1, *range_a.first), rays(0, *range_a.first));
-                    const double max_a = std::atan2(rays(1, *range_a.second), rays(0, *range_a.second));
+                    const double min_a = std::atan2(uPCw(1, *range_a.first), uPCw(0, *range_a.first));
+                    const double max_a = std::atan2(uPCw(1, *range_a.second), uPCw(0, *range_a.second));
 
                     for (auto it2 = std::next(it); it2 != clusters.end();) {
                         // Get the largest and smallest theta values
                         auto range_b =
-                            std::minmax_element(it2->begin(), it2->end(), [&rays](const int& a, const int& b) {
-                                return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
+                            std::minmax_element(it2->begin(), it2->end(), [&uPCw](const int& a, const int& b) {
+                                return std::atan2(uPCw(1, a), uPCw(0, a)) < std::atan2(uPCw(1, b), uPCw(0, b));
                             });
 
-                        const double min_b = std::atan2(rays(1, *range_b.first), rays(0, *range_b.first));
-                        const double max_b = std::atan2(rays(1, *range_b.second), rays(0, *range_b.second));
+                        const double min_b = std::atan2(uPCw(1, *range_b.first), uPCw(0, *range_b.first));
+                        const double max_b = std::atan2(uPCw(1, *range_b.second), uPCw(0, *range_b.second));
 
                         // The clusters are overlapping, merge them
                         if (((min_a <= min_b) && (min_b <= max_a)) || ((min_b <= min_a) && (min_a <= max_b))) {
@@ -205,13 +206,13 @@ namespace module::vision {
 
                             // Find the median of the left side and the right side
                             if (config.use_median) {
-                                utility::math::geometry::sort_by_theta(cluster.begin(), right, rays, world_offset);
-                                utility::math::geometry::sort_by_theta(right, other, rays, world_offset);
+                                utility::math::geometry::sort_by_theta(cluster.begin(), right, uPCw, world_offset);
+                                utility::math::geometry::sort_by_theta(right, other, uPCw, world_offset);
                                 left_side =
-                                    rays.col(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
-                                right_side = rays.col(*std::next(right, std::distance(right, other) / 2));
+                                    uPCw.col(*std::next(cluster.begin(), std::distance(cluster.begin(), right) / 2));
+                                right_side = uPCw.col(*std::next(right, std::distance(right, other) / 2));
                                 for (auto it = cluster.begin(); it != cluster.end(); it = std::next(it)) {
-                                    const Eigen::Vector3d& p0(rays.col(*it));
+                                    const Eigen::Vector3d& p0(uPCw.col(*it));
                                     if (p0.z() < bottom_point.z()) {
                                         bottom_point = p0;
                                     }
@@ -221,21 +222,21 @@ namespace module::vision {
                             else {
                                 // Calculate average of left_xy and right_xy and find lowest z point
                                 for (auto it = cluster.begin(); it != right; it = std::next(it)) {
-                                    const Eigen::Vector3d& p0(rays.col(*it));
+                                    const Eigen::Vector3d& p0(uPCw.col(*it));
                                     left_side += p0;
                                     if (p0.z() < bottom_point.z()) {
                                         bottom_point = p0;
                                     }
                                 }
                                 for (auto it = right; it != other; it = std::next(it)) {
-                                    const Eigen::Vector3d& p0(rays.col(*it));
+                                    const Eigen::Vector3d& p0(uPCw.col(*it));
                                     right_side += p0;
                                     if (p0.z() < bottom_point.z()) {
                                         bottom_point = p0;
                                     }
                                 }
                                 for (auto it = other; it != cluster.end(); it = std::next(it)) {
-                                    const Eigen::Vector3d& p0(rays.col(*it));
+                                    const Eigen::Vector3d& p0(uPCw.col(*it));
                                     if (p0.z() < bottom_point.z()) {
                                         bottom_point = p0;
                                     }
