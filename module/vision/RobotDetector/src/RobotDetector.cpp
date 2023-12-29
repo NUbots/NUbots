@@ -59,7 +59,7 @@ namespace module::vision {
             const auto& cls        = horizon.mesh->classifications;
             const auto& neighbours = horizon.mesh->neighbourhood;
             // Unit vectors from camera to a point in the mesh, in world space
-            const Eigen::Matrix<float, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays;
+            const Eigen::Matrix<float, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw;
             const int ROBOT_INDEX                               = horizon.class_map.at("robot");
 
             // PARTITION INDICES AND CLUSTER
@@ -68,29 +68,14 @@ namespace module::vision {
             std::vector<int> indices(horizon.mesh->indices.size());
             std::iota(indices.begin(), indices.end(), 0);
 
-            // Partition the indices such that the robot points that have robot points surrounding them are removed,
-            // and then resize the vector to remove those points
-            auto boundary = utility::vision::visualmesh::partition_points(
-                indices.begin(),
-                indices.end(),
-                neighbours,
-                [&](const int& idx) {
-                    return idx == int(indices.size()) || (cls(ROBOT_INDEX, idx) >= cfg.confidence_threshold);
-                });
-            indices.resize(std::distance(indices.begin(), boundary));
+            // Set up the check for if a point is a robot point
+            auto is_robot = [&](const int& idx) { return cls(ROBOT_INDEX, idx) >= cfg.confidence_threshold; };
 
-            log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
+            // Partition the indices such that we only have the robot points
+            auto robot_points = std::partition(indices.begin(), indices.end(), is_robot);
+            indices.resize(std::distance(indices.begin(), robot_points));
 
-            // Cluster all points into robot candidates
-            // Points are clustered based on their connectivity to other robot points
-            // Clustering is down in two steps
-            // 1) Take the set of robot points found above and partition them into potential clusters by
-            //    a) Add the first point and its robot neighbours to a cluster
-            //    b) Find all other robot points who are neighbours of the points in the cluster
-            //    c) Partition all of the indices that are in the cluster
-            //    d) Repeat a-c for all points that were not partitioned
-            //    e) Delete all partitions smaller than a given threshold
-            // 2) Discard all clusters are entirely above the green horizon
+            // Cluster the points, assuming each cluster is a robot
             std::vector<std::vector<int>> clusters;
             utility::vision::visualmesh::cluster_points(indices.begin(),
                                                         indices.end(),
@@ -100,14 +85,21 @@ namespace module::vision {
 
             log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
+            // Get only the boundary of each cluster
+            for (auto& cluster : clusters) {
+                auto boundary =
+                    utility::vision::visualmesh::boundary_points(cluster.begin(), cluster.end(), neighbours, is_robot);
+            }
+
             // Partition the clusters such that clusters above the green horizons are removed,
             // and then resize the vector to remove them
             auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters.begin(),
                                                                                         clusters.end(),
                                                                                         horizon.horizon.begin(),
                                                                                         horizon.horizon.end(),
-                                                                                        uPCw,
+                                                                                        rPWw,
                                                                                         false,
+                                                                                        true,
                                                                                         true);
             clusters.resize(std::distance(clusters.begin(), green_boundary));
 
