@@ -124,8 +124,12 @@ namespace module::vision {
 
                 // Partition the clusters such that clusters above the green horizons are removed,
                 // and then resize the vector to remove them
-                auto green_boundary =
-                    utility::vision::visualmesh::check_green_horizon_side(clusters, horizon.horizon, uPCw, false, true);
+                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
+                                                                                            horizon.horizon,
+                                                                                            uPCw,
+                                                                                            false,
+                                                                                            true,
+                                                                                            true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));

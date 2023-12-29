@@ -128,19 +128,26 @@ namespace utility::vision::visualmesh {
     auto check_green_horizon_side(std::vector<std::vector<int>>& clusters,
                                   const std::vector<Eigen::Vector3d>& horizon,
                                   const Eigen::Matrix<double, 3, Eigen::Dynamic>& rays,
-                                  const bool& outside = true,
-                                  const bool& inside  = true) {
+                                  const bool& outside   = true,    // accept clusters completely outside
+                                  const bool& inside    = true,    // accept clusters completely inside
+                                  const bool& intersect = true) {  // accept clusters that go over the boundary
 
         auto success = [&](const bool& cluster_outside, const bool& cluster_inside) {
-            if (outside && inside) {
-                return cluster_outside && cluster_inside;
+            // Cluster is completely outside
+            if (cluster_outside && !cluster_inside) {
+                return outside;
             }
-            else if (outside) {
-                return cluster_outside && !cluster_inside;
+            // Cluster is completely inside
+            if (!cluster_outside && cluster_inside) {
+                return inside;
             }
-            else {
-                return cluster_inside && !cluster_outside;
+            // Cluster intersects the boundary
+            if (cluster_outside && cluster_inside) {
+                return intersect;
             }
+            // Last option is it's neither in or out
+            log<NUClear::ERROR>("Cluster is neither inside or outside the green horizon. This is bad.");
+            return false;
         };
 
         // Move any clusters that don't intersect the green horizon to the end of the list

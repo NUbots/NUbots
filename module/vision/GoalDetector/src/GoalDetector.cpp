@@ -116,8 +116,12 @@ namespace module::vision {
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-                auto green_boundary =
-                    utility::vision::visualmesh::check_green_horizon_side(clusters, horizon.horizon, rays, true, true);
+                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
+                                                                                            horizon.horizon,
+                                                                                            rays,
+                                                                                            false,
+                                                                                            false,
+                                                                                            true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
