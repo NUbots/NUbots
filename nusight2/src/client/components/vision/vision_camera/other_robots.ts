@@ -9,6 +9,8 @@ import { LineProjection } from "../../camera/objects/line_projection";
 import { group } from "../../three/builders";
 import { Canvas } from "../../three/three";
 
+const ROBOT_COLOUR = new Vector4(1, 0.5, 0, 1); // orange
+
 export interface OtherRobotsModel {
   readonly timestamp: number;
   readonly Hcw: Matrix4;
@@ -40,13 +42,12 @@ export class OtherRobotsViewModel {
 
     // Transform the axis so that it is in the perspective of the latest camera image.
     const axis = Vector3.fromThree(m.rRCc.toThree().applyMatrix4(Hcc.toThree())).normalize();
-    const magenta = new Vector4(1, 0.5, 0, 1);
 
     return this.lineProjection.cone({
       axis,
       radius: 0.999,
-      color: magenta,
-      lineWidth: 10,
+      color: ROBOT_COLOUR,
+      lineWidth: 8,
     });
   });
 }
