@@ -9,7 +9,9 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/vision/Ball.hpp"
 
+#include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/projection.hpp"
 
@@ -18,8 +20,12 @@ namespace module::vision {
     using extension::Configuration;
 
     using message::input::Image;
-    using utility::support::Expression;
+    using message::vision::Ball;
+    using message::vision::Balls;
 
+
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
+    using utility::support::Expression;
     using utility::vision::unproject;
 
     cv::Point2f correct_distortion(const cv::Point2f& point, const Image& img) {
@@ -92,51 +98,69 @@ namespace module::vision {
             log<NUClear::DEBUG>("Number of detections: ", detections);
 
             // -------- Draw Detections --------
+
+            auto balls       = std::make_unique<Balls>();
+            balls->id        = img.id;         // camera id
+            balls->timestamp = img.timestamp;  // time when the image was taken
+            balls->Hcw       = img.Hcw;        // world to camera transform at the time the image was taken
+
             for (int i = 0; i < detections; ++i) {
                 Detection detection = output[i];
 
-                cv::Rect box     = detection.box;
-                cv::Scalar color = detection.color;
+                if (log_level <= NUClear::DEBUG) {
+                    cv::Rect box     = detection.box;
+                    cv::Scalar color = detection.color;
 
-                // Detection box with thinner line
-                cv::rectangle(frame, box, color, 1);  // Thickness reduced to 1
+                    // Detection box with thinner line
+                    cv::rectangle(frame, box, color, 1);  // Thickness reduced to 1
 
-                // Detection box text with smaller font
-                std::string classString = detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4);
-                cv::Size textSize       = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 0.5, 1, 0);
-                cv::Rect textBox(box.x, box.y - 20, textSize.width + 10, textSize.height + 10);  // Adjusted size
+                    // Detection box text with smaller font
+                    std::string classString =
+                        detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4);
+                    cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 0.5, 1, 0);
+                    cv::Rect textBox(box.x, box.y - 20, textSize.width + 10, textSize.height + 10);  // Adjusted size
 
-                cv::rectangle(frame, textBox, color, cv::FILLED);
-                cv::putText(frame,
-                            classString,
-                            cv::Point(box.x + 5, box.y - 5),
-                            cv::FONT_HERSHEY_DUPLEX,
-                            0.5,
-                            cv::Scalar(0, 0, 0),
-                            1,
-                            0);
-
-                // Calculate the middle of the bottom border of the detection box
-                Eigen::Matrix<double, 2, 1> box_bottom_centre(detection.box.x + detection.box.width / 2.0f,
-                                                              detection.box.y + detection.box.height);
-                // Correct for lens distortion
-                // box_bottom_centre = undistort_point(box_bottom_centre, img);
-
-                // Convert to unit vector in camera space
-                Eigen::Matrix<double, 3, 1> uPCc = compute_ray(box_bottom_centre, img);
+                    cv::rectangle(frame, textBox, color, cv::FILLED);
+                    cv::putText(frame,
+                                classString,
+                                cv::Point(box.x + 5, box.y - 5),
+                                cv::FONT_HERSHEY_DUPLEX,
+                                0.5,
+                                cv::Scalar(0, 0, 0),
+                                1,
+                                0);
+                }
 
                 if (detection.className == "ball") {
-                    log<NUClear::DEBUG>("pixel: ", box_bottom_centre.transpose());
-                    log<NUClear::DEBUG>("uPCc: ", uPCc.transpose());
+                    // Calculate the middle of the bottom border of the detection box
+                    Eigen::Matrix<double, 2, 1> box_bottom_centre(detection.box.x + detection.box.width / 2.0f,
+                                                                  detection.box.y + detection.box.height / 2.0f);
+                    // Correct for lens distortion
+                    // box_bottom_centre = undistort_point(box_bottom_centre, img);
+                    // Convert to unit vector in camera space
+                    Eigen::Matrix<double, 3, 1> uPCc = compute_ray(box_bottom_centre, img);
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uPCw = Hwc.rotation() * uPCc;
                     Eigen::Vector3d rPWw = uPCw * std::abs(Hwc.translation().z() / uPCw.z()) + Hwc.translation();
-                    log<NUClear::DEBUG>("Ball position: ", rPWw.transpose());
+                    Eigen::Vector3d rPCc = Hwc.inverse() * rPWw;
+
+                    // Add ball to balls message
+                    Ball b;
+                    b.uBCc = rPCc.normalized();
+                    b.measurements.emplace_back();
+                    b.measurements.back().type  = Ball::MeasurementType::PROJECTION;
+                    b.measurements.back().srBCc = cartesianToReciprocalSpherical(rPCc);
+                    b.radius                    = 0.1;
+                    balls->balls.push_back(b);
                 }
             }
 
-            cv::resize(frame, frame, cv::Size(frame.cols, frame.rows));
-            cv::imwrite("recordings/yolo.jpg", frame);
+            emit(std::move(balls));
+
+            if (log_level <= NUClear::DEBUG) {
+                cv::resize(frame, frame, cv::Size(frame.cols, frame.rows));
+                cv::imwrite("recordings/yolo.jpg", frame);
+            }
         });
     }
 
