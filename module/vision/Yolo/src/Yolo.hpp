@@ -11,6 +11,7 @@ namespace module::vision {
     private:
         /// @brief Stores configuration values
         struct Config {
+            std::string model_path = "";
         } cfg;
 
         Inference inf;

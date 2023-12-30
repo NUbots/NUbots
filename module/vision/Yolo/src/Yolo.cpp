@@ -10,31 +10,76 @@
 
 #include "message/input/Image.hpp"
 
-namespace module::vision {
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/projection.hpp"
 
-    using namespace std;
-    using namespace cv;
+namespace module::vision {
 
     using extension::Configuration;
 
     using message::input::Image;
+    using utility::support::Expression;
+
+    using utility::vision::unproject;
+
+    cv::Point2f correct_distortion(const cv::Point2f& point, const Image& img) {
+        float k1 = img.lens.k.x();
+        float k2 = img.lens.k.y();
+
+        // Shift point by centre offset
+        float x = point.x - img.lens.centre.x();
+        float y = point.y - img.lens.centre.y();
+
+        // Calculate r^2
+        float r2 = x * x + y * y;
+
+        // Apply distortion k1 and k2
+        float x_distorted = x * (1 + k1 * r2 + k2 * r2 * r2);
+        float y_distorted = y * (1 + k1 * r2 + k2 * r2 * r2);
+
+        return cv::Point2f(x_distorted + img.lens.centre.x(), y_distorted + img.lens.centre.y());
+    }
+
+    // Convert pixel coordinates to a unit vector (ray) in camera space
+    Eigen::Vector3d compute_ray(const Eigen::Vector2d& pixel, const Image& img) {
+        // Convert to Normalized Device Coordinates (NDC)
+        double x_ndc = (2.0 * (pixel.x() - img.lens.centre.x()) / img.dimensions.x()) - 1.0;
+        double y_ndc = 1.0 - (2.0 * (pixel.y() - img.lens.centre.y()) / img.dimensions.y());
+
+        // Aspect ratio
+        double aspect_ratio = img.dimensions.x() / img.dimensions.y();
+
+        // Apply field of view and aspect ratio to convert to camera space
+        double x_camera = 1.0;
+        double y_camera = -x_ndc * aspect_ratio * img.lens.focal_length * std::tan(img.lens.fov / 2.0);
+        double z_camera = y_ndc * img.lens.focal_length * std::tan(img.lens.fov / 2.0);
+
+        Eigen::Vector3d ray_direction(x_camera, y_camera, z_camera);
+        ray_direction.normalize();
+
+        return ray_direction;
+    }
 
     Yolo::Yolo(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Yolo.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.model_path  = config["model_path"].as<std::string>();
         });
 
-        on<Startup>().then("Test Yolo", [this] {
-            inf = Inference("/home/nubots/build/yolo.onnx", cv::Size(640, 640), "classes.txt", false);
-        });
+        on<Startup>().then("Load Yolo Model",
+                           [this] { inf = Inference(cfg.model_path, cv::Size(640, 640), "classes.txt", false); });
 
         on<Trigger<Image>, Single>().then([this](const Image& img) {
+            const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
+
             // -------- Convert Image to cv::Mat --------
             const int width  = img.dimensions.x();
             const int height = img.dimensions.y();
-            cv::Mat frame    = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+            log<NUClear::DEBUG>("Image width: ", width);
+            log<NUClear::DEBUG>("Image height: ", height);
+            cv::Mat frame = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
 
 
             // -------- Run Inference --------
@@ -58,24 +103,39 @@ namespace module::vision {
 
                 // Detection box text with smaller font
                 std::string classString = detection.className + ' ' + std::to_string(detection.confidence).substr(0, 4);
-                float fontScale         = 0.5;  // Reduced font scale
-                int thickness           = 1;    // Thickness for text, can be reduced if needed
-                cv::Size textSize = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, fontScale, thickness, 0);
+                cv::Size textSize       = cv::getTextSize(classString, cv::FONT_HERSHEY_DUPLEX, 0.5, 1, 0);
                 cv::Rect textBox(box.x, box.y - 20, textSize.width + 10, textSize.height + 10);  // Adjusted size
 
                 cv::rectangle(frame, textBox, color, cv::FILLED);
                 cv::putText(frame,
                             classString,
-                            cv::Point(box.x + 5, box.y - 10),
+                            cv::Point(box.x + 5, box.y - 5),
                             cv::FONT_HERSHEY_DUPLEX,
-                            fontScale,
+                            0.5,
                             cv::Scalar(0, 0, 0),
-                            thickness,
+                            1,
                             0);
+
+                // Calculate the middle of the bottom border of the detection box
+                Eigen::Matrix<double, 2, 1> box_bottom_centre(detection.box.x + detection.box.width / 2.0f,
+                                                              detection.box.y + detection.box.height);
+                // Correct for lens distortion
+                // box_bottom_centre = undistort_point(box_bottom_centre, img);
+
+                // Convert to unit vector in camera space
+                Eigen::Matrix<double, 3, 1> uPCc = compute_ray(box_bottom_centre, img);
+
+                if (detection.className == "ball") {
+                    log<NUClear::DEBUG>("pixel: ", box_bottom_centre.transpose());
+                    log<NUClear::DEBUG>("uPCc: ", uPCc.transpose());
+                    // Project the unit vector onto the ground plane
+                    Eigen::Vector3d uPCw = Hwc.rotation() * uPCc;
+                    Eigen::Vector3d rPWw = uPCw * std::abs(Hwc.translation().z() / uPCw.z()) + Hwc.translation();
+                    log<NUClear::DEBUG>("Ball position: ", rPWw.transpose());
+                }
             }
 
-            float scale = 0.8;
-            cv::resize(frame, frame, cv::Size(frame.cols * scale, frame.rows * scale));
+            cv::resize(frame, frame, cv::Size(frame.cols, frame.rows));
             cv::imwrite("recordings/yolo.jpg", frame);
         });
     }
