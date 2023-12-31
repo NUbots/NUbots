@@ -43,6 +43,12 @@ namespace module::support {
 
         /// @brief Map to store the reaction profiles
         std::map<uint64_t, ReactionProfile> reaction_profiles;
+
+        /// @brief Total time of all reactions
+        double total_time_all = 0;
+
+        /// @brief Total count of all reactions
+        int total_count = 0;
     };
 }  // namespace module::support
 
