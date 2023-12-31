@@ -5,9 +5,9 @@ import { VisionRobotModel } from "../model";
 
 import { BallsViewModel } from "./balls";
 import { GoalsViewModel } from "./goals";
-import { OtherRobotsViewModel } from "./other_robots";
 import { GreenHorizonViewModel } from "./green_horizon";
 import { VisionCameraModel } from "./model";
+import { OtherRobotsViewModel } from "./other_robots";
 import { VisualMeshViewModel } from "./visual_mesh";
 
 export class VisionCameraViewModel extends CameraViewModel {
@@ -58,7 +58,8 @@ export class VisionCameraViewModel extends CameraViewModel {
   @computed
   private get robots(): OtherRobotsViewModel | undefined {
     return (
-      this.model.robots && OtherRobotsViewModel.of(this.model.robots, this.model.params, this.canvas, this.imageAspectRatio)
+      this.model.robots &&
+      OtherRobotsViewModel.of(this.model.robots, this.model.params, this.canvas, this.imageAspectRatio)
     );
   }
 

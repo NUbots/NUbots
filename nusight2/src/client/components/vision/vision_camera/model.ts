@@ -6,8 +6,8 @@ import { CameraDefaultDrawOptions, CameraModel } from "../../camera/model";
 
 import { BallModel } from "./balls";
 import { GoalModel } from "./goals";
-import { OtherRobotsModel } from "./other_robots";
 import { GreenHorizonModel } from "./green_horizon";
+import { OtherRobotsModel } from "./other_robots";
 import { VisualMeshModel } from "./visual_mesh";
 
 type DrawOptions = CameraDefaultDrawOptions & {

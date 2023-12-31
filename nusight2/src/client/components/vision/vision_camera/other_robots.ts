@@ -28,7 +28,12 @@ export class OtherRobotsViewModel {
     this.lineProjection = lineProjection;
   }
 
-  static of(model: OtherRobotsModel[], params: CameraParams, canvas: Canvas, imageAspectRatio: number): OtherRobotsViewModel {
+  static of(
+    model: OtherRobotsModel[],
+    params: CameraParams,
+    canvas: Canvas,
+    imageAspectRatio: number,
+  ): OtherRobotsViewModel {
     return new OtherRobotsViewModel(model, params, LineProjection.of(canvas, params.lens, imageAspectRatio));
   }
 
