@@ -35,11 +35,12 @@ namespace module::vision {
     private:
         /// @brief Stores configuration values
         struct Config {
-            double confidence_threshold   = 0.0;
-            int cluster_points            = 0;
+            /// @brief The threshold for the confidence of a point to be a robot
+            double confidence_threshold = 0.0;
+            /// @brief The minimum number of points in a cluster to be considered a robot
+            int cluster_points = 0;
+            /// @brief The minimum distance a robot can be to be considered a robot, to exclude the self robot
             double minimum_robot_distance = 0.0;
-            double minimum_robot_height   = 0.0;
-            double maximum_robot_height   = 0.0;
         } cfg;
 
     public:
