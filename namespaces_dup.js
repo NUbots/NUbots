@@ -981,7 +981,7 @@ var namespaces_dup =
       [ "vision", null, [
         [ "visualmesh", null, [
           [ "boundary_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#aefa8fd21888715d12dba230e3fd4d637", null ],
-          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a2174498ccb46bcff2e58bb731502aaea", null ],
+          [ "check_green_horizon_side", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#ac21f7b62d03694ada0517dbbd1518fde", null ],
           [ "cluster_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a01b125faf9b79a6d584f8feee218a4c4", null ],
           [ "partition_points", "shared_2utility_2vision_2visualmesh_2VisualMesh_8hpp.html#a0e6e3b4a4ccdd107086a0b256d36e959", null ]
         ] ],
