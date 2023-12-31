@@ -89,6 +89,7 @@ namespace module::vision {
                                                         cfg.cluster_points,
                                                         clusters);
             log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
+
             // Partition the clusters such that clusters above the green horizons are removed,
             // and then resize the vector to remove them
             auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
