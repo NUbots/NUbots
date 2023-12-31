@@ -69,6 +69,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleRobotVisibility={this.toggleRobotVisibility}
           toggleBallVisibility={this.toggleBallVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+          toggleTrajectoryVisibility={this.toggleTrajectoryVisibility}
         ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -143,6 +144,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleFieldLinePointsVisibility = () => {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
   };
+
+  private toggleTrajectoryVisibility = () => {
+    this.props.controller.toggleTrajectoryVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -156,6 +161,7 @@ interface LocalisationMenuBarProps {
   toggleRobotVisibility(): void;
   toggleBallVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
+  toggleTrajectoryVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -192,6 +198,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           isVisible={model.fieldLinePointsVisible}
           onClick={props.toggleFieldLinePointsVisibility}
         />
+        <MenuItem label="Trajectories" isVisible={model.trajectoryVisible} onClick={props.toggleTrajectoryVisibility} />
       </ul>
     </Menu>
   );
@@ -248,57 +255,60 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
 
-      {model.robots.map((robotModel) => {
-        const swingFootTrajectory = robotModel.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-        if (swingFootTrajectory.length > 0 && robotModel.visible) {
-          const color = robotModel.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
-          return (
-            <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} lineColor={color} tubeRadius={0.005} />
-          );
-        }
-      })}
+      {model.trajectoryVisible &&
+        model.robots.map((robotModel) => {
+          const swingFootTrajectory = robotModel.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+          if (swingFootTrajectory.length > 0 && robotModel.visible) {
+            const color = robotModel.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
+            return (
+              <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} lineColor={color} tubeRadius={0.005} />
+            );
+          }
+        })}
       {model.robots.map((robotModel) => {
         const torsoTrajectory = robotModel.rTFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
         if (torsoTrajectory.length > 0 && robotModel.visible) {
           return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} lineColor="grey" tubeRadius={0.005} />;
         }
       })}
-      {/* History of walking trajectories */}
-      {model.robots.map((robotModel) => {
-        if (robotModel.visible && robotModel.swingFootTrajectoryHistory.trajectories.length > 0) {
-          return robotModel.swingFootTrajectoryHistory.trajectories.map((traj, index) => {
-            const swingFootTrajectory = traj.trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-            if (swingFootTrajectory.length > 0) {
-              const color = traj.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
-              return (
-                <Trajectory
-                  trajectory={swingFootTrajectory}
-                  key={`${robotModel.id}-trajectory-${index}`}
-                  lineColor={color}
-                  tubeRadius={0.005}
-                />
-              );
-            }
-          });
-        }
-      })}
-      {model.robots.map((robotModel) => {
-        if (robotModel.visible && robotModel.torsoTrajectoryHistory.trajectories.length > 0) {
-          return robotModel.torsoTrajectoryHistory.trajectories.map((trajectory, index) => {
-            const torsoTrajectory = trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-            if (torsoTrajectory.length > 0) {
-              return (
-                <Trajectory
-                  trajectory={torsoTrajectory}
-                  key={`${robotModel.id}-trajectory-${index}`}
-                  lineColor="grey"
-                  tubeRadius={0.005}
-                />
-              );
-            }
-          });
-        }
-      })}
+
+      {model.trajectoryVisible &&
+        model.robots.map((robotModel) => {
+          if (robotModel.visible && robotModel.swingFootTrajectoryHistory.trajectories.length > 0) {
+            return robotModel.swingFootTrajectoryHistory.trajectories.map((traj, index) => {
+              const swingFootTrajectory = traj.trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+              if (swingFootTrajectory.length > 0) {
+                const color = traj.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
+                return (
+                  <Trajectory
+                    trajectory={swingFootTrajectory}
+                    key={`${robotModel.id}-trajectory-${index}`}
+                    lineColor={color}
+                    tubeRadius={0.005}
+                  />
+                );
+              }
+            });
+          }
+        })}
+      {model.trajectoryVisible &&
+        model.robots.map((robotModel) => {
+          if (robotModel.visible && robotModel.torsoTrajectoryHistory.trajectories.length > 0) {
+            return robotModel.torsoTrajectoryHistory.trajectories.map((trajectory, index) => {
+              const torsoTrajectory = trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
+              if (torsoTrajectory.length > 0) {
+                return (
+                  <Trajectory
+                    trajectory={torsoTrajectory}
+                    key={`${robotModel.id}-trajectory-${index}`}
+                    lineColor="grey"
+                    tubeRadius={0.005}
+                  />
+                );
+              }
+            });
+          }
+        })}
     </object3D>
   );
 });
