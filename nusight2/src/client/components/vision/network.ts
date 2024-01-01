@@ -82,14 +82,14 @@ export class VisionNetwork {
   @action
   onMesh(robotModel: RobotModel, packet: message.vision.VisualMesh) {
     const robot = VisionRobotModel.of(robotModel);
-    const { id, neighbourhood, rays, classifications } = packet;
+    const { id, neighbourhood, uPCw, classifications } = packet;
     const camera = robot.cameras.get(id);
     if (!camera) {
       return;
     }
     camera.visualMesh = {
       neighbours: neighbourhood?.v!,
-      rays: rays?.v!,
+      rays: uPCw?.v!,
       classifications: { dim: classifications?.rows!, values: classifications?.v! },
     };
   }
@@ -109,7 +109,11 @@ export class VisionNetwork {
         axis: Vector3.from(ball.uBCc),
         radius: ball.radius!,
       },
-      distance: Math.abs(ball.measurements?.[0].srBCc?.x!),
+      distance: Math.hypot(
+        ball.measurements?.[0].rBCc?.x!,
+        ball.measurements?.[0].rBCc?.y!,
+        ball.measurements?.[0].rBCc?.z!,
+      ),
       colour: Vector4.from(ball.colour),
     }));
   }
@@ -148,7 +152,7 @@ export class VisionNetwork {
       return;
     }
     const greenHorizon = new GreenHorizonModel({
-      horizon: horizon?.map((v) => Vector3.from(v)),
+      horizon: horizon?.map((v) => Matrix4.from(Hcw).invert().decompose().translation.subtract(Vector3.from(v))),
       Hcw: Matrix4.from(Hcw),
     });
     camera.greenHorizon = camera.greenHorizon?.copy(greenHorizon) || greenHorizon;
