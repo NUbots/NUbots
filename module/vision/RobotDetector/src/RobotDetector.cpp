@@ -37,6 +37,7 @@
 #include "message/vision/Robot.hpp"
 
 #include "utility/math/coordinates.hpp"
+#include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::vision {
@@ -47,7 +48,7 @@ namespace module::vision {
     using message::vision::Robot;
     using message::vision::Robots;
     using utility::math::coordinates::cartesianToReciprocalSpherical;
-
+    using utility::support::Expression;
 
     RobotDetector::RobotDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -59,7 +60,6 @@ namespace module::vision {
             cfg.cluster_points         = config["cluster_points"].as<int>();
             cfg.minimum_robot_distance = config["minimum_robot_distance"].as<double>();
             cfg.robot_radius           = config["robot_radius"].as<double>();
-            cfg.robot_covariance       = config["robot_covariance"].as<Expression>();
         });
 
         on<Trigger<GreenHorizon>, Buffer<2>>().then("Visual Mesh", [this](const GreenHorizon& horizon) {
@@ -143,8 +143,7 @@ namespace module::vision {
                 }
 
                 // Should be changed to the average confidence of the robot
-                robot.covariance = cfg.robot_covariance;
-                robot.radius     = cfg.robot_radius;
+                robot.radius = cfg.robot_radius;
                 robots->robots.push_back(std::move(robot));
             }
 

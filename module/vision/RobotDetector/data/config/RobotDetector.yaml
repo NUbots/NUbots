@@ -4,6 +4,4 @@ log_level: INFO
 confidence_threshold: 0.8
 cluster_points: 30
 minimum_robot_distance: 0.5
-
 robot_radius: 0.3
-robot_covariance: 0.1

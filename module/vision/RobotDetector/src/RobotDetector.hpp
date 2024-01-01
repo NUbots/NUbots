@@ -27,6 +27,7 @@
 #ifndef MODULE_VISION_ROBOTDETECTOR_HPP
 #define MODULE_VISION_ROBOTDETECTOR_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 
 namespace module::vision {
@@ -43,8 +44,6 @@ namespace module::vision {
             double minimum_robot_distance = 0.0;
             /// @brief Assumed radius of robots
             double robot_radius = 0.0;
-            /// @brief Assumed covariance of robots
-            Eigen::Vector3d robot_covariance = Eigen::Vector3d::Zero();
         } cfg;
 
     public:

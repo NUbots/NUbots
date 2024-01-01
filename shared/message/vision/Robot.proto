@@ -53,8 +53,6 @@ import "Transform.proto";
 message Robot {
     /// Vector from the camera to the point on the robot's feet, most in the center of the robot
     vec3 rRCc = 1;
-    /// Confidence of this measurement, for localisation
-    mat3 covariance = 2;
     /// Radius of the robot
     double radius = 3;
 }
