@@ -27,6 +27,7 @@ export class VisionNetwork {
     this.network.on(message.vision.VisualMesh, this.onMesh);
     this.network.on(message.vision.Balls, this.onBalls);
     this.network.on(message.vision.Goals, this.onGoals);
+    this.network.on(message.vision.Robots, this.onRobots);
     this.network.on(message.vision.GreenHorizon, this.onGreenHorizon);
   }
 
@@ -115,6 +116,21 @@ export class VisionNetwork {
         ball.measurements?.[0].rBCc?.z!,
       ),
       colour: Vector4.from(ball.colour),
+    }));
+  }
+
+  @action
+  private onRobots(robotModel: RobotModel, packet: message.vision.Robots) {
+    const robot = VisionRobotModel.of(robotModel);
+    const { id, timestamp, Hcw, robots } = packet;
+    const camera = robot.cameras.get(id);
+    if (!camera) {
+      return;
+    }
+    camera.robots = robots.map((robot) => ({
+      timestamp: toSeconds(timestamp),
+      Hcw: Matrix4.from(Hcw),
+      rRCc: Vector3.from(robot.rRCc),
     }));
   }
 
