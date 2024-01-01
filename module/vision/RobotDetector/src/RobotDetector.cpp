@@ -58,6 +58,8 @@ namespace module::vision {
             cfg.confidence_threshold   = config["confidence_threshold"].as<double>();
             cfg.cluster_points         = config["cluster_points"].as<int>();
             cfg.minimum_robot_distance = config["minimum_robot_distance"].as<double>();
+            cfg.robot_radius           = config["robot_radius"].as<double>();
+            cfg.robot_covariance       = config["robot_covariance"].as<Expression>();
         });
 
         on<Trigger<GreenHorizon>, Buffer<2>>().then("Visual Mesh", [this](const GreenHorizon& horizon) {
@@ -141,8 +143,8 @@ namespace module::vision {
                 }
 
                 // Should be changed to the average confidence of the robot
-                robot.covariance = Eigen::Matrix3d::Ones();
-                robot.radius     = 0.05;
+                robot.covariance = cfg.robot_covariance;
+                robot.radius     = cfg.robot_radius;
                 robots->robots.push_back(std::move(robot));
             }
 

@@ -41,6 +41,10 @@ namespace module::vision {
             int cluster_points = 0;
             /// @brief The minimum distance a robot can be to be considered a robot, to exclude the self robot
             double minimum_robot_distance = 0.0;
+            /// @brief Assumed radius of robots
+            double robot_radius = 0.0;
+            /// @brief Assumed covariance of robots
+            Eigen::Vector3d robot_covariance = Eigen::Vector3d::Zero();
         } cfg;
 
     public:
