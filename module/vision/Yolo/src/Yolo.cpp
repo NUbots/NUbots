@@ -148,9 +148,9 @@ namespace module::vision {
                     Ball b;
                     b.uBCc = rPCc.normalized();
                     b.measurements.emplace_back();
-                    b.measurements.back().type  = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().srBCc = cartesianToReciprocalSpherical(rPCc);
-                    b.radius                    = 0.1;
+                    b.measurements.back().type = Ball::MeasurementType::PROJECTION;
+                    b.measurements.back().rBCc = rPCc;
+                    b.radius                   = 0.1;
                     balls->balls.push_back(b);
                 }
             }
