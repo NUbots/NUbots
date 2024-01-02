@@ -310,6 +310,8 @@ namespace utility::math::filter {
             throw std::runtime_error("Invalid setting for resample method.");
         }
 
+
+    public:
         /**
          * @brief Do a weighted resampling of all of the particles in the filter. The model is also asked to provide new
          * rogues. All particle weights are reset to 1.
@@ -342,7 +344,6 @@ namespace utility::math::filter {
             std::fill(weights.begin(), weights.end(), Scalar(1));
         }
 
-    public:
         /**
          * @brief Resample all particles in the filter and set their weights back to 1. The model is asked to give a
          * prediction on what happens to each particle after dt time has elapsed (using model::time).
@@ -423,6 +424,13 @@ namespace utility::math::filter {
         }
 
         /**
+         * @brief Manually set a particles weight.
+         */
+        void set_particle_weight(const Scalar& weight, const int& idx) {
+            weights[idx] = weight;
+        }
+
+        /**
          * @brief Calculates and returns the mean of all particles.
          */
         [[nodiscard]] StateVec get_state() const {
@@ -438,16 +446,23 @@ namespace utility::math::filter {
         }
 
         /**
+         * @brief Returns the particle at the given index.
+         */
+        [[nodiscard]] const Eigen::Matrix<Scalar, Model::size, 1> get_particle(int idx) const {
+            return particles.col(idx);
+        }
+
+        /**
          * @brief Returns the underlying particle list.
          */
-        [[nodiscard]] const ParticleList& getParticles() const {
+        [[nodiscard]] const ParticleList& get_particles() const {
             return particles;
         }
 
         /**
          * @brief Returns the underlying particle weights.
          */
-        [[nodiscard]] const ParticleWeights& getParticleWeights() const {
+        [[nodiscard]] const ParticleWeights& get_particle_weights() const {
             return weights;
         }
     };
