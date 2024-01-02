@@ -10,6 +10,7 @@
 
 #include "message/input/Image.hpp"
 #include "message/vision/Ball.hpp"
+#include "message/vision/Robot.hpp"
 
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -22,6 +23,8 @@ namespace module::vision {
     using message::input::Image;
     using message::vision::Ball;
     using message::vision::Balls;
+    using message::vision::Robot;
+    using message::vision::Robots;
 
 
     using utility::math::coordinates::cartesianToReciprocalSpherical;
@@ -60,10 +63,10 @@ namespace module::vision {
         double y_camera = -x_ndc * aspect_ratio * img.lens.focal_length * std::tan(img.lens.fov / 2.0);
         double z_camera = y_ndc * img.lens.focal_length * std::tan(img.lens.fov / 2.0);
 
-        Eigen::Vector3d ray_direction(x_camera, y_camera, z_camera);
-        ray_direction.normalize();
+        Eigen::Vector3d uRCc(x_camera, y_camera, z_camera);
+        uRCc.normalize();
 
-        return ray_direction;
+        return uRCc;
     }
 
     Yolo::Yolo(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -83,9 +86,7 @@ namespace module::vision {
             // -------- Convert Image to cv::Mat --------
             const int width  = img.dimensions.x();
             const int height = img.dimensions.y();
-            log<NUClear::DEBUG>("Image width: ", width);
-            log<NUClear::DEBUG>("Image height: ", height);
-            cv::Mat frame = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+            cv::Mat frame    = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
 
 
             // -------- Run Inference --------
@@ -97,12 +98,19 @@ namespace module::vision {
             log<NUClear::DEBUG>("Inference took: ", duration.count(), "ms");
             log<NUClear::DEBUG>("Number of detections: ", detections);
 
-            // -------- Draw Detections --------
+            // -------- Emit Detections --------
 
+            // Balls
             auto balls       = std::make_unique<Balls>();
             balls->id        = img.id;         // camera id
             balls->timestamp = img.timestamp;  // time when the image was taken
             balls->Hcw       = img.Hcw;        // world to camera transform at the time the image was taken
+
+            // Robots
+            auto robots       = std::make_unique<Robots>();
+            robots->timestamp = img.timestamp;
+            robots->id        = img.id;
+            robots->Hcw       = img.Hcw;
 
             for (int i = 0; i < detections; ++i) {
                 Detection detection = output[i];
@@ -133,29 +141,59 @@ namespace module::vision {
 
                 if (detection.className == "ball") {
                     // Calculate the middle of the bottom border of the detection box
-                    Eigen::Matrix<double, 2, 1> box_bottom_centre(detection.box.x + detection.box.width / 2.0f,
-                                                                  detection.box.y + detection.box.height / 2.0f);
+                    Eigen::Matrix<double, 2, 1> box_centre(detection.box.x + detection.box.width / 2.0,
+                                                           detection.box.y + detection.box.height / 2.0);
+                    // Calculate the bottom left corner of the detection box
+                    Eigen::Matrix<double, 2, 1> box_left(detection.box.x, detection.box.y + detection.box.height);
+
                     // Correct for lens distortion
-                    // box_bottom_centre = undistort_point(box_bottom_centre, img);
+                    // box_centre = undistort_point(box_centre, img);
                     // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uPCc = compute_ray(box_bottom_centre, img);
+                    Eigen::Matrix<double, 3, 1> uBCc = compute_ray(box_centre, img);
+                    Eigen::Matrix<double, 3, 1> uLCc = compute_ray(box_left, img);
+
                     // Project the unit vector onto the ground plane
-                    Eigen::Vector3d uPCw = Hwc.rotation() * uPCc;
-                    Eigen::Vector3d rPWw = uPCw * std::abs(Hwc.translation().z() / uPCw.z()) + Hwc.translation();
-                    Eigen::Vector3d rPCc = Hwc.inverse() * rPWw;
+                    Eigen::Vector3d uBCw = Hwc.rotation() * uBCc;
+                    Eigen::Vector3d rPWw = uBCw * std::abs(Hwc.translation().z() / uBCw.z()) + Hwc.translation();
+                    Eigen::Vector3d rBCc = Hwc.inverse() * rPWw;
 
                     // Add ball to balls message
                     Ball b;
-                    b.uBCc = rPCc.normalized();
+                    b.uBCc = rBCc.normalized();
                     b.measurements.emplace_back();
                     b.measurements.back().type = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().rBCc = rPCc;
-                    b.radius                   = 0.1;
+                    b.measurements.back().rBCc = rBCc;
+                    // Calculate the angular radius of the ball in camera space
+                    b.radius = uBCc.dot(uLCc);
+                    b.colour.fill(1.0);
                     balls->balls.push_back(b);
+                }
+
+                if (detection.className == "robot") {
+                    // Calculate the bottom of box centre
+                    Eigen::Matrix<double, 2, 1> box_bottom_centre(detection.box.x + detection.box.width / 2.0f,
+                                                                  detection.box.y + detection.box.height);
+
+                    // Correct for lens distortion
+                    // box_bottom_centre = undistort_point(box_bottom_centre, img);
+                    // Convert to unit vector in camera space
+                    Eigen::Matrix<double, 3, 1> uRCc = compute_ray(box_bottom_centre, img);
+
+                    // Project the unit vector onto the ground plane
+                    Eigen::Vector3d uRCw = Hwc.rotation() * uRCc;
+                    Eigen::Vector3d rRWw = uRCw * std::abs(Hwc.translation().z() / uRCw.z()) + Hwc.translation();
+                    Eigen::Vector3d rRCc = Hwc.inverse() * rRWw;
+
+                    // Add robot to robots message
+                    Robot r;
+                    r.rRCc   = rRCc.normalized();
+                    r.radius = 0.3;
+                    robots->robots.push_back(r);
                 }
             }
 
             emit(std::move(balls));
+            emit(std::move(robots));
 
             if (log_level <= NUClear::DEBUG) {
                 cv::resize(frame, frame, cv::Size(frame.cols, frame.rows));
