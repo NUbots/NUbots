@@ -1,7 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="5,853,240,895"/>
 <area shape="rect" id="node2" href="$classmodule_1_1extension_1_1Director.html" title=" " alt="" coords="340,853,491,895"/>
-<area shape="rect" id="node3" title=" " alt="" coords="55,1974,190,2001"/>
+<area shape="rect" id="node3" title=" " alt="" coords="55,2003,190,2030"/>
 <area shape="rect" id="node4" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="336,919,495,960"/>
 <area shape="rect" id="node40" href="$classmodule_1_1actuation_1_1KinematicsConfiguration.html" title=" " alt="" coords="324,984,507,1025"/>
 <area shape="rect" id="node41" href="$classmodule_1_1extension_1_1FileWatcher.html" title=" " alt="" coords="340,1049,491,1091"/>
@@ -40,7 +40,8 @@
 <area shape="rect" id="node74" href="$classmodule_1_1vision_1_1FieldLineDetector.html" title=" " alt="" coords="323,2964,507,3005"/>
 <area shape="rect" id="node75" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="309,3030,521,3057"/>
 <area shape="rect" id="node76" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="308,3081,523,3123"/>
-<area shape="rect" id="node77" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,3147,516,3174"/>
+<area shape="rect" id="node77" href="$classmodule_1_1vision_1_1RobotDetector.html" title=" " alt="" coords="305,3147,525,3174"/>
+<area shape="rect" id="node78" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,3198,516,3225"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="635,5,783,47"/>
 <area shape="rect" id="node6" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="635,71,783,112"/>
 <area shape="rect" id="node7" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="635,136,783,177"/>

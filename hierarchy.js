@@ -246,6 +246,7 @@ var hierarchy =
     [ "module::tools::FirmwareInstaller::Firmware", "structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html", null ],
     [ "module::tools::FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
     [ "module::tools::FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
+    [ "module::vision::RobotDetector::Config", "structmodule_1_1vision_1_1RobotDetector_1_1Config.html", null ],
     [ "module::vision::VisualMesh::EngineContext", "structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html", null ],
     [ "module::vision::VisualMesh::EngineContext::Runner", "structmodule_1_1vision_1_1VisualMesh_1_1EngineContext_1_1Runner.html", null ],
     [ "module::vision::visualmesh::generate_runner::BuildEngine< Engine, Scalar >", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine.html", null ],
@@ -334,6 +335,7 @@ var hierarchy =
       [ "module::vision::FieldLineDetector", "classmodule_1_1vision_1_1FieldLineDetector.html", null ],
       [ "module::vision::GoalDetector", "classmodule_1_1vision_1_1GoalDetector.html", null ],
       [ "module::vision::GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", null ],
+      [ "module::vision::RobotDetector", "classmodule_1_1vision_1_1RobotDetector.html", null ],
       [ "module::vision::VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", null ]
     ] ],
     [ "module::localisation::OccupancyMap< double >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],
