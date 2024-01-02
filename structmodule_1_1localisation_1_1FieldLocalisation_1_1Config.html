@@ -196,18 +196,14 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a893bc2285b317f6a529ae830b6194df1">initial_covariance</a> = Eigen::Matrix3d::Identity()</td></tr>
 <tr class="memdesc:a893bc2285b317f6a529ae830b6194df1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial covariance matrix of the robot's state, saved for resetting. <br /></td></tr>
 <tr class="separator:a893bc2285b317f6a529ae830b6194df1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4278fb0439673d48a9a2e3b128440781"><td class="memItemLeft" align="right" valign="top"><a id="a4278fb0439673d48a9a2e3b128440781"></a>
-std::vector&lt; Eigen::Vector3d &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a4278fb0439673d48a9a2e3b128440781">initial_state</a> {}</td></tr>
-<tr class="memdesc:a4278fb0439673d48a9a2e3b128440781"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial state (x,y,theta) of the robot, saved for resetting. <br /></td></tr>
-<tr class="separator:a4278fb0439673d48a9a2e3b128440781"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6deb98fc9b469cc8b3e83949cc92cb51"><td class="memItemLeft" align="right" valign="top"><a id="a6deb98fc9b469cc8b3e83949cc92cb51"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a6deb98fc9b469cc8b3e83949cc92cb51">max_range</a> = 0</td></tr>
-<tr class="memdesc:a6deb98fc9b469cc8b3e83949cc92cb51"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum distance a field line can be from a particle to be considered an observation [m]. <br /></td></tr>
-<tr class="separator:a6deb98fc9b469cc8b3e83949cc92cb51"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3ff7ce75f5e4467df70a13806c73659e"><td class="memItemLeft" align="right" valign="top"><a id="a3ff7ce75f5e4467df70a13806c73659e"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a3ff7ce75f5e4467df70a13806c73659e">measurement_noise</a> = 0</td></tr>
-<tr class="memdesc:a3ff7ce75f5e4467df70a13806c73659e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uncertainty in the measurement model. <br /></td></tr>
-<tr class="separator:a3ff7ce75f5e4467df70a13806c73659e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48be2aa1c04144fc9a6f487ff9a30526"><td class="memItemLeft" align="right" valign="top"><a id="a48be2aa1c04144fc9a6f487ff9a30526"></a>
+std::vector&lt; std::pair&lt; Eigen::Vector3d, Eigen::Matrix3d &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a48be2aa1c04144fc9a6f487ff9a30526">initial_hypotheses</a> {}</td></tr>
+<tr class="memdesc:a48be2aa1c04144fc9a6f487ff9a30526"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial hypothesis of the robot's state (x,y,theta) and covariance, saved for resetting. <br /></td></tr>
+<tr class="separator:a48be2aa1c04144fc9a6f487ff9a30526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c5bbfe28b1aa70e872214a1b5d52a3e"><td class="memItemLeft" align="right" valign="top"><a id="a1c5bbfe28b1aa70e872214a1b5d52a3e"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a1c5bbfe28b1aa70e872214a1b5d52a3e">initial_state</a> {}</td></tr>
+<tr class="memdesc:a1c5bbfe28b1aa70e872214a1b5d52a3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial state (x,y,theta) of the robot, saved for resetting. <br /></td></tr>
+<tr class="separator:a1c5bbfe28b1aa70e872214a1b5d52a3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7b06ccdb5eaf8ffd8ae98989f84ba81"><td class="memItemLeft" align="right" valign="top"><a id="aa7b06ccdb5eaf8ffd8ae98989f84ba81"></a>
 size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#aa7b06ccdb5eaf8ffd8ae98989f84ba81">min_observations</a> = 0</td></tr>
 <tr class="memdesc:aa7b06ccdb5eaf8ffd8ae98989f84ba81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of field line points for a measurement update. <br /></td></tr>
@@ -216,13 +212,9 @@ size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab1e7f3b79690f9e0095edf4aebbb4c07">n_particles</a> = 0</td></tr>
 <tr class="memdesc:ab1e7f3b79690f9e0095edf4aebbb4c07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of particles to use in the particle filter. <br /></td></tr>
 <tr class="separator:ab1e7f3b79690f9e0095edf4aebbb4c07"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab6083f90b5f87a9031c93032a76761f2"><td class="memItemLeft" align="right" valign="top"><a id="ab6083f90b5f87a9031c93032a76761f2"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab6083f90b5f87a9031c93032a76761f2">outside_map_penalty_factor</a> = 0.0</td></tr>
-<tr class="memdesc:ab6083f90b5f87a9031c93032a76761f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty factor for observations being outside map. <br /></td></tr>
-<tr class="separator:ab6083f90b5f87a9031c93032a76761f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aafebc0f5c8962cec8b52f9d7787bf7d6"><td class="memItemLeft" align="right" valign="top"><a id="aafebc0f5c8962cec8b52f9d7787bf7d6"></a>
 Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#aafebc0f5c8962cec8b52f9d7787bf7d6">process_noise</a> = Eigen::Matrix3d::Zero()</td></tr>
-<tr class="memdesc:aafebc0f5c8962cec8b52f9d7787bf7d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uncertainty in the process model. <br /></td></tr>
+<tr class="memdesc:aafebc0f5c8962cec8b52f9d7787bf7d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Uncertainty in the process model (adds noise to the particles}. <br /></td></tr>
 <tr class="separator:aafebc0f5c8962cec8b52f9d7787bf7d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ab7059ddff8e0eafa08690c8fd35582"><td class="memItemLeft" align="right" valign="top"><a id="a5ab7059ddff8e0eafa08690c8fd35582"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#a5ab7059ddff8e0eafa08690c8fd35582">save_map</a> = false</td></tr>
@@ -234,7 +226,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <tr class="separator:afafb8c72629fb15549b336f527824b00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad058f69ba5667093c7ec93c001e95500"><td class="memItemLeft" align="right" valign="top"><a id="ad058f69ba5667093c7ec93c001e95500"></a>
 <a class="el" href="structmodule_1_1localisation_1_1StartingSide.html">StartingSide</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ad058f69ba5667093c7ec93c001e95500">starting_side</a> = StartingSide::UNKNOWN</td></tr>
-<tr class="memdesc:ad058f69ba5667093c7ec93c001e95500"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starting side of the field (left, right, or either) <br /></td></tr>
+<tr class="memdesc:ad058f69ba5667093c7ec93c001e95500"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM) <br /></td></tr>
 <tr class="separator:ad058f69ba5667093c7ec93c001e95500"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -248,7 +240,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html">FieldLocalisation</a></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Tue Jan 2 2024 00:32:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jan 2 2024 00:33:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

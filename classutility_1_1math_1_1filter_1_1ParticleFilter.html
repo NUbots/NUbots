@@ -214,22 +214,33 @@ Public Member Functions</h2></td></tr>
 StateMat&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a32ed424e8cfa5d9b8c32fdbf4c47bfcb">get_covariance</a> () const</td></tr>
 <tr class="memdesc:a32ed424e8cfa5d9b8c32fdbf4c47bfcb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates and returns the covariance of the particles. <br /></td></tr>
 <tr class="separator:a32ed424e8cfa5d9b8c32fdbf4c47bfcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8fe2856373f573f2478849e32312c31f"><td class="memItemLeft" align="right" valign="top"><a id="a8fe2856373f573f2478849e32312c31f"></a>
+const Eigen::Matrix&lt; Scalar, Model::size, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a8fe2856373f573f2478849e32312c31f">get_particle</a> (int idx) const</td></tr>
+<tr class="memdesc:a8fe2856373f573f2478849e32312c31f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the particle at the given index. <br /></td></tr>
+<tr class="separator:a8fe2856373f573f2478849e32312c31f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4700059d7e6f22196b2bde80566d70d7"><td class="memItemLeft" align="right" valign="top"><a id="a4700059d7e6f22196b2bde80566d70d7"></a>
+const ParticleWeights &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a4700059d7e6f22196b2bde80566d70d7">get_particle_weights</a> () const</td></tr>
+<tr class="memdesc:a4700059d7e6f22196b2bde80566d70d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the underlying particle weights. <br /></td></tr>
+<tr class="separator:a4700059d7e6f22196b2bde80566d70d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a810d5de8071b62ddb9477437d9ec0999"><td class="memItemLeft" align="right" valign="top"><a id="a810d5de8071b62ddb9477437d9ec0999"></a>
+const ParticleList &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a810d5de8071b62ddb9477437d9ec0999">get_particles</a> () const</td></tr>
+<tr class="memdesc:a810d5de8071b62ddb9477437d9ec0999"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the underlying particle list. <br /></td></tr>
+<tr class="separator:a810d5de8071b62ddb9477437d9ec0999"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b5d5b95d4c7884dd6801bb8e981d43a"><td class="memItemLeft" align="right" valign="top"><a id="a7b5d5b95d4c7884dd6801bb8e981d43a"></a>
 StateVec&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a7b5d5b95d4c7884dd6801bb8e981d43a">get_state</a> () const</td></tr>
 <tr class="memdesc:a7b5d5b95d4c7884dd6801bb8e981d43a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates and returns the mean of all particles. <br /></td></tr>
 <tr class="separator:a7b5d5b95d4c7884dd6801bb8e981d43a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a79f83c5172e0287cfa440b2ee92b6b84"><td class="memItemLeft" align="right" valign="top"><a id="a79f83c5172e0287cfa440b2ee92b6b84"></a>
-const ParticleList &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a79f83c5172e0287cfa440b2ee92b6b84">getParticles</a> () const</td></tr>
-<tr class="memdesc:a79f83c5172e0287cfa440b2ee92b6b84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the underlying particle list. <br /></td></tr>
-<tr class="separator:a79f83c5172e0287cfa440b2ee92b6b84"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8f71059b704d1ce68c93de44f5cb336f"><td class="memItemLeft" align="right" valign="top"><a id="a8f71059b704d1ce68c93de44f5cb336f"></a>
-const ParticleWeights &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a8f71059b704d1ce68c93de44f5cb336f">getParticleWeights</a> () const</td></tr>
-<tr class="memdesc:a8f71059b704d1ce68c93de44f5cb336f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the underlying particle weights. <br /></td></tr>
-<tr class="separator:a8f71059b704d1ce68c93de44f5cb336f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a05fd8f821f4ba41ae7c4a775445915a2"><td class="memTemplParams" colspan="2">template&lt;typename MeasurementScalar , int S, int... VArgs, int... MArgs, typename... Args&gt; </td></tr>
 <tr class="memitem:a05fd8f821f4ba41ae7c4a775445915a2"><td class="memTemplItemLeft" align="right" valign="top">MeasurementScalar&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a05fd8f821f4ba41ae7c4a775445915a2">measure</a> (const Eigen::Matrix&lt; MeasurementScalar, S, 1, VArgs... &gt; &amp;measurement, const Eigen::Matrix&lt; MeasurementScalar, S, S, MArgs... &gt; &amp;measurement_covariance, Args &amp;&amp;... params)</td></tr>
 <tr class="memdesc:a05fd8f821f4ba41ae7c4a775445915a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the model to predict (using model::predict) what the next measurement will be then determine how accurate this prediction is (using model::difference).  <a href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a05fd8f821f4ba41ae7c4a775445915a2">More...</a><br /></td></tr>
 <tr class="separator:a05fd8f821f4ba41ae7c4a775445915a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bcc9c9d69f0102c6c2e6a28a1e0ad23"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a1bcc9c9d69f0102c6c2e6a28a1e0ad23">resample</a> ()</td></tr>
+<tr class="memdesc:a1bcc9c9d69f0102c6c2e6a28a1e0ad23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a weighted resampling of all of the particles in the filter.  <a href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a1bcc9c9d69f0102c6c2e6a28a1e0ad23">More...</a><br /></td></tr>
+<tr class="separator:a1bcc9c9d69f0102c6c2e6a28a1e0ad23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac73befebf1cf6ab7b56206caea2f9176"><td class="memItemLeft" align="right" valign="top"><a id="ac73befebf1cf6ab7b56206caea2f9176"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#ac73befebf1cf6ab7b56206caea2f9176">set_particle_weight</a> (const Scalar &amp;weight, const int &amp;idx)</td></tr>
+<tr class="memdesc:ac73befebf1cf6ab7b56206caea2f9176"><td class="mdescLeft">&#160;</td><td class="mdescRight">Manually set a particles weight. <br /></td></tr>
+<tr class="separator:ac73befebf1cf6ab7b56206caea2f9176"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb97666f35223dc079edf3d5b563f7eb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#aeb97666f35223dc079edf3d5b563f7eb">set_state</a> (const StateVec &amp;mean, const StateMat &amp;covariance)</td></tr>
 <tr class="memdesc:aeb97666f35223dc079edf3d5b563f7eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears all particles in the filter and samples new particles from the multivariate normal distribution with the given mean and covariance.  <a href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#aeb97666f35223dc079edf3d5b563f7eb">More...</a><br /></td></tr>
 <tr class="separator:aeb97666f35223dc079edf3d5b563f7eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -270,9 +281,6 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:aea8480fb9c6f0eff82cd1e007cae660b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#aea8480fb9c6f0eff82cd1e007cae660b">init</a> (const std::vector&lt; std::pair&lt; StateVec, StateMat &gt;&gt; &amp;hypotheses)</td></tr>
 <tr class="memdesc:aea8480fb9c6f0eff82cd1e007cae660b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears all particles in the filter and samples new particles from the multivariate normal distribution with the given mean and covariance.  <a href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#aea8480fb9c6f0eff82cd1e007cae660b">More...</a><br /></td></tr>
 <tr class="separator:aea8480fb9c6f0eff82cd1e007cae660b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1bcc9c9d69f0102c6c2e6a28a1e0ad23"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a1bcc9c9d69f0102c6c2e6a28a1e0ad23">resample</a> ()</td></tr>
-<tr class="memdesc:a1bcc9c9d69f0102c6c2e6a28a1e0ad23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Do a weighted resampling of all of the particles in the filter.  <a href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a1bcc9c9d69f0102c6c2e6a28a1e0ad23">More...</a><br /></td></tr>
-<tr class="separator:a1bcc9c9d69f0102c6c2e6a28a1e0ad23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a200179128c2836d233d373dfef3c71f2"><td class="memItemLeft" align="right" valign="top"><a id="a200179128c2836d233d373dfef3c71f2"></a>
 std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html#a200179128c2836d233d373dfef3c71f2">resample_particles</a> ()</td></tr>
 <tr class="memdesc:a200179128c2836d233d373dfef3c71f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Use the chosen resample and residual method to resample the particles in the filter based on their weights. <br /></td></tr>
@@ -655,7 +663,7 @@ template&lt;typename Scalar , template&lt; typename &gt; class FilterModel&gt; <
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -817,7 +825,7 @@ template&lt;typename... Args&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>math</b></li><li class="navelem"><b>filter</b></li><li class="navelem"><a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html">ParticleFilter</a></li>
-    <li class="footer">Generated on Tue Jan 2 2024 00:32:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jan 2 2024 00:33:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

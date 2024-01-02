@@ -155,9 +155,9 @@ var hierarchy =
     [ "module::localisation::BallModel< Scalar >", "classmodule_1_1localisation_1_1BallModel.html", null ],
     [ "module::localisation::BallModel< Scalar >::StateVec", "structmodule_1_1localisation_1_1BallModel_1_1StateVec.html", null ],
     [ "module::localisation::FieldLocalisation::Config", "structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html", null ],
+    [ "module::localisation::FieldModel< Scalar >", "classmodule_1_1localisation_1_1FieldModel.html", null ],
     [ "module::localisation::MeasurementType::BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ],
     [ "module::localisation::OccupancyMap< Scalar >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],
-    [ "module::localisation::Particle", "structmodule_1_1localisation_1_1Particle.html", null ],
     [ "module::localisation::StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", null ],
     [ "module::motion::Animator", "classmodule_1_1motion_1_1Animator.html", null ],
     [ "module::motion::ExecuteKick", "structmodule_1_1motion_1_1ExecuteKick.html", null ],
@@ -339,6 +339,7 @@ var hierarchy =
       [ "module::vision::VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", null ]
     ] ],
     [ "module::localisation::OccupancyMap< double >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],
+    [ "utility::math::filter::ParticleFilter< double, module::localisation::FieldModel >", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", null ],
     [ "extension::behaviour::ProviderBase< T, commands::ProviderClassification::PROVIDE >", "structextension_1_1behaviour_1_1ProviderBase.html", [
       [ "extension::behaviour::Provide< T >", "structextension_1_1behaviour_1_1Provide.html", null ]
     ] ],

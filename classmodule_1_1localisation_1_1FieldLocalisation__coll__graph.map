@@ -1,7 +1,8 @@
 <map id="module::localisation::FieldLocalisation" name="module::localisation::FieldLocalisation">
-<area shape="rect" id="node1" title=" " alt="" coords="641,63,796,105"/>
-<area shape="rect" id="node2" title=" " alt="" coords="331,5,466,32"/>
-<area shape="rect" id="node3" href="$structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html" title="Stores configuration values." alt="" coords="321,56,476,112"/>
+<area shape="rect" id="node1" title=" " alt="" coords="752,103,907,145"/>
+<area shape="rect" id="node2" title=" " alt="" coords="356,5,491,32"/>
+<area shape="rect" id="node3" href="$structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html" title="Stores configuration values." alt="" coords="346,56,501,112"/>
 <area shape="rect" id="node4" href="$structmodule_1_1localisation_1_1StartingSide.html" title=" " alt="" coords="5,63,160,105"/>
-<area shape="rect" id="node5" href="$classmodule_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,137,500,178"/>
+<area shape="rect" id="node5" href="$classutility_1_1math_1_1filter_1_1ParticleFilter.html" title=" " alt="" coords="297,136,549,192"/>
+<area shape="rect" id="node6" href="$classmodule_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="322,217,525,258"/>
 </map>

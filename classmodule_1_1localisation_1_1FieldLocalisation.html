@@ -189,11 +189,12 @@ Collaboration diagram for module::localisation::FieldLocalisation:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1localisation_1_1FieldLocalisation__coll__graph.png" border="0" usemap="#amodule_1_1localisation_1_1FieldLocalisation_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1localisation_1_1FieldLocalisation_coll__map" id="amodule_1_1localisation_1_1FieldLocalisation_coll__map">
-<area shape="rect" title=" " alt="" coords="641,63,796,105"/>
-<area shape="rect" title=" " alt="" coords="331,5,466,32"/>
-<area shape="rect" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html" title="Stores configuration values." alt="" coords="321,56,476,112"/>
+<area shape="rect" title=" " alt="" coords="752,103,907,145"/>
+<area shape="rect" title=" " alt="" coords="356,5,491,32"/>
+<area shape="rect" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html" title="Stores configuration values." alt="" coords="346,56,501,112"/>
 <area shape="rect" href="structmodule_1_1localisation_1_1StartingSide.html" title=" " alt="" coords="5,63,160,105"/>
-<area shape="rect" href="classmodule_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="297,137,500,178"/>
+<area shape="rect" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html" title=" " alt="" coords="297,136,549,192"/>
+<area shape="rect" href="classmodule_1_1localisation_1_1OccupancyMap.html" title=" " alt="" coords="322,217,525,258"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -209,92 +210,44 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a45bd53aeb8a3cdadbbcca05e5715ad27">FieldLocalisation</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:a45bd53aeb8a3cdadbbcca05e5715ad27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html">FieldLocalisation</a> reactor. <br /></td></tr>
 <tr class="separator:a45bd53aeb8a3cdadbbcca05e5715ad27"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adb67cee9e176d77a01368f3d28cfa480"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#adb67cee9e176d77a01368f3d28cfa480">add_noise</a> ()</td></tr>
-<tr class="memdesc:adb67cee9e176d77a01368f3d28cfa480"><td class="mdescLeft">&#160;</td><td class="mdescRight">Add some noise to the particles to compensate for the fact that we don't have a perfect model.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#adb67cee9e176d77a01368f3d28cfa480">More...</a><br /></td></tr>
-<tr class="separator:adb67cee9e176d77a01368f3d28cfa480"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5dab2151b6930ffdc66d21c11f7e1af0"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a5dab2151b6930ffdc66d21c11f7e1af0">calculate_weight</a> (const Eigen::Vector3d particle, const std::vector&lt; Eigen::Vector3d &gt; &amp;observations)</td></tr>
-<tr class="memdesc:a5dab2151b6930ffdc66d21c11f7e1af0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the weight of a particle given a set of observations.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a5dab2151b6930ffdc66d21c11f7e1af0">More...</a><br /></td></tr>
-<tr class="separator:a5dab2151b6930ffdc66d21c11f7e1af0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a306abc5e4b9bb117f95572fa8a841f2d"><td class="memItemLeft" align="right" valign="top"><a id="a306abc5e4b9bb117f95572fa8a841f2d"></a>
-Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a306abc5e4b9bb117f95572fa8a841f2d">compute_covariance</a> ()</td></tr>
-<tr class="memdesc:a306abc5e4b9bb117f95572fa8a841f2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current covariance matrix of the robot's state. <br /></td></tr>
-<tr class="separator:a306abc5e4b9bb117f95572fa8a841f2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31ec05258deee3fba3c0fc6c54711f1a"><td class="memItemLeft" align="right" valign="top"><a id="a31ec05258deee3fba3c0fc6c54711f1a"></a>
-Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a31ec05258deee3fba3c0fc6c54711f1a">compute_mean</a> ()</td></tr>
-<tr class="memdesc:a31ec05258deee3fba3c0fc6c54711f1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current mean (state) of the robot. <br /></td></tr>
-<tr class="separator:a31ec05258deee3fba3c0fc6c54711f1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9bd908bd08f4093ae7a16032cdf61e2"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#aa9bd908bd08f4093ae7a16032cdf61e2">position_in_map</a> (const Eigen::Vector3d particle, const Eigen::Vector3d rPWw)</td></tr>
-<tr class="memdesc:aa9bd908bd08f4093ae7a16032cdf61e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a point in the robot's coordinate frame into an index in the map.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#aa9bd908bd08f4093ae7a16032cdf61e2">More...</a><br /></td></tr>
-<tr class="separator:aa9bd908bd08f4093ae7a16032cdf61e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a70c42ad45895d12a46c376c6e339d6de"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de">resample</a> ()</td></tr>
-<tr class="memdesc:a70c42ad45895d12a46c376c6e339d6de"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resample the particles based on their weights.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a70c42ad45895d12a46c376c6e339d6de">More...</a><br /></td></tr>
-<tr class="separator:a70c42ad45895d12a46c376c6e339d6de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bb3dd02e901d3ff96bb043933c4bec2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9bb3dd02e901d3ff96bb043933c4bec2">time_update</a> ()</td></tr>
-<tr class="memdesc:a9bb3dd02e901d3ff96bb043933c4bec2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Perform a time update on the particles.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9bb3dd02e901d3ff96bb043933c4bec2">More...</a><br /></td></tr>
-<tr class="separator:a9bb3dd02e901d3ff96bb043933c4bec2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35bf2023beca8d29ff5e1fa084a65db3"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a35bf2023beca8d29ff5e1fa084a65db3">calculate_weight</a> (const Eigen::Vector3d &amp;particle, const std::vector&lt; Eigen::Vector3d &gt; &amp;observations)</td></tr>
+<tr class="memdesc:a35bf2023beca8d29ff5e1fa084a65db3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the weight of a particle given a set of observations.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a35bf2023beca8d29ff5e1fa084a65db3">More...</a><br /></td></tr>
+<tr class="separator:a35bf2023beca8d29ff5e1fa084a65db3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78b0225cda7e145d91d5f83ae48271a5"><td class="memItemLeft" align="right" valign="top">Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a78b0225cda7e145d91d5f83ae48271a5">compute_Hfw</a> (const Eigen::Vector3d &amp;particle)</td></tr>
+<tr class="memdesc:a78b0225cda7e145d91d5f83ae48271a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a78b0225cda7e145d91d5f83ae48271a5">More...</a><br /></td></tr>
+<tr class="separator:a78b0225cda7e145d91d5f83ae48271a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a356274a0a3eee7cdbd9705948f39ea33"><td class="memItemLeft" align="right" valign="top">Eigen::Vector2i&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a356274a0a3eee7cdbd9705948f39ea33">position_in_map</a> (const Eigen::Vector3d &amp;particle, const Eigen::Vector3d &amp;rPWw)</td></tr>
+<tr class="memdesc:a356274a0a3eee7cdbd9705948f39ea33"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform a field line point from world {w} to position in the distance map {m}.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#a356274a0a3eee7cdbd9705948f39ea33">More...</a><br /></td></tr>
+<tr class="separator:a356274a0a3eee7cdbd9705948f39ea33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc278764495056c24aa87ce54561f6da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#abc278764495056c24aa87ce54561f6da">setup_fieldline_distance_map</a> (const FieldDescription &amp;fd)</td></tr>
+<tr class="memdesc:abc278764495056c24aa87ce54561f6da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup field line distance map.  <a href="classmodule_1_1localisation_1_1FieldLocalisation.html#abc278764495056c24aa87ce54561f6da">More...</a><br /></td></tr>
+<tr class="separator:abc278764495056c24aa87ce54561f6da"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:adf5d1af90cac7a1c998dcaa5f4adbb08"><td class="memItemLeft" align="right" valign="top"><a id="adf5d1af90cac7a1c998dcaa5f4adbb08"></a>
 struct <a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html">module::localisation::FieldLocalisation::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:adf5d1af90cac7a1c998dcaa5f4adbb08"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2eeec07c3ffb0b7ab1ebfc3a5845f973"><td class="memItemLeft" align="right" valign="top"><a id="a2eeec07c3ffb0b7ab1ebfc3a5845f973"></a>
-Eigen::Matrix3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a2eeec07c3ffb0b7ab1ebfc3a5845f973">covariance</a> = Eigen::Matrix3d::Identity()</td></tr>
-<tr class="memdesc:a2eeec07c3ffb0b7ab1ebfc3a5845f973"><td class="mdescLeft">&#160;</td><td class="mdescRight">Covariance matrix of the robot's state. <br /></td></tr>
-<tr class="separator:a2eeec07c3ffb0b7ab1ebfc3a5845f973"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a89d7cb30ff43910bba580191eef78bdd"><td class="memItemLeft" align="right" valign="top"><a id="a89d7cb30ff43910bba580191eef78bdd"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a89d7cb30ff43910bba580191eef78bdd">falling</a> = false</td></tr>
-<tr class="memdesc:a89d7cb30ff43910bba580191eef78bdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Status of if the robot is falling. <br /></td></tr>
-<tr class="separator:a89d7cb30ff43910bba580191eef78bdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a35229f8d5231986b2607375de9450558"><td class="memItemLeft" align="right" valign="top"><a id="a35229f8d5231986b2607375de9450558"></a>
-<a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">OccupancyMap</a>&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a35229f8d5231986b2607375de9450558">fieldline_map</a></td></tr>
-<tr class="memdesc:a35229f8d5231986b2607375de9450558"><td class="mdescLeft">&#160;</td><td class="mdescRight">Occupancy grid map of the field lines. <br /></td></tr>
-<tr class="separator:a35229f8d5231986b2607375de9450558"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a943c8351a8f801b991130c4f9361ff4a"><td class="memItemLeft" align="right" valign="top"><a id="a943c8351a8f801b991130c4f9361ff4a"></a>
+<a class="el" href="classmodule_1_1localisation_1_1OccupancyMap.html">OccupancyMap</a>&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a943c8351a8f801b991130c4f9361ff4a">fieldline_distance_map</a></td></tr>
+<tr class="memdesc:a943c8351a8f801b991130c4f9361ff4a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Field line distance map (encodes the minimum distance to a field line) <br /></td></tr>
+<tr class="separator:a943c8351a8f801b991130c4f9361ff4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abebd3a63aac67d9ac2e272a08e544fef"><td class="memItemLeft" align="right" valign="top"><a id="abebd3a63aac67d9ac2e272a08e544fef"></a>
+<a class="el" href="classutility_1_1math_1_1filter_1_1ParticleFilter.html">utility::math::filter::ParticleFilter</a>&lt; double, <a class="el" href="classmodule_1_1localisation_1_1FieldModel.html">FieldModel</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#abebd3a63aac67d9ac2e272a08e544fef">filter</a></td></tr>
+<tr class="memdesc:abebd3a63aac67d9ac2e272a08e544fef"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particle filter class. <br /></td></tr>
+<tr class="separator:abebd3a63aac67d9ac2e272a08e544fef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9088430d15da9aa140452f3ae2ff35ba"><td class="memItemLeft" align="right" valign="top"><a id="a9088430d15da9aa140452f3ae2ff35ba"></a>
-NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b>last_time_update_time</b></td></tr>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a9088430d15da9aa140452f3ae2ff35ba">last_time_update_time</a></td></tr>
+<tr class="memdesc:a9088430d15da9aa140452f3ae2ff35ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last time filter was updated. <br /></td></tr>
 <tr class="separator:a9088430d15da9aa140452f3ae2ff35ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae1ee5b507145d9c986f1e706b637489a"><td class="memItemLeft" align="right" valign="top"><a id="ae1ee5b507145d9c986f1e706b637489a"></a>
-std::vector&lt; <a class="el" href="structmodule_1_1localisation_1_1Particle.html">Particle</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#ae1ee5b507145d9c986f1e706b637489a">particles</a> {}</td></tr>
-<tr class="memdesc:ae1ee5b507145d9c986f1e706b637489a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Particles used in the particle filter. <br /></td></tr>
-<tr class="separator:ae1ee5b507145d9c986f1e706b637489a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b219938714c034f0697574533a13585"><td class="memItemLeft" align="right" valign="top"><a id="a6b219938714c034f0697574533a13585"></a>
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#a6b219938714c034f0697574533a13585">startup_time</a></td></tr>
-<tr class="memdesc:a6b219938714c034f0697574533a13585"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time of startup. <br /></td></tr>
+<tr class="memdesc:a6b219938714c034f0697574533a13585"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time at startup. <br /></td></tr>
 <tr class="separator:a6b219938714c034f0697574533a13585"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae366bcd7d0c2925f0e90958c40c23b13"><td class="memItemLeft" align="right" valign="top"><a id="ae366bcd7d0c2925f0e90958c40c23b13"></a>
-Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html#ae366bcd7d0c2925f0e90958c40c23b13">state</a> = Eigen::Vector3d::Zero()</td></tr>
-<tr class="memdesc:ae366bcd7d0c2925f0e90958c40c23b13"><td class="mdescLeft">&#160;</td><td class="mdescRight">State (x,y,theta) of the robot. <br /></td></tr>
-<tr class="separator:ae366bcd7d0c2925f0e90958c40c23b13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="adb67cee9e176d77a01368f3d28cfa480"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adb67cee9e176d77a01368f3d28cfa480">&#9670;&nbsp;</a></span>add_noise()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void module::localisation::FieldLocalisation::add_noise </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Add some noise to the particles to compensate for the fact that we don't have a perfect model. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">particles</td><td>Vector of particles to be resampled </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The particles with noise added </dd></dl>
-
-</div>
-</div>
-<a id="a5dab2151b6930ffdc66d21c11f7e1af0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5dab2151b6930ffdc66d21c11f7e1af0">&#9670;&nbsp;</a></span>calculate_weight()</h2>
+<a id="a35bf2023beca8d29ff5e1fa084a65db3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a35bf2023beca8d29ff5e1fa084a65db3">&#9670;&nbsp;</a></span>calculate_weight()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -302,7 +255,7 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="memname">double module::localisation::FieldLocalisation::calculate_weight </td>
           <td>(</td>
-          <td class="paramtype">const Eigen::Vector3d&#160;</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
           <td class="paramname"><em>particle</em>, </td>
         </tr>
         <tr>
@@ -319,7 +272,7 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
       </table>
 </div><div class="memdoc">
 
-<p>Get the weight of a particle given a set of observations. </p>
+<p>Calculate the weight of a particle given a set of observations. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">particle</td><td>The state of the particle (x,y,theta) </td></tr>
@@ -327,12 +280,39 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The weight of the particle </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Weight of the particle </dd></dl>
 
 </div>
 </div>
-<a id="aa9bd908bd08f4093ae7a16032cdf61e2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9bd908bd08f4093ae7a16032cdf61e2">&#9670;&nbsp;</a></span>position_in_map()</h2>
+<a id="a78b0225cda7e145d91d5f83ae48271a5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a78b0225cda7e145d91d5f83ae48271a5">&#9670;&nbsp;</a></span>compute_Hfw()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">Eigen::Isometry3d module::localisation::FieldLocalisation::compute_Hfw </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
+          <td class="paramname"><em>particle</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta) </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">state</td><td>The state vector (x,y,theta) </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Hfw, the homogenous transformation matrix from world {w} to field {f} space </dd></dl>
+
+</div>
+</div>
+<a id="a356274a0a3eee7cdbd9705948f39ea33"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a356274a0a3eee7cdbd9705948f39ea33">&#9670;&nbsp;</a></span>position_in_map()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -340,13 +320,13 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
         <tr>
           <td class="memname">Eigen::Vector2i module::localisation::FieldLocalisation::position_in_map </td>
           <td>(</td>
-          <td class="paramtype">const Eigen::Vector3d&#160;</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
           <td class="paramname"><em>particle</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Eigen::Vector3d&#160;</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
           <td class="paramname"><em>rPWw</em>&#160;</td>
         </tr>
         <tr>
@@ -357,7 +337,7 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
       </table>
 </div><div class="memdoc">
 
-<p>Transform a point in the robot's coordinate frame into an index in the map. </p>
+<p>Transform a field line point from world {w} to position in the distance map {m}. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">particle</td><td>The state of the particle (x,y,theta) </td></tr>
@@ -365,56 +345,30 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The observation location (x, y) in the map </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Eigen::Vector2i </dd></dl>
 
 </div>
 </div>
-<a id="a70c42ad45895d12a46c376c6e339d6de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a70c42ad45895d12a46c376c6e339d6de">&#9670;&nbsp;</a></span>resample()</h2>
+<a id="abc278764495056c24aa87ce54561f6da"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abc278764495056c24aa87ce54561f6da">&#9670;&nbsp;</a></span>setup_fieldline_distance_map()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void module::localisation::FieldLocalisation::resample </td>
+          <td class="memname">void module::localisation::FieldLocalisation::setup_fieldline_distance_map </td>
           <td>(</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramtype">const FieldDescription &amp;&#160;</td>
+          <td class="paramname"><em>fd</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p>Resample the particles based on their weights. </p>
+<p>Setup field line distance map. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">particles</td><td>Vector of particles to be resampled </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>The resampled particles </dd></dl>
-
-</div>
-</div>
-<a id="a9bb3dd02e901d3ff96bb043933c4bec2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9bb3dd02e901d3ff96bb043933c4bec2">&#9670;&nbsp;</a></span>time_update()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void module::localisation::FieldLocalisation::time_update </td>
-          <td>(</td>
-          <td class="paramname"></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Perform a time update on the particles. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">walk_command</td><td>The walk command (dx, dy, dtheta) </td></tr>
-    <tr><td class="paramname">dt</td><td>The time since the last time update </td></tr>
+    <tr><td class="paramname">fd</td><td>The field dimensions </td></tr>
   </table>
   </dd>
 </dl>
@@ -423,6 +377,7 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/localisation/FieldLocalisation/src/<a class="el" href="FieldLocalisation_8hpp_source.html">FieldLocalisation.hpp</a></li>
+<li>module/localisation/FieldLocalisation/src/FieldLineOccupanyMap.cpp</li>
 <li>module/localisation/FieldLocalisation/src/FieldLocalisation.cpp</li>
 </ul>
 </div><!-- contents -->
@@ -431,7 +386,7 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1localisation_1_1FieldLocalisation.html">FieldLocalisation</a></li>
-    <li class="footer">Generated on Tue Jan 2 2024 00:32:31 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Jan 2 2024 00:33:59 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
