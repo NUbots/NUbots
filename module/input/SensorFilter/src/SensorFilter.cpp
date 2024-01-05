@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "SensorFilter.hpp"
@@ -38,7 +46,6 @@ namespace module::input {
     using utility::support::Expression;
 
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkState;
     using message::localisation::ResetFieldLocalisation;
 
     using extension::Configuration;
@@ -48,10 +55,10 @@ namespace module::input {
         on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // **************************************** Button config ****************************************
+            // Button config
             cfg.buttons.debounce_threshold = config["buttons"]["debounce_threshold"].as<int>();
 
-            // **************************************** Foot down config ****************************************
+            // Foot down config
             const FootDownMethod method = config["foot_down"]["method"].as<std::string>();
             std::map<FootDownMethod, float> thresholds;
             for (const auto& threshold : config["foot_down"]["known_methods"]) {
@@ -59,17 +66,23 @@ namespace module::input {
             }
             cfg.footDown.set_method(method, thresholds);
 
-            //  **************************************** Configure Filters ****************************************
+            //  Kinematics Model
+            cfg.urdf_path = config["urdf_path"].as<std::string>();
+            nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
+
+            //  Configure Filters
             cfg.filtering_method = config["filtering_method"].as<std::string>();
             configure_ukf(config);
             configure_kf(config);
             configure_mahony(config);
 
-            // ****************************************  Kinematics Model ****************************************
-            cfg.urdf_path = config["urdf_path"].as<std::string>();
-            nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
-
             // Deadreckoning
+            Hwa.translation().y() =
+                tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
+                                                                   nugus_model.home_configuration(),
+                                                                   config["initial_anchor_frame"].as<std::string>())
+                    .translation()
+                    .y();
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
         });
 
@@ -133,7 +146,7 @@ namespace module::input {
                                   update_odometry_kf(sensors, previous_sensors, raw_sensors, stability, walk_state);
                                   break;
                               case FilteringMethod::MAHONY:
-                                  update_odometry_mahony(sensors, previous_sensors, raw_sensors, stability, walk_state);
+                                  update_odometry_mahony(sensors, previous_sensors, raw_sensors, walk_state);
                                   break;
                               case FilteringMethod::GROUND_TRUTH:
                                   update_odometry_ground_truth(sensors, raw_sensors);
@@ -169,6 +182,33 @@ namespace module::input {
             Hwt.translation().x() += dx * cos(yaw) - dy * sin(yaw);
             Hwt.translation().y() += dy * cos(yaw) + dx * sin(yaw);
         }
+    }
+
+    void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state) {
+        // Compute torso pose in world space using kinematics from anchor frame
+        if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
+            Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+        }
+        else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
+            Hwt = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+        }
+
+        // Update the anchor {a} frame if a support phase switch just occurred (could be done with foot down sensors)
+        if (walk_state.support_phase != current_support_phase) {
+            current_support_phase = walk_state.support_phase;
+            if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
+                // Update the anchor frame to the base of left foot
+                Hwa = Hwt * sensors->Htx[FrameID::L_FOOT_BASE];
+            }
+            else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
+                // Update the anchor frame to the base of right foot
+                Hwa = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
+            }
+        }
+        // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on flat ground
+        Hwa.translation().z() = 0;
+        Hwa.linear() =
+            Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwa.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {

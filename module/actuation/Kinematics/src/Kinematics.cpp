@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Kinematics.hpp"
 
 #include "extension/Behaviour.hpp"
@@ -26,7 +52,7 @@ namespace module::actuation {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using utility::actuation::kinematics::calculate_head_joints;
-    using utility::actuation::kinematics::calculateLegJoints;
+    using utility::actuation::kinematics::calculate_leg_joints;
     using utility::actuation::tinyrobotics::configuration_to_servos;
     using utility::actuation::tinyrobotics::servos_to_configuration;
     using utility::input::LimbID;
@@ -71,7 +97,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<LeftLeg>();
-                auto joints = calculateLegJoints<double>(kinematics_model, leg_ik.Htl, LimbID::LEFT_LEG);
+                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htl, LimbID::LEFT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -113,7 +139,7 @@ namespace module::actuation {
 
                 // Perform analytical IK
                 auto servos = std::make_unique<RightLeg>();
-                auto joints = calculateLegJoints<double>(kinematics_model, leg_ik.Htr, LimbID::RIGHT_LEG);
+                auto joints = calculate_leg_joints<double>(kinematics_model, leg_ik.Htr, LimbID::RIGHT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
