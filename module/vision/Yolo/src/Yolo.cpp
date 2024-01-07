@@ -31,22 +31,22 @@ namespace module::vision {
     using utility::support::Expression;
     using utility::vision::unproject;
 
-    cv::Point2f correct_distortion(const cv::Point2f& point, const Image& img) {
-        float k1 = img.lens.k.x();
-        float k2 = img.lens.k.y();
+    Eigen::Vector2d correct_distortion(const Eigen::Vector2d& pixel, const Image& img) {
+        double k1 = img.lens.k.x();
+        double k2 = img.lens.k.y();
 
         // Shift point by centre offset
-        float x = point.x - img.lens.centre.x();
-        float y = point.y - img.lens.centre.y();
+        double x = pixel.x() - img.lens.centre.x();
+        double y = pixel.y() - img.lens.centre.y();
 
         // Calculate r^2
-        float r2 = x * x + y * y;
+        double r2 = x * x + y * y;
 
         // Apply distortion k1 and k2
-        float x_distorted = x * (1 + k1 * r2 + k2 * r2 * r2);
-        float y_distorted = y * (1 + k1 * r2 + k2 * r2 * r2);
+        double x_distorted = x * (1 + k1 * r2 + k2 * r2 * r2);
+        double y_distorted = y * (1 + k1 * r2 + k2 * r2 * r2);
 
-        return cv::Point2f(x_distorted + img.lens.centre.x(), y_distorted + img.lens.centre.y());
+        return Eigen::Vector2d(x_distorted + img.lens.centre.x(), y_distorted + img.lens.centre.y());
     }
 
     /**
@@ -66,9 +66,12 @@ namespace module::vision {
      * @return Unit vector that this pixel represents in camera {c} space
      */
     Eigen::Vector3d unproject(const Eigen::Vector2d& pixel, const Image& img) {
+        // Correct for distortion
+        Eigen::Vector2d corrected_pixel = correct_distortion(pixel, img);
+
         // Convert pixel to normalized device coordinates (NDC), between [-1, 1]
-        double x_ndc = (2.0 * (pixel.x() - img.lens.centre.x()) / img.dimensions.x()) - 1.0;
-        double y_ndc = 1.0 - (2.0 * (pixel.y() - img.lens.centre.y()) / img.dimensions.y());
+        double x_ndc = (2.0 * (corrected_pixel.x()) / img.dimensions.x()) - 1.0;
+        double y_ndc = 1.0 - (2.0 * (corrected_pixel.y()) / img.dimensions.y());
 
         // Compute aspect ratio
         const double width  = img.dimensions.x();
