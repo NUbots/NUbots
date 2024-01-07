@@ -49,21 +49,35 @@ namespace module::vision {
         return cv::Point2f(x_distorted + img.lens.centre.x(), y_distorted + img.lens.centre.y());
     }
 
-    // Convert pixel coordinates to a unit vector (ray) in camera space
-    Eigen::Vector3d compute_ray(const Eigen::Vector2d& pixel, const Image& img) {
-        // Convert to Normalized Device Coordinates (NDC)
+    /**
+     * @brief Unprojects a pixel coordinate into a unit vector working out which lens model to use via the lens
+     * parameters.
+     *
+     * @details
+     *  This function expects a pixel coordinate having (0,0) at the top left of the image, with x to the right and y
+     * down. It will then convert this into a unit vector in camera space. For this camera space is defined as a
+     * coordinate system with the x axis going down the viewing direction of the camera, y is to the left of the image,
+     * and z is up.
+     *
+     *
+     * @param pixel the pixel coordinate to unproject
+     * @param img the image that the pixel coordinate is from
+     *
+     * @return Unit vector that this pixel represents in camera {c} space
+     */
+    Eigen::Vector3d unproject(const Eigen::Vector2d& pixel, const Image& img) {
+        // Convert pixel to Normalized Device Coordinates (NDC), between [-1, 1]
         double x_ndc = (2.0 * (pixel.x() - img.lens.centre.x()) / img.dimensions.x()) - 1.0;
         double y_ndc = 1.0 - (2.0 * (pixel.y() - img.lens.centre.y()) / img.dimensions.y());
 
         // Aspect ratio
-        double aspect_ratio = img.dimensions.x() / img.dimensions.y();
+        const double width  = img.dimensions.x();
+        const double height = img.dimensions.y();
+        double aspect_ratio = height / width;
+        double fov_vertical = 2.0 * std::atan(std::tan(img.lens.fov * 0.5) * aspect_ratio);
 
-        // Apply field of view and aspect ratio to convert to camera space
-        double x_camera = 1.0;
-        double y_camera = -x_ndc * aspect_ratio * img.lens.focal_length * std::tan(img.lens.fov / 2.0);
-        double z_camera = y_ndc * img.lens.focal_length * std::tan(img.lens.fov / 2.0);
-
-        Eigen::Vector3d uRCc(x_camera, y_camera, z_camera);
+        // Calculate unit vector in camera {c} space
+        Eigen::Vector3d uRCc(1.0, -x_ndc * std::tan(img.lens.fov / 2.0), y_ndc * std::tan(fov_vertical / 2.0));
         uRCc.normalize();
 
         return uRCc;
@@ -149,8 +163,8 @@ namespace module::vision {
                     // Correct for lens distortion
                     // box_centre = undistort_point(box_centre, img);
                     // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uBCc = compute_ray(box_centre, img);
-                    Eigen::Matrix<double, 3, 1> uLCc = compute_ray(box_left, img);
+                    Eigen::Matrix<double, 3, 1> uBCc = unproject(box_centre, img);
+                    Eigen::Matrix<double, 3, 1> uLCc = unproject(box_left, img);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uBCw = Hwc.rotation() * uBCc;
@@ -177,7 +191,7 @@ namespace module::vision {
                     // Correct for lens distortion
                     // box_bottom_centre = undistort_point(box_bottom_centre, img);
                     // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uRCc = compute_ray(box_bottom_centre, img);
+                    Eigen::Matrix<double, 3, 1> uRCc = unproject(box_bottom_centre, img);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uRCw = Hwc.rotation() * uRCc;

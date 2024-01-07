@@ -20,7 +20,7 @@ lens:
   # The polynomial distortion coefficients for the lens
   k: [0, 0]
   # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
-  fov: 2.0944
+  fov: 1.571
 
 settings:
   # PixelFormat: BayerRG8
