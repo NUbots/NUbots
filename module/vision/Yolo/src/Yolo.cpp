@@ -66,18 +66,19 @@ namespace module::vision {
      * @return Unit vector that this pixel represents in camera {c} space
      */
     Eigen::Vector3d unproject(const Eigen::Vector2d& pixel, const Image& img) {
-        // Convert pixel to Normalized Device Coordinates (NDC), between [-1, 1]
+        // Convert pixel to normalized device coordinates (NDC), between [-1, 1]
         double x_ndc = (2.0 * (pixel.x() - img.lens.centre.x()) / img.dimensions.x()) - 1.0;
         double y_ndc = 1.0 - (2.0 * (pixel.y() - img.lens.centre.y()) / img.dimensions.y());
 
-        // Aspect ratio
+        // Compute aspect ratio
         const double width  = img.dimensions.x();
         const double height = img.dimensions.y();
         double aspect_ratio = height / width;
-        double fov_vertical = 2.0 * std::atan(std::tan(img.lens.fov * 0.5) * aspect_ratio);
 
         // Calculate unit vector in camera {c} space
-        Eigen::Vector3d uRCc(1.0, -x_ndc * std::tan(img.lens.fov / 2.0), y_ndc * std::tan(fov_vertical / 2.0));
+        Eigen::Vector3d uRCc(1.0,
+                             -x_ndc * std::tan(0.5 * img.lens.fov),
+                             y_ndc * std::tan(0.5 * img.lens.fov) * aspect_ratio);
         uRCc.normalize();
 
         return uRCc;
