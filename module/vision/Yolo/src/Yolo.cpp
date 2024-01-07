@@ -10,6 +10,7 @@
 
 #include "message/input/Image.hpp"
 #include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 #include "message/vision/Robot.hpp"
 
 #include "utility/math/coordinates.hpp"
@@ -23,11 +24,14 @@ namespace module::vision {
     using message::input::Image;
     using message::vision::Ball;
     using message::vision::Balls;
+    using message::vision::Goal;
+    using message::vision::Goals;
     using message::vision::Robot;
     using message::vision::Robots;
 
 
     using utility::math::coordinates::cartesianToReciprocalSpherical;
+    using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
     using utility::vision::unproject;
 
@@ -130,6 +134,13 @@ namespace module::vision {
             robots->id        = img.id;
             robots->Hcw       = img.Hcw;
 
+            // Goals
+            auto goals       = std::make_unique<Goals>();
+            goals->timestamp = img.timestamp;
+            goals->id        = img.id;
+            goals->Hcw       = img.Hcw;
+
+
             for (int i = 0; i < detections; ++i) {
                 Detection detection = output[i];
 
@@ -164,8 +175,6 @@ namespace module::vision {
                     // Calculate the bottom left corner of the detection box
                     Eigen::Matrix<double, 2, 1> box_left(detection.box.x, detection.box.y + detection.box.height);
 
-                    // Correct for lens distortion
-                    // box_centre = undistort_point(box_centre, img);
                     // Convert to unit vector in camera space
                     Eigen::Matrix<double, 3, 1> uBCc = unproject(box_centre, img);
                     Eigen::Matrix<double, 3, 1> uLCc = unproject(box_left, img);
@@ -192,8 +201,6 @@ namespace module::vision {
                     Eigen::Matrix<double, 2, 1> box_bottom_centre(detection.box.x + detection.box.width / 2.0f,
                                                                   detection.box.y + detection.box.height);
 
-                    // Correct for lens distortion
-                    // box_bottom_centre = undistort_point(box_bottom_centre, img);
                     // Convert to unit vector in camera space
                     Eigen::Matrix<double, 3, 1> uRCc = unproject(box_bottom_centre, img);
 
@@ -208,10 +215,41 @@ namespace module::vision {
                     r.radius = 0.3;
                     robots->robots.push_back(r);
                 }
+
+                if (detection.className == "goal post") {
+                    // Calculate the middle of the bottom border of the detection box
+                    Eigen::Matrix<double, 2, 1> box_bottom_middle(detection.box.x + detection.box.width / 2.0,
+                                                                  detection.box.y + detection.box.height);
+                    // Calculate the middle of the top border of the detection box
+                    Eigen::Matrix<double, 2, 1> box_top_middle(detection.box.x + detection.box.width / 2.0,
+                                                               detection.box.y);
+
+                    // Convert to unit vector in camera space
+                    Eigen::Matrix<double, 3, 1> uGbCc = unproject(box_bottom_middle, img);
+                    Eigen::Matrix<double, 3, 1> uGtCc = unproject(box_top_middle, img);
+
+                    // Project the bottom unit vector onto the ground plane
+                    Eigen::Vector3d uGbCw = Hwc.rotation() * uGbCc;
+                    Eigen::Vector3d rGbWw = uGbCw * std::abs(Hwc.translation().z() / uGbCw.z()) + Hwc.translation();
+                    Eigen::Vector3d rGbCc = Hwc.inverse() * rGbWw;
+
+                    // Add goal to goals message
+                    Goal g;
+                    g.measurements.emplace_back();
+                    g.measurements.back().type  = Goal::MeasurementType::CENTRE;
+                    g.measurements.back().srGCc = cartesianToReciprocalSpherical(rGbCc);
+                    g.post.top                  = uGtCc;
+                    g.post.bottom               = uGbCc;
+                    g.post.distance             = rGbCc.norm();
+                    g.side                      = Goal::Side::UNKNOWN_SIDE;
+                    g.screen_angular            = cartesianToSpherical(g.post.bottom).tail<2>();
+                    goals->goals.push_back(std::move(g));
+                }
             }
 
             emit(std::move(balls));
             emit(std::move(robots));
+            emit(std::move(goals));
 
             if (log_level <= NUClear::DEBUG) {
                 cv::resize(frame, frame, cv::Size(frame.cols, frame.rows));
