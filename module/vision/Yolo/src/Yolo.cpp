@@ -10,6 +10,7 @@
 
 #include "message/input/Image.hpp"
 #include "message/vision/Ball.hpp"
+#include "message/vision/FieldIntersections.hpp"
 #include "message/vision/Goal.hpp"
 #include "message/vision/Robot.hpp"
 
@@ -24,11 +25,12 @@ namespace module::vision {
     using message::input::Image;
     using message::vision::Ball;
     using message::vision::Balls;
+    using message::vision::FieldIntersection;
+    using message::vision::FieldIntersections;
     using message::vision::Goal;
     using message::vision::Goals;
     using message::vision::Robot;
     using message::vision::Robots;
-
 
     using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
@@ -36,9 +38,6 @@ namespace module::vision {
     using utility::vision::unproject;
 
     Eigen::Vector2d correct_distortion(const Eigen::Vector2d& pixel, const Image& img) {
-        double k1 = img.lens.k.x();
-        double k2 = img.lens.k.y();
-
         // Shift point by centre offset
         double x = pixel.x() - img.lens.centre.x();
         double y = pixel.y() - img.lens.centre.y();
@@ -47,6 +46,8 @@ namespace module::vision {
         double r2 = x * x + y * y;
 
         // Apply distortion k1 and k2
+        double k1          = img.lens.k.x();
+        double k2          = img.lens.k.y();
         double x_distorted = x * (1 + k1 * r2 + k2 * r2 * r2);
         double y_distorted = y * (1 + k1 * r2 + k2 * r2 * r2);
 
@@ -74,8 +75,8 @@ namespace module::vision {
         Eigen::Vector2d corrected_pixel = correct_distortion(pixel, img);
 
         // Convert pixel to normalized device coordinates (NDC), between [-1, 1]
-        double x_ndc = (2.0 * (corrected_pixel.x()) / img.dimensions.x()) - 1.0;
-        double y_ndc = 1.0 - (2.0 * (corrected_pixel.y()) / img.dimensions.y());
+        double x_ndc = 2.0 * corrected_pixel.x() / img.dimensions.x() - 1.0;
+        double y_ndc = 1.0 - 2.0 * corrected_pixel.y() / img.dimensions.y();
 
         // Compute aspect ratio
         const double width  = img.dimensions.x();
@@ -139,6 +140,12 @@ namespace module::vision {
             goals->timestamp = img.timestamp;
             goals->id        = img.id;
             goals->Hcw       = img.Hcw;
+
+            // FieldIntersections
+            auto field_intersections       = std::make_unique<FieldIntersections>();
+            field_intersections->timestamp = img.timestamp;
+            field_intersections->id        = img.id;
+            field_intersections->Hcw       = img.Hcw;
 
 
             for (int i = 0; i < detections; ++i) {
@@ -245,11 +252,40 @@ namespace module::vision {
                     g.screen_angular            = cartesianToSpherical(g.post.bottom).tail<2>();
                     goals->goals.push_back(std::move(g));
                 }
+
+                if (detection.className == "L-intersection" || detection.className == "T-intersection"
+                    || detection.className == "X-intersection") {
+                    // Calculate the middle of the bottom border of the detection box
+                    Eigen::Matrix<double, 2, 1> box_bottom_middle(detection.box.x + detection.box.width / 2.0,
+                                                                  detection.box.y + detection.box.height);
+
+                    // Convert to unit vector in camera space
+                    Eigen::Matrix<double, 3, 1> uICc = unproject(box_bottom_middle, img);
+
+                    // Project the unit vector onto the ground plane
+                    Eigen::Vector3d uICw = Hwc.rotation() * uICc;
+                    Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
+
+                    // Add intersection to intersections message
+                    FieldIntersection i;
+                    i.rIWw = rIWw;
+                    if (detection.className == "L-intersection") {
+                        i.type = FieldIntersection::IntersectionType::L_INTERSECTION;
+                    }
+                    else if (detection.className == "T-intersection") {
+                        i.type = FieldIntersection::IntersectionType::T_INTERSECTION;
+                    }
+                    else if (detection.className == "X-intersection") {
+                        i.type = FieldIntersection::IntersectionType::X_INTERSECTION;
+                    }
+                    field_intersections->intersections.push_back(std::move(i));
+                }
             }
 
             emit(std::move(balls));
             emit(std::move(robots));
             emit(std::move(goals));
+            emit(std::move(field_intersections));
 
             if (log_level <= NUClear::DEBUG) {
                 cv::resize(frame, frame, cv::Size(frame.cols, frame.rows));
