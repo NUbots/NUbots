@@ -110,6 +110,7 @@ export class LocalisationModel {
   @observable robotVisible = true;
   @observable ballVisible = true;
   @observable fieldLinePointsVisible = true;
+  @observable fieldIntersectionsVisible = true;
 
   constructor(
     appModel: AppModel,

@@ -69,6 +69,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleRobotVisibility={this.toggleRobotVisibility}
           toggleBallVisibility={this.toggleBallVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
         ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -143,6 +144,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleFieldLinePointsVisibility = () => {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
   };
+
+  private toggleFieldIntersectionsVisibility = () => {
+    this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -156,6 +161,7 @@ interface LocalisationMenuBarProps {
   toggleRobotVisibility(): void;
   toggleBallVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
+  toggleFieldIntersectionsVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -191,6 +197,11 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
           onClick={props.toggleFieldLinePointsVisibility}
+        />
+        <MenuItem
+          label="Field Intersections"
+          isVisible={model.fieldIntersectionsVisible}
+          onClick={props.toggleFieldIntersectionsVisibility}
         />
       </ul>
     </Menu>
@@ -247,7 +258,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         })}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
-      <FieldIntersections model={model} />
+      {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
     </object3D>
   );
 });
