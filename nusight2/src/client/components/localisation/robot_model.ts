@@ -111,6 +111,15 @@ export class ServoMotorSet {
   }
 }
 
+export class FieldIntersection {
+  @observable type: string;
+  @observable position: Vector3;
+  constructor({ type, position }: { type: string; position: Vector3 }) {
+    this.type = type;
+    this.position = position;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -121,6 +130,7 @@ export class LocalisationRobotModel {
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
+  @observable fieldIntersections?: FieldIntersection[];
 
   constructor({
     model,
@@ -132,6 +142,7 @@ export class LocalisationRobotModel {
     motors,
     fieldLinePoints,
     ball,
+    fieldIntersections,
   }: {
     model: RobotModel;
     name: string;
@@ -142,6 +153,7 @@ export class LocalisationRobotModel {
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
+    fieldIntersections?: FieldIntersection[];
   }) {
     this.model = model;
     this.name = name;
@@ -152,6 +164,7 @@ export class LocalisationRobotModel {
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
+    this.fieldIntersections = fieldIntersections;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -190,5 +203,16 @@ export class LocalisationRobotModel {
   @computed
   get rBFf(): Vector3 | undefined {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
+  }
+
+  /** Field intersections in field space */
+  @computed
+  get fieldIntersectionsF(): FieldIntersection[] | undefined {
+    return this.fieldIntersections?.map((intersection) => {
+      return new FieldIntersection({
+        type: intersection.type,
+        position: intersection.position.applyMatrix4(this.Hfw),
+      });
+    });
   }
 }

@@ -111,7 +111,6 @@ namespace module::vision {
             const int height = img.dimensions.y();
             cv::Mat frame    = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
 
-
             // -------- Run Inference --------
             auto start                    = std::chrono::high_resolution_clock::now();
             std::vector<Detection> output = inf.runInference(frame);
@@ -256,11 +255,11 @@ namespace module::vision {
                 if (detection.className == "L-intersection" || detection.className == "T-intersection"
                     || detection.className == "X-intersection") {
                     // Calculate the middle of the bottom border of the detection box
-                    Eigen::Matrix<double, 2, 1> box_bottom_middle(detection.box.x + detection.box.width / 2.0,
-                                                                  detection.box.y + detection.box.height);
+                    Eigen::Matrix<double, 2, 1> box_middle(detection.box.x + detection.box.width / 2.0,
+                                                           detection.box.y + detection.box.height / 2.0);
 
                     // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uICc = unproject(box_bottom_middle, img);
+                    Eigen::Matrix<double, 3, 1> uICc = unproject(box_middle, img);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uICw = Hwc.rotation() * uICc;
