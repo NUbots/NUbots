@@ -343,6 +343,35 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
+# OpenVino
+
+RUN install-package opencl-clhpp && \
+    install-package opencl-headers && \
+    install-package ocl-icd
+
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1
+
+RUN cd openvino && git submodule update --init --recursive
+
+RUN cd openvino && mkdir build && \
+cd build && \
+cmake .. -DBUILD_TESTING:BOOL='OFF' \
+        -DCMAKE_BUILD_TYPE:STRING='Release' \
+        -DENABLE_AVX512F:BOOL='OFF' \
+        -DENABLE_PYTHON:BOOL='OFF' \
+        -DENABLE_CLANG_FORMAT:BOOL='OFF' \
+        -DENABLE_NCC_STYLE:BOOL='OFF' \
+        -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
+        -DENABLE_SYSTEM_TBB:BOOL='ON' \
+        -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
+        -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
+        -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+        -Wno-dev && \
+make -j$(nproc) && \
+make install
+
+RUN /usr/local/setupvars.sh
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -389,7 +418,10 @@ RUN install-package clinfo
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 # Re-run ldconfig to make sure the database is up to date
+RUN echo '/usr/local/runtime/lib/intel64' | sudo tee /etc/ld.so.conf.d/openvino.conf
 RUN ldconfig
+
+RUN install-package intel-tbb
 
 ##############################
 ### SETUP THE USER ACCOUNT ###
