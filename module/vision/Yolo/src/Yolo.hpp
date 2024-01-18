@@ -2,8 +2,7 @@
 #define MODULE_VISION_YOLO_HPP
 
 #include <nuclear>
-
-#include "inference.h"
+#include <openvino/openvino.hpp>
 
 namespace module::vision {
 
@@ -14,7 +13,14 @@ namespace module::vision {
             std::string model_path = "";
         } cfg;
 
-        Inference inf;
+        /// @brief OpenVINO Core
+        ov::Core core;
+
+        /// @brief Compiled model
+        ov::CompiledModel compiled_model;
+
+        /// @brief Inference request
+        ov::InferRequest infer_request;
 
     public:
         /// @brief Called by the powerplant to build and setup the Yolo reactor.
