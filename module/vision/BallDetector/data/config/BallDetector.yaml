@@ -8,6 +8,6 @@ distance_disagreement:
   0.30 # Percentage difference between width and projection based distances. 0.0 means
   # the distance measurements must match perfectly
 maximum_deviation:
-  0.17 # A threshold on how large the standard deviation of the angle between ray and
+  0.30 # A threshold on how large the standard deviation of the angle between ray and
   # cone axis can be
 ball_angular_cov: [0.01, 0.01, 0.01] # Measurement certainties for ball localisation
