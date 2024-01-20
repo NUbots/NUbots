@@ -5,7 +5,6 @@
 #include <yaml-cpp/yaml.h>
 
 #include "tasks/RotationEvaluator.hpp"
-// #include "tasks/StandEvaluator.hpp"
 #include "tasks/StrafeEvaluator.hpp"
 #include "tasks/WalkEvaluator.hpp"
 
@@ -21,9 +20,8 @@
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
+#include "message/support/optimisation/OptimisationRobotPosition.hpp"
 #include "message/support/optimisation/OptimisationTimeUpdate.hpp"
-#include "message/support/optimisation/OptimisationRobotPosition.hpp"
-#include "message/support/optimisation/OptimisationRobotPosition.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -45,10 +43,10 @@ namespace module::support::optimisation {
     using message::support::optimisation::NSGA2FitnessScores;
     using message::support::optimisation::NSGA2Terminate;
     using message::support::optimisation::NSGA2TrialExpired;
-    using message::support::optimisation::OptimisationResetDone;
-    using message::support::optimisation::OptimisationTimeUpdate;
-    using message::support::optimisation::OptimisationRobotPosition;
     using message::support::optimisation::OptimisationCommand;
+    using message::support::optimisation::OptimisationResetDone;
+    using message::support::optimisation::OptimisationRobotPosition;
+    using message::support::optimisation::OptimisationTimeUpdate;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
