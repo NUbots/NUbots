@@ -48,7 +48,7 @@ from .camera_calibration.loss import extrinsic_loss
 from .camera_calibration.metric import *
 from .camera_calibration.model import *
 from .images import decode_image, fourcc
-from .nbs import Decoder
+from utility.nbs import LinearDecoder as Decoder
 
 # The dtype we will use to calibrate, 64 bit floats tend to be a little more numerically stable
 TF_CALIBRATION_DTYPE = tf.float64
@@ -97,25 +97,17 @@ def register(command):
 
 
 def packetise_stream(decoder):
-
-    bytes_read = 0
     for packet in decoder:
-
         # Check for compressed images
-        if packet.type == "message.output.CompressedImage":
-
-            # Work out how many bytes we have read to get to this message
-            read = decoder.bytes_read() - bytes_read
-            bytes_read = decoder.bytes_read()
-
+        if packet.type.name == "message.output.CompressedImage":
             # Get some useful info into a pickleable format
             yield {
-                "bytes_read": read,
                 "camera_name": packet.msg.name,
                 "timestamp": (packet.msg.timestamp.seconds, packet.msg.timestamp.nanos),
                 "data": packet.msg.data,
                 "format": packet.msg.format,
             }
+
 
 
 def process_frame(item, rows, cols):
@@ -172,7 +164,6 @@ def process_frame(item, rows, cols):
     return {
         "name": item["camera_name"],
         "timestamp": item["timestamp"],
-        "bytes_read": item["bytes_read"],
         "image": img,
         "blobs": detector.detect(img),
         "centres": centres if ret else None,
@@ -188,7 +179,6 @@ def find_grids(files, rows, cols):
 
     # The points from the images that have been gathered
     if not os.path.isfile(pickle_path):
-
         # Read the nbs file
         with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
             decoder = Decoder(*files)
@@ -205,7 +195,7 @@ def find_grids(files, rows, cols):
                 def update_results(msg):
 
                     # Update the progress based on the image we are up to
-                    progress.update(msg["bytes_read"])
+                    # progress.update(msg["bytes_read"])
 
                     img = msg["image"]
                     img = cv2.drawKeypoints(
@@ -214,8 +204,8 @@ def find_grids(files, rows, cols):
                     if msg["centres"] is not None:
                         img = cv2.drawChessboardCorners(img, (rows, cols), msg["centres"], True)
 
-                    cv2.imshow(msg["name"], img)
-                    cv2.waitKey(1)
+                    # cv2.imshow(msg["name"], img)
+                    # cv2.waitKey(1)
 
                     # Add this to the grids list
                     if msg["name"] not in grids:
@@ -227,7 +217,7 @@ def find_grids(files, rows, cols):
                             # And then divide by the width of the image to get a normalised coordinate
                             "centres": None
                             if msg["centres"] is None
-                            else (np.array(img.shape[:2][::-1], dtype=np.float) * 0.5 - msg["centres"]) / img.shape[1],
+                            else (np.array(img.shape[:2][::-1], dtype=NP_CALIBRATION_DTYPE) * 0.5 - msg["centres"]) / img.shape[1],
                             "dimensions": img.shape,
                         }
                     )
@@ -250,10 +240,10 @@ def find_grids(files, rows, cols):
                 with open(pickle_path, "wb") as f:
                     pickle.dump(grids, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-        # Close all the windows
-        cv2.destroyAllWindows()
+    # Close all the windows
+    # cv2.destroyAllWindows()
 
-    # If we have a pickle file load it
+    # # If we have a pickle file load it
     else:
         # Load the pickle file
         with open(pickle_path, "rb") as f:
@@ -329,6 +319,7 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
 
     # Calculate the intrinsics for each of the lenses
     for name, data in grids.items():
+
         if name not in configurations:
             raise RuntimeError("There is no file in the configuration directory for the {} camera".format(name))
 
@@ -371,65 +362,68 @@ def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics,
             # Stack up the points into rows/cols
             points = tf.cast(tf.reshape(points, (points.shape[0], cols, rows, 2)), dtype=TF_CALIBRATION_DTYPE)
 
-            history = model.fit(
-                x=points,
-                # y=tf.ones([*points.shape[:-1], 3], dtype=TF_CALIBRATION_DTYPE),
-                epochs=1000000,
-                batch_size=points.shape[0],
-                verbose=0,
-                callbacks=[
-                    # 0 Learning rate for the first epoch so that if our current optimisation is the best we don't lose it
-                    tf.keras.callbacks.LearningRateScheduler(schedule=lambda epoch: 0.0 if epoch == 0 else 1e-2),
-                    tf.keras.callbacks.EarlyStopping(monitor="loss", patience=99, restore_best_weights=True),
-                    IntrinsicProgress(),
-                ],
-            )
-
-            # Update the intrinsics in the config
-            config["lens"]["focal_length"] = float(model.focal_length.numpy())
-            config["lens"]["centre"][0] = float(model.centre[0].numpy())
-            config["lens"]["centre"][1] = float(model.centre[1].numpy())
-            for i in range(len(config["lens"]["k"])):
-                config["lens"]["k"][i] = float(model.k[i].numpy())
-
-            # Work out how much the loss has improved by
-            best_idx = np.argmin(history.history["loss"])
-
-            # Extract the angular errors and express them in pixels also
-            collinearity = math.sqrt(history.history["collinearity"][best_idx])
-            parallelity = math.sqrt(history.history["parallelity"][best_idx])
-            orthogonality = math.sqrt(history.history["orthogonality"][best_idx])
-            collinearity_px = model.r(tf.cast(collinearity, model.dtype)) * dimensions[1]
-            parallelity_percent = 100 * math.tan(parallelity)
-            orthogonality_percent = 100 * math.tan(orthogonality)
-
-            inverse_qualities = [math.sqrt(model.inverse_quality(i).numpy()) for i in range(1, 10)]
-
-            print("Intrinsic calibration results for {} camera".format(name))
-            print("\t ƒ: {:.3f}".format(model.focal_length.numpy()))
-            print("\tΔc: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.centre.numpy()])))
-            print("\t k: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.k.numpy()])))
-            print("\tik: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.inverse_coeffs()])))
-            print("Error")
-            print("\t ↔: {:.3f}º ({:.3f}px) ".format(collinearity * 180 / math.pi, collinearity_px))
-            print("\t||: {:.3f}º ({:.3f}%)".format(parallelity * 180 / math.pi, parallelity_percent))
-            print("\t ⟂: {:.3f}º ({:.3f}%)".format(orthogonality * 180 / math.pi, orthogonality_percent))
-            print(
-                "\t k: [{}]".format(
-                    ", ".join(["{:.2f}px ({:.2f}%)".format(v * dimensions[1], v * 100) for v in inverse_qualities])
+            # If not empty, calibrate and write new config values
+            if tf.size(points) != 0:
+                history = model.fit(
+                    x=points,
+                    # y=tf.ones([*points.shape[:-1], 3], dtype=TF_CALIBRATION_DTYPE),
+                    epochs=1000000,
+                    batch_size=points.shape[0],
+                    verbose=0,
+                    callbacks=[
+                        # 0 Learning rate for the first epoch so that if our current optimisation is the best we don't lose it
+                        tf.keras.callbacks.LearningRateScheduler(schedule=lambda epoch: 0.0 if epoch == 0 else 1e-2),
+                        tf.keras.callbacks.EarlyStopping(monitor="loss", patience=99, restore_best_weights=True),
+                        IntrinsicProgress(),
+                    ],
                 )
-            )
 
-            original_loss = history.history["loss"][0]
-            best_loss = min(history.history["loss"])
-            print()
-            print("Loss improved by {:.2g}%".format(100.0 * (original_loss - best_loss) / original_loss))
-            print()
+                # Update the intrinsics in the config
+                config["lens"]["focal_length"] = float(model.focal_length.numpy())
+                config["lens"]["centre"][0] = float(model.centre[0].numpy())
+                config["lens"]["centre"][1] = float(model.centre[1].numpy())
+                for i in range(len(config["lens"]["k"])):
+                    config["lens"]["k"][i] = float(model.k[i].numpy())
 
-    # Write out the new model configuration
-    for name, config in configurations.items():
-        with open(os.path.join(config_path, "{}.yaml".format(name)), "w") as f:
-            yaml.dump(config["config"], f)
+                # Work out how much the loss has improved by
+                best_idx = np.argmin(history.history["loss"])
+
+                # Extract the angular errors and express them in pixels also
+                collinearity = math.sqrt(history.history["collinearity"][best_idx])
+                parallelity = math.sqrt(history.history["parallelity"][best_idx])
+                orthogonality = math.sqrt(history.history["orthogonality"][best_idx])
+                collinearity_px = model.r(tf.cast(collinearity, model.dtype)) * dimensions[1]
+                parallelity_percent = 100 * math.tan(parallelity)
+                orthogonality_percent = 100 * math.tan(orthogonality)
+
+                inverse_qualities = [math.sqrt(model.inverse_quality(i).numpy()) for i in range(1, 10)]
+
+                print("Intrinsic calibration results for {} camera".format(name))
+                print("\t ƒ: {:.3f}".format(model.focal_length.numpy()))
+                print("\tΔc: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.centre.numpy()])))
+                print("\t k: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.k.numpy()])))
+                print("\tik: [{}]".format(", ".join(["{:+.3f}".format(v) for v in model.inverse_coeffs()])))
+                print("Error")
+                print("\t ↔: {:.3f}º ({:.3f}px) ".format(collinearity * 180 / math.pi, collinearity_px))
+                print("\t||: {:.3f}º ({:.3f}%)".format(parallelity * 180 / math.pi, parallelity_percent))
+                print("\t ⟂: {:.3f}º ({:.3f}%)".format(orthogonality * 180 / math.pi, orthogonality_percent))
+                print(
+                    "\t k: [{}]".format(
+                        ", ".join(["{:.2f}px ({:.2f}%)".format(v * dimensions[1], v * 100) for v in inverse_qualities])
+                    )
+                )
+
+                original_loss = history.history["loss"][0]
+                best_loss = min(history.history["loss"])
+                print()
+                print("Loss improved by {:.2g}%".format(100.0 * (original_loss - best_loss) / original_loss))
+                print()
+
+                # Only need to write new cfgs if we have data for calibration
+                # Write out the new model configuration
+                for name, config in configurations.items():
+                    with open(os.path.join(config_path, "{}.yaml".format(name)), "w") as f:
+                        yaml.dump(config["config"], f)
 
     # Create the extrinsics dataset
     if not no_extrinsics:
