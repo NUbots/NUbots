@@ -41,10 +41,10 @@
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
-#include "message/support/optimisation/OptimisationResetDone.hpp"
-#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
-#include "message/support/optimisation/OptimisationRobotPosition.hpp"
 #include "message/support/optimisation/OptimisationCommand.hpp"
+#include "message/support/optimisation/OptimisationResetDone.hpp"
+#include "message/support/optimisation/OptimisationRobotPosition.hpp"
+#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 #include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -83,10 +83,10 @@ namespace module::platform {
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
-    using message::support::optimisation::OptimisationResetDone;
-    using message::support::optimisation::OptimisationTimeUpdate;
-    using message::support::optimisation::OptimisationRobotPosition;
     using message::support::optimisation::OptimisationCommand;
+    using message::support::optimisation::OptimisationResetDone;
+    using message::support::optimisation::OptimisationRobotPosition;
+    using message::support::optimisation::OptimisationTimeUpdate;
 
     using utility::input::FrameID;
     using utility::input::ServoID;

@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "OnboardWalkOptimisation.hpp"
 
 #include "extension/Configuration.hpp"
@@ -5,10 +31,10 @@
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
-#include "message/support/optimisation/OptimisationResetDone.hpp"
-#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
-#include "message/support/optimisation/OptimisationRobotPosition.hpp"
 #include "message/support/optimisation/OptimisationCommand.hpp"
+#include "message/support/optimisation/OptimisationResetDone.hpp"
+#include "message/support/optimisation/OptimisationRobotPosition.hpp"
+#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 namespace module::support::optimisation {
 
@@ -19,10 +45,10 @@ namespace module::support::optimisation {
     using message::platform::RawSensors;
 
     using message::support::optimisation::NSGA2Evaluating;
-    using message::support::optimisation::OptimisationResetDone;
-    using message::support::optimisation::OptimisationTimeUpdate;
-    using message::support::optimisation::OptimisationRobotPosition;
     using message::support::optimisation::OptimisationCommand;
+    using message::support::optimisation::OptimisationResetDone;
+    using message::support::optimisation::OptimisationRobotPosition;
+    using message::support::optimisation::OptimisationTimeUpdate;
 
     OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -40,7 +66,7 @@ namespace module::support::optimisation {
             if (msg.command == OptimisationCommand::CommandType::RESET_ROBOT) {
                 NUClear::log<NUClear::DEBUG>("Onboard Resetting!");
                 is_upright = false;
-                resetting = true;
+                resetting  = true;
             }
         });
 
@@ -79,7 +105,7 @@ namespace module::support::optimisation {
             else {
                 // Calculate and emit an odometry position vector
                 Eigen::Isometry3d Hwt = sensors.Htw.inverse();
-                Eigen::Vector3d rTWw = Hwt.translation();
+                Eigen::Vector3d rTWw  = Hwt.translation();
 
                 auto robot_position   = std::make_unique<OptimisationRobotPosition>();
                 robot_position->value = rTWw;

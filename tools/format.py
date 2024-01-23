@@ -81,6 +81,7 @@ formatters = OrderedDict()
 #         "shared/utility/motion/splines/*",
 #         "shared/utility/platform/models/nugus/nugus.proto",
 #         "nusight2/src/assets/robot-models/nugus/nugus.proto",
+#         "module/support/optimisation/NSGA2Optimiser/src/nsga2",
 #     ],  # TODO exclude files that are not ours
 # }
 formatters["clang-format"] = {

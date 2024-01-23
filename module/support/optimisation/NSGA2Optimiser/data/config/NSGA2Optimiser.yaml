@@ -40,8 +40,8 @@ walk:
   step:
     # # Maximum step limits in x and y (in meters), and theta (in radians).
     limits:
-      x:     [0.5, 0.1, 1.0]
-      y:     [0.2, 0.1, 1.0]
+      x: [0.5, 0.1, 1.0]
+      y: [0.2, 0.1, 1.0]
       theta: [0.4, 0.1, 1.0]
     # Step height (in meters)
     height: [0.075, 0.05, 0.1]

@@ -132,7 +132,7 @@ message SensorMeasurements {
 
     // NUbots-specific, used for the walk optimisation
     support.optimisation.OptimisationRobotPosition robot_position = 102;
-    bool                      reset_done     = 103;
+    bool                                           reset_done     = 103;
 }
 
 message MotorPosition {
