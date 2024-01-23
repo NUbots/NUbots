@@ -29,37 +29,25 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
-#include "message/platform/RawSensors.hpp"
-#include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/OptimisationCommand.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
 #include "message/support/optimisation/OptimisationRobotPosition.hpp"
-#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
 namespace module::support::optimisation {
 
     using extension::Configuration;
     using message::input::Sensors;
-    using message::platform::ButtonLeftDown;
-    using message::platform::ButtonMiddleDown;
-    using message::platform::RawSensors;
-
-    using message::support::optimisation::NSGA2Evaluating;
     using message::support::optimisation::OptimisationCommand;
     using message::support::optimisation::OptimisationResetDone;
     using message::support::optimisation::OptimisationRobotPosition;
-    using message::support::optimisation::OptimisationTimeUpdate;
 
     OnboardWalkOptimisation::OnboardWalkOptimisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Configuration>("OnboardWalkOptimisation.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file OnboardWalkOptimisation.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-
+            this->log_level    = config["log_level"].as<NUClear::LogLevel>();
             cfg.standing_angle = config["standing_angle"].as<float>();
-
-            cfg.wait_time = config["wait_time"].as<float>();
+            cfg.wait_time      = config["wait_time"].as<float>();
         });
 
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {

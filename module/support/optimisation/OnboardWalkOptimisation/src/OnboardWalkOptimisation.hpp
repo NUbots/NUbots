@@ -37,7 +37,6 @@ namespace module::support::optimisation {
         struct Config {
             /// @brief Threshold angle for standing stably, from torso z axis to world z axis.
             float standing_angle = 0.0f;
-
             /// @brief Time required to be standing before starting a new individual.
             float wait_time = 0.0f;
         } cfg;
