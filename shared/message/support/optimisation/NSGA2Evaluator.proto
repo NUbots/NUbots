@@ -22,10 +22,11 @@ syntax = "proto3";
 package message.support.optimisation;
 
 message NSGA2TrialExpired {
-    // generation and individual allows us to identifiy who made the message
+    /// The generation of the trial that expired. A generation in genetic algorithms contains a set of individuals.
     int32 generation  = 1;
+    /// The individual that expired. An individual is a set of parameters that are used to evaluate the fitness of the individual.
     int32 individual  = 2;
-    // To support multi-stage trials
+    /// Which stage of the trial this is for, to support multi-stage trials
     int32 trial_stage = 3;
 }
 
@@ -36,7 +37,8 @@ message NSGA2FitnessScores {
     repeated double constraints = 4;
 }
 
-// Announce Evaluator is ready to go (not busy evaluating)
+/// Indicates that the evaluator is ready to run and not currently processing a trial
 message NSGA2EvaluatorReady {}
 
+/// Indicates that the evaluator is running evaluation over a trial and is not ready to run another trial
 message NSGA2Evaluating {}

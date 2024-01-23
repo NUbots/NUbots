@@ -20,8 +20,6 @@
 
  package message.support.optimisation;
 
- import "Vector.proto";
-
 // Command sent to indicate that an event needs to happen externally from the optimiser
 message OptimisationCommand {
     enum CommandType {

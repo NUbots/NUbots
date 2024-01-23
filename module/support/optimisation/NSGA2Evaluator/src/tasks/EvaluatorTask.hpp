@@ -27,7 +27,13 @@ namespace module::support::optimisation {
 
     class EvaluatorTask {
     public:
-        virtual bool has_fallen(const Sensors& sensors)                                             = 0;
+        /// @brief Determines if the robot has fallen over or not
+        /// @param sensors Information on the robot's state, including IMU data
+        /// @return True if the robot has fallen over, false otherwise
+        virtual bool has_fallen(const Sensors& sensors) = 0;
+
+        /// @brief Stores the position of the robot for use in the optimisation
+        /// @param position The position of the robot in the world
         virtual void process_optimisation_robot_position(const OptimisationRobotPosition& position) = 0;
         virtual void set_up_trial(const NSGA2EvaluationRequest& request)                            = 0;
         virtual void reset_trial()                                                                  = 0;
