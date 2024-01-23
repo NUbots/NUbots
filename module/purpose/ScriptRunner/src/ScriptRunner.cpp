@@ -39,7 +39,7 @@ namespace module::purpose {
     using extension::Configuration;
     using extension::behaviour::Task;
 
-    using message::actuation::LimbsSequence;
+    using message::actuation::BodySequence;
     using message::platform::ButtonMiddleDown;
     using NUClear::message::CommandLineArguments;
 
@@ -76,7 +76,7 @@ namespace module::purpose {
             for (auto& script : scripts) {
                 log<NUClear::INFO>("\n", script);
             }
-            emit<Task>(load_script<LimbsSequence>(scripts));
+            emit<Task>(load_script<BodySequence>(scripts));
         });
     }
 }  // namespace module::purpose
