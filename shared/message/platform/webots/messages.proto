@@ -127,10 +127,10 @@ message SensorMeasurements {
     repeated GyroMeasurement           gyros            = 10;
     repeated PositionSensorMeasurement position_sensors = 11;
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
+    // Ground truth data
     OdometryGroundTruth odometry_ground_truth = 100;
     VisionGroundTruth   vision_ground_truth   = 101;
-
-    // NUbots-specific, used for the walk optimisation
+    // Walk optimisation data
     support.optimisation.OptimisationRobotPosition robot_position = 102;
     bool                                           reset_done     = 103;
 }
@@ -185,6 +185,7 @@ message ActuatorRequests {
     repeated CameraQuality  camera_qualities  = 7;
     repeated CameraExposure camera_exposures  = 8;
 
-    // NUbots-specific, used for the walk optimisation
+    // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
+    // Walk optimisation data
     support.optimisation.OptimisationCommand optimisation_command = 100;
 }
