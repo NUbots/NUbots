@@ -8,7 +8,7 @@ varying vec3 vWorldPosition;
 varying vec3 vSunDirection;
 varying float vSunfade;
 varying vec3 vBetaR;
-varying vec3 vBeta_m;
+varying vec3 vBetaM;
 varying float vSunE;
 
 const vec3 up = vec3(0.0, 1.0, 0.0);
@@ -65,5 +65,5 @@ void main() {
     vBetaR = totalRayleigh * rayleighCoefficient;
 
     // mie coefficients
-    vBeta_m = totalMie(turbidity) * mieCoefficient;
+    vBetaM = totalMie(turbidity) * mieCoefficient;
 }

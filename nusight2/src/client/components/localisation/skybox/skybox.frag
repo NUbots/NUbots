@@ -3,7 +3,7 @@ varying vec3 vWorldPosition;
 varying vec3 vSunDirection;
 varying float vSunfade;
 varying vec3 vBetaR;
-varying vec3 vBeta_m;
+varying vec3 vBetaM;
 varying float vSunE;
 
 uniform float luminance;
@@ -63,7 +63,7 @@ void main() {
     float sM          = mieZenithLength * inverse;
 
     // combined extinction factor
-    vec3 Fex = exp(-(vBetaR * sR + vBeta_m * sM));
+    vec3 Fex = exp(-(vBetaR * sR + vBetaM * sM));
 
     // in scattering
     float cosTheta = dot(normalize(vWorldPosition - cameraPos), vSunDirection);
@@ -71,12 +71,12 @@ void main() {
     float rPhase    = rayleighPhase(cosTheta * 0.5 + 0.5);
     vec3 betaRTheta = vBetaR * rPhase;
 
-    float mPhase     = hgPhase(cosTheta, mieDirectionalG);
-    vec3 beta_mTheta = vBeta_m * mPhase;
+    float mPhase    = hgPhase(cosTheta, mieDirectionalG);
+    vec3 betaMTheta = vBetaM * mPhase;
 
-    vec3 Lin = pow(vSunE * ((betaRTheta + beta_mTheta) / (vBetaR + vBeta_m)) * (1.0 - Fex), vec3(1.5));
+    vec3 Lin = pow(vSunE * ((betaRTheta + betaMTheta) / (vBetaR + vBetaM)) * (1.0 - Fex), vec3(1.5));
     Lin *= mix(vec3(1.0),
-               pow(vSunE * ((betaRTheta + beta_mTheta) / (vBetaR + vBeta_m)) * Fex, vec3(1.0 / 2.0)),
+               pow(vSunE * ((betaRTheta + betaMTheta) / (vBetaR + vBetaM)) * Fex, vec3(1.0 / 2.0)),
                clamp(pow(1.0 - dot(up, vSunDirection), 5.0), 0.0, 1.0));
 
     // nightsky
