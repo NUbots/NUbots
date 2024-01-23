@@ -3,10 +3,12 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <iostream>
 #include <nuclear>
 
-#include "extension/Behaviour.hpp"
 #include "tasks/EvaluatorTask.hpp"
+
+#include "extension/Behaviour.hpp"
 
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
@@ -22,35 +24,87 @@ namespace module::support::optimisation {
     public:
         /// @brief Called by the powerplant to build and setup the NSGA2Evaluator reactor.
         explicit NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Sets up a message to emit when the maximum time for this trial has elapsed
+        /// @param trial_stage The stage this expiration is for, if running multi-stage trials
+        /// @param delay_time The amount of time the trial has before expiring
         void schedule_trial_expired_message(const int trial_stage, const std::chrono::seconds delay_time);
 
+        /// @brief Call to make the robot walk
+        /// @param vec3 The direction to walk in (x m/s, y m/s, theta radians/s)
         void walk(Eigen::Vector3d vec3);
 
-        enum State {
-            UNKNOWN                = 0,
-            WAITING_FOR_REQUEST    = 1,
-            SETTING_UP_TRIAL       = 2,
-            RESETTING_TRIAL        = 3,
-            EVALUATING             = 4,
-            TERMINATING_EARLY      = 5,
-            TERMINATING_GRACEFULLY = 6,
-            FINISHED               = 7
+        /// @brief The current state of the optimisation
+        struct State {
+            enum Value {
+                UNKNOWN                = 0,
+                WAITING_FOR_REQUEST    = 1,
+                SETTING_UP_TRIAL       = 2,
+                RESETTING_TRIAL        = 3,
+                EVALUATING             = 4,
+                TERMINATING_EARLY      = 5,
+                TERMINATING_GRACEFULLY = 6,
+                FINISHED               = 7
+            };
+            Value value = Value::UNKNOWN;
+
+            // Constructors
+            State() = default;
+            State(Value const& v) : value(v) {}
+
+            // Overload output operator
+            friend std::ostream& operator<<(std::ostream& os, const State& state) {
+                switch (state.value) {
+                    case Value::UNKNOWN: return os << "UNKNOWN";
+                    case Value::WAITING_FOR_REQUEST: return os << "WAITING_FOR_REQUEST";
+                    case Value::SETTING_UP_TRIAL: return os << "SETTING_UP_TRIAL";
+                    case Value::RESETTING_TRIAL: return os << "RESETTING_TRIAL";
+                    case Value::EVALUATING: return os << "EVALUATING";
+                    case Value::TERMINATING_EARLY: return os << "TERMINATING_EARLY";
+                    case Value::TERMINATING_GRACEFULLY: return os << "TERMINATING_GRACEFULLY";
+                    case Value::FINISHED: return os << "FINISHED";
+                    default: throw std::runtime_error("enum State's value is corrupt, unknown value stored");
+                }
+            }
         };
 
-        enum Event {
-            // From webots
-            RESET_DONE = 0,
+        /// @brief The current event that is happening in the optimisation
+        struct Event {
+            enum Value {
+                // From webots
+                RESET_DONE = 0,
+                // From optimiser
+                CHECK_READY          = 1,
+                EVALUATE_REQUEST     = 2,
+                TERMINATE_EVALUATION = 3,
+                // Internal
+                TRIAL_SETUP_DONE    = 4,
+                TERMINATE_EARLY     = 5,
+                TRIAL_COMPLETED     = 6,
+                FITNESS_SCORES_SENT = 7
+            };
 
-            // From optimiser
-            CHECK_READY          = 1,
-            EVALUATE_REQUEST     = 2,
-            TERMINATE_EVALUATION = 3,
+            /// @brief The event that is happening
+            Value value = Value::RESET_DONE;
 
-            // Internal
-            TRIAL_SETUP_DONE    = 4,
-            TERMINATE_EARLY     = 5,
-            TRIAL_COMPLETED     = 6,
-            FITNESS_SCORES_SENT = 7
+            // Constructors
+            Event() = default;
+            Event(Value const& v) : value(v) {}
+
+            // Overload output operator
+            friend std::ostream& operator<<(std::ostream& os, const Event& event) {
+                switch (event.value) {
+                    case Value::RESET_DONE: return os << "RESET_DONE";
+                    case Value::CHECK_READY: return os << "CHECK_READY";
+                    case Value::EVALUATE_REQUEST: return os << "EVALUATE_REQUEST";
+                    case Value::TERMINATE_EVALUATION: return os << "TERMINATE_EVALUATION";
+                    case Value::TRIAL_SETUP_DONE: return os << "TRIAL_SETUP_DONE";
+                    case Value::TERMINATE_EARLY: return os << "TERMINATE_EARLY";
+                    case Value::TRIAL_COMPLETED: return os << "TRIAL_COMPLETED";
+                    case Value::FITNESS_SCORES_SENT: return os << "FITNESS_SCORES_SENT";
+                    default: throw std::runtime_error("enum Event's value is corrupt, unknown value stored");
+                }
+            }
         };
 
     private:

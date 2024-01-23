@@ -62,57 +62,37 @@ namespace module::support::optimisation {
 
         // Handle a state transition event
         on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
-            State old_state            = current_state;
-            State new_state            = handle_transition(current_state, event);
-            const char* state_string[] = {"UNKNOWN",
-                                          "WAITING_FOR_REQUEST",
-                                          "SETTING_UP_TRIAL",
-                                          "RESETTING_TRIAL",
-                                          "EVALUATING",
-                                          "TERMINATING_EARLY",
-                                          "TERMINATING_GRACEFULLY",
-                                          "FINISHED"};
-            const char* event_string[] = {"RESET_DONE",
-                                          "CHECK_READY",
-                                          "EVALUATE_REQUEST",
-                                          "TERMINATE_EVALUATION",
-                                          "TRIAL_SETUP_DONE",
-                                          "TERMINATE_EARLY",
-                                          "TRIAL_COMPLETED",
-                                          "FITNESS_SCORES_SENT"};
-            log<NUClear::DEBUG>("Transitioning on",
-                                event_string[event],
-                                ", from state",
-                                state_string[old_state],
-                                "to state",
-                                state_string[new_state]);
+            State old_state = current_state;
+            State new_state = handle_transition(current_state, event);
 
-            switch (new_state) {
-                case State::WAITING_FOR_REQUEST:
+            log<NUClear::DEBUG>("Transitioning on", event, ", from state", old_state, "to state", new_state);
+
+            switch (new_state.value) {
+                case State::Value::WAITING_FOR_REQUEST:
                     current_state = new_state;
                     waiting_for_request();
                     break;
-                case State::SETTING_UP_TRIAL:
+                case State::Value::SETTING_UP_TRIAL:
                     current_state = new_state;
                     setting_up_trial();
                     break;
-                case State::RESETTING_TRIAL:
+                case State::Value::RESETTING_TRIAL:
                     current_state = new_state;
                     resetting_trial();
                     break;
-                case State::EVALUATING:
+                case State::Value::EVALUATING:
                     current_state = new_state;
                     evaluating(event);
                     break;
-                case State::TERMINATING_EARLY:
+                case State::Value::TERMINATING_EARLY:
                     current_state = new_state;
                     terminating_early();
                     break;
-                case State::TERMINATING_GRACEFULLY:
+                case State::Value::TERMINATING_GRACEFULLY:
                     current_state = new_state;
                     terminating_gracefully();
                     break;
-                case State::FINISHED:
+                case State::Value::FINISHED:
                     current_state = new_state;
                     finished();
                     break;
@@ -122,14 +102,14 @@ namespace module::support::optimisation {
 
         on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
             last_eval_request_msg = request;
-            emit(std::make_unique<Event>(Event::EVALUATE_REQUEST));
+            emit(std::make_unique<Event>(Event(Event::Value::EVALUATE_REQUEST)));
         });
 
         on<Trigger<NSGA2TrialExpired>, Single>().then([this](const NSGA2TrialExpired& message) {
             // Only start terminating gracefully if the trial that just expired is the current one
             // (and not previous ones that have terminated early)
             if (message.generation == generation && message.individual == individual) {
-                emit(std::make_unique<Event>(Event::TRIAL_COMPLETED));
+                emit(std::make_unique<Event>(Event(Event::Value::TRIAL_COMPLETED)));
             }
         });
 
@@ -137,7 +117,7 @@ namespace module::support::optimisation {
             // When an evaluaton is running, check to see if we have fallen
             if (evaluation_running) {
                 if (task->has_fallen(sensors)) {
-                    emit(std::make_unique<Event>(Event::TERMINATE_EARLY));
+                    emit(std::make_unique<Event>(Event(Event::Value::TERMINATE_EARLY)));
                 }
             }
         });
@@ -145,21 +125,21 @@ namespace module::support::optimisation {
         on<Trigger<OptimisationResetDone>, Single>().then([this](const OptimisationResetDone&) {
             log<NUClear::INFO>("Reset done");
             task->reset_trial();
-            emit(std::make_unique<Event>(Event::RESET_DONE));
+            emit(std::make_unique<Event>(Event(Event::Value::RESET_DONE)));
         });
 
         on<Trigger<NSGA2Terminate>, Single>().then([this]() {
             // NSGA2Terminate is emitted when we've finished all generations and all individuals
-            emit(std::make_unique<Event>(Event::TERMINATE_EVALUATION));
+            emit(std::make_unique<Event>(Event(Event::Value::TERMINATE_EVALUATION)));
         });
 
         on<Trigger<NSGA2EvaluatorReadinessQuery>, Single>().then([this]() {
             // NSGA2EvaluatorReadinessQuery is the optimiser checking if we're ready
-            emit(std::make_unique<Event>(Event::CHECK_READY));
+            emit(std::make_unique<Event>(Event(Event::Value::CHECK_READY)));
         });
 
         on<Trigger<OptimisationRobotPosition>, Single>().then([this](const OptimisationRobotPosition& position) {
-            if (current_state == State::EVALUATING) {
+            if (current_state.value == State::Value::EVALUATING) {
                 task->process_optimisation_robot_position(position);
             }
         });
@@ -167,39 +147,39 @@ namespace module::support::optimisation {
 
     NSGA2Evaluator::State NSGA2Evaluator::handle_transition(NSGA2Evaluator::State current_state,
                                                             NSGA2Evaluator::Event event) {
-        switch (current_state) {
-            case State::WAITING_FOR_REQUEST: return transition_events(event);
-            case State::SETTING_UP_TRIAL: return transition_events(event);
-            case State::RESETTING_TRIAL: return transition_events(event);
-            case State::EVALUATING: return transition_events(event);
-            case State::TERMINATING_EARLY: return transition_events(event);
-            case State::TERMINATING_GRACEFULLY: return transition_events(event);
-            case State::FINISHED:
+        switch (current_state.value) {
+            case State::Value::WAITING_FOR_REQUEST: return transition_events(event);
+            case State::Value::SETTING_UP_TRIAL: return transition_events(event);
+            case State::Value::RESETTING_TRIAL: return transition_events(event);
+            case State::Value::EVALUATING: return transition_events(event);
+            case State::Value::TERMINATING_EARLY: return transition_events(event);
+            case State::Value::TERMINATING_GRACEFULLY: return transition_events(event);
+            case State::Value::FINISHED:
                 // Arguably this should return FINISHED regardless of event, unless we want to be able to
                 // reset
-                if (event == Event::FITNESS_SCORES_SENT) {
-                    return State::FINISHED;
+                if (event.value == Event::Value::FITNESS_SCORES_SENT) {
+                    return State(State::Value::FINISHED);
                 }
                 else {
                     return transition_events(event);
                 }
 
-            default: return State::UNKNOWN;
+            default: return State(State::Value::UNKNOWN);
         }
     }
 
     NSGA2Evaluator::State NSGA2Evaluator::transition_events(NSGA2Evaluator::Event event) {
-        switch (event) {
-            case Event::EVALUATE_REQUEST: return State::SETTING_UP_TRIAL;
-            case Event::CHECK_READY: return State::WAITING_FOR_REQUEST;
-            case Event::TERMINATE_EVALUATION: return State::FINISHED;
-            case Event::TRIAL_SETUP_DONE: return State::RESETTING_TRIAL;
-            case Event::RESET_DONE: return State::EVALUATING;
-            case Event::TERMINATE_EARLY: return State::TERMINATING_EARLY;
-            case Event::TRIAL_COMPLETED: return State::TERMINATING_GRACEFULLY;
-            case Event::FITNESS_SCORES_SENT: return State::WAITING_FOR_REQUEST;
+        switch (event.value) {
+            case Event::Value::EVALUATE_REQUEST: return State(State::Value::SETTING_UP_TRIAL);
+            case Event::Value::CHECK_READY: return State(State::Value::WAITING_FOR_REQUEST);
+            case Event::Value::TERMINATE_EVALUATION: return State(State::Value::FINISHED);
+            case Event::Value::TRIAL_SETUP_DONE: return State(State::Value::RESETTING_TRIAL);
+            case Event::Value::RESET_DONE: return State(State::Value::EVALUATING);
+            case Event::Value::TERMINATE_EARLY: return State(State::Value::TERMINATING_EARLY);
+            case Event::Value::TRIAL_COMPLETED: return State(State::Value::TERMINATING_GRACEFULLY);
+            case Event::Value::FITNESS_SCORES_SENT: return State(State::Value::WAITING_FOR_REQUEST);
 
-            default: return State::UNKNOWN;
+            default: return State(State::Value::UNKNOWN);
         }
     }
 
@@ -229,16 +209,13 @@ namespace module::support::optimisation {
         else if (last_eval_request_msg.task == "rotation") {
             task = std::make_unique<RotationEvaluator>();
         }
-        // else if (last_eval_request_msg.task == "stand") {
-        //     task = std::make_unique<StandEvaluator>();
-        // }
         else {
             log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
         }
 
         task->set_up_trial(last_eval_request_msg);
 
-        emit(std::make_unique<Event>(Event::TRIAL_SETUP_DONE));
+        emit(std::make_unique<Event>(Event(Event::Value::TRIAL_SETUP_DONE)));
     }
 
     // Handle the RESETTING_TRIAL state
@@ -255,7 +232,7 @@ namespace module::support::optimisation {
     void NSGA2Evaluator::evaluating(NSGA2Evaluator::Event event) {
         log<NUClear::DEBUG>("Evaluating");
 
-        if (event == Event::RESET_DONE) {
+        if (event.value == Event::Value::RESET_DONE) {
             if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
                 || last_eval_request_msg.task == "strafe" || last_eval_request_msg.task == "rotation") {
                 task->evaluating_state(this);
@@ -291,7 +268,8 @@ namespace module::support::optimisation {
         auto fitness_scores    = task->calculate_fitness_scores(early_termination, generation, individual);
         emit(fitness_scores);
 
-        emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
+        emit(std::make_unique<Event>(
+            Event(Event::Value::FITNESS_SCORES_SENT)));  // Go back to waiting for the next request
     }
 
     // Handle the TERMINATING_GRACEFULLY state
@@ -304,7 +282,8 @@ namespace module::support::optimisation {
         auto fitness_scores    = task->calculate_fitness_scores(early_termination, generation, individual);
         emit(fitness_scores);
 
-        emit(std::make_unique<Event>(Event::FITNESS_SCORES_SENT));  // Go back to waiting for the next request
+        emit(std::make_unique<Event>(
+            Event(Event::Value::FITNESS_SCORES_SENT)));  // Go back to waiting for the next request
     }
 
     void NSGA2Evaluator::finished() {
