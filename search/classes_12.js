@@ -2,7 +2,7 @@ var searchData=
 [
   ['say_1365',['Say',['../classmodule_1_1skill_1_1Say.html',1,'module::skill']]],
   ['script_1366',['Script',['../structutility_1_1skill_1_1Script.html',1,'utility::skill']]],
-  ['script_3c_20limbssequence_20_3e_1367',['Script&lt; LimbsSequence &gt;',['../structutility_1_1skill_1_1Script.html',1,'utility::skill']]],
+  ['script_3c_20bodysequence_20_3e_1367',['Script&lt; BodySequence &gt;',['../structutility_1_1skill_1_1Script.html',1,'utility::skill']]],
   ['scriptkick_1368',['ScriptKick',['../classmodule_1_1skill_1_1ScriptKick.html',1,'module::skill']]],
   ['scriptrequest_1369',['ScriptRequest',['../structutility_1_1skill_1_1ScriptRequest.html',1,'utility::skill']]],
   ['scriptrunner_1370',['ScriptRunner',['../classmodule_1_1purpose_1_1ScriptRunner.html',1,'module::purpose']]],

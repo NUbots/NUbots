@@ -349,7 +349,7 @@ var hierarchy =
     [ "extension::behaviour::ProviderBase< T, commands::ProviderClassification::STOP >", "structextension_1_1behaviour_1_1ProviderBase.html", [
       [ "extension::behaviour::Stop< T >", "structextension_1_1behaviour_1_1Stop.html", null ]
     ] ],
-    [ "utility::skill::Script< LimbsSequence >", "structutility_1_1skill_1_1Script.html", null ],
+    [ "utility::skill::Script< BodySequence >", "structutility_1_1skill_1_1Script.html", null ],
     [ "std::error_category", null, [
       [ "module::output::compressor::vaapi::cl::opencl_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html", null ],
       [ "module::output::compressor::vaapi::vaapi_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html", null ]
