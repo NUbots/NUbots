@@ -36,7 +36,7 @@
 
 namespace module::purpose {
 
-    using message::actuation::LimbsSequence;
+    using message::actuation::BodySequence;
     using utility::skill::Script;
 
     /**
@@ -50,7 +50,7 @@ namespace module::purpose {
         std::string script_path;
 
         /// @brief The script object we are editing
-        Script<LimbsSequence> script;
+        Script<BodySequence> script;
 
         /// @brief The index of the frame we are currently editing
         size_t frame;
