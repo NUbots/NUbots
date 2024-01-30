@@ -104,7 +104,7 @@ namespace module::support::optimisation {
         NUClear::clock::time_point trial_start_time{NUClear::clock::now()};
 
         /// @brief The walk command velocity.
-        Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.0, 0.0);
+        Eigen::Vector2d walk_command_velocity = Eigen::Vector2d::Zero();
 
         /// @brief The walk command rotation.
         double walk_command_rotation = 0.0;
