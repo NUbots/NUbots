@@ -1,5 +1,2 @@
-gravity:
-  min: 0.5
-  max: 9.2
-
-fallen_angle: 0.95 # ~55 degrees
+# The angle at which we determine the robot is now fallen, in rradians
+fallen_angle: 55 * pi / 180
