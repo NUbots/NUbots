@@ -64,7 +64,6 @@ namespace module::support::optimisation {
         for (size_t i = 0; i < current_request.parameters.real_params.size(); i++) {
             int frame_time = current_request.parameters.real_params[i];
             limit_ms       = limit_ms + std::chrono::milliseconds(frame_time);
-            // script.frames[i].duration = std::chrono::milliseconds(frame_time);
         }
         save_script(fmt::format("gen{:03d}_ind{:03d}_task-stand.yaml", current_request.generation, current_request.id));
 
