@@ -174,7 +174,7 @@ namespace module::support::optimisation {
     NSGA2Evaluator::State NSGA2Evaluator::handle_transition(NSGA2Evaluator::State current_state,
                                                             NSGA2Evaluator::Event event) {
         // If finished and fitness scores are done, then we are finished
-        if (current_state.value == FINISHED && event.value == Event::Value::FITNESS_SCORES_SENT) {
+        if (current_state.value == State::Value::FINISHED && event.value == Event::Value::FITNESS_SCORES_SENT) {
             return State(State::Value::FINISHED);
         }
 
@@ -209,17 +209,13 @@ namespace module::support::optimisation {
         generation = last_eval_request_msg.generation;
         individual = last_eval_request_msg.id;
 
-        if (last_eval_request_msg.task == "walk") {
-            task = std::make_unique<WalkEvaluator>();
-        }
-        else if (last_eval_request_msg.task == "strafe") {
-            task = std::make_unique<StrafeEvaluator>();
-        }
-        else if (last_eval_request_msg.task == "rotation") {
-            task = std::make_unique<RotationEvaluator>();
-        }
-        else {
-            log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
+        switch (int(last_eval_request_msg.task)) {
+            case int(message::support::optimisation::Task::WALK): task = std::make_unique<WalkEvaluator>(); break;
+            case int(message::support::optimisation::Task::STRAFE): task = std::make_unique<StrafeEvaluator>(); break;
+            case int(message::support::optimisation::Task::ROTATION):
+                task = std::make_unique<RotationEvaluator>();
+                break;
+            default: log<NUClear::ERROR>("Unhandled task type:", last_eval_request_msg.task);
         }
 
         task->set_up_trial(last_eval_request_msg);
@@ -242,8 +238,10 @@ namespace module::support::optimisation {
         log<NUClear::DEBUG>("Evaluating");
 
         if (event.value == Event::Value::RESET_DONE) {
-            if (last_eval_request_msg.task == "walk" || last_eval_request_msg.task == "stand"
-                || last_eval_request_msg.task == "strafe" || last_eval_request_msg.task == "rotation") {
+            if (last_eval_request_msg.task == message::support::optimisation::Task::WALK
+                || last_eval_request_msg.task == message::support::optimisation::Task::STAND
+                || last_eval_request_msg.task == message::support::optimisation::Task::ROTATION
+                || last_eval_request_msg.task == message::support::optimisation::Task::STRAFE) {
                 task->evaluating_state(this);
                 evaluation_running = true;
             }

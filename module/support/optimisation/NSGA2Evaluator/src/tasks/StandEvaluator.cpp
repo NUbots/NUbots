@@ -66,10 +66,7 @@ namespace module::support::optimisation {
             limit_ms       = limit_ms + std::chrono::milliseconds(frame_time);
             // script.frames[i].duration = std::chrono::milliseconds(frame_time);
         }
-        save_script(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
-                                current_request.generation,
-                                current_request.id,
-                                current_request.task));
+        save_script(fmt::format("gen{:03d}_ind{:03d}_task-stand.yaml", current_request.generation, current_request.id));
 
         auto overhead = std::chrono::seconds(2);  // Overhead tacked on to give the robot time to fall over if unstable
         trial_duration_limit = std::chrono::duration_cast<std::chrono::seconds>(limit_ms) + overhead;

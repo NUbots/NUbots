@@ -91,7 +91,7 @@ namespace module::support::optimisation {
         auto request              = std::make_unique<NSGA2EvaluationRequest>();
         request->id               = id;
         request->generation       = generation;
-        request->task             = "rotation";
+        request->task             = message::support::optimisation::Task::ROTATION;
         request->task_config_path = walk_config_path;
 
         request->trial_duration_limit = trial_duration_limit;

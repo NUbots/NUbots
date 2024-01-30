@@ -70,7 +70,7 @@ namespace module::support::optimisation {
         auto request              = std::make_unique<NSGA2EvaluationRequest>();
         request->id               = id;
         request->generation       = generation;
-        request->task             = "stand";
+        request->task             = message::support::optimisation::Task::STAND;
         request->task_config_path = script_path;
         // Add the individual's parameters to the message
         request->parameters.real_params = reals;

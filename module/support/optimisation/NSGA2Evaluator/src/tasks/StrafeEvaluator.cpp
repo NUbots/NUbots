@@ -115,14 +115,11 @@ namespace module::support::optimisation {
         overwrite_file_stream.close();
 
         // Write the config to keep for later
-        NUClear::log<NUClear::DEBUG>(fmt::format("Saving as: gen{:03d}_ind{:03d}_task-{}.yaml",
+        NUClear::log<NUClear::DEBUG>(fmt::format("Saving as: gen{:03d}_ind{:03d}_task-strafe.yaml",
                                                  current_request.generation,
-                                                 current_request.id,
-                                                 current_request.task));
-        std::ofstream save_file_stream(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
-                                                   current_request.generation,
-                                                   current_request.id,
-                                                   current_request.task));
+                                                 current_request.id));
+        std::ofstream save_file_stream(
+            fmt::format("gen{:03d}_ind{:03d}_task-strafe.yaml", current_request.generation, current_request.id));
         save_file_stream << YAML::Dump(walk_config);
         save_file_stream.close();
 
