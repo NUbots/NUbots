@@ -206,8 +206,8 @@ namespace module::support::optimisation {
     std::vector<double> RotationEvaluator::calculate_scores() {
 
         return {
-            max_field_plane_sway,  // For now, we want to reduce this
-            1.0 / std::abs(theta)  // Minimiser!!!
+            max_field_plane_sway,  // Reduce the torso sway
+            1.0 / std::abs(theta)  // 1/x since the NSGA2 optimiser is a minimiser
         };
     }
 

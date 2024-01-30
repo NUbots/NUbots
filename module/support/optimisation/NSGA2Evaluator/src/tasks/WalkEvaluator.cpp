@@ -210,7 +210,7 @@ namespace module::support::optimisation {
         NUClear::log<NUClear::DEBUG>("Distance travelled", robot_distance_travelled);
         NUClear::log<NUClear::DEBUG>("Max field plane sway", max_field_plane_sway);
         return {
-            max_field_plane_sway,           // For now, we want to reduce this
+            max_field_plane_sway,           // Reduce the torso sway
             1.0 / robot_distance_travelled  // 1/x since the NSGA2 optimiser is a minimiser
         };
     }

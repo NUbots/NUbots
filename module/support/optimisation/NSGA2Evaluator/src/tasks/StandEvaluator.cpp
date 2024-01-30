@@ -144,7 +144,7 @@ namespace module::support::optimisation {
     }
 
     std::vector<double> StandEvaluator::calculate_scores(double trial_duration) {
-        return {max_field_plane_sway,  // For now, we want to reduce this
+        return {max_field_plane_sway,  // Reduce the torso sway
                 trial_duration};
     }
 
