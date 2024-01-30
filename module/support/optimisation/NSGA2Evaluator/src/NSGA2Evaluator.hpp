@@ -173,8 +173,6 @@ namespace module::support::optimisation {
         /// @brief Get the next state to transition to given the current state and an event
         State handle_transition(State current_state, Event event);
 
-        State transition_events(NSGA2Evaluator::Event event);
-
         /// @brief Handle the WAITING_FOR_REQUEST state
         void waiting_for_request();
 

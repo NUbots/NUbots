@@ -173,28 +173,12 @@ namespace module::support::optimisation {
 
     NSGA2Evaluator::State NSGA2Evaluator::handle_transition(NSGA2Evaluator::State current_state,
                                                             NSGA2Evaluator::Event event) {
-        switch (current_state.value) {
-            case State::Value::WAITING_FOR_REQUEST: return transition_events(event);
-            case State::Value::SETTING_UP_TRIAL: return transition_events(event);
-            case State::Value::RESETTING_TRIAL: return transition_events(event);
-            case State::Value::EVALUATING: return transition_events(event);
-            case State::Value::TERMINATING_EARLY: return transition_events(event);
-            case State::Value::TERMINATING_GRACEFULLY: return transition_events(event);
-            case State::Value::FINISHED:
-                // Arguably this should return FINISHED regardless of event, unless we want to be able to
-                // reset
-                if (event.value == Event::Value::FITNESS_SCORES_SENT) {
-                    return State(State::Value::FINISHED);
-                }
-                else {
-                    return transition_events(event);
-                }
-
-            default: return State(State::Value::UNKNOWN);
+        // If finished and fitness scores are done, then we are finished
+        if (current_state.value == FINISHED && event.value == Event::Value::FITNESS_SCORES_SENT) {
+            return State(State::Value::FINISHED);
         }
-    }
 
-    NSGA2Evaluator::State NSGA2Evaluator::transition_events(NSGA2Evaluator::Event event) {
+        // Check event and determine next state
         switch (event.value) {
             case Event::Value::EVALUATE_REQUEST: return State(State::Value::SETTING_UP_TRIAL);
             case Event::Value::CHECK_READY: return State(State::Value::WAITING_FOR_REQUEST);
@@ -204,7 +188,6 @@ namespace module::support::optimisation {
             case Event::Value::TERMINATE_EARLY: return State(State::Value::TERMINATING_EARLY);
             case Event::Value::TRIAL_COMPLETED: return State(State::Value::TERMINATING_GRACEFULLY);
             case Event::Value::FITNESS_SCORES_SENT: return State(State::Value::WAITING_FOR_REQUEST);
-
             default: return State(State::Value::UNKNOWN);
         }
     }
