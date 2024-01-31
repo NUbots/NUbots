@@ -140,8 +140,7 @@ namespace module::network {
                             Eigen::Vector3d rTFf  = Hft.translation();
 
                             // Store our position from field to torso
-                            msg->current_pose.position.x() = rTFf.x();
-                            msg->current_pose.position.y() = rTFf.y();
+                            msg->current_pose.position = rTFf;
                             msg->current_pose.position.z() = MatrixToEulerIntrinsic(Hft.rotation()).z();
 
                             msg->current_pose.covariance = field->covariance.cast<float>();
@@ -160,8 +159,7 @@ namespace module::network {
 
                 // Kick target
                 if (kick) {
-                    msg->kick_target.x() = kick->target.x();
-                    msg->kick_target.y() = kick->target.y();
+                    msg->kick_target = kick->target;
                 }
 
                 // Ball
@@ -173,9 +171,7 @@ namespace module::network {
                         Eigen::Isometry3d Hfw = Eigen::Isometry3d(field->Hfw);
                         Eigen::Vector3d rBFf  = Hfw * rBWw;
                         // Store our position from field to ball
-                        msg->ball.position.x() = rBFf.x();
-                        msg->ball.position.y() = rBFf.y();
-                        msg->ball.position.z() = rBFf.z();
+                        msg->ball.position = rBFf;
                     }
 
                     msg->ball.covariance = loc_ball->covariance.block(0, 0, 3, 3).cast<float>();
