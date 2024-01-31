@@ -51,11 +51,11 @@ message NSGA2EvaluationParameters {
 }
 
 enum Task {
-    UNKNOWN = 0;
-    WALK = 1;
-    STRAFE = 2;
-    ROTATION = 3;
-    STAND = 4;
+    UNKNOWN   = 0;
+    WALK      = 1;
+    STRAFE    = 2;
+    ROTATION  = 3;
+    STAND     = 4;
     MULTIPATH = 5;
 }
 
@@ -63,7 +63,7 @@ enum Task {
 message NSGA2EvaluationRequest {
     int32                     id                   = 1;
     int32                     generation           = 2;
-    Task                    task                 = 3;
+    Task                      task                 = 3;
     string                    task_config_path     = 4;
     int32                     trial_duration_limit = 5;
     NSGA2EvaluationParameters parameters           = 6;
