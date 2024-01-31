@@ -4,6 +4,7 @@ nuclear_role(
   extension::FileWatcher
   support::logging::FileLogHandler
   support::logging::ConsoleLogHandler
+  support::logging::MessageLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   actuation::KinematicsConfiguration
   # Support and Configuration
@@ -26,6 +27,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
+  vision::RobotDetector
   vision::FieldLineDetector
   output::ImageCompressor
   # Localisation
