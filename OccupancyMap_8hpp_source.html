@@ -296,146 +296,150 @@ $(document).ready(function(){initNavTree('OccupancyMap_8hpp_source.html',''); in
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="comment">         */</span></div>
 <div class="line"><a name="l00125"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03">  125</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03">add_rectangle</a>(<span class="keywordtype">int</span> x0, <span class="keywordtype">int</span> y0, <span class="keywordtype">int</span> width, <span class="keywordtype">int</span> height, <span class="keywordtype">int</span> inner_width) {</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; inner_width; i++) {</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#ac1f4588e0d084d046f81b5a9e246c610">add_rectangle</a>(x0 + i, y0 + i, width - (2 * i), height - (2 * i));</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;            }</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;        }</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="comment">         * @brief Add a circle to the map with specified origin, radius and line width</span></div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="comment">         * @param origin The origin (x,y) of the circle</span></div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="comment">         * @param radius The radius of the circle</span></div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="comment">         * @param inner_width The width of the circle line</span></div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00137"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">  137</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">add_circle</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> X0, <span class="keyword">const</span> <span class="keywordtype">int</span> Y0, <span class="keyword">const</span> <span class="keywordtype">int</span> radius, <span class="keyword">const</span> <span class="keywordtype">int</span> inner_width) {</div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> y = Y0 - radius; y &lt;= Y0 + radius; y++) {</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> x = X0 - radius; x &lt;= X0 + radius; x++) {</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                    <span class="keywordflow">if</span> (std::pow(x - X0, 2) + std::pow(y - Y0, 2) &lt;= std::pow(radius, 2)) {</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;                        <span class="keywordtype">int</span> dist = std::sqrt(std::pow(x - X0, 2) + std::pow(y - Y0, 2));</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                        <span class="keywordflow">if</span> (dist &gt;= radius - inner_width &amp;&amp; dist &lt;= radius) {</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                            <span class="keywordflow">if</span> (x &gt;= 0 &amp;&amp; x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols() &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows()) {</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;                                <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>(y, x) = 1;</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;                            }</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;                        }</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;                    }</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;                }</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;            }</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;        }</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;<span class="comment">         * @brief Add a rectangular cross to the map with specified origin, radius and line width</span></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;<span class="comment">         * @param origin The origin (x,y) of the circle</span></div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;<span class="comment">         * @param radius The radius of the circle</span></div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="comment">         * @param inner_width The width of the circle line</span></div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00158"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">  158</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">add_cross</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> X0, <span class="keyword">const</span> <span class="keywordtype">int</span> Y0, <span class="keyword">const</span> <span class="keywordtype">int</span> radius, <span class="keyword">const</span> <span class="keywordtype">int</span> inner_width) {</div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = Y0 - radius; i &lt;= Y0 + radius; i++) {</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;                <span class="keywordflow">if</span> (i &gt;= 0 &amp;&amp; i &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows()) {</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;                    <span class="keywordtype">int</span> width   = inner_width / 2;</div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;                    <span class="keywordtype">int</span> start_x = X0 - width;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                    <span class="keywordtype">int</span> end_x   = X0 + width;</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                    <span class="keywordflow">if</span> (start_x &gt;= 0 &amp;&amp; end_x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols()) {</div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                        <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.block(i, start_x, 1, end_x - start_x + 1) =</div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                            Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt;::Ones(1, end_x - start_x + 1);</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;                    }</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                }</div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;            }</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = X0 - radius; i &lt;= X0 + radius; i++) {</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;                <span class="keywordflow">if</span> (i &gt;= 0 &amp;&amp; i &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols()) {</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;                    <span class="keywordtype">int</span> width   = inner_width / 2;</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;                    <span class="keywordtype">int</span> start_y = Y0 - width;</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;                    <span class="keywordtype">int</span> end_y   = Y0 + width;</div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;                    <span class="keywordflow">if</span> (start_y &gt;= 0 &amp;&amp; end_y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows()) {</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;                        <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.block(start_y, i, end_y - start_y + 1, 1) =</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;                            Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt;::Ones(end_y - start_y + 1, 1);</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;                    }</div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;                }</div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;            }</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        }</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;<span class="comment">        /**</span></div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;<span class="comment">         * @brief Replace map with a new map with occupancy values which encode the minimum distance to the</span></div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;<span class="comment">         * closest occupied cell</span></div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;<span class="comment">         * @param map The pre-filled Map with occupancy values of 0 or 1</span></div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="comment">         * @param grid_size The size of the grid cells</span></div>
-<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="comment">         */</span></div>
-<div class="line"><a name="l00190"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">  190</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">create_distance_map</a>(Scalar grid_size) {</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;            <span class="comment">// Initialize the distance map with infinite distances</span></div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;            Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt; dist_map =</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;                Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt;::Constant(<a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows(),</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;                                                                                <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols(),</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;                                                                                std::numeric_limits&lt;float&gt;::infinity());</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160; </div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;            <span class="comment">// Create a queue to hold the cells to be visited</span></div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;            std::queue&lt;std::pair&lt;int, int&gt;&gt; q;</div>
-<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160; </div>
-<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;            <span class="comment">// Mark all occupied cells as visited and set their distances to 0</span></div>
-<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> y = 0; y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows(); y++) {</div>
-<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> x = 0; x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols(); x++) {</div>
-<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;                    <span class="keywordflow">if</span> (<a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>(y, x) == 1) {</div>
-<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;                        dist_map(y, x) = 0;</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;                        q.push(std::make_pair(y, x));</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                    }</div>
-<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                }</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;            }</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160; </div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;            <span class="comment">// Run BFS algorithm to compute the distances of all unoccupied cells to the nearest occupied cell</span></div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;            <span class="keywordflow">while</span> (!q.empty()) {</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;                std::pair&lt;int, int&gt; curr = q.front();</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;                q.pop();</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;                <span class="keywordtype">int</span> y = curr.first;</div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;                <span class="keywordtype">int</span> x = curr.second;</div>
-<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160; </div>
-<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;                <span class="comment">// Update the distances of the neighbors of the current cell</span></div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = -1; j &lt;= 1; j++) {</div>
-<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;                    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = -1; i &lt;= 1; i++) {</div>
-<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;                        <span class="comment">// Skip the current cell</span></div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;                        <span class="keywordflow">if</span> (i == 0 &amp;&amp; j == 0) {</div>
-<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;                            <span class="keywordflow">continue</span>;</div>
-<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;                        }</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160; </div>
-<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;                        <span class="keywordtype">int</span> new_y = y + j;</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                        <span class="keywordtype">int</span> new_x = x + i;</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;                        <span class="comment">// Check if the neighbor is within the map boundaries</span></div>
-<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                        <span class="keywordflow">if</span> (new_y &gt;= 0 &amp;&amp; new_y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows() &amp;&amp; new_x &gt;= 0 &amp;&amp; new_x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols()) {</div>
-<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;                            <span class="keywordtype">float</span> weight = std::sqrt(std::pow(i, 2) + std::pow(j, 2));</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                <span class="keywordtype">int</span> new_width  = width - (2 * i);</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;                <span class="keywordtype">int</span> new_height = height - (2 * i);</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;                <span class="keywordflow">if</span> (new_width &gt; 0 &amp;&amp; new_height &gt; 0) {</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                    <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#ac1f4588e0d084d046f81b5a9e246c610">add_rectangle</a>(x0 + i, y0 + i, new_width, new_height);</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                }</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;            }</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        }</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="comment">         * @brief Add a circle to the map with specified origin, radius and line width</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="comment">         * @param origin The origin (x,y) of the circle</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;<span class="comment">         * @param radius The radius of the circle</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;<span class="comment">         * @param inner_width The width of the circle line</span></div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">  141</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">add_circle</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> X0, <span class="keyword">const</span> <span class="keywordtype">int</span> Y0, <span class="keyword">const</span> <span class="keywordtype">int</span> radius, <span class="keyword">const</span> <span class="keywordtype">int</span> inner_width) {</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> y = Y0 - radius; y &lt;= Y0 + radius; y++) {</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> x = X0 - radius; x &lt;= X0 + radius; x++) {</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;                    <span class="keywordflow">if</span> (std::pow(x - X0, 2) + std::pow(y - Y0, 2) &lt;= std::pow(radius, 2)) {</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;                        <span class="keywordtype">int</span> dist = std::sqrt(std::pow(x - X0, 2) + std::pow(y - Y0, 2));</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;                        <span class="keywordflow">if</span> (dist &gt;= radius - inner_width &amp;&amp; dist &lt;= radius) {</div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;                            <span class="keywordflow">if</span> (x &gt;= 0 &amp;&amp; x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols() &amp;&amp; y &gt;= 0 &amp;&amp; y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows()) {</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;                                <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>(y, x) = 1;</div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;                            }</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;                        }</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;                    }</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;                }</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;            }</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;        }</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="comment">         * @brief Add a rectangular cross to the map with specified origin, radius and line width</span></div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="comment">         * @param origin The origin (x,y) of the circle</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="comment">         * @param radius The radius of the circle</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="comment">         * @param inner_width The width of the circle line</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">  162</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">add_cross</a>(<span class="keyword">const</span> <span class="keywordtype">int</span> X0, <span class="keyword">const</span> <span class="keywordtype">int</span> Y0, <span class="keyword">const</span> <span class="keywordtype">int</span> radius, <span class="keyword">const</span> <span class="keywordtype">int</span> inner_width) {</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = Y0 - radius; i &lt;= Y0 + radius; i++) {</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;                <span class="keywordflow">if</span> (i &gt;= 0 &amp;&amp; i &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows()) {</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                    <span class="keywordtype">int</span> width   = inner_width / 2;</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                    <span class="keywordtype">int</span> start_x = X0 - width;</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;                    <span class="keywordtype">int</span> end_x   = X0 + width;</div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                    <span class="keywordflow">if</span> (start_x &gt;= 0 &amp;&amp; end_x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols()) {</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;                        <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.block(i, start_x, 1, end_x - start_x + 1) =</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;                            Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt;::Ones(1, end_x - start_x + 1);</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;                    }</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;                }</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;            }</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160; </div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = X0 - radius; i &lt;= X0 + radius; i++) {</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;                <span class="keywordflow">if</span> (i &gt;= 0 &amp;&amp; i &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols()) {</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;                    <span class="keywordtype">int</span> width   = inner_width / 2;</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;                    <span class="keywordtype">int</span> start_y = Y0 - width;</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;                    <span class="keywordtype">int</span> end_y   = Y0 + width;</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;                    <span class="keywordflow">if</span> (start_y &gt;= 0 &amp;&amp; end_y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows()) {</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;                        <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.block(start_y, i, end_y - start_y + 1, 1) =</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;                            Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt;::Ones(end_y - start_y + 1, 1);</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;                    }</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;                }</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;            }</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;        }</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;<span class="comment">         * @brief Replace map with a new map with occupancy values which encode the minimum distance to the</span></div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="comment">         * closest occupied cell</span></div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;<span class="comment">         * @param map The pre-filled Map with occupancy values of 0 or 1</span></div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;<span class="comment">         * @param grid_size The size of the grid cells</span></div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00194"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">  194</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">create_distance_map</a>(Scalar grid_size) {</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;            <span class="comment">// Initialize the distance map with infinite distances</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;            Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt; dist_map =</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;                Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt;::Constant(<a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows(),</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;                                                                                <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols(),</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;                                                                                std::numeric_limits&lt;float&gt;::infinity());</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;            <span class="comment">// Create a queue to hold the cells to be visited</span></div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;            std::queue&lt;std::pair&lt;int, int&gt;&gt; q;</div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160; </div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;            <span class="comment">// Mark all occupied cells as visited and set their distances to 0</span></div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;            <span class="keywordflow">for</span> (<span class="keywordtype">int</span> y = 0; y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows(); y++) {</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> x = 0; x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols(); x++) {</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;                    <span class="keywordflow">if</span> (<a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>(y, x) == 1) {</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;                        dist_map(y, x) = 0;</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;                        q.push(std::make_pair(y, x));</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;                    }</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;                }</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;            }</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160; </div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;            <span class="comment">// Run BFS algorithm to compute the distances of all unoccupied cells to the nearest occupied cell</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;            <span class="keywordflow">while</span> (!q.empty()) {</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;                std::pair&lt;int, int&gt; curr = q.front();</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;                q.pop();</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;                <span class="keywordtype">int</span> y = curr.first;</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;                <span class="keywordtype">int</span> x = curr.second;</div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160; </div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;                <span class="comment">// Update the distances of the neighbors of the current cell</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;                <span class="keywordflow">for</span> (<span class="keywordtype">int</span> j = -1; j &lt;= 1; j++) {</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;                    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = -1; i &lt;= 1; i++) {</div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                        <span class="comment">// Skip the current cell</span></div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;                        <span class="keywordflow">if</span> (i == 0 &amp;&amp; j == 0) {</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                            <span class="keywordflow">continue</span>;</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;                        }</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160; </div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;                        <span class="keywordtype">int</span> new_y = y + j;</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;                        <span class="keywordtype">int</span> new_x = x + i;</div>
 <div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160; </div>
-<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;                            <span class="comment">// Check if the neighbor is unoccupied and has a shorter distance through the current cell</span></div>
-<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;                            <span class="keywordflow">if</span> (<a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>(new_y, new_x) == 0 &amp;&amp; dist_map(new_y, new_x) &gt; dist_map(y, x) + weight) {</div>
-<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;                                dist_map(new_y, new_x) = dist_map(y, x) + weight;</div>
-<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;                                q.push(std::make_pair(new_y, new_x));</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;                            }</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;                        }</div>
-<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                    }</div>
-<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;                }</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;            }</div>
-<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160; </div>
-<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;            <span class="comment">// Replace the original map with the distance map</span></div>
-<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;            <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a> = dist_map * grid_size;</div>
-<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;        }</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;                        <span class="comment">// Check if the neighbor is within the map boundaries</span></div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;                        <span class="keywordflow">if</span> (new_y &gt;= 0 &amp;&amp; new_y &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.rows() &amp;&amp; new_x &gt;= 0 &amp;&amp; new_x &lt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>.cols()) {</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;                            <span class="keywordtype">float</span> weight = std::sqrt(std::pow(i, 2) + std::pow(j, 2));</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160; </div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;                            <span class="comment">// Check if the neighbor is unoccupied and has a shorter distance through the current cell</span></div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;                            <span class="keywordflow">if</span> (<a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>(new_y, new_x) == 0 &amp;&amp; dist_map(new_y, new_x) &gt; dist_map(y, x) + weight) {</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;                                dist_map(new_y, new_x) = dist_map(y, x) + weight;</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;                                q.push(std::make_pair(new_y, new_x));</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;                            }</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;                        }</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;                    }</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;                }</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;            }</div>
 <div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160; </div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
-<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;<span class="comment">        /// @brief Eigen matrix which stores the map data</span></div>
-<div class="line"><a name="l00248"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">  248</a></span>&#160;<span class="comment"></span>        Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>;</div>
-<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;    };</div>
-<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160; </div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;}  <span class="comment">// namespace module::localisation</span></div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160; </div>
-<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_LOCALISATION_MAP_HPP</span></div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;            <span class="comment">// Replace the original map with the distance map</span></div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;            <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a> = dist_map * grid_size;</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;        }</div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160; </div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;<span class="comment">        /// @brief Eigen matrix which stores the map data</span></div>
+<div class="line"><a name="l00252"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">  252</a></span>&#160;<span class="comment"></span>        Eigen::Matrix&lt;Scalar, Eigen::Dynamic, Eigen::Dynamic&gt; <a class="code" href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">map</a>;</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;    };</div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160; </div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;}  <span class="comment">// namespace module::localisation</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160; </div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_LOCALISATION_MAP_HPP</span></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html">module::localisation::OccupancyMap</a></div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:36</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a01726e6e4877e9d4fda1bf6104bc3a03"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03">module::localisation::OccupancyMap::add_rectangle</a></div><div class="ttdeci">void add_rectangle(int x0, int y0, int width, int height, int inner_width)</div><div class="ttdoc">Add a rectangle to the map with specified inner width.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:125</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a15c1432dc72c7ec98ff12b1fc689d0d8"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a15c1432dc72c7ec98ff12b1fc689d0d8">module::localisation::OccupancyMap::get_width</a></div><div class="ttdeci">int get_width()</div><div class="ttdoc">Get the width (number of columns) of the map.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:45</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a2ce98900abdb784a2478820dd69ee47d"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a2ce98900abdb784a2478820dd69ee47d">module::localisation::OccupancyMap::get_length</a></div><div class="ttdeci">int get_length()</div><div class="ttdoc">Get the length (number of rows) of the map.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:50</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a3b4ead5da00d9640976cfaebbd989a7f"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a3b4ead5da00d9640976cfaebbd989a7f">module::localisation::OccupancyMap::add_horizontal_line</a></div><div class="ttdeci">void add_horizontal_line(int x0, int y0, int length)</div><div class="ttdoc">Add a horizontal line to the map.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:86</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a4b7b361737f80ba27fdd80df0fedc304"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a4b7b361737f80ba27fdd80df0fedc304">module::localisation::OccupancyMap::resize</a></div><div class="ttdeci">void resize(int width, int length)</div><div class="ttdoc">Resize the map to specified width and length, and set all values to zero.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:74</div></div>
-<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a60338a0ecceff589c466e4e21d770ff3"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">module::localisation::OccupancyMap::create_distance_map</a></div><div class="ttdeci">void create_distance_map(Scalar grid_size)</div><div class="ttdoc">Replace map with a new map with occupancy values which encode the minimum distance to the closest occ...</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:190</div></div>
-<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a75cc84bbae363d61630898069aac013d"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">module::localisation::OccupancyMap::add_cross</a></div><div class="ttdeci">void add_cross(const int X0, const int Y0, const int radius, const int inner_width)</div><div class="ttdoc">Add a rectangular cross to the map with specified origin, radius and line width.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:158</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a60338a0ecceff589c466e4e21d770ff3"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a60338a0ecceff589c466e4e21d770ff3">module::localisation::OccupancyMap::create_distance_map</a></div><div class="ttdeci">void create_distance_map(Scalar grid_size)</div><div class="ttdoc">Replace map with a new map with occupancy values which encode the minimum distance to the closest occ...</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:194</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a75cc84bbae363d61630898069aac013d"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a75cc84bbae363d61630898069aac013d">module::localisation::OccupancyMap::add_cross</a></div><div class="ttdeci">void add_cross(const int X0, const int Y0, const int radius, const int inner_width)</div><div class="ttdoc">Add a rectangular cross to the map with specified origin, radius and line width.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:162</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_a7c7e484bb9bf64b1c85469d9eb718cf5"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#a7c7e484bb9bf64b1c85469d9eb718cf5">module::localisation::OccupancyMap::get_map</a></div><div class="ttdeci">Eigen::Matrix&lt; Scalar, Eigen::Dynamic, Eigen::Dynamic &gt; get_map()</div><div class="ttdoc">Getter for the map data.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:40</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_ac1f4588e0d084d046f81b5a9e246c610"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#ac1f4588e0d084d046f81b5a9e246c610">module::localisation::OccupancyMap::add_rectangle</a></div><div class="ttdeci">void add_rectangle(int x0, int y0, int width, int height)</div><div class="ttdoc">Add a rectangle to the map with width of 1 grid cell.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:108</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_aca1a52f02c6a66c9f4be1933bb5384bd"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#aca1a52f02c6a66c9f4be1933bb5384bd">module::localisation::OccupancyMap::add_vertical_line</a></div><div class="ttdeci">void add_vertical_line(int x0, int y0, int length)</div><div class="ttdoc">Add a vertical line to the map.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:97</div></div>
-<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_acddd3b34ecf9b2f0520359cbd6cc7828"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">module::localisation::OccupancyMap::add_circle</a></div><div class="ttdeci">void add_circle(const int X0, const int Y0, const int radius, const int inner_width)</div><div class="ttdoc">Add a circle to the map with specified origin, radius and line width.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:137</div></div>
-<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_aef2566637f1e4f449975c11e9542fa85"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">module::localisation::OccupancyMap::map</a></div><div class="ttdeci">Eigen::Matrix&lt; Scalar, Eigen::Dynamic, Eigen::Dynamic &gt; map</div><div class="ttdoc">Eigen matrix which stores the map data.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:248</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_acddd3b34ecf9b2f0520359cbd6cc7828"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#acddd3b34ecf9b2f0520359cbd6cc7828">module::localisation::OccupancyMap::add_circle</a></div><div class="ttdeci">void add_circle(const int X0, const int Y0, const int radius, const int inner_width)</div><div class="ttdoc">Add a circle to the map with specified origin, radius and line width.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:141</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_aef2566637f1e4f449975c11e9542fa85"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#aef2566637f1e4f449975c11e9542fa85">module::localisation::OccupancyMap::map</a></div><div class="ttdeci">Eigen::Matrix&lt; Scalar, Eigen::Dynamic, Eigen::Dynamic &gt; map</div><div class="ttdoc">Eigen matrix which stores the map data.</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:252</div></div>
 <div class="ttc" id="aclassmodule_1_1localisation_1_1OccupancyMap_html_af9ea4344bbf8685568ba4a0300ee209f"><div class="ttname"><a href="classmodule_1_1localisation_1_1OccupancyMap.html#af9ea4344bbf8685568ba4a0300ee209f">module::localisation::OccupancyMap::get_occupancy_value</a></div><div class="ttdeci">Scalar get_occupancy_value(int x, int y)</div><div class="ttdoc">Get the value of the map at the specified coordinates or return -1 if the coordinates are outside the...</div><div class="ttdef"><b>Definition:</b> OccupancyMap.hpp:59</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -443,7 +447,7 @@ $(document).ready(function(){initNavTree('OccupancyMap_8hpp_source.html',''); in
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_38bed732d55f0866e6135bc645f051b9.html">localisation</a></li><li class="navelem"><b>OccupancyMap.hpp</b></li>
-    <li class="footer">Generated on Fri Feb 2 2024 03:15:09 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Feb 3 2024 02:13:35 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
