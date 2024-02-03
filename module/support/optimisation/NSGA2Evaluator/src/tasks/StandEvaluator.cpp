@@ -59,6 +59,10 @@ namespace module::support::optimisation {
     }
 
     void StandEvaluator::set_up_trial(const NSGA2EvaluationRequest& current_request) {
+        // Get constant variables
+        YAML::Node config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+        cfg.fallen_angle  = config["fallen_angle"].as<float>();
+
         load_script(current_request.task_config_path);
         std::chrono::milliseconds limit_ms = std::chrono::milliseconds(0);
         for (size_t i = 0; i < current_request.parameters.real_params.size(); i++) {
@@ -67,13 +71,9 @@ namespace module::support::optimisation {
         }
         save_script(fmt::format("gen{:03d}_ind{:03d}_task-stand.yaml", current_request.generation, current_request.id));
 
-        auto overhead = std::chrono::seconds(2);  // Overhead tacked on to give the robot time to fall over if unstable
-        trial_duration_limit = std::chrono::duration_cast<std::chrono::seconds>(limit_ms) + overhead;
+        trial_duration_limit = std::chrono::duration_cast<std::chrono::seconds>(limit_ms)
+                               + std::chrono::seconds(config["stand"]["stability_overhead"].as<int>());
 
-        // Get constant variables
-        YAML::Node config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
-
-        cfg.fallen_angle = config["fallen_angle"].as<float>();
 
         fallen = false;
     }

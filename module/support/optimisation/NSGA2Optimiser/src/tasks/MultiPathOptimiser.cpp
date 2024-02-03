@@ -47,14 +47,10 @@ namespace module::support::optimisation {
         NUClear::log<NUClear::INFO>("Multipath Optimiser Setting up NSGA2");
         std::vector<std::vector<double>> population_data;
 
-        std::string input_file_name =
-            "../NUbots/module/support/optimisation/NSGA2Optimiser/data/config/Supplied_Pop_Reals.csv";
+        std::string input_file_name = config["multipath"]["input_file"].as<std::string>();
 
         population_data = read_in_population_file(input_file_name);
         NUClear::log<NUClear::INFO>("Data file size is", population_data.size());
-
-
-        // bool supp_pop =
 
         // Extract the initial values and limits and from config file, for all of the parameters
         auto walk = config["walk"];
@@ -78,7 +74,6 @@ namespace module::support::optimisation {
 
         walk_config_path     = config["task_config_path"].as<std::string>();
         trial_duration_limit = config["trial_duration_limit"].as<int>();
-        // supplied
 
         // Set configuration for real variables
         NUClear::log<NUClear::INFO>("Real Var Count: ", param_initial_values.size());
@@ -154,9 +149,7 @@ namespace module::support::optimisation {
         }
 
         if (!inputFile.eof()) {
-            // cerr << "Could not read file " << inputFileName << "\n";
-            NUClear::log<NUClear::INFO>("Could not read file", file_name);
-            // std::__throw_invalid_argument("File not found.");
+            throw std::runtime_error("File not found: " + file_name);
         }
 
         return data;

@@ -149,10 +149,6 @@ namespace module::support::optimisation {
     }
 
     bool RotationEvaluator::has_fallen(const Sensors& sensors) {
-        // omega           = sensors.gyroscope.z();
-        // deltaT          = sim_time - old_time;
-        // old_time        = sim_time;
-        // theta += omega * deltaT / 1000;
         update_max_field_plane_sway(sensors);
 
         // Transform to torso {t} from world {w} space
