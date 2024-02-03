@@ -11,6 +11,8 @@ nuclear_role(
   network::PlotJuggler
   network::NUClearNet
   network::NetworkForwarder
+  output::Overview
+  output::ImageCompressor
   # Sensors
   input::GameController
   input::SensorFilter
@@ -20,6 +22,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::BallDetector
   vision::FieldLineDetector
+  vision::RobotDetector
   # Localisation
   localisation::FieldLocalisation
   localisation::BallLocalisation

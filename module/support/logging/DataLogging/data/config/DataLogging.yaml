@@ -21,3 +21,5 @@ messages:
   message.localisation.Ball: false
   message.localisation.Field: false
   message.platform.RawSensors: true
+  message.nuclear.LogMessage: false
+  message.nuclear.ReactionStatistics: false
