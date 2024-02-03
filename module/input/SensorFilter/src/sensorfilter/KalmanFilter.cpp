@@ -57,9 +57,13 @@ namespace module::input {
         // Initialise the Kalman filter
         kf.update(cfg.Ac, cfg.Bc, cfg.C, cfg.Q, cfg.R);
         kf.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
-        Hwt.translation() = Eigen::VectorXd(config["initial_rTWw"].as<Expression>());
-        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3d(config["initial_rpy"].as<Expression>()));
+        Hwt = cfg.initial_Hwt;
         update_loop.enable();
+    }
+
+    void SensorFilter::reset_kf() {
+        kf.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
+        Hwt = cfg.initial_Hwt;
     }
 
     void SensorFilter::update_odometry_kf(std::unique_ptr<Sensors>& sensors,
