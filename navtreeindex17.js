@@ -1,5 +1,11 @@
 var NAVTREEINDEX17 =
 {
+"vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba6731a66e6d987a6700bf8937b4685390":[1,0,3,6,0,1,6,17],
+"vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba696b031073e74bf2cb98e5ef201d4aa3":[1,0,3,6,0,1,6,31],
+"vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba703171bd0f3a9c3a5ca09fe350514991":[1,0,3,6,0,1,6,14],
+"vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba707ca6cc10b67e02d113a0653b051900":[1,0,3,6,0,1,6,12],
+"vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba787e7b7efa7f385b717a6a53a0a5c409":[1,0,3,6,0,1,6,19],
+"vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba8daf504f26451420b7aac3cb87b06652":[1,0,3,6,0,1,6,6],
 "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba8eca9cea5610e4a4cb96ae6677b8f3a6":[1,0,3,6,0,1,6,29],
 "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba8f8d49d3d0842358e0fe8f43601d8537":[1,0,3,6,0,1,6,1],
 "vaapi__error__category_8hpp.html#a730a99160b02059db487a1a94b20eeeba99e1e29f22ce0ae9736d69cc616133fc":[1,0,3,6,0,1,6,30],

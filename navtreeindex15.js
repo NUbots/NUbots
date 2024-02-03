@@ -1,5 +1,11 @@
 var NAVTREEINDEX15 =
 {
+"structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html":[2,0,5,1],
+"structutility_1_1actuation_1_1ServoMap.html":[2,0,6,0,0],
+"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html":[2,0,6,0,1],
+"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html#a690fc0a10878a580f023df38d277cfa0":[2,0,6,0,1,0],
+"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html":[2,0,6,0,2],
+"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html#ad6a8f3533793d1cea4245d4e8c3b070e":[2,0,6,0,2,0],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html":[2,0,6,0,3],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html#a92577dac919bdb0c173dfdc3d06ea3e0":[2,0,6,0,3,0],
 "structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html":[2,0,6,0,4],
@@ -243,11 +249,5 @@ var NAVTREEINDEX15 =
 "structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a8aa6305cebcaff6eaf5ddbc110704b33":[2,0,6,5,0,4,0,1],
 "structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html":[2,0,6,5,0,5,0],
 "structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a0dc9721d1e1f7cd0201b108189082fe2":[2,0,6,5,0,5,0,0],
-"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a32cb7b95c46ee8404e1b9ae5401c8407":[2,0,6,5,0,5,0,1],
-"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a5299dbe7c2dbda05e2591b5413abd5bb":[2,0,6,5,0,5,0,2],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html":[2,0,6,5,0,8],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a00d4bc7b78fcfe117e424fa74dfc27df":[2,0,6,5,0,8,16],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a04362c734f46ab57001737c514f4cfe3":[2,0,6,5,0,8,5],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704c":[2,0,6,5,0,8,0],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca033c902a42ce564f5e69a3b461f9dd14":[2,0,6,5,0,8,0,10]
+"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a32cb7b95c46ee8404e1b9ae5401c8407":[2,0,6,5,0,5,0,1]
 };

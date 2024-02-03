@@ -1,5 +1,9 @@
 var NAVTREEINDEX8 =
 {
+"glyphs_8hpp.html#af3b204f9c4dd1e5c4b36cc57e9bdc13e":[1,0,3,13,8],
+"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5d":[1,0,3,8,0,16],
+"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da029bcf6a5b5cb28d33634f4e4549f215":[1,0,3,8,0,16,2],
+"handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da442f0b6625bbdda7f8ec5ce2fd27126e":[1,0,3,8,0,16,3],
 "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da567bb7d42622ad0d2d636aea2b8152db":[1,0,3,8,0,16,5],
 "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da75815bad26a6db6f30b95e1fe252fe35":[1,0,3,8,0,16,0],
 "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5dae7f66be9ec3ebd3c838cee9554ad037e":[1,0,3,8,0,16,1],
@@ -245,9 +249,5 @@ var NAVTREEINDEX8 =
 "pure__evil_8cpp.html#ae19fa2fe95aea29bb47634a53b5b5341":[1,0,6,14,0,2],
 "quantization__matrix_8cpp.html#aaa85ed4fef1efdc929e3ddde853719e0":[1,0,3,6,0,1,1,7],
 "quaternion_8hpp.html#a125dc8461b108045bb8763abaf1019ff":[1,0,6,6,5,0],
-"quaternion_8hpp.html#a85b29996c0d776de35dc74b241911f20":[1,0,6,6,5,1],
-"quaternion_8hpp.html#ab77fdf01cc1ef83f3be36c92f8d9cf77":[1,0,6,6,5,2],
-"read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e":[1,0,3,12,1,7],
-"resample_8hpp.html#ad303838c627903439887c863cc1ef49a":[1,0,6,6,7,0,4],
-"residual_8hpp.html#a3666903fbc2bb877aac34c9574b99fdb":[1,0,6,6,7,0,5]
+"quaternion_8hpp.html#a85b29996c0d776de35dc74b241911f20":[1,0,6,6,5,1]
 };

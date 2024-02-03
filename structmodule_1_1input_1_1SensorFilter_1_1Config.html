@@ -218,10 +218,6 @@ Eigen::Matrix&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilt
 Eigen::Matrix&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a15a89bcf7e8aa241e0f7bc1d312f5f22">n_states</a>, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a96af9da50aef0e88a0bd1a844b61886d">n_inputs</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#a7bbec7e3d22d886b1ff2389be8f1afde">Bc</a></td></tr>
 <tr class="memdesc:a7bbec7e3d22d886b1ff2389be8f1afde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kalman Continuous time input model. <br /></td></tr>
 <tr class="separator:a7bbec7e3d22d886b1ff2389be8f1afde"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa4f4e84a00899d094570244b5a71d1c"><td class="memItemLeft" align="right" valign="top"><a id="afa4f4e84a00899d094570244b5a71d1c"></a>
-Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#afa4f4e84a00899d094570244b5a71d1c">bias</a> = Eigen::Vector3d::Zero()</td></tr>
-<tr class="memdesc:afa4f4e84a00899d094570244b5a71d1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mahony filter bias. <br /></td></tr>
-<tr class="separator:afa4f4e84a00899d094570244b5a71d1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aea88c1529974c0e1b638d8cd2fe4482c"><td class="memItemLeft" align="right" valign="top"><a id="aea88c1529974c0e1b638d8cd2fe4482c"></a>
 struct <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config_1_1Button.html">module::input::SensorFilter::Config::Button</a>&#160;</td><td class="memItemRight" valign="bottom"><b>buttons</b></td></tr>
 <tr class="separator:aea88c1529974c0e1b638d8cd2fe4482c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -240,10 +236,22 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <tr class="memitem:ac3022042736ebb833127de6ecfbb8f45"><td class="memItemLeft" align="right" valign="top"><a id="ac3022042736ebb833127de6ecfbb8f45"></a>
 struct <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html">module::input::SensorFilter::Config::FootDown</a>&#160;</td><td class="memItemRight" valign="bottom"><b>footDown</b></td></tr>
 <tr class="separator:ac3022042736ebb833127de6ecfbb8f45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99b5f955571d3b5e7ed13b637f8bc9a7"><td class="memItemLeft" align="right" valign="top"><a id="a99b5f955571d3b5e7ed13b637f8bc9a7"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#a99b5f955571d3b5e7ed13b637f8bc9a7">initial_anchor_frame</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a99b5f955571d3b5e7ed13b637f8bc9a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial frame for anchoring deadreckoning. <br /></td></tr>
+<tr class="separator:a99b5f955571d3b5e7ed13b637f8bc9a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af44d6a83327e9f41a7fee514b15fce95"><td class="memItemLeft" align="right" valign="top"><a id="af44d6a83327e9f41a7fee514b15fce95"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#af44d6a83327e9f41a7fee514b15fce95">initial_bias</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:af44d6a83327e9f41a7fee514b15fce95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mahony filter bias. <br /></td></tr>
+<tr class="separator:af44d6a83327e9f41a7fee514b15fce95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac2ddba845c284e7262ed3fee4ec80700"><td class="memItemLeft" align="right" valign="top"><a id="ac2ddba845c284e7262ed3fee4ec80700"></a>
 <a class="el" href="classmodule_1_1input_1_1MotionModel.html">MotionModel</a>&lt; double &gt;::StateVec&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#ac2ddba845c284e7262ed3fee4ec80700">initial_covariance</a></td></tr>
 <tr class="memdesc:ac2ddba845c284e7262ed3fee4ec80700"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial covariance of the for the <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config_1_1UKF.html" title="Config for the UKF.">UKF</a> filter. <br /></td></tr>
 <tr class="separator:ac2ddba845c284e7262ed3fee4ec80700"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2613cc10241604e8aa7b4c3884063676"><td class="memItemLeft" align="right" valign="top"><a id="a2613cc10241604e8aa7b4c3884063676"></a>
+Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#a2613cc10241604e8aa7b4c3884063676">initial_Hwt</a> = Eigen::Isometry3d::Identity()</td></tr>
+<tr class="memdesc:a2613cc10241604e8aa7b4c3884063676"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial transform from torso {t} to world {w} space. <br /></td></tr>
+<tr class="separator:a2613cc10241604e8aa7b4c3884063676"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeda328ca782efe82853ede05f40d2039"><td class="memItemLeft" align="right" valign="top"><a id="aeda328ca782efe82853ede05f40d2039"></a>
 <a class="el" href="classmodule_1_1input_1_1MotionModel.html">MotionModel</a>&lt; double &gt;::StateVec&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#aeda328ca782efe82853ede05f40d2039">initial_mean</a></td></tr>
 <tr class="memdesc:aeda328ca782efe82853ede05f40d2039"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial state of the for the <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config_1_1UKF.html" title="Config for the UKF.">UKF</a> filter. <br /></td></tr>
@@ -281,7 +289,7 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html">SensorFilter</a></li><li class="navelem"><a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sat Feb 3 2024 02:13:36 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Feb 3 2024 23:44:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

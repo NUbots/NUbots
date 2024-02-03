@@ -169,9 +169,9 @@ $(document).ready(function(){initNavTree('classmodule_1_1input_1_1SensorFilter.h
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="#pub-static-attribs">Static Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classmodule_1_1input_1_1SensorFilter-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">module::input::SensorFilter Class Reference</div>  </div>
@@ -229,6 +229,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a6d6fc5e0cdc20c4735433b554af93189"><td class="memItemLeft" align="right" valign="top"><a id="a6d6fc5e0cdc20c4735433b554af93189"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>SensorFilter</b> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="separator:a6d6fc5e0cdc20c4735433b554af93189"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
 <tr class="memitem:ab83166c6f8b1127c967998af06da0a73"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#ab83166c6f8b1127c967998af06da0a73">anchor_update</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const WalkState &amp;walk_state)</td></tr>
 <tr class="memdesc:ab83166c6f8b1127c967998af06da0a73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates translational and yaw components of odometry using the anchor method.  <a href="classmodule_1_1input_1_1SensorFilter.html#ab83166c6f8b1127c967998af06da0a73">More...</a><br /></td></tr>
 <tr class="separator:ab83166c6f8b1127c967998af06da0a73"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -253,6 +256,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a734571fe0006b4b4e2957fc40077ad8c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a734571fe0006b4b4e2957fc40077ad8c">integrate_walkcommand</a> (const double dt, const Stability &amp;stability, const WalkState &amp;walk_state)</td></tr>
 <tr class="memdesc:a734571fe0006b4b4e2957fc40077ad8c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs a deadreckoning update on the odometry for x, y and yaw using the walk command.  <a href="classmodule_1_1input_1_1SensorFilter.html#a734571fe0006b4b4e2957fc40077ad8c">More...</a><br /></td></tr>
 <tr class="separator:a734571fe0006b4b4e2957fc40077ad8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66e3f5ea495ae55ce42ce3bf6d24aaeb"><td class="memItemLeft" align="right" valign="top"><a id="a66e3f5ea495ae55ce42ce3bf6d24aaeb"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a66e3f5ea495ae55ce42ce3bf6d24aaeb">reset_kf</a> ()</td></tr>
+<tr class="memdesc:a66e3f5ea495ae55ce42ce3bf6d24aaeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the Kalman filter state. <br /></td></tr>
+<tr class="separator:a66e3f5ea495ae55ce42ce3bf6d24aaeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa0e4188d3d54d35e3f0b003d1787c381"><td class="memItemLeft" align="right" valign="top"><a id="aa0e4188d3d54d35e3f0b003d1787c381"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa0e4188d3d54d35e3f0b003d1787c381">reset_mahony</a> ()</td></tr>
+<tr class="memdesc:aa0e4188d3d54d35e3f0b003d1787c381"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the Mahony filter state. <br /></td></tr>
+<tr class="separator:aa0e4188d3d54d35e3f0b003d1787c381"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9767d30c19797dee70d4736b7bd8de5f"><td class="memItemLeft" align="right" valign="top"><a id="a9767d30c19797dee70d4736b7bd8de5f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a9767d30c19797dee70d4736b7bd8de5f">reset_ukf</a> ()</td></tr>
+<tr class="memdesc:a9767d30c19797dee70d4736b7bd8de5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the UKF state. <br /></td></tr>
+<tr class="separator:a9767d30c19797dee70d4736b7bd8de5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a108c8864395b9e74cb4d888497ccecfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">update_kinematics</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a108c8864395b9e74cb4d888497ccecfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the sensors message with kinematics data.  <a href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">More...</a><br /></td></tr>
 <tr class="separator:a108c8864395b9e74cb4d888497ccecfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -272,45 +287,15 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memdesc:a23d293bdd9daafc76437a515f76e63ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with raw sensor data, including the timestamp, battery voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.  <a href="classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba">More...</a><br /></td></tr>
 <tr class="separator:a23d293bdd9daafc76437a515f76e63ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a40d778195ecb3ad9ea971332caaef6f0"><td class="memItemLeft" align="right" valign="top"><a id="a40d778195ecb3ad9ea971332caaef6f0"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a40d778195ecb3ad9ea971332caaef6f0">bias_mahony</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a40d778195ecb3ad9ea971332caaef6f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bias used in the mahony filter, updates with each mahony update. <br /></td></tr>
+<tr class="separator:a40d778195ecb3ad9ea971332caaef6f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7ce23c53225aa0b67e82cc7de8974aa5"><td class="memItemLeft" align="right" valign="top"><a id="a7ce23c53225aa0b67e82cc7de8974aa5"></a>
 struct <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html">module::input::SensorFilter::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a7ce23c53225aa0b67e82cc7de8974aa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8a09ed758631186a143d04b0529ae97b"><td class="memItemLeft" align="right" valign="top"><a id="a8a09ed758631186a143d04b0529ae97b"></a>
-<a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html">utility::math::filter::KalmanFilter</a>&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a15a89bcf7e8aa241e0f7bc1d312f5f22">n_states</a>, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a96af9da50aef0e88a0bd1a844b61886d">n_inputs</a>, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa503f208447ddd9bf98a27c96cdc265e">n_measurements</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a8a09ed758631186a143d04b0529ae97b">kf</a> {}</td></tr>
-<tr class="memdesc:a8a09ed758631186a143d04b0529ae97b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kalman filter for pose estimation. <br /></td></tr>
-<tr class="separator:a8a09ed758631186a143d04b0529ae97b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af52d83229b487471a813526f49536da5"><td class="memItemLeft" align="right" valign="top"><a id="af52d83229b487471a813526f49536da5"></a>
-tinyrobotics::Model&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a089622313a3c016c9d4c4e1a8d69de67">n_joints</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#af52d83229b487471a813526f49536da5">nugus_model</a></td></tr>
-<tr class="memdesc:af52d83229b487471a813526f49536da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">tinyrobotics NUgus model used for kinematics <br /></td></tr>
-<tr class="separator:af52d83229b487471a813526f49536da5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66c82048dee96b89d1febe7260060423"><td class="memItemLeft" align="right" valign="top"><a id="a66c82048dee96b89d1febe7260060423"></a>
-<a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html">utility::math::filter::UKF</a>&lt; double, <a class="el" href="classmodule_1_1input_1_1MotionModel.html">MotionModel</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a66c82048dee96b89d1febe7260060423">ukf</a> {}</td></tr>
-<tr class="memdesc:a66c82048dee96b89d1febe7260060423"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unscented kalman filter for pose estimation. <br /></td></tr>
-<tr class="separator:a66c82048dee96b89d1febe7260060423"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
-Static Public Attributes</h2></td></tr>
-<tr class="memitem:a96af9da50aef0e88a0bd1a844b61886d"><td class="memItemLeft" align="right" valign="top"><a id="a96af9da50aef0e88a0bd1a844b61886d"></a>
-static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a96af9da50aef0e88a0bd1a844b61886d">n_inputs</a> = 0</td></tr>
-<tr class="memdesc:a96af9da50aef0e88a0bd1a844b61886d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of inputs in the Kalman filter. Model has no inputs. <br /></td></tr>
-<tr class="separator:a96af9da50aef0e88a0bd1a844b61886d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a089622313a3c016c9d4c4e1a8d69de67"><td class="memItemLeft" align="right" valign="top"><a id="a089622313a3c016c9d4c4e1a8d69de67"></a>
-static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a089622313a3c016c9d4c4e1a8d69de67">n_joints</a> = 20</td></tr>
-<tr class="memdesc:a089622313a3c016c9d4c4e1a8d69de67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of actuatable joints in the NUgus robot. <br /></td></tr>
-<tr class="separator:a089622313a3c016c9d4c4e1a8d69de67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa503f208447ddd9bf98a27c96cdc265e"><td class="memItemLeft" align="right" valign="top"><a id="aa503f208447ddd9bf98a27c96cdc265e"></a>
-static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa503f208447ddd9bf98a27c96cdc265e">n_measurements</a> = 4</td></tr>
-<tr class="memdesc:aa503f208447ddd9bf98a27c96cdc265e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of measurements in the Kalman filter. y = [roll, pitch, roll rate, pitch rate]'. <br /></td></tr>
-<tr class="separator:aa503f208447ddd9bf98a27c96cdc265e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a15a89bcf7e8aa241e0f7bc1d312f5f22"><td class="memItemLeft" align="right" valign="top"><a id="a15a89bcf7e8aa241e0f7bc1d312f5f22"></a>
-static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a15a89bcf7e8aa241e0f7bc1d312f5f22">n_states</a> = 4</td></tr>
-<tr class="memdesc:a15a89bcf7e8aa241e0f7bc1d312f5f22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of states in the Kalman filter. x = [roll, pitch, roll rate, pitch rate]'. <br /></td></tr>
-<tr class="separator:a15a89bcf7e8aa241e0f7bc1d312f5f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
-Private Attributes</h2></td></tr>
 <tr class="memitem:a05c60c8cc81b618da2e97d43c04bd062"><td class="memItemLeft" align="right" valign="top"><a id="a05c60c8cc81b618da2e97d43c04bd062"></a>
 WalkState::SupportPhase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a05c60c8cc81b618da2e97d43c04bd062">current_support_phase</a> = WalkState::SupportPhase::LEFT</td></tr>
 <tr class="memdesc:a05c60c8cc81b618da2e97d43c04bd062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current support phase of the robot. <br /></td></tr>
@@ -329,6 +314,10 @@ Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="e
 <tr class="memitem:a8fcf0dd0c32c65161671b6507e6e35ad"><td class="memItemLeft" align="right" valign="top"><a id="a8fcf0dd0c32c65161671b6507e6e35ad"></a>
 Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><b>Hwt_mahony</b> = Eigen::Isometry3d::Identity()</td></tr>
 <tr class="separator:a8fcf0dd0c32c65161671b6507e6e35ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a09ed758631186a143d04b0529ae97b"><td class="memItemLeft" align="right" valign="top"><a id="a8a09ed758631186a143d04b0529ae97b"></a>
+<a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html">utility::math::filter::KalmanFilter</a>&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a15a89bcf7e8aa241e0f7bc1d312f5f22">n_states</a>, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a96af9da50aef0e88a0bd1a844b61886d">n_inputs</a>, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa503f208447ddd9bf98a27c96cdc265e">n_measurements</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a8a09ed758631186a143d04b0529ae97b">kf</a> {}</td></tr>
+<tr class="memdesc:a8a09ed758631186a143d04b0529ae97b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Kalman filter for pose estimation. <br /></td></tr>
+<tr class="separator:a8a09ed758631186a143d04b0529ae97b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7c6fb9560d48f59cc9484cbf2c142ecf"><td class="memItemLeft" align="right" valign="top"><a id="a7c6fb9560d48f59cc9484cbf2c142ecf"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a7c6fb9560d48f59cc9484cbf2c142ecf">left_down</a> = false</td></tr>
 <tr class="memdesc:a7c6fb9560d48f59cc9484cbf2c142ecf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current state of the left button. <br /></td></tr>
@@ -341,12 +330,20 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#ac4f3de7645c8e092e0ee35cea26b9ad4">middle_down</a> = false</td></tr>
 <tr class="memdesc:ac4f3de7645c8e092e0ee35cea26b9ad4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current state of the middle button. <br /></td></tr>
 <tr class="separator:ac4f3de7645c8e092e0ee35cea26b9ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af52d83229b487471a813526f49536da5"><td class="memItemLeft" align="right" valign="top"><a id="af52d83229b487471a813526f49536da5"></a>
+tinyrobotics::Model&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a089622313a3c016c9d4c4e1a8d69de67">n_joints</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#af52d83229b487471a813526f49536da5">nugus_model</a></td></tr>
+<tr class="memdesc:af52d83229b487471a813526f49536da5"><td class="mdescLeft">&#160;</td><td class="mdescRight">tinyrobotics NUgus model used for kinematics <br /></td></tr>
+<tr class="separator:af52d83229b487471a813526f49536da5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab686a5107ed9851c3b84430f1dc3eeaf"><td class="memItemLeft" align="right" valign="top"><a id="ab686a5107ed9851c3b84430f1dc3eeaf"></a>
 std::array&lt; bool, 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>previous_foot_down</b> = {false, false}</td></tr>
 <tr class="separator:ab686a5107ed9851c3b84430f1dc3eeaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0eba6561e4fef50dd67ce9a7c6d610c7"><td class="memItemLeft" align="right" valign="top"><a id="a0eba6561e4fef50dd67ce9a7c6d610c7"></a>
 std::atomic_bool&#160;</td><td class="memItemRight" valign="bottom"><b>reset_filter</b> {false}</td></tr>
 <tr class="separator:a0eba6561e4fef50dd67ce9a7c6d610c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66c82048dee96b89d1febe7260060423"><td class="memItemLeft" align="right" valign="top"><a id="a66c82048dee96b89d1febe7260060423"></a>
+<a class="el" href="classutility_1_1math_1_1filter_1_1UKF.html">utility::math::filter::UKF</a>&lt; double, <a class="el" href="classmodule_1_1input_1_1MotionModel.html">MotionModel</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a66c82048dee96b89d1febe7260060423">ukf</a> {}</td></tr>
+<tr class="memdesc:a66c82048dee96b89d1febe7260060423"><td class="mdescLeft">&#160;</td><td class="mdescRight">Unscented kalman filter for pose estimation. <br /></td></tr>
+<tr class="separator:a66c82048dee96b89d1febe7260060423"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3139be49da016a46b3d8af0add2aa5de"><td class="memItemLeft" align="right" valign="top"><a id="a3139be49da016a46b3d8af0add2aa5de"></a>
 ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><b>update_loop</b> {}</td></tr>
 <tr class="separator:a3139be49da016a46b3d8af0add2aa5de"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -358,6 +355,25 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a75af4bca7a29316d14fb488a4f013ee2">yaw</a> = 0</td></tr>
 <tr class="memdesc:a75af4bca7a29316d14fb488a4f013ee2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dead reckoning yaw orientation of the robot in world space. <br /></td></tr>
 <tr class="separator:a75af4bca7a29316d14fb488a4f013ee2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a96af9da50aef0e88a0bd1a844b61886d"><td class="memItemLeft" align="right" valign="top"><a id="a96af9da50aef0e88a0bd1a844b61886d"></a>
+static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a96af9da50aef0e88a0bd1a844b61886d">n_inputs</a> = 0</td></tr>
+<tr class="memdesc:a96af9da50aef0e88a0bd1a844b61886d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of inputs in the Kalman filter. Model has no inputs. <br /></td></tr>
+<tr class="separator:a96af9da50aef0e88a0bd1a844b61886d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a089622313a3c016c9d4c4e1a8d69de67"><td class="memItemLeft" align="right" valign="top"><a id="a089622313a3c016c9d4c4e1a8d69de67"></a>
+static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a089622313a3c016c9d4c4e1a8d69de67">n_joints</a> = 20</td></tr>
+<tr class="memdesc:a089622313a3c016c9d4c4e1a8d69de67"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of actuatable joints in the NUgus robot. <br /></td></tr>
+<tr class="separator:a089622313a3c016c9d4c4e1a8d69de67"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa503f208447ddd9bf98a27c96cdc265e"><td class="memItemLeft" align="right" valign="top"><a id="aa503f208447ddd9bf98a27c96cdc265e"></a>
+static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa503f208447ddd9bf98a27c96cdc265e">n_measurements</a> = 4</td></tr>
+<tr class="memdesc:aa503f208447ddd9bf98a27c96cdc265e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of measurements in the Kalman filter. y = [roll, pitch, roll rate, pitch rate]'. <br /></td></tr>
+<tr class="separator:aa503f208447ddd9bf98a27c96cdc265e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a15a89bcf7e8aa241e0f7bc1d312f5f22"><td class="memItemLeft" align="right" valign="top"><a id="a15a89bcf7e8aa241e0f7bc1d312f5f22"></a>
+static const size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a15a89bcf7e8aa241e0f7bc1d312f5f22">n_states</a> = 4</td></tr>
+<tr class="memdesc:a15a89bcf7e8aa241e0f7bc1d312f5f22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Number of states in the Kalman filter. x = [roll, pitch, roll rate, pitch rate]'. <br /></td></tr>
+<tr class="separator:a15a89bcf7e8aa241e0f7bc1d312f5f22"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><dl class="section author"><dt>Author</dt><dd>Jade Fountain </dd>
@@ -369,6 +385,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::anchor_update </td>
@@ -388,6 +407,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Updates translational and yaw components of odometry using the anchor method. </p>
@@ -405,6 +429,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::debug_sensor_filter </td>
@@ -424,6 +451,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Display debug information. </p>
@@ -442,6 +474,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::detect_button_press </td>
@@ -451,6 +486,11 @@ Trent Houliston </dd></dl>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Detect when a button has been pressed. </p>
@@ -468,6 +508,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::integrate_walkcommand </td>
@@ -493,6 +536,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Runs a deadreckoning update on the odometry for x, y and yaw using the walk command. </p>
@@ -511,6 +559,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::update_kinematics </td>
@@ -530,6 +581,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Update the sensors message with kinematics data. </p>
@@ -548,6 +604,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::update_odometry_ground_truth </td>
@@ -567,6 +626,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes the position, orientation, velocity and rotational velocity of the torso in world space. </p>
@@ -586,6 +650,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::update_odometry_kf </td>
@@ -623,6 +690,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Updates the sensors message with odometry data filtered using Kalman Filter. This includes the. </p>
@@ -642,6 +714,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::update_odometry_mahony </td>
@@ -673,6 +748,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Updates the sensors message with odometry data filtered using MahonyFilter. This includes the. </p>
@@ -692,6 +772,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::update_odometry_ukf </td>
@@ -717,6 +800,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Updates the sensors message with odometry data filtered using UKF. This includes the. </p>
@@ -736,6 +824,9 @@ Trent Houliston </dd></dl>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void module::input::SensorFilter::update_raw_sensors </td>
@@ -761,6 +852,11 @@ Trent Houliston </dd></dl>
           <td></td><td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Updates the sensors message with raw sensor data, including the timestamp, battery voltage, servo sensors, accelerometer, gyroscope, buttons, and LED. </p>
@@ -791,7 +887,7 @@ Trent Houliston </dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html">SensorFilter</a></li>
-    <li class="footer">Generated on Sat Feb 3 2024 02:13:36 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Feb 3 2024 23:44:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -1,5 +1,11 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca8d74500a52198bf8c27a3d263983e8a9":[2,0,3,8,0,5,0,9],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca950644fef457fd4bed6ad1b2c778ee3c":[2,0,3,8,0,5,0,12],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca9fc24ee49a31e51525013f48ef47f5b4":[2,0,3,8,0,5,0,10],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dcaa453cba319739039e059bf2518b140c3":[2,0,3,8,0,5,0,4],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dcab718adec73e04ce3ec720dd11a06a308":[2,0,3,8,0,5,0,3],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dcade93759c8df128fc1db6f664f7fcbafc":[2,0,3,8,0,5,0,16],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dcaf510b97de4ace11844b85f23d0fc012f":[2,0,3,8,0,5,0,21],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dcaff45670f7090a57a0b15e455551eb6e5":[2,0,3,8,0,5,0,14],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html":[2,0,3,8,0,6,0],
@@ -243,11 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a.html#a9b0684dede7b4bfccc84a4c5cddd7237":[2,0,3,14,0,0,1,0],
 "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf.html":[2,0,3,14,0,0,2],
 "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf.html#a5c8587a70cf9147753dc8e576f32c1ef":[2,0,3,14,0,0,2,0],
-"structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__code_01_4.html":[2,0,5,0],
-"structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html":[2,0,5,1],
-"structutility_1_1actuation_1_1ServoMap.html":[2,0,6,0,0],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html":[2,0,6,0,1],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html#a690fc0a10878a580f023df38d277cfa0":[2,0,6,0,1,0],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html":[2,0,6,0,2],
-"structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html#ad6a8f3533793d1cea4245d4e8c3b070e":[2,0,6,0,2,0]
+"structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__code_01_4.html":[2,0,5,0]
 };
