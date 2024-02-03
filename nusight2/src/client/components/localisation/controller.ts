@@ -300,4 +300,9 @@ export class LocalisationController {
   toggleFieldLinePointsVisibility = (model: LocalisationModel) => {
     model.fieldLinePointsVisible = !model.fieldLinePointsVisible;
   };
+
+  @action
+  toggleTrajectoryVisibility = (model: LocalisationModel) => {
+    model.trajectoryVisible = !model.trajectoryVisible;
+  };
 }

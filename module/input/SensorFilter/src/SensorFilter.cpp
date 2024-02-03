@@ -41,6 +41,7 @@ namespace module::input {
     using message::actuation::BodySide;
     using utility::input::FrameID;
     using utility::input::ServoID;
+    using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -77,7 +78,7 @@ namespace module::input {
             configure_mahony(config);
 
             // Deadreckoning
-            Hwa.translation().y() =
+            Hwp.translation().y() =
                 tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
                                                                    nugus_model.home_configuration(),
                                                                    config["initial_anchor_frame"].as<std::string>())
@@ -186,29 +187,47 @@ namespace module::input {
 
     void SensorFilter::anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state) {
         // Compute torso pose in world space using kinematics from anchor frame
-        if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
-            Hwt = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+        if (current_phase.value == WalkState::Phase::LEFT) {
+            auto current_translation       = Hwt.translation();
+            auto current_rotation          = MatrixToEulerIntrinsic(Hwt.rotation());
+            Eigen::Isometry3d measured_Hwt = Hwp * Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
+            auto measured_translation      = measured_Hwt.translation();
+            auto measured_rotation         = MatrixToEulerIntrinsic(measured_Hwt.rotation());
+            // Apply exponential filter to the translation and rotation
+            double alpha      = 0.9;
+            Hwt.translation() = alpha * measured_translation + (1 - alpha) * current_translation;
+            Hwt.linear()      = EulerIntrinsicToMatrix(alpha * measured_rotation + (1 - alpha) * current_rotation);
         }
-        else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
-            Hwt = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+        else if (current_phase.value == WalkState::Phase::RIGHT) {
+            auto current_translation       = Hwt.translation();
+            auto current_rotation          = MatrixToEulerIntrinsic(Hwt.rotation());
+            Eigen::Isometry3d measured_Hwt = Hwp * Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse());
+            auto measured_translation      = measured_Hwt.translation();
+            auto measured_rotation         = MatrixToEulerIntrinsic(measured_Hwt.rotation());
+            // Apply exponential filter to the translation and rotation
+            double alpha      = 0.9;
+            Hwt.translation() = alpha * measured_translation + (1 - alpha) * current_translation;
+            Hwt.linear()      = EulerIntrinsicToMatrix(alpha * measured_rotation + (1 - alpha) * current_rotation);
         }
 
+
         // Update the anchor {a} frame if a support phase switch just occurred (could be done with foot down sensors)
-        if (walk_state.support_phase != current_support_phase) {
-            current_support_phase = walk_state.support_phase;
-            if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
+        if (walk_state.phase != current_phase) {
+            current_phase = walk_state.phase;
+            if (current_phase.value == WalkState::Phase::LEFT) {
                 // Update the anchor frame to the base of left foot
-                Hwa = Hwt * sensors->Htx[FrameID::L_FOOT_BASE];
+                Hwp = Hwt * sensors->Htx[FrameID::L_FOOT_BASE];
             }
-            else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
+            else if (current_phase.value == WalkState::Phase::RIGHT) {
                 // Update the anchor frame to the base of right foot
-                Hwa = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
+                Hwp = Hwt * sensors->Htx[FrameID::R_FOOT_BASE];
             }
         }
         // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on flat ground
-        Hwa.translation().z() = 0;
-        Hwa.linear() =
-            Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwa.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        Hwp.translation().z() = 0;
+        Hwp.linear() =
+            Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwp.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        sensors->Hwp = Hwp;
     }
 
     void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {

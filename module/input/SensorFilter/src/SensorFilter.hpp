@@ -354,11 +354,11 @@ namespace module::input {
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
     private:
-        /// @brief Transform from anchor {a} to world {w} space
-        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+        /// @brief Transform from planted foot {p} to world {w} space
+        Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
         /// @brief Current support phase of the robot
-        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+        WalkState::Phase current_phase = WalkState::Phase::LEFT;
 
         /// @brief Dead reckoning yaw orientation of the robot in world space
         double yaw = 0;
