@@ -57,6 +57,7 @@ namespace module::extension {
         // Add each unmet when as a requirement
         for (const auto& w : provider->when) {
             if (!w->current) {
+                option.state = Solution::Option::BLOCKED_WHEN;
                 option.requirements.push_back(solve_when(*w, authority, visited));
             }
         }

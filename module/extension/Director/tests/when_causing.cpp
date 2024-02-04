@@ -91,17 +91,29 @@ namespace {
                 events.push_back("emitting task at high priority");
                 emit<Task>(std::make_unique<SimpleTask>(), 100);
             });
+            // Remove the task so the helper goes back to its normal Provider
+            on<Trigger<Step<5>>, Priority::LOW>().then([this] {
+                events.push_back("removing task");
+                emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
+            });
+            on<Trigger<Step<6>>, Priority::LOW>().then([this] {
+                events.push_back("emitting helper task again");
+                emit<Task>(std::make_unique<Helper>(), 10);
+            });
+
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
                 emit(std::make_unique<Step<3>>());
                 emit(std::make_unique<Step<4>>());
+                emit(std::make_unique<Step<5>>());
+                emit(std::make_unique<Step<6>>());
             });
         }
     };
 }  // namespace
 
-TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][!mayfail]") {
+TEST_CASE("Test that the causing keyword can provide what another module needs", "[director][when][causing][simple]") {
 
     NUClear::Configuration config;
     config.thread_count = 1;
@@ -118,6 +130,8 @@ TEST_CASE("Test that the causing keyword can provide what another module needs",
         "emitting task at high priority",
         "helper causing allow",
         "task executed",
+        "removing task",
+        "emitting helper task again",
         "helper waiting",
     };
 

@@ -70,7 +70,7 @@ namespace {
                 events.push_back("subtask 1 executed");
             });
             on<Provide<Subtask<2>>, When<Condition<2>, std::equal_to, Condition<2>::ALLOW>>().then([this] {  //
-                events.push_back("subtask 1 executed");
+                events.push_back("subtask 2 executed");
             });
 
 
@@ -121,7 +121,8 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that if multiple things that are needed have when+causings all will run", "[director][!mayfail]") {
+TEST_CASE("Test that if multiple things that are needed have when+causings all will run",
+          "[director][when][causing][multiple][!mayfail]") {
 
     NUClear::Configuration config;
     config.thread_count = 1;

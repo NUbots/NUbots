@@ -125,6 +125,7 @@ namespace module::skill {
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
             .then([this](const WalkTask& walk_task) {
+                log<NUClear::WARN>("ON WALK NORMAL");
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -170,6 +171,77 @@ namespace module::skill {
                 WalkState::SupportPhase phase = walk_generator.is_left_foot_planted() ? WalkState::SupportPhase::LEFT
                                                                                       : WalkState::SupportPhase::RIGHT;
                 emit(std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase));
+
+                // Debugging
+                if (log_level <= NUClear::DEBUG) {
+                    Eigen::Vector3d thetaTL = MatrixToEulerIntrinsic(Htl.linear());
+                    emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+                    emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
+                    Eigen::Vector3d thetaTR = MatrixToEulerIntrinsic(Htr.linear());
+                    emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+                    emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
+                    Eigen::Isometry3d Hpt   = walk_generator.get_torso_pose();
+                    Eigen::Vector3d thetaPT = MatrixToEulerIntrinsic(Hpt.linear());
+                    emit(graph("Torso desired position (x,y,z)",
+                               Hpt.translation().x(),
+                               Hpt.translation().y(),
+                               Hpt.translation().z()));
+                    emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
+                }
+            });
+
+        on<Provide<WalkTask>,
+           Needs<LeftLegIK>,
+           Needs<RightLegIK>,
+           With<Stability>,
+           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
+           Causing<Stability, Stability::STANDING>,
+           Single>()
+            .then([this](const Stability& stability) {
+                log<NUClear::WARN>("ON WALK CAUSING", stability);
+                // Compute time since the last update
+                auto time_delta =
+                    std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
+                        .count();
+                last_update_time = NUClear::clock::now();
+
+                // Update the walk engine and emit the stability state
+                switch (walk_generator.update(time_delta, Eigen::Vector3d::Zero()).value) {
+                    case WalkState::State::WALKING:
+                    case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
+                    case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                    case WalkState::State::UNKNOWN:
+                    default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                }
+
+                // Compute the goal position time
+                const NUClear::clock::time_point goal_time =
+                    NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+
+                // Get desired feet poses in the torso {t} frame from the walk engine
+                Eigen::Isometry3d Htl = walk_generator.get_foot_pose(LimbID::LEFT_LEG);
+                Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
+
+                // Construct ControlFoot tasks
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_generator.is_left_foot_planted()));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_generator.is_left_foot_planted()));
+
+                // Construct Arm IK tasks
+                auto left_arm  = std::make_unique<LeftArm>();
+                auto right_arm = std::make_unique<RightArm>();
+                for (auto id : utility::input::LimbID::servos_for_limb(LimbID::RIGHT_ARM)) {
+                    right_arm->servos[id] =
+                        ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
+                }
+                for (auto id : utility::input::LimbID::servos_for_limb(LimbID::LEFT_ARM)) {
+                    left_arm->servos[id] =
+                        ServoCommand(goal_time, cfg.arm_positions[ServoID(id)].second, cfg.servo_states[ServoID(id)]);
+                }
+                emit<Task>(left_arm, 0, true, "Walk left arm");
+                emit<Task>(right_arm, 0, true, "Walk right arm");
+
+                // Emit walk engine state
+                emit(std::make_unique<WalkState>(walk_generator.get_state(), Eigen::Vector3d::Zero()));
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {

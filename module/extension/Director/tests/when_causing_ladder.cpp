@@ -107,7 +107,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail]") {
+TEST_CASE("Test that when/causing relationships can be cascaded", "[director][when][causing][ladder][!mayfail]") {
 
     NUClear::Configuration config;
     config.thread_count = 1;

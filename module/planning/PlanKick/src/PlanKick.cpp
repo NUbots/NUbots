@@ -65,14 +65,11 @@ namespace module::planning {
             cfg.kick_leg                = config["kick_leg"].as<std::string>();
         });
 
-        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, Trigger<Stability>, With<Sensors>>().then(
-            [this](const KickTo& kick_to,
-                   const Uses<Kick>& kick,
-                   const Ball& ball,
-                   const Stability& stability,
-                   const Sensors& sensors) {
+        on<Provide<KickTo>, Uses<Kick>, Trigger<Ball>, With<Sensors>>().then(
+            [this](const KickTo& kick_to, const Uses<Kick>& kick, const Ball& ball, const Sensors& sensors) {
                 // If the kick is running, don't interrupt or the robot may fall
                 if (kick.run_state == GroupInfo::RunState::RUNNING && !kick.done) {
+                    log<NUClear::INFO>("KickPlanner");
                     emit<Task>(std::make_unique<Idle>());
                     return;
                 }
@@ -104,6 +101,8 @@ namespace module::planning {
                     return;
                 }
 
+                log<NUClear::INFO>("KickPlanner");
+
                 // If the kick conditions are not met, the function will have returned with no Tasks, ending the kick
                 // Otherwise, the kick conditions are met and we need to check if we are already kicking
                 // If we are already queued to kick, then only emit Idle to keep the previous Kick Task running
@@ -112,11 +111,11 @@ namespace module::planning {
                     return;
                 }
 
-                // If the robot is not standing, make it stand before kicking
-                if (stability != Stability::STANDING) {
-                    emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
-                    return;
-                }
+                // // If the robot is not standing, make it stand before kicking
+                // if (stability != Stability::STANDING) {
+                //     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
+                //     return;
+                // }
 
                 // If the kick leg is forced left, kick left. If the kick leg is auto,
                 // kick with left leg if ball is more to the left
