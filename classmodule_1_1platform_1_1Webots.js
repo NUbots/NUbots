@@ -25,6 +25,8 @@ var classmodule_1_1platform_1_1Webots =
     [ "num_cameras", "classmodule_1_1platform_1_1Webots.html#aa901e5b3e386af48c5d441bf2198cff1", null ],
     [ "read_io", "classmodule_1_1platform_1_1Webots.html#ae1145c0d4c2afcf64e0c259a034ae05f", null ],
     [ "real_delta", "classmodule_1_1platform_1_1Webots.html#ada43737945db7981ecc77c29b00bf0eb", null ],
+    [ "reset_simulation_time", "classmodule_1_1platform_1_1Webots.html#aa5886664ad636e50826e9d44746069fd", null ],
+    [ "reset_simulation_world", "classmodule_1_1platform_1_1Webots.html#a518f20eaf8f29076cdfae343f88402b6", null ],
     [ "rtf", "classmodule_1_1platform_1_1Webots.html#abb715e6a207d6ea5bbd7358697df79bf", null ],
     [ "send_io", "classmodule_1_1platform_1_1Webots.html#a271d171164dcd5c37429e69fbed78fb8", null ],
     [ "sensors_mutex", "classmodule_1_1platform_1_1Webots.html#a53e4dabeab79a22f5e292e28a1830c58", null ],
@@ -32,6 +34,7 @@ var classmodule_1_1platform_1_1Webots =
     [ "server_port", "classmodule_1_1platform_1_1Webots.html#ab7b65fc30185fd75e2abf056e5a6f2cf", null ],
     [ "servo_state", "classmodule_1_1platform_1_1Webots.html#a0e3aeeed4dc3662ec83d8bfcb3250a2a", null ],
     [ "sim_delta", "classmodule_1_1platform_1_1Webots.html#a15f8677186f106976c4f181422de1ba5", null ],
+    [ "terminate_simulation", "classmodule_1_1platform_1_1Webots.html#a5d3edaabf7a672c816fab2ad1a2043a2", null ],
     [ "time_step", "classmodule_1_1platform_1_1Webots.html#a30f87fa65a805fffc81422db32d7d93b", null ],
     [ "UPDATE_FREQUENCY", "classmodule_1_1platform_1_1Webots.html#ac0568dd06b9e0beaa729bf7064d882d8", null ]
 ];

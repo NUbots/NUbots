@@ -1,0 +1,435 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::support::optimisation::RotationEvaluator Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::support::optimisation::RotationEvaluator Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+Inheritance diagram for module::support::optimisation::RotationEvaluator:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator__inherit__graph.png" border="0" usemap="#amodule_1_1support_1_1optimisation_1_1RotationEvaluator_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1support_1_1optimisation_1_1RotationEvaluator_inherit__map" id="amodule_1_1support_1_1optimisation_1_1RotationEvaluator_inherit__map">
+<area shape="rect" title=" " alt="" coords="5,95,224,136"/>
+<area shape="rect" href="classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html" title=" " alt="" coords="5,5,224,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::support::optimisation::RotationEvaluator:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator__coll__graph.png" border="0" usemap="#amodule_1_1support_1_1optimisation_1_1RotationEvaluator_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1support_1_1optimisation_1_1RotationEvaluator_coll__map" id="amodule_1_1support_1_1optimisation_1_1RotationEvaluator_coll__map">
+<area shape="rect" title=" " alt="" coords="297,39,516,80"/>
+<area shape="rect" href="classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html" title=" " alt="" coords="5,5,224,47"/>
+<area shape="rect" href="structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html" title=" " alt="" coords="5,71,224,112"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html">Config</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a60f501c3cc87081328cfebb8a0c01275"><td class="memItemLeft" align="right" valign="top"><a id="a60f501c3cc87081328cfebb8a0c01275"></a>
+std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a60f501c3cc87081328cfebb8a0c01275">calculate_constraints</a> (double trial_duration)</td></tr>
+<tr class="memdesc:a60f501c3cc87081328cfebb8a0c01275"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine constraints for the algorithm, if we have fallen, based on the time that the trial ran for. <br /></td></tr>
+<tr class="separator:a60f501c3cc87081328cfebb8a0c01275"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a047c9d9ec86dfada64fef5f4928849"><td class="memItemLeft" align="right" valign="top">std::unique_ptr&lt; NSGA2FitnessScores &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a5a047c9d9ec86dfada64fef5f4928849">calculate_fitness_scores</a> (bool early_termination, int generation, int individual)</td></tr>
+<tr class="memdesc:a5a047c9d9ec86dfada64fef5f4928849"><td class="mdescLeft">&#160;</td><td class="mdescRight">After an evaluation has completed calculates the scores for the individual.  <a href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a5a047c9d9ec86dfada64fef5f4928849">More...</a><br /></td></tr>
+<tr class="separator:a5a047c9d9ec86dfada64fef5f4928849"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aac6ba3693708b885775b478fdb7b2833"><td class="memItemLeft" align="right" valign="top"><a id="aac6ba3693708b885775b478fdb7b2833"></a>
+std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#aac6ba3693708b885775b478fdb7b2833">calculate_scores</a> ()</td></tr>
+<tr class="memdesc:aac6ba3693708b885775b478fdb7b2833"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determine scores for the algorithm based on distance travelled and sway. <br /></td></tr>
+<tr class="separator:aac6ba3693708b885775b478fdb7b2833"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac5546445cd54d0b0ead99909b93ec88b"><td class="memItemLeft" align="right" valign="top"><a id="ac5546445cd54d0b0ead99909b93ec88b"></a>
+std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac5546445cd54d0b0ead99909b93ec88b">constraints_not_violated</a> ()</td></tr>
+<tr class="memdesc:ac5546445cd54d0b0ead99909b93ec88b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gives no constraints as a result of staying upright for the duration of the trial. <br /></td></tr>
+<tr class="separator:ac5546445cd54d0b0ead99909b93ec88b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4b435518893ae0a1a011d04d98e2416"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae4b435518893ae0a1a011d04d98e2416">evaluating_state</a> (<a class="el" href="classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html">NSGA2Evaluator</a> *evaluator)</td></tr>
+<tr class="memdesc:ae4b435518893ae0a1a011d04d98e2416"><td class="mdescLeft">&#160;</td><td class="mdescRight">Starts an evaluation, running the walk and setting the duration.  <a href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae4b435518893ae0a1a011d04d98e2416">More...</a><br /></td></tr>
+<tr class="separator:ae4b435518893ae0a1a011d04d98e2416"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a33eb29dc012cc9b576f0289c7310adeb"><td class="memItemLeft" align="right" valign="top"><a id="a33eb29dc012cc9b576f0289c7310adeb"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a33eb29dc012cc9b576f0289c7310adeb">has_fallen</a> (const Sensors &amp;sensors)</td></tr>
+<tr class="memdesc:a33eb29dc012cc9b576f0289c7310adeb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detects whether we have fallen. <br /></td></tr>
+<tr class="separator:a33eb29dc012cc9b576f0289c7310adeb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3b6a856d43b718a5a8414c0af3cdcbd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ab3b6a856d43b718a5a8414c0af3cdcbd">process_optimisation_robot_position</a> (const OptimisationRobotPosition &amp;position)</td></tr>
+<tr class="memdesc:ab3b6a856d43b718a5a8414c0af3cdcbd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores the position of the robot for use in the optimisation.  <a href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ab3b6a856d43b718a5a8414c0af3cdcbd">More...</a><br /></td></tr>
+<tr class="separator:ab3b6a856d43b718a5a8414c0af3cdcbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a09ec28e03688262c2bda99248738f982"><td class="memItemLeft" align="right" valign="top"><a id="a09ec28e03688262c2bda99248738f982"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a09ec28e03688262c2bda99248738f982">reset_trial</a> ()</td></tr>
+<tr class="memdesc:a09ec28e03688262c2bda99248738f982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset the local state of the trial. <br /></td></tr>
+<tr class="separator:a09ec28e03688262c2bda99248738f982"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9691ab7643e875d50d323d3ca15573a"><td class="memItemLeft" align="right" valign="top"><a id="ae9691ab7643e875d50d323d3ca15573a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae9691ab7643e875d50d323d3ca15573a">set_up_trial</a> (const NSGA2EvaluationRequest &amp;request)</td></tr>
+<tr class="memdesc:ae9691ab7643e875d50d323d3ca15573a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Setup the next trial, updating the trial duration, velocity, and walk config parameters also saving them into a new file. <br /></td></tr>
+<tr class="separator:ae9691ab7643e875d50d323d3ca15573a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba1b7b4d6c6055e31febec56fd7be9dd"><td class="memItemLeft" align="right" valign="top"><a id="aba1b7b4d6c6055e31febec56fd7be9dd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#aba1b7b4d6c6055e31febec56fd7be9dd">update_max_field_plane_sway</a> (const Sensors &amp;sensors)</td></tr>
+<tr class="memdesc:aba1b7b4d6c6055e31febec56fd7be9dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the robot sway along the field plane (left/right, forward/backward) <br /></td></tr>
+<tr class="separator:aba1b7b4d6c6055e31febec56fd7be9dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a9e3a05f4d51b853470064c091771bff2"><td class="memItemLeft" align="right" valign="top"><a id="a9e3a05f4d51b853470064c091771bff2"></a>
+struct <a class="el" href="structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html">module::support::optimisation::RotationEvaluator::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
+<tr class="separator:a9e3a05f4d51b853470064c091771bff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6f0339573e2a7c02f7d0f1a28e96883"><td class="memItemLeft" align="right" valign="top"><a id="ac6f0339573e2a7c02f7d0f1a28e96883"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>deltaT</b> = 0.0</td></tr>
+<tr class="separator:ac6f0339573e2a7c02f7d0f1a28e96883"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a353ddd1632cdf3cb859ad949e4781f02"><td class="memItemLeft" align="right" valign="top"><a id="a353ddd1632cdf3cb859ad949e4781f02"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a353ddd1632cdf3cb859ad949e4781f02">fallen</a> = false</td></tr>
+<tr class="memdesc:a353ddd1632cdf3cb859ad949e4781f02"><td class="mdescLeft">&#160;</td><td class="mdescRight">Indicates that a fall has occured. <br /></td></tr>
+<tr class="separator:a353ddd1632cdf3cb859ad949e4781f02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a79c2782909999d0b0135a16a85c1620e"><td class="memItemLeft" align="right" valign="top"><a id="a79c2782909999d0b0135a16a85c1620e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a79c2782909999d0b0135a16a85c1620e">initial_position_set</a> = false</td></tr>
+<tr class="memdesc:a79c2782909999d0b0135a16a85c1620e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Robot state for this evaluation, used during fitness and constraint calculation. <br /></td></tr>
+<tr class="separator:a79c2782909999d0b0135a16a85c1620e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac61228519f19a7e62dc7d3dddcfb7b85"><td class="memItemLeft" align="right" valign="top"><a id="ac61228519f19a7e62dc7d3dddcfb7b85"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><b>initial_robot_position</b> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="separator:ac61228519f19a7e62dc7d3dddcfb7b85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a643fe5894b9cc8d56dca65b0be8f5c79"><td class="memItemLeft" align="right" valign="top"><a id="a643fe5894b9cc8d56dca65b0be8f5c79"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>max_field_plane_sway</b> = 0.0</td></tr>
+<tr class="separator:a643fe5894b9cc8d56dca65b0be8f5c79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5ff1713de7eb55c7bff59b0d1ac13241"><td class="memItemLeft" align="right" valign="top"><a id="a5ff1713de7eb55c7bff59b0d1ac13241"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>old_time</b> = 0.0</td></tr>
+<tr class="separator:a5ff1713de7eb55c7bff59b0d1ac13241"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a275de7c185e28448a26f8c1cec9b0d22"><td class="memItemLeft" align="right" valign="top"><a id="a275de7c185e28448a26f8c1cec9b0d22"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>omega</b> = 0.0</td></tr>
+<tr class="separator:a275de7c185e28448a26f8c1cec9b0d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0749c67c1a548ecac93c09f3e2c2aef6"><td class="memItemLeft" align="right" valign="top"><a id="a0749c67c1a548ecac93c09f3e2c2aef6"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><b>robot_position</b> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="separator:a0749c67c1a548ecac93c09f3e2c2aef6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a881ec247de985936ec224ef572f8be47"><td class="memItemLeft" align="right" valign="top"><a id="a881ec247de985936ec224ef572f8be47"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>theta</b> = 0.0</td></tr>
+<tr class="separator:a881ec247de985936ec224ef572f8be47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49c7ed6b13bf1624e8a39071bef89398"><td class="memItemLeft" align="right" valign="top"><a id="a49c7ed6b13bf1624e8a39071bef89398"></a>
+std::chrono::seconds&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a49c7ed6b13bf1624e8a39071bef89398">trial_duration_limit</a> = std::chrono::seconds(0)</td></tr>
+<tr class="memdesc:a49c7ed6b13bf1624e8a39071bef89398"><td class="mdescLeft">&#160;</td><td class="mdescRight">The amount of time to run a single trial, in seconds. <br /></td></tr>
+<tr class="separator:a49c7ed6b13bf1624e8a39071bef89398"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a207b2f6c9c66eb4609409286876f06d4"><td class="memItemLeft" align="right" valign="top"><a id="a207b2f6c9c66eb4609409286876f06d4"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a207b2f6c9c66eb4609409286876f06d4">trial_start_time</a> {NUClear::clock::now()}</td></tr>
+<tr class="memdesc:a207b2f6c9c66eb4609409286876f06d4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keep track of when the trial started. <br /></td></tr>
+<tr class="separator:a207b2f6c9c66eb4609409286876f06d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae981c454a02704f2d4af9e8ce9ba92c"><td class="memItemLeft" align="right" valign="top"><a id="aae981c454a02704f2d4af9e8ce9ba92c"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#aae981c454a02704f2d4af9e8ce9ba92c">walk_command_rotation</a> = 0.0</td></tr>
+<tr class="memdesc:aae981c454a02704f2d4af9e8ce9ba92c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The walk command rotation. <br /></td></tr>
+<tr class="separator:aae981c454a02704f2d4af9e8ce9ba92c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83a87835d03b1174e33c13e92500a6a2"><td class="memItemLeft" align="right" valign="top"><a id="a83a87835d03b1174e33c13e92500a6a2"></a>
+Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a83a87835d03b1174e33c13e92500a6a2">walk_command_velocity</a> = Eigen::Vector2d::Zero()</td></tr>
+<tr class="memdesc:a83a87835d03b1174e33c13e92500a6a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The walk command velocity. <br /></td></tr>
+<tr class="separator:a83a87835d03b1174e33c13e92500a6a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5a047c9d9ec86dfada64fef5f4928849"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a047c9d9ec86dfada64fef5f4928849">&#9670;&nbsp;</a></span>calculate_fitness_scores()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt; NSGA2FitnessScores &gt; module::support::optimisation::RotationEvaluator::calculate_fitness_scores </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>early_termination</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>generation</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>individual</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>After an evaluation has completed calculates the scores for the individual. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">early_termination</td><td>Has the trial been forced to terminate early </td></tr>
+    <tr><td class="paramname">generation</td><td>The generation that we have been evaluating </td></tr>
+    <tr><td class="paramname">individual</td><td>The specific individual we were trialing </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a651276ae9d168cc260f3d0ad4c1911f4">module::support::optimisation::EvaluatorTask</a>.</p>
+
+</div>
+</div>
+<a id="ae4b435518893ae0a1a011d04d98e2416"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4b435518893ae0a1a011d04d98e2416">&#9670;&nbsp;</a></span>evaluating_state()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::support::optimisation::RotationEvaluator::evaluating_state </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html">NSGA2Evaluator</a> *&#160;</td>
+          <td class="paramname"><em>evaluator</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Starts an evaluation, running the walk and setting the duration. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">evaluator</td><td>Instance of the <a class="el" href="classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html">NSGA2Evaluator</a> which this task is running from </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a88ced5993bbfcf37a880e2c671e93c2e">module::support::optimisation::EvaluatorTask</a>.</p>
+
+</div>
+</div>
+<a id="ab3b6a856d43b718a5a8414c0af3cdcbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab3b6a856d43b718a5a8414c0af3cdcbd">&#9670;&nbsp;</a></span>process_optimisation_robot_position()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::support::optimisation::RotationEvaluator::process_optimisation_robot_position </td>
+          <td>(</td>
+          <td class="paramtype">const OptimisationRobotPosition &amp;&#160;</td>
+          <td class="paramname"><em>position</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Stores the position of the robot for use in the optimisation. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">position</td><td>The position of the robot in the world </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p>Implements <a class="el" href="classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html#a6c54214b790a61e826ee084cc29ca2a4">module::support::optimisation::EvaluatorTask</a>.</p>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/support/optimisation/NSGA2Evaluator/src/tasks/<a class="el" href="RotationEvaluator_8hpp_source.html">RotationEvaluator.hpp</a></li>
+<li>module/support/optimisation/NSGA2Evaluator/src/tasks/RotationEvaluator.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>support</b></li><li class="navelem"><b>optimisation</b></li><li class="navelem"><a class="el" href="classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html">RotationEvaluator</a></li>
+    <li class="footer">Generated on Sun Feb 4 2024 01:02:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

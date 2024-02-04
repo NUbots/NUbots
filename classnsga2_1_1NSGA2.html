@@ -1,0 +1,431 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: nsga2::NSGA2 Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classnsga2_1_1NSGA2.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="classnsga2_1_1NSGA2-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">nsga2::NSGA2 Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:adbb146c9548a1df0c3ceb80e3e714ae7"><td class="memItemLeft" align="right" valign="top"><a id="adbb146c9548a1df0c3ceb80e3e714ae7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>complete_generation_and_advance</b> ()</td></tr>
+<tr class="separator:adbb146c9548a1df0c3ceb80e3e714ae7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32c5d01db1acd90decd34321f920887c"><td class="memItemLeft" align="right" valign="top"><a id="a32c5d01db1acd90decd34321f920887c"></a>
+std::shared_ptr&lt; <a class="el" href="classnsga2_1_1Population.html">Population</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>get_current_pop</b> ()</td></tr>
+<tr class="separator:a32c5d01db1acd90decd34321f920887c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a634bc70e73c202864d80cca81d8fcfbe"><td class="memItemLeft" align="right" valign="top"><a id="a634bc70e73c202864d80cca81d8fcfbe"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>has_met_optimisation_terminal_condition</b> ()</td></tr>
+<tr class="separator:a634bc70e73c202864d80cca81d8fcfbe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7779f4c38cb9f460a4ef6a75a05cdb33"><td class="memItemLeft" align="right" valign="top"><a id="a7779f4c38cb9f460a4ef6a75a05cdb33"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>initialize_first_generation</b> ()</td></tr>
+<tr class="separator:a7779f4c38cb9f460a4ef6a75a05cdb33"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4fe63a0e1d1d57518972953ab8f7cd6"><td class="memItemLeft" align="right" valign="top"><a id="ad4fe63a0e1d1d57518972953ab8f7cd6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>initialize_next_generation</b> ()</td></tr>
+<tr class="separator:ad4fe63a0e1d1d57518972953ab8f7cd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75361aee89138f2217146f34be40f739"><td class="memItemLeft" align="right" valign="top"><a id="a75361aee89138f2217146f34be40f739"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_bin_crossover_probability</b> (const double &amp;bin_cross_prob_)</td></tr>
+<tr class="separator:a75361aee89138f2217146f34be40f739"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32731411e1e97d8025f6c56d4cd9083b"><td class="memItemLeft" align="right" valign="top"><a id="a32731411e1e97d8025f6c56d4cd9083b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_bin_mutation_probability</b> (const double &amp;bin_mut_prob_)</td></tr>
+<tr class="separator:a32731411e1e97d8025f6c56d4cd9083b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4791d14d7e583e77188b3032d65a176"><td class="memItemLeft" align="right" valign="top"><a id="ac4791d14d7e583e77188b3032d65a176"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_bin_var_limits</b> (const std::vector&lt; std::pair&lt; double, double &gt;&gt; &amp;bin_limits_)</td></tr>
+<tr class="separator:ac4791d14d7e583e77188b3032d65a176"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a986e2e2d57154721ee934260ffd2b115"><td class="memItemLeft" align="right" valign="top"><a id="a986e2e2d57154721ee934260ffd2b115"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_bin_variable_count</b> (const int &amp;bin_vars_)</td></tr>
+<tr class="separator:a986e2e2d57154721ee934260ffd2b115"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d3441c7c3af0feab03db31bccca7a00"><td class="memItemLeft" align="right" valign="top"><a id="a9d3441c7c3af0feab03db31bccca7a00"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_bit_count</b> (const std::vector&lt; int &gt; &amp;bin_bits_)</td></tr>
+<tr class="separator:a9d3441c7c3af0feab03db31bccca7a00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a685f5d186cc1e503396a9ac961168adf"><td class="memItemLeft" align="right" valign="top"><a id="a685f5d186cc1e503396a9ac961168adf"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_constraint_count</b> (const int &amp;constraints_)</td></tr>
+<tr class="separator:a685f5d186cc1e503396a9ac961168adf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abeb3f3d705bf32749c8690c9a42746a9"><td class="memItemLeft" align="right" valign="top"><a id="abeb3f3d705bf32749c8690c9a42746a9"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_eps_c</b> (const double &amp;eps_c_)</td></tr>
+<tr class="separator:abeb3f3d705bf32749c8690c9a42746a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a459463516ac53cec1c540e4f818ae634"><td class="memItemLeft" align="right" valign="top"><a id="a459463516ac53cec1c540e4f818ae634"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_eta_c</b> (const double &amp;eta_c_)</td></tr>
+<tr class="separator:a459463516ac53cec1c540e4f818ae634"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa598a32e3181eb197c70414ae05bcb49"><td class="memItemLeft" align="right" valign="top"><a id="aa598a32e3181eb197c70414ae05bcb49"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_eta_m</b> (const double &amp;eta_m_)</td></tr>
+<tr class="separator:aa598a32e3181eb197c70414ae05bcb49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aebcfcf4c83c83e66db6a2159088b2fa8"><td class="memItemLeft" align="right" valign="top"><a id="aebcfcf4c83c83e66db6a2159088b2fa8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_initial_population_real_vars</b> (const std::vector&lt; std::vector&lt; double &gt;&gt; &amp;supplied_population_real_vars_)</td></tr>
+<tr class="separator:aebcfcf4c83c83e66db6a2159088b2fa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f16056d734e419ff198fe7ea04f9f3e"><td class="memItemLeft" align="right" valign="top"><a id="a1f16056d734e419ff198fe7ea04f9f3e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_initial_real_vars</b> (const std::vector&lt; double &gt; &amp;init_real_vars_)</td></tr>
+<tr class="separator:a1f16056d734e419ff198fe7ea04f9f3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1cdbdf4a56b4590c6595c0cec892dd19"><td class="memItemLeft" align="right" valign="top"><a id="a1cdbdf4a56b4590c6595c0cec892dd19"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_objective_count</b> (const int &amp;objectives_)</td></tr>
+<tr class="separator:a1cdbdf4a56b4590c6595c0cec892dd19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac70f0fb651b024d47c2d4ac575bf1c05"><td class="memItemLeft" align="right" valign="top"><a id="ac70f0fb651b024d47c2d4ac575bf1c05"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_population_size</b> (const int &amp;pop_size_)</td></tr>
+<tr class="separator:ac70f0fb651b024d47c2d4ac575bf1c05"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a10ce1262a2831281672fea70fc11cd16"><td class="memItemLeft" align="right" valign="top"><a id="a10ce1262a2831281672fea70fc11cd16"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_real_crossover_probability</b> (const double &amp;real_cross_prob_)</td></tr>
+<tr class="separator:a10ce1262a2831281672fea70fc11cd16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae51ea17704fc3902e99a7edb9fd35e69"><td class="memItemLeft" align="right" valign="top"><a id="ae51ea17704fc3902e99a7edb9fd35e69"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_real_mutation_probability</b> (const double &amp;real_mut_prob_)</td></tr>
+<tr class="separator:ae51ea17704fc3902e99a7edb9fd35e69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dfb4f2de7eb2e0a35e8126913104f59"><td class="memItemLeft" align="right" valign="top"><a id="a7dfb4f2de7eb2e0a35e8126913104f59"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_real_var_limits</b> (const std::vector&lt; std::pair&lt; double, double &gt;&gt; &amp;real_limits_)</td></tr>
+<tr class="separator:a7dfb4f2de7eb2e0a35e8126913104f59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2dddbbfeb84404825748b29f8fde5bd"><td class="memItemLeft" align="right" valign="top"><a id="aa2dddbbfeb84404825748b29f8fde5bd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_real_variable_count</b> (const int &amp;real_vars_)</td></tr>
+<tr class="separator:aa2dddbbfeb84404825748b29f8fde5bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8f07ba6bb2d72bdc9576ff9424c4719e"><td class="memItemLeft" align="right" valign="top"><a id="a8f07ba6bb2d72bdc9576ff9424c4719e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_seed</b> (const int &amp;_seed)</td></tr>
+<tr class="separator:a8f07ba6bb2d72bdc9576ff9424c4719e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cde5bf046243306877b47847a0ff03f"><td class="memItemLeft" align="right" valign="top"><a id="a5cde5bf046243306877b47847a0ff03f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_supplied_pop</b> (const bool &amp;supplied_pop_)</td></tr>
+<tr class="separator:a5cde5bf046243306877b47847a0ff03f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef2eac7764da1d7e8de597a079c36df4"><td class="memItemLeft" align="right" valign="top"><a id="aef2eac7764da1d7e8de597a079c36df4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_target_generations</b> (const int &amp;_generations)</td></tr>
+<tr class="separator:aef2eac7764da1d7e8de597a079c36df4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a268a4b76c952f665baea350431f819f0"><td class="memItemLeft" align="right" valign="top"><a id="a268a4b76c952f665baea350431f819f0"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>bin_cross_count</b> = 0</td></tr>
+<tr class="separator:a268a4b76c952f665baea350431f819f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e73dc486b3ef49037f9926bfde46699"><td class="memItemLeft" align="right" valign="top"><a id="a3e73dc486b3ef49037f9926bfde46699"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>bin_mut_count</b> = 0</td></tr>
+<tr class="separator:a3e73dc486b3ef49037f9926bfde46699"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5f849d512752fa0fa18895ee24f141b0"><td class="memItemLeft" align="right" valign="top"><a id="a5f849d512752fa0fa18895ee24f141b0"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>bit_length</b> = 0</td></tr>
+<tr class="separator:a5f849d512752fa0fa18895ee24f141b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a108b0c7a32e1cc2d653dd505784462fb"><td class="memItemLeft" align="right" valign="top"><a id="a108b0c7a32e1cc2d653dd505784462fb"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>crowd_obj</b> = true</td></tr>
+<tr class="separator:a108b0c7a32e1cc2d653dd505784462fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afbcdbbe09a4f5a2a9c0b5a86baf2f30b"><td class="memItemLeft" align="right" valign="top"><a id="afbcdbbe09a4f5a2a9c0b5a86baf2f30b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>current_gen</b></td></tr>
+<tr class="separator:afbcdbbe09a4f5a2a9c0b5a86baf2f30b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ab1e69e4901ee6f3453f0518469d27b"><td class="memItemLeft" align="right" valign="top"><a id="a1ab1e69e4901ee6f3453f0518469d27b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>generations</b></td></tr>
+<tr class="separator:a1ab1e69e4901ee6f3453f0518469d27b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3eb3eea31e2ebe64e923789903f5479b"><td class="memItemLeft" align="right" valign="top"><a id="a3eb3eea31e2ebe64e923789903f5479b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>pop_size</b></td></tr>
+<tr class="separator:a3eb3eea31e2ebe64e923789903f5479b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00cb104d576df314a9085c4542f2328a"><td class="memItemLeft" align="right" valign="top"><a id="a00cb104d576df314a9085c4542f2328a"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>real_cross_count</b> = 0</td></tr>
+<tr class="separator:a00cb104d576df314a9085c4542f2328a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a530b497730f7b7c8ac2794efaee48357"><td class="memItemLeft" align="right" valign="top"><a id="a530b497730f7b7c8ac2794efaee48357"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>real_mut_count</b> = 0</td></tr>
+<tr class="separator:a530b497730f7b7c8ac2794efaee48357"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a006e55b3dc903494aacb136d28186fff"><td class="memItemLeft" align="right" valign="top"><a id="a006e55b3dc903494aacb136d28186fff"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>report_count</b> = 0</td></tr>
+<tr class="separator:a006e55b3dc903494aacb136d28186fff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a189c9288b9071e58dcc66ade16c985cd"><td class="memItemLeft" align="right" valign="top"><a id="a189c9288b9071e58dcc66ade16c985cd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>bincross</b> (const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;parent_1, const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;parent_2, <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;child_1, <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;child_2)</td></tr>
+<tr class="separator:a189c9288b9071e58dcc66ade16c985cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4b310a5cbd742e8a71d8df74fc816910"><td class="memItemLeft" align="right" valign="top"><a id="a4b310a5cbd742e8a71d8df74fc816910"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>complete_generation</b> ()</td></tr>
+<tr class="separator:a4b310a5cbd742e8a71d8df74fc816910"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ec300a3cf296dedcdc836a76f488377"><td class="memItemLeft" align="right" valign="top"><a id="a8ec300a3cf296dedcdc836a76f488377"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>configuration_is_valid</b> ()</td></tr>
+<tr class="separator:a8ec300a3cf296dedcdc836a76f488377"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afeade93d59fd4695c7e5ec4aeb9df98b"><td class="memItemLeft" align="right" valign="top"><a id="afeade93d59fd4695c7e5ec4aeb9df98b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>create_starting_populations</b> ()</td></tr>
+<tr class="separator:afeade93d59fd4695c7e5ec4aeb9df98b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4a4d4395bbf365252c11e5bade084050"><td class="memItemLeft" align="right" valign="top"><a id="a4a4d4395bbf365252c11e5bade084050"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>crossover</b> (const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;parent_1, const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;parent_2, <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;child_1, <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;child_2)</td></tr>
+<tr class="separator:a4a4d4395bbf365252c11e5bade084050"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cb38282985bff3d1d3d141aefb0cfda"><td class="memItemLeft" align="right" valign="top"><a id="a4cb38282985bff3d1d3d141aefb0cfda"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>initialize_reporting_streams</b> ()</td></tr>
+<tr class="separator:a4cb38282985bff3d1d3d141aefb0cfda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a432255edc9d2daf8910b00d5c040e4b0"><td class="memItemLeft" align="right" valign="top"><a id="a432255edc9d2daf8910b00d5c040e4b0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>report_params</b> (std::ofstream &amp;_os, std::string file_name) const</td></tr>
+<tr class="separator:a432255edc9d2daf8910b00d5c040e4b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a37159eeb74535ac68edbf5ad6187fd8f"><td class="memItemLeft" align="right" valign="top"><a id="a37159eeb74535ac68edbf5ad6187fd8f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>report_pop</b> (const std::shared_ptr&lt; <a class="el" href="classnsga2_1_1Population.html">Population</a> &gt; &amp;pop, std::ofstream &amp;os) const</td></tr>
+<tr class="separator:a37159eeb74535ac68edbf5ad6187fd8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68540b8602c6adbeab610017d8c337bf"><td class="memItemLeft" align="right" valign="top"><a id="a68540b8602c6adbeab610017d8c337bf"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>selection</b> (const std::shared_ptr&lt; <a class="el" href="classnsga2_1_1Population.html">Population</a> &gt; &amp;oldpop, std::shared_ptr&lt; <a class="el" href="classnsga2_1_1Population.html">Population</a> &gt; &amp;newpop)</td></tr>
+<tr class="separator:a68540b8602c6adbeab610017d8c337bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a757e571c65b7433e002489a5e94d38da"><td class="memItemLeft" align="right" valign="top"><a id="a757e571c65b7433e002489a5e94d38da"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>self_adaptive_sbx</b> (const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;parent_1, const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;parent_2, <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;child_1, <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;child_2)</td></tr>
+<tr class="separator:a757e571c65b7433e002489a5e94d38da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9edcb4b1066ca90d64394342df7171fe"><td class="memItemLeft" align="right" valign="top"><a id="a9edcb4b1066ca90d64394342df7171fe"></a>
+const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>tournament</b> (const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;ind_1, const <a class="el" href="classnsga2_1_1Individual.html">Individual</a> &amp;ind_2) const</td></tr>
+<tr class="separator:a9edcb4b1066ca90d64394342df7171fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafdc66784b6711558aad922c0004bf8a"><td class="memItemLeft" align="right" valign="top"><a id="aafdc66784b6711558aad922c0004bf8a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>write_report_headers</b> (std::ofstream &amp;_os, std::string file_name) const</td></tr>
+<tr class="separator:aafdc66784b6711558aad922c0004bf8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a01bc39720c5f545b48ba0447315764a1"><td class="memItemLeft" align="right" valign="top"><a id="a01bc39720c5f545b48ba0447315764a1"></a>
+std::ofstream&#160;</td><td class="memItemRight" valign="bottom"><b>all_pop_file</b></td></tr>
+<tr class="separator:a01bc39720c5f545b48ba0447315764a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4132b127460ef9f79377ea701f2a50b5"><td class="memItemLeft" align="right" valign="top"><a id="a4132b127460ef9f79377ea701f2a50b5"></a>
+std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>bin_bits</b> = {}</td></tr>
+<tr class="separator:a4132b127460ef9f79377ea701f2a50b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c9210f8f6b65f7e238c841012cc9da6"><td class="memItemLeft" align="right" valign="top"><a id="a2c9210f8f6b65f7e238c841012cc9da6"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>bin_cross_prob</b> = -1.0</td></tr>
+<tr class="separator:a2c9210f8f6b65f7e238c841012cc9da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91e76f07db2b028f14f435fb8aef7205"><td class="memItemLeft" align="right" valign="top"><a id="a91e76f07db2b028f14f435fb8aef7205"></a>
+std::vector&lt; std::pair&lt; double, double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>bin_limits</b> = {}</td></tr>
+<tr class="separator:a91e76f07db2b028f14f435fb8aef7205"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9cccdb9adc43607dc5aa91304341eafd"><td class="memItemLeft" align="right" valign="top"><a id="a9cccdb9adc43607dc5aa91304341eafd"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>bin_mut_prob</b> = -1.0</td></tr>
+<tr class="separator:a9cccdb9adc43607dc5aa91304341eafd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2bd709e015d9acda51884e2f28b008f3"><td class="memItemLeft" align="right" valign="top"><a id="a2bd709e015d9acda51884e2f28b008f3"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>bin_vars</b> = -1</td></tr>
+<tr class="separator:a2bd709e015d9acda51884e2f28b008f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad2a346fc789da675db87b5dfee401645"><td class="memItemLeft" align="right" valign="top"><a id="ad2a346fc789da675db87b5dfee401645"></a>
+std::shared_ptr&lt; <a class="el" href="classnsga2_1_1Population.html">Population</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>child_pop</b> = nullptr</td></tr>
+<tr class="separator:ad2a346fc789da675db87b5dfee401645"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a516137613b6ed75e790f3b2e2d21fc3f"><td class="memItemLeft" align="right" valign="top"><a id="a516137613b6ed75e790f3b2e2d21fc3f"></a>
+std::shared_ptr&lt; <a class="el" href="classnsga2_1_1Population.html">Population</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>combined_pop</b> = nullptr</td></tr>
+<tr class="separator:a516137613b6ed75e790f3b2e2d21fc3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af9cca5f098b6d2704690b54e943beb06"><td class="memItemLeft" align="right" valign="top"><a id="af9cca5f098b6d2704690b54e943beb06"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>constraints</b> = -1</td></tr>
+<tr class="separator:af9cca5f098b6d2704690b54e943beb06"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcfb1c3149b7c03895aae8e3c2b11dd4"><td class="memItemLeft" align="right" valign="top"><a id="abcfb1c3149b7c03895aae8e3c2b11dd4"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>early_stopping_no_improvement</b> = false</td></tr>
+<tr class="separator:abcfb1c3149b7c03895aae8e3c2b11dd4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90889f4efd4cc6d5d3a691f044685a89"><td class="memItemLeft" align="right" valign="top"><a id="a90889f4efd4cc6d5d3a691f044685a89"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>early_stopping_one_front</b> = false</td></tr>
+<tr class="separator:a90889f4efd4cc6d5d3a691f044685a89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae753d585f3d881ebff4b4d87eafab6ec"><td class="memItemLeft" align="right" valign="top"><a id="ae753d585f3d881ebff4b4d87eafab6ec"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>eps_c</b> = std::numeric_limits&lt;double&gt;::epsilon()</td></tr>
+<tr class="separator:ae753d585f3d881ebff4b4d87eafab6ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabe18309c8d13b02eba04238e5353b76"><td class="memItemLeft" align="right" valign="top"><a id="aabe18309c8d13b02eba04238e5353b76"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>eta_m</b> = -1.0</td></tr>
+<tr class="separator:aabe18309c8d13b02eba04238e5353b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad564414bb7d362abde94b0fce260a6e"><td class="memItemLeft" align="right" valign="top"><a id="aad564414bb7d362abde94b0fce260a6e"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>etaC</b> = -1.0</td></tr>
+<tr class="separator:aad564414bb7d362abde94b0fce260a6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a403d33c5c7102e6f3c77361574e881f8"><td class="memItemLeft" align="right" valign="top"><a id="a403d33c5c7102e6f3c77361574e881f8"></a>
+std::ofstream&#160;</td><td class="memItemRight" valign="bottom"><b>final_pop_file</b></td></tr>
+<tr class="separator:a403d33c5c7102e6f3c77361574e881f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89141c28b96b3c386ee6e6bae6e35bb4"><td class="memItemLeft" align="right" valign="top"><a id="a89141c28b96b3c386ee6e6bae6e35bb4"></a>
+std::ofstream&#160;</td><td class="memItemRight" valign="bottom"><b>initial_pop_file</b></td></tr>
+<tr class="separator:a89141c28b96b3c386ee6e6bae6e35bb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4b50ec117ebe0ef4798d0e945c4a193"><td class="memItemLeft" align="right" valign="top"><a id="ae4b50ec117ebe0ef4798d0e945c4a193"></a>
+std::vector&lt; double &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>initial_real_vars</b></td></tr>
+<tr class="separator:ae4b50ec117ebe0ef4798d0e945c4a193"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a450aa576116667239fb32a724e1f64e2"><td class="memItemLeft" align="right" valign="top"><a id="a450aa576116667239fb32a724e1f64e2"></a>
+std::ofstream&#160;</td><td class="memItemRight" valign="bottom"><b>nsga2_params_file</b></td></tr>
+<tr class="separator:a450aa576116667239fb32a724e1f64e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab73c2f07480e6f2b2054a0af2ea4442"><td class="memItemLeft" align="right" valign="top"><a id="aab73c2f07480e6f2b2054a0af2ea4442"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>objectives</b> = -1</td></tr>
+<tr class="separator:aab73c2f07480e6f2b2054a0af2ea4442"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5cebb4d6ad374231df9014891e0a6daf"><td class="memItemLeft" align="right" valign="top"><a id="a5cebb4d6ad374231df9014891e0a6daf"></a>
+std::shared_ptr&lt; <a class="el" href="classnsga2_1_1Population.html">Population</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>parent_pop</b> = nullptr</td></tr>
+<tr class="separator:a5cebb4d6ad374231df9014891e0a6daf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad16ceb6a3a224c066576b04c453e64ee"><td class="memItemLeft" align="right" valign="top"><a id="ad16ceb6a3a224c066576b04c453e64ee"></a>
+std::shared_ptr&lt; <a class="el" href="classnsga2_1_1RandomGenerator.html">RandomGenerator</a>&lt;&gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>rand_gen</b> = nullptr</td></tr>
+<tr class="separator:ad16ceb6a3a224c066576b04c453e64ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05a08c1be1d7c96a3c5649c4985ea678"><td class="memItemLeft" align="right" valign="top"><a id="a05a08c1be1d7c96a3c5649c4985ea678"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>random_initialize</b> = {}</td></tr>
+<tr class="separator:a05a08c1be1d7c96a3c5649c4985ea678"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a28e65b96d6d84437619283680c4edf5d"><td class="memItemLeft" align="right" valign="top"><a id="a28e65b96d6d84437619283680c4edf5d"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>real_cross_prob</b> = -1.0</td></tr>
+<tr class="separator:a28e65b96d6d84437619283680c4edf5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07c00bb50f2ef8d90011eb31dedf2153"><td class="memItemLeft" align="right" valign="top"><a id="a07c00bb50f2ef8d90011eb31dedf2153"></a>
+std::vector&lt; std::pair&lt; double, double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>real_limits</b> = {}</td></tr>
+<tr class="separator:a07c00bb50f2ef8d90011eb31dedf2153"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6454d37d2dd3da167072bca1c627cbb"><td class="memItemLeft" align="right" valign="top"><a id="ac6454d37d2dd3da167072bca1c627cbb"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><b>real_mut_prob</b> = -1.0</td></tr>
+<tr class="separator:ac6454d37d2dd3da167072bca1c627cbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ff3a87e8a716103d1609a46d24ae166"><td class="memItemLeft" align="right" valign="top"><a id="a8ff3a87e8a716103d1609a46d24ae166"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>real_vars</b> = -1</td></tr>
+<tr class="separator:a8ff3a87e8a716103d1609a46d24ae166"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa69c4d20589d6df851c33a09f1528a90"><td class="memItemLeft" align="right" valign="top"><a id="aa69c4d20589d6df851c33a09f1528a90"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>supplied_pop</b> = false</td></tr>
+<tr class="separator:aa69c4d20589d6df851c33a09f1528a90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a008edb4bd244f5622ab99ae14e8781ec"><td class="memItemLeft" align="right" valign="top"><a id="a008edb4bd244f5622ab99ae14e8781ec"></a>
+std::vector&lt; std::vector&lt; double &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>supplied_population_real_vars</b></td></tr>
+<tr class="separator:a008edb4bd244f5622ab99ae14e8781ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/support/optimisation/NSGA2Optimiser/src/nsga2/<a class="el" href="NSGA2_8hpp_source.html">NSGA2.hpp</a></li>
+<li>module/support/optimisation/NSGA2Optimiser/src/nsga2/NSGA2.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>nsga2</b></li><li class="navelem"><a class="el" href="classnsga2_1_1NSGA2.html">NSGA2</a></li>
+    <li class="footer">Generated on Sun Feb 4 2024 01:02:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -297,6 +297,14 @@ ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" 
 uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#ada43737945db7981ecc77c29b00bf0eb">real_delta</a> = 0</td></tr>
 <tr class="memdesc:ada43737945db7981ecc77c29b00bf0eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of milliseconds which have passed since the last IO::READ trigger. <br /></td></tr>
 <tr class="separator:ada43737945db7981ecc77c29b00bf0eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5886664ad636e50826e9d44746069fd"><td class="memItemLeft" align="right" valign="top"><a id="aa5886664ad636e50826e9d44746069fd"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#aa5886664ad636e50826e9d44746069fd">reset_simulation_time</a> = false</td></tr>
+<tr class="memdesc:aa5886664ad636e50826e9d44746069fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">When set, the next ActuatorRequests to webots will set the reset time command to end the simulation. <br /></td></tr>
+<tr class="separator:aa5886664ad636e50826e9d44746069fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a518f20eaf8f29076cdfae343f88402b6"><td class="memItemLeft" align="right" valign="top"><a id="a518f20eaf8f29076cdfae343f88402b6"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#a518f20eaf8f29076cdfae343f88402b6">reset_simulation_world</a> = false</td></tr>
+<tr class="memdesc:a518f20eaf8f29076cdfae343f88402b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">When set, the next ActuatorRequests to webots will set the reset world command to end the simulation. <br /></td></tr>
+<tr class="separator:a518f20eaf8f29076cdfae343f88402b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb715e6a207d6ea5bbd7358697df79bf"><td class="memItemLeft" align="right" valign="top"><a id="abb715e6a207d6ea5bbd7358697df79bf"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#abb715e6a207d6ea5bbd7358697df79bf">rtf</a> = 1.0</td></tr>
 <tr class="memdesc:abb715e6a207d6ea5bbd7358697df79bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Real time factor of the simulation clock. <br /></td></tr>
@@ -324,6 +332,10 @@ std::array&lt; <a class="el" href="structmodule_1_1platform_1_1Webots_1_1ServoSt
 uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#a15f8677186f106976c4f181422de1ba5">sim_delta</a> = 0</td></tr>
 <tr class="memdesc:a15f8677186f106976c4f181422de1ba5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of time ticks which have passed since the last IO::READ trigger. <br /></td></tr>
 <tr class="separator:a15f8677186f106976c4f181422de1ba5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d3edaabf7a672c816fab2ad1a2043a2"><td class="memItemLeft" align="right" valign="top"><a id="a5d3edaabf7a672c816fab2ad1a2043a2"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#a5d3edaabf7a672c816fab2ad1a2043a2">terminate_simulation</a> = false</td></tr>
+<tr class="memdesc:a5d3edaabf7a672c816fab2ad1a2043a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">When set, the next ActuatorRequests to webots will set the terminate command to end the simulation. <br /></td></tr>
+<tr class="separator:a5d3edaabf7a672c816fab2ad1a2043a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30f87fa65a805fffc81422db32d7d93b"><td class="memItemLeft" align="right" valign="top"><a id="a30f87fa65a805fffc81422db32d7d93b"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1platform_1_1Webots.html#a30f87fa65a805fffc81422db32d7d93b">time_step</a></td></tr>
 <tr class="memdesc:a30f87fa65a805fffc81422db32d7d93b"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time between two measurements, expressed in milliseconds. <br /></td></tr>
@@ -409,7 +421,7 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><a class
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1Webots.html">Webots</a></li>
-    <li class="footer">Generated on Sat Feb 3 2024 23:44:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Feb 4 2024 01:02:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

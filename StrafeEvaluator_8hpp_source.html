@@ -1,0 +1,319 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module/support/optimisation/NSGA2Evaluator/src/tasks/StrafeEvaluator.hpp Source File</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('StrafeEvaluator_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">StrafeEvaluator.hpp</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="comment">/*</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="comment"> * MIT License</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="comment"> * Copyright (c) 2022 NUbots</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="comment"> * This file is part of the NUbots codebase.</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="comment"> * See https://github.com/NUbots/NUbots for further info.</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="comment"> * Permission is hereby granted, free of charge, to any person obtaining a copy</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="comment"> * of this software and associated documentation files (the &quot;Software&quot;), to deal</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="comment"> * in the Software without restriction, including without limitation the rights</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="comment"> * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="comment"> * copies of the Software, and to permit persons to whom the Software is</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="comment"> * furnished to do so, subject to the following conditions:</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="comment"> * The above copyright notice and this permission notice shall be included in all</span></div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * copies or substantial portions of the Software.</span></div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> *</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment"> * THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment"> * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment"> * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment"> * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment"> * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef MODULE_SUPPORT_OPTIMISATION_STRAFEEVALUATOR_HPP</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define MODULE_SUPPORT_OPTIMISATION_STRAFEEVALUATOR_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &lt;Eigen/Core&gt;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &quot;EvaluatorTask.hpp&quot;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;message/platform/RawSensors.hpp&quot;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;message/support/optimisation/NSGA2Evaluator.hpp&quot;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;message/support/optimisation/NSGA2Optimiser.hpp&quot;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="keyword">namespace </span>module::support::optimisation {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;    <span class="keyword">using</span> message::platform::RawSensors;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">using</span> message::support::optimisation::NSGA2EvaluationRequest;</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> message::support::optimisation::NSGA2FitnessScores;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
+<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html">   45</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html">StrafeEvaluator</a> : <span class="keyword">public</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html">EvaluatorTask</a> {</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="comment">// Implementing the EvaluatorTask interface</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a4a4ef84694d874c22461c588a9a90d6f">process_optimisation_robot_position</a>(<span class="keyword">const</span> OptimisationRobotPosition&amp; position);</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;<span class="comment">        /// @brief Setup the next trial, updating the trial duration, velocity, and walk config parameters also saving</span></div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment">        /// them into a new file</span></div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ad3ee6e618be4a84fed9162a259ef97b0">set_up_trial</a>(<span class="keyword">const</span> NSGA2EvaluationRequest&amp; request);</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">        /// @brief Reset the local state of the trial</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a41eb007734155bf4f77c73442909c8d3">reset_trial</a>();</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;<span class="comment">        /// @brief Starts an evaluation, running the walk and setting the duration</span></div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;<span class="comment">        /// @param evaluator Instance of the NSGA2Evaluator which this task is running from</span></div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a6d7ed943ce1cf7d1ce5ac7c6834a56bf">evaluating_state</a>(<a class="code" href="classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html">NSGA2Evaluator</a>* evaluator);</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;<span class="comment">        /// @brief Detects whether we have fallen</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a2c658dd02e8fdbe0447462776a220f7d">has_fallen</a>(<span class="keyword">const</span> Sensors&amp; sensors);</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;<span class="comment">        /// @brief After an evaluation has completed calculates the scores for the individual</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;<span class="comment">        /// @param early_termination Has the trial been forced to terminate early</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">        /// @param generation The generation that we have been evaluating</span></div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">        /// @param individual The specific individual we were trialing</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;<span class="comment"></span>        std::unique_ptr&lt;NSGA2FitnessScores&gt; <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#aa1b84fa27dee1f02e36a1448f2f92eac">calculate_fitness_scores</a>(<span class="keywordtype">bool</span> early_termination,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                                                                     <span class="keywordtype">int</span> generation,</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                                                                     <span class="keywordtype">int</span> individual);</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160; </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;        <span class="comment">// Task-specific functions</span><span class="comment"></span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">        /// @brief Determine scores for the algorithm based on distance travelled and sway</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment"></span>        std::vector&lt;double&gt; <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#abf913d5ed47e4b6ada2aef90a3f5cf6d">calculate_scores</a>();</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">        /// @brief Determine constraints for the algorithm, if we have fallen, based on the time that the trial ran for</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment"></span>        std::vector&lt;double&gt; <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#afcdf9e75f4ccbe4a183bdf8992545063">calculate_constraints</a>(<span class="keywordtype">double</span> trial_duration);</div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">        /// @brief Gives no constraints as a result of staying upright for the duration of the trial</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment"></span>        std::vector&lt;double&gt; <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ac2f642e78b012c121e22ef98f884e2ac">constraints_not_violated</a>();</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">        /// @brief Calculate the robot sway along the field plane (left/right, forward/backward)</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a6ad73ee043d49e2007ac61aba5d96e2a">update_max_field_plane_sway</a>(<span class="keyword">const</span> Sensors&amp; sensors);</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160; </div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html">   86</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html">Config</a> {<span class="comment"></span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">            /// @brief Threshold angle for fallover detection, between torso z axis and world z axis</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno"><a class="line" href="structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html#a29006077dcf7a37a7f3bf77ee9ba5b05">   88</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">float</span> <a class="code" href="structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html#a29006077dcf7a37a7f3bf77ee9ba5b05">fallen_angle</a> = 0.0f;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        } cfg;</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment">        /// @brief Robot state for this evaluation, used during fitness and constraint calculation</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ae60ba1041253ec53f3ab06fcaa9375fa">   92</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ae60ba1041253ec53f3ab06fcaa9375fa">initial_position_set</a>              = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        Eigen::Vector3d initial_robot_position = Eigen::Vector3d::Zero();</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        Eigen::Vector3d robot_position         = Eigen::Vector3d::Zero();</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <span class="keywordtype">double</span> max_field_plane_sway            = 0.0;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="comment">        /// @brief The amount of time to run a single trial, in seconds.</span></div>
+<div class="line"><a name="l00098"></a><span class="lineno"><a class="line" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ae40c63c9595f353233b423309264d6ea">   98</a></span>&#160;<span class="comment"></span>        std::chrono::seconds <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ae40c63c9595f353233b423309264d6ea">trial_duration_limit</a> = std::chrono::seconds(0);</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment">        /// @brief Keep track of when the trial started</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno"><a class="line" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a78d86ac28293556160e11f837bdf6bae">  101</a></span>&#160;<span class="comment"></span>        NUClear::clock::time_point <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a78d86ac28293556160e11f837bdf6bae">trial_start_time</a>{NUClear::clock::now()};</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment">        /// @brief The walk command velocity.</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno"><a class="line" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a98487ab74020b390745c4659c2dbae3d">  104</a></span>&#160;<span class="comment"></span>        Eigen::Vector2d <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a98487ab74020b390745c4659c2dbae3d">walk_command_velocity</a> = Eigen::Vector2d(0.0, 0.0);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="comment">        /// @brief The walk command rotation.</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno"><a class="line" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a904b064b74166954e5ecf932054530e3">  107</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">double</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a904b064b74166954e5ecf932054530e3">walk_command_rotation</a> = 0.0;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="comment">        /// @brief Indicates that a fall has occured.</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno"><a class="line" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a2202786952a4b96d2cbf830c80a41cd4">  110</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a2202786952a4b96d2cbf830c80a41cd4">fallen</a> = <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    };</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160; </div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;}  <span class="comment">// namespace module::support::optimisation</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_SUPPORT_OPTIMISATION_STRAFEEVALUATOR_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1EvaluatorTask_html"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html">module::support::optimisation::EvaluatorTask</a></div><div class="ttdef"><b>Definition:</b> EvaluatorTask.hpp:54</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_html"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html">module::support::optimisation::NSGA2Evaluator</a></div><div class="ttdef"><b>Definition:</b> NSGA2Evaluator.hpp:48</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html">module::support::optimisation::StrafeEvaluator</a></div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:45</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a2202786952a4b96d2cbf830c80a41cd4"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a2202786952a4b96d2cbf830c80a41cd4">module::support::optimisation::StrafeEvaluator::fallen</a></div><div class="ttdeci">bool fallen</div><div class="ttdoc">Indicates that a fall has occured.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:110</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a2c658dd02e8fdbe0447462776a220f7d"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a2c658dd02e8fdbe0447462776a220f7d">module::support::optimisation::StrafeEvaluator::has_fallen</a></div><div class="ttdeci">bool has_fallen(const Sensors &amp;sensors)</div><div class="ttdoc">Detects whether we have fallen.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:152</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a41eb007734155bf4f77c73442909c8d3"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a41eb007734155bf4f77c73442909c8d3">module::support::optimisation::StrafeEvaluator::reset_trial</a></div><div class="ttdeci">void reset_trial()</div><div class="ttdoc">Reset the local state of the trial.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:134</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a4a4ef84694d874c22461c588a9a90d6f"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a4a4ef84694d874c22461c588a9a90d6f">module::support::optimisation::StrafeEvaluator::process_optimisation_robot_position</a></div><div class="ttdeci">void process_optimisation_robot_position(const OptimisationRobotPosition &amp;position)</div><div class="ttdoc">Stores the position of the robot for use in the optimisation.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:53</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a6ad73ee043d49e2007ac61aba5d96e2a"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a6ad73ee043d49e2007ac61aba5d96e2a">module::support::optimisation::StrafeEvaluator::update_max_field_plane_sway</a></div><div class="ttdeci">void update_max_field_plane_sway(const Sensors &amp;sensors)</div><div class="ttdoc">Calculate the robot sway along the field plane (left/right, forward/backward)</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:169</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a6d7ed943ce1cf7d1ce5ac7c6834a56bf"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a6d7ed943ce1cf7d1ce5ac7c6834a56bf">module::support::optimisation::StrafeEvaluator::evaluating_state</a></div><div class="ttdeci">void evaluating_state(NSGA2Evaluator *evaluator)</div><div class="ttdoc">Starts an evaluation, running the walk and setting the duration.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:142</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a78d86ac28293556160e11f837bdf6bae"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a78d86ac28293556160e11f837bdf6bae">module::support::optimisation::StrafeEvaluator::trial_start_time</a></div><div class="ttdeci">NUClear::clock::time_point trial_start_time</div><div class="ttdoc">Keep track of when the trial started.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:101</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a904b064b74166954e5ecf932054530e3"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a904b064b74166954e5ecf932054530e3">module::support::optimisation::StrafeEvaluator::walk_command_rotation</a></div><div class="ttdeci">double walk_command_rotation</div><div class="ttdoc">The walk command rotation.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:107</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_a98487ab74020b390745c4659c2dbae3d"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a98487ab74020b390745c4659c2dbae3d">module::support::optimisation::StrafeEvaluator::walk_command_velocity</a></div><div class="ttdeci">Eigen::Vector2d walk_command_velocity</div><div class="ttdoc">The walk command velocity.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:104</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_aa1b84fa27dee1f02e36a1448f2f92eac"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#aa1b84fa27dee1f02e36a1448f2f92eac">module::support::optimisation::StrafeEvaluator::calculate_fitness_scores</a></div><div class="ttdeci">std::unique_ptr&lt; NSGA2FitnessScores &gt; calculate_fitness_scores(bool early_termination, int generation, int individual)</div><div class="ttdoc">After an evaluation has completed calculates the scores for the individual.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:179</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_abf913d5ed47e4b6ada2aef90a3f5cf6d"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#abf913d5ed47e4b6ada2aef90a3f5cf6d">module::support::optimisation::StrafeEvaluator::calculate_scores</a></div><div class="ttdeci">std::vector&lt; double &gt; calculate_scores()</div><div class="ttdoc">Determine scores for the algorithm based on distance travelled and sway.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:202</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_ac2f642e78b012c121e22ef98f884e2ac"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ac2f642e78b012c121e22ef98f884e2ac">module::support::optimisation::StrafeEvaluator::constraints_not_violated</a></div><div class="ttdeci">std::vector&lt; double &gt; constraints_not_violated()</div><div class="ttdoc">Gives no constraints as a result of staying upright for the duration of the trial.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:223</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_ad3ee6e618be4a84fed9162a259ef97b0"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ad3ee6e618be4a84fed9162a259ef97b0">module::support::optimisation::StrafeEvaluator::set_up_trial</a></div><div class="ttdeci">void set_up_trial(const NSGA2EvaluationRequest &amp;request)</div><div class="ttdoc">Setup the next trial, updating the trial duration, velocity, and walk config parameters also saving t...</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:62</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_ae40c63c9595f353233b423309264d6ea"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ae40c63c9595f353233b423309264d6ea">module::support::optimisation::StrafeEvaluator::trial_duration_limit</a></div><div class="ttdeci">std::chrono::seconds trial_duration_limit</div><div class="ttdoc">The amount of time to run a single trial, in seconds.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:98</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_ae60ba1041253ec53f3ab06fcaa9375fa"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#ae60ba1041253ec53f3ab06fcaa9375fa">module::support::optimisation::StrafeEvaluator::initial_position_set</a></div><div class="ttdeci">bool initial_position_set</div><div class="ttdoc">Robot state for this evaluation, used during fitness and constraint calculation.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:92</div></div>
+<div class="ttc" id="aclassmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_html_afcdf9e75f4ccbe4a183bdf8992545063"><div class="ttname"><a href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#afcdf9e75f4ccbe4a183bdf8992545063">module::support::optimisation::StrafeEvaluator::calculate_constraints</a></div><div class="ttdeci">std::vector&lt; double &gt; calculate_constraints(double trial_duration)</div><div class="ttdoc">Determine constraints for the algorithm, if we have fallen, based on the time that the trial ran for.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.cpp:210</div></div>
+<div class="ttc" id="astructmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config_html"><div class="ttname"><a href="structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html">module::support::optimisation::StrafeEvaluator::Config</a></div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:86</div></div>
+<div class="ttc" id="astructmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config_html_a29006077dcf7a37a7f3bf77ee9ba5b05"><div class="ttname"><a href="structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html#a29006077dcf7a37a7f3bf77ee9ba5b05">module::support::optimisation::StrafeEvaluator::Config::fallen_angle</a></div><div class="ttdeci">float fallen_angle</div><div class="ttdoc">Threshold angle for fallover detection, between torso z axis and world z axis.</div><div class="ttdef"><b>Definition:</b> StrafeEvaluator.hpp:88</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_28d3ea03ae757061a3b72d8f4c630bc4.html">support</a></li><li class="navelem"><a class="el" href="dir_d9ddb9a50272bc9b2b04abc5cc8c9f89.html">optimisation</a></li><li class="navelem"><a class="el" href="dir_2351d8157d309e6a754b19ba000d4fe3.html">NSGA2Evaluator</a></li><li class="navelem"><a class="el" href="dir_32d63cd3848a868ba4b54f4f8286bce1.html">src</a></li><li class="navelem"><a class="el" href="dir_de3fbfde9c0d315a6c9e6f48ded3dfe6.html">tasks</a></li><li class="navelem"><b>StrafeEvaluator.hpp</b></li>
+    <li class="footer">Generated on Sun Feb 4 2024 01:02:13 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -243,6 +243,26 @@ var hierarchy =
     [ "module::support::logging::DataLogging::DataLog", "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html", null ],
     [ "module::support::logging::DataPlayback::Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", null ],
     [ "module::support::logging::Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", null ],
+    [ "module::support::optimisation::EvaluatorTask", "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html", [
+      [ "module::support::optimisation::RotationEvaluator", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html", null ],
+      [ "module::support::optimisation::StandEvaluator", "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html", null ],
+      [ "module::support::optimisation::StrafeEvaluator", "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html", null ],
+      [ "module::support::optimisation::WalkEvaluator", "classmodule_1_1support_1_1optimisation_1_1WalkEvaluator.html", null ]
+    ] ],
+    [ "module::support::optimisation::NSGA2Evaluator::Event", "structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1Event.html", null ],
+    [ "module::support::optimisation::NSGA2Evaluator::State", "structmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator_1_1State.html", null ],
+    [ "module::support::optimisation::OnboardWalkOptimisation::Config", "structmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation_1_1Config.html", null ],
+    [ "module::support::optimisation::OptimiserTask", "classmodule_1_1support_1_1optimisation_1_1OptimiserTask.html", [
+      [ "module::support::optimisation::MultiPathOptimiser", "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html", null ],
+      [ "module::support::optimisation::RotationOptimiser", "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html", null ],
+      [ "module::support::optimisation::StandOptimiser", "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html", null ],
+      [ "module::support::optimisation::StrafeOptimiser", "classmodule_1_1support_1_1optimisation_1_1StrafeOptimiser.html", null ],
+      [ "module::support::optimisation::WalkOptimiser", "classmodule_1_1support_1_1optimisation_1_1WalkOptimiser.html", null ]
+    ] ],
+    [ "module::support::optimisation::RotationEvaluator::Config", "structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html", null ],
+    [ "module::support::optimisation::StandEvaluator::Config", "structmodule_1_1support_1_1optimisation_1_1StandEvaluator_1_1Config.html", null ],
+    [ "module::support::optimisation::StrafeEvaluator::Config", "structmodule_1_1support_1_1optimisation_1_1StrafeEvaluator_1_1Config.html", null ],
+    [ "module::support::optimisation::WalkEvaluator::Config", "structmodule_1_1support_1_1optimisation_1_1WalkEvaluator_1_1Config.html", null ],
     [ "module::tools::FirmwareInstaller::Firmware", "structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html", null ],
     [ "module::tools::FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
     [ "module::tools::FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
@@ -257,6 +277,12 @@ var hierarchy =
     [ "module::vision::visualmesh::VisualMeshResults", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html", null ],
     [ "module::vision::visualmesh::VisualMeshRunner", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html", null ],
     [ "module::input::MotionModel< double >", "classmodule_1_1input_1_1MotionModel.html", null ],
+    [ "nsga2::Individual", "classnsga2_1_1Individual.html", null ],
+    [ "nsga2::IndividualConfigurator", "structnsga2_1_1IndividualConfigurator.html", null ],
+    [ "nsga2::NSGA2", "classnsga2_1_1NSGA2.html", null ],
+    [ "nsga2::Population", "classnsga2_1_1Population.html", null ],
+    [ "nsga2::RandomGenerator< IntType, RealType >", "classnsga2_1_1RandomGenerator.html", null ],
+    [ "nsga2::sort_n", "structnsga2_1_1sort__n.html", null ],
     [ "NUClear::dsl::operation::DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", null ],
     [ "NUClear::dsl::operation::DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", null ],
     [ "NUClear::Reactor", null, [
@@ -295,7 +321,8 @@ var hierarchy =
         [ "module::strategy::StrategiseLook", "classmodule_1_1strategy_1_1StrategiseLook.html", null ],
         [ "module::strategy::WalkInsideBoundedBox", "classmodule_1_1strategy_1_1WalkInsideBoundedBox.html", null ],
         [ "module::strategy::WalkToBall", "classmodule_1_1strategy_1_1WalkToBall.html", null ],
-        [ "module::strategy::WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", null ]
+        [ "module::strategy::WalkToFieldPosition", "classmodule_1_1strategy_1_1WalkToFieldPosition.html", null ],
+        [ "module::support::optimisation::NSGA2Evaluator", "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],
       [ "module::extension::Director", "classmodule_1_1extension_1_1Director.html", null ],
@@ -329,6 +356,8 @@ var hierarchy =
       [ "module::support::logging::DataPlayback", "classmodule_1_1support_1_1logging_1_1DataPlayback.html", null ],
       [ "module::support::logging::FileLogHandler", "classmodule_1_1support_1_1logging_1_1FileLogHandler.html", null ],
       [ "module::support::logging::MessageLogHandler", "classmodule_1_1support_1_1logging_1_1MessageLogHandler.html", null ],
+      [ "module::support::optimisation::NSGA2Optimiser", "classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html", null ],
+      [ "module::support::optimisation::OnboardWalkOptimisation", "classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html", null ],
       [ "module::tools::FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", null ],
       [ "module::tools::SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", null ],
       [ "module::vision::BallDetector", "classmodule_1_1vision_1_1BallDetector.html", null ],

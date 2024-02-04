@@ -634,6 +634,22 @@ var namespaces_dup =
           [ "formatted_time", "DataLogging_8cpp.html#a31101356c34dad13c8d4985675f0dcb9", null ],
           [ "read_packet", "read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e", null ]
         ] ],
+        [ "optimisation", null, [
+          [ "EvaluatorTask", "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask.html", "classmodule_1_1support_1_1optimisation_1_1EvaluatorTask" ],
+          [ "MultiPathOptimiser", "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1MultiPathOptimiser" ],
+          [ "NSGA2Evaluator", "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html", "classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator" ],
+          [ "NSGA2Optimiser", "classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html", "classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser" ],
+          [ "OnboardWalkOptimisation", "classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation.html", "classmodule_1_1support_1_1optimisation_1_1OnboardWalkOptimisation" ],
+          [ "OptimiserTask", "classmodule_1_1support_1_1optimisation_1_1OptimiserTask.html", "classmodule_1_1support_1_1optimisation_1_1OptimiserTask" ],
+          [ "RotationEvaluator", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator" ],
+          [ "RotationOptimiser", "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1RotationOptimiser" ],
+          [ "StandEvaluator", "classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1StandEvaluator" ],
+          [ "StandOptimiser", "classmodule_1_1support_1_1optimisation_1_1StandOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1StandOptimiser" ],
+          [ "StrafeEvaluator", "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator" ],
+          [ "StrafeOptimiser", "classmodule_1_1support_1_1optimisation_1_1StrafeOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1StrafeOptimiser" ],
+          [ "WalkEvaluator", "classmodule_1_1support_1_1optimisation_1_1WalkEvaluator.html", "classmodule_1_1support_1_1optimisation_1_1WalkEvaluator" ],
+          [ "WalkOptimiser", "classmodule_1_1support_1_1optimisation_1_1WalkOptimiser.html", "classmodule_1_1support_1_1optimisation_1_1WalkOptimiser" ]
+        ] ],
         [ "LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", "classmodule_1_1support_1_1LocalisationSimulator" ],
         [ "NUsightHarness", "classmodule_1_1support_1_1NUsightHarness.html", "classmodule_1_1support_1_1NUsightHarness" ],
         [ "ReactionTimer", "classmodule_1_1support_1_1ReactionTimer.html", "classmodule_1_1support_1_1ReactionTimer" ],
@@ -680,6 +696,14 @@ var namespaces_dup =
         [ "RobotDetector", "classmodule_1_1vision_1_1RobotDetector.html", "classmodule_1_1vision_1_1RobotDetector" ],
         [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ]
       ] ]
+    ] ],
+    [ "nsga2", null, [
+      [ "Individual", "classnsga2_1_1Individual.html", "classnsga2_1_1Individual" ],
+      [ "IndividualConfigurator", "structnsga2_1_1IndividualConfigurator.html", "structnsga2_1_1IndividualConfigurator" ],
+      [ "NSGA2", "classnsga2_1_1NSGA2.html", "classnsga2_1_1NSGA2" ],
+      [ "Population", "classnsga2_1_1Population.html", "classnsga2_1_1Population" ],
+      [ "RandomGenerator", "classnsga2_1_1RandomGenerator.html", "classnsga2_1_1RandomGenerator" ],
+      [ "sort_n", "structnsga2_1_1sort__n.html", "structnsga2_1_1sort__n" ]
     ] ],
     [ "NUClear", null, [
       [ "dsl", null, [

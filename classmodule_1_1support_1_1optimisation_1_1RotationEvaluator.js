@@ -1,0 +1,28 @@
+var classmodule_1_1support_1_1optimisation_1_1RotationEvaluator =
+[
+    [ "Config", "structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config.html", "structmodule_1_1support_1_1optimisation_1_1RotationEvaluator_1_1Config" ],
+    [ "calculate_constraints", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a60f501c3cc87081328cfebb8a0c01275", null ],
+    [ "calculate_fitness_scores", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a5a047c9d9ec86dfada64fef5f4928849", null ],
+    [ "calculate_scores", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#aac6ba3693708b885775b478fdb7b2833", null ],
+    [ "constraints_not_violated", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac5546445cd54d0b0ead99909b93ec88b", null ],
+    [ "evaluating_state", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae4b435518893ae0a1a011d04d98e2416", null ],
+    [ "has_fallen", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a33eb29dc012cc9b576f0289c7310adeb", null ],
+    [ "process_optimisation_robot_position", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ab3b6a856d43b718a5a8414c0af3cdcbd", null ],
+    [ "reset_trial", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a09ec28e03688262c2bda99248738f982", null ],
+    [ "set_up_trial", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ae9691ab7643e875d50d323d3ca15573a", null ],
+    [ "update_max_field_plane_sway", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#aba1b7b4d6c6055e31febec56fd7be9dd", null ],
+    [ "cfg", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a9e3a05f4d51b853470064c091771bff2", null ],
+    [ "deltaT", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac6f0339573e2a7c02f7d0f1a28e96883", null ],
+    [ "fallen", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a353ddd1632cdf3cb859ad949e4781f02", null ],
+    [ "initial_position_set", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a79c2782909999d0b0135a16a85c1620e", null ],
+    [ "initial_robot_position", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#ac61228519f19a7e62dc7d3dddcfb7b85", null ],
+    [ "max_field_plane_sway", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a643fe5894b9cc8d56dca65b0be8f5c79", null ],
+    [ "old_time", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a5ff1713de7eb55c7bff59b0d1ac13241", null ],
+    [ "omega", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a275de7c185e28448a26f8c1cec9b0d22", null ],
+    [ "robot_position", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a0749c67c1a548ecac93c09f3e2c2aef6", null ],
+    [ "theta", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a881ec247de985936ec224ef572f8be47", null ],
+    [ "trial_duration_limit", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a49c7ed6b13bf1624e8a39071bef89398", null ],
+    [ "trial_start_time", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a207b2f6c9c66eb4609409286876f06d4", null ],
+    [ "walk_command_rotation", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#aae981c454a02704f2d4af9e8ce9ba92c", null ],
+    [ "walk_command_velocity", "classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html#a83a87835d03b1174e33c13e92500a6a2", null ]
+];

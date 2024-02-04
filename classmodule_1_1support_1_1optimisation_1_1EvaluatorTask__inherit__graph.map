@@ -1,0 +1,7 @@
+<map id="module::support::optimisation::EvaluatorTask" name="module::support::optimisation::EvaluatorTask">
+<area shape="rect" id="node1" title=" " alt="" coords="5,104,224,145"/>
+<area shape="rect" id="node2" href="$classmodule_1_1support_1_1optimisation_1_1RotationEvaluator.html" title=" " alt="" coords="272,5,491,47"/>
+<area shape="rect" id="node3" href="$classmodule_1_1support_1_1optimisation_1_1StandEvaluator.html" title=" " alt="" coords="272,71,491,112"/>
+<area shape="rect" id="node4" href="$classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html" title=" " alt="" coords="272,136,491,177"/>
+<area shape="rect" id="node5" href="$classmodule_1_1support_1_1optimisation_1_1WalkEvaluator.html" title=" " alt="" coords="272,201,491,243"/>
+</map>

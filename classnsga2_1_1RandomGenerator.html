@@ -1,0 +1,230 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: nsga2::RandomGenerator&lt; IntType, RealType &gt; Class Template Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classnsga2_1_1RandomGenerator.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="classnsga2_1_1RandomGenerator-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">nsga2::RandomGenerator&lt; IntType, RealType &gt; Class Template Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:ade93220ed1860f8c2c172098cc255464"><td class="memItemLeft" align="right" valign="top"><a id="ade93220ed1860f8c2c172098cc255464"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>RandomGenerator</b> (const uint32_t &amp;seed_=0)</td></tr>
+<tr class="separator:ade93220ed1860f8c2c172098cc255464"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acabe65452bbd5888ff3154695a77a328"><td class="memItemLeft" align="right" valign="top"><a id="acabe65452bbd5888ff3154695a77a328"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>get_seed</b> () const</td></tr>
+<tr class="separator:acabe65452bbd5888ff3154695a77a328"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3641adf5887b287a408d8509fa05968b"><td class="memItemLeft" align="right" valign="top"><a id="a3641adf5887b287a408d8509fa05968b"></a>
+IntType&#160;</td><td class="memItemRight" valign="bottom"><b>Integer</b> (const IntType &amp;low, const IntType &amp;high)</td></tr>
+<tr class="separator:a3641adf5887b287a408d8509fa05968b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7cdf20004be3a02478d10982ac9fd10"><td class="memItemLeft" align="right" valign="top"><a id="aa7cdf20004be3a02478d10982ac9fd10"></a>
+RealType&#160;</td><td class="memItemRight" valign="bottom"><b>Real</b> (const RealType &amp;low, const RealType &amp;high)</td></tr>
+<tr class="separator:aa7cdf20004be3a02478d10982ac9fd10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a84c65a281ebab8ec55ab98498b25a4e7"><td class="memItemLeft" align="right" valign="top"><a id="a84c65a281ebab8ec55ab98498b25a4e7"></a>
+RealType&#160;</td><td class="memItemRight" valign="bottom"><b>Realu</b> ()</td></tr>
+<tr class="separator:a84c65a281ebab8ec55ab98498b25a4e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2c60408a978805b0a65d0cfa6cf57e4d"><td class="memItemLeft" align="right" valign="top"><a id="a2c60408a978805b0a65d0cfa6cf57e4d"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>set_seed</b> (const uint32_t &amp;seed_)</td></tr>
+<tr class="separator:a2c60408a978805b0a65d0cfa6cf57e4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:aea6f136f4fce9cf9de5cf4dd13ed83a9"><td class="memItemLeft" align="right" valign="top"><a id="aea6f136f4fce9cf9de5cf4dd13ed83a9"></a>
+std::mt19937&#160;</td><td class="memItemRight" valign="bottom"><b>generator</b></td></tr>
+<tr class="separator:aea6f136f4fce9cf9de5cf4dd13ed83a9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d971ff20f62dc3cb6f018172aab2b95"><td class="memItemLeft" align="right" valign="top"><a id="a5d971ff20f62dc3cb6f018172aab2b95"></a>
+std::random_device&#160;</td><td class="memItemRight" valign="bottom"><b>random_device</b></td></tr>
+<tr class="separator:a5d971ff20f62dc3cb6f018172aab2b95"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f8940c20acc8224f7f1d1560b6246e7"><td class="memItemLeft" align="right" valign="top"><a id="a3f8940c20acc8224f7f1d1560b6246e7"></a>
+uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>seed</b></td></tr>
+<tr class="separator:a3f8940c20acc8224f7f1d1560b6246e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb4ac1ed6baabb0a45138da727a8eccb"><td class="memItemLeft" align="right" valign="top"><a id="acb4ac1ed6baabb0a45138da727a8eccb"></a>
+std::uniform_real_distribution&lt; RealType &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>u01d</b></td></tr>
+<tr class="separator:acb4ac1ed6baabb0a45138da727a8eccb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a596d41d527ed4d0bce0f3ad921caae89"><td class="memItemLeft" align="right" valign="top"><a id="a596d41d527ed4d0bce0f3ad921caae89"></a>
+std::uniform_int_distribution&lt; IntType &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>uintd</b></td></tr>
+<tr class="separator:a596d41d527ed4d0bce0f3ad921caae89"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<hr/>The documentation for this class was generated from the following file:<ul>
+<li>module/support/optimisation/NSGA2Optimiser/src/nsga2/<a class="el" href="Random_8hpp_source.html">Random.hpp</a></li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>nsga2</b></li><li class="navelem"><a class="el" href="classnsga2_1_1RandomGenerator.html">RandomGenerator</a></li>
+    <li class="footer">Generated on Sun Feb 4 2024 01:02:14 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>
