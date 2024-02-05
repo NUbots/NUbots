@@ -140,7 +140,7 @@ namespace module::network {
                             Eigen::Vector3d rTFf  = Hft.translation();
 
                             // Store our position from field to torso
-                            msg->current_pose.position = rTFf.cast<float>();
+                            msg->current_pose.position     = rTFf.cast<float>();
                             msg->current_pose.position.z() = MatrixToEulerIntrinsic(Hft.rotation()).z();
 
                             msg->current_pose.covariance = field->covariance.cast<float>();
