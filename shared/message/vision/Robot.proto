@@ -47,7 +47,6 @@ package message.vision;
 
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
-import "Matrix.proto";
 import "Transform.proto";
 
 message Robot {

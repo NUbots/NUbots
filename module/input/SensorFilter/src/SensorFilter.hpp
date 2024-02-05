@@ -64,6 +64,7 @@ namespace module::input {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
+    private:
         /// @brief Number of actuatable joints in the NUgus robot
         static const int n_joints = 20;
 
@@ -160,6 +161,9 @@ namespace module::input {
             /// @brief Path to NUgus URDF file
             std::string urdf_path = "";
 
+            /// @brief Initial transform from torso {t} to world {w} space
+            Eigen::Isometry3d initial_Hwt = Eigen::Isometry3d::Identity();
+
             /// @brief Config for the button debouncer
             struct Button {
                 Button() = default;
@@ -247,6 +251,9 @@ namespace module::input {
             /// @brief Parameter for scaling the walk command to better match actual achieved velocity
             Eigen::Vector3d deadreckoning_scale = Eigen::Vector3d::Zero();
 
+            /// @brief Initial frame for anchoring deadreckoning
+            std::string initial_anchor_frame = "";
+
             //  **************************************** Kalman Filter Config ****************************************
             /// @brief Kalman Continuous time process model
             Eigen::Matrix<double, n_states, n_states> Ac;
@@ -265,7 +272,7 @@ namespace module::input {
 
             //  **************************************** Mahony Filter Config ****************************************
             /// @brief Mahony filter bias
-            Eigen::Vector3d bias = Eigen::Vector3d::Zero();
+            Eigen::Vector3d initial_bias = Eigen::Vector3d::Zero();
 
             /// @brief Mahony filter proportional gain
             double Ki = 0.0;
@@ -310,6 +317,15 @@ namespace module::input {
         /// @brief Configure Mahony filter
         void configure_mahony(const Configuration& config);
 
+        /// @brief Reset the UKF state
+        void reset_ukf();
+
+        /// @brief Reset the Kalman filter state
+        void reset_kf();
+
+        /// @brief Reset the Mahony filter state
+        void reset_mahony();
+
         /// @brief Updates the sensors message with odometry data filtered using UKF. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
         /// @param sensors The sensors message to update
@@ -353,7 +369,6 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
-    private:
         /// @brief Transform from anchor {a} to world {w} space
         Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
 
@@ -368,6 +383,9 @@ namespace module::input {
 
         // @brief Transform from torso {t} to world {w} space using mahony filter (only roll and pitch estimation)
         Eigen::Isometry3d Hwt_mahony = Eigen::Isometry3d::Identity();
+
+        /// @brief Bias used in the mahony filter, updates with each mahony update
+        Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();
 
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();

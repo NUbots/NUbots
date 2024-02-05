@@ -152,6 +152,15 @@ namespace module::platform {
         std::map<std::string, CameraContext> camera_context;
         uint32_t num_cameras = 0;
 
+        /// @brief When set, the next ActuatorRequests to webots will set the reset world command to end the simulation.
+        bool reset_simulation_world = false;
+
+        /// @brief When set, the next ActuatorRequests to webots will set the reset time command to end the simulation.
+        bool reset_simulation_time = false;
+
+        /// @brief When set, the next ActuatorRequests to webots will set the terminate command to end the simulation.
+        bool terminate_simulation = false;
+
         /// @brief Max FSR sensor value
         float max_fsr_value = 0;
 

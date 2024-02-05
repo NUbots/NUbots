@@ -28,7 +28,6 @@ nuclear_role(
   vision::BallDetector
   vision::RobotDetector
   vision::FieldLineDetector
-  output::ImageCompressor
   # Localisation
   localisation::BallLocalisation
   localisation::FieldLocalisation

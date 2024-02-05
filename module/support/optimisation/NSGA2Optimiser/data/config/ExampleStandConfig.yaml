@@ -1,0 +1,39 @@
+# Larger population encourages wider search
+population_size: 60
+# More generations encourages deeper search
+max_generations: 200
+num_objectives: 2
+num_constraints: 2
+seed: 7777777
+probabilities:
+  real:
+    # Note that simulated binary crossover (SBX) does something like mutation as well
+    crossover: 0.9
+    # recommended nsga2 mutation probability is 1/n, where n is number of parameters
+    mutation: 0.083
+  binary:
+    crossover: 0.9
+    mutation: 0.083
+eta:
+  # eta_c is distribution index for simulated binary crossover (SBX)
+  # higher values of eta_c makes children more similar to parents
+  # Recommended nsga2 value for eta_c is 20
+  C: 20
+  M: 20
+
+task: "stand"
+task_config_path: "scripts/webots/StandUpFront.yaml"
+initial_translation: [-5.0, -3.0, 0.4] # x, y, z
+intial_rotation: [0, 1, 0, 1.5] # x, y, z, angle (rads)
+# The following values are setting the initial values and limits for the script engine parameters.
+# Each item is a frame of the script
+# Each param is the tuple [initial value, minimum, maximum].
+stand:
+  - duration: [1000, 200, 1100]
+  - duration: [1000, 200, 1100]
+  - duration: [2000, 200, 2100]
+  - duration: [1000, 200, 1100]
+  - duration: [1000, 200, 1100]
+  - duration: [1000, 200, 1100]
+  - duration: [1500, 200, 1600]
+  - duration: [1000, 200, 1100]

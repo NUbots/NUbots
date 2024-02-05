@@ -73,7 +73,7 @@ mahony:
   # Mahony "Integral" Gain used to compute bias
   Ki: 0.3
   # Mahony Filter initial bias
-  bias: [0, 0, 0]
+  initial_bias: [0, 0, 0]
 
 # Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
 deadreckoning_scale: [1, 1, 0.6]

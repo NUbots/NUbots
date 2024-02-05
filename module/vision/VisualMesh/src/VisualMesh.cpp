@@ -120,7 +120,7 @@ namespace module::vision {
                             // rPCw * abs(rCWw.z) / rPCw.z) + rCWw
                             rPWw =
                                 (result.rays.array()
-                                 * (Hwc_translation.z() / result.rays.row(2).replicate(1, result.rays.cols()).array())
+                                 * (Hwc_translation.z() / result.rays.row(2).replicate(result.rays.rows(), 1).array())
                                        .abs())
                                     .matrix()
                                 + Hwc_translation.replicate(1, result.rays.cols());

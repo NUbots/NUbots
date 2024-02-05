@@ -78,6 +78,7 @@ packer/build.pwi
 /home/nubots/NUbots/log/*
 log
 log/*
+nsga2-output/*
 
 # Generated documentation
 /doc/Generated/*
