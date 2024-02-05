@@ -1,5 +1,13 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1strategy_1_1WalkInsideBoundedBox_1_1Config.html#ae3f2db2fa6f24da1c79b86b874f50910":[2,0,3,11,8,0,0],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html":[2,0,3,11,9,0],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a37852bb8f11bf710e84cd8a44184accb":[2,0,3,11,9,0,0],
+"structmodule_1_1strategy_1_1WalkToBall_1_1Config.html#a958bcdb230880540d2662b7bd4f33779":[2,0,3,11,9,0,1],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html":[2,0,3,11,10,0],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#a628852e0d3a968cf2aab7f69833cb846":[2,0,3,11,10,0,2],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#a68f8a14b5e22198e6c0f0b26c8ec153e":[2,0,3,11,10,0,1],
+"structmodule_1_1strategy_1_1WalkToFieldPosition_1_1Config.html#a6d11097fdace879ea88840444cf25a3e":[2,0,3,11,10,0,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html":[2,0,3,12,1,1,0],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a02b3fdf96ac782c63ef223acd9e93f60":[2,0,3,12,1,1,0,5],
 "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html#a06ffb50ededb1423c2d68e8bdab6d9ee":[2,0,3,12,1,1,0,3],
@@ -241,13 +249,5 @@ var NAVTREEINDEX16 =
 "structutility_1_1input_1_1LimbID.html#a72cd61b173056a71a00f042b628bebfc":[2,0,7,2,1,26],
 "structutility_1_1input_1_1LimbID.html#a72f2611922c784d7a99641458581ca9a":[2,0,7,2,1,13],
 "structutility_1_1input_1_1LimbID.html#a74feb53f6551a89fdda3e036f00591c5":[2,0,7,2,1,5],
-"structutility_1_1input_1_1LimbID.html#a8092af2020fd60172e5cfdb448ef0775":[2,0,7,2,1,23],
-"structutility_1_1input_1_1LimbID.html#a855d959e1011dee3be3459e118cb6cd4":[2,0,7,2,1,18],
-"structutility_1_1input_1_1LimbID.html#a87654775b33c5d85862b79bbcc2fdb7e":[2,0,7,2,1,10],
-"structutility_1_1input_1_1LimbID.html#a8ff4fb422577de65c95788a31ec98801":[2,0,7,2,1,7],
-"structutility_1_1input_1_1LimbID.html#a99b49b9f61d005a96683f82f7c97f0fb":[2,0,7,2,1,19],
-"structutility_1_1input_1_1LimbID.html#a9b1ad9e3a0fc2d804b587a292c89d107":[2,0,7,2,1,14],
-"structutility_1_1input_1_1LimbID.html#aa3e91f83bcb8f4dff2e816babdaf8b29":[2,0,7,2,1,4],
-"structutility_1_1input_1_1LimbID.html#aa692b1f468ea590fa27804580a432337":[2,0,7,2,1,31],
-"structutility_1_1input_1_1LimbID.html#aac5d041448c7c1c1f8506db165c7804f":[2,0,7,2,1,25]
+"structutility_1_1input_1_1LimbID.html#a8092af2020fd60172e5cfdb448ef0775":[2,0,7,2,1,23]
 };

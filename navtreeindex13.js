@@ -1,5 +1,9 @@
 var NAVTREEINDEX13 =
 {
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#abe2b25b6158254047e1112238403a0fa":[2,0,3,2,1,3,0],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#ad6fd832c93987f9451e8d1608f946798":[2,0,3,2,1,3,7],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#ae26000b5aef378a11eeae2c5150aab1c":[2,0,3,2,1,3,8],
+"structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html":[2,0,3,3,1,0],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#aaa21a58921fba9a288cec499def49b67":[2,0,3,3,1,0,1],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#aaa29751fd30d2dae6e04520bd3655715":[2,0,3,3,1,0,4],
 "structmodule_1_1localisation_1_1BallLocalisation_1_1Config.html#aeeb19a30a0ecb5fa54d8105a8f4902bb":[2,0,3,3,1,0,3],
@@ -75,6 +79,10 @@ var NAVTREEINDEX13 =
 "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html":[2,0,3,5,0,0,0],
 "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html#a6705f726fef96daf09c8412eb7bd66d8":[2,0,3,5,0,0,0,1],
 "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html#a900cedd2a35b892b568f5fa00b102f39":[2,0,3,5,0,0,0,0],
+"structmodule_1_1network_1_1RobotCommunication_1_1Config.html":[2,0,3,5,3,0],
+"structmodule_1_1network_1_1RobotCommunication_1_1Config.html#abb9e6b41b54c7095ea0f9ca98dda1dfc":[2,0,3,5,3,0,1],
+"structmodule_1_1network_1_1RobotCommunication_1_1Config.html#ac151d88b94d4f104d6caef6b07fc2353":[2,0,3,5,3,0,0],
+"structmodule_1_1network_1_1RobotCommunication_1_1Config.html#add7386e92dc2ca1235f5178752f8bba6":[2,0,3,5,3,0,2],
 "structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext.html":[2,0,3,6,1,0],
 "structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext.html#a5b4f302e7b03e65daba41c3c9daab949":[2,0,3,6,1,0,4],
 "structmodule_1_1output_1_1ImageCompressor_1_1CompressorContext.html#a6abca1c33b913a8fb75f7668fc03f025":[2,0,3,6,1,0,2],
@@ -241,13 +249,5 @@ var NAVTREEINDEX13 =
 "structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html#af0eaa05a5f622744df89827197a614ac":[2,0,3,8,1,0,1],
 "structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html#af682b4edd6ae4ace6a261e6e007b773d":[2,0,3,8,1,0,0],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html":[2,0,3,8,0,1],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227d":[2,0,3,8,0,1,0],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da0033e03289b54e59eefe6ce9d5de39b9":[2,0,3,8,0,1,0,125],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da0195f22b6cf8f016b8530b300ab1e0d3":[2,0,3,8,0,1,0,266],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da01c5b44246e694dcabfce0d006d44080":[2,0,3,8,0,1,0,77],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da01c6404d2a166f9707c8edd2eef8efc1":[2,0,3,8,0,1,0,171],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da0200d59257342aeccddcd85cd41853ee":[2,0,3,8,0,1,0,114],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da02c9739bc951b92987d4a92644f52cfa":[2,0,3,8,0,1,0,206],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da02db8c3f1f51bce619bd6786d7e342db":[2,0,3,8,0,1,0,178],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da03e6416575c752074ef4d582b8340557":[2,0,3,8,0,1,0,14]
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227d":[2,0,3,8,0,1,0]
 };

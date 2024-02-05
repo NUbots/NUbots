@@ -169,6 +169,7 @@ var hierarchy =
     [ "module::motion::SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", null ],
     [ "module::network::NetworkForwarder::Handle", "structmodule_1_1network_1_1NetworkForwarder_1_1Handle.html", null ],
     [ "module::network::NetworkForwarder::Handle::TargetHandle", "structmodule_1_1network_1_1NetworkForwarder_1_1Handle_1_1TargetHandle.html", null ],
+    [ "module::network::RobotCommunication::Config", "structmodule_1_1network_1_1RobotCommunication_1_1Config.html", null ],
     [ "module::output::compressor::Compressor", "classmodule_1_1output_1_1compressor_1_1Compressor.html", [
       [ "module::output::compressor::turbojpeg::Compressor", "classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html", null ],
       [ "module::output::compressor::vaapi::Compressor", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html", null ]
@@ -339,6 +340,7 @@ var hierarchy =
       [ "module::network::NUClearNet", "classmodule_1_1network_1_1NUClearNet.html", null ],
       [ "module::network::NetworkForwarder", "classmodule_1_1network_1_1NetworkForwarder.html", null ],
       [ "module::network::PlotJuggler", "classmodule_1_1network_1_1PlotJuggler.html", null ],
+      [ "module::network::RobotCommunication", "classmodule_1_1network_1_1RobotCommunication.html", null ],
       [ "module::output::ImageCompressor", "classmodule_1_1output_1_1ImageCompressor.html", null ],
       [ "module::output::Overview", "classmodule_1_1output_1_1Overview.html", null ],
       [ "module::platform::HardwareSimulator", "classmodule_1_1platform_1_1HardwareSimulator.html", null ],
