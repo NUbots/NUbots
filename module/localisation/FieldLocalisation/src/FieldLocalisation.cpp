@@ -130,8 +130,29 @@ namespace module::localisation {
     }
 
     Eigen::Isometry3d FieldLocalisation::compute_Hfw(const Eigen::Vector3d& particle) {
-        return Eigen::Translation<double, 3>(particle.x(), particle.y(), 0)
-               * Eigen::AngleAxis<double>(particle.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
+        Eigen::Isometry3d Hfw = Eigen::Translation<double, 3>(particle.x(), particle.y(), 0)
+                                * Eigen::AngleAxis<double>(particle.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
+        if (raw_sensors.localisation_ground_truth.exists) {
+            Eigen::Isometry3d true_Hfw = raw_sensors.localisation_ground_truth.Hfw;
+            // Identify error between true Hfw and estimated Hfw
+            // Determine translational distance error
+            Eigen::Vector3d true_rFWw      = true_Hfw.translation();
+            Eigen::Vector3d estimated_rFWw = Hfw.translation();
+            Eigen::Vector3d error_rFWw     = (true_rFWw - estimated_rFWw).cwiseAbs;
+            // Determine yaw, pitch and roll error
+            Eigen::Vector3d true_Rfw      = MatrixToEulerIntrinsic(true_Hfw.rotation());
+            Eigen::Vector3d estimated_Rfw = MatrixToEulerIntrinsic(Hfw.rotation());
+            Eigen::Vector3d error_Rfw     = (true_Rfw - estimated_Rfw).cwiseAbs();
+            double quat_rot_error         = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
+
+            // Graph translation and its error
+            emit(graph("Hwt true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));
+            emit(graph("Hwt translation error", rFWw_error.x(), rFWw_error.y(), rFWw_error.z()));
+            // Graph rotation and its error
+            emit(graph("Rwt true rotation (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
+            emit(graph("Rwt error (rpy)", error_Rfw.x(), error_Rfw.y(), error_rfw.z()));
+            emit(graph("Quaternion rotational error", quat_rot_error));
+        }
     }
 
     Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw) {
