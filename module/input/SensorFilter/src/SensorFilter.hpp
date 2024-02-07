@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #ifndef MODULES_INPUT_SENSORFILTER_HPP
@@ -23,13 +31,14 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <tinyrobotics/kinematics.hpp>
+#include <tinyrobotics/parser.hpp>
 
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
 #include "extension/Configuration.hpp"
 
-#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/Sensors.hpp"
@@ -42,7 +51,6 @@ using extension::Configuration;
 
 namespace module::input {
 
-    using message::actuation::KinematicsModel;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
@@ -55,6 +63,13 @@ namespace module::input {
     class SensorFilter : public NUClear::Reactor {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+
+    private:
+        /// @brief Number of actuatable joints in the NUgus robot
+        static const int n_joints = 20;
+
+        /// @brief tinyrobotics NUgus model used for kinematics
+        tinyrobotics::Model<double, n_joints> nugus_model;
 
         /// @brief Unscented kalman filter for pose estimation
         utility::math::filter::UKF<double, MotionModel> ukf{};
@@ -143,6 +158,12 @@ namespace module::input {
 
 
         struct Config {
+            /// @brief Path to NUgus URDF file
+            std::string urdf_path = "";
+
+            /// @brief Initial transform from torso {t} to world {w} space
+            Eigen::Isometry3d initial_Hwt = Eigen::Isometry3d::Identity();
+
             /// @brief Config for the button debouncer
             struct Button {
                 Button() = default;
@@ -230,6 +251,9 @@ namespace module::input {
             /// @brief Parameter for scaling the walk command to better match actual achieved velocity
             Eigen::Vector3d deadreckoning_scale = Eigen::Vector3d::Zero();
 
+            /// @brief Initial frame for anchoring deadreckoning
+            std::string initial_anchor_frame = "";
+
             //  **************************************** Kalman Filter Config ****************************************
             /// @brief Kalman Continuous time process model
             Eigen::Matrix<double, n_states, n_states> Ac;
@@ -248,7 +272,7 @@ namespace module::input {
 
             //  **************************************** Mahony Filter Config ****************************************
             /// @brief Mahony filter bias
-            Eigen::Vector3d bias = Eigen::Vector3d::Zero();
+            Eigen::Vector3d initial_bias = Eigen::Vector3d::Zero();
 
             /// @brief Mahony filter proportional gain
             double Ki = 0.0;
@@ -272,15 +296,17 @@ namespace module::input {
 
         /// @brief Update the sensors message with kinematics data
         /// @param sensors The sensors message to update
-        /// @param kinematics_model The kinematics model to use for calculations
-        void update_kinematics(std::unique_ptr<Sensors>& sensors,
-                               const KinematicsModel& kinematics_model,
-                               const RawSensors& raw_sensors);
+        /// @param raw_sensors The raw sensor data
+        void update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
         /// @brief Runs a deadreckoning update on the odometry for x, y and yaw using the walk command
         /// @param dt The time since the last update
         /// @param walk_state Current state of walk engine
         void integrate_walkcommand(const double dt, const Stability& stability, const WalkState& walk_state);
+
+        /// @brief Updates translational and yaw components of odometry using the anchor method
+        /// @param walk_state Current state of walk engine
+        void anchor_update(std::unique_ptr<Sensors>& sensors, const WalkState& walk_state);
 
         /// @brief Configure UKF filter
         void configure_ukf(const Configuration& config);
@@ -290,6 +316,15 @@ namespace module::input {
 
         /// @brief Configure Mahony filter
         void configure_mahony(const Configuration& config);
+
+        /// @brief Reset the UKF state
+        void reset_ukf();
+
+        /// @brief Reset the Kalman filter state
+        void reset_kf();
+
+        /// @brief Reset the Mahony filter state
+        void reset_mahony();
 
         /// @brief Updates the sensors message with odometry data filtered using UKF. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
@@ -320,7 +355,6 @@ namespace module::input {
         void update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
                                     const std::shared_ptr<const Sensors>& previous_sensors,
                                     const RawSensors& raw_sensors,
-                                    const std::shared_ptr<const Stability>& stability,
                                     const std::shared_ptr<const WalkState>& walk_state);
 
         /// @brief Updates the sensors message with odometry data filtered using ground truth from WeBots. This includes
@@ -335,21 +369,26 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
-    private:
+        /// @brief Transform from anchor {a} to world {w} space
+        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+
+        /// @brief Current support phase of the robot
+        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+
         /// @brief Dead reckoning yaw orientation of the robot in world space
         double yaw = 0;
 
-        /// @brief Transform of torso from world space
+        /// @brief Transform from torso {t} to world {w} space
         Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
+
+        // @brief Transform from torso {t} to world {w} space using mahony filter (only roll and pitch estimation)
+        Eigen::Isometry3d Hwt_mahony = Eigen::Isometry3d::Identity();
+
+        /// @brief Bias used in the mahony filter, updates with each mahony update
+        Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();
 
         /// @brief Current walk command
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
-
-        /// @brief Bool to indicate if the robot is falling
-        bool falling = false;
-
-        /// @brief Bool to indicate if the robot is walking
-        bool walk_engine_enabled = false;
 
         /// @brief Current state of the left button
         bool left_down = false;

@@ -1,6 +1,6 @@
 import React from "react";
-import { Canvas, useThree } from "@react-three/fiber";
-import { CanvasProps } from "@react-three/fiber/dist/declarations/src/web/Canvas";
+import { RawShaderMaterialProps } from "@react-three/fiber";
+import { Canvas, CanvasProps, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 import { Vector3 } from "../../../shared/math/vector3";
@@ -43,4 +43,33 @@ export const PerspectiveCamera = ({
     }
   }, [lookAt]);
   return <perspectiveCamera ref={ref} {...props} />;
+};
+
+export const OrthographicCamera = (
+  props: JSX.IntrinsicElements["orthographicCamera"] & {
+    /** Making it manual will stop responsiveness, and you have to calculate aspect ratio yourself. */
+    manual?: boolean;
+  },
+) => {
+  const ref = React.useRef<THREE.OrthographicCamera>(null);
+  const three = useThree();
+  React.useEffect(() => {
+    const camera = ref.current;
+    if (camera) {
+      three.set({ camera });
+      three.setSize(three.gl.domElement.clientWidth, three.gl.domElement.clientHeight);
+    }
+  }, []);
+  return <orthographicCamera ref={ref} {...props} />;
+};
+
+export const RawShaderMaterial = (props: RawShaderMaterialProps) => {
+  // Maintain a constant uniforms object, as three.js does not handle it changing reference.
+  const uniforms = React.useMemo<NonNullable<RawShaderMaterialProps["uniforms"]>>(() => ({}), []);
+  if (props.uniforms) {
+    for (const key in props.uniforms) {
+      uniforms[key].value = props.uniforms[key].value;
+    }
+  }
+  return <rawShaderMaterial {...props} uniforms={uniforms} />;
 };

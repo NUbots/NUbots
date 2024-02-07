@@ -1,11 +1,11 @@
-FROM archlinux:base-20210829.0.32635
-
-WORKDIR /home/nubots/NUbots
+FROM --platform=linux/amd64 archlinux:base-devel-20220710.0.67642
+RUN echo -e "Server=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Add a script that installs packages
-COPY /usr/local/bin/install-package /usr/local/bin/install-package
+COPY usr/local/bin/install-package /usr/local/bin/install-package
 COPY etc/pacman.conf /etc/pacman.conf
 
+WORKDIR /home/nubots/NUbots
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
 RUN install-package \
