@@ -3,10 +3,10 @@
 #include <vector>
 
 namespace module::platform::NUsense {
-    std::vector<char> msg_to_nbs(const ServoTargets& msg) {
+    std::vector<uint8_t> msg_to_nbs(const ServoTargets& msg) {
 
         // Use a vector to preprocess the packet then once it is filled, we insert everything to a vector
-        std::vector<char> packet_data;
+        std::vector<uint8_t> packet_data;
 
         // Add header - interpret the hex values below as type char
         packet_data.emplace_back(0xE2);
@@ -14,7 +14,7 @@ namespace module::platform::NUsense {
         packet_data.emplace_back(0xA2);
 
         // Serialise protobuf message to string, add its length as 4 uint8_t's (1024 bits) then add everything else
-        std::vector<char> protobuf_bytes = NUClear::util::serialise::Serialise<ServoTargets>::serialise(msg);
+        std::vector<uint8_t> protobuf_bytes = NUClear::util::serialise::Serialise<ServoTargets>::serialise(msg);
         uint32_t msg_length = static_cast<std::uint32_t>(protobuf_bytes.size());
 
         std::vector<uint8_t> high_byte_low_byte = {static_cast<uint8_t>((msg_length >> 8) & 0x00FF), static_cast<uint8_t>(msg_length & 0x00FF)};

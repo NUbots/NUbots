@@ -26,7 +26,7 @@ namespace module::platform::NUsense {
     using message::actuation::ServoTargets;
 
     // Protobuf msg to nbs packet
-    std::vector<char> msg_to_nbs(const ServoTargets& msg);
+    std::vector<uint8_t> msg_to_nbs(const ServoTargets& msg);
 
     // Nbs packet to protobuf msg
     // const RawSensors& nbs_to_msg(std::vector<char> nbs_packet);

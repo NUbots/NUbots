@@ -23,7 +23,7 @@ namespace module::platform::NUsense {
         } cfg;
 
         /// @brief Manage desired port for NUSense
-        utility::io::uart nusense{};
+        utility::io::uart nusense;
     };
 
 }  // namespace module::platform::NUsense

@@ -21,7 +21,7 @@ namespace module::platform::NUsense {
             // Use configuration here from file HardwareIO.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.nusense.port        = config["nusense"]["port"].as<std::string>();
-            cfg.nusense.baud        = config["nusense"]["baud"].as<int>();
+            cfg.nusense.baud        = config["nusense"]["baud"].as<unsigned int>();
         });
 
         on<Startup>().then("NUSense HardwareIO Startup", [this] {
@@ -32,7 +32,7 @@ namespace module::platform::NUsense {
 
             // If /dev/ttyACM0 is acting up, follow the link below
             // https://stackoverflow.com/questions/40951728/avrdude-ser-open-cant-open-device-dev-ttyacm0-device-or-resource-busy
-            nusense.open(cfg.nusense.port, cfg.nusense.baud);
+            nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
             log<NUClear::INFO>("PORT OPENED");
 
             // Send fake packets
@@ -81,7 +81,7 @@ namespace module::platform::NUsense {
             // will be triggered twice.
             std::array<char, 3> header = {(char)0xE2, (char)0x98, (char)0xA2};
 
-            std::vector<char> payload  = NUClear::util::serialise::Serialise<ServoTargets>::serialise(commands);
+            std::vector<uint8_t> payload  = NUClear::util::serialise::Serialise<ServoTargets>::serialise(commands);
 
             int payload_length = payload.size();
             uint8_t high_byte = (payload_length >> 8) & 0xFF;
