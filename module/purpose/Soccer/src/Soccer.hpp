@@ -29,6 +29,8 @@
 
 #include <nuclear>
 #include <string>
+#include <vector>
+#include <Eigen/Core>
 
 #include "extension/Behaviour.hpp"
 
@@ -67,6 +69,20 @@ namespace module::purpose {
             /// @brief The soccer position of the robot
             Position position{};
         } cfg;
+
+        enum class PenaltyState {
+            UNKNOWN_STATE = 0,
+            UNPENALISED = 1,
+            PENALISED = 2
+        };
+
+        struct Robot {
+            uint32_t player_id;  // player ID
+            PenaltyState penaltyState;  // penalty state of the player
+            Eigen::Vector3d position;
+        };
+
+        std::vector<Robot> robots;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
