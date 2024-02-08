@@ -46,6 +46,7 @@ from ruamel.yaml import YAML
 from tqdm import tqdm, trange
 
 import b
+from utility.nbs import LinearDecoder as Decoder
 
 from .camera_calibration.callback import ExtrinsicProgress, IntrinsicProgress
 from .camera_calibration.grid_distance import grid_distance
@@ -53,7 +54,6 @@ from .camera_calibration.loss import extrinsic_loss
 from .camera_calibration.metric import *
 from .camera_calibration.model import *
 from .images import decode_image, fourcc
-from utility.nbs import LinearDecoder as Decoder
 
 # The dtype we will use to calibrate, 64 bit floats tend to be a little more numerically stable
 TF_CALIBRATION_DTYPE = tf.float64
@@ -119,7 +119,6 @@ def packetise_stream(decoder):
                 "data": packet.msg.data,
                 "format": packet.msg.format,
             }
-
 
 
 def process_frame(item, rows, cols):
@@ -225,12 +224,15 @@ def find_grids(files, rows, cols, show_grids):
                         # And then divide by the width of the image to get a normalised coordinate
                         "centres": None
                         if msg["centres"] is None
-                        else (np.array(img.shape[:2][::-1], dtype=NP_CALIBRATION_DTYPE) * 0.5 - msg["centres"]) / img.shape[1],
+                        else (np.array(img.shape[:2][::-1], dtype=NP_CALIBRATION_DTYPE) * 0.5 - msg["centres"])
+                        / img.shape[1],
                         "dimensions": img.shape,
                     }
                 )
 
-            for msg in tqdm(packetise_stream(decoder), unit=" B", unit_scale=True, dynamic_ncols=True, total=len(decoder)):
+            for msg in tqdm(
+                packetise_stream(decoder), unit=" B", unit_scale=True, dynamic_ncols=True, total=len(decoder)
+            ):
                 # Add a task to the pool to process
                 results.append(pool.apply_async(process_frame, (msg, rows, cols)))
 
@@ -309,6 +311,7 @@ def plane_quality(points, rows, cols, grid_size):
     z_valid = result[:, 2] < z_threshold
 
     return tf.squeeze(tf.where(tf.logical_and(tf.reduce_all(xy_valid[:, :2], axis=-1), z_valid)), axis=-1)
+
 
 def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics, show_grids, **kwargs):
     yaml = YAML()
