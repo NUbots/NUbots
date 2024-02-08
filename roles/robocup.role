@@ -7,6 +7,8 @@ nuclear_role(
   support::configuration::SoccerConfig
   actuation::KinematicsConfiguration
   support::configuration::GlobalConfig
+  # Network
+  network::RobotCommunication
   # Sensors
   platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
