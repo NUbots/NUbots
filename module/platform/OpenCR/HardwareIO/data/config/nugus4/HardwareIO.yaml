@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: ERROR
+log_level: INFO
 
 battery:
   charged_voltage: 16.8
