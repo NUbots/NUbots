@@ -1,0 +1,24 @@
+nuclear_role(
+  # FileWatcher, Signal Catcher and ConsoleLogHandler Must Go First
+  extension::FileWatcher
+  support::SignalCatcher
+  support::logging::ConsoleLogHandler
+  # Config
+  actuation::KinematicsConfiguration
+  support::configuration::GlobalConfig
+  # Sensors
+  platform::${SUBCONTROLLER}::HardwareIO
+  input::SensorFilter
+  # Director
+  extension::Director
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
+  actuation::FootController
+  # Skills
+  skill::Walk
+  # Optimisation
+  support::optimisation::NSGA2Evaluator
+  support::optimisation::NSGA2Optimiser
+  support::optimisation::OnboardWalkOptimisation
+)

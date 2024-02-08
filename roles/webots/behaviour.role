@@ -14,6 +14,7 @@ nuclear_role(
   output::ImageCompressor
   # Sensors
   input::GameController
+  network::RobotCommunication
   input::SensorFilter
   platform::Webots
   # Vision
