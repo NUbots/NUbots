@@ -32,6 +32,11 @@ import json
 import math
 import multiprocessing
 import os
+
+# Tell tensorflow to shut up
+if "TF_CPP_MIN_LOG_LEVEL" not in os.environ:
+    os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+
 import pickle
 
 import cv2
@@ -93,6 +98,13 @@ def register(command):
         "--no-extrinsics",
         action="store_true",
         help="use the intrinsics provided in the configuration file and do not attempt to optimise them",
+    )
+    command.add_argument(
+        "--show_grids",
+        "-s",
+        default=False,
+        action="store_true",
+        help="Visualise the grids detected by opencv",
     )
 
 
@@ -170,7 +182,7 @@ def process_frame(item, rows, cols):
     }
 
 
-def find_grids(files, rows, cols):
+def find_grids(files, rows, cols, show_grids):
 
     # Work out what the name of the pickle file will be for caching
     pickle_path = "{}.pickle".format(
@@ -187,61 +199,58 @@ def find_grids(files, rows, cols):
 
             print("Detecting asymmetric circles grids")
 
-            with tqdm(total=len(decoder), unit="B", unit_scale=True, dynamic_ncols=True) as progress:
+            results = []
 
-                results = []
+            # Function that updates the results
+            def update_results(msg):
 
-                # Function that updates the results
-                def update_results(msg):
+                img = msg["image"]
+                img = cv2.drawKeypoints(
+                    img, msg["blobs"], np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+                )
+                if msg["centres"] is not None:
+                    img = cv2.drawChessboardCorners(img, (rows, cols), msg["centres"], True)
 
-                    # Update the progress based on the image we are up to
-                    # progress.update(msg["bytes_read"])
+                if show_grids:
+                    cv2.imshow(msg["name"], img)
+                    cv2.waitKey(1)
 
-                    img = msg["image"]
-                    img = cv2.drawKeypoints(
-                        img, msg["blobs"], np.array([]), (0, 0, 255), cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
-                    )
-                    if msg["centres"] is not None:
-                        img = cv2.drawChessboardCorners(img, (rows, cols), msg["centres"], True)
+                # Add this to the grids list
+                if msg["name"] not in grids:
+                    grids[msg["name"]] = []
+                grids[msg["name"]].append(
+                    {
+                        "timestamp": msg["timestamp"],
+                        # Normalise the pixel coordinates to be based from the centre of the image
+                        # And then divide by the width of the image to get a normalised coordinate
+                        "centres": None
+                        if msg["centres"] is None
+                        else (np.array(img.shape[:2][::-1], dtype=NP_CALIBRATION_DTYPE) * 0.5 - msg["centres"]) / img.shape[1],
+                        "dimensions": img.shape,
+                    }
+                )
 
-                    # cv2.imshow(msg["name"], img)
-                    # cv2.waitKey(1)
+            for msg in tqdm(packetise_stream(decoder), unit=" B", unit_scale=True, dynamic_ncols=True, total=len(decoder)):
+                # Add a task to the pool to process
+                results.append(pool.apply_async(process_frame, (msg, rows, cols)))
 
-                    # Add this to the grids list
-                    if msg["name"] not in grids:
-                        grids[msg["name"]] = []
-                    grids[msg["name"]].append(
-                        {
-                            "timestamp": msg["timestamp"],
-                            # Normalise the pixel coordinates to be based from the centre of the image
-                            # And then divide by the width of the image to get a normalised coordinate
-                            "centres": None
-                            if msg["centres"] is None
-                            else (np.array(img.shape[:2][::-1], dtype=NP_CALIBRATION_DTYPE) * 0.5 - msg["centres"]) / img.shape[1],
-                            "dimensions": img.shape,
-                        }
-                    )
+                # Only buffer a number images for each cpu core to avoid running out of memory
+                if len(results) > 128 * multiprocessing.cpu_count():
+                    results[0].wait()
 
-                for msg in packetise_stream(decoder):
-                    # Add a task to the pool to process
-                    results.append(pool.apply_async(process_frame, (msg, rows, cols)))
-
-                    # Only buffer a number images for each cpu core to avoid running out of memory
-                    if len(results) > 128 * multiprocessing.cpu_count():
-                        results[0].wait()
-
-                    # If the next one is ready process it
-                    if len(results) > 0 and results[0].ready():
-                        update_results(results.pop(0).get())
-
-                while len(results) > 0:
+                # If the next one is ready process it
+                if len(results) > 0 and results[0].ready():
                     update_results(results.pop(0).get())
 
-                with open(pickle_path, "wb") as f:
-                    pickle.dump(grids, f, protocol=pickle.HIGHEST_PROTOCOL)
+            while len(results) > 0:
+                update_results(results.pop(0).get())
 
-    # Close all the windows
-    # cv2.destroyAllWindows()
+            with open(pickle_path, "wb") as f:
+                pickle.dump(grids, f, protocol=pickle.HIGHEST_PROTOCOL)
+
+        # Close all the windows
+        if show_grids:
+            cv2.destroyAllWindows()
 
     # # If we have a pickle file load it
     else:
@@ -301,11 +310,10 @@ def plane_quality(points, rows, cols, grid_size):
 
     return tf.squeeze(tf.where(tf.logical_and(tf.reduce_all(xy_valid[:, :2], axis=-1), z_valid)), axis=-1)
 
-# TODO: Test on an nbs file generated by the data recording role
-def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics, **kwargs):
+def run(files, config_path, rows, cols, grid_size, no_intrinsics, no_extrinsics, show_grids, **kwargs):
     yaml = YAML()
     # Load all the grids
-    grids = find_grids(files, rows, cols)
+    grids = find_grids(files, rows, cols, show_grids)
 
     # Load the configuration files
     configurations = {}
