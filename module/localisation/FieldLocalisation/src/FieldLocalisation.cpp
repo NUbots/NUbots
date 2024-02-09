@@ -31,6 +31,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/platform/RawSensors.hpp"
 
 namespace module::localisation {
 
@@ -100,9 +101,9 @@ namespace module::localisation {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] { filter.set_state(cfg.initial_hypotheses); });
 
-        on<Trigger<FieldLines>, With<Stability>>().then(
+        on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
             "Particle Filter",
-            [this](const FieldLines& field_lines, const Stability& stability) {
+            [this](const FieldLines& field_lines, const Stability& stability, const RawSensors& raw_sensors) {
                 auto time_since_startup =
                     std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
                 bool fallen = stability == Stability::FALLEN || stability == Stability::FALLING;
@@ -122,17 +123,16 @@ namespace module::localisation {
                     filter.time(dt);
 
                     auto field(std::make_unique<Field>());
-                    field->Hfw        = compute_Hfw(filter.get_state());
+                    field->Hfw = compute_Hfw(filter.get_state());
+                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                        debug_field_localisation(field->Hfw, raw_sensors);
+                    }
                     field->covariance = filter.get_covariance();
                     emit(field);
                 }
             });
-    }
 
-    Eigen::Isometry3d FieldLocalisation::compute_Hfw(const Eigen::Vector3d& particle) {
-        Eigen::Isometry3d Hfw = Eigen::Translation<double, 3>(particle.x(), particle.y(), 0)
-                                * Eigen::AngleAxis<double>(particle.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
-        if (raw_sensors.localisation_ground_truth.exists) {
+        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {
             Eigen::Isometry3d true_Hfw = raw_sensors.localisation_ground_truth.Hfw;
             // Identify error between true Hfw and estimated Hfw
             // Determine translational distance error
@@ -146,35 +146,40 @@ namespace module::localisation {
             double quat_rot_error         = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
 
             // Graph translation and its error
-            emit(graph("Hwt true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));
-            emit(graph("Hwt translation error", rFWw_error.x(), rFWw_error.y(), rFWw_error.z()));
+            emit(graph("Hfw true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));
+            emit(graph("Hfw translation error", rFWw_error.x(), rFWw_error.y(), rFWw_error.z()));
             // Graph rotation and its error
-            emit(graph("Rwt true rotation (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
-            emit(graph("Rwt error (rpy)", error_Rfw.x(), error_Rfw.y(), error_rfw.z()));
+            emit(graph("Rfw true rotation (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
+            emit(graph("Rfw error (rpy)", error_Rfw.x(), error_Rfw.y(), error_rfw.z()));
             emit(graph("Quaternion rotational error", quat_rot_error));
         }
-    }
 
-    Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw) {
-        // Transform observations from world {w} to field {f} space
-        Eigen::Vector3d rPFf = compute_Hfw(particle) * rPWw;
-
-        // Get the associated index in the field line map [x, y]
-        // Note: field space is placed in centre of the field, whereas the field line map origin (x,y) is top left
-        // corner of discretised field
-        return Eigen::Vector2i(fieldline_distance_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size),
-                               fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
-    }
-
-    double FieldLocalisation::calculate_weight(const Eigen::Vector3d& particle,
-                                               const std::vector<Eigen::Vector3d>& observations) {
-        double weight = 0;
-        for (auto rORr : observations) {
-            // Get the position [x, y] of the observation in the map for this particle
-            Eigen::Vector2i map_position = position_in_map(particle, rORr);
-            weight += std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
+        Eigen::Isometry3d FieldLocalisation::compute_Hfw(const Eigen::Vector3d& particle) {
+            Eigen::Isometry3d Hfw = Eigen::Translation<double, 3>(particle.x(), particle.y(), 0)
+                                    * Eigen::AngleAxis<double>(particle.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
         }
-        return 1.0 / (weight + std::numeric_limits<double>::epsilon());
-    }
 
-}  // namespace module::localisation
+        Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d& particle,
+                                                           const Eigen::Vector3d& rPWw) {
+            // Transform observations from world {w} to field {f} space
+            Eigen::Vector3d rPFf = compute_Hfw(particle) * rPWw;
+
+            // Get the associated index in the field line map [x, y]
+            // Note: field space is placed in centre of the field, whereas the field line map origin (x,y) is top left
+            // corner of discretised field
+            return Eigen::Vector2i(fieldline_distance_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size),
+                                   fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
+        }
+
+        double FieldLocalisation::calculate_weight(const Eigen::Vector3d& particle,
+                                                   const std::vector<Eigen::Vector3d>& observations) {
+            double weight = 0;
+            for (auto rORr : observations) {
+                // Get the position [x, y] of the observation in the map for this particle
+                Eigen::Vector2i map_position = position_in_map(particle, rORr);
+                weight += std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
+            }
+            return 1.0 / (weight + std::numeric_limits<double>::epsilon());
+        }
+
+    }  // namespace module::localisation

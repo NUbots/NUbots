@@ -733,7 +733,7 @@ namespace module::platform {
 
         log(sensor_measurements.localisation_ground_truth.exists) {
             log<NUClear::TRACE>("  sm.localisation_ground_truth:");
-            log<NUClear::TRACE>("    Hfw:\n", sensor_measurements.localisation_ground_truth);
+            log<NUClear::TRACE>("    Hfw:\n", sensor_measurements.localisation_ground_truth.Hfw);
         }
 
         // Parse the errors and warnings from Webots and log them.

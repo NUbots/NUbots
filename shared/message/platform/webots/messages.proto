@@ -118,16 +118,16 @@ message SensorMeasurements {
     // simulation time stamp at which the measurements were performed expressed in [ms] from the start of the connection
     uint32 time = 1;
     // real unix time stamp at which the measurements were performed in [ms]
-    uint64                               real_time      = 2;
-    repeated Message                     messages       = 3;
-    repeated AccelerometerMeasurement    accelerometers = 4;
-    repeated BumperMeasurement           bumpers        = 5;
-    repeated CameraMeasurement           cameras        = 6;
-    repeated ForceMeasurement            forces         = 7;
-    repeated Force3DMeasurement          force3ds       = 8;
-    repeated Force6DMeasurement force6ds t "message/platform/webots/messages.  = 9;
-        repeated GyroMeasurement         gyros            = 10;
-    repeated PositionSensorMeasurement   position_sensors = 11;
+    uint64                             real_time        = 2;
+    repeated Message                   messages         = 3;
+    repeated AccelerometerMeasurement  accelerometers   = 4;
+    repeated BumperMeasurement         bumpers          = 5;
+    repeated CameraMeasurement         cameras          = 6;
+    repeated ForceMeasurement          forces           = 7;
+    repeated Force3DMeasurement        force3ds         = 8;
+    repeated Force6DMeasurement        force6ds         = 9;
+    repeated GyroMeasurement           gyros            = 10;
+    repeated PositionSensorMeasurement position_sensors = 11;
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
     OdometryGroundTruth     odometry_ground_truth     = 100;
     LocalisationGroundTruth localisation_ground_truth = 101;

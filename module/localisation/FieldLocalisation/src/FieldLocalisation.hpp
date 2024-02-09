@@ -34,6 +34,7 @@
 
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
 
@@ -46,6 +47,7 @@
 
 namespace module::localisation {
 
+    using message::platform::RawSensors;
     using message::support::FieldDescription;
 
     struct StartingSide {
@@ -142,6 +144,8 @@ namespace module::localisation {
          * @return Hfw, the homogenous transformation matrix from world {w} to field {f} space
          */
         Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& particle);
+
+        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
