@@ -34,4 +34,3 @@ starting_side: LEFT
 # Buzzer fields for when the left (black) button is pressed
 buzzer:
   localisation_reset_frequency: 1280
-  duration: 300 # Milliseconds
