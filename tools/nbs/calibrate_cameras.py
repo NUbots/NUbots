@@ -231,7 +231,7 @@ def find_grids(files, rows, cols, show_grids):
                 )
 
             for msg in tqdm(
-                packetise_stream(decoder), unit=" B", unit_scale=True, dynamic_ncols=True, total=len(decoder)
+                packetise_stream(decoder), unit=" packet(s)", unit_scale=True, dynamic_ncols=True, total=len(decoder)
             ):
                 # Add a task to the pool to process
                 results.append(pool.apply_async(process_frame, (msg, rows, cols)))
