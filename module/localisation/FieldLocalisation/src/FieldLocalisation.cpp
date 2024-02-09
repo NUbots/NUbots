@@ -73,7 +73,6 @@ namespace module::localisation {
             filter.model.process_noise_diagonal = config["process_noise"].as<Expression>();
             filter.model.n_particles            = config["n_particles"].as<int>();
             cfg.buzzer.localisation_reset_frequency = config["buzzer"]["localisation_reset_frequency"].as<float>();
-            cfg.buzzer.duration                     = config["buzzer"]["duration"].as<int>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -117,16 +116,15 @@ namespace module::localisation {
             // Reset localisation and ring the buzzer
             emit(std::make_unique<ResetFieldLocalisation>());
             emit(std::make_unique<Buzzer>(cfg.buzzer.localisation_reset_frequency));
-
-            // Use the ButtonLeftUp message to silence the buzzer after a busy wait
-            emit<Scope::DELAY>(std::make_unique<ButtonLeftUp>(), std::chrono::milliseconds(cfg.buzzer.duration));
-
         });
 
         // Silence the buzzer after the user lets go of the left (black) pin
         on<Trigger<ButtonLeftUp>>().then([this]() { emit(std::make_unique<Buzzer>(0)); });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this] { filter.set_state(cfg.initial_hypotheses); });
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
+            filter.set_state(cfg.initial_hypotheses);
+            log<NUClear::WARN>("Field localisation reset completed.");
+        });
 
         on<Trigger<FieldLines>, With<Stability>>().then(
             "Particle Filter",
