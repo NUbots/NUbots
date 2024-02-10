@@ -1,7 +1,0 @@
-nuclear_role(
-  # FileWatcher and ConsoleLogHandler must go first.
-  extension::FileWatcher
-  support::logging::ConsoleLogHandler
-  support::logging::MessageLogHandler
-  support::logging::DataLogging
-)
