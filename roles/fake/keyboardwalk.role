@@ -1,13 +1,12 @@
-# This module is used to manually move the robot around with a very basic simulator.
-# It is primarily used for the recruitment task.
-# It does not require any physical robot hardware or external simulation.
+# This module is used to manually move the robot around with a very basic simulator. It is primarily used for the
+# recruitment task. It does not require any physical robot hardware or external simulation.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
-  extension::FileWatcher  # Watches configuration files for changes
-  support::SignalCatcher  # Allows for graceful shutdown
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Configuration
-  actuation::KinematicsConfiguration  # Must go early in the role as other modules depend on it
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Network
   network::NUClearNet
   network::NetworkForwarder

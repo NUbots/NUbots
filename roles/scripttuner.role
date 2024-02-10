@@ -1,9 +1,8 @@
-# This role is used to tune scripts on the real robot with a terminal interface.
-# NUsight is used to see logs
+# This role is used to tune scripts on the real robot with a terminal interface. NUsight is used to see logs.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
-  extension::FileWatcher  # Watches configuration files for changes
-  support::SignalCatcher  # Allows for graceful shutdown
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Sensors
   platform::${SUBCONTROLLER}::HardwareIO

@@ -1,14 +1,14 @@
-# This role is similar to keyboard walk where you can manually control a robot in Webots with the keyboard.
-# Unlike keyboard walk, this role includes vision and localisation modules.
-# This can be used to move the robot around and test vision and localisation.
+# This role is similar to keyboard walk where you can manually control a robot in Webots with the keyboard. Unlike
+# keyboard walk, this role includes vision and localisation modules. This can be used to move the robot around and test
+# vision and localisation.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
-  extension::FileWatcher  # Watches configuration files for changes
-  support::SignalCatcher  # Allows for graceful shutdown
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
   support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Configuration
-  actuation::KinematicsConfiguration  # Must go early in the role as other modules depend on it
-  support::configuration::SoccerConfig  # Field description
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::SoccerConfig # Field description
   # Network
   network::NUClearNet
   network::NetworkForwarder
