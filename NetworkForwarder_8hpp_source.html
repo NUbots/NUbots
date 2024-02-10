@@ -246,7 +246,7 @@ $(document).ready(function(){initNavTree('NetworkForwarder_8hpp_source.html','')
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;            <span class="comment">// However if because of the low priority other modules are taking all the thread time this module won&#39;t</span></div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;            <span class="comment">// queue indefinitely killing all the ram in the system.</span></div>
 <div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;            handle-&gt;reaction =</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                on&lt;Trigger&lt;T&gt;, Buffer&lt;10&gt;, Priority::LOW&gt;()</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;                on&lt;Trigger&lt;T&gt;, Single, Priority::LOW&gt;()</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;                    .then(</div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                        type,</div>
 <div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                        [<span class="keyword">this</span>, type, handle](std::shared_ptr&lt;const T&gt; msg) {</div>
@@ -291,7 +291,7 @@ $(document).ready(function(){initNavTree('NetworkForwarder_8hpp_source.html','')
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_9af8278a7df151ee47addfd2d0402c20.html">network</a></li><li class="navelem"><a class="el" href="dir_3eaa99bc9c8d6f1a6a620ae4dac5c5a1.html">NetworkForwarder</a></li><li class="navelem"><a class="el" href="dir_bea948c831e4f227103117d1efe854e3.html">src</a></li><li class="navelem"><b>NetworkForwarder.hpp</b></li>
-    <li class="footer">Generated on Fri Feb 9 2024 03:46:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sat Feb 10 2024 03:43:13 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
