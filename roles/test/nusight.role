@@ -1,11 +1,12 @@
+# This role is for testing connection with NUsight.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run
-  support::logging::ConsoleLogHandler
-  # Config
-  extension::FileWatcher
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher  # Watches configuration files for changes
+  support::SignalCatcher  # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Network
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
-  support::NUsightHarness
+  support::NUsightHarness # emits graph data for testing NUsight
 )

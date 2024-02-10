@@ -1,26 +1,24 @@
+# This role is similar to keyboard walk where you can manually control a robot in Webots with the keyboard.
+# Unlike keyboard walk, this role includes vision and localisation modules.
+# This can be used to move the robot around and test vision and localisation.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run support::SignalCatcher
-  extension::FileWatcher
-  support::logging::FileLogHandler
-  support::logging::ConsoleLogHandler
-  support::logging::MessageLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  actuation::KinematicsConfiguration
-  # Support and Configuration
-  support::configuration::GlobalConfig
-  support::configuration::SoccerConfig
-  # NUsight
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher  # Watches configuration files for changes
+  support::SignalCatcher  # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration  # Must go early in the role as other modules depend on it
+  support::configuration::SoccerConfig  # Field description
+  # Network
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
   output::ImageCompressor
+  support::logging::MessageLogHandler # Used to send log messages and reaction statistics to NUsight
+  network::PlotJuggler
   # Platform
   input::SensorFilter
   platform::Webots
-  # Network
-  network::NUClearNet
-  network::PlotJuggler
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector

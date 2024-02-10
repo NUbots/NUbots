@@ -1,19 +1,22 @@
+# This role is used for running the full autonomous soccer set up with a real robot.
+# It should be used with a computer on the network running GameController,
+# or set force_playing to true in Soccer.yaml to play without GameController.
+# This is used at the RoboCup competition for real games.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
-  extension::FileWatcher
-  support::SignalCatcher
-  support::logging::ConsoleLogHandler
-  # Config
-  support::configuration::SoccerConfig
-  actuation::KinematicsConfiguration
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher  # Watches configuration files for changes
+  support::SignalCatcher  # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration  # Must go early in the role as other modules depend on it
+  support::configuration::SoccerConfig  # Field description
   support::configuration::GlobalConfig
-  # Network
-  network::RobotCommunication
-  # Sensors
+  # Sensors and network (input)
   platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter
   input::Camera
   input::GameController
+  network::RobotCommunication
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
