@@ -145,6 +145,12 @@ namespace module::localisation {
          */
         Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& particle);
 
+        /**
+         * @brief Find error between computed Hfw and ground truth if available
+         *
+         * @param Hfw Computed Hfw to be compared against ground truth
+         * @param raw_sensors The raw sensor data
+         */
         void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
 
         /**
