@@ -10,7 +10,7 @@ tasks:
   walk_to_ball_priority: 0
   walk_to_field_position_priority: 0
   kick_to_goal_priority: 0
-  stand_still_priority: 0
+  stand_still_priority: 1
 
   # Planners
   kick_to_priority: 0

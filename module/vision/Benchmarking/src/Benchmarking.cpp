@@ -55,7 +55,7 @@ namespace module::vision {
 
                 const float mag = sqrt((p.x() * p.x()) + (p.y() * p.y()));
 
-                log<NUClear::DEBUG>(fmt::format("Point {}: x:{} y:{} mag:{}", i, p.x(), p.y(), mag));
+                //log<NUClear::DEBUG>(fmt::format("Point {}: x:{} y:{} mag:{}", i, p.x(), p.y(), mag));
                 emit(graph("Goal rPWw", p.x(), p.y(), mag));
             }
 
@@ -79,7 +79,7 @@ namespace module::vision {
 
                 const float best_mag = sqrt((p.x() * p.x()) + (p.y() * p.y()));
 
-                log<NUClear::DEBUG>(fmt::format("Cluster {} Normal Best: x:{} y:{}", i, p.x(), p.y()));
+                //log<NUClear::DEBUG>(fmt::format("Cluster {} Normal Best: x:{} y:{}", i, p.x(), p.y()));
                 emit(graph("Normal Best", p.x(), p.y()));
             }
 

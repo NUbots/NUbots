@@ -123,6 +123,10 @@ message SensorMeasurements {
     VisionGroundTruth   vision_ground_truth   = 101;
 }
 
+message FinishBenchmark {
+    uint32 timestep = 2;
+}
+
 message MotorPosition {
     string name     = 1;
     double position = 2;  // linear or angular target position expressed in [m] or [rad]
