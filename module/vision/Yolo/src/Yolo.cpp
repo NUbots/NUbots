@@ -130,7 +130,7 @@ namespace module::vision {
         on<Trigger<Image>, Single>().then([this](const Image& img) {
             const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
-            // -------- Convert Image to cv::Mat and preprocess --------
+            // -------- Convert image to cv::Mat and preprocess --------
             const int width   = img.dimensions.x();
             const int height  = img.dimensions.y();
             cv::Mat img_cv    = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
@@ -160,8 +160,6 @@ namespace module::vision {
             // -------- Get the inference result --------
             auto output       = infer_request.get_output_tensor(0);
             auto output_shape = output.get_shape();
-            int rows          = output_shape[2];  // 8400
-            int dimensions    = output_shape[1];  // 84: box[cx, cy, w, h]+80 classes scores
 
             // -------- Postprocess the result --------
             float* data = output.data<float>();
@@ -244,7 +242,7 @@ namespace module::vision {
                     Eigen::Matrix<double, 2, 1> box_centre(boxes[index].x + boxes[index].width / 2.0,
                                                            boxes[index].y + boxes[index].height / 2.0);
                     // Calculate the bottom left corner of the detection box
-                    Eigen::Matrix<double, 2, 1> box_left(boxes[index].x, boxes[index].y + boxes[index].height);
+                    Eigen::Matrix<double, 2, 1> box_left(boxes[index].x, boxes[index].y + boxes[index].height / 2.0);
 
                     // Convert to unit vector in camera space
                     Eigen::Matrix<double, 3, 1> uBCc = unproject(box_centre, img);
