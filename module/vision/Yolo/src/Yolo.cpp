@@ -94,8 +94,12 @@ namespace module::vision {
 
         on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Yolo.yaml
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.model_path  = config["model_path"].as<std::string>();
+            this->log_level                       = config["log_level"].as<NUClear::LogLevel>();
+            cfg.model_path                        = config["model_path"].as<std::string>();
+            cfg.ball_confidence_threshold         = config["ball_confidence_threshold"].as<double>();
+            cfg.goal_confidence_threshold         = config["goal_confidence_threshold"].as<double>();
+            cfg.robot_confidence_threshold        = config["robot_confidence_threshold"].as<double>();
+            cfg.intersection_confidence_threshold = config["intersection_confidence_threshold"].as<double>();
         });
 
         on<Startup>().then("Load Yolo Model", [this] {
@@ -202,7 +206,8 @@ namespace module::vision {
                 int class_id = class_ids[index];
                 rectangle(img_cv, boxes[index], colors[class_id % 6], 2, 8);
                 std::string class_name = class_names[class_id];
-                std::string label      = class_name + ":" + std::to_string(class_scores[index]).substr(0, 4);
+                double confidence      = class_scores[index];
+                std::string label      = class_name + ":" + std::to_string(confidence).substr(0, 4);
                 cv::Size textSize      = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
                 cv::Rect textBox(boxes[index].tl().x, boxes[index].tl().y - 15, textSize.width, textSize.height + 5);
                 cv::rectangle(img_cv, textBox, colors[class_id % 6], cv::FILLED);
@@ -213,7 +218,7 @@ namespace module::vision {
                             0.5,
                             cv::Scalar(255, 255, 255));
 
-                if (class_name == "ball") {
+                if (class_name == "ball" && confidence > cfg.ball_confidence_threshold) {
                     // Calculate the middle of the bottom border of the detection box
                     Eigen::Matrix<double, 2, 1> box_centre(boxes[index].x + boxes[index].width / 2.0,
                                                            boxes[index].y + boxes[index].height / 2.0);
@@ -241,7 +246,7 @@ namespace module::vision {
                     balls->balls.push_back(b);
                 }
 
-                if (class_name == "robot") {
+                if (class_name == "robot" && confidence > cfg.robot_confidence_threshold) {
                     // Calculate the bottom of box centre
                     Eigen::Matrix<double, 2, 1> box_bottom_centre(boxes[index].x + boxes[index].width / 2.0,
                                                                   boxes[index].y + boxes[index].height);
@@ -261,7 +266,7 @@ namespace module::vision {
                     robots->robots.push_back(r);
                 }
 
-                if (class_name == "goal post") {
+                if (class_name == "goal post" && confidence > cfg.goal_confidence_threshold) {
                     // Calculate the middle of the bottom border of the detection box
                     Eigen::Matrix<double, 2, 1> box_bottom_middle(boxes[index].x + boxes[index].width / 2.0,
                                                                   boxes[index].y + boxes[index].height);
@@ -291,8 +296,8 @@ namespace module::vision {
                     goals->goals.push_back(std::move(g));
                 }
 
-                if (class_name == "L-intersection" || class_name == "T-intersection"
-                    || class_name == "X-intersection") {
+                if ((class_name == "L-intersection" || class_name == "T-intersection" || class_name == "X-intersection")
+                    && (confidence > cfg.intersection_confidence_threshold)) {
                     // Calculate the middle of the bottom border of the detection box
                     Eigen::Matrix<double, 2, 1> box_middle(boxes[index].x + boxes[index].width / 2.0,
                                                            boxes[index].y + boxes[index].height / 2.0);

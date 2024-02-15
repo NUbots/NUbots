@@ -32,7 +32,11 @@ namespace module::vision {
     private:
         /// @brief Stores configuration values
         struct Config {
-            std::string model_path = "";
+            std::string model_path                   = "";
+            double ball_confidence_threshold         = 0.0;
+            double goal_confidence_threshold         = 0.0;
+            double robot_confidence_threshold        = 0.0;
+            double intersection_confidence_threshold = 0.0;
         } cfg;
 
         /// @brief OpenVINO Core
