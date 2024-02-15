@@ -53,12 +53,16 @@ namespace module::input {
 
     void SensorFilter::configure_mahony(const Configuration& config) {
         // Mahony Filter Config
-        cfg.Ki            = config["mahony"]["Ki"].as<Expression>();
-        cfg.Kp            = config["mahony"]["Kp"].as<Expression>();
-        cfg.bias          = Eigen::Vector3d(config["mahony"]["bias"].as<Expression>());
-        Hwt.translation() = Eigen::VectorXd(config["initial_rTWw"].as<Expression>());
-        Hwt.linear()      = EulerIntrinsicToMatrix(Eigen::Vector3d(config["initial_rpy"].as<Expression>()));
-        Hwt_mahony        = Hwt;
+        cfg.Ki           = config["mahony"]["Ki"].as<Expression>();
+        cfg.Kp           = config["mahony"]["Kp"].as<Expression>();
+        cfg.initial_bias = Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>());
+        bias_mahony      = cfg.initial_bias;
+        Hwt_mahony       = cfg.initial_Hwt;
+    }
+
+    void SensorFilter::reset_mahony() {
+        bias_mahony = cfg.initial_bias;
+        Hwt_mahony  = cfg.initial_Hwt;
     }
 
     void SensorFilter::update_odometry_mahony(std::unique_ptr<Sensors>& sensors,
@@ -83,7 +87,7 @@ namespace module::input {
                                             dt,
                                             cfg.Ki,
                                             cfg.Kp,
-                                            cfg.bias);
+                                            bias_mahony);
 
         // Convert the rotation matrices from anchor and mahony method into euler angles
         Eigen::Vector3d rpy_mahony = MatrixToEulerIntrinsic(Hwt_mahony.linear());

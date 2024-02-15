@@ -113,6 +113,14 @@ namespace module::input {
         reset_filter.store(true);
     }
 
+    void SensorFilter::reset_ukf() {
+        // Set our initial state with the config means and covariances, flagging the filter to reset it
+        ukf.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
+
+        // Don't filter any sensors until we have initialised the filter
+        reset_filter.store(true);
+    }
+
     void SensorFilter::update_odometry_ukf(std::unique_ptr<Sensors>& sensors,
                                            const std::shared_ptr<const Sensors>& previous_sensors,
                                            const RawSensors& raw_sensors) {
