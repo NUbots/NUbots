@@ -3,7 +3,6 @@
 #include <chrono>
 #include <getopt.h>
 #include <iostream>
-#include <opencv2/opencv.hpp>
 #include <vector>
 
 #include "extension/Configuration.hpp"
@@ -35,7 +34,6 @@ namespace module::vision {
     using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
-    using utility::vision::unproject;
 
     Eigen::Vector2d correct_distortion(const Eigen::Vector2d& pixel, const Image& img) {
         // Shift point by centre offset
@@ -92,28 +90,6 @@ namespace module::vision {
         return uRCc;
     }
 
-    std::vector<cv::Scalar> colors = {cv::Scalar(0, 0, 255),
-                                      cv::Scalar(0, 255, 0),
-                                      cv::Scalar(255, 0, 0),
-                                      cv::Scalar(255, 100, 50),
-                                      cv::Scalar(50, 100, 255),
-                                      cv::Scalar(255, 50, 100)};
-    const std::vector<std::string> class_names =
-        {"ball", "goal post", "robot", "L-intersection", "T-intersection", "X-intersection"};
-
-    using namespace cv;
-    using namespace dnn;
-
-    // Keep the ratio before resize
-    Mat letterbox(const cv::Mat& source) {
-        int col    = source.cols;
-        int row    = source.rows;
-        int _max   = MAX(col, row);
-        Mat result = Mat::zeros(_max, _max, CV_8UC3);
-        source.copyTo(result(Rect(0, 0, col, row)));
-        return result;
-    }
-
     Yolo::Yolo(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
@@ -131,12 +107,12 @@ namespace module::vision {
             const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
             // -------- Convert image to cv::Mat and preprocess --------
-            const int width   = img.dimensions.x();
-            const int height  = img.dimensions.y();
-            cv::Mat img_cv    = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
-            Mat letterbox_img = letterbox(img_cv);
-            float scale       = letterbox_img.size[0] / 640.0;
-            Mat blob          = blobFromImage(letterbox_img, 1.0 / 255.0, Size(640, 640), Scalar(), true);
+            const int width       = img.dimensions.x();
+            const int height      = img.dimensions.y();
+            cv::Mat img_cv        = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+            cv::Mat letterbox_img = letterbox(img_cv);
+            float scale           = letterbox_img.size[0] / 640.0;
+            cv::Mat blob = cv::dnn::blobFromImage(letterbox_img, 1.0 / 255.0, cv::Size(640, 640), cv::Scalar(), true);
 
             // -------- Feed the blob into the input node of the Model -------
             // Get input port for model with one input
@@ -163,20 +139,20 @@ namespace module::vision {
 
             // -------- Postprocess the result --------
             float* data = output.data<float>();
-            Mat output_buffer(output_shape[1], output_shape[2], CV_32F, data);
+            cv::Mat output_buffer(output_shape[1], output_shape[2], CV_32F, data);
             transpose(output_buffer, output_buffer);  //[8400,84]
             float score_threshold = 0.1;
             float nms_threshold   = 0.5;
             std::vector<int> class_ids;
             std::vector<float> class_scores;
-            std::vector<Rect> boxes;
+            std::vector<cv::Rect> boxes;
 
             // Figure out the bbox, class_id and class_score
             for (int i = 0; i < output_buffer.rows; i++) {
-                Mat classes_scores = output_buffer.row(i).colRange(4, 10);
-                Point class_id;
+                cv::Mat classes_scores = output_buffer.row(i).colRange(4, 10);
+                cv::Point class_id;
                 double maxClassScore;
-                minMaxLoc(classes_scores, 0, &maxClassScore, 0, &class_id);
+                cv::minMaxLoc(classes_scores, 0, &maxClassScore, 0, &class_id);
 
                 if (maxClassScore > score_threshold) {
                     class_scores.push_back(maxClassScore);
@@ -191,13 +167,13 @@ namespace module::vision {
                     int width  = int(w * scale);
                     int height = int(h * scale);
 
-                    boxes.push_back(Rect(left, top, width, height));
+                    boxes.push_back(cv::Rect(left, top, width, height));
                 }
             }
 
             // NMS
             std::vector<int> indices;
-            NMSBoxes(boxes, class_scores, score_threshold, nms_threshold, indices);
+            cv::dnn::NMSBoxes(boxes, class_scores, score_threshold, nms_threshold, indices);
 
             // -------- Emit Detections --------
 
@@ -227,15 +203,15 @@ namespace module::vision {
                 rectangle(img_cv, boxes[index], colors[class_id % 6], 2, 8);
                 std::string class_name = class_names[class_id];
                 std::string label      = class_name + ":" + std::to_string(class_scores[index]).substr(0, 4);
-                Size textSize          = cv::getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
-                Rect textBox(boxes[index].tl().x, boxes[index].tl().y - 15, textSize.width, textSize.height + 5);
-                cv::rectangle(img_cv, textBox, colors[class_id % 6], FILLED);
-                putText(img_cv,
-                        label,
-                        Point(boxes[index].tl().x, boxes[index].tl().y - 5),
-                        FONT_HERSHEY_SIMPLEX,
-                        0.5,
-                        Scalar(255, 255, 255));
+                cv::Size textSize      = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
+                cv::Rect textBox(boxes[index].tl().x, boxes[index].tl().y - 15, textSize.width, textSize.height + 5);
+                cv::rectangle(img_cv, textBox, colors[class_id % 6], cv::FILLED);
+                cv::putText(img_cv,
+                            label,
+                            cv::Point(boxes[index].tl().x, boxes[index].tl().y - 5),
+                            cv::FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            cv::Scalar(255, 255, 255));
 
                 if (class_name == "ball") {
                     // Calculate the middle of the bottom border of the detection box
