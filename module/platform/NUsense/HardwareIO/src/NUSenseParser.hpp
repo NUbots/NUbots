@@ -1,3 +1,5 @@
+#ifndef MODULE_PLATFORM_NUSENSE_HARDWAREIO_NUSENSE_PARSER_HPP
+#define MODULE_PLATFORM_NUSENSE_HARDWAREIO_NUSENSE_PARSER_HPP
 
 #include <array>
 #include <cstdint>
@@ -33,3 +35,5 @@ namespace module::platform::NUsense {
     };
 
 }  // namespace module::platform::NUsense
+
+#endif  // MODULE_PLATFORM_NUSENSE_HARDWAREIO_NUSENSE_PARSER_HPP
