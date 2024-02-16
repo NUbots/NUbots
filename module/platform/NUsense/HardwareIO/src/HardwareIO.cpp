@@ -54,7 +54,7 @@ namespace module::platform::NUsense {
 
         // Emit any messages sent by the device to the rest of the system
         on<Trigger<NBSFrame>>().then("From NUSense", [this](const NBSFrame& packet) {
-            message::reflection::from_hash<IdReflector>(packet.hash)->emit(packet);
+            message::reflection::from_hash<IdReflector>(packet.hash)->emit(powerplant, packet);
         });
     }
 
