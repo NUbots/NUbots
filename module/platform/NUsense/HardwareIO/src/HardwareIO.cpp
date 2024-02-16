@@ -30,8 +30,6 @@ namespace module::platform::NUsense {
                 nusense.close();
             }
 
-            // If /dev/ttyACM0 is acting up, follow the link below
-            // https://stackoverflow.com/questions/40951728/avrdude-ser-open-cant-open-device-dev-ttyacm0-device-or-resource-busy
             nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
             log<NUClear::INFO>("PORT OPENED");
 
