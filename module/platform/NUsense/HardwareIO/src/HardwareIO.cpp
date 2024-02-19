@@ -53,7 +53,7 @@ namespace module::platform::NUsense {
         on<Trigger<ServoTargets>>().then("ServoTargets", [this](const ServoTargets& packet) { send_packet(packet); });
 
         // Emit any messages sent by the device to the rest of the system
-        on<Trigger<NBSFrame>>().then("From NUSense", [this](const NBSFrame& packet) {
+        on<Trigger<NUSenseFrame>>().then("From NUSense", [this](const NUSenseFrame& packet) {
             message::reflection::from_hash<IdReflector>(packet.hash)->emit(powerplant, packet);
         });
     }
