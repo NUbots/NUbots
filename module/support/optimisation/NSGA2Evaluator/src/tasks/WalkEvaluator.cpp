@@ -131,7 +131,7 @@ namespace module::support::optimisation {
         // Get constant variables
         YAML::Node config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
-        cfg.fallen_angle = config["fallen_angle"].as<float>();
+        cfg.fallen_angle = config["fallen_angle"].as<Expression>();
 
         fallen = false;
     }
