@@ -43,6 +43,7 @@
 #include "message/skill/Walk.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
+#include "message/support/datalogging/NewDataLog.hpp"
 #include "message/support/optimisation/NSGA2Evaluator.hpp"
 #include "message/support/optimisation/NSGA2Optimiser.hpp"
 #include "message/support/optimisation/OptimisationResetDone.hpp"
@@ -62,6 +63,7 @@ namespace module::support::optimisation {
     using message::input::Sensors;
     using message::skill::Walk;
     using message::strategy::FallRecovery;
+    using message::support::datalogging::NewDataLog;
     using message::support::optimisation::NSGA2Evaluating;
     using message::support::optimisation::NSGA2EvaluationRequest;
     using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
@@ -277,6 +279,8 @@ namespace module::support::optimisation {
 
         emit(std::make_unique<Event>(
             Event(Event::Value::FITNESS_SCORES_SENT)));  // Go back to waiting for the next request
+
+        emit(std::make_unique<NewDataLog>());
     }
 
     // Handle the TERMINATING_GRACEFULLY state
