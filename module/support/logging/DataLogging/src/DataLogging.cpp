@@ -33,6 +33,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/support/datalogging/NewDataLog.hpp"
+
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::support::logging {
@@ -40,6 +42,8 @@ namespace module::support::logging {
     using extension::Configuration;
     using NUClear::message::CommandLineArguments;
     using utility::support::Expression;
+
+    using message::support::datalogging::NewDataLog;
 
     std::string formatted_time() {
         std::time_t now     = time(nullptr);
@@ -50,6 +54,7 @@ namespace module::support::logging {
     }
 
     DataLogging::DataLogging(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
 
         /// This receives every DataLog message as a Sync operation (one at a time) and writes it to the file
         on<Trigger<DataLog>, Sync<DataLog>>().then([this](const DataLog& data) {
@@ -113,6 +118,44 @@ namespace module::support::logging {
 
             encoder->write(data.timestamp, data.message_timestamp, data.hash, data.id, data.data);
         });
+
+        on<Trigger<NewDataLog>>().then([this](const NewDataLog& new_data_log) {
+            if (encoder) {
+                encoder->close();
+            }
+
+            std::filesystem::path temp;
+
+            if (!output_file_path.empty()) {
+                temp = output_file_path;
+                // Remove the first character of the filename
+                temp.replace_filename(
+                    output_file_path.filename().string().substr(1, output_file_path.filename().string().size() - 1));
+                std::filesystem::rename(output_file_path, temp);
+            }
+
+            if (!index_file_path.empty()) {
+                temp = index_file_path;
+                // Remove the first character of the filename
+                temp.replace_filename(
+                    index_file_path.filename().string().substr(1, index_file_path.filename().string().size() - 1));
+                std::filesystem::rename(index_file_path, temp);
+            }
+
+            // Creates directory for output
+            std::filesystem::create_directories(config.output.directory / config.output.binary);
+
+            // Creates the output ".nbs" file path.
+            std::string ftime = formatted_time();
+            output_file_path  = config.output.directory / config.output.binary / ("_new" + ftime + ".nbs");
+
+            // Creates the output ".idx" file path.
+            index_file_path = output_file_path;
+            index_file_path += ".idx";
+
+            encoder = std::make_unique<utility::nbs::Encoder>(output_file_path, index_file_path);
+        });
+
 
         on<Shutdown>().then([this] {
             encoder->close();
