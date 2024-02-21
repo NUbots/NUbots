@@ -32,7 +32,7 @@ def main():
     # parser = argparse.ArgumentParser(description="Train an LSTM-RNN on servo and imu data with XYZ ground truth.")
     # parser.add_argument(
     #     "path_to_data",
-    #     help="The path to the directory holding the training data." + "The program will search nested directories.",
+    #     help="The path to the directory holding the training " + "The program will search nested directories.",
     # )
 
     # args = parser.parse_args()
@@ -52,13 +52,14 @@ def main():
 
     plt.close('all')
 
-    plot_num = 1000
+    plot_num = 3000
 
     # plot
-    fig, ax = plt.subplots(2, 1, figsize=(18, 6), sharex = True)
+    fig, ax = plt.subplots(3, 1, figsize=(18, 6), sharex = True)
     ax[0].plot(imu[:plot_num, [0, 1]], 'o-')
     ax[0].plot(imu[:plot_num, [2]]-np.array([9.8]), 'o-')
     ax[1].plot(imu[:plot_num, [3, 4, 5]], 'o-')
+    ax[2].plot(servos[:plot_num, [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]], 'o-')
     ax[0].legend([
         "accelerometer.x",
         "accelerometer.y",
@@ -69,10 +70,33 @@ def main():
         "gyroscope.y",
         "gyroscope.z"
     ])
+    ax[2].legend([
+        # "servo.rShoulderPitch.presentPosition",
+        # "servo.lShoulderPitch.presentPosition",
+        # "servo.rShoulderRoll.presentPosition",
+        # "servo.lShoulderRoll.presentPosition",
+        # "servo.rElbow.presentPosition",
+        # "servo.lElbow.presentPosition",
+        "servo.rHipYaw.presentPosition",
+        "servo.lHipYaw.presentPosition",
+        "servo.rHipRoll.presentPosition",
+        "servo.lHipRoll.presentPosition",
+        "servo.rHipPitch.presentPosition",
+        "servo.lHipPitch.presentPosition",
+        "servo.rKnee.presentPosition",
+        "servo.lKnee.presentPosition",
+        "servo.rAnklePitch.presentPosition",
+        "servo.lAnklePitch.presentPosition",
+        "servo.rAnkleRoll.presentPosition",
+        "servo.lAnkleRoll.presentPosition"
+        # "servo.headPan.presentPosition",
+        # "servo.headTilt.presentPosition"
+    ])
 
-    # plt.figure()
-    # tstamps_diff = (tstamps[1:] - tstamps[:-1])
+    plt.figure()
+    tstamps_diff = (tstamps[1:] - tstamps[:-1])
     # plt.plot(tstamps_diff[:plot_num], 'o-')
+    plt.plot(tstamps[:plot_num], 'o-')
 
 
     plt.show()
