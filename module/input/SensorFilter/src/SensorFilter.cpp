@@ -38,13 +38,14 @@
 
 namespace module::input {
 
-    using message::actuation::BodySide;
     using utility::input::FrameID;
     using utility::input::ServoID;
+    using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    using message::actuation::BodySide;
     using message::behaviour::state::Stability;
     using message::localisation::ResetFieldLocalisation;
 
@@ -70,6 +71,10 @@ namespace module::input {
             cfg.urdf_path = config["urdf_path"].as<std::string>();
             nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
 
+            // Set the initial transform for resetting
+            cfg.initial_Hwt.translation() = Eigen::VectorXd(config["initial_rTWw"].as<Expression>());
+            cfg.initial_Hwt.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(config["initial_rpy"].as<Expression>()));
+
             //  Configure Filters
             cfg.filtering_method = config["filtering_method"].as<std::string>();
             configure_ukf(config);
@@ -77,12 +82,12 @@ namespace module::input {
             configure_mahony(config);
 
             // Deadreckoning
-            Hwa.translation().y() =
-                tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
-                                                                   nugus_model.home_configuration(),
-                                                                   config["initial_anchor_frame"].as<std::string>())
-                    .translation()
-                    .y();
+            cfg.initial_anchor_frame = config["initial_anchor_frame"].as<std::string>();
+            Hwa.translation().y()    = tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
+                                                                                       nugus_model.home_configuration(),
+                                                                                       cfg.initial_anchor_frame)
+                                        .translation()
+                                        .y();
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
         });
 
@@ -164,10 +169,21 @@ namespace module::input {
                 .disable();
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
+            // Reset the state of the filters
+            reset_ukf();
+            reset_kf();
+            reset_mahony();
+
+            // Reset deadreckoning
+            Hwa                   = Eigen::Isometry3d::Identity();
+            Hwa.translation().y() = tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
+                                                                                       nugus_model.home_configuration(),
+                                                                                       cfg.initial_anchor_frame)
+                                        .translation()
+                                        .y();
+
             // Reset the translation and yaw of odometry
-            Hwt.translation().x() = 0;
-            Hwt.translation().y() = 0;
-            yaw                   = 0;
+            Hwt = cfg.initial_Hwt;
         });
     }
 

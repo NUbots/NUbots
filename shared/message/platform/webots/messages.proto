@@ -31,6 +31,9 @@ package message.platform.webots;
 import "Matrix.proto";
 import "Vector.proto";
 
+import "message/support/optimisation/OptimisationRobotPosition.proto";
+import "message/support/optimisation/OptimisationCommand.proto";
+
 // Copy of cyberbotics/webots projects/samples/contests/robocup/controllers/player/messages.proto
 
 
@@ -129,9 +132,13 @@ message SensorMeasurements {
     repeated GyroMeasurement           gyros            = 10;
     repeated PositionSensorMeasurement position_sensors = 11;
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
-    OdometryGroundTruth     odometry_ground_truth     = 100;
+    // Ground truth data
+    OdometryGroundTruth odometry_ground_truth = 100;
     LocalisationGroundTruth localisation_ground_truth = 101;
-    VisionGroundTruth       vision_ground_truth       = 102;
+    VisionGroundTruth   vision_ground_truth   = 101;
+    // Walk optimisation data
+    support.optimisation.OptimisationRobotPosition robot_position = 102;
+    bool                                           reset_done     = 103;
 }
 message MotorPosition {
     string name     = 1;
@@ -182,4 +189,8 @@ message ActuatorRequests {
     repeated SensorTimeStep sensor_time_steps = 6;
     repeated CameraQuality  camera_qualities  = 7;
     repeated CameraExposure camera_exposures  = 8;
+
+    // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
+    // Walk optimisation data
+    support.optimisation.OptimisationCommand optimisation_command = 100;
 }
