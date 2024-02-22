@@ -234,7 +234,7 @@ namespace utility::io {
         }
         return -1;
     }
-  
+
     int uart::get() {
         uint8_t c = 0;
         if (read(&c, 1) == 1) {
