@@ -360,6 +360,9 @@ var annotated_dup =
       [ "clock", null, [
         [ "ClockData", "structutility_1_1clock_1_1ClockData.html", "structutility_1_1clock_1_1ClockData" ]
       ] ],
+      [ "file", "namespaceutility_1_1file.html", [
+        [ "FileDescriptor", "classutility_1_1file_1_1FileDescriptor.html", "classutility_1_1file_1_1FileDescriptor" ]
+      ] ],
       [ "input", null, [
         [ "FrameID", "structutility_1_1input_1_1FrameID.html", "structutility_1_1input_1_1FrameID" ],
         [ "LimbID", "structutility_1_1input_1_1LimbID.html", "structutility_1_1input_1_1LimbID" ],
@@ -411,6 +414,9 @@ var annotated_dup =
         [ "Encoder", "classutility_1_1nbs_1_1Encoder.html", "classutility_1_1nbs_1_1Encoder" ],
         [ "Index", "classutility_1_1nbs_1_1Index.html", "classutility_1_1nbs_1_1Index" ],
         [ "IndexItem", "structutility_1_1nbs_1_1IndexItem.html", "structutility_1_1nbs_1_1IndexItem" ]
+      ] ],
+      [ "reactor", null, [
+        [ "StreamReactor", "classutility_1_1reactor_1_1StreamReactor.html", "classutility_1_1reactor_1_1StreamReactor" ]
       ] ],
       [ "reflection", null, [
         [ "unknown_message", "structutility_1_1reflection_1_1unknown__message.html", "structutility_1_1reflection_1_1unknown__message" ]

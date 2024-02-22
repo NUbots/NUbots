@@ -1,0 +1,346 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: utility::file::FileDescriptor Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classutility_1_1file_1_1FileDescriptor.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="classutility_1_1file_1_1FileDescriptor-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">utility::file::FileDescriptor Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+
+<p>An RAII file descriptor.  
+ <a href="classutility_1_1file_1_1FileDescriptor.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="FileDescriptor_8hpp_source.html">FileDescriptor.hpp</a>&gt;</code></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a80a818ebdc60b311e4046e879cfe1578"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#a80a818ebdc60b311e4046e879cfe1578">FileDescriptor</a> ()</td></tr>
+<tr class="memdesc:a80a818ebdc60b311e4046e879cfe1578"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new RAII file descriptor.  <a href="classutility_1_1file_1_1FileDescriptor.html#a80a818ebdc60b311e4046e879cfe1578">More...</a><br /></td></tr>
+<tr class="separator:a80a818ebdc60b311e4046e879cfe1578"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4188f8e66da04e8c2dabfe1461217de7"><td class="memItemLeft" align="right" valign="top"><a id="a4188f8e66da04e8c2dabfe1461217de7"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>FileDescriptor</b> (const <a class="el" href="classutility_1_1file_1_1FileDescriptor.html">FileDescriptor</a> &amp;)=delete</td></tr>
+<tr class="separator:a4188f8e66da04e8c2dabfe1461217de7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a132d43396d1e5333d250954bc8d25934"><td class="memItemLeft" align="right" valign="top"><a id="a132d43396d1e5333d250954bc8d25934"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>FileDescriptor</b> (const int &amp;fd_, std::function&lt; void(int)&gt; cleanup_=nullptr)</td></tr>
+<tr class="separator:a132d43396d1e5333d250954bc8d25934"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64ae055e0c881b2017b39f20048f8536"><td class="memItemLeft" align="right" valign="top"><a id="a64ae055e0c881b2017b39f20048f8536"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>FileDescriptor</b> (<a class="el" href="classutility_1_1file_1_1FileDescriptor.html">FileDescriptor</a> &amp;&amp;rhs) noexcept</td></tr>
+<tr class="separator:a64ae055e0c881b2017b39f20048f8536"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a037cd2b752a7d6ddbd418a8a6ad7540b"><td class="memItemLeft" align="right" valign="top"><a id="a037cd2b752a7d6ddbd418a8a6ad7540b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#a037cd2b752a7d6ddbd418a8a6ad7540b">~FileDescriptor</a> ()</td></tr>
+<tr class="memdesc:a037cd2b752a7d6ddbd418a8a6ad7540b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destruct the file descriptor, closes the held fd. <br /></td></tr>
+<tr class="separator:a037cd2b752a7d6ddbd418a8a6ad7540b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ea2220f21d18bc73b3e739d1bb5d064"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#a3ea2220f21d18bc73b3e739d1bb5d064">available</a> () const</td></tr>
+<tr class="memdesc:a3ea2220f21d18bc73b3e739d1bb5d064"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of bytes available for reading.  <a href="classutility_1_1file_1_1FileDescriptor.html#a3ea2220f21d18bc73b3e739d1bb5d064">More...</a><br /></td></tr>
+<tr class="separator:a3ea2220f21d18bc73b3e739d1bb5d064"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64ecdf049c419dc33c9fb7c71db673f1"><td class="memItemLeft" align="right" valign="top"><a id="a64ecdf049c419dc33c9fb7c71db673f1"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#a64ecdf049c419dc33c9fb7c71db673f1">close</a> ()</td></tr>
+<tr class="memdesc:a64ecdf049c419dc33c9fb7c71db673f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Close the currently held file descriptor. <br /></td></tr>
+<tr class="separator:a64ecdf049c419dc33c9fb7c71db673f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9fe9d6118a29fe64f6ce8537182b5526"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#a9fe9d6118a29fe64f6ce8537182b5526">get</a> ()</td></tr>
+<tr class="memdesc:a9fe9d6118a29fe64f6ce8537182b5526"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the currently held file descriptor.  <a href="classutility_1_1file_1_1FileDescriptor.html#a9fe9d6118a29fe64f6ce8537182b5526">More...</a><br /></td></tr>
+<tr class="separator:a9fe9d6118a29fe64f6ce8537182b5526"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab917219dac27de5ae1007b3f3300789f"><td class="memItemLeft" align="right" valign="top"><a id="ab917219dac27de5ae1007b3f3300789f"></a>
+<a class="el" href="classutility_1_1file_1_1FileDescriptor.html">FileDescriptor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classutility_1_1file_1_1FileDescriptor.html">FileDescriptor</a> &amp;)=delete</td></tr>
+<tr class="separator:ab917219dac27de5ae1007b3f3300789f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8295d32395709f94605e646ad15ad7f0"><td class="memItemLeft" align="right" valign="top"><a id="a8295d32395709f94605e646ad15ad7f0"></a>
+<a class="el" href="classutility_1_1file_1_1FileDescriptor.html">FileDescriptor</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classutility_1_1file_1_1FileDescriptor.html">FileDescriptor</a> &amp;&amp;rhs) noexcept</td></tr>
+<tr class="separator:a8295d32395709f94605e646ad15ad7f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0be87ba121477dc864583120b173d352"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#a0be87ba121477dc864583120b173d352">valid</a> () const</td></tr>
+<tr class="memdesc:a0be87ba121477dc864583120b173d352"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns if the currently held file descriptor is valid.  <a href="classutility_1_1file_1_1FileDescriptor.html#a0be87ba121477dc864583120b173d352">More...</a><br /></td></tr>
+<tr class="separator:a0be87ba121477dc864583120b173d352"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:af4749dded0d385a2313e0235cce6b0d8"><td class="memItemLeft" align="right" valign="top"><a id="af4749dded0d385a2313e0235cce6b0d8"></a>
+std::function&lt; void(int)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#af4749dded0d385a2313e0235cce6b0d8">cleanup</a></td></tr>
+<tr class="memdesc:af4749dded0d385a2313e0235cce6b0d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">An optional cleanup function to call on close. <br /></td></tr>
+<tr class="separator:af4749dded0d385a2313e0235cce6b0d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acfe0d2f8909512ffc39a22ac6d13a27e"><td class="memItemLeft" align="right" valign="top"><a id="acfe0d2f8909512ffc39a22ac6d13a27e"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html#acfe0d2f8909512ffc39a22ac6d13a27e">fd</a> {-1}</td></tr>
+<tr class="memdesc:acfe0d2f8909512ffc39a22ac6d13a27e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The held file descriptor. <br /></td></tr>
+<tr class="separator:acfe0d2f8909512ffc39a22ac6d13a27e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>An RAII file descriptor. </p>
+<p>This class represents an RAII file descriptor. It will close the file descriptor it holds on destruction. </p>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a80a818ebdc60b311e4046e879cfe1578"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a80a818ebdc60b311e4046e879cfe1578">&#9670;&nbsp;</a></span>FileDescriptor()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">utility::file::FileDescriptor::FileDescriptor </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Constructs a new RAII file descriptor. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">fd</td><td>[description] </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a3ea2220f21d18bc73b3e739d1bb5d064"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ea2220f21d18bc73b3e739d1bb5d064">&#9670;&nbsp;</a></span>available()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int utility::file::FileDescriptor::available </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the number of bytes available for reading. </p>
+<dl class="section return"><dt>Returns</dt><dd>-2 if no current connection, -1 for some other error. Check errno if -1 is returned. </dd></dl>
+
+</div>
+</div>
+<a id="a9fe9d6118a29fe64f6ce8537182b5526"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9fe9d6118a29fe64f6ce8537182b5526">&#9670;&nbsp;</a></span>get()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int utility::file::FileDescriptor::get </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Get the currently held file descriptor. </p>
+<dl class="section return"><dt>Returns</dt><dd>the file descriptor </dd></dl>
+
+</div>
+</div>
+<a id="a0be87ba121477dc864583120b173d352"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0be87ba121477dc864583120b173d352">&#9670;&nbsp;</a></span>valid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool utility::file::FileDescriptor::valid </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns if the currently held file descriptor is valid. </p>
+<dl class="section return"><dt>Returns</dt><dd>true if the file descriptor is valid </dd>
+<dd>
+false if the file descriptor is invalid </dd></dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>shared/utility/file/<a class="el" href="FileDescriptor_8hpp_source.html">FileDescriptor.hpp</a></li>
+<li>shared/utility/file/FileDescriptor.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1file.html">file</a></li><li class="navelem"><a class="el" href="classutility_1_1file_1_1FileDescriptor.html">FileDescriptor</a></li>
+    <li class="footer">Generated on Thu Feb 22 2024 23:59:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

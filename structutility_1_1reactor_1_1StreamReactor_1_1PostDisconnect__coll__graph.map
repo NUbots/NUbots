@@ -1,0 +1,6 @@
+<map id="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::PostDisconnect" name="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::PostDisconnect">
+<area shape="rect" id="node1" title="A message struct that is emitted immediately after a connection is torn down." alt="" coords="540,16,784,72"/>
+<area shape="rect" id="node2" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="249,9,492,79"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,201,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="58,56,149,83"/>
+</map>

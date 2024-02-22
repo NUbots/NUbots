@@ -1,0 +1,686 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: shared/utility/reactor/StreamReactor.hpp Source File</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('StreamReactor_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">StreamReactor.hpp</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef UTILITY_REACTOR_STREAMREACTOR_HPP</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define UTILITY_REACTOR_STREAMREACTOR_HPP</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;fmt/format.h&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;memory&gt;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;<span class="preprocessor">#include &lt;mutex&gt;</span></div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;<span class="preprocessor">#include &lt;variant&gt;</span></div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160; </div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#include &quot;utility/file/FileDescriptor.hpp&quot;</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#include &quot;utility/io/uart.hpp&quot;</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;<span class="preprocessor">#include &quot;utility/network/connect.hpp&quot;</span></div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;utility/strutil/strutil.hpp&quot;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;utility/support/si_unit.hpp&quot;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160; </div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">namespace </span>utility::reactor {</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;<span class="comment">     * This reactor implements the common pattern of connecting to a stream device such as a serial port or a TCP</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="comment">     * connection. It then will process bytes one at a time as they come in by calling the parser function provided</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="comment">     * by the CRTP T type.</span></div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="comment">     * @tparam T The CRTP type (the type that inherits from this class)</span></div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment">     * @tparam Parser The parser function that will be called to process the bytes as they come in</span></div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment">     *                The type is expected to have operator()(uint8_t) so either a functor or a lambda can be used</span></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment">     * @tparam TimeoutTicks The number of units to wait before considering the device to be disconnected or</span></div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="comment">     *                      non-responsive</span></div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="comment">     * @tparam TimeoutPeriod The units that TimeoutTicks is measured in</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Parser, <span class="keywordtype">int</span> TimeoutTicks = 1, <span class="keyword">typename</span> TimeoutPeriod = std::chrono::seconds&gt;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html">   31</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classutility_1_1reactor_1_1StreamReactor.html">StreamReactor</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the StreamReactor.</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#af3d521ac0613eed80a5fdd116edabb16">   34</a></span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#af3d521ac0613eed80a5fdd116edabb16">StreamReactor</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment) : Reactor(std::move(environment)) {</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="comment">            /**************************</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="comment">             *   USER TRIGGER HOOKS   *</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="comment">             **************************/</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;            on&lt;ConnectTCP&gt;().then(<span class="stringliteral">&quot;Initiate a TCP Connection&quot;</span>, [<span class="keyword">this</span>](<span class="keyword">const</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html">ConnectTCP</a>&amp; c) {</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;                <span class="comment">// Setup the connection details</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;                <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a> = c;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;                emit(std::make_unique&lt;Reconnect&gt;());</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;            });</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;            on&lt;ConnectSerial&gt;().then(<span class="stringliteral">&quot;Initiate a Serial Connection&quot;</span>, [<span class="keyword">this</span>](<span class="keyword">const</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html">ConnectSerial</a>&amp; c) {</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                <span class="comment">// Setup the connection details</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a> = c;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160; </div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;                emit(std::make_unique&lt;Reconnect&gt;());</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;            });</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160; </div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;            on&lt;Disconnect&gt;().then(<span class="stringliteral">&quot;Disconnecting&quot;</span>, [<span class="keyword">this</span>] {</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                <span class="comment">// Allow pre-disconnection settings to be applied</span></div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                emit(std::make_unique&lt;PreDisconnect&gt;(<span class="keyword">false</span>));</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                emit(std::make_unique&lt;<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do&lt;PreDisconnect&gt;</a>&gt;(<span class="keyword">false</span>));</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;            });</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;            on&lt;Reconnect&gt;().then(<span class="stringliteral">&quot;Reconnecting&quot;</span>, [<span class="keyword">this</span>](<span class="keyword">const</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html">Reconnect</a>&amp; rc) {</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                <span class="comment">// Log the reason we are reconnecting if it&#39;s not an empty string.</span></div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                <span class="comment">// empty string means we are just starting up</span></div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;                <span class="keywordflow">if</span> (!rc.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#afe090fa86a65b4dc441dca2ba7e795a7">reason</a>.empty()) {</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;                    log&lt;NUClear::WARN&gt;(rc.reason);</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;                }</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160; </div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                if (<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a719ae6fac95a1e5adc36b8eb13733bce">connection_valid</a>()) {</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;                    <span class="comment">// Initiate the reconnection</span></div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;                    emit(std::make_unique&lt;PreDisconnect&gt;(<span class="keyword">true</span>));</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;                    emit(std::make_unique&lt;<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do&lt;PreDisconnect&gt;</a>&gt;(<span class="keyword">true</span>));</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;                }</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;                <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                    <span class="comment">// Initiate the connection</span></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;                    emit(std::make_unique&lt;PreConnect&gt;());</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;                    emit(std::make_unique&lt;<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do&lt;PreConnect&gt;</a>&gt;());</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;                }</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;            });</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;            on&lt;TransmitData&gt;().then(<span class="stringliteral">&quot;Transmit data to device&quot;</span>, [<span class="keyword">this</span>](<span class="keyword">const</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">TransmitData</a>&amp; t) {</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;                <span class="comment">// If there is not already a connection established, then calling reconnect is an error</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;                <span class="keywordflow">if</span> (std::holds_alternative&lt;std::monostate&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>) || <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a> &lt; 0) {</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;                    <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Can&#39;t transmit to no one.&quot;</span>);</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;                }</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;                <span class="comment">// Write data to the device</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                <span class="keywordtype">size_t</span> bytes_written = 0;</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                <span class="keywordflow">while</span> (bytes_written &lt; t.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>.size()) {</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;                    ssize_t written = ::write(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>, t.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>.data() + bytes_written, t.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>.size() - bytes_written);</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                    <span class="keywordflow">if</span> (written &lt; 0) {</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                        <span class="keywordflow">throw</span> std::system_error(errno,</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                                                std::system_category(),</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                                                fmt::format(<span class="stringliteral">&quot;Failed to transmit data to device at {} with error {}&quot;</span>,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                                                            <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>(),</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;                                                            errno));</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;                    }</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                    bytes_written += written;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                }</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            });</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160; </div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160; </div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;<span class="comment">            /**************************</span></div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="comment">             * INTERNAL TRIGGER CHAIN *</span></div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment">             **************************/</span></div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;            on&lt;Do&lt;PreConnect&gt;&gt;().then([<span class="keyword">this</span>] { emit(std::make_unique&lt;DoConnect&gt;()); });</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160; </div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;            on&lt;DoConnect&gt;().then([<span class="keyword">this</span>] {</div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;                <span class="comment">// Increase the connection attempt number to stop any existing configuration loops</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                ++<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a4d52287af7127948b9c465e1cfecf6d0">connection_attempt</a>;</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160; </div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                    <span class="comment">// Initiate the connection and get the file descriptor for the IO handle</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;                    <span class="keywordflow">if</span> (std::holds_alternative&lt;ConnectTCP&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>)) {</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;                        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; r = std::get&lt;ConnectTCP&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>);</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                        <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>    = <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html">TCPConnection</a>(r.host, r.port);</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                        <span class="keyword">auto</span>&amp; tcp = std::get&lt;TCPConnection&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>);</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                        tcp.fd    = utility::network::connect(tcp.host, tcp.port);</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                        <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>        = tcp.fd.get();</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                    }</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                    <span class="keywordflow">else</span> <span class="keywordflow">if</span> (std::holds_alternative&lt;ConnectSerial&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>)) {</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; r = std::get&lt;ConnectSerial&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>);</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                        <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>    = <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html">SerialConnection</a>(r.device, r.baud_rate);</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;                        <span class="keyword">auto</span>&amp; serial = std::get&lt;SerialConnection&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>);</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;                        serial.uart  = <a class="code" href="classutility_1_1io_1_1uart.html">utility::io::uart</a>(serial.device, serial.baud_rate);</div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                        <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>           = serial.uart.native_handle();</div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;                    }</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;                    <span class="keywordflow">else</span> {</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;                        <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>     = std::monostate();</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;                        <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a> = std::monostate();</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                        <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>         = -1;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                        <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;No valid connection settings found.&quot;</span>);</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                    }</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160; </div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;                    <span class="comment">// Something must have gone wrong and we are not connected</span></div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;                    <span class="keywordflow">if</span> (!<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a719ae6fac95a1e5adc36b8eb13733bce">connection_valid</a>()) {</div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;                        <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Failed to connect to device&quot;</span>);</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;                    }</div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160; </div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;                    <span class="comment">// Recreate the IO reaction</span></div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                    <span class="keyword">auto</span> flags = IO::READ | IO::CLOSE | IO::ERROR;</div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;                    <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a5ae1907c2b5b3cdb0c612393f1708d27">io_handle</a>  = on&lt;IO&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>, flags).then(<span class="stringliteral">&quot;Read Stream&quot;</span>, [<span class="keyword">this</span>](<span class="keyword">const</span> IO::Event&amp; event) {</div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;                        <span class="keywordflow">if</span> ((event.events &amp; IO::READ) != 0) {</div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;                            process(event.fd);</div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;                        }</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;                        if ((event.events &amp; IO::ERROR) != 0) {</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;                            <span class="comment">// Unbind the handle, so it does not read stream in later iterations</span></div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;                            io_handle.unbind();</div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;                            <span class="comment">// Start a new connection</span></div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;                            emit(std::make_unique&lt;Reconnect&gt;(<span class="stringliteral">&quot;An invalid state occurred&quot;</span>));</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;                        }</div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;                        if ((event.events &amp; IO::CLOSE) != 0) {</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;                            <span class="comment">// Unbind the handle, so it does not read stream in later iterations</span></div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;                            io_handle.unbind();</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;                            <span class="comment">// Start a new connection</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;                            emit(std::make_unique&lt;Reconnect&gt;(<span class="stringliteral">&quot;The device hung up&quot;</span>));</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;                        }</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;                        if ((event.events &amp; ~(IO::READ | IO::ERROR | IO::CLOSE)) != 0) {</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;                            log&lt;NUClear::ERROR&gt;(</div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;                                utility::strutil::dedent(fmt::format(<span class="stringliteral">&quot;Unknown IO event on {}valid connection: {}&quot;</span>,</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;                                                                     connection_valid() ? <span class="stringliteral">&quot;&quot;</span> : <span class="stringliteral">&quot;in&quot;</span>,</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;                                                                     event.events)));</div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;                        }</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;                    });</div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160; </div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;                    <span class="comment">// Allow post-connection settings to be applied</span></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;                    emit(std::make_unique&lt;PostConnect&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a4d52287af7127948b9c465e1cfecf6d0">connection_attempt</a>));</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160; </div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;                    log&lt;NUClear::INFO&gt;(fmt::format(<span class="stringliteral">&quot;Successfully connected to the device at {}&quot;</span>, <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>()));</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;                }</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;                <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::runtime_error&amp; ex) {</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;                    log&lt;NUClear::WARN&gt;(fmt::format(<span class="stringliteral">&quot;Failed to connect to the device at {}\nError: {}&quot;</span>,</div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;                                                   <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>(),</div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;                                                   ex.what()));</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;                }</div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;            });</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160; </div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;            on&lt;Do&lt;PreDisconnect&gt;&gt;().then([<span class="keyword">this</span>](<span class="keyword">const</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do&lt;PreDisconnect&gt;</a>&amp; pd) {</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;                <span class="comment">// Allow post-disconnection settings to be applied</span></div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;                emit(std::make_unique&lt;DoDisconnect&gt;(pd.reconnect));</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;            });</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160; </div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;            on&lt;DoDisconnect&gt;().then(<span class="stringliteral">&quot;Disconnect from device&quot;</span>, [<span class="keyword">this</span>](<span class="keyword">const</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html">DoDisconnect</a>&amp; d) {</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;                <span class="comment">// Unbind the reaction handle if it is bound</span></div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;                <span class="keywordflow">if</span> (<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a5ae1907c2b5b3cdb0c612393f1708d27">io_handle</a>) {</div>
+<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;                    <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a5ae1907c2b5b3cdb0c612393f1708d27">io_handle</a>.unbind();</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;                }</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160; </div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;                <span class="comment">// Reset the connection part of the variant</span></div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;                <span class="keywordflow">if</span> (!std::holds_alternative&lt;std::monostate&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>)) {</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;                    <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a> = std::monostate();</div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;                }</div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;                <span class="comment">// Clear old file descriptor</span></div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;                <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a> = -1;</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160; </div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;                <span class="comment">// Allow post-disconnection settings to be applied</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;                emit(std::make_unique&lt;PostDisconnect&gt;(d.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">reconnect</a>));</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;                emit(std::make_unique&lt;<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do&lt;PostDisconnect&gt;</a>&gt;(d.<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">reconnect</a>));</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;            });</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;            on&lt;Do&lt;PostDisconnect&gt;&gt;().then([<span class="keyword">this</span>](<span class="keyword">const</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do&lt;PostDisconnect&gt;</a>&amp; pd) {</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;                <span class="comment">// If a reconnect has been initiated then kick off the connection attempt now</span></div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;                <span class="keywordflow">if</span> (pd.reconnect) {</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;                    emit(std::make_unique&lt;PreConnect&gt;());</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;                    emit(std::make_unique&lt;<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do&lt;PreConnect&gt;</a>&gt;());</div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;                }</div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;            });</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160; </div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;            <span class="comment">// Watchdog to ensure we are getting data from the device</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;            on&lt;Watchdog&lt;StreamReactor&lt;T, Parser&gt;, TimeoutTicks, TimeoutPeriod&gt;, Single&gt;().then([<span class="keyword">this</span>] {</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;                <span class="keyword">auto</span> s = double(TimeoutTicks) * double(TimeoutPeriod::period::num) / double(TimeoutPeriod::period::den);</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;                <span class="keyword">auto</span> [si, unit] = utility::support::si_time(s);</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;                emit(std::make_unique&lt;Reconnect&gt;(fmt::format(<span class="stringliteral">&quot;No activity from the Device at {} in {}{}. Reconnecting&quot;</span>,</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;                                                             <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>(),</div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;                                                             si,</div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;                                                             unit)));</div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;            });</div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;        }</div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160; </div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;    <span class="keyword">protected</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;<span class="comment">         * @brief Common inheritance for all StreamReactor steps</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> U&gt;</div>
+<div class="line"><a name="l00225"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">  225</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a></div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;            : <span class="keyword">public</span> Trigger&lt;U&gt;</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;            , Sync&lt;T&gt; {};</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160;<span class="comment">         * A message struct that is emitted immediately before a connection is established</span></div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00232"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1PreConnect.html">  232</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PreConnect.html">PreConnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;PreConnect&gt; {};</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;<span class="comment">         * A message struct that is emitted immediately after a connection is established</span></div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00237"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html">  237</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html">PostConnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;PostConnect&gt; {</div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;            <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html">PostConnect</a>(<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516">attempt</a>) : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516">attempt</a>(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516">attempt</a>) {}<span class="comment"></span></div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;<span class="comment">            /// The attempt number of the connection</span></div>
+<div class="line"><a name="l00240"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516">  240</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">int</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516">attempt</a>;</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;        };</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;<span class="comment">         * A message struct that is emitted immediately before a connection is torn down</span></div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00246"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html">  246</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html">PreDisconnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;PreDisconnect&gt; {</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html">PreDisconnect</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html#a1e9dc6734a23f3dedc7636f304322fdf">reconnect</a>) : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html#a1e9dc6734a23f3dedc7636f304322fdf">reconnect</a>(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html#a1e9dc6734a23f3dedc7636f304322fdf">reconnect</a>) {}</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;<span class="comment">            /// Set to true if a new connection should be established after disconnection is complete</span></div>
+<div class="line"><a name="l00250"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html#a1e9dc6734a23f3dedc7636f304322fdf">  250</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">bool</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html#a1e9dc6734a23f3dedc7636f304322fdf">reconnect</a>{<span class="keyword">false</span>};</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;        };</div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="comment">         * A message struct that is emitted immediately after a connection is torn down</span></div>
+<div class="line"><a name="l00255"></a><span class="lineno">  255</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00256"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html">  256</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html">PostDisconnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;PostDisconnect&gt; {</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html">PostDisconnect</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html#afb9dcec933fe187d240a58b7ae75c1d8">reconnect</a>) : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html#afb9dcec933fe187d240a58b7ae75c1d8">reconnect</a>(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html#afb9dcec933fe187d240a58b7ae75c1d8">reconnect</a>) {}</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;<span class="comment">            /// Set to true if a new connection should be established after disconnection is complete</span></div>
+<div class="line"><a name="l00260"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html#afb9dcec933fe187d240a58b7ae75c1d8">  260</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">bool</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html#afb9dcec933fe187d240a58b7ae75c1d8">reconnect</a>{<span class="keyword">false</span>};</div>
+<div class="line"><a name="l00261"></a><span class="lineno">  261</span>&#160;        };</div>
+<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00264"></a><span class="lineno">  264</span>&#160;<span class="comment">         * A message to tell the system to establish a connection to a TCP server</span></div>
+<div class="line"><a name="l00265"></a><span class="lineno">  265</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00266"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html">  266</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html">ConnectTCP</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;ConnectTCP&gt; {</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;            <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html">ConnectTCP</a>(std::string host, <span class="keyword">const</span> uint16_t&amp; port) : host(std::move(host)), port(port) {}</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;            std::string host{};</div>
+<div class="line"><a name="l00269"></a><span class="lineno">  269</span>&#160;            uint16_t port{0};</div>
+<div class="line"><a name="l00270"></a><span class="lineno">  270</span>&#160;        };</div>
+<div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;<span class="comment">         * A message to tell the system to establish a connection to a serial device</span></div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00275"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html">  275</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html">ConnectSerial</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;ConnectSerial&gt; {</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;            <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html">ConnectSerial</a>(std::string device, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; baud_rate) : device(std::move(device)), baud_rate(baud_rate) {}</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;            std::string device{};</div>
+<div class="line"><a name="l00278"></a><span class="lineno">  278</span>&#160;            <span class="keywordtype">int</span> baud_rate{0};</div>
+<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;        };</div>
+<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;<span class="comment">         * A message to tell the system to disconnect from a device</span></div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00284"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1Disconnect.html">  284</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Disconnect.html">Disconnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;Disconnect&gt; {};</div>
+<div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;<span class="comment">         * A message struct to tell the system to reconnect to the device</span></div>
+<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00289"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html">  289</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html">Reconnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;Reconnect&gt; {</div>
+<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;            <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html">Reconnect</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;<span class="comment">            /**</span></div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;<span class="comment">             * @brief Construct a new Reconnect object</span></div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;<span class="comment">             *</span></div>
+<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;<span class="comment">             * @param reason_ The reason the reconnection is happening when reconnecting or empty for the initial</span></div>
+<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;<span class="comment">             * connection</span></div>
+<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;<span class="comment">             */</span></div>
+<div class="line"><a name="l00298"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#a1a2db8dee59f75168f2ee6bacf006686">  298</a></span>&#160;            <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#a1a2db8dee59f75168f2ee6bacf006686">Reconnect</a>(std::string reason_) : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#afe090fa86a65b4dc441dca2ba7e795a7">reason</a>(std::move(reason_)) {}</div>
+<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;<span class="comment">            /// The reason the reconnection is happening when reconnecting or empty for the initial connection</span></div>
+<div class="line"><a name="l00301"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#afe090fa86a65b4dc441dca2ba7e795a7">  301</a></span>&#160;<span class="comment"></span>            std::string <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#afe090fa86a65b4dc441dca2ba7e795a7">reason</a>;</div>
+<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;        };</div>
+<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;<span class="comment">         * A message struct to tell the system to transmit data to the device</span></div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00307"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">  307</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">TransmitData</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;TransmitData&gt; {</div>
+<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">TransmitData</a>(<span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; source) : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>(source) {}</div>
+<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">TransmitData</a>(std::vector&lt;uint8_t&gt;&amp;&amp; source) noexcept : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>(std::move(source)) {}</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;            <span class="keyword">template</span> &lt;<span class="keyword">typename</span> SourceType&gt;</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">TransmitData</a>(<span class="keyword">const</span> SourceType&amp; source)</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;                : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>(NUClear::util::serialise::Serialise&lt;SourceType&gt;::serialise(source)) {}</div>
+<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160; </div>
+<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;            <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">TransmitData</a>&amp; operator=(<span class="keyword">const</span> std::vector&lt;uint8_t&gt;&amp; rhs) {</div>
+<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;                <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a> = rhs;</div>
+<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;            }</div>
+<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;            <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">TransmitData</a>&amp; operator=(std::vector&lt;uint8_t&gt;&amp;&amp; rhs) noexcept {</div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;                <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a> = std::move(rhs);</div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;                <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;            }</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;<span class="comment">            /// The data to be transferred</span></div>
+<div class="line"><a name="l00324"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">  324</a></span>&#160;<span class="comment"></span>            std::vector&lt;uint8_t&gt; <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">data</a>{};</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;        };</div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;<span class="comment">         * @brief Returns true if there is a currently established connection, false otherwise</span></div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00330"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#a719ae6fac95a1e5adc36b8eb13733bce">  330</a></span>&#160;        [[nodiscard]] <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a719ae6fac95a1e5adc36b8eb13733bce">connection_valid</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;            <span class="keywordflow">if</span> (std::holds_alternative&lt;SerialConnection&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>)) {</div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;                <span class="keyword">auto</span>&amp; serial = std::get&lt;SerialConnection&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>);</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;                <span class="keywordflow">return</span> serial.uart.connected();</div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            }</div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;            <span class="keywordflow">if</span> (std::holds_alternative&lt;TCPConnection&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>)) {</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;                <span class="keyword">auto</span>&amp; tcp = std::get&lt;TCPConnection&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>);</div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;                <span class="keywordflow">return</span> tcp.fd.valid();</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;            }</div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;        }</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;<span class="comment">        /// The current connection attempt to remove double ups in reactions</span></div>
+<div class="line"><a name="l00343"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#a4d52287af7127948b9c465e1cfecf6d0">  343</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">int</span> <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a4d52287af7127948b9c465e1cfecf6d0">connection_attempt</a> = 0;</div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160; </div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;    <span class="keyword">private</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;<span class="comment">         * @brief Internal message used to perform connection logic</span></div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00349"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1DoConnect.html">  349</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoConnect.html">DoConnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;DoConnect&gt; {};</div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;<span class="comment">         * @brief Internal message used to perform disconnection logic</span></div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00354"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html">  354</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html">DoDisconnect</a> : <span class="keyword">public</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;DoDisconnect&gt; {</div>
+<div class="line"><a name="l00355"></a><span class="lineno">  355</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html">DoDisconnect</a>(<span class="keyword">const</span> <span class="keywordtype">bool</span>&amp; <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">reconnect</a>) : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">reconnect</a>(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">reconnect</a>) {}</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;<span class="comment">            /// Set to true if a new connection should be established after disconnection is complete</span></div>
+<div class="line"><a name="l00358"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">  358</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">bool</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">reconnect</a>{<span class="keyword">false</span>};</div>
+<div class="line"><a name="l00359"></a><span class="lineno">  359</span>&#160;        };</div>
+<div class="line"><a name="l00360"></a><span class="lineno">  360</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00361"></a><span class="lineno">  361</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00362"></a><span class="lineno">  362</span>&#160;<span class="comment">         * @brief Aliasing type for sanity and brevity purposes</span></div>
+<div class="line"><a name="l00363"></a><span class="lineno">  363</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00364"></a><span class="lineno">  364</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Step&gt;</div>
+<div class="line"><a name="l00365"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">  365</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">Do</a></div>
+<div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;            : <span class="keyword">public</span> Step</div>
+<div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;            , <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs</a>&lt;Do&lt;Step&gt;&gt; {</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;            <span class="comment">// Inherit constructors from Step</span></div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;            <span class="keyword">using</span> Step::Step;</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160; </div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;            <span class="comment">// Disambiguate inherited NUClear fusion functions</span></div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;            <span class="keyword">using</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs&lt;Do&lt;Step&gt;</a>&gt;::bind;   <span class="comment">// For the triggering</span></div>
+<div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;            <span class="keyword">using</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs&lt;Do&lt;Step&gt;</a>&gt;::get;    <span class="comment">// For the caching</span></div>
+<div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;            <span class="keyword">using</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">NUClearArgs&lt;Do&lt;Step&gt;</a>&gt;::group;  <span class="comment">// For the syncing</span></div>
+<div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160;        };</div>
+<div class="line"><a name="l00376"></a><span class="lineno">  376</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00377"></a><span class="lineno">  377</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00378"></a><span class="lineno">  378</span>&#160;<span class="comment">         * Holds the information about a serial connection</span></div>
+<div class="line"><a name="l00379"></a><span class="lineno">  379</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00380"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html">  380</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html">SerialConnection</a> {</div>
+<div class="line"><a name="l00381"></a><span class="lineno">  381</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html">SerialConnection</a>(std::string <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a92f934b65d9db9d79a34d998c2a826cb">device</a>, <span class="keyword">const</span> <span class="keywordtype">int</span>&amp; <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a391ceb9ebaba7bc86816c21dc387bfa7">baud_rate</a>)</div>
+<div class="line"><a name="l00382"></a><span class="lineno">  382</span>&#160;                : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a92f934b65d9db9d79a34d998c2a826cb">device</a>(std::move(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a92f934b65d9db9d79a34d998c2a826cb">device</a>)), <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a391ceb9ebaba7bc86816c21dc387bfa7">baud_rate</a>(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a391ceb9ebaba7bc86816c21dc387bfa7">baud_rate</a>) {}<span class="comment"></span></div>
+<div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;<span class="comment">            /// The path to the serial device</span></div>
+<div class="line"><a name="l00384"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a92f934b65d9db9d79a34d998c2a826cb">  384</a></span>&#160;<span class="comment"></span>            std::string <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a92f934b65d9db9d79a34d998c2a826cb">device</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;<span class="comment">            /// The baud rate to connect at</span></div>
+<div class="line"><a name="l00386"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a391ceb9ebaba7bc86816c21dc387bfa7">  386</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">int</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a391ceb9ebaba7bc86816c21dc387bfa7">baud_rate</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;<span class="comment">            /// The uart object that is connected to the serial device</span></div>
+<div class="line"><a name="l00388"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a6d7479ef19aa28523dcc6463c1964541">  388</a></span>&#160;<span class="comment"></span>            <a class="code" href="classutility_1_1io_1_1uart.html">utility::io::uart</a> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a6d7479ef19aa28523dcc6463c1964541">uart</a>{};</div>
+<div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;        };</div>
+<div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00391"></a><span class="lineno">  391</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00392"></a><span class="lineno">  392</span>&#160;<span class="comment">         * Holds the information about a TCP connection</span></div>
+<div class="line"><a name="l00393"></a><span class="lineno">  393</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00394"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html">  394</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html">TCPConnection</a> {</div>
+<div class="line"><a name="l00395"></a><span class="lineno">  395</span>&#160;            <span class="keyword">explicit</span> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html">TCPConnection</a>(std::string <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#a90b32cebf3836b5d70214e5df3690aae">host</a>, <span class="keyword">const</span> uint16_t&amp; <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#af89d1813b2e685482d98a58539bd8396">port</a>) : <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#a90b32cebf3836b5d70214e5df3690aae">host</a>(std::move(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#a90b32cebf3836b5d70214e5df3690aae">host</a>)), <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#af89d1813b2e685482d98a58539bd8396">port</a>(<a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#af89d1813b2e685482d98a58539bd8396">port</a>) {}<span class="comment"></span></div>
+<div class="line"><a name="l00396"></a><span class="lineno">  396</span>&#160;<span class="comment">            /// The host to connect to</span></div>
+<div class="line"><a name="l00397"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#a90b32cebf3836b5d70214e5df3690aae">  397</a></span>&#160;<span class="comment"></span>            std::string <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#a90b32cebf3836b5d70214e5df3690aae">host</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00398"></a><span class="lineno">  398</span>&#160;<span class="comment">            /// The port to connect to</span></div>
+<div class="line"><a name="l00399"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#af89d1813b2e685482d98a58539bd8396">  399</a></span>&#160;<span class="comment"></span>            uint16_t <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#af89d1813b2e685482d98a58539bd8396">port</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160;<span class="comment">            /// The file descriptor connected to the TCP socket</span></div>
+<div class="line"><a name="l00401"></a><span class="lineno"><a class="line" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#acca0b28e38657578b8f0f07ea148eff5">  401</a></span>&#160;<span class="comment"></span>            <a class="code" href="classutility_1_1file_1_1FileDescriptor.html">utility::file::FileDescriptor</a> <a class="code" href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#acca0b28e38657578b8f0f07ea148eff5">fd</a>{};</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;        };</div>
+<div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;<span class="comment">         * Get the description of the device that we are connected to (network or serial)</span></div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;<span class="comment">         * @return the description of the device</span></div>
+<div class="line"><a name="l00408"></a><span class="lineno">  408</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00409"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">  409</a></span>&#160;        [[nodiscard]] std::string <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">device_description</a>() {</div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;            <span class="keywordflow">if</span> (std::holds_alternative&lt;ConnectSerial&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>)) {</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160;                <span class="keyword">auto</span>&amp; serial = std::get&lt;ConnectSerial&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>);</div>
+<div class="line"><a name="l00412"></a><span class="lineno">  412</span>&#160;                <span class="keywordflow">return</span> fmt::format(<span class="stringliteral">&quot;Serial Device: {} @ {}baud&quot;</span>, serial.device, serial.baud_rate);</div>
+<div class="line"><a name="l00413"></a><span class="lineno">  413</span>&#160;            }</div>
+<div class="line"><a name="l00414"></a><span class="lineno">  414</span>&#160; </div>
+<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;            <span class="keywordflow">if</span> (std::holds_alternative&lt;ConnectTCP&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>)) {</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;                <span class="keyword">auto</span>&amp; tcp = std::get&lt;ConnectTCP&gt;(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>);</div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;                <span class="keywordflow">return</span> fmt::format(<span class="stringliteral">&quot;{}:{}&quot;</span>, tcp.host, tcp.port);</div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;            }</div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160; </div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;            <span class="keywordflow">return</span> <span class="stringliteral">&quot;Unknown&quot;</span>;</div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;        }</div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;<span class="comment">        /**</span></div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;<span class="comment">         * @brief Process the data received from the device</span></div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160;<span class="comment">         *</span></div>
+<div class="line"><a name="l00426"></a><span class="lineno">  426</span>&#160;<span class="comment">         * @details This function is called when the IO reaction is triggered. It reads the data from the device and</span></div>
+<div class="line"><a name="l00427"></a><span class="lineno">  427</span>&#160;<span class="comment">         * passes it to the parser. Once the parser finds a packet it emits that packet.</span></div>
+<div class="line"><a name="l00428"></a><span class="lineno">  428</span>&#160;<span class="comment">         */</span></div>
+<div class="line"><a name="l00429"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#aafdb93f45be3de20d0257fa47c347e84">  429</a></span>&#160;        <span class="keywordtype">void</span> <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#aafdb93f45be3de20d0257fa47c347e84">process</a>(<span class="keyword">const</span> <span class="keywordtype">int</span>&amp; <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>) {</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;            <span class="comment">// Read bytes one at a time</span></div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;            uint8_t <span class="keywordtype">byte</span> = 0;</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;            <span class="keywordflow">while</span> (::read(<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a>, &amp;<span class="keywordtype">byte</span>, 1) == 1) {</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;                <span class="keywordflow">try</span> {</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;                    <span class="comment">// Pass the byte to the parser and emit the packet if it is complete</span></div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;                    <span class="keyword">auto</span> packet = <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a635d4f7540db98594224ed880c6857b2">parser</a>(<span class="keywordtype">byte</span>);</div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;                    <span class="keywordflow">if</span> (packet) {</div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;                        <span class="comment">// Service the watchdog and emit the packet</span></div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160;                        emit&lt;Scope::WATCHDOG&gt;(ServiceWatchdog&lt;<a class="code" href="classutility_1_1reactor_1_1StreamReactor.html">StreamReactor&lt;T, Parser&gt;</a>&gt;());</div>
+<div class="line"><a name="l00439"></a><span class="lineno">  439</span>&#160;                        emit(std::move(packet));</div>
+<div class="line"><a name="l00440"></a><span class="lineno">  440</span>&#160;                    }</div>
+<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;                }</div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;                <span class="keywordflow">catch</span> (<span class="keyword">const</span> std::exception&amp; ex) {</div>
+<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;                    log&lt;NUClear::WARN&gt;(ex.what());</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;                }</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;            }</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160;        }</div>
+<div class="line"><a name="l00447"></a><span class="lineno">  447</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00448"></a><span class="lineno">  448</span>&#160;<span class="comment">        /// The parser for this reactor</span></div>
+<div class="line"><a name="l00449"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#a635d4f7540db98594224ed880c6857b2">  449</a></span>&#160;<span class="comment"></span>        Parser <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a635d4f7540db98594224ed880c6857b2">parser</a>;<span class="comment"></span></div>
+<div class="line"><a name="l00450"></a><span class="lineno">  450</span>&#160;<span class="comment">        /// Holds the information about the connection for the stream reactor</span></div>
+<div class="line"><a name="l00451"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">  451</a></span>&#160;<span class="comment"></span>        std::variant&lt;std::monostate, SerialConnection, TCPConnection&gt; <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">connection</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;<span class="comment">        /// Holds details about the remote device</span></div>
+<div class="line"><a name="l00453"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">  453</a></span>&#160;<span class="comment"></span>        std::variant&lt;std::monostate, ConnectSerial, ConnectTCP&gt; <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">remote</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;<span class="comment">        /// The handle attached to the IO reaction</span></div>
+<div class="line"><a name="l00455"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#a5ae1907c2b5b3cdb0c612393f1708d27">  455</a></span>&#160;<span class="comment"></span>        ReactionHandle <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#a5ae1907c2b5b3cdb0c612393f1708d27">io_handle</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;<span class="comment">        /// The file descriptor for the currently active connection</span></div>
+<div class="line"><a name="l00457"></a><span class="lineno"><a class="line" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">  457</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">int</span> <a class="code" href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">fd</a> = -1;</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;    };</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160; </div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;}  <span class="comment">// namespace utility::reactor</span></div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160; </div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_REACTOR_STREAMREACTOR_HPP</span></div>
+<div class="ttc" id="aclassutility_1_1file_1_1FileDescriptor_html"><div class="ttname"><a href="classutility_1_1file_1_1FileDescriptor.html">utility::file::FileDescriptor</a></div><div class="ttdoc">An RAII file descriptor.</div><div class="ttdef"><b>Definition:</b> FileDescriptor.hpp:14</div></div>
+<div class="ttc" id="aclassutility_1_1io_1_1uart_html"><div class="ttname"><a href="classutility_1_1io_1_1uart.html">utility::io::uart</a></div><div class="ttdoc">Class for managing a connection to a serial device.</div><div class="ttdef"><b>Definition:</b> uart.hpp:38</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html">utility::reactor::StreamReactor</a></div><div class="ttdoc">This reactor implements the common pattern of connecting to a stream device such as a serial port or ...</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:31</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_a35ed213ce5c6efaa7512b6785a2a8747"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#a35ed213ce5c6efaa7512b6785a2a8747">utility::reactor::StreamReactor::remote</a></div><div class="ttdeci">std::variant&lt; std::monostate, ConnectSerial, ConnectTCP &gt; remote</div><div class="ttdoc">Holds details about the remote device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:453</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_a4d52287af7127948b9c465e1cfecf6d0"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#a4d52287af7127948b9c465e1cfecf6d0">utility::reactor::StreamReactor::connection_attempt</a></div><div class="ttdeci">int connection_attempt</div><div class="ttdoc">The current connection attempt to remove double ups in reactions.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:343</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_a539854c99205b4428fd9b4979d7bc482"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#a539854c99205b4428fd9b4979d7bc482">utility::reactor::StreamReactor::connection</a></div><div class="ttdeci">std::variant&lt; std::monostate, SerialConnection, TCPConnection &gt; connection</div><div class="ttdoc">Holds the information about the connection for the stream reactor.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:451</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_a5ae1907c2b5b3cdb0c612393f1708d27"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#a5ae1907c2b5b3cdb0c612393f1708d27">utility::reactor::StreamReactor::io_handle</a></div><div class="ttdeci">ReactionHandle io_handle</div><div class="ttdoc">The handle attached to the IO reaction.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:455</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_a635d4f7540db98594224ed880c6857b2"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#a635d4f7540db98594224ed880c6857b2">utility::reactor::StreamReactor::parser</a></div><div class="ttdeci">Parser parser</div><div class="ttdoc">The parser for this reactor.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:449</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_a719ae6fac95a1e5adc36b8eb13733bce"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#a719ae6fac95a1e5adc36b8eb13733bce">utility::reactor::StreamReactor::connection_valid</a></div><div class="ttdeci">bool connection_valid() const</div><div class="ttdoc">Returns true if there is a currently established connection, false otherwise.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:330</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_aafdb93f45be3de20d0257fa47c347e84"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#aafdb93f45be3de20d0257fa47c347e84">utility::reactor::StreamReactor::process</a></div><div class="ttdeci">void process(const int &amp;fd)</div><div class="ttdoc">Process the data received from the device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:429</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_ace1fe04631839643d9b510b4cf171ad5"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#ace1fe04631839643d9b510b4cf171ad5">utility::reactor::StreamReactor::device_description</a></div><div class="ttdeci">std::string device_description()</div><div class="ttdoc">Get the description of the device that we are connected to (network or serial)</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:409</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_ad8b52cd4a6199e1df968098ae457b002"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#ad8b52cd4a6199e1df968098ae457b002">utility::reactor::StreamReactor::fd</a></div><div class="ttdeci">int fd</div><div class="ttdoc">The file descriptor for the currently active connection.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:457</div></div>
+<div class="ttc" id="aclassutility_1_1reactor_1_1StreamReactor_html_af3d521ac0613eed80a5fdd116edabb16"><div class="ttname"><a href="classutility_1_1reactor_1_1StreamReactor.html#af3d521ac0613eed80a5fdd116edabb16">utility::reactor::StreamReactor::StreamReactor</a></div><div class="ttdeci">StreamReactor(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the StreamReactor.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:34</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html">utility::reactor::StreamReactor::ConnectSerial</a></div><div class="ttdoc">A message to tell the system to establish a connection to a serial device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:275</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html">utility::reactor::StreamReactor::ConnectTCP</a></div><div class="ttdoc">A message to tell the system to establish a connection to a TCP server.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:266</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1Disconnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1Disconnect.html">utility::reactor::StreamReactor::Disconnect</a></div><div class="ttdoc">A message to tell the system to disconnect from a device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:284</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1DoConnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1DoConnect.html">utility::reactor::StreamReactor::DoConnect</a></div><div class="ttdoc">Internal message used to perform connection logic.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:349</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html">utility::reactor::StreamReactor::DoDisconnect</a></div><div class="ttdoc">Internal message used to perform disconnection logic.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:354</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect_html_afbd9441f9aa7a9ebe5046284aaea4dd9"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html#afbd9441f9aa7a9ebe5046284aaea4dd9">utility::reactor::StreamReactor::DoDisconnect::reconnect</a></div><div class="ttdeci">bool reconnect</div><div class="ttdoc">Set to true if a new connection should be established after disconnection is complete.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:358</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1Do_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1Do.html">utility::reactor::StreamReactor::Do</a></div><div class="ttdoc">Aliasing type for sanity and brevity purposes.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:367</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html">utility::reactor::StreamReactor::NUClearArgs</a></div><div class="ttdoc">Common inheritance for all StreamReactor steps.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:227</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1PostConnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html">utility::reactor::StreamReactor::PostConnect</a></div><div class="ttdoc">A message struct that is emitted immediately after a connection is established.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:237</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1PostConnect_html_abfbc065e34c84d1f6204475e927f8516"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516">utility::reactor::StreamReactor::PostConnect::attempt</a></div><div class="ttdeci">int attempt</div><div class="ttdoc">The attempt number of the connection.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:240</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html">utility::reactor::StreamReactor::PostDisconnect</a></div><div class="ttdoc">A message struct that is emitted immediately after a connection is torn down.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:256</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect_html_afb9dcec933fe187d240a58b7ae75c1d8"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html#afb9dcec933fe187d240a58b7ae75c1d8">utility::reactor::StreamReactor::PostDisconnect::reconnect</a></div><div class="ttdeci">bool reconnect</div><div class="ttdoc">Set to true if a new connection should be established after disconnection is complete.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:260</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1PreConnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1PreConnect.html">utility::reactor::StreamReactor::PreConnect</a></div><div class="ttdoc">A message struct that is emitted immediately before a connection is established.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:232</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html">utility::reactor::StreamReactor::PreDisconnect</a></div><div class="ttdoc">A message struct that is emitted immediately before a connection is torn down.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:246</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect_html_a1e9dc6734a23f3dedc7636f304322fdf"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html#a1e9dc6734a23f3dedc7636f304322fdf">utility::reactor::StreamReactor::PreDisconnect::reconnect</a></div><div class="ttdeci">bool reconnect</div><div class="ttdoc">Set to true if a new connection should be established after disconnection is complete.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:250</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1Reconnect_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html">utility::reactor::StreamReactor::Reconnect</a></div><div class="ttdoc">A message struct to tell the system to reconnect to the device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:289</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1Reconnect_html_a1a2db8dee59f75168f2ee6bacf006686"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#a1a2db8dee59f75168f2ee6bacf006686">utility::reactor::StreamReactor::Reconnect::Reconnect</a></div><div class="ttdeci">Reconnect(std::string reason_)</div><div class="ttdoc">Construct a new Reconnect object.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:298</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1Reconnect_html_afe090fa86a65b4dc441dca2ba7e795a7"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html#afe090fa86a65b4dc441dca2ba7e795a7">utility::reactor::StreamReactor::Reconnect::reason</a></div><div class="ttdeci">std::string reason</div><div class="ttdoc">The reason the reconnection is happening when reconnecting or empty for the initial connection.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:301</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1SerialConnection_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html">utility::reactor::StreamReactor::SerialConnection</a></div><div class="ttdoc">Holds the information about a serial connection.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:380</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1SerialConnection_html_a391ceb9ebaba7bc86816c21dc387bfa7"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a391ceb9ebaba7bc86816c21dc387bfa7">utility::reactor::StreamReactor::SerialConnection::baud_rate</a></div><div class="ttdeci">int baud_rate</div><div class="ttdoc">The baud rate to connect at.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:386</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1SerialConnection_html_a6d7479ef19aa28523dcc6463c1964541"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a6d7479ef19aa28523dcc6463c1964541">utility::reactor::StreamReactor::SerialConnection::uart</a></div><div class="ttdeci">utility::io::uart uart</div><div class="ttdoc">The uart object that is connected to the serial device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:388</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1SerialConnection_html_a92f934b65d9db9d79a34d998c2a826cb"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a92f934b65d9db9d79a34d998c2a826cb">utility::reactor::StreamReactor::SerialConnection::device</a></div><div class="ttdeci">std::string device</div><div class="ttdoc">The path to the serial device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:384</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1TCPConnection_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html">utility::reactor::StreamReactor::TCPConnection</a></div><div class="ttdoc">Holds the information about a TCP connection.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:394</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1TCPConnection_html_a90b32cebf3836b5d70214e5df3690aae"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#a90b32cebf3836b5d70214e5df3690aae">utility::reactor::StreamReactor::TCPConnection::host</a></div><div class="ttdeci">std::string host</div><div class="ttdoc">The host to connect to.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:397</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1TCPConnection_html_acca0b28e38657578b8f0f07ea148eff5"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#acca0b28e38657578b8f0f07ea148eff5">utility::reactor::StreamReactor::TCPConnection::fd</a></div><div class="ttdeci">utility::file::FileDescriptor fd</div><div class="ttdoc">The file descriptor connected to the TCP socket.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:401</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1TCPConnection_html_af89d1813b2e685482d98a58539bd8396"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1TCPConnection.html#af89d1813b2e685482d98a58539bd8396">utility::reactor::StreamReactor::TCPConnection::port</a></div><div class="ttdeci">uint16_t port</div><div class="ttdoc">The port to connect to.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:399</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1TransmitData_html"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html">utility::reactor::StreamReactor::TransmitData</a></div><div class="ttdoc">A message struct to tell the system to transmit data to the device.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:307</div></div>
+<div class="ttc" id="astructutility_1_1reactor_1_1StreamReactor_1_1TransmitData_html_af07fb9aa45ffef2c8978d9176f89591e"><div class="ttname"><a href="structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html#af07fb9aa45ffef2c8978d9176f89591e">utility::reactor::StreamReactor::TransmitData::data</a></div><div class="ttdeci">std::vector&lt; uint8_t &gt; data</div><div class="ttdoc">The data to be transferred.</div><div class="ttdef"><b>Definition:</b> StreamReactor.hpp:324</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_9684913f59199b6b691f8fa6be506247.html">reactor</a></li><li class="navelem"><b>StreamReactor.hpp</b></li>
+    <li class="footer">Generated on Thu Feb 22 2024 23:59:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

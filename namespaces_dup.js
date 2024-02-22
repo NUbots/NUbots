@@ -778,20 +778,7 @@ var namespaces_dup =
         [ "custom_rtf", "clock_8hpp.html#ac97f5461ef949723188525c4a74f45be", null ],
         [ "data", "clock_8cpp.html#adca9c04254e1704be4e85278a7d0ced9", null ]
       ] ],
-      [ "file", "namespaceutility_1_1file.html", [
-        [ "exists", "namespaceutility_1_1file.html#a10216a048f9880b4d86974843f1a778a", null ],
-        [ "getModificationTime", "namespaceutility_1_1file.html#a085c3adcef0a3168d1adeb6e2cb6f29c", null ],
-        [ "isDir", "namespaceutility_1_1file.html#a8e4dc493a403969b6fa33b375be3256b", null ],
-        [ "listDir", "namespaceutility_1_1file.html#ac14ddb95682d6cdc0cce8f5c06c3a619", null ],
-        [ "listFiles", "namespaceutility_1_1file.html#a83ab2ccab91d9e78d9617ebfc32d12de", null ],
-        [ "loadFromFile", "namespaceutility_1_1file.html#a4f9f5fb6dd3cb2af578607edb6ff8b39", null ],
-        [ "makeDir", "namespaceutility_1_1file.html#a3108b0499107292c1fb7b54b51e2a540", null ],
-        [ "makeDirectory", "namespaceutility_1_1file.html#a14fa72f78f809085ebcd6bc65b6a4ef8", null ],
-        [ "pathSplit", "namespaceutility_1_1file.html#aaffed3789274c1f71fcd3fdad7b8b98a", null ],
-        [ "readFile", "namespaceutility_1_1file.html#ad556258cde7871a15a3d50fdad40271b", null ],
-        [ "touch", "namespaceutility_1_1file.html#abf7cc2d962e6ad6bca544849441b8c2d", null ],
-        [ "writeToFile", "namespaceutility_1_1file.html#a5e0aa63bf00a2bd8ce78d527d0335c1a", null ]
-      ] ],
+      [ "file", "namespaceutility_1_1file.html", "namespaceutility_1_1file" ],
       [ "input", null, [
         [ "FrameID", "structutility_1_1input_1_1FrameID.html", "structutility_1_1input_1_1FrameID" ],
         [ "LimbID", "structutility_1_1input_1_1LimbID.html", "structutility_1_1input_1_1LimbID" ],
@@ -963,6 +950,9 @@ var namespaces_dup =
         [ "get_timestamp", "get__timestamp_8hpp.html#a16ad3a3febb3193fea09e24973a9fff7", null ],
         [ "get_timestamp", "get__timestamp_8hpp.html#a771f67c5a6486f5d158328dad6588d57", null ]
       ] ],
+      [ "network", null, [
+        [ "connect", "connect_8cpp.html#a8a3061591c5c998ef537a2be3f902bb3", null ]
+      ] ],
       [ "nusight", null, [
         [ "helpers", null, [
           [ "buildGraph", "NUhelpers_8hpp.html#a66a2bed1fe7f0996fa255a30cc3174b1", null ],
@@ -976,6 +966,9 @@ var namespaces_dup =
         [ "getRawServo", "RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ],
         [ "make_packet_error_string", "RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
         [ "make_servo_hardware_error_string", "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
+      ] ],
+      [ "reactor", null, [
+        [ "StreamReactor", "classutility_1_1reactor_1_1StreamReactor.html", "classutility_1_1reactor_1_1StreamReactor" ]
       ] ],
       [ "reflection", null, [
         [ "unknown_message", "structutility_1_1reflection_1_1unknown__message.html", "structutility_1_1reflection_1_1unknown__message" ]

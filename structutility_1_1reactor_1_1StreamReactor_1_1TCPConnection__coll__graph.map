@@ -1,0 +1,4 @@
+<map id="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::TCPConnection" name="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::TCPConnection">
+<area shape="rect" id="node1" title="Holds the information about a TCP connection." alt="" coords="5,95,248,151"/>
+<area shape="rect" id="node2" href="$classutility_1_1file_1_1FileDescriptor.html" title="An RAII file descriptor." alt="" coords="34,5,219,32"/>
+</map>

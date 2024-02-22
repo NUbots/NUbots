@@ -201,6 +201,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#adad0e0c79fc9b2f58572ba64df373769">~uart</a> ()</td></tr>
 <tr class="memdesc:adad0e0c79fc9b2f58572ba64df373769"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor, close the device on destruction. <br /></td></tr>
 <tr class="separator:adad0e0c79fc9b2f58572ba64df373769"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cbf406fe4a50cf63c835f470da777e6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6">available</a> () const</td></tr>
+<tr class="memdesc:a4cbf406fe4a50cf63c835f470da777e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return the number of bytes available for reading.  <a href="classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6">More...</a><br /></td></tr>
+<tr class="separator:a4cbf406fe4a50cf63c835f470da777e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a191683ecb6d0e0c828b5e77f7b9063c5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5">connected</a> () const</td></tr>
 <tr class="memdesc:a191683ecb6d0e0c828b5e77f7b9063c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Return true if the connection is valid.  <a href="classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5">More...</a><br /></td></tr>
 <tr class="separator:a191683ecb6d0e0c828b5e77f7b9063c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -314,6 +317,26 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>fd</b> = -1</td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4cbf406fe4a50cf63c835f470da777e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4cbf406fe4a50cf63c835f470da777e6">&#9670;&nbsp;</a></span>available()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int utility::io::uart::available </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Return the number of bytes available for reading. </p>
+<dl class="section return"><dt>Returns</dt><dd>-2 if no current connection, -1 for some other error. Check errno if -1 is returned. </dd></dl>
+
+</div>
+</div>
 <a id="a191683ecb6d0e0c828b5e77f7b9063c5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a191683ecb6d0e0c828b5e77f7b9063c5">&#9670;&nbsp;</a></span>connected()</h2>
 
@@ -516,7 +539,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>io</b></li><li class="navelem"><a class="el" href="classutility_1_1io_1_1uart.html">uart</a></li>
-    <li class="footer">Generated on Thu Feb 15 2024 00:02:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Feb 22 2024 23:59:11 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

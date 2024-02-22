@@ -1,0 +1,6 @@
+<map id="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::Disconnect" name="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::Disconnect">
+<area shape="rect" id="node1" title="A message to tell the system to disconnect from a device." alt="" coords="512,16,755,72"/>
+<area shape="rect" id="node2" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="221,9,464,79"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,173,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="44,56,135,83"/>
+</map>

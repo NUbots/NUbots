@@ -1,0 +1,6 @@
+<map id="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::TransmitData" name="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::TransmitData">
+<area shape="rect" id="node1" title="A message struct to tell the system to transmit data to the device." alt="" coords="527,16,769,72"/>
+<area shape="rect" id="node2" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="236,9,479,79"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,188,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="51,56,142,83"/>
+</map>

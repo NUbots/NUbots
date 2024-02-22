@@ -1,7 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="5,879,240,920"/>
 <area shape="rect" id="node2" href="$classmodule_1_1extension_1_1Director.html" title=" " alt="" coords="353,879,504,920"/>
-<area shape="rect" id="node3" title=" " alt="" coords="55,2105,190,2131"/>
+<area shape="rect" id="node3" title=" " alt="" coords="55,2130,190,2157"/>
 <area shape="rect" id="node4" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="349,944,508,985"/>
 <area shape="rect" id="node41" href="$classmodule_1_1actuation_1_1KinematicsConfiguration.html" title=" " alt="" coords="337,1009,520,1051"/>
 <area shape="rect" id="node42" href="$classmodule_1_1extension_1_1FileWatcher.html" title=" " alt="" coords="353,1075,504,1116"/>
@@ -45,6 +45,7 @@
 <area shape="rect" id="node80" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="321,3288,536,3329"/>
 <area shape="rect" id="node81" href="$classmodule_1_1vision_1_1RobotDetector.html" title=" " alt="" coords="319,3354,539,3381"/>
 <area shape="rect" id="node82" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="328,3405,529,3431"/>
+<area shape="rect" id="node83" href="$classutility_1_1reactor_1_1StreamReactor.html" title="This reactor implements the common pattern of connecting to a stream device such as a serial port or ..." alt="" coords="307,3455,550,3511"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="662,5,810,47"/>
 <area shape="rect" id="node6" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="662,71,810,112"/>
 <area shape="rect" id="node7" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="662,136,810,177"/>

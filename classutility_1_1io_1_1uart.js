@@ -5,6 +5,7 @@ var classutility_1_1io_1_1uart =
     [ "uart", "classutility_1_1io_1_1uart.html#aa44beb67b10ef67a0caa9e61f18c744f", null ],
     [ "uart", "classutility_1_1io_1_1uart.html#ab0855a5f5657cb2cb0604d400c00f737", null ],
     [ "~uart", "classutility_1_1io_1_1uart.html#adad0e0c79fc9b2f58572ba64df373769", null ],
+    [ "available", "classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6", null ],
     [ "connected", "classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5", null ],
     [ "native_handle", "classutility_1_1io_1_1uart.html#a583cecd2d46723b9f6dc0e0f63955039", null ],
     [ "operator=", "classutility_1_1io_1_1uart.html#a83ddf4c5b2eb447a4f409da82262e8b4", null ],

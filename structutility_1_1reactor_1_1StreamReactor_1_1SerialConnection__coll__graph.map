@@ -1,0 +1,4 @@
+<map id="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::SerialConnection" name="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::SerialConnection">
+<area shape="rect" id="node1" title="Holds the information about a serial connection." alt="" coords="5,95,260,151"/>
+<area shape="rect" id="node2" href="$classutility_1_1io_1_1uart.html" title="Class for managing a connection to a serial device." alt="" coords="76,5,189,32"/>
+</map>

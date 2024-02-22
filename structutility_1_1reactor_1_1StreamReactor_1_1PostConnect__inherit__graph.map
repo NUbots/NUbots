@@ -1,0 +1,6 @@
+<map id="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::PostConnect" name="utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::PostConnect">
+<area shape="rect" id="node1" title="A message struct that is emitted immediately after a connection is established." alt="" coords="521,16,764,72"/>
+<area shape="rect" id="node2" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="231,9,473,79"/>
+<area shape="rect" id="node3" title=" " alt="" coords="5,5,183,32"/>
+<area shape="rect" id="node4" title=" " alt="" coords="49,56,139,83"/>
+</map>
