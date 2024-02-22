@@ -12,7 +12,6 @@
 #include <system_error>
 #include <unistd.h>
 
-
 namespace utility::network {
 
     utility::file::FileDescriptor connect(const std::string& host, const uint16_t& port) {

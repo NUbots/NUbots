@@ -11,8 +11,6 @@
 #include <thread>
 #include <unistd.h>
 
-#include "utility/network/resolve.hpp"
-
 std::pair<std::thread, int> create_tcp_server(const sa_family_t& family) {
 
     std::mutex mutex;
@@ -98,7 +96,7 @@ TEST_CASE("connect() connects to a TCP server and sends data", "[network][connec
     INFO("Testing connection to " << host);
 
     // Work out what kind of TCP server we need and create it
-    auto sock = utility::network::resolve(host, 0);
+    auto sock = NUClear::util::network::resolve(host, 0);
 
     INFO("Using " << (sock.sock.sa_family == AF_INET ? "ipv4" : "ipv6") << " socket");
 
