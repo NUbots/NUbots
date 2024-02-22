@@ -13,11 +13,15 @@ namespace module::platform::NUsense {
      */
     template <typename T>
     T read_le(const uint8_t* ptr) {
-        T value = 0;
-        for (size_t i = 0; i < sizeof(T); i++) {
-            value |= static_cast<T>(ptr[i]) << (8 * i);
+        switch (sizeof(T)) {
+            case 2: return (T(ptr[0]) << 0) | (T(ptr[1]) << 8);
+            case 4: return (T(ptr[0]) << 0) | (T(ptr[1]) << 8) | (T(ptr[2]) << 16) | (T(ptr[3]) << 24);
+            case 8:
+                return (T(ptr[0]) << 0) | (T(ptr[1]) << 8) | (T(ptr[2]) << 16) | (T(ptr[3]) << 24)  //
+                       | (T(ptr[4]) << 32) | (T(ptr[5]) << 40) | (T(ptr[6]) << 48) | (T(ptr[7]) << 56);
+            default: return 0;
         }
-        return value;
+        static_assert(sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8, "Only 2, 4, and 8 byte values are supported");
     }
 
     std::unique_ptr<NUSenseFrame> NUSenseParser::operator()(const uint8_t& byte) {
