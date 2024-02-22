@@ -74,7 +74,7 @@ namespace module::network {
             // However if because of the low priority other modules are taking all the thread time this module won't
             // queue indefinitely killing all the ram in the system.
             handle->reaction =
-                on<Trigger<T>, Buffer<10>, Priority::LOW>()
+                on<Trigger<T>, Single, Priority::LOW>()
                     .then(
                         type,
                         [this, type, handle](std::shared_ptr<const T> msg) {

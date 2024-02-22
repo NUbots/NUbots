@@ -121,7 +121,7 @@ namespace {
 TEST_CASE("Test that if a task is optional then it does not need to be executed for the other tasks to run",
           "[director][priority][optional]") {
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     config.thread_count = 1;
     NUClear::PowerPlant powerplant(config);
     powerplant.install<module::extension::Director>();

@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2016 NUbots
+# Copyright (c) 2013 NUbots
 #
 # This file is part of the NUbots codebase.
 # See https://github.com/NUbots/NUbots for further info.
@@ -99,7 +99,7 @@ with open(role_name, "w", encoding="utf-8") as role_file:
 
     start = """\
 
-    NUClear::PowerPlant::Configuration config;
+    NUClear::Configuration config;
     unsigned int nThreads = std::thread::hardware_concurrency() + 2;
     config.thread_count = nThreads >= 4 ? nThreads : 4;
 

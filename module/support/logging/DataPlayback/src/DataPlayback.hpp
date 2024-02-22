@@ -44,7 +44,7 @@ namespace module::support::logging {
 
         struct Player {
             // The function that will queue this message to be emitted
-            std::function<void(const NUClear::clock::time_point&, const std::vector<char>&)> emit;
+            std::function<void(const NUClear::clock::time_point&, const std::vector<uint8_t>&)> emit;
             // If this player should execute and send messages
             bool enabled = false;
         };
@@ -53,7 +53,7 @@ namespace module::support::logging {
         void add_player() {
             uint64_t hash = NUClear::util::serialise::Serialise<T>::hash();
             Player p;
-            p.emit = [this](const NUClear::clock::time_point& emit_time, const std::vector<char>& payload) {
+            p.emit = [this](const NUClear::clock::time_point& emit_time, const std::vector<uint8_t>& payload) {
                 // Deserialise our type
                 auto msg = std::make_unique<T>(NUClear::util::serialise::Serialise<T>::deserialise(payload));
 

@@ -7,6 +7,7 @@ import { CameraDefaultDrawOptions, CameraModel } from "../../camera/model";
 import { BallModel } from "./balls";
 import { GoalModel } from "./goals";
 import { GreenHorizonModel } from "./green_horizon";
+import { OtherRobotsModel } from "./other_robots";
 import { VisualMeshModel } from "./visual_mesh";
 
 type DrawOptions = CameraDefaultDrawOptions & {
@@ -14,6 +15,7 @@ type DrawOptions = CameraDefaultDrawOptions & {
   drawGreenHorizon: boolean;
   drawBalls: boolean;
   drawGoals: boolean;
+  drawRobots: boolean;
 };
 
 export interface VisionCameraModelOpts {
@@ -25,6 +27,7 @@ export interface VisionCameraModelOpts {
   greenHorizon?: GreenHorizonModel;
   balls?: BallModel[];
   goals?: GoalModel[];
+  robots?: OtherRobotsModel[];
   selected?: boolean;
 }
 
@@ -39,6 +42,7 @@ export class VisionCameraModel implements CameraModel {
   @observable.ref greenHorizon?: GreenHorizonModel;
   @observable.ref balls?: BallModel[];
   @observable.ref goals?: GoalModel[];
+  @observable.ref robots?: OtherRobotsModel[];
 
   @observable drawOptions: DrawOptions;
 
@@ -51,6 +55,7 @@ export class VisionCameraModel implements CameraModel {
     this.greenHorizon = opts.greenHorizon;
     this.balls = opts.balls;
     this.goals = opts.goals;
+    this.robots = opts.robots;
     this.drawOptions = opts.drawOptions;
     this.selected = opts.selected ?? false;
   }
@@ -67,6 +72,7 @@ export class VisionCameraModel implements CameraModel {
         drawGreenHorizon: true,
         drawBalls: true,
         drawGoals: true,
+        drawRobots: true,
       },
     });
   }
@@ -80,6 +86,7 @@ export class VisionCameraModel implements CameraModel {
     this.greenHorizon = (that.greenHorizon && this.greenHorizon?.copy(that.greenHorizon)) || that.greenHorizon;
     this.balls = that.balls;
     this.goals = that.goals;
+    this.robots = that.robots;
     return this;
   }
 }

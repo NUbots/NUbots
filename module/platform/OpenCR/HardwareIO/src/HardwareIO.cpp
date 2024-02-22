@@ -132,12 +132,7 @@ namespace module::platform::OpenCR {
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Make sure OpenCR is operating at the correct baud rate (based on config params)
-            if (opencr.connected()) {
-                opencr.close();
-            }
-
-            opencr.open(config["opencr"]["device"], config["opencr"]["baud"]);
+            opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
             byte_wait   = config["opencr"]["byte_wait"];
             packet_wait = config["opencr"]["packet_wait"];
 
@@ -236,6 +231,7 @@ namespace module::platform::OpenCR {
 
                         // Stop the model watchdog since we have it now
                         // Start the packet watchdog since the main loop is now starting
+                        model_watchdog.disable();
                         model_watchdog.unbind();
                         log<NUClear::WARN>("Packet watchdog enabled");
                         packet_watchdog.enable();

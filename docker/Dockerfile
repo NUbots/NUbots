@@ -291,7 +291,7 @@ RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/e682ea6224bee18034bed24d37403ca922c421e7.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/f6704a1f049c7a30e1b92f4cd70af219d28a4697.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
@@ -346,6 +346,7 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 
 # Install python libraries
 RUN pip install \
+    pygit2==1.13.3 \
     xxhash \
     pylint \
     termcolor \

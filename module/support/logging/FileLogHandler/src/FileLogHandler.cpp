@@ -70,7 +70,7 @@ namespace module::support::logging {
                 std::lock_guard<std::mutex> lock(mutex);
 
                 // Get our reactor name
-                std::string reactor = stats.identifier[1];
+                std::string reactor = stats.identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t last_c = reactor.find_last_of(':');
@@ -79,7 +79,8 @@ namespace module::support::logging {
 #ifndef NDEBUG  // We have a cold hearted monstrosity that got built!
 
                 // Print our exception detals
-                log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                log_file << reactor << " "
+                         << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                          << Colour::brightred << "Exception:"
                          << " " << Colour::brightred << utility::support::evil::exception_name << std::endl;
 
@@ -96,14 +97,16 @@ namespace module::support::logging {
 
                     std::string exception_name = NUClear::util::demangle(typeid(ex).name());
 
-                    log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                    log_file << reactor << " "
+                             << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                              << Colour::brightred << "Exception:"
                              << " " << Colour::brightred << exception_name << " " << ex.what() << std::endl;
                 }
                 // We don't actually want to crash
                 catch (...) {
 
-                    log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                    log_file << reactor << " "
+                             << (stats.identifiers.name.empty() ? "" : "- " + stats.identifiers.name + " ")
                              << Colour::brightred << "Exception of unkown type" << std::endl;
                 }
 #endif
@@ -119,7 +122,7 @@ namespace module::support::logging {
             // If we know where this log message came from, we display that
             if (message.task != nullptr) {
                 // Get our reactor name
-                std::string reactor = message.task->identifier[1];
+                std::string reactor = message.task->identifiers.reactor;
 
                 // Strip to the last semicolon if we have one
                 size_t last_c = reactor.find_last_of(':');
@@ -127,7 +130,7 @@ namespace module::support::logging {
 
                 // This is our source
                 source = reactor + " "
-                         + (message.task->identifier[0].empty() ? "" : "- " + message.task->identifier[0] + " ");
+                         + (message.task->identifiers.name.empty() ? "" : "- " + message.task->identifiers.name + " ");
             }
 
             // Output the level
@@ -137,6 +140,7 @@ namespace module::support::logging {
                 case NUClear::INFO: log_file << source << Colour::brightblue << "INFO: "; break;
                 case NUClear::WARN: log_file << source << Colour::yellow << "WARN: "; break;
                 case NUClear::ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
+                case NUClear::UNKNOWN:;
                 case NUClear::FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
             }
 
