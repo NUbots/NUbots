@@ -143,9 +143,15 @@ namespace utility::reactor {
                             process(event.fd);
                         }
                         if ((event.events & IO::ERROR) != 0) {
+                            // Unbind the handle, so it does not read stream in later iterations
+                            io_handle.unbind();
+                            // Start a new connection
                             emit(std::make_unique<Reconnect>("An invalid state occurred"));
                         }
                         if ((event.events & IO::CLOSE) != 0) {
+                            // Unbind the handle, so it does not read stream in later iterations
+                            io_handle.unbind();
+                            // Start a new connection
                             emit(std::make_unique<Reconnect>("The device hung up"));
                         }
                         if ((event.events & ~(IO::READ | IO::ERROR | IO::CLOSE)) != 0) {
