@@ -17,29 +17,34 @@ namespace module::platform::NUsense {
         void send_packet(const T& packet) {
             // Serialize the packet
             auto payload = NUClear::util::serialise::Serialise<T>::serialise(packet);
+            // Get the hash of the packet
+            uint64_t hash = NUClear::util::serialise::Serialise<T>::hash();
+            // Get the current timestamp
+            uint64_t timestamp =
+                std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count();
 
             // Create the nbs packet
             std::vector<uint8_t> nbs;
-            bytes.push_back(0xE2);
-            bytes.push_back(0x98);
-            bytes.push_back(0xA2);
+            nbs.push_back(0xE2);
+            nbs.push_back(0x98);
+            nbs.push_back(0xA2);
             // Size
             for (int i = 0; i < 4; ++i) {
-                bytes.push_back((payload.size() >> (i * 8)) & 0xFF);
+                nbs.push_back((payload.size() >> (i * 8)) & 0xFF);
             }
             // Timestamp
             for (int i = 0; i < 8; ++i) {
-                bytes.push_back((timestamp >> (i * 8)) & 0xFF);
+                nbs.push_back((timestamp >> (i * 8)) & 0xFF);
             }
             // Hash
             for (int i = 0; i < 8; ++i) {
-                bytes.push_back((hash >> (i * 8)) & 0xFF);
+                nbs.push_back((hash >> (i * 8)) & 0xFF);
             }
             // Payload
-            bytes.insert(bytes.end(), payload.begin(), payload.end());
+            nbs.insert(nbs.end(), payload.begin(), payload.end());
 
             // Send the packet to the device
-            emit(std::make_unique<TransmitData>(packet.bytes));
+            emit(std::make_unique<TransmitData>(nbs));
         }
     };
 
