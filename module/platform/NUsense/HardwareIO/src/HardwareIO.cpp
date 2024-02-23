@@ -10,6 +10,7 @@
 
 namespace module::platform::NUsense {
     using message::actuation::ServoTargets;
+    using extension::Configuration;
     /**
      * Message reflector class that can be used to emit messages provided as NUSenseFrames to the rest of the system
      *
