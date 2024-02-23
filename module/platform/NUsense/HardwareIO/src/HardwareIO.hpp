@@ -19,9 +19,10 @@ namespace module::platform::NUsense {
             auto payload = NUClear::util::serialise::Serialise<T>::serialise(packet);
             // Get the hash of the packet
             uint64_t hash = NUClear::util::serialise::Serialise<T>::hash();
-            // Get the current timestamp
-            uint64_t timestamp =
-                std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now().time_since_epoch()).count();
+
+            // Get the timestamp of the emit if we can, otherwise use now
+            const auto* task = NUClear::threading::ReactionTask::get_current_task();
+            log->timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
 
             // Create the nbs packet
             std::vector<uint8_t> nbs;
