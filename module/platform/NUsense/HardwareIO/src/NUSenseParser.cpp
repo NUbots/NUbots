@@ -2,26 +2,13 @@
 
 namespace module::platform::NUsense {
 
-    /**
-     * Read a little endian value from a byte array
-     *
-     * @tparam T The type of the value to read
-     *
-     * @param ptr The pointer to the first byte of the value
-     *
-     * @return The value read from the byte array
-     */
-    template <typename T>
-    T read_le(const uint8_t* ptr) {
-        switch (sizeof(T)) {
-            case 2: return (T(ptr[0]) << 0) | (T(ptr[1]) << 8);
-            case 4: return (T(ptr[0]) << 0) | (T(ptr[1]) << 8) | (T(ptr[2]) << 16) | (T(ptr[3]) << 24);
-            case 8:
-                return (T(ptr[0]) << 0) | (T(ptr[1]) << 8) | (T(ptr[2]) << 16) | (T(ptr[3]) << 24)  //
-                       | (T(ptr[4]) << 32) | (T(ptr[5]) << 40) | (T(ptr[6]) << 48) | (T(ptr[7]) << 56);
-            default: return 0;
-        }
-        static_assert(sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8, "Only 2, 4, and 8 byte values are supported");
+    uint32_t read_le_32(const uint8_t* ptr) {
+        return (uint32_t(ptr[0]) << 0) | (uint32_t(ptr[1]) << 8) | (uint32_t(ptr[2]) << 16) | (uint32_t(ptr[3]) << 24);
+    }
+    uint64_t read_le_64(const uint8_t* ptr) {
+        return (uint64_t(ptr[0]) << 0) | (uint64_t(ptr[1]) << 8) | (uint64_t(ptr[2]) << 16) | (uint64_t(ptr[3]) << 24)
+               | (uint64_t(ptr[4]) << 32) | (uint64_t(ptr[5]) << 40) | (uint64_t(ptr[6]) << 48)
+               | (uint64_t(ptr[7]) << 56);
     }
 
     std::unique_ptr<NUSenseFrame> NUSenseParser::operator()(const uint8_t& byte) {
@@ -37,7 +24,7 @@ namespace module::platform::NUsense {
             case SIZE: {
                 // We have read the size of the payload
                 if (buffer.size() == 7) {
-                    size  = read_le<uint32_t>(&buffer[3]);
+                    size  = read_le_32(&buffer[3]);
                     state = PAYLOAD;
                 }
             } break;
@@ -50,8 +37,8 @@ namespace module::platform::NUsense {
                     auto msg       = std::make_unique<NUSenseFrame>();
                     msg->header    = {buffer[0], buffer[1], buffer[2]};
                     msg->size      = size;
-                    msg->timestamp = read_le<uint64_t>(&buffer[3]);
-                    msg->hash      = read_le<uint64_t>(&buffer[11]);
+                    msg->timestamp = read_le_64(&buffer[3]);
+                    msg->hash      = read_le_64(&buffer[11]);
                     msg->payload   = std::vector<uint8_t>(std::next(buffer.begin(), 19), buffer.end());
 
                     return msg;

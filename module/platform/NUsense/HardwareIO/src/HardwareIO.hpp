@@ -3,6 +3,8 @@
 
 #include <nuclear>
 
+#include "NUSenseParser.hpp"
+
 #include "utility/reactor/StreamReactor.hpp"
 
 namespace module::platform::NUsense {
