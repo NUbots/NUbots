@@ -9,7 +9,7 @@ namespace module::platform::NUsense {
 
     class HardwareIO : public utility::reactor::StreamReactor<HardwareIO, NBSParser, 5> {
     public:
-        /// @brief Called by the powerplant to build and setup the GPS reactor.
+        /// @brief Called by the powerplant to build and setup the NUSense reactor.
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
 
     private:
