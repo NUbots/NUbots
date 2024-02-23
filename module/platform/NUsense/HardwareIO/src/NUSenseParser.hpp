@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <vector>
+#include <memory>
 
 namespace module::platform::NUsense {
 

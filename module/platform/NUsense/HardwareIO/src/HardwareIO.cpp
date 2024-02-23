@@ -1,14 +1,17 @@
-#include "NUSense.hpp"
+#include "NUSenseParser.hpp"
 
 #include "extension/Configuration.hpp"
 
 #include "message/reflection.hpp"
 
+#include "HardwareIO.hpp"
+
+#include "message/actuation/ServoTarget.hpp"
 
 namespace module::platform::NUsense {
-
+    using message::actuation::ServoTargets;
     /**
-     * Message reflector class that can be used to emit messages provided as NBSFrames to the rest of the system
+     * Message reflector class that can be used to emit messages provided as NUSenseFrames to the rest of the system
      *
      * @tparam T The type of the message to emit
      */
@@ -18,13 +21,13 @@ namespace module::platform::NUsense {
     /// Virtual base class for the emit reflector
     template <>
     struct EmitReflector<void> {  // NOLINT(cppcoreguidelines-special-member-functions)
-        virtual uint64_t emit(const NBSFrame& frame) = 0;
+        virtual uint64_t emit(const NUSenseFrame& frame) = 0;
         virtual ~EmitReflector()                     = default;
     };
     template <typename T>
     struct EmitReflector : public EmitReflector<void> {
         template <typename U = T>
-        void emit(NUClear::PowerPlant& powerplant, const NBSFrame& frame) {
+        void emit(NUClear::PowerPlant& powerplant, const NUSenseFrame& frame) {
             // Deserialise and emit
             powerplant.emit(std::make_unique<T>(NUClear::util::serialise::Serialise<T>::deserialise(frame.payload)));
         }
@@ -32,7 +35,7 @@ namespace module::platform::NUsense {
 
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-        : utility::reactor::StreamReactor<HardwareIO, NBSParser, 5>(std::move(environment)) {
+        : utility::reactor::StreamReactor<HardwareIO, NUSenseParser, 5>(std::move(environment)) {
 
         on<Configuration>("NUSense.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -54,7 +57,7 @@ namespace module::platform::NUsense {
 
         // Emit any messages sent by the device to the rest of the system
         on<Trigger<NUSenseFrame>>().then("From NUSense", [this](const NUSenseFrame& packet) {
-            message::reflection::from_hash<IdReflector>(packet.hash)->emit(powerplant, packet);
+            message::reflection::from_hash<EmitReflector>(packet.hash)->emit(powerplant, packet);
         });
     }
 
