@@ -6,6 +6,7 @@
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/reflection.hpp"
+#include <string>
 
 namespace module::platform::NUsense {
 
@@ -42,7 +43,7 @@ namespace module::platform::NUsense {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Get the IP address and port from the config file
-            auto device = config["connection"]["device"].as<std::string>();
+            auto device = config["connection"]["path"].as<std::string>();
             auto baud   = config["connection"]["baud"].as<int>();
 
             // Tell the stream reactor to connect to the device
