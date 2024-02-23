@@ -1,15 +1,17 @@
+#include "HardwareIO.hpp"
+
 #include "NUSenseParser.hpp"
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/ServoTarget.hpp"
 #include "message/reflection.hpp"
 
-#include "HardwareIO.hpp"
-
-#include "message/actuation/ServoTarget.hpp"
-
 namespace module::platform::NUsense {
+
+    using extension::Configuration;
     using message::actuation::ServoTargets;
+
     /**
      * Message reflector class that can be used to emit messages provided as NUSenseFrames to the rest of the system
      *
@@ -21,13 +23,12 @@ namespace module::platform::NUsense {
     /// Virtual base class for the emit reflector
     template <>
     struct EmitReflector<void> {  // NOLINT(cppcoreguidelines-special-member-functions)
-        virtual uint64_t emit(const NUSenseFrame& frame) = 0;
-        virtual ~EmitReflector()                     = default;
+        virtual void emit(NUClear::PowerPlant& powerplant, const NUSenseFrame& frame) = 0;
+        virtual ~EmitReflector()                                                      = default;
     };
     template <typename T>
     struct EmitReflector : public EmitReflector<void> {
-        template <typename U = T>
-        void emit(NUClear::PowerPlant& powerplant, const NUSenseFrame& frame) {
+        void emit(NUClear::PowerPlant& powerplant, const NUSenseFrame& frame) override {
             // Deserialise and emit
             powerplant.emit(std::make_unique<T>(NUClear::util::serialise::Serialise<T>::deserialise(frame.payload)));
         }
