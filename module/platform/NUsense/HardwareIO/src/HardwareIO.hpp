@@ -25,6 +25,7 @@ namespace module::platform::NUsense {
             auto timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
             auto timestamp_us =
                 std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
+            uint32_t size = uint32_t(payload.size() + sizeof(hash) + sizeof(timestamp_us));
 
             // Create the nbs packet
             std::vector<uint8_t> nbs;
@@ -32,16 +33,16 @@ namespace module::platform::NUsense {
             nbs.push_back(0x98);
             nbs.push_back(0xA2);
             // Size
-            for (int i = 0; i < 4; ++i) {
-                nbs.push_back((payload.size() >> (i * 8)) & 0xFF);
+            for (size_t i = 0; i < sizeof(size); ++i) {
+                nbs.push_back(uint8_t((size >> (i * 8)) & 0xFF));
             }
             // Timestamp
-            for (int i = 0; i < 8; ++i) {
-                nbs.push_back((timestamp >> (i * 8)) & 0xFF);
+            for (size_t i = 0; i < sizeof(timestamp_us); ++i) {
+                nbs.push_back(uint8_t((timestamp_us >> (i * 8)) & 0xFF));
             }
             // Hash
-            for (int i = 0; i < 8; ++i) {
-                nbs.push_back((hash >> (i * 8)) & 0xFF);
+            for (size_t i = 0; i < sizeof(hash); ++i) {
+                nbs.push_back(uint8_t((hash >> (i * 8)) & 0xFF));
             }
             // Payload
             nbs.insert(nbs.end(), payload.begin(), payload.end());
