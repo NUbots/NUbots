@@ -22,7 +22,9 @@ namespace module::platform::NUsense {
 
             // Get the timestamp of the emit if we can, otherwise use now
             const auto* task = NUClear::threading::ReactionTask::get_current_task();
-            log->timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
+            auto timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
+            auto timestamp_us =
+                std::chrono::duration_cast<std::chrono::microseconds>(timestamp.time_since_epoch()).count();
 
             // Create the nbs packet
             std::vector<uint8_t> nbs;
