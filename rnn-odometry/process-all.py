@@ -15,7 +15,7 @@ def main():
     parser.add_argument(
         "file_prefix", help="The prefix to add for identifying the type of path represented by the data"
     )
-
+    # Example: python3 process-all.py configs/ nuclear-outputs/long-run-1.json processed-outputs/json/ processed-outputs/numpy/ long
     args = parser.parse_args()
     config_dir = args.config_dir
     input_file = args.input_file
