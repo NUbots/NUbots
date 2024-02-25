@@ -15,21 +15,77 @@ def main():
     # numpy arrays
     imu = np.load("processed-outputs/numpy/long/1/long-imu-1.npy")
     servos = np.load("processed-outputs/numpy/long/1/long-servos-1.npy")
-    truth = np.load("processed-outputs/numpy/long/1/long-truth-1.npy")
+    truth_all = np.load("processed-outputs/numpy/long/1/long-truth-1.npy")
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
+
+    # # Reconstruct the matrices
+    # # "data.odometryGroundTruth.Htw.x.x", - 0
+    # # "data.odometryGroundTruth.Htw.x.y", - 1
+    # # "data.odometryGroundTruth.Htw.x.z", - 2
+    # # "data.odometryGroundTruth.Htw.y.x", - 3
+    # # "data.odometryGroundTruth.Htw.y.y", - 4
+    # # "data.odometryGroundTruth.Htw.y.z", - 5
+    # # "data.odometryGroundTruth.Htw.z.x", - 6
+    # # "data.odometryGroundTruth.Htw.z.y", - 7
+    # # "data.odometryGroundTruth.Htw.z.z", - 8
+    # # "data.odometryGroundTruth.Htw.t.x", - 9
+    # # "data.odometryGroundTruth.Htw.t.y", - 10
+    # # "data.odometryGroundTruth.Htw.t.z" - 11
+    # Hwts = []
+    # for t in truth_all:
+    #     m = np.array[[t[0], t[3], t[6], t[9]],[t[1], t[4], t[7], t[10]],[t[2], t[5], t[8], t[11]],[0.0, 0.0, 0.0, 1.0]]
+    #     Hwts.append(m)
+    # Htws = [np.linalg.inv(m) for m in Hwts]
+    # robot_position_in_world_truth = np.array([h[3,:3] for h in Htws])
+
+    # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
+    truth = truth_all[:, 9:12]
+
+    # Normalise the data
+    # "data.accelerometer.x",
+    # "data.accelerometer.y",
+    # "data.accelerometer.z",
+    # "data.gyroscope.x",
+    # "data.gyroscope.y",
+    # "data.gyroscope.z"
+    imu_buffers = [10.0, 10.0, 10.0, 50.0, 50.0, 50.0]
+    imu_maxes = np.max(imu, axis = 0) + imu_buffers
+    imu_mins = np.min(imu, axis = 0) - imu_buffers
+    # Cap the imu data off to remove outliers
+    imu_capped = np.maximum(np.minimum(imu, imu_maxes, axis = 1), imu_mins, axis = 1)
+    normalized_imu  = ((imu_capped + imu_mins) / (imu_maxes + imu_mins)) - 0.5
+    # plot this
+    # import pdb
+    # pdb.set_trace()
+
 
     # Join the data
     joined_data = np.concatenate([imu, servos, truth], axis=1)
     print(joined_data.shape)
+
+    # Normalised the training data
+
+
+
+
+    # Split the training data into training, validation and test sets
     training_size = 0.5
     validate_size = 0.2
 
     # Split the data into training, validation and testing sets
+    # then normalise
     num_time_steps = joined_data.shape[0]
-    num_train = int(num_time_steps * training_size)
-    num_val = int(num_time_steps * validate_size)
 
-    train_arr = joined_data[:num_train]
+    num_train_max_idx = np.floor(num_time_steps * training_size)
+    num_val_max_idx = np.floor(num_time_steps * (training_size + validate_size))
+
+
+    train_arr = joined_data[:num_train_max_idx]
+    val_arr = joined_data[num_train_max_idx: num_val_max_idx]
+    test_arr = joined_data[num_val_max_idx:]
+
+    import pdb
+    pdb.set_trace()
 
     mean = train_arr.mean(axis=0)
     std = train_arr.std(axis=0)

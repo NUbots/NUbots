@@ -26,7 +26,7 @@ max_val = tf.reduce_max(concatenated)
 # use the same normalisation.(like servos between 0-360 degrees)
 
 # Normalize each tensor
-normalized_tensor = [(tensor - min_val) / (max_val - min_val) for tensor in tensor]
+normalized_tensor = [(t - min_val) / (max_val - min_val) for t in tensor]
 
 print(normalized_tensor)
 # normalized_arrays = []
