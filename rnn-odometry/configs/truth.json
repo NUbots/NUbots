@@ -8,7 +8,9 @@
         "data.odometryGroundTruth.Htw.y.z",
         "data.odometryGroundTruth.Htw.z.x",
         "data.odometryGroundTruth.Htw.z.y",
-        "data.odometryGroundTruth.Htw.z.z"
-
+        "data.odometryGroundTruth.Htw.z.z",
+        "data.odometryGroundTruth.Htw.t.x",
+        "data.odometryGroundTruth.Htw.t.y",
+        "data.odometryGroundTruth.Htw.t.z"
     ]
 }
