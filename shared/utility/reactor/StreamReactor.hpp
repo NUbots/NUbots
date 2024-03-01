@@ -98,7 +98,7 @@ namespace utility::reactor {
                 if (log_level <= NUClear::TRACE) {
                     std::stringstream debug_string;
                     for (const auto& byte : t.data) {
-                        debug_string << std::isprint(byte) ? std::string(byte) : fmt::format("\\x{:02X} ", byte);
+                        debug_string << std::isprint(byte) ? std::string(byte) : fmt::format("\\{:#04x} ", byte);
                     }
                     log<NUClear::TRACE>("Wrote:", debug_string.str());
                 }
@@ -441,7 +441,7 @@ namespace utility::reactor {
             while (::read(fd, &byte, 1) == 1) {
 
                 if (log_level <= NUClear::TRACE) {
-                    debug_string << std::isprint(byte) ? std::string(byte) : fmt::format("\\x{:02X} ", byte);
+                    debug_string << std::isprint(byte) ? std::string(byte) : fmt::format("\\{:#04x} ", byte);
                 }
 
                 try {
