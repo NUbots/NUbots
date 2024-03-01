@@ -22,16 +22,12 @@ namespace module::platform::NUsense {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
             cfg.nusense.port        = config["nusense"]["port"].as<std::string>();
             cfg.nusense.baud        = config["nusense"]["baud"].as<unsigned int>();
-        });
-
-        on<Startup>().then("NUSense HardwareIO Startup", [this] {
-            // Make sure the port is closed before we open it
-            if (nusense.connected()){
-                nusense.close();
-            }
 
             nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
             log<NUClear::INFO>("PORT OPENED");
+        });
+
+        on<Startup>().then("NUSense HardwareIO Startup", [this] {
 
             // Send fake packets
             auto fake_servo_targets = std::make_unique<ServoTargets>();

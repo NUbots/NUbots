@@ -22,6 +22,8 @@ namespace module::platform::NUsense {
             } nusense;
         } cfg;
 
+
+        char buf[512] = {0};
         /// @brief Manage desired port for NUSense
         utility::io::uart nusense;
     };
