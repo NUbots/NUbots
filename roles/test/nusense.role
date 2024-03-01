@@ -4,7 +4,6 @@ nuclear_role(
   support::SignalCatcher
   support::logging::ConsoleLogHandler
   # Platform
-  #platform::HardwareSimulator
   platform::NUsense::HardwareIO
 
 )
