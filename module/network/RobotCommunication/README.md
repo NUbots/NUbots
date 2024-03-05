@@ -15,6 +15,11 @@ The information that has been received over UDP is then emitted locally.
 
 Add this module to get information about other robots.
 
+To use this, you must set the broadcast_ip in the yaml file with your IP, but with the last digits(s) replaced by 255. For example:
+
+- Run "hostname -I"
+- if the first IP address is "172.17.0.1", then use "172.17.0.255"
+
 ## Consumes
 
 - `message::input::RoboCup` which contains data about the robot, including its state, current position, projected position and its view of the other robots.
