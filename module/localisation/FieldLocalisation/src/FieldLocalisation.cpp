@@ -49,7 +49,6 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-
     using namespace std::chrono;
 
     FieldLocalisation::FieldLocalisation(std::unique_ptr<NUClear::Environment> environment)
@@ -173,8 +172,8 @@ namespace module::localisation {
         Eigen::Vector3d rPFf = compute_Hfw(particle) * rPWw;
 
         // Get the associated index in the field line map [x, y]
-        // Note: field space is placed in centre of the field, whereas the field line map origin (x,y) is top
-        // left corner of discretised field
+        // Note: field space is placed in centre of the field, whereas the field line map origin (x,y) is top left
+        // corner of discretised field
         return Eigen::Vector2i(fieldline_distance_map.get_length() / 2 - std::round(rPFf(1) / cfg.grid_size),
                                fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
     }

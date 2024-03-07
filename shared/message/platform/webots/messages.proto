@@ -105,9 +105,12 @@ message OdometryGroundTruth {
     mat4 Htw = 2;
 }
 
+/// NUbots specific data sent from our own controllers rather than the official RoboCup Webots controller
 message LocalisationGroundTruth {
+    /// Indicates if this message exists
     bool exists = 1;
-    mat4 Hfw    = 2;
+    /// Isometry3d transform from localisation (world) space to field space
+    mat4 Hfw = 2;
 }
 
 message VisionGroundTruth {
