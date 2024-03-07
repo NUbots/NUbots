@@ -154,16 +154,18 @@ namespace module::localisation {
 
         // Graph translation and its error
         emit(graph("Hfw true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));
+        emit(graph("Hfw estimated translation (rFWw)", estimated_rFWw.x(), estimated_rFWw.y(), estimated_rFWw.z()));
         emit(graph("Hfw translation error", error_rFWw.x(), error_rFWw.y(), error_rFWw.z()));
         // Graph rotation and its error
         emit(graph("Rfw true rotation (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
+        emit(graph("Rfw estimated rotation (rpy)", estimated_Rfw.x(), estimated_Rfw.y(), estimated_Rfw.z()));
         emit(graph("Rfw error (rpy)", error_Rfw.x(), error_Rfw.y(), error_Rfw.z()));
         emit(graph("Quaternion rotational error", quat_rot_error));
     }
 
     Eigen::Isometry3d FieldLocalisation::compute_Hfw(const Eigen::Vector3d& particle) {
-        Eigen::Isometry3d Hfw = Eigen::Translation<double, 3>(particle.x(), particle.y(), 0)
-                                * Eigen::AngleAxis<double>(particle.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
+        return Eigen::Translation<double, 3>(particle.x(), particle.y(), 0)
+               * Eigen::AngleAxis<double>(particle.z(), Eigen::Matrix<double, 3, 1>::UnitZ());
     }
 
     Eigen::Vector2i FieldLocalisation::position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw) {
