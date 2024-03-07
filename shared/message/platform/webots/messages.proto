@@ -133,13 +133,14 @@ message SensorMeasurements {
     repeated PositionSensorMeasurement position_sensors = 11;
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
     // Ground truth data
-    OdometryGroundTruth odometry_ground_truth = 100;
+    OdometryGroundTruth     odometry_ground_truth     = 100;
     LocalisationGroundTruth localisation_ground_truth = 101;
-    VisionGroundTruth   vision_ground_truth   = 101;
+    VisionGroundTruth       vision_ground_truth       = 102;
     // Walk optimisation data
-    support.optimisation.OptimisationRobotPosition robot_position = 102;
-    bool                                           reset_done     = 103;
+    support.optimisation.OptimisationRobotPosition robot_position = 103;
+    bool                                           reset_done     = 104;
 }
+
 message MotorPosition {
     string name     = 1;
     double position = 2;  // linear or angular target position expressed in [m] or [rad]
