@@ -140,24 +140,23 @@ namespace module::localisation {
 
     void FieldLocalisation::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {
         const Eigen::Isometry3d true_Hfw = Eigen::Isometry3d(raw_sensors.localisation_ground_truth.Hfw);
-        // Localisation information
-        Eigen::Vector3d estimated_Rfw  = MatrixToEulerIntrinsic(Hfw.rotation());
-        Eigen::Vector3d estimated_rFWw = (Hfw.translation());
         // Determine translational distance error
         Eigen::Vector3d true_rFWw  = true_Hfw.translation();
-        Eigen::Vector3d error_rFWw = (true_rFWw - estimated_rFWw).cwiseAbs();
-        // Determine rotational distance error
+        Eigen::Vector3d rFWw       = (Hfw.translation());
+        Eigen::Vector3d error_rFWw = (true_rFWw - rFWw).cwiseAbs();
+        // Determine yaw, pitch, and roll error
         Eigen::Vector3d true_Rfw  = MatrixToEulerIntrinsic(true_Hfw.rotation());
-        Eigen::Vector3d error_Rfw = (true_Rfw - estimated_Rfw).cwiseAbs();
+        Eigen::Vector3d Rfw       = MatrixToEulerIntrinsic(Hfw.rotation());
+        Eigen::Vector3d error_Rfw = (true_Rfw - Rfw).cwiseAbs();
         double quat_rot_error     = Eigen::Quaterniond(true_Hfw.linear() * Hfw.inverse().linear()).w();
 
-        // Graph translation and its error
+        // Graph translation and error from ground truth
         emit(graph("Hfw true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));
-        emit(graph("Hfw estimated translation (rFWw)", estimated_rFWw.x(), estimated_rFWw.y(), estimated_rFWw.z()));
+        emit(graph("Hfw estimated translation (rFWw)", rFWw.x(), rFWw.y(), rFWw.z()));
         emit(graph("Hfw translation error", error_rFWw.x(), error_rFWw.y(), error_rFWw.z()));
-        // Graph rotation and its error
-        emit(graph("Rfw true rotation (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
-        emit(graph("Rfw estimated rotation (rpy)", estimated_Rfw.x(), estimated_Rfw.y(), estimated_Rfw.z()));
+        // Graph rotation and error from ground truth
+        emit(graph("Rfw true angles (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
+        emit(graph("Rfw estimated angles (rpy)", Rfw.x(), Rfw.y(), Rfw.z()));
         emit(graph("Rfw error (rpy)", error_Rfw.x(), error_Rfw.y(), error_Rfw.z()));
         emit(graph("Quaternion rotational error", quat_rot_error));
     }
