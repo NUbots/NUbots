@@ -152,11 +152,9 @@ namespace module::localisation {
 
         // Graph translation and error from ground truth
         emit(graph("Hfw true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));
-        emit(graph("Hfw estimated translation (rFWw)", rFWw.x(), rFWw.y(), rFWw.z()));
         emit(graph("Hfw translation error", error_rFWw.x(), error_rFWw.y(), error_rFWw.z()));
         // Graph rotation and error from ground truth
         emit(graph("Rfw true angles (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
-        emit(graph("Rfw estimated angles (rpy)", Rfw.x(), Rfw.y(), Rfw.z()));
         emit(graph("Rfw error (rpy)", error_Rfw.x(), error_Rfw.y(), error_Rfw.z()));
         emit(graph("Quaternion rotational error", quat_rot_error));
     }
