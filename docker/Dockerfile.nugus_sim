@@ -41,4 +41,4 @@ ENV TERM xterm
 
 # Set the run.py script as the entrypoint.
 # `dockerCmd` in the Robocup team config will be passed to run.py as arguments.
-ENTRYPOINT [ "python3", "run.py" ]
+ENTRYPOINT [ "python3", "-u", "run.py" ]

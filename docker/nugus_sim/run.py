@@ -118,7 +118,10 @@ def update_config_files(args: dict) -> None:
     # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
     global_config = read_config("GlobalConfig.yaml")
     global_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
+    print("player_id exists and its value is:", global_config["player_id"])
     write_config("GlobalConfig.yaml", global_config)
+    # Print the entire global configuration
+    print("Updated global_config:", global_config)
 
     # Set `player_id` in GameController.yaml from ROBOCUP_ROBOT_ID
     game_controller_config = read_config("GameController.yaml")

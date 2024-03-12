@@ -146,6 +146,9 @@ namespace module::input {
         packet->player  = PLAYER_ID;
         packet->message = message;
 
+        log<NUClear::DEBUG>("packet->player", int(packet->player));
+        log<NUClear::DEBUG>("player id", PLAYER_ID);
+
         emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
     }
 
