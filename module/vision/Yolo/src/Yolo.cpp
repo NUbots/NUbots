@@ -34,62 +34,7 @@ namespace module::vision {
     using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
-
-    Eigen::Vector2d correct_distortion(const Eigen::Vector2d& pixel, const Image& img) {
-        // Shift point by centre offset
-        double x = pixel.x() - img.lens.centre.x();
-        double y = pixel.y() - img.lens.centre.y();
-
-        // Calculate r^2
-        double r2 = x * x + y * y;
-
-        // Apply distortion k1 and k2
-        double k1          = img.lens.k.x();
-        double k2          = img.lens.k.y();
-        double x_distorted = x * (1 + k1 * r2 + k2 * r2 * r2);
-        double y_distorted = y * (1 + k1 * r2 + k2 * r2 * r2);
-
-        return Eigen::Vector2d(x_distorted + img.lens.centre.x(), y_distorted + img.lens.centre.y());
-    }
-
-    /**
-     * @brief Unprojects a pixel coordinate into a unit vector working out which lens model to use via the lens
-     * parameters.
-     *
-     * @details
-     *  This function expects a pixel coordinate having (0,0) at the top left of the image, with x to the right and y
-     * down. It will then convert this into a unit vector in camera space. For this camera space is defined as a
-     * coordinate system with the x axis going down the viewing direction of the camera, y is to the left of the image,
-     * and z is up.
-     *
-     *
-     * @param pixel the pixel coordinate to unproject
-     * @param img the image that the pixel coordinate is from
-     *
-     * @return Unit vector that this pixel represents in camera {c} space
-     */
-    Eigen::Vector3d unproject(const Eigen::Vector2d& pixel, const Image& img) {
-        // Correct for distortion
-        // Eigen::Vector2d corrected_pixel = correct_distortion(pixel, img);
-        Eigen::Vector2d corrected_pixel = pixel;
-
-        // Convert pixel to normalized device coordinates (NDC), between [-1, 1]
-        double x_ndc = 2.0 * corrected_pixel.x() / img.dimensions.x() - 1.0;
-        double y_ndc = 1.0 - 2.0 * corrected_pixel.y() / img.dimensions.y();
-
-        // Compute aspect ratio
-        const double width  = img.dimensions.x();
-        const double height = img.dimensions.y();
-        double aspect_ratio = height / width;
-
-        // Calculate unit vector in camera {c} space
-        Eigen::Vector3d uRCc(1.0,
-                             -x_ndc * std::tan(0.5 * img.lens.fov),
-                             y_ndc * std::tan(0.5 * img.lens.fov) * aspect_ratio);
-        uRCc.normalize();
-
-        return uRCc;
-    }
+    using utility::vision::unproject;
 
     Yolo::Yolo(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -106,7 +51,7 @@ namespace module::vision {
         });
 
         on<Startup>().then("Load Yolo Model", [this] {
-            compiled_model = core.compile_model(cfg.model_path, "CPU");
+            compiled_model = core.compile_model(cfg.model_path, cfg.device);
             infer_request  = compiled_model.create_infer_request();
         });
 
@@ -118,7 +63,7 @@ namespace module::vision {
             const int height = img.dimensions.y();
 
             cv::Mat img_cv;
-            if (cfg.image_format == "bayer_rggb8") {
+            if (cfg.image_format == "BayerRG8") {
                 cv::Mat img_bayer = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
                 cv::cvtColor(img_bayer, img_cv, cv::COLOR_BayerRG2RGB);
             }
@@ -230,7 +175,8 @@ namespace module::vision {
                             cv::FONT_HERSHEY_SIMPLEX,
                             0.5,
                             cv::Scalar(255, 255, 255));
-
+                Eigen::Matrix<double, 2, 1> dim =
+                    Eigen::Matrix<double, 2, 1>(img.dimensions.x(), img.dimensions.y()) / img.dimensions.x();
                 if (class_name == "ball" && confidence > cfg.ball_confidence_threshold) {
                     // Calculate the middle of the bottom border of the detection box
                     Eigen::Matrix<double, 2, 1> box_centre(boxes[index].x + boxes[index].width / 2.0,
@@ -239,13 +185,11 @@ namespace module::vision {
                     Eigen::Matrix<double, 2, 1> box_left(boxes[index].x, boxes[index].y + boxes[index].height / 2.0);
 
                     // Convert to unit vector in camera space
-                    log<NUClear::DEBUG>("Box centre: ", box_centre);
-                    Eigen::Matrix<double, 2, 1> dim =
-                        Eigen::Matrix<double, 2, 1>(img.dimensions.x(), img.dimensions.y());
-                    Eigen::Matrix<double, 3, 1> uBCc = unproject(box_centre, img);
-                    // utility::vision::unproject(box_centre, img.lens, dim);
-                    log<NUClear::DEBUG>("uBCc: ", uBCc.transpose());
-                    Eigen::Matrix<double, 3, 1> uLCc = unproject(box_left, img);
+
+                    Eigen::Matrix<double, 3, 1> uBCc =
+                        unproject(Eigen::Matrix<double, 2, 1>(box_centre / img.dimensions.x()), img.lens, dim);
+                    Eigen::Matrix<double, 3, 1> uLCc =
+                        unproject(Eigen::Matrix<double, 2, 1>(box_left / img.dimensions.x()), img.lens, dim);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uBCw = Hwc.rotation() * uBCc;
@@ -270,7 +214,8 @@ namespace module::vision {
                                                                   boxes[index].y + boxes[index].height);
 
                     // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uRCc = unproject(box_bottom_centre, img);
+                    Eigen::Matrix<double, 3, 1> uRCc =
+                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_centre / img.dimensions.x()), img.lens, dim);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uRCw = Hwc.rotation() * uRCc;
@@ -293,8 +238,10 @@ namespace module::vision {
                                                                boxes[index].y);
 
                     // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uGbCc = unproject(box_bottom_middle, img);
-                    Eigen::Matrix<double, 3, 1> uGtCc = unproject(box_top_middle, img);
+                    Eigen::Matrix<double, 3, 1> uGbCc =
+                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_middle / img.dimensions.x()), img.lens, dim);
+                    Eigen::Matrix<double, 3, 1> uGtCc =
+                        unproject(Eigen::Matrix<double, 2, 1>(box_top_middle / img.dimensions.x()), img.lens, dim);
 
                     // Project the bottom unit vector onto the ground plane
                     Eigen::Vector3d uGbCw = Hwc.rotation() * uGbCc;
@@ -321,7 +268,8 @@ namespace module::vision {
                                                            boxes[index].y + boxes[index].height / 2.0);
 
                     // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uICc = unproject(box_middle, img);
+                    Eigen::Matrix<double, 3, 1> uICc =
+                        unproject(Eigen::Matrix<double, 2, 1>(box_middle / img.dimensions.x()), img.lens, dim);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uICw = Hwc.rotation() * uICc;
