@@ -70,7 +70,8 @@ namespace module::vision {
      */
     Eigen::Vector3d unproject(const Eigen::Vector2d& pixel, const Image& img) {
         // Correct for distortion
-        Eigen::Vector2d corrected_pixel = correct_distortion(pixel, img);
+        // Eigen::Vector2d corrected_pixel = correct_distortion(pixel, img);
+        Eigen::Vector2d corrected_pixel = pixel;
 
         // Convert pixel to normalized device coordinates (NDC), between [-1, 1]
         double x_ndc = 2.0 * corrected_pixel.x() / img.dimensions.x() - 1.0;
@@ -100,6 +101,8 @@ namespace module::vision {
             cfg.goal_confidence_threshold         = config["goal_confidence_threshold"].as<double>();
             cfg.robot_confidence_threshold        = config["robot_confidence_threshold"].as<double>();
             cfg.intersection_confidence_threshold = config["intersection_confidence_threshold"].as<double>();
+            cfg.image_format                      = config["image_format"].as<std::string>();
+            cfg.device                            = config["device"].as<std::string>();
         });
 
         on<Startup>().then("Load Yolo Model", [this] {
@@ -111,9 +114,19 @@ namespace module::vision {
             const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
             // -------- Convert image to cv::Mat and preprocess --------
-            const int width       = img.dimensions.x();
-            const int height      = img.dimensions.y();
-            cv::Mat img_cv        = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+            const int width  = img.dimensions.x();
+            const int height = img.dimensions.y();
+
+            cv::Mat img_cv;
+            if (cfg.image_format == "bayer_rggb8") {
+                cv::Mat img_bayer = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
+                cv::cvtColor(img_bayer, img_cv, cv::COLOR_BayerRG2RGB);
+            }
+            else {
+                cv::Mat img_bayer = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+                img_cv            = img_bayer;
+            }
+
             cv::Mat letterbox_img = letterbox(img_cv);
             float scale           = letterbox_img.size[0] / 640.0;
             cv::Mat blob = cv::dnn::blobFromImage(letterbox_img, 1.0 / 255.0, cv::Size(640, 640), cv::Scalar(), true);
@@ -226,7 +239,12 @@ namespace module::vision {
                     Eigen::Matrix<double, 2, 1> box_left(boxes[index].x, boxes[index].y + boxes[index].height / 2.0);
 
                     // Convert to unit vector in camera space
+                    log<NUClear::DEBUG>("Box centre: ", box_centre);
+                    Eigen::Matrix<double, 2, 1> dim =
+                        Eigen::Matrix<double, 2, 1>(img.dimensions.x(), img.dimensions.y());
                     Eigen::Matrix<double, 3, 1> uBCc = unproject(box_centre, img);
+                    // utility::vision::unproject(box_centre, img.lens, dim);
+                    log<NUClear::DEBUG>("uBCc: ", uBCc.transpose());
                     Eigen::Matrix<double, 3, 1> uLCc = unproject(box_left, img);
 
                     // Project the unit vector onto the ground plane

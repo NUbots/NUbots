@@ -7,8 +7,6 @@ find_package(TBB REQUIRED)
 
 
 # Build our NUClear module
-nuclear_module(LIBRARIES ${OpenCV_LIBRARIES} TBB::tbb openvino::runtime ${OpenVINO_LIBRARIES} ${InferenceEngine_LIBRARIES} /usr/local/runtime/lib/intel64/libopenvino.so.2301)
- include_directories(/usr/local/runtime/include)
-# include_directories(${OpenVINO_INCLUDE_DIRS})
-# link_directories(${OpenVINO_LIBRARY_DIRS})
-link_directories(/usr/local/runtime/lib/intel64/)
+nuclear_module(LIBRARIES ${OpenCV_LIBRARIES} TBB::tbb openvino::runtime ${OpenVINO_LIBRARIES} ${InferenceEngine_LIBRARIES} )
+#include_directories(/usr/local/runtime/include)
+#link_directories(/usr/local/runtime/lib/intel64/)

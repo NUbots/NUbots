@@ -37,6 +37,9 @@ namespace module::vision {
             double goal_confidence_threshold         = 0.0;
             double robot_confidence_threshold        = 0.0;
             double intersection_confidence_threshold = 0.0;
+
+            std::string image_format = "";
+            std::string device       = "";
         } cfg;
 
         /// @brief OpenVINO Core
