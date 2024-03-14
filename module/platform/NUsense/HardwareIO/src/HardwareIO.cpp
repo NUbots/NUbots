@@ -50,7 +50,7 @@ namespace module::platform::NUsense {
             if (nusense_receiver.handle()) {
                 const auto& nusense_msg = nusense_receiver.get_nusense_message();
 
-                log<NUClear::INFO>(
+                log<NUClear::DEBUG>(
                     fmt::format("\nIMU Data\n"
                                 "\tAccel(xyz): {} - {} - {}\n"
                                 "\t Gyro(xyz): {} - {} - {}\n ",
@@ -61,24 +61,24 @@ namespace module::platform::NUsense {
                                 nusense_msg.imu.gyro.y,
                                 nusense_msg.imu.gyro.z));
 
-                log<NUClear::INFO>("Logging servo states...");
+                log<NUClear::DEBUG>("Logging servo states...");
 
                 for (const auto& [key, val] : nusense_msg.servo_map) {
-                    log<NUClear::INFO>(fmt::format("      key: {}", key));
+                    log<NUClear::DEBUG>(fmt::format("      key: {}", key));
 
-                    log<NUClear::INFO>(fmt::format("       id: {}", val.id));
-                    log<NUClear::INFO>(fmt::format("   hw_err: {}", val.hardware_error));
-                    log<NUClear::INFO>(fmt::format("torque_en: {}", val.torque_enabled));
-                    log<NUClear::INFO>(fmt::format("     ppwm: {}", val.present_pwm));
-                    log<NUClear::INFO>(fmt::format("    pcurr: {}", val.present_current));
-                    log<NUClear::INFO>(fmt::format("    pvelo: {}", val.present_velocity));
-                    log<NUClear::INFO>(fmt::format("     ppos: {}", val.present_position));
-                    log<NUClear::INFO>(fmt::format("     gpwm: {}", val.goal_pwm));
-                    log<NUClear::INFO>(fmt::format("    gcurr: {}", val.goal_current));
-                    log<NUClear::INFO>(fmt::format("    gvelo: {}", val.goal_velocity));
-                    log<NUClear::INFO>(fmt::format("     gpos: {}", val.goal_position));
-                    log<NUClear::INFO>(fmt::format("  voltage: {}", val.voltage));
-                    log<NUClear::INFO>(fmt::format("     temp: {}", val.temperature));
+                    log<NUClear::DEBUG>(fmt::format("       id: {}", val.id));
+                    log<NUClear::DEBUG>(fmt::format("   hw_err: {}", val.hardware_error));
+                    log<NUClear::DEBUG>(fmt::format("torque_en: {}", val.torque_enabled));
+                    log<NUClear::DEBUG>(fmt::format("     ppwm: {}", val.present_pwm));
+                    log<NUClear::DEBUG>(fmt::format("    pcurr: {}", val.present_current));
+                    log<NUClear::DEBUG>(fmt::format("    pvelo: {}", val.present_velocity));
+                    log<NUClear::DEBUG>(fmt::format("     ppos: {}", val.present_position));
+                    log<NUClear::DEBUG>(fmt::format("     gpwm: {}", val.goal_pwm));
+                    log<NUClear::DEBUG>(fmt::format("    gcurr: {}", val.goal_current));
+                    log<NUClear::DEBUG>(fmt::format("    gvelo: {}", val.goal_velocity));
+                    log<NUClear::DEBUG>(fmt::format("     gpos: {}", val.goal_position));
+                    log<NUClear::DEBUG>(fmt::format("  voltage: {}", val.voltage));
+                    log<NUClear::DEBUG>(fmt::format("     temp: {}", val.temperature));
                 }
             }
         });
@@ -107,15 +107,15 @@ namespace module::platform::NUsense {
             nusense.write(full_msg.data(), full_msg.size());
 
             // Logging
-            log<NUClear::INFO>("Servo targets received");
+            log<NUClear::DEBUG>("Servo targets received");
 
             uint16_t total_length = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
 
-            log<NUClear::INFO>(total_length);
-            log<NUClear::INFO>(fmt::format("header length: {}  length length: {}  payload length: {}",
-                                           header.size(),
-                                           byte_lengths.size(),
-                                           payload.size()));
+            log<NUClear::DEBUG>(total_length);
+            log<NUClear::DEBUG>(fmt::format("header length: {}  length length: {}  payload length: {}",
+                                            header.size(),
+                                            byte_lengths.size(),
+                                            payload.size()));
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
@@ -125,7 +125,7 @@ namespace module::platform::NUsense {
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(command_list));
 
-            log<NUClear::INFO>("Servo target received");
+            log<NUClear::DEBUG>("Servo target received");
         });
     }
 
