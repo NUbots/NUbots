@@ -4,17 +4,17 @@
 #include <fmt/format.h>
 #include <sstream>
 
-#include "util/SIProcessor.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+#include "message/platform/NUSenseData.hpp"
 
 namespace module::platform::NUsense {
 
     using extension::Configuration;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
+    using message::platform::NUSense;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), nusense() {
@@ -39,9 +39,7 @@ namespace module::platform::NUsense {
 
         // When we receive data back from NUsense, we handle it here
         on<IO>(nusense.native_handle(), IO::READ).then([this] {
-            // TODO Fill this properly below, receive protobuf bytes and parse them to our NUsense message
             // Read from NUsense
-            // log<NUClear::INFO>("In IO reaction");
             uint32_t num_bytes = nusense.read(nusense_usb_bytes.data(), 512);
 
             nusense_receiver.receive(num_bytes, nusense_usb_bytes.data());
