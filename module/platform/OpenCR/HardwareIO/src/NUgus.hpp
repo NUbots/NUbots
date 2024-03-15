@@ -61,6 +61,12 @@ namespace module::platform::OpenCR {
         /// @brief Offsets the radian angles of motors to change their 0 position
         std::array<double, 20> servo_offset{};
 
+        ///@brief Sets the upper limit of servo rotation
+        std::array<float, 20> servo_max_position_limits{};
+
+        ///@brief Sets the lower limit of servo rotation
+        std::array<float, 20> servo_min_position_limits{};
+
         enum class ID : uint8_t {
             NO_ID            = 0,
             R_SHOULDER_PITCH = 1,
