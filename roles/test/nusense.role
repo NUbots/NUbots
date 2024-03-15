@@ -5,5 +5,4 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   # Platform
   platform::NUsense::HardwareIO
-
 )
