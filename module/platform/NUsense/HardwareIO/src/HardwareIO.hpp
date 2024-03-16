@@ -6,7 +6,10 @@
 
 #include "util/packet_handler.hpp"
 
+#include "message/platform/RawSensors.hpp"
+
 #include "utility/io/uart.hpp"
+#include "utility/platform/RawSensors.hpp"
 
 namespace module::platform::NUsense {
 
