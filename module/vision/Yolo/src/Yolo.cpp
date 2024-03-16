@@ -9,6 +9,7 @@
 
 #include "message/input/Image.hpp"
 #include "message/vision/Ball.hpp"
+#include "message/vision/BoundingBoxes.hpp"
 #include "message/vision/FieldIntersections.hpp"
 #include "message/vision/Goal.hpp"
 #include "message/vision/Robot.hpp"
@@ -24,6 +25,8 @@ namespace module::vision {
     using message::input::Image;
     using message::vision::Ball;
     using message::vision::Balls;
+    using message::vision::BoundingBox;
+    using message::vision::BoundingBoxes;
     using message::vision::FieldIntersection;
     using message::vision::FieldIntersections;
     using message::vision::Goal;
@@ -152,14 +155,21 @@ namespace module::vision {
             field_intersections->id        = img.id;
             field_intersections->Hcw       = img.Hcw;
 
+            auto bounding_boxes       = std::make_unique<BoundingBoxes>();
+            bounding_boxes->timestamp = img.timestamp;
+            bounding_boxes->id        = img.id;
+            bounding_boxes->Hcw       = img.Hcw;
+
             for (size_t i = 0; i < indices.size(); i++) {
                 int index    = indices[i];
                 int class_id = class_ids[index];
                 rectangle(img_cv, boxes[index], colors[class_id % 6], 2, 8);
                 std::string class_name = class_names[class_id];
                 double confidence      = class_scores[index];
-                std::string label      = class_name + ":" + std::to_string(confidence).substr(0, 4);
-                cv::Size textSize      = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
+
+
+                std::string label = class_name + ":" + std::to_string(confidence).substr(0, 4);
+                cv::Size textSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
                 cv::Rect textBox(boxes[index].tl().x, boxes[index].tl().y - 15, textSize.width, textSize.height + 5);
                 cv::rectangle(img_cv, textBox, colors[class_id % 6], cv::FILLED);
                 cv::putText(img_cv,
@@ -168,26 +178,51 @@ namespace module::vision {
                             cv::FONT_HERSHEY_SIMPLEX,
                             0.5,
                             cv::Scalar(255, 255, 255));
+
+                // Calculate the image width normalized dimensions of the image
                 Eigen::Matrix<double, 2, 1> normalized_dim =
                     Eigen::Matrix<double, 2, 1>(img.dimensions.x(), img.dimensions.y()) / img.dimensions.x();
+
+                double box_x       = boxes[index].x;
+                double box_y       = boxes[index].y;
+                double box_width   = boxes[index].width;
+                double box_height  = boxes[index].height;
+                double half_width  = box_width / 2.0;
+                double half_height = box_height / 2.0;
+                double norm_factor = img.dimensions.x();  // Assuming this is a scalar
+
+                // Helper lambda to simplify unprojection calls
+                auto unproject_point = [&](double x, double y) {
+                    return unproject(Eigen::Matrix<double, 2, 1>(x / norm_factor, y / norm_factor),
+                                     img.lens,
+                                     normalized_dim);
+                };
+
+                // Calculate corner points and their rays in one go
+                Eigen::Matrix<double, 3, 1> top_left_ray     = unproject_point(box_x, box_y);
+                Eigen::Matrix<double, 3, 1> top_right_ray    = unproject_point(box_x + box_width, box_y);
+                Eigen::Matrix<double, 3, 1> bottom_right_ray = unproject_point(box_x + box_width, box_y + box_height);
+                Eigen::Matrix<double, 3, 1> bottom_left_ray  = unproject_point(box_x, box_y + box_height);
+
+                // Calculate center points and their rays
+                Eigen::Matrix<double, 3, 1> centre_ray = unproject_point(box_x + half_width, box_y + half_height);
+                Eigen::Matrix<double, 3, 1> bottom_centre_ray = unproject_point(box_x + half_width, box_y + box_height);
+                Eigen::Matrix<double, 3, 1> top_centre_ray    = unproject_point(box_x + half_width, box_y);
+
+
+                // Create a bounding box message
+                auto bbox        = std::make_unique<BoundingBox>();
+                bbox->name       = class_name;
+                bbox->confidence = confidence;
+                bbox->corners.push_back(top_left_ray);
+                bbox->corners.push_back(top_right_ray);
+                bbox->corners.push_back(bottom_right_ray);
+                bbox->corners.push_back(bottom_left_ray);
+
+
                 if (class_name == "ball" && confidence > cfg.ball_confidence_threshold) {
-                    // Calculate the middle of the bottom border of the detection box
-                    Eigen::Matrix<double, 2, 1> box_centre(boxes[index].x + boxes[index].width / 2.0,
-                                                           boxes[index].y + boxes[index].height / 2.0);
-                    // Calculate the bottom left corner of the detection box
-                    Eigen::Matrix<double, 2, 1> box_left(boxes[index].x, boxes[index].y + boxes[index].height / 2.0);
-
-                    // Convert to unit vector in camera space
-
-                    Eigen::Matrix<double, 3, 1> uBCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_centre / img.dimensions.x()),
-                                  img.lens,
-                                  normalized_dim);
-                    Eigen::Matrix<double, 3, 1> uLCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_left / img.dimensions.x()), img.lens, normalized_dim);
-
-                    // Project the unit vector onto the ground plane
-                    Eigen::Vector3d uBCw = Hwc.rotation() * uBCc;
+                    // Project the centre ray onto the ground plane
+                    Eigen::Vector3d uBCw = Hwc.rotation() * centre_ray;
                     Eigen::Vector3d rPWw = uBCw * std::abs(Hwc.translation().z() / uBCw.z()) + Hwc.translation();
                     Eigen::Vector3d rBCc = Hwc.inverse() * rPWw;
 
@@ -198,24 +233,16 @@ namespace module::vision {
                     b.measurements.back().type = Ball::MeasurementType::PROJECTION;
                     b.measurements.back().rBCc = rBCc;
                     // Calculate the angular radius of the ball in camera space
-                    b.radius = uBCc.dot(uLCc);
+                    b.radius = bottom_centre_ray.dot(bottom_left_ray);
                     b.colour.fill(1.0);
                     balls->balls.push_back(b);
+
+                    bbox->colour = Eigen::Vector4d(1.0, 1.0, 1.0, 1.0);
                 }
 
                 if (class_name == "robot" && confidence > cfg.robot_confidence_threshold) {
-                    // Calculate the bottom of box centre
-                    Eigen::Matrix<double, 2, 1> box_bottom_centre(boxes[index].x + boxes[index].width / 2.0,
-                                                                  boxes[index].y + boxes[index].height);
-
-                    // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uRCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_centre / img.dimensions.x()),
-                                  img.lens,
-                                  normalized_dim);
-
-                    // Project the unit vector onto the ground plane
-                    Eigen::Vector3d uRCw = Hwc.rotation() * uRCc;
+                    // Project the centre ray onto the ground plane
+                    Eigen::Vector3d uRCw = Hwc.rotation() * bottom_centre_ray;
                     Eigen::Vector3d rRWw = uRCw * std::abs(Hwc.translation().z() / uRCw.z()) + Hwc.translation();
                     Eigen::Vector3d rRCc = Hwc.inverse() * rRWw;
 
@@ -224,28 +251,12 @@ namespace module::vision {
                     r.rRCc   = rRCc.normalized();
                     r.radius = 0.3;
                     robots->robots.push_back(r);
+                    bbox->colour = Eigen::Vector4d(1.0, 0.0, 0.0, 1.0);
                 }
 
                 if (class_name == "goal post" && confidence > cfg.goal_confidence_threshold) {
-                    // Calculate the middle of the bottom border of the detection box
-                    Eigen::Matrix<double, 2, 1> box_bottom_middle(boxes[index].x + boxes[index].width / 2.0,
-                                                                  boxes[index].y + boxes[index].height);
-                    // Calculate the middle of the top border of the detection box
-                    Eigen::Matrix<double, 2, 1> box_top_middle(boxes[index].x + boxes[index].width / 2.0,
-                                                               boxes[index].y);
-
-                    // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uGbCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_middle / img.dimensions.x()),
-                                  img.lens,
-                                  normalized_dim);
-                    Eigen::Matrix<double, 3, 1> uGtCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_top_middle / img.dimensions.x()),
-                                  img.lens,
-                                  normalized_dim);
-
-                    // Project the bottom unit vector onto the ground plane
-                    Eigen::Vector3d uGbCw = Hwc.rotation() * uGbCc;
+                    // Project the bottom centre ray onto the ground plane
+                    Eigen::Vector3d uGbCw = Hwc.rotation() * bottom_centre_ray;
                     Eigen::Vector3d rGbWw = uGbCw * std::abs(Hwc.translation().z() / uGbCw.z()) + Hwc.translation();
                     Eigen::Vector3d rGbCc = Hwc.inverse() * rGbWw;
 
@@ -254,50 +265,48 @@ namespace module::vision {
                     g.measurements.emplace_back();
                     g.measurements.back().type  = Goal::MeasurementType::CENTRE;
                     g.measurements.back().srGCc = cartesianToReciprocalSpherical(rGbCc);
-                    g.post.top                  = uGtCc;
-                    g.post.bottom               = uGbCc;
+                    g.post.top                  = top_centre_ray;
+                    g.post.bottom               = bottom_centre_ray;
                     g.post.distance             = rGbCc.norm();
                     g.side                      = Goal::Side::UNKNOWN_SIDE;
                     g.screen_angular            = cartesianToSpherical(g.post.bottom).tail<2>();
                     goals->goals.push_back(std::move(g));
+                    bbox->colour = Eigen::Vector4d(0.0, 1.0, 0.0, 1.0);
                 }
 
                 if ((class_name == "L-intersection" || class_name == "T-intersection" || class_name == "X-intersection")
                     && (confidence > cfg.intersection_confidence_threshold)) {
-                    // Calculate the middle of the bottom border of the detection box
-                    Eigen::Matrix<double, 2, 1> box_middle(boxes[index].x + boxes[index].width / 2.0,
-                                                           boxes[index].y + boxes[index].height / 2.0);
-
-                    // Convert to unit vector in camera space
-                    Eigen::Matrix<double, 3, 1> uICc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_middle / img.dimensions.x()),
-                                  img.lens,
-                                  normalized_dim);
-
-                    // Project the unit vector onto the ground plane
-                    Eigen::Vector3d uICw = Hwc.rotation() * uICc;
+                    // Project the centre ray onto the ground plane
+                    Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
                     Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
 
                     // Add intersection to intersections message
                     FieldIntersection i;
                     i.rIWw = rIWw;
                     if (class_name == "L-intersection") {
-                        i.type = FieldIntersection::IntersectionType::L_INTERSECTION;
+                        i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
+                        bbox->colour = Eigen::Vector4d(0.0, 0.0, 1.0, 1.0);
                     }
                     else if (class_name == "T-intersection") {
-                        i.type = FieldIntersection::IntersectionType::T_INTERSECTION;
+                        i.type       = FieldIntersection::IntersectionType::T_INTERSECTION;
+                        bbox->colour = Eigen::Vector4d(1.0, 1.0, 0.0, 1.0);
                     }
                     else if (class_name == "X-intersection") {
-                        i.type = FieldIntersection::IntersectionType::X_INTERSECTION;
+                        i.type       = FieldIntersection::IntersectionType::X_INTERSECTION;
+                        bbox->colour = Eigen::Vector4d(1.0, 0.0, 1.0, 1.0);
                     }
                     field_intersections->intersections.push_back(std::move(i));
                 }
+
+                bounding_boxes->bounding_boxes.push_back(*bbox);
             }
+
 
             emit(std::move(balls));
             emit(std::move(robots));
             emit(std::move(goals));
             emit(std::move(field_intersections));
+            emit(std::move(bounding_boxes));
 
             if (log_level <= NUClear::DEBUG) {
                 // Stop the timer

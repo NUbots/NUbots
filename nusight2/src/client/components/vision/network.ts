@@ -29,6 +29,7 @@ export class VisionNetwork {
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.vision.Robots, this.onRobots);
     this.network.on(message.vision.GreenHorizon, this.onGreenHorizon);
+    this.network.on(message.vision.BoundingBoxes, this.onBoundingBoxes);
   }
 
   static of(nusightNetwork: NUsightNetwork): VisionNetwork {
@@ -156,6 +157,25 @@ export class VisionNetwork {
         bottom: Vector3.from(goal.post?.bottom),
         distance: goal.post?.distance!,
       },
+    }));
+  }
+
+  @action
+  private onBoundingBoxes(robotModel: RobotModel, packet: message.vision.BoundingBoxes) {
+    const robot = VisionRobotModel.of(robotModel);
+    const { id, timestamp, Hcw, boundingBoxes } = packet;
+    const camera = robot.cameras.get(id);
+    if (!camera) {
+      return;
+    }
+    console.log("here");
+    camera.boundingBoxes = boundingBoxes.map((boundingBox) => ({
+      timestamp: toSeconds(timestamp),
+      Hcw: Matrix4.from(Hcw),
+      name: boundingBox.name!,
+      confidence: boundingBox.confidence!,
+      corners: boundingBox.corners?.map((corner) => Vector3.from(corner))!,
+      colour: Vector4.from(boundingBox.colour),
     }));
   }
 
