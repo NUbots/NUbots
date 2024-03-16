@@ -81,7 +81,7 @@ namespace module::platform::NUsense {
                 }
 
                 // emit the nusense msg to be captured by the reactino below.
-                emit<Scope::DIRECT>(std::move(nusense_msg));
+                emit<Scope::DIRECT>(std::make_unique<NUsense>(nusense_msg));
             }
         });
 
@@ -136,7 +136,7 @@ namespace module::platform::NUsense {
             }
 
             /* release to SensorFilter */
-            emit(std::make_unique<RawSensors>(construct_sensors()));
+            emit(std::make_unique<RawSensors>(sensors));
         });
 
 
