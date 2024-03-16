@@ -417,11 +417,11 @@ RUN install-package clinfo
 # Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
-# Re-run ldconfig to make sure the database is up to date
-RUN echo '/usr/local/runtime/lib/intel64' | sudo tee /etc/ld.so.conf.d/openvino.conf
-RUN ldconfig
+# Move OpenVino libraries to our library path
+RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 
-RUN install-package intel-tbb
+# Re-run ldconfig to make sure the database is up to date
+RUN ldconfig
 
 ##############################
 ### SETUP THE USER ACCOUNT ###
