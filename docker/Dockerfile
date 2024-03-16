@@ -344,7 +344,6 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
 # OpenVino
-
 RUN install-package opencl-clhpp && \
     install-package opencl-headers && \
     install-package ocl-icd
@@ -371,6 +370,19 @@ make -j$(nproc) && \
 make install
 
 RUN /usr/local/setupvars.sh
+
+# Pangolin
+RUN install-package mesa
+RUN install-package glew
+RUN install-from-source https://github.com/stevenlovegrove/Pangolin/archive/refs/tags/v0.9.1.tar.gz \
+    -DBUILD_PANGOLIN_EIGEN=OFF \
+    -DBUILD_EXAMPLES=OFF
+
+# OrbSlam3
+RUN install-package boost
+RUN git clone https://github.com/aPR0T0/ORB_SLAM3.git && \
+    cd ORB_SLAM3 && \
+    ./build.sh
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
