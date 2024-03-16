@@ -7,9 +7,9 @@ namespace module::platform::NUSense {
         rx_count += 1;
 
         // Check if we have a header and if we do extract our lengths and pb bytes
-        if ((rx_buffer.data[rx_buffer.front] == (char) 0xE2)
-            && (rx_buffer.data[(rx_buffer.front + 1) % RX_BUF_SIZE] == (char) 0x98)
-            && (rx_buffer.data[(rx_buffer.front + 2) % RX_BUF_SIZE] == (char) 0xA2)) {
+        if ((rx_buffer.data[rx_buffer.front] == uint8_t(0xE2))
+            && (rx_buffer.data[(rx_buffer.front + 1) % RX_BUF_SIZE] == uint8_t(0x98))
+            && (rx_buffer.data[(rx_buffer.front + 2) % RX_BUF_SIZE] == uint8_t(0xA2))) {
 
             pb_length = static_cast<uint16_t>(rx_buffer.data[(rx_buffer.front + 3) % RX_BUF_SIZE] << 8)
                         | static_cast<uint16_t>(rx_buffer.data[(rx_buffer.front + 4) % RX_BUF_SIZE]);
