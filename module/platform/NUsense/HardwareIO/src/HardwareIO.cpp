@@ -101,8 +101,8 @@ namespace module::platform::NUsense {
             sensors.buttons             = 0;  // not yet implemented
 
             /* IMU */
-            sensors.accelerometer = data.imu.accel;
-            sensors.gyroscope     = data.imu.gyro;
+            sensors.accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
+            sensors.gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
 
             /* Battery data */
             sensors.battery = 0;  // not yet implemented
