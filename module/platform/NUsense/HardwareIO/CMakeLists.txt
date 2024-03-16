@@ -1,5 +1,5 @@
 # Check subcontroller before we build
-if(NOT SUBCONTROLLER STREQUAL "NUsense")
+if(NOT SUBCONTROLLER STREQUAL "NUSense")
     return()
 endif()
 

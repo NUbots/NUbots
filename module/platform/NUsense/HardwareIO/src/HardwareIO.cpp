@@ -9,7 +9,7 @@
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
 
-namespace module::platform::NUsense {
+namespace module::platform::NUSense {
 
     using extension::Configuration;
     using message::actuation::ServoTarget;
@@ -38,9 +38,9 @@ namespace module::platform::NUsense {
             }
         });
 
-        // When we receive data back from NUsense, we handle it here
+        // When we receive data back from NUSense, we handle it here
         on<IO>(nusense.native_handle(), IO::READ).then([this] {
-            // Read from NUsense
+            // Read from NUSense
             uint32_t num_bytes = nusense.read(nusense_usb_bytes.data(), 512);
 
             nusense_receiver.receive(num_bytes, nusense_usb_bytes.data());
@@ -85,7 +85,7 @@ namespace module::platform::NUsense {
             }
         });
 
-        // handle successfully decoded NUsense data
+        // handle successfully decoded NUSense data
         on<Trigger<NUSense>>().then([this](const NUSense& data) {
             /* temp message to fill up */
             RawSensors sensors;
@@ -114,13 +114,13 @@ namespace module::platform::NUsense {
                 // fill all servo values from the reference
                 servo.hardware_error        = val.hardware_error;
                 servo.torque_enabled        = val.torque_enabled;
-                servo.velocity_i_gain       = 0;  // not present in NUsense message
-                servo.velocity_p_gain       = 0;  // not present in NUsense message
-                servo.position_d_gain       = 0;  // not present in NUsense message
-                servo.position_i_gain       = 0;  // not present in NUsense message
-                servo.position_p_gain       = 0;  // not present in NUsense message
-                servo.feed_forward_1st_Gain = 0;  // not present in NUsense message
-                servo.feed_forward_2nd_Gain = 0;  // not present in NUsense message
+                servo.velocity_i_gain       = 0;  // not present in NUSense message
+                servo.velocity_p_gain       = 0;  // not present in NUSense message
+                servo.position_d_gain       = 0;  // not present in NUSense message
+                servo.position_i_gain       = 0;  // not present in NUSense message
+                servo.position_p_gain       = 0;  // not present in NUSense message
+                servo.feed_forward_1st_Gain = 0;  // not present in NUSense message
+                servo.feed_forward_2nd_Gain = 0;  // not present in NUSense message
                 servo.present_PWM           = val.present_pwm;
                 servo.present_current       = val.present_current;
                 servo.present_velocity      = val.present_velocity;
@@ -131,8 +131,8 @@ namespace module::platform::NUsense {
                 servo.goal_position         = val.goal_position;
                 servo.voltage               = val.voltage;
                 servo.temperature           = val.temperature;
-                servo.profile_acceleration  = 0;  // not present in NUsense message
-                servo.profile_velocity      = 0;  // not present in NUsense message
+                servo.profile_acceleration  = 0;  // not present in NUSense message
+                servo.profile_velocity      = 0;  // not present in NUSense message
             }
 
             /* release to SensorFilter */
@@ -185,4 +185,4 @@ namespace module::platform::NUsense {
         });
     }
 
-}  // namespace module::platform::NUsense
+}  // namespace module::platform::NUSense

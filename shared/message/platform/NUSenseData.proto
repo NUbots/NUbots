@@ -25,7 +25,7 @@ syntax = "proto3";
 
 package message.platform;
 
-// Message mainly for NUsense <-> NUC communication. NUsense will encode this message via nanopb after it queries all
+// Message mainly for NUSense <-> NUC communication. NUSense will encode this message via nanopb after it queries all
 // servo states and send it to the NUC.
 message Servo {
     /// The ID of the servo
