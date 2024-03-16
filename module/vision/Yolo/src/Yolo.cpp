@@ -56,20 +56,20 @@ namespace module::vision {
         });
 
         on<Trigger<Image>, Single>().then([this](const Image& img) {
+            // Start timer
+            auto start                   = std::chrono::high_resolution_clock::now();
             const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
             // -------- Convert image to cv::Mat and preprocess --------
             const int width  = img.dimensions.x();
             const int height = img.dimensions.y();
-
             cv::Mat img_cv;
             if (cfg.image_format == "BayerRG8") {
-                cv::Mat img_bayer = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
-                cv::cvtColor(img_bayer, img_cv, cv::COLOR_BayerRG2RGB);
+                img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
+                cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
             }
-            else {
-                cv::Mat img_bayer = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
-                img_cv            = img_bayer;
+            else if (cfg.image_format == "BRGA") {
+                img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
             }
 
             cv::Mat letterbox_img = letterbox(img_cv);
@@ -85,15 +85,8 @@ namespace module::vision {
             infer_request.set_input_tensor(input_tensor);
 
             // -------- Start inference --------
-
-            // Start timer
-            auto start = std::chrono::high_resolution_clock::now();
             infer_request.infer();
-            // Stop the timer
-            auto end      = std::chrono::high_resolution_clock::now();
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-            log<NUClear::DEBUG>("Inference took: ", duration.count(), "ms");
-            log<NUClear::DEBUG>("FPS: ", 1000.0 / duration.count());
+
 
             // -------- Get the inference result --------
             auto output       = infer_request.get_output_tensor(0);
@@ -175,7 +168,7 @@ namespace module::vision {
                             cv::FONT_HERSHEY_SIMPLEX,
                             0.5,
                             cv::Scalar(255, 255, 255));
-                Eigen::Matrix<double, 2, 1> dim =
+                Eigen::Matrix<double, 2, 1> normalized_dim =
                     Eigen::Matrix<double, 2, 1>(img.dimensions.x(), img.dimensions.y()) / img.dimensions.x();
                 if (class_name == "ball" && confidence > cfg.ball_confidence_threshold) {
                     // Calculate the middle of the bottom border of the detection box
@@ -187,9 +180,11 @@ namespace module::vision {
                     // Convert to unit vector in camera space
 
                     Eigen::Matrix<double, 3, 1> uBCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_centre / img.dimensions.x()), img.lens, dim);
+                        unproject(Eigen::Matrix<double, 2, 1>(box_centre / img.dimensions.x()),
+                                  img.lens,
+                                  normalized_dim);
                     Eigen::Matrix<double, 3, 1> uLCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_left / img.dimensions.x()), img.lens, dim);
+                        unproject(Eigen::Matrix<double, 2, 1>(box_left / img.dimensions.x()), img.lens, normalized_dim);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uBCw = Hwc.rotation() * uBCc;
@@ -215,7 +210,9 @@ namespace module::vision {
 
                     // Convert to unit vector in camera space
                     Eigen::Matrix<double, 3, 1> uRCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_centre / img.dimensions.x()), img.lens, dim);
+                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_centre / img.dimensions.x()),
+                                  img.lens,
+                                  normalized_dim);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uRCw = Hwc.rotation() * uRCc;
@@ -239,9 +236,13 @@ namespace module::vision {
 
                     // Convert to unit vector in camera space
                     Eigen::Matrix<double, 3, 1> uGbCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_middle / img.dimensions.x()), img.lens, dim);
+                        unproject(Eigen::Matrix<double, 2, 1>(box_bottom_middle / img.dimensions.x()),
+                                  img.lens,
+                                  normalized_dim);
                     Eigen::Matrix<double, 3, 1> uGtCc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_top_middle / img.dimensions.x()), img.lens, dim);
+                        unproject(Eigen::Matrix<double, 2, 1>(box_top_middle / img.dimensions.x()),
+                                  img.lens,
+                                  normalized_dim);
 
                     // Project the bottom unit vector onto the ground plane
                     Eigen::Vector3d uGbCw = Hwc.rotation() * uGbCc;
@@ -269,7 +270,9 @@ namespace module::vision {
 
                     // Convert to unit vector in camera space
                     Eigen::Matrix<double, 3, 1> uICc =
-                        unproject(Eigen::Matrix<double, 2, 1>(box_middle / img.dimensions.x()), img.lens, dim);
+                        unproject(Eigen::Matrix<double, 2, 1>(box_middle / img.dimensions.x()),
+                                  img.lens,
+                                  normalized_dim);
 
                     // Project the unit vector onto the ground plane
                     Eigen::Vector3d uICw = Hwc.rotation() * uICc;
@@ -297,6 +300,11 @@ namespace module::vision {
             emit(std::move(field_intersections));
 
             if (log_level <= NUClear::DEBUG) {
+                // Stop the timer
+                auto end      = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+                log<NUClear::DEBUG>("Yolo took: ", duration.count(), "ms");
+                log<NUClear::DEBUG>("FPS: ", 1000.0 / duration.count());
                 cv::resize(img_cv, img_cv, cv::Size(img_cv.cols, img_cv.rows));
                 cv::imwrite("recordings/yolo.jpg", img_cv);
             }
