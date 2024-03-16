@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2013 NUbots
+ * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -54,7 +54,7 @@ namespace module::purpose {
 
     using NUClear::message::CommandLineArguments;
 
-    using message::actuation::LimbsSequence;
+    using message::actuation::BodySequence;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::behaviour::state::Stability;
@@ -433,8 +433,8 @@ namespace module::purpose {
         // Load the YAML file
         YAML::Node node = YAML::LoadFile(path);
 
-        // Decode the YAML node into a Script<LimbsSequence> object
-        if (!YAML::convert<Script<LimbsSequence>>::decode(node, this->script)) {
+        // Decode the YAML node into a Script<BodySequence> object
+        if (!YAML::convert<Script<BodySequence>>::decode(node, this->script)) {
             throw std::runtime_error("Failed to load script from " + path);
         }
 
@@ -598,7 +598,7 @@ namespace module::purpose {
     }
 
     void ScriptTuner::play_script() {
-        emit<Task>(utility::skill::load_script<LimbsSequence>(script));
+        emit<Task>(utility::skill::load_script<BodySequence>(script));
     }
 
     void ScriptTuner::jump_to_frame() {

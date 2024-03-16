@@ -1,0 +1,72 @@
+# Larger population encourages wider search
+population_size: 25 #60 25 = 2 x parameters+1
+# More generations encourages deeper search
+max_generations: 200
+num_objectives: 2
+num_constraints: 2
+seed: 7777777
+trial_duration_limit: 30 # number of seconds to run a single trial for
+probabilities:
+  real:
+    # Note that simulated binary crossover (SBX) does something like mutation as well
+    crossover: 0.9
+    # recommended nsga2 mutation probability is 1/n, where n is number of parameters
+    mutation: 0.083
+  binary:
+    crossover: 0.9
+    mutation: 0.083
+eta:
+  # eta_c is distribution index for simulated binary crossover (SBX)
+  # higher values of eta_c makes children more similar to parents
+  # Recommended nsga2 value for eta_c is 20
+  C: 20
+  M: 20
+
+task: "walk"
+task_config_path: "config/webots/QuinticWalk.yaml"
+initial_translation: [-7.0, -3.0, 0.51] # x, y, z
+intial_rotation: [0, 0, 1, 0] # x, y, z, angle (rads)
+# The following values are setting the initial values and limits for the walk engine parameters.
+# Each param is the tuple [initial value, minimum, maximum]. These values are merged with the
+# values in QuinticWalk.yaml for an individual, and then evaluated with the walk.
+walk:
+  # Full walk cycle frequency (how long it takes in seconds for a left + right steps)
+  # (in Hz, > 0)
+  freq: [3, 0.5, 5.0]
+  # Length of double support phase in half cycle (how long both legs should be on the ground, as a ratio of how long it takes for a single step)
+  # (ratio, [0:1])
+  double_support_ratio: [0.1, 0.05, 0.2]
+  foot:
+    # Lateral distance between the feet center (how spread apart the feet should be)
+    # (in m, >= 0)
+    distance: [0.18, 0.12, 0.24]
+    # Maximum flying foot height (how high we lift a foot from the ground)
+    # (in m, >= 0)
+    rise: [0.075, 0.05, 0.17]
+  trunk:
+    # Height of the trunk from ground (how much we bend the knee, for the entire walk, fully standing is 0.51-ish)
+    # (in m, > 0)
+    height: [0.45, 0.35, 0.5]
+    # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
+    # (in rad)
+    pitch: [24 * pi / 180, -15 * pi / 180, 30 * pi / 180]
+    # Trunk forward offset (how much we offset the trunk forward or backward lean when walking)
+    # (in m)
+    x_offset: [0.03, -0.05, 0.05]
+    # Trunk lateral offset (how much we offset the trunk left or right lean when walking)
+    # (in m)
+    y_offset: [-0.01, -0.02, 0.02]
+    # Trunk lateral oscillation amplitude ratio (how much we swing the trunk left and right when stepping)
+    # (ratio, >= 0)
+    swing: [0.03, 0.01, 0.05]
+    # Trunk swing pause length in phase at apex (how long we keep the trunk at the max swing position, before swinging back)
+    # (half cycle ratio, [0:1])
+    pause: [0.1, 0.0, 0.2]
+  pause:
+    # Time that the walking is paused when becoming unstable
+    # (in s, [0:10])
+    duration: [0.5, 0.0, 2.0]
+
+# The following values are setting the initial values and limits for the walk engine command.
+walk_command:
+  velocity: [0.2, 0.01, 0.51]

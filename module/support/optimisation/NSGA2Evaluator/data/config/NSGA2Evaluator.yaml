@@ -1,0 +1,9 @@
+# The angle at which we determine the robot is now fallen, in rradians
+fallen_angle: 55 * pi / 180
+
+# Overhead added to trial duration, to account for robot falling over
+stand:
+  stability_overhead: 2
+
+multipath:
+  input_file: "../NUbots/module/support/optimisation/NSGA2Optimiser/data/config/Supplied_Pop_Reals.csv"

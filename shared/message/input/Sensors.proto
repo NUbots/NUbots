@@ -1,21 +1,28 @@
-/*
- * This file is part of the NUbots Codebase.
- *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2013 NUbots <nubots@nubots.net>
- */
+// MIT License
+//
+// Copyright (c) 2013 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 
 syntax = "proto3";
 
@@ -139,12 +146,12 @@ message Sensors {
     /// A set of transforms; one for each frame (All the joints, cameras and base of feet)
     repeated mat4 Htx = 12 [(array_size) = 24];
 
-    /// Homogeneous transform: torso {t} from ground {g}
+    /// Homogeneous transform: torso {t} to ground {g}
     iso3 Hgt = 13;
 
-    /// Homogeneous transform: world {w} from robot {r}
+    /// Homogeneous transform: world {w} to robot {r}
     iso3 Hrw = 14;
 
-    /// Homogeneous transform: world {w} from torso {t}
+    /// Homogeneous transform: world {w} to torso {t}
     iso3 Htw = 15;
 }

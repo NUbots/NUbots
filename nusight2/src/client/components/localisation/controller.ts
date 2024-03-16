@@ -275,4 +275,34 @@ export class LocalisationController {
     const targetIndex = model.robots.findIndex((robot) => robot === model.target);
     return model.robots[targetIndex - 1] || model.robots[model.robots.length - 1];
   }
+
+  @action
+  toggleFieldVisibility = (model: LocalisationModel) => {
+    model.fieldVisible = !model.fieldVisible;
+  };
+
+  @action
+  toggleGridVisibility = (model: LocalisationModel) => {
+    model.gridVisible = !model.gridVisible;
+  };
+
+  @action
+  toggleBallVisibility = (model: LocalisationModel) => {
+    model.ballVisible = !model.ballVisible;
+  };
+
+  @action
+  toggleRobotVisibility = (model: LocalisationModel) => {
+    model.robotVisible = !model.robotVisible;
+  };
+
+  @action
+  toggleFieldLinePointsVisibility = (model: LocalisationModel) => {
+    model.fieldLinePointsVisible = !model.fieldLinePointsVisible;
+  };
+
+  @action
+  toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
+    model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
+  };
 }
