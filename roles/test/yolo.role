@@ -17,6 +17,7 @@ nuclear_role(
   input::Camera
   platform::${SUBCONTROLLER}::HardwareIO
   input::SensorFilter # VisualMesh uses odometry
+  input::ORBSLAM
   # Vision
   vision::Yolo
   # Data logging is commonly used with this role for camera calibration: support::logging::DataLogging
