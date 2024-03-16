@@ -25,5 +25,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]
 
+# Check subcontroller before we build
+if(NOT SUBCONTROLLER STREQUAL "OpenCR")
+    return()
+endif()
+
 # Build our NUClear module
 nuclear_module()
