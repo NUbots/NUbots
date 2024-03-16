@@ -166,10 +166,8 @@ namespace module::vision {
                 rectangle(img_cv, boxes[index], colors[class_id % 6], 2, 8);
                 std::string class_name = class_names[class_id];
                 double confidence      = class_scores[index];
-
-
-                std::string label = class_name + ":" + std::to_string(confidence).substr(0, 4);
-                cv::Size textSize = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
+                std::string label      = class_name + ":" + std::to_string(confidence).substr(0, 4);
+                cv::Size textSize      = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
                 cv::Rect textBox(boxes[index].tl().x, boxes[index].tl().y - 15, textSize.width, textSize.height + 5);
                 cv::rectangle(img_cv, textBox, colors[class_id % 6], cv::FILLED);
                 cv::putText(img_cv,
@@ -189,7 +187,7 @@ namespace module::vision {
                 double box_height  = boxes[index].height;
                 double half_width  = box_width / 2.0;
                 double half_height = box_height / 2.0;
-                double norm_factor = img.dimensions.x();  // Assuming this is a scalar
+                double norm_factor = img.dimensions.x();
 
                 // Helper lambda to simplify unprojection calls
                 auto unproject_point = [&](double x, double y) {
@@ -198,17 +196,13 @@ namespace module::vision {
                                      normalized_dim);
                 };
 
-                // Calculate corner points and their rays in one go
                 Eigen::Matrix<double, 3, 1> top_left_ray     = unproject_point(box_x, box_y);
                 Eigen::Matrix<double, 3, 1> top_right_ray    = unproject_point(box_x + box_width, box_y);
                 Eigen::Matrix<double, 3, 1> bottom_right_ray = unproject_point(box_x + box_width, box_y + box_height);
                 Eigen::Matrix<double, 3, 1> bottom_left_ray  = unproject_point(box_x, box_y + box_height);
-
-                // Calculate center points and their rays
-                Eigen::Matrix<double, 3, 1> centre_ray = unproject_point(box_x + half_width, box_y + half_height);
+                Eigen::Matrix<double, 3, 1> centre_ray       = unproject_point(box_x + half_width, box_y + half_height);
                 Eigen::Matrix<double, 3, 1> bottom_centre_ray = unproject_point(box_x + half_width, box_y + box_height);
                 Eigen::Matrix<double, 3, 1> top_centre_ray    = unproject_point(box_x + half_width, box_y);
-
 
                 // Create a bounding box message
                 auto bbox        = std::make_unique<BoundingBox>();
@@ -219,14 +213,12 @@ namespace module::vision {
                 bbox->corners.push_back(bottom_right_ray);
                 bbox->corners.push_back(bottom_left_ray);
 
-
                 if (class_name == "ball" && confidence > cfg.ball_confidence_threshold) {
                     // Project the centre ray onto the ground plane
                     Eigen::Vector3d uBCw = Hwc.rotation() * centre_ray;
                     Eigen::Vector3d rPWw = uBCw * std::abs(Hwc.translation().z() / uBCw.z()) + Hwc.translation();
                     Eigen::Vector3d rBCc = Hwc.inverse() * rPWw;
 
-                    // Add ball to balls message
                     Ball b;
                     b.uBCc = rBCc.normalized();
                     b.measurements.emplace_back();
@@ -246,7 +238,6 @@ namespace module::vision {
                     Eigen::Vector3d rRWw = uRCw * std::abs(Hwc.translation().z() / uRCw.z()) + Hwc.translation();
                     Eigen::Vector3d rRCc = Hwc.inverse() * rRWw;
 
-                    // Add robot to robots message
                     Robot r;
                     r.rRCc   = rRCc.normalized();
                     r.radius = 0.3;
@@ -260,7 +251,6 @@ namespace module::vision {
                     Eigen::Vector3d rGbWw = uGbCw * std::abs(Hwc.translation().z() / uGbCw.z()) + Hwc.translation();
                     Eigen::Vector3d rGbCc = Hwc.inverse() * rGbWw;
 
-                    // Add goal to goals message
                     Goal g;
                     g.measurements.emplace_back();
                     g.measurements.back().type  = Goal::MeasurementType::CENTRE;
@@ -280,7 +270,6 @@ namespace module::vision {
                     Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
                     Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
 
-                    // Add intersection to intersections message
                     FieldIntersection i;
                     i.rIWw = rIWw;
                     if (class_name == "L-intersection") {
@@ -309,11 +298,13 @@ namespace module::vision {
             emit(std::move(bounding_boxes));
 
             if (log_level <= NUClear::DEBUG) {
-                // Stop the timer
+                // Benchmark inference time
                 auto end      = std::chrono::high_resolution_clock::now();
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
                 log<NUClear::DEBUG>("Yolo took: ", duration.count(), "ms");
                 log<NUClear::DEBUG>("FPS: ", 1000.0 / duration.count());
+
+                // Save image to file
                 cv::resize(img_cv, img_cv, cv::Size(img_cv.cols, img_cv.rows));
                 cv::imwrite("recordings/yolo.jpg", img_cv);
             }
