@@ -123,8 +123,8 @@ namespace module::platform::OpenCR {
 
         // TEST - writing a single servo's position limit
         opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(DynamixelServo::Address::MAX_POSITION_LIMIT_L),
-                                                          uint16_t(nugus.servo_ids()[20]),
-                                                          uint8_t(500)));
+                                                          uint16_t(nugus.servo_ids()[19]),
+                                                          uint8_t(10)));
 
         // Set up indirect addressing for read addresses for each dynamixel
         dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>> read_data[20];
