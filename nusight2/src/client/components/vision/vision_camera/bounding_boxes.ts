@@ -45,9 +45,6 @@ export class BoundingBoxesViewModel {
     const segments = new Array<THREE.Mesh>();
     this.model.forEach((m) => {
       for (let i = 0; i < 4; i++) {
-        console.log(m.name);
-        console.log(m.confidence);
-        console.log(m.corners[i]);
         segments.push(
           this.lineProjection.planeSegment({
             start: m.corners[i],

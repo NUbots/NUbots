@@ -168,7 +168,6 @@ export class VisionNetwork {
     if (!camera) {
       return;
     }
-    console.log("here");
     camera.boundingBoxes = boundingBoxes.map((boundingBox) => ({
       timestamp: toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
