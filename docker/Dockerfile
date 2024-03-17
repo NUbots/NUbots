@@ -380,9 +380,9 @@ RUN install-from-source https://github.com/stevenlovegrove/Pangolin/archive/refs
 
 # OrbSlam3
 RUN install-package boost
-RUN git clone https://github.com/Tom0Brien/ORB_SLAM3.git && \
-    cd ORB_SLAM3 && \
-    ./build.sh
+# RUN git clone https://github.com/Tom0Brien/ORB_SLAM3.git && \
+#     cd ORB_SLAM3 && \
+#     ./build.sh
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###

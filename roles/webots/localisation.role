@@ -18,6 +18,7 @@ nuclear_role(
   network::PlotJuggler
   # Platform
   input::SensorFilter
+  input::ORBSLAM
   platform::Webots
   # Vision
   vision::VisualMesh

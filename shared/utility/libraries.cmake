@@ -28,6 +28,15 @@ target_link_libraries(nuclear_utility PUBLIC tinyrobotics::tinyrobotics)
 find_package(NLopt REQUIRED)
 target_link_libraries(nuclear_utility PUBLIC NLopt::nlopt)
 
+find_package(OpenCV REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC ${OpenCV_LIBS})
+
+find_package(Pangolin REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC ${Pangolin_LIBRARIES})
+
+find_package(Boost COMPONENTS system filesystem serialization REQUIRED)
+target_link_libraries(nuclear_utility PUBLIC Boost::boost -lboost_serialization -lcrypto)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   find_package(libbacktrace REQUIRED)
   target_link_libraries(nuclear_utility PUBLIC libbacktrace::libbacktrace ${CMAKE_DL_LIBS})
