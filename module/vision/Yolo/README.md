@@ -19,7 +19,7 @@ Include this module to detect balls, goals, robots and field line intersections 
 
 ## Consumes
 
-- `message::input::Image` the image to run the Visual Mesh on.
+- `message::input::Image` the image to run the YOLO on.
 
 ## Emits
 
