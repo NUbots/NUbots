@@ -1,17 +1,11 @@
-import { createTransformer } from "mobx-utils";
 import * as THREE from "three";
 
-import { Matrix4 } from "../../../../shared/math/matrix4";
-import { Vector2 } from "../../../../shared/math/vector2";
 import { Vector3 } from "../../../../shared/math/vector3";
 import { Vector4 } from "../../../../shared/math/vector4";
 import { CameraParams } from "../../camera/camera_params";
 import { LineProjection } from "../../camera/objects/line_projection";
 import { group } from "../../three/builders";
 import { Canvas } from "../../three/three";
-
-const BOX_COLOUR = new Vector4(1, 0.5, 0, 1); // orange
-
 export interface BoundingBoxesModel {
   readonly timestamp: number;
   readonly name: string;

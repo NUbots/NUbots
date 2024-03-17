@@ -34,7 +34,7 @@ import "Transform.proto";
 
 message FieldIntersection {
     enum IntersectionType {
-        UNKNOWN = 0;
+        UNKNOWN        = 0;
         L_INTERSECTION = 1;
         T_INTERSECTION = 2;
         X_INTERSECTION = 3;
@@ -42,13 +42,13 @@ message FieldIntersection {
 
     IntersectionType type = 1;
     // Position of the intersection in world space
-    vec3        rIWw = 2;
+    vec3 rIWw = 2;
 }
 
 message FieldIntersections {
     uint32                    id        = 1;
     google.protobuf.Timestamp timestamp = 2;
     /// Isometry3d transform from world space to camera space at the time that the image was taken
-    iso3 Hcw = 3;
+    iso3                       Hcw           = 3;
     repeated FieldIntersection intersections = 4;
 }

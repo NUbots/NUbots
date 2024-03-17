@@ -4,11 +4,11 @@ import { CameraViewModel } from "../../camera/view_model";
 import { VisionRobotModel } from "../model";
 
 import { BallsViewModel } from "./balls";
+import { BoundingBoxesViewModel } from "./bounding_boxes";
 import { GoalsViewModel } from "./goals";
 import { GreenHorizonViewModel } from "./green_horizon";
 import { VisionCameraModel } from "./model";
 import { OtherRobotsViewModel } from "./other_robots";
-import { BoundingBoxesViewModel } from "./bounding_boxes";
 import { VisualMeshViewModel } from "./visual_mesh";
 
 export class VisionCameraViewModel extends CameraViewModel {

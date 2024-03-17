@@ -19,7 +19,7 @@ import { GridView } from "./grid/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
-import { FieldIntersection, LocalisationRobotModel } from "./robot_model";
+import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
 
@@ -290,7 +290,7 @@ const FieldIntersections = ({ model }: { model: LocalisationModel }) => {
         (robot) =>
           robot.visible && (
             <object3D key={robot.id}>
-              {robot.fieldIntersectionsF?.map((intersection, i) => {
+              {robot.fieldIntersectionsF?.map((intersection) => {
                 const createShapeForIntersection = (intersectionType: string, position: Vector3) => {
                   const basePosition = position.add(new Vector3(0.1, 0.1, 0)).toArray();
                   switch (intersectionType) {
