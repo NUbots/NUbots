@@ -19,6 +19,7 @@ namespace module::input {
         // const std::string vocabularyFile = "";
         // const std::string settingsFile   = "";
         // ORB_SLAM3::System slamSystem(vocabularyFile, settingsFile, ORB_SLAM3::System::eSensor::MONOCULAR, false);
+        std::unique_ptr<ORB_SLAM3::System> slamSystem;
         std::mutex mutex;
         //////////////////////////////////////////////
 

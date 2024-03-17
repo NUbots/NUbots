@@ -19,7 +19,7 @@ log_level: DEBUG
 # Main parameters
 #--------------------------------------------------------------------------------------------
 # ORB-SLAM vocabulary file, can be .txt or .bin.
-vocabulary: "ORBvoc.bin"
+vocabulary: "ORBvoc.txt"
 settings: "SlamSettings.yaml"
 
 # Save received images to file.
