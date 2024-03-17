@@ -1,3 +1,4 @@
+# This role is used for testing YOLO in Webots.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
   # and without it many roles do not run
@@ -12,9 +13,7 @@ nuclear_role(
   output::Overview
   # Sensors
   platform::Webots
-  input::SensorFilter
   # Vision
   vision::Yolo
   output::ImageCompressor
-  # Data logger support::logging::DataLogging
 )
