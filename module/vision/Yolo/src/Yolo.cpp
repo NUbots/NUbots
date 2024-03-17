@@ -60,10 +60,9 @@ namespace module::vision {
 
         on<Trigger<Image>, Single>().then([this](const Image& img) {
             // Start timer
-            auto start                   = std::chrono::high_resolution_clock::now();
-            const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
+            auto start = std::chrono::high_resolution_clock::now();
 
-            // -------- Convert image to cv::Mat and preprocess --------
+            // -------- Convert image to cv::Mat -------
             const int width  = img.dimensions.x();
             const int height = img.dimensions.y();
             cv::Mat img_cv;
@@ -74,7 +73,12 @@ namespace module::vision {
             else if (cfg.image_format == "BRGA") {
                 img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
             }
+            else {
+                log<NUClear::ERROR>("Unsupported image format", cfg.image_format);
+                powerplant.shutdown();
+            }
 
+            // -------- Preprocess the image -------
             cv::Mat letterbox_img = letterbox(img_cv);
             float scale           = letterbox_img.size[0] / 640.0;
             cv::Mat blob = cv::dnn::blobFromImage(letterbox_img, 1.0 / 255.0, cv::Size(640, 640), cv::Scalar(), true);
@@ -87,11 +91,8 @@ namespace module::vision {
             // Set input tensor for model with one input
             infer_request.set_input_tensor(input_tensor);
 
-            // -------- Start inference --------
+            // -------- Perform Inference --------
             infer_request.infer();
-
-
-            // -------- Get the inference result --------
             auto output       = infer_request.get_output_tensor(0);
             auto output_shape = output.get_shape();
 
@@ -120,20 +121,21 @@ namespace module::vision {
                     float w  = output_buffer.at<float>(i, 2);
                     float h  = output_buffer.at<float>(i, 3);
 
+                    // Scale the bbox to the original image dimensions
                     int left   = int((cx - 0.5 * w) * scale);
                     int top    = int((cy - 0.5 * h) * scale);
                     int width  = int(w * scale);
                     int height = int(h * scale);
-
                     boxes.push_back(cv::Rect(left, top, width, height));
                 }
             }
 
-            // NMS
+            // NMS to remove overlapping boxes
             std::vector<int> indices;
             cv::dnn::NMSBoxes(boxes, class_scores, score_threshold, nms_threshold, indices);
 
             // -------- Emit Detections --------
+            const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
             auto balls       = std::make_unique<Balls>();
             balls->id        = img.id;
@@ -163,13 +165,13 @@ namespace module::vision {
             for (size_t i = 0; i < indices.size(); i++) {
                 int index    = indices[i];
                 int class_id = class_ids[index];
-                rectangle(img_cv, boxes[index], colors[class_id % 6], 2, 8);
+                rectangle(img_cv, boxes[index], colours[class_id % 6], 2, 8);
                 std::string class_name = class_names[class_id];
                 double confidence      = class_scores[index];
                 std::string label      = class_name + ":" + std::to_string(confidence).substr(0, 4);
                 cv::Size textSize      = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
                 cv::Rect textBox(boxes[index].tl().x, boxes[index].tl().y - 15, textSize.width, textSize.height + 5);
-                cv::rectangle(img_cv, textBox, colors[class_id % 6], cv::FILLED);
+                cv::rectangle(img_cv, textBox, colours[class_id % 6], cv::FILLED);
                 cv::putText(img_cv,
                             label,
                             cv::Point(boxes[index].tl().x, boxes[index].tl().y - 5),
@@ -196,6 +198,7 @@ namespace module::vision {
                                      normalized_dim);
                 };
 
+                // Convert the bounding box points to unit vectors (rays) in the camera {c} space
                 Eigen::Matrix<double, 3, 1> top_left_ray     = unproject_point(box_x, box_y);
                 Eigen::Matrix<double, 3, 1> top_right_ray    = unproject_point(box_x + box_width, box_y);
                 Eigen::Matrix<double, 3, 1> bottom_right_ray = unproject_point(box_x + box_width, box_y + box_height);
@@ -229,20 +232,8 @@ namespace module::vision {
                     b.colour.fill(1.0);
                     balls->balls.push_back(b);
 
-                    bbox->colour = Eigen::Vector4d(1.0, 1.0, 1.0, 1.0);
-                }
-
-                if (class_name == "robot" && confidence > cfg.robot_confidence_threshold) {
-                    // Project the centre ray onto the ground plane
-                    Eigen::Vector3d uRCw = Hwc.rotation() * bottom_centre_ray;
-                    Eigen::Vector3d rRWw = uRCw * std::abs(Hwc.translation().z() / uRCw.z()) + Hwc.translation();
-                    Eigen::Vector3d rRCc = Hwc.inverse() * rRWw;
-
-                    Robot r;
-                    r.rRCc   = rRCc.normalized();
-                    r.radius = 0.3;
-                    robots->robots.push_back(r);
-                    bbox->colour = Eigen::Vector4d(1.0, 0.0, 0.0, 1.0);
+                    bbox->colour =
+                        Eigen::Vector4d(colours[0][0] / 255.0, colours[0][1] / 255.0, colours[0][2] / 255.0, 1.0);
                 }
 
                 if (class_name == "goal post" && confidence > cfg.goal_confidence_threshold) {
@@ -261,7 +252,22 @@ namespace module::vision {
                     g.side                      = Goal::Side::UNKNOWN_SIDE;
                     g.screen_angular            = cartesianToSpherical(g.post.bottom).tail<2>();
                     goals->goals.push_back(std::move(g));
-                    bbox->colour = Eigen::Vector4d(0.0, 1.0, 0.0, 1.0);
+                    bbox->colour =
+                        Eigen::Vector4d(colours[1][0] / 255.0, colours[1][1] / 255.0, colours[1][2] / 255.0, 1.0);
+                }
+
+                if (class_name == "robot" && confidence > cfg.robot_confidence_threshold) {
+                    // Project the centre ray onto the ground plane
+                    Eigen::Vector3d uRCw = Hwc.rotation() * bottom_centre_ray;
+                    Eigen::Vector3d rRWw = uRCw * std::abs(Hwc.translation().z() / uRCw.z()) + Hwc.translation();
+                    Eigen::Vector3d rRCc = Hwc.inverse() * rRWw;
+
+                    Robot r;
+                    r.rRCc   = rRCc.normalized();
+                    r.radius = 0.3;
+                    robots->robots.push_back(r);
+                    bbox->colour =
+                        Eigen::Vector4d(colours[2][0] / 255.0, colours[2][1] / 255.0, colours[2][2] / 255.0, 1.0);
                 }
 
                 if ((class_name == "L-intersection" || class_name == "T-intersection" || class_name == "X-intersection")
@@ -273,16 +279,19 @@ namespace module::vision {
                     FieldIntersection i;
                     i.rIWw = rIWw;
                     if (class_name == "L-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
-                        bbox->colour = Eigen::Vector4d(0.0, 0.0, 1.0, 1.0);
+                        i.type = FieldIntersection::IntersectionType::L_INTERSECTION;
+                        bbox->colour =
+                            Eigen::Vector4d(colours[3][0] / 255.0, colours[3][1] / 255.0, colours[3][2] / 255.0, 1.0);
                     }
                     else if (class_name == "T-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::T_INTERSECTION;
-                        bbox->colour = Eigen::Vector4d(1.0, 1.0, 0.0, 1.0);
+                        i.type = FieldIntersection::IntersectionType::T_INTERSECTION;
+                        bbox->colour =
+                            Eigen::Vector4d(colours[4][0] / 255.0, colours[4][1] / 255.0, colours[4][2] / 255.0, 1.0);
                     }
                     else if (class_name == "X-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::X_INTERSECTION;
-                        bbox->colour = Eigen::Vector4d(1.0, 0.0, 1.0, 1.0);
+                        i.type = FieldIntersection::IntersectionType::X_INTERSECTION;
+                        bbox->colour =
+                            Eigen::Vector4d(colours[5][0] / 255.0, colours[5][1] / 255.0, colours[5][2] / 255.0, 1.0);
                     }
                     field_intersections->intersections.push_back(std::move(i));
                 }
@@ -290,13 +299,13 @@ namespace module::vision {
                 bounding_boxes->bounding_boxes.push_back(*bbox);
             }
 
-
             emit(std::move(balls));
             emit(std::move(robots));
             emit(std::move(goals));
             emit(std::move(field_intersections));
             emit(std::move(bounding_boxes));
 
+            // -------- Debug --------
             if (log_level <= NUClear::DEBUG) {
                 // Benchmark inference time
                 auto end      = std::chrono::high_resolution_clock::now();
