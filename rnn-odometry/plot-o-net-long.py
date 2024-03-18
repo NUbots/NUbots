@@ -51,15 +51,15 @@ def main():
     print('Size of tstamps data: ' + str(tstamps.shape))
 
     plt.close('all')
-
-    plot_num = 3000
+    plot_num_low = 200000
+    plot_num_high = 250000
 
     # plot
     fig, ax = plt.subplots(3, 1, figsize=(18, 6), sharex = True)
-    ax[0].plot(imu[:plot_num, [0, 1]], 'o-')
-    ax[0].plot(imu[:plot_num, [2]]-np.array([9.8]), 'o-')
-    ax[1].plot(imu[:plot_num, [3, 4, 5]], 'o-')
-    ax[2].plot(servos[:plot_num, [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]], 'o-')
+    ax[0].plot(imu[plot_num_low:plot_num_high, [0, 1]], 'o-')
+    ax[0].plot(imu[plot_num_low:plot_num_high, [2]]-np.array([9.8]), 'o-')
+    ax[1].plot(imu[plot_num_low:plot_num_high, [3, 4, 5]], 'o-')
+    ax[2].plot(servos[plot_num_low:plot_num_high, [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]], 'o-')
     ax[0].legend([
         "accelerometer.x",
         "accelerometer.y",
@@ -96,7 +96,7 @@ def main():
     plt.figure()
     tstamps_diff = (tstamps[1:] - tstamps[:-1])
     # plt.plot(tstamps_diff[:plot_num], 'o-')
-    plt.plot(tstamps[:plot_num], 'o-')
+    plt.plot(tstamps[plot_num_low:plot_num_high], 'o-')
 
 
     plt.show()

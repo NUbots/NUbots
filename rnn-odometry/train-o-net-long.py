@@ -41,19 +41,21 @@ def main():
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
     truth = truth_all[:, 9:12]
 
-    # Normalise the data
     # "data.accelerometer.x",
     # "data.accelerometer.y",
     # "data.accelerometer.z",
     # "data.gyroscope.x",
     # "data.gyroscope.y",
     # "data.gyroscope.z"
-    imu_buffers = [10.0, 10.0, 10.0, 50.0, 50.0, 50.0]
-    imu_maxes = np.max(imu, axis = 0) + imu_buffers
-    imu_mins = np.min(imu, axis = 0) - imu_buffers
-    # Cap the imu data off to remove outliers
-    imu_capped = np.maximum(np.minimum(imu, imu_maxes, axis = 1), imu_mins, axis = 1)
-    normalized_imu  = ((imu_capped + imu_mins) / (imu_maxes + imu_mins)) - 0.5
+
+    # Add buffers to the imu data
+
+    # imu_buffers = [10.0, 10.0, 10.0, 50.0, 50.0, 50.0]
+    # imu_maxes = np.max(imu, axis = 0) + imu_buffers
+    # imu_mins = np.min(imu, axis = 0) - imu_buffers
+    # # Cap the imu data off to remove outliers
+    # imu_capped = np.maximum(np.minimum(imu, imu_maxes, axis = 1), imu_mins, axis = 1)
+    # normalized_imu  = ((imu_capped + imu_mins) / (imu_maxes + imu_mins)) - 0.5
     # plot this
     # import pdb
     # pdb.set_trace()
@@ -63,41 +65,50 @@ def main():
     joined_data = np.concatenate([imu, servos, truth], axis=1)
     print(joined_data.shape)
 
-    # Normalised the training data
-
-
-
-
     # Split the training data into training, validation and test sets
     training_size = 0.5
     validate_size = 0.2
-
-    # Split the data into training, validation and testing sets
-    # then normalise
     num_time_steps = joined_data.shape[0]
 
-    num_train_max_idx = np.floor(num_time_steps * training_size)
-    num_val_max_idx = np.floor(num_time_steps * (training_size + validate_size))
+    num_train_max_idx = int(np.floor(num_time_steps * training_size))
+    num_val_max_idx = int(np.floor(num_time_steps * (training_size + validate_size)))
 
+    # import pdb
+    # pdb.set_trace()
 
     train_arr = joined_data[:num_train_max_idx]
-    val_arr = joined_data[num_train_max_idx: num_val_max_idx]
+    validate_arr = joined_data[num_train_max_idx: num_val_max_idx]
     test_arr = joined_data[num_val_max_idx:]
 
-    import pdb
-    pdb.set_trace()
+    # import pdb
+    # pdb.set_trace()
 
+    # array sizes
+    # num_train = train_arr.size
+    # num_val = validate_arr.size
+
+    # normalise - NOTE: mean and std from training dataset is used to normalise
+    # all of the datasets to prevent information leakage.
     mean = train_arr.mean(axis=0)
     std = train_arr.std(axis=0)
 
     train_arr = (train_arr - mean) / std
-    validate_arr = (joined_data[num_train : (num_train + num_val)] - mean) / std
-    test_arr = (joined_data[(num_train + num_val) :] - mean) / std
+    validate_arr = (validate_arr - mean) / std
+    test_arr = (test_arr - mean) / std
 
     print(f"Training set size: {train_arr.shape}")
     print(f"Validation set size: {validate_arr.shape}")
     print(f"Test set size: {test_arr.shape}")
 
+    # plot
+    num_channels = train_arr.shape[1]
+    plt.figure(figsize=(10, 5))
+    # Plot each channel
+    for i in range(num_channels):
+        plt.plot(train_arr[200000:250000, i], label=f'Channel {i+1}')
+    # Add a legend
+    plt.legend()
+    plt.show()
 
 if __name__ == "__main__":
     main()
