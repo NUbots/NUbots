@@ -340,6 +340,50 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+# OpenCV
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
+
+# OpenVino
+RUN install-package opencl-clhpp && \
+    install-package opencl-headers && \
+    install-package ocl-icd
+
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1
+
+RUN cd openvino && git submodule update --init --recursive
+
+RUN cd openvino && mkdir build && \
+cd build && \
+cmake .. -DBUILD_TESTING:BOOL='OFF' \
+        -DCMAKE_BUILD_TYPE:STRING='Release' \
+        -DENABLE_AVX512F:BOOL='OFF' \
+        -DENABLE_PYTHON:BOOL='OFF' \
+        -DENABLE_CLANG_FORMAT:BOOL='OFF' \
+        -DENABLE_NCC_STYLE:BOOL='OFF' \
+        -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
+        -DENABLE_SYSTEM_TBB:BOOL='ON' \
+        -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
+        -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
+        -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+        -Wno-dev && \
+make -j$(nproc) && \
+make install
+
+RUN /usr/local/setupvars.sh
+
+# Pangolin
+RUN install-package mesa
+RUN install-package glew
+RUN install-from-source https://github.com/stevenlovegrove/Pangolin/archive/refs/tags/v0.9.1.tar.gz \
+    -DBUILD_PANGOLIN_EIGEN=OFF \
+    -DBUILD_EXAMPLES=OFF
+
+# OrbSlam3
+RUN install-package boost
+# RUN git clone https://github.com/Tom0Brien/ORB_SLAM3.git && \
+#     cd ORB_SLAM3 && \
+#     ./build.sh
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -384,6 +428,9 @@ RUN install-package clinfo
 
 # Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
+
+# Move OpenVino libraries to our library path
+RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
 
 # Re-run ldconfig to make sure the database is up to date
 RUN ldconfig

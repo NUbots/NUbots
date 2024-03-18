@@ -1,0 +1,15 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+model_path: "yolo.onnx"
+
+ball_confidence_threshold: 0.1 # Minimum confidence required for a ball detection to be accepted
+goal_confidence_threshold: 0.1 # Minimum confidence required for a goal detection to be accepted
+robot_confidence_threshold: 0.1 # Minimum confidence required for a robot detection to be accepted
+intersection_confidence_threshold: 0.1 # Minimum confidence required for a field line intersection detection to be accepted
+
+# Input image format (BayerRG8, BRGA)
+image_format: BayerRG8
+
+# OpenVino device (CPU, GPU)
+device: GPU
