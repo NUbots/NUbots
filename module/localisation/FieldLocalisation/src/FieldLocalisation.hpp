@@ -117,6 +117,9 @@ namespace module::localisation {
             /// @brief Start time delay for the particle filter
             double start_time_delay = 0.0;
 
+            /// @brief Bool to enable/disable using ground truth for localisation
+            bool use_ground_truth_localisation;
+
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
         } cfg;

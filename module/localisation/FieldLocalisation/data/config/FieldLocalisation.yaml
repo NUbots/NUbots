@@ -27,3 +27,6 @@ min_observations: 50
 
 # Delay before the particle filter starts (allows odometry to settle)
 start_time_delay: 5
+
+# Bool to use ground truth for localisation
+use_ground_truth_localisation: false
