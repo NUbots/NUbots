@@ -142,7 +142,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   };
 
   private toggleParticleVisibility = () => {
-    this.props.controller.toggleParticleVisibility(this.props.model);
+    this.props.controller.toggleParticlesVisibility(this.props.model);
   };
 
   private toggleFieldLinePointsVisibility = () => {
@@ -193,7 +193,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
         <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
-        <MenuItem label="Balls" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
+        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
         <MenuItem
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
