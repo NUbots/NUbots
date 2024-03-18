@@ -1,5 +1,4 @@
-# This role is used for testing the VisualMesh on the real robot. This does not move the robot's servos, so it is
-# recommended to stand the robot first. This role is commonly used to record data for automatic camera calibration.
+# This role is used for testing YOLO on the real robot. This role does not move the robot's servos.
 nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
   extension::FileWatcher # Watches configuration files for changes
