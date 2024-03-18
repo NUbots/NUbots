@@ -12,22 +12,27 @@ namespace module::vision {
         /// @brief Stores configuration values
         struct Config {
             /// @brief The path to the model file
-            std::string model_path                   = "";
-            std::string device                       = "";
-            double ball_confidence_threshold         = 0.0;
-            double goal_confidence_threshold         = 0.0;
-            double robot_confidence_threshold        = 0.0;
+            std::string model_path = "";
+            /// @brief The device (GPU or CPU) to run the model on
+            std::string device = "";
+            /// @brief The confidence threshold for the ball
+            double ball_confidence_threshold = 0.0;
+            /// @brief The confidence threshold for the goal
+            double goal_confidence_threshold = 0.0;
+            /// @brief The confidence threshold for the robot
+            double robot_confidence_threshold = 0.0;
+            /// @brief The confidence threshold for the field intersections (L, T, X)
             double intersection_confidence_threshold = 0.0;
         } cfg;
 
-        /// @brief OpenVINO Core
-        ov::Core core;
+        /// @brief OpenVINO Core runtime Core entity, used to generate the compiled model object
+        ov::Core core{};
 
-        /// @brief Compiled model
-        ov::CompiledModel compiled_model;
+        /// @brief OpenVINO compiled model, used create inference request object
+        ov::CompiledModel compiled_model{};
 
-        /// @brief Inference request
-        ov::InferRequest infer_request;
+        /// @brief Inference request, used to run the model (inference)
+        ov::InferRequest infer_request{};
 
         /// @brief Object struct for storing name and colour
         struct Object {
