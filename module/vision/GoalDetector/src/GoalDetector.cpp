@@ -72,7 +72,6 @@ namespace module::vision {
                 const auto& neighbours                               = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->uPCw.cast<double>();
                 const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw.cast<double>();
-                const double world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
                 const int GOAL_INDEX                                 = horizon.class_map.at("goal");
 
                 // Get some indices to partition
@@ -150,9 +149,9 @@ namespace module::vision {
                         // Grab the goal point closest in the cluster and assume it is the bottom of the post
                         auto closest_uGCw_idx =
                             std::min_element(cluster.begin(), cluster.end(), [&](const int& a, const int& b) {
-                                return rays.col(a).z() < rays.col(b).z();
+                                return uPCw.col(a).z() < uPCw.col(b).z();
                             });
-                        Eigen::Vector3d closest_uGCw = Eigen::Vector3d(rays.col(*closest_uGCw_idx));
+                        Eigen::Vector3d closest_uGCw = Eigen::Vector3d(uPCw.col(*closest_uGCw_idx));
 
                         // Project goal point onto the ground plane
                         Eigen::Vector3d rCWw = horizon.Hcw.inverse().translation();
