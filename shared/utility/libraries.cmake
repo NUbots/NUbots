@@ -61,11 +61,13 @@ set(SCRIPT_FILES
     CACHE INTERNAL "A list of all script files" FORCE
 )
 
-# Add the platform models directory to the build directory
-file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/platform/models" DESTINATION ${PROJECT_BINARY_DIR})
-# Add the models to the model files variable for the install script
-file(GLOB_RECURSE models "${PROJECT_BINARY_DIR}/models/*")
+# Copy only .urdf files from the platform models directory to the build directory
+file(GLOB_RECURSE urdf_files "${PROJECT_SOURCE_DIR}/shared/utility/platform/models/*.urdf")
+file(COPY ${urdf_files} DESTINATION "${PROJECT_BINARY_DIR}/models")
+
+# Add the .urdf models to the model files variable for the install script
+file(GLOB_RECURSE models "${PROJECT_BINARY_DIR}/models/*.urdf")
 set(MODEL_FILES
     ${models}
-    CACHE INTERNAL "A list of all model files" FORCE
+    CACHE INTERNAL "A list of all model .urdf files" FORCE
 )

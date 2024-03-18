@@ -14,7 +14,7 @@ Include this module whenever the robot needs to vocalize or acknowledge messages
 
 ## Emits
 
-- `message::actuation::LimbsSequence`: A Task to instruct the robot's limbs to perform specific sequences, such as a nodding gesture.
+- `message::actuation::HeadSequence`: A Task to instruct the robot's head to perform specific sequences, such as a nodding gesture.
 
 ## Dependencies
 

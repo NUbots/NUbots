@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2013 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "SensorFilter.hpp"
@@ -30,13 +38,14 @@
 
 namespace module::input {
 
-    using message::actuation::BodySide;
     using utility::input::FrameID;
     using utility::input::ServoID;
+    using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    using message::actuation::BodySide;
     using message::behaviour::state::Stability;
     using message::localisation::ResetFieldLocalisation;
 
@@ -62,6 +71,10 @@ namespace module::input {
             cfg.urdf_path = config["urdf_path"].as<std::string>();
             nugus_model   = tinyrobotics::import_urdf<double, n_joints>(cfg.urdf_path);
 
+            // Set the initial transform for resetting
+            cfg.initial_Hwt.translation() = Eigen::VectorXd(config["initial_rTWw"].as<Expression>());
+            cfg.initial_Hwt.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(config["initial_rpy"].as<Expression>()));
+
             //  Configure Filters
             cfg.filtering_method = config["filtering_method"].as<std::string>();
             configure_ukf(config);
@@ -69,12 +82,12 @@ namespace module::input {
             configure_mahony(config);
 
             // Deadreckoning
-            Hwa.translation().y() =
-                tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
-                                                                   nugus_model.home_configuration(),
-                                                                   config["initial_anchor_frame"].as<std::string>())
-                    .translation()
-                    .y();
+            cfg.initial_anchor_frame = config["initial_anchor_frame"].as<std::string>();
+            Hwa.translation().y()    = tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
+                                                                                       nugus_model.home_configuration(),
+                                                                                       cfg.initial_anchor_frame)
+                                        .translation()
+                                        .y();
             cfg.deadreckoning_scale = Eigen::Vector3d(config["deadreckoning_scale"].as<Expression>());
         });
 
@@ -156,10 +169,21 @@ namespace module::input {
                 .disable();
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
+            // Reset the state of the filters
+            reset_ukf();
+            reset_kf();
+            reset_mahony();
+
+            // Reset deadreckoning
+            Hwa                   = Eigen::Isometry3d::Identity();
+            Hwa.translation().y() = tinyrobotics::forward_kinematics<double, n_joints>(nugus_model,
+                                                                                       nugus_model.home_configuration(),
+                                                                                       cfg.initial_anchor_frame)
+                                        .translation()
+                                        .y();
+
             // Reset the translation and yaw of odometry
-            Hwt.translation().x() = 0;
-            Hwt.translation().y() = 0;
-            yaw                   = 0;
+            Hwt = cfg.initial_Hwt;
         });
     }
 

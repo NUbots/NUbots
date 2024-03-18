@@ -23,6 +23,7 @@ targets:
     message.output.CompressedImage: 10
     message.vision.Balls: true
     message.vision.Goals: true
+    message.vision.Robots: true
     message.vision.GreenHorizon: true
     message.vision.FieldLines: true
     message.vision.VisualMesh: false
@@ -30,3 +31,7 @@ targets:
     # Localisation Messages
     message.localisation.Ball: true
     message.localisation.Field: true
+
+    # Log messages
+    message.nuclear.LogMessage: true
+    message.nuclear.ReactionStatistics: false
