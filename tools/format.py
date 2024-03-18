@@ -48,40 +48,42 @@ repo = pygit2.Repository(b.project_dir)
 # The extensions that are handled by the various formatters
 formatters = OrderedDict()
 
-formatters["licence"] = {
-    "format": [
-        [
-            "licenseheaders",
-            "-t",
-            os.path.join(b.project_dir, ".licence.tmpl"),
-            "--years={added}",
-            "--owner=NUbots",
-            f"--projname=NUbots",
-            "--projurl=https://github.com/NUbots/NUbots",
-            "-f",
-            "{path}",
-        ]
-    ],
-    "include": [
-        "*.cpp",
-        "*.hpp",
-        "*.h",
-        "*.c",
-        "*.py",
-        "*.sh",
-        "*.cmake",
-        "*.proto",
-        "CMakeLists.txt",
-        "**/CMakeLists.txt",
-        "Dockerfile",
-        "**/Dockerfile",
-    ],
-    "exclude": [
-        "shared/utility/motion/splines/*",
-        "shared/utility/platform/models/nugus/nugus.proto",
-        "nusight2/src/assets/robot-models/nugus/nugus.proto",
-    ],  # TODO exclude files that are not ours
-}
+# TODO: Fix this
+# formatters["licence"] = {
+#     "format": [
+#         [
+#             "licenseheaders",
+#             "-t",
+#             os.path.join(b.project_dir, ".licence.tmpl"),
+#             "--years={added}",
+#             "--owner=NUbots",
+#             f"--projname=NUbots",
+#             "--projurl=https://github.com/NUbots/NUbots",
+#             "-f",
+#             "{path}",
+#         ]
+#     ],
+#     "include": [
+#         "*.cpp",
+#         "*.hpp",
+#         "*.h",
+#         "*.c",
+#         "*.py",
+#         "*.sh",
+#         "*.cmake",
+#         "*.proto",
+#         "CMakeLists.txt",
+#         "**/CMakeLists.txt",
+#         "Dockerfile",
+#         "**/Dockerfile",
+#     ],
+#     "exclude": [
+#         "shared/utility/motion/splines/*",
+#         "shared/utility/platform/models/nugus/nugus.proto",
+#         "nusight2/src/assets/robot-models/nugus/nugus.proto",
+#         "module/support/optimisation/NSGA2Optimiser/src/nsga2",
+#     ],  # TODO exclude files that are not ours
+# }
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
     "include": ["*.h", "*.c", "*.cc", "*.cxx", "*.cpp", "*.hpp", "*.ipp", "*.frag", "*.glsl", "*.vert", "*.proto"],

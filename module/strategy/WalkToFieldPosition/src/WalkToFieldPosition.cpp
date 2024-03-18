@@ -73,8 +73,8 @@ namespace module::strategy {
 
                 // Compute the current position error and heading error in field {f} space
                 const double position_error = (Hfr.translation().head(2) - rPFf.head(2)).norm();
-                const Eigen::Vector3d uXRf  = Hfr.linear().col(0).head(2);
-                const double heading_error  = std::acos(std::max(-1.0, std::min(1.0, uXRf.dot(uHFf.head(2)))));
+                Eigen::Vector2d uXRf        = Hfr.rotation().col(0).head<2>();
+                const double heading_error  = std::acos(std::max(-1.0, std::min(1.0, uXRf.dot(uHFf.head<2>()))));
 
                 // If we have stopped and our position and heading error is below resume tolerance, then remain stopped
                 if (stopped && position_error < cfg.resume_tolerance && heading_error < cfg.resume_tolerance) {

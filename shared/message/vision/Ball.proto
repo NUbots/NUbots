@@ -44,9 +44,7 @@ message Ball {
     /// and the certainty of the measurement
     message Measurement {
         MeasurementType type = 1;
-        /// Spherical Reciprocal Coordinates (1/distance, phi, theta)
-        /// Gives a better representation of the error of the measurement, since error comes from the angular position
-        vec3 srBCc = 2;
+        vec3            rBCc = 2;
         /// Confidence of this measurement, for localisation
         mat3 covariance = 3;
     }

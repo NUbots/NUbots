@@ -107,9 +107,8 @@ namespace module::localisation {
                 Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
                 double lowest_distance = std::numeric_limits<double>::max();
                 for (const auto& ball : balls.balls) {
-                    Eigen::Vector3d current_rBWw =
-                        Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<double>());
-                    double current_distance = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
+                    Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
+                    double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
                     if (current_distance < lowest_distance) {
                         lowest_distance = current_distance;
                         rBWw            = current_rBWw;
