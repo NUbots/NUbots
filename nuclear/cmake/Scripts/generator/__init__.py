@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2015 NUbots
+# Copyright (c) 2017 NUbots
 #
 # This file is part of the NUbots codebase.
 # See https://github.com/NUbots/NUbots for further info.

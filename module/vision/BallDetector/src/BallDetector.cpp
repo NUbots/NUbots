@@ -81,7 +81,8 @@ namespace module::vision {
                 const auto& cls        = horizon.mesh->classifications;
                 const auto& neighbours = horizon.mesh->neighbourhood;
                 // Unit vectors from camera to a point in the mesh, in world space
-                const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays.cast<double>();
+                const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = horizon.mesh->uPCw.cast<double>();
+                const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = horizon.mesh->rPWw.cast<double>();
                 const int BALL_INDEX                                 = horizon.class_map.at("ball");
 
                 // PARTITION INDICES AND CLUSTER
@@ -124,8 +125,12 @@ namespace module::vision {
 
                 // Partition the clusters such that clusters above the green horizons are removed,
                 // and then resize the vector to remove them
-                auto green_boundary =
-                    utility::vision::visualmesh::check_green_horizon_side(clusters, horizon.horizon, uPCw, false, true);
+                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
+                                                                                            horizon.horizon,
+                                                                                            rPWw,
+                                                                                            false,
+                                                                                            true,
+                                                                                            true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
@@ -204,7 +209,7 @@ namespace module::vision {
                     // Coordinates (1/distance, phi, theta)
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::ANGULAR;
-                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * angular_distance);
+                    b.measurements.back().rBCc       = b.uBCc * angular_distance;
                     b.measurements.back().covariance = cfg.ball_angular_cov.asDiagonal();
 
                     // Projection-based distance
@@ -221,7 +226,7 @@ namespace module::vision {
                     // Create a ball measurement message for this calculation
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * projection_distance);
+                    b.measurements.back().rBCc       = b.uBCc * projection_distance;
                     b.measurements.back().covariance = cfg.ball_angular_cov.asDiagonal();
 
 
@@ -317,10 +322,10 @@ namespace module::vision {
                     log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
                     log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
                     log<NUClear::DEBUG>(
-                        fmt::format("Distance {} - srBCc {}", angular_distance, b.measurements[0].srBCc.transpose()));
-                    log<NUClear::DEBUG>(fmt::format("Projection Distance {} - srBCc",
+                        fmt::format("Distance {} - rBCc {}", angular_distance, b.measurements[0].rBCc.transpose()));
+                    log<NUClear::DEBUG>(fmt::format("Projection Distance {} - rBCc",
                                                     projection_distance,
-                                                    b.measurements[1].srBCc.transpose()));
+                                                    b.measurements[1].rBCc.transpose()));
                     log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
                                                     std::abs(projection_distance - angular_distance) / max_distance));
                     log<NUClear::DEBUG>("**************************************************");
@@ -363,63 +368,3 @@ namespace module::vision {
             });
     }
 }  // namespace module::vision
-
-/*****************************************************************************
- * TODO(VisionTeam) BallDetector improvements issue is on GitHub
- * Cone fitting ... kind of broken
-                    // Get axis unit vector from 3 unit vectors
-                    auto cone_from_points = [&](const int& a, const int& b, const int& c) {
-                        Eigen::Matrix3f A;
-                        A.row(0) = uPCw.row(a);
-                        A.row(1) = uPCw.row(b);
-                        A.row(2) = uPCw.row(c);
-                        return A.householderQr().solve(Eigen::Vector3f::Ones()).normalized();
-                    };
-
-                    // Determine if point d is contained within the cone made from a, b, and c
-                    // Returns which of the points a (0), b (1), c (2), or d (3) is contained in the cone formed by the
-                    // other 3 points
-                    // Returns -1 if none of the cones formed by any permutation is valid
-                    auto point_in_cone = [&](const int& a, const int& b, const int& c, const int& d) {
-                        std::array<int, 4> perms = {a, b, c, d};
-                        for (int i = 0; i < 4; ++i) {
-                            const Eigen::Vector3f& p0 = uPCw.row(perms[i]);
-                            const Eigen::Vector3f& p1 = uPCw.row(perms[(i + 1) % 4]);
-                            const Eigen::Vector3f& p2 = uPCw.row(perms[(i + 2) % 4]);
-                            const Eigen::Vector3f& p3 = uPCw.row(perms[(i + 3) % 4]);
-                            Eigen::Vector3f x = cone_from_points(perms[i], perms[(i + 1) % 4], perms[(i + 2) % 4]);
-
-                            // Cone is valid
-                            if (utility::math::almost_equal(p0.dot(x), p1.dot(x), 2)
-                                && utility::math::almost_equal(p0.dot(x), p2.dot(x), 2)) {
-                                // Point is contained within the cone of a, b, c
-                                if (x.dot(p0) > config.maximum_cone_radius) {
-                                    if (x.dot(p3) >= p0.dot(x)) {
-                                        return 3 - i;
-                                    }
-                                }
-                            }
-                        }
-                        // Everything is just horribly bad, pick on the new guy
-                        return 3;
-                    };
-
-                    for (auto& cluster : clusters) {
-                        Ball b;
-
-                        // Shuffle to be random
-                        std::random_shuffle(cluster.begin(), cluster.end());
-                        while (cluster.size() > 3) {
-                            // Consider changing this to use only 2 vectors to form the axis for the cone
-                            cluster.erase(std::next(cluster.begin(),
-                                                    point_in_cone(cluster[0], cluster[1], cluster[2], cluster[3])));
-                        }
-
-                        // The first (only) 3 points left in the cluster are used to form the cone
-                        Eigen::Vector3f uBCw = cone_from_points(cluster[0], cluster[1], cluster[2]);
-                        double radius        = uBCw.dot(uPCw.row(cluster[0]));
-
-                        /// DO MEASUREMENTS AND THROWOUTS
-                    }
-
- *****************************************************************************/
