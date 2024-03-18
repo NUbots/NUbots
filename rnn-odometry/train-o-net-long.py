@@ -40,6 +40,7 @@ def main():
     # Htws = [np.linalg.inv(m) for m in Hwts]
     # robot_position_in_world_truth = np.array([h[3,:3] for h in Htws])
 
+    # NOTE: Using only position for first tests to see what happens. May add in heading later.
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
     truth = truth_all[:, 9:12]
     print(truth.shape)
@@ -50,7 +51,7 @@ def main():
     # "data.gyroscope.y",
     # "data.gyroscope.z"
 
-    # Add buffers to the imu data
+    # Add buffers to the imu data (maybe not needed?)
 
     # imu_buffers = [10.0, 10.0, 10.0, 50.0, 50.0, 50.0]
     # imu_maxes = np.max(imu, axis = 0) + imu_buffers
@@ -89,8 +90,10 @@ def main():
     # num_train = train_arr.size
     # num_val = validate_arr.size
 
-    # normalise - NOTE: mean and std from training dataset is used to normalise
+    # Normalise -
+    # NOTE: mean and std from training dataset is used to normalise
     # all of the datasets to prevent information leakage.
+    # mean and std from the training run will need to be used in production for de-normalising the predictions.
     mean = train_arr.mean(axis=0)
     std = train_arr.std(axis=0)
 
@@ -102,7 +105,7 @@ def main():
     print(f"Validation set size: {validate_arr.shape}")
     print(f"Test set size: {test_arr.shape}")
 
-    # plot
+    # Plot and inspect
     # num_channels = train_arr.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
