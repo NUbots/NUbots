@@ -17,7 +17,9 @@ def main():
     servos = np.load("processed-outputs/numpy/long/1/long-servos-1.npy")
     truth_all = np.load("processed-outputs/numpy/long/1/long-truth-1.npy")
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
-
+    print(imu.shape)
+    print(servos.shape)
+    print(truth_all.shape)
     # # Reconstruct the matrices
     # # "data.odometryGroundTruth.Htw.x.x", - 0
     # # "data.odometryGroundTruth.Htw.x.y", - 1
@@ -40,7 +42,7 @@ def main():
 
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
     truth = truth_all[:, 9:12]
-
+    print(truth.shape)
     # "data.accelerometer.x",
     # "data.accelerometer.y",
     # "data.accelerometer.z",
@@ -101,14 +103,19 @@ def main():
     print(f"Test set size: {test_arr.shape}")
 
     # plot
-    num_channels = train_arr.shape[1]
-    plt.figure(figsize=(10, 5))
-    # Plot each channel
-    for i in range(num_channels):
-        plt.plot(train_arr[200000:250000, i], label=f'Channel {i+1}')
-    # Add a legend
-    plt.legend()
-    plt.show()
+    # num_channels = train_arr.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(train_arr[200000:250000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
+
+    # Split into data and targets
+    input_data = joined_data[:, :26]  # imu and servos
+    input_targets = joined_data[:, 26:]  # truth
+
 
 if __name__ == "__main__":
     main()
