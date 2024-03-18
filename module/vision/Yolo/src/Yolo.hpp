@@ -7,31 +7,12 @@
 
 namespace module::vision {
 
-    std::vector<cv::Scalar> colours = {cv::Scalar(0, 0, 255),
-                                       cv::Scalar(0, 255, 0),
-                                       cv::Scalar(255, 0, 0),
-                                       cv::Scalar(255, 100, 50),
-                                       cv::Scalar(50, 100, 255),
-                                       cv::Scalar(255, 50, 100)};
-
-    const std::vector<std::string> class_names =
-        {"ball", "goal post", "robot", "L-intersection", "T-intersection", "X-intersection"};
-
-    cv::Mat letterbox(const cv::Mat& source) {
-        int col        = source.cols;
-        int row        = source.rows;
-        int max        = MAX(col, row);
-        cv::Mat result = cv::Mat::zeros(max, max, CV_8UC3);
-        source.copyTo(result(cv::Rect(0, 0, col, row)));
-        return result;
-    }
-
     class Yolo : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief The path to the model file
             std::string model_path                   = "";
-            std::string image_format                 = "";
             std::string device                       = "";
             double ball_confidence_threshold         = 0.0;
             double goal_confidence_threshold         = 0.0;
@@ -47,6 +28,22 @@ namespace module::vision {
 
         /// @brief Inference request
         ov::InferRequest infer_request;
+
+        /// @brief Object struct for storing name and colour
+        struct Object {
+            /// @brief Class name
+            std::string name = "";
+            /// @brief Colour for bounding box
+            cv::Scalar colour = cv::Scalar(255, 255, 255);
+        };
+
+        /// @brief The objects that the Yolo model can detect
+        const std::vector<Object> objects = {{"ball", cv::Scalar(255, 255, 255)},
+                                             {"goal post", cv::Scalar(255, 0, 255)},
+                                             {"robot", cv::Scalar(255, 127.5, 0)},
+                                             {"L-intersection", cv::Scalar(255, 0, 0)},
+                                             {"T-intersection", cv::Scalar(0, 255, 0)},
+                                             {"X-intersection", cv::Scalar(0, 0, 255)}};
 
     public:
         /// @brief Called by the powerplant to build and setup the Yolo reactor.

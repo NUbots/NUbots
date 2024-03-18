@@ -8,8 +8,5 @@ goal_confidence_threshold: 0.1 # Minimum confidence required for a goal detectio
 robot_confidence_threshold: 0.1 # Minimum confidence required for a robot detection to be accepted
 intersection_confidence_threshold: 0.1 # Minimum confidence required for a field line intersection detection to be accepted
 
-# BayerRG8, BRGA
-image_format: BRGA
-
 # OpenVino device (CPU, GPU)
 device: CPU

@@ -16,6 +16,8 @@
 
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
+#include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
 
 namespace module::vision {
@@ -49,7 +51,6 @@ namespace module::vision {
             cfg.goal_confidence_threshold         = config["goal_confidence_threshold"].as<double>();
             cfg.robot_confidence_threshold        = config["robot_confidence_threshold"].as<double>();
             cfg.intersection_confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            cfg.image_format                      = config["image_format"].as<std::string>();
             cfg.device                            = config["device"].as<std::string>();
         });
 
@@ -59,28 +60,31 @@ namespace module::vision {
         });
 
         on<Trigger<Image>, Single>().then([this](const Image& img) {
-            // Start timer
+            // Start timer for benchmarking
             auto start = std::chrono::high_resolution_clock::now();
 
             // -------- Convert image to cv::Mat -------
             const int width  = img.dimensions.x();
             const int height = img.dimensions.y();
             cv::Mat img_cv;
-            if (cfg.image_format == "BayerRG8") {
-                img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
-                cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
-            }
-            else if (cfg.image_format == "BRGA") {
-                img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
-            }
-            else {
-                log<NUClear::ERROR>("Unsupported image format", cfg.image_format);
-                powerplant.shutdown();
+            switch (img.format) {
+                case utility::vision::fourcc("BGR3"):  // BGR3 not available in utility::vision::FOURCC.
+                    img_cv = cv::Mat(height, width, CV_8UC3, const_cast<uint8_t*>(img.data.data()));
+                    break;
+                case utility::vision::FOURCC::RGGB:
+                    img_cv = cv::Mat(height, width, CV_8UC1, const_cast<uint8_t*>(img.data.data()));
+                    cv::cvtColor(img_cv, img_cv, cv::COLOR_BayerRG2RGB);
+                    break;
+                default:
+                    log<NUClear::WARN>("Image format not supported: ", utility::vision::fourcc(img.format));
+                    return;
             }
 
             // -------- Preprocess the image -------
-            cv::Mat letterbox_img = letterbox(img_cv);
-            float scale           = letterbox_img.size[0] / 640.0;
+            int max               = MAX(width, height);
+            cv::Mat letterbox_img = cv::Mat::zeros(max, max, CV_8UC3);
+            img_cv.copyTo(letterbox_img(cv::Rect(0, 0, width, height)));
+            float scale  = letterbox_img.size[0] / 640.0;
             cv::Mat blob = cv::dnn::blobFromImage(letterbox_img, 1.0 / 255.0, cv::Size(640, 640), cv::Scalar(), true);
 
             // -------- Feed the blob into the input node of the Model -------
@@ -108,10 +112,10 @@ namespace module::vision {
 
             // Figure out the bbox, class_id and class_score
             for (int i = 0; i < output_buffer.rows; i++) {
-                cv::Mat classes_scores = output_buffer.row(i).colRange(4, 10);
+                cv::Mat objects_scores = output_buffer.row(i).colRange(4, 10);
                 cv::Point class_id;
                 double maxClassScore;
-                cv::minMaxLoc(classes_scores, 0, &maxClassScore, 0, &class_id);
+                cv::minMaxLoc(objects_scores, 0, &maxClassScore, 0, &class_id);
 
                 if (maxClassScore > score_threshold) {
                     class_scores.push_back(maxClassScore);
@@ -137,41 +141,32 @@ namespace module::vision {
             // -------- Emit Detections --------
             const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
-            auto balls       = std::make_unique<Balls>();
-            balls->id        = img.id;
-            balls->timestamp = img.timestamp;
-            balls->Hcw       = img.Hcw;
+            auto balls               = std::make_unique<Balls>();
+            auto robots              = std::make_unique<Robots>();
+            auto goals               = std::make_unique<Goals>();
+            auto field_intersections = std::make_unique<FieldIntersections>();
+            auto bounding_boxes      = std::make_unique<BoundingBoxes>();
 
-            auto robots       = std::make_unique<Robots>();
-            robots->timestamp = img.timestamp;
-            robots->id        = img.id;
-            robots->Hcw       = img.Hcw;
-
-            auto goals       = std::make_unique<Goals>();
-            goals->timestamp = img.timestamp;
-            goals->id        = img.id;
-            goals->Hcw       = img.Hcw;
-
-            auto field_intersections       = std::make_unique<FieldIntersections>();
-            field_intersections->timestamp = img.timestamp;
-            field_intersections->id        = img.id;
-            field_intersections->Hcw       = img.Hcw;
-
-            auto bounding_boxes       = std::make_unique<BoundingBoxes>();
-            bounding_boxes->timestamp = img.timestamp;
-            bounding_boxes->id        = img.id;
-            bounding_boxes->Hcw       = img.Hcw;
+            // Common message fields
+            balls->id = robots->id = goals->id = field_intersections->id = bounding_boxes->id = img.id;
+            balls->timestamp = robots->timestamp = goals->timestamp = field_intersections->timestamp =
+                bounding_boxes->timestamp                           = img.timestamp;
+            balls->Hcw = robots->Hcw = goals->Hcw = field_intersections->Hcw = bounding_boxes->Hcw = img.Hcw;
 
             for (size_t i = 0; i < indices.size(); i++) {
                 int index    = indices[i];
                 int class_id = class_ids[index];
-                rectangle(img_cv, boxes[index], colours[class_id % 6], 2, 8);
-                std::string class_name = class_names[class_id];
-                double confidence      = class_scores[index];
-                std::string label      = class_name + ":" + std::to_string(confidence).substr(0, 4);
-                cv::Size textSize      = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
+                rectangle(img_cv, boxes[index], objects[class_id].colour, 2, 8);
+                std::string class_name      = objects[class_id].name;
+                Eigen::Vector4d rgba_colour = Eigen::Vector4d(objects[class_id].colour[0] / 255.0,
+                                                              objects[class_id].colour[1] / 255.0,
+                                                              objects[class_id].colour[2] / 255.0,
+                                                              1.0);
+                double confidence           = class_scores[index];
+                std::string label           = class_name + ":" + std::to_string(confidence).substr(0, 4);
+                cv::Size textSize           = cv::getTextSize(label, cv::FONT_HERSHEY_SIMPLEX, 0.5, 1, 0);
                 cv::Rect textBox(boxes[index].tl().x, boxes[index].tl().y - 15, textSize.width, textSize.height + 5);
-                cv::rectangle(img_cv, textBox, colours[class_id % 6], cv::FILLED);
+                cv::rectangle(img_cv, textBox, objects[class_id].colour, cv::FILLED);
                 cv::putText(img_cv,
                             label,
                             cv::Point(boxes[index].tl().x, boxes[index].tl().y - 5),
@@ -231,9 +226,8 @@ namespace module::vision {
                     b.radius = bottom_centre_ray.dot(bottom_left_ray);
                     b.colour.fill(1.0);
                     balls->balls.push_back(b);
-
-                    bbox->colour =
-                        Eigen::Vector4d(colours[0][0] / 255.0, colours[0][1] / 255.0, colours[0][2] / 255.0, 1.0);
+                    // Set the bounding box colour to the ball colour
+                    bbox->colour = rgba_colour;
                 }
 
                 if (class_name == "goal post" && confidence > cfg.goal_confidence_threshold) {
@@ -252,8 +246,8 @@ namespace module::vision {
                     g.side                      = Goal::Side::UNKNOWN_SIDE;
                     g.screen_angular            = cartesianToSpherical(g.post.bottom).tail<2>();
                     goals->goals.push_back(std::move(g));
-                    bbox->colour =
-                        Eigen::Vector4d(colours[1][0] / 255.0, colours[1][1] / 255.0, colours[1][2] / 255.0, 1.0);
+                    // Set the bounding box colour to the goal post colour
+                    bbox->colour = rgba_colour;
                 }
 
                 if (class_name == "robot" && confidence > cfg.robot_confidence_threshold) {
@@ -266,8 +260,8 @@ namespace module::vision {
                     r.rRCc   = rRCc.normalized();
                     r.radius = 0.3;
                     robots->robots.push_back(r);
-                    bbox->colour =
-                        Eigen::Vector4d(colours[2][0] / 255.0, colours[2][1] / 255.0, colours[2][2] / 255.0, 1.0);
+                    // Set the bounding box colour to the robot colour
+                    bbox->colour = rgba_colour;
                 }
 
                 if ((class_name == "L-intersection" || class_name == "T-intersection" || class_name == "X-intersection")
@@ -280,18 +274,18 @@ namespace module::vision {
                     i.rIWw = rIWw;
                     if (class_name == "L-intersection") {
                         i.type = FieldIntersection::IntersectionType::L_INTERSECTION;
-                        bbox->colour =
-                            Eigen::Vector4d(colours[3][0] / 255.0, colours[3][1] / 255.0, colours[3][2] / 255.0, 1.0);
+                        // Set the bounding box colour to the L-intersection colour
+                        bbox->colour = rgba_colour;
                     }
                     else if (class_name == "T-intersection") {
                         i.type = FieldIntersection::IntersectionType::T_INTERSECTION;
-                        bbox->colour =
-                            Eigen::Vector4d(colours[4][0] / 255.0, colours[4][1] / 255.0, colours[4][2] / 255.0, 1.0);
+                        // Set the bounding box colour to the T-intersection colour
+                        bbox->colour = rgba_colour;
                     }
                     else if (class_name == "X-intersection") {
                         i.type = FieldIntersection::IntersectionType::X_INTERSECTION;
-                        bbox->colour =
-                            Eigen::Vector4d(colours[5][0] / 255.0, colours[5][1] / 255.0, colours[5][2] / 255.0, 1.0);
+                        // Set the bounding box colour to the X-intersection colour
+                        bbox->colour = rgba_colour;
                     }
                     field_intersections->intersections.push_back(std::move(i));
                 }
