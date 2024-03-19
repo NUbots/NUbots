@@ -55,7 +55,7 @@ namespace module::network {
     using message::localisation::Field;
     using message::skill::Kick;
     using message::support::GlobalConfig;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_eul_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -141,7 +141,7 @@ namespace module::network {
 
                             // Store our position from field to torso
                             msg->current_pose.position     = rTFf.cast<float>();
-                            msg->current_pose.position.z() = MatrixToEulerIntrinsic(Hft.rotation()).z();
+                            msg->current_pose.position.z() = mat_to_eul_intrinsic(Hft.rotation()).z();
 
                             msg->current_pose.covariance = field->covariance.cast<float>();
 

@@ -55,7 +55,7 @@ namespace module::input {
             cfg.Kp           = config["mahony"]["Kp"].as<Expression>();
             cfg.initial_bias = Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>());
             cfg.initial_Hwt.linear() =
-                EulerIntrinsicToMatrix(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>()));
+                eul_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>()));
             bias_mahony = cfg.initial_bias;
             Hwt_mahony  = cfg.initial_Hwt;
 
@@ -322,7 +322,7 @@ namespace module::input {
 
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
                 Hwa.translation().z() = 0;
-                Hwa.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(0, 0, MatrixToEulerIntrinsic(Hwa.linear()).z()));
+                Hwa.linear() = eul_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_eul_intrinsic(Hwa.linear()).z()));
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
@@ -335,21 +335,21 @@ namespace module::input {
 
             // Perform Anchor Update (x, y, z, yaw)
             Hwt_anchor                 = Hwa * Hat;
-            Eigen::Vector3d rpy_anchor = MatrixToEulerIntrinsic(Hwt_anchor.linear());
+            Eigen::Vector3d rpy_anchor = mat_to_eul_intrinsic(Hwt_anchor.linear());
 
             // Perform Mahony update (roll, pitch)
             mahony_update(sensors->accelerometer, sensors->gyroscope, Hwt_mahony, dt, cfg.Ki, cfg.Kp, bias_mahony);
 
             // Convert the rotation matrices from anchor and mahony method into euler angles
-            Eigen::Vector3d rpy_mahony = MatrixToEulerIntrinsic(Hwt_mahony.linear());
+            Eigen::Vector3d rpy_mahony = mat_to_eul_intrinsic(Hwt_mahony.linear());
             // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
-            Hwt_mahony.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0));
+            Hwt_mahony.linear() = eul_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0));
             // Construct world {w} to torso {t} space transform
             Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
             // Take the translation from the anchor method
             Hwt.translation() = Hwt_anchor.translation();
             // Fuse roll + pitch of mahony filter with yaw of anchor method
-            Hwt.linear() = EulerIntrinsicToMatrix(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
+            Hwt.linear() = eul_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), rpy_anchor.z()));
             sensors->Htw = Hwt.inverse();
 
             // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
@@ -364,8 +364,8 @@ namespace module::input {
             sensors->Htw          = Hwt.inverse();
             // Construct robot {r} to world {w} space transform from ground truth
             Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
-            Hwr.linear() = Eigen::AngleAxisd(MatrixToEulerIntrinsic(Hwt.linear()).z(), Eigen::Vector3d::UnitZ())
-                               .toRotationMatrix();
+            Hwr.linear() =
+                Eigen::AngleAxisd(mat_to_eul_intrinsic(Hwt.linear()).z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
             Hwr.translation() = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
         }
     }
@@ -385,7 +385,7 @@ namespace module::input {
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
         Eigen::Vector3d est_rTWw = Hwt.translation();
-        Eigen::Vector3d est_Rwt  = MatrixToEulerIntrinsic(Hwt.rotation());
+        Eigen::Vector3d est_Rwt  = mat_to_eul_intrinsic(Hwt.rotation());
         emit(graph("Hwt est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
         emit(graph("Rwt est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
 
@@ -396,7 +396,7 @@ namespace module::input {
             // Determine translation and orientation error
             Eigen::Vector3d true_rTWw  = true_Hwt.translation();
             Eigen::Vector3d error_rTWw = (true_rTWw - est_rTWw).cwiseAbs();
-            Eigen::Vector3d true_Rwt   = MatrixToEulerIntrinsic(true_Hwt.rotation());
+            Eigen::Vector3d true_Rwt   = mat_to_eul_intrinsic(true_Hwt.rotation());
             Eigen::Vector3d error_Rwt  = (true_Rwt - est_Rwt).cwiseAbs();
             double quat_rot_error      = Eigen::Quaterniond(true_Hwt.linear() * Hwt.inverse().linear()).w();
 

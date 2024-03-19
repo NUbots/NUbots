@@ -39,7 +39,7 @@
 namespace utility::skill {
 
     using utility::input::LimbID;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_eul_intrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::Waypoint;
 

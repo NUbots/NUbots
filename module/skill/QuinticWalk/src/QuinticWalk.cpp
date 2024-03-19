@@ -64,8 +64,8 @@ namespace module::skill {
     using message::skill::Walk;
 
     using utility::input::ServoID;
-    using utility::math::euler::EulerIntrinsicToMatrix;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::eul_intrinsic_to_mat;
+    using utility::math::euler::mat_to_eul_intrinsic;
     using utility::nusight::graph;
     using utility::skill::WalkEngineState;
     using utility::support::Expression;
@@ -138,7 +138,7 @@ namespace module::skill {
         : BehaviourReactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            Eigen::Vector3d RPY = utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.rotation().cast<double>());
+            Eigen::Vector3d RPY = utility::math::euler::mat_to_eul_intrinsic(sensors.Htw.rotation().cast<double>());
 
             // compute the pitch offset to the currently wanted pitch of the engine
             double wanted_pitch =
@@ -331,12 +331,12 @@ namespace module::skill {
         // Change goals from support foot based coordinate system to trunk based coordinate system
         // Trunk {t} from support foot {s}
         Eigen::Isometry3f Hst;
-        Hst.linear()      = EulerIntrinsicToMatrix(thetaST);
+        Hst.linear()      = eul_intrinsic_to_mat(thetaST);
         Hst.translation() = rTSs;
 
         // Flying foot {f} from support foot {s}
         Eigen::Isometry3f Hsf;
-        Hsf.linear()      = EulerIntrinsicToMatrix(thetaSF);
+        Hsf.linear()      = eul_intrinsic_to_mat(thetaSF);
         Hsf.translation() = rFSs;
 
         // Support foot {s} from trunk {t}
@@ -395,11 +395,11 @@ namespace module::skill {
 
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
-            Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
+            Eigen::Vector3f thetaTL = mat_to_eul_intrinsic(Htl.linear());
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
             emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
 
-            Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
+            Eigen::Vector3f thetaTR = mat_to_eul_intrinsic(Htr.linear());
             emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
             emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
 

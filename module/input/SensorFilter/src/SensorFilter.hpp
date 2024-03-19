@@ -58,8 +58,8 @@ namespace module::input {
     using utility::actuation::tinyrobotics::sensors_to_configuration;
     using utility::input::FrameID;
     using utility::input::ServoID;
-    using utility::math::euler::EulerIntrinsicToMatrix;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::eul_intrinsic_to_mat;
+    using utility::math::euler::mat_to_eul_intrinsic;
     using utility::math::filter::mahony_update;
     using utility::nusight::graph;
     using utility::platform::getRawServo;
