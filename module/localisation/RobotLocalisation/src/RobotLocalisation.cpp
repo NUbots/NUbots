@@ -41,30 +41,27 @@ namespace module::localisation {
             // Set our initial state with the config means and covariances, flagging the filter to reset it
             cfg.initial_mean.rRWw = cfg.ukf.initial.mean.position;
             cfg.initial_mean.vRw  = cfg.ukf.initial.mean.velocity;
+
+            // Set our max association distance and max missed count
+            cfg.max_association_distance = config["max_association_distance"].as<double>();
+            cfg.max_missed_count         = config["max_missed_count"].as<int>();
         });
 
         on<Trigger<VisionRobots>>().then([this](const VisionRobots& vision_robots) {
             if (!vision_robots.robots.empty()) {
                 Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw.cast<double>()).inverse();
 
+                // Set all filtered robots to unseen
+                for (auto& filtered_robot : filtered_robots) {
+                    filtered_robot.seen = false;
+                }
+
                 for (const auto& vision_robot : vision_robots.robots) {
                     // Position of robot in world space
                     auto rRWw = Hwc * vision_robot.rRCc;
 
                     // Data association: find the filtered robot which is best associated with the current vision robot
-                    int id = data_association(rRWw, filtered_robots);
-
-                    if (id == -1) {
-                        // If no robot is associated, create a new one
-                        id = add_new_robot(rRWw);
-                        log<NUClear::DEBUG>("New robot added with id: ", id);
-                    }
-                    else {
-                        log<NUClear::DEBUG>("Robot ", id, " associated with vision robot");
-                    }
-
-                    // Get the filtered robot associated with the current vision robot
-                    auto& filtered_robot = filtered_robots[id];
+                    auto& filtered_robot = data_association(rRWw, filtered_robots);
 
                     // Perform the time and measurement update
                     const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(
@@ -78,31 +75,42 @@ namespace module::localisation {
                                                MeasurementType::ROBOT_POSITION());
                 }
 
+                // If a robot has not been seen for a certain number of frames, remove it
+                for (auto& filtered_robot : filtered_robots) {
+                    if (!filtered_robot.seen) {
+                        filtered_robot.missed_count++;
+                    }
+                    else {
+                        filtered_robot.missed_count = std::max(0, filtered_robot.missed_count - 1);
+                    }
+                }
+                filtered_robots.erase(std::remove_if(filtered_robots.begin(),
+                                                     filtered_robots.end(),
+                                                     [this](const FilteredRobot& filtered_robot) {
+                                                         return filtered_robot.missed_count > cfg.max_missed_count;
+                                                     }),
+                                      filtered_robots.end());
+
+
+                // Emit the localisation of the robots
+                auto localisation_robots = std::make_unique<LocalisationRobots>();
                 for (auto& filtered_robot : filtered_robots) {
                     auto state = RobotModel<double>::StateVec(filtered_robot.ukf.get_state());
+                    LocalisationRobot localisation_robot;
+                    localisation_robot.id                  = filtered_robot.id;
+                    localisation_robot.rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0);
+                    localisation_robot.vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
+                    localisation_robot.covariance          = filtered_robot.ukf.get_covariance();
+                    localisation_robot.time_of_measurement = filtered_robot.last_time_update;
+                    localisation_robots->robots.push_back(localisation_robot);
                     emit(graph("Robot " + std::to_string(filtered_robot.id) + " rRWw", state.rRWw.x(), state.rRWw.y()));
                 }
-
-
-                // // Generate and emit message
-                // auto robot                 = std::make_unique<Robot>();
-                // robot->rRWw                = Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), fd.robot_radius);
-                // robot->vRw                 = Eigen::Vector3d(state.vRw.x(), state.vRw.y(), 0);
-                // robot->time_of_measurement = last_time_update;
-                // robot->Hcw                 = robots.Hcw;
-                // if (log_level <= NUClear::DEBUG) {
-                //     log<NUClear::DEBUG>("rRWw: ", robot->rRWw.x(), robot->rRWw.y(), robot->rRWw.z());
-                //     log<NUClear::DEBUG>("vRw: ", robot->vRw.x(), robot->vRw.y(), robot->vRw.z());
-                //     emit(graph("rRWw: ", robot->rRWw.x(), robot->rRWw.y(), robot->rRWw.z()));
-                //     emit(graph("vRw: ", robot->vRw.x(), robot->vRw.y(), robot->vRw.z()));
-                // }
-
-                // emit(robot);
+                emit(std::move(localisation_robots));
             }
         });
     }
 
-    int RobotLocalisation::add_new_robot(const Eigen::Vector3d& initial_rRWw) {
+    void RobotLocalisation::add_new_robot(const Eigen::Vector3d& initial_rRWw) {
         // Create a new robot
         FilteredRobot new_robot;
         new_robot.id = filtered_robots.size();
@@ -116,34 +124,45 @@ namespace module::localisation {
         new_robot.ukf.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
         // Set the robot's last time update to now
         new_robot.last_time_update = NUClear::clock::now();
+        // Set the robot as seen
+        new_robot.seen = true;
         // Add the new robot to the list of filtered robots
+        log<NUClear::DEBUG>("Adding new robot: ", new_robot.id);
         filtered_robots.push_back(new_robot);
-        return new_robot.id;
     }
 
-    int RobotLocalisation::data_association(const Eigen::Vector3d& rRWw,
-                                            const std::vector<FilteredRobot>& filtered_robots) {
-        // If no filtered robots, return -1
-        int id = -1;
+    RobotLocalisation::FilteredRobot& RobotLocalisation::data_association(const Eigen::Vector3d& rRWw,
+                                                                          std::vector<FilteredRobot>& filtered_robots) {
+        // If no filtered robots, add a new robot to the filtered robot list
         if (filtered_robots.empty()) {
-            return id;
+            add_new_robot(rRWw);
+            return filtered_robots.back();
         }
 
         // Find the filtered robot which is closest to the current vision robot
-        // Data association: find the ball closest to our current estimate
-        double lowest_distance = std::numeric_limits<double>::max();
+        double closest_distance      = std::numeric_limits<double>::max();
+        FilteredRobot& closest_robot = filtered_robots.front();
         for (const auto& filtered_robot : filtered_robots) {
             auto filtered_robot_rRWw = RobotModel<double>::StateVec(filtered_robot.ukf.get_state()).rRWw;
             double current_distance  = (rRWw.head<2>() - filtered_robot_rRWw).squaredNorm();
-            if (current_distance < lowest_distance) {
-                lowest_distance = current_distance;
-                id              = filtered_robot.id;
+            if (current_distance < closest_distance) {
+                closest_distance = current_distance;
+                closest_robot    = filtered_robot;
             }
         }
 
-        // TODO: If the distance is too large, return -1
+        // If the distance is too large, add a new robot to the filtered robot list
+        if (closest_distance > cfg.max_association_distance) {
+            log<NUClear::DEBUG>("Robot detection ",
+                                std::to_string(closest_distance),
+                                " m away from the closest robot, adding new robot");
+            add_new_robot(rRWw);
+            return filtered_robots.back();
+        }
 
-        return id;
+        // Set the associated robot as seen
+        closest_robot.seen = true;
+        return closest_robot;
     }
 
 }  // namespace module::localisation

@@ -52,6 +52,12 @@ namespace module::localisation {
             /// @brief Initial covariance of the for the UKF filter
             RobotModel<double>::StateVec initial_covariance;
 
+            /// @brief The maximum distance a robot can be from a filtered robot to be associated
+            double max_association_distance = 0.0;
+
+            /// @brief The maximum number of times a robot can be missed before it is removed
+            int max_missed_count = 0;
+
         } cfg;
 
         struct FilteredRobot {
@@ -62,6 +68,10 @@ namespace module::localisation {
             NUClear::clock::time_point last_time_update;
             /// @brief Unscented Kalman Filter for this robot
             utility::math::filter::UKF<double, RobotModel> ukf{};
+            /// @brief Whether the robot was and should have been seen in the last vision update
+            bool seen = false;
+            /// @brief Count of the number of times the robot has not been seen, but should have been
+            int missed_count = 0;
         };
 
         /// @brief List of filtered robots
@@ -74,13 +84,13 @@ namespace module::localisation {
         /// @brief Function to add a robot to the list of robots
         /// @param initial_rRWw The initial position of the robot in world space
         /// @return The id of the robot that was added
-        int add_new_robot(const Eigen::Vector3d& initial_rRWw);
+        void add_new_robot(const Eigen::Vector3d& initial_rRWw);
 
         /// @brief Data association function
         /// @param vision_robot The robot detection from the vision system
         /// @param filtered_robots The list of current filtered robots
-        /// @return The id of the robot that was associated or -1 if no robot was associated
-        int data_association(const Eigen::Vector3d& rRWw, const std::vector<FilteredRobot>& filtered_robots);
+        /// @return The filtered robot that the vision robot is associated with
+        FilteredRobot& data_association(const Eigen::Vector3d& rRWw, std::vector<FilteredRobot>& filtered_robots);
     };
 
 }  // namespace module::localisation

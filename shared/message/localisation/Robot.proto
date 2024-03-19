@@ -33,22 +33,26 @@ import "Transform.proto";
 import "google/protobuf/timestamp.proto";
 
 message Robot {
+    /// Robot id
+    uint32 id = 1;
+
     /// Robot's filtered cartesian position measured in world space {w} from the world {W}
-    vec3 rRWw = 1;
+    vec3 rRWw = 2;
 
     /// Robot's velocity in world {w} space
-    vec3 vRw = 2;
+    vec3 vRw = 3;
 
     /// Covariance of state (rRWw, vRw)
-    mat4 covariance = 3;
+    mat4 covariance = 4;
 
     /// Time the ball measurement was taken
-    google.protobuf.Timestamp time_of_measurement = 4;
+    google.protobuf.Timestamp time_of_measurement = 5;
 
     /// Homogeneous transformation matrix from world to camera space
-    iso3 Hcw = 5;
+    iso3 Hcw = 6;
 }
 
 message Robots {
+    /// List of localised robots
     repeated Robot robots = 1;
 }
