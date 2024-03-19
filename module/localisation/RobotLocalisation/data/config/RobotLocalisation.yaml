@@ -19,4 +19,4 @@ ukf:
       velocity: [1e-3, 1e-3]
 
 max_association_distance: 0.5
-max_missed_count: 20
+max_missed_count: 25

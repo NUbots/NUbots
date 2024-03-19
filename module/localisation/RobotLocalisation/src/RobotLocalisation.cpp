@@ -2,14 +2,21 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/vision/GreenHorizon.hpp"
+
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
 namespace module::localisation {
 
     using extension::Configuration;
 
     using message::eye::DataPoint;
+
+    using message::vision::GreenHorizon;
+
+    using utility::math::geometry::point_in_convex_hull;
 
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -46,37 +53,50 @@ namespace module::localisation {
             cfg.max_missed_count         = config["max_missed_count"].as<int>();
         });
 
-        on<Trigger<VisionRobots>>().then([this](const VisionRobots& vision_robots) {
-            if (!vision_robots.robots.empty()) {
-                Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw.cast<double>()).inverse();
 
+        on<Trigger<VisionRobots>, With<GreenHorizon>>().then(
+            [this](const VisionRobots& vision_robots, const GreenHorizon& horizon) {
                 // Set all filtered robots to unseen
                 for (auto& filtered_robot : filtered_robots) {
                     filtered_robot.seen = false;
                 }
 
-                for (const auto& vision_robot : vision_robots.robots) {
-                    // Position of robot in world space
-                    auto rRWw = Hwc * vision_robot.rRCc;
+                if (!vision_robots.robots.empty()) {
+                    Eigen::Isometry3d Hwc = Eigen::Isometry3d(vision_robots.Hcw.cast<double>()).inverse();
 
-                    // Data association: find the filtered robot which is best associated with the current vision robot
-                    auto& filtered_robot = data_association(rRWw, filtered_robots);
+                    for (const auto& vision_robot : vision_robots.robots) {
+                        // Position of robot in world space
+                        auto rRWw = Hwc * vision_robot.rRCc;
 
-                    // Perform the time and measurement update
-                    const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(
-                                        NUClear::clock::now() - filtered_robot.last_time_update)
-                                        .count();
-                    filtered_robot.last_time_update = NUClear::clock::now();
+                        // Only consider vision measurements within the green horizon
+                        if (point_in_convex_hull(horizon.horizon, rRWw)) {
 
-                    filtered_robot.ukf.time(dt);
-                    filtered_robot.ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
-                                               cfg.ukf.noise.measurement.position,
-                                               MeasurementType::ROBOT_POSITION());
+                            // Data association: find filtered robot which is best associated with the vision
+                            // measurement
+                            auto& filtered_robot = data_association(rRWw, filtered_robots);
+
+                            // Perform time and measurement update for filtered robot associated with the vision
+                            // measurement
+                            const auto dt = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                                NUClear::clock::now() - filtered_robot.last_time_update)
+                                                .count();
+                            filtered_robot.last_time_update = NUClear::clock::now();
+                            filtered_robot.ukf.time(dt);
+                            filtered_robot.ukf.measure(Eigen::Vector2d(rRWw.head<2>()),
+                                                       cfg.ukf.noise.measurement.position,
+                                                       MeasurementType::ROBOT_POSITION());
+                        }
+                    }
                 }
 
-                // If a robot has not been seen for a certain number of frames, remove it
-                // TODO: Check if the filtered robot is in the field of view of the camera before adding missed count
+                // If a robot is not detected after some frames and it should be, remove it from the list
                 for (auto& filtered_robot : filtered_robots) {
+                    auto state = RobotModel<double>::StateVec(filtered_robot.ukf.get_state());
+                    // If the filtered robot isn't in green horizon, treat it as "seen"
+                    if (!point_in_convex_hull(horizon.horizon, Eigen::Vector3d(state.rRWw.x(), state.rRWw.y(), 0))) {
+                        filtered_robot.seen = true;
+                    }
+
                     if (!filtered_robot.seen) {
                         filtered_robot.missed_count++;
                     }
@@ -108,8 +128,7 @@ namespace module::localisation {
                                state.rRWw.y()));
                 }
                 emit(std::move(localisation_robots));
-            }
-        });
+            });
     }
 
     void RobotLocalisation::add_new_robot(const Eigen::Vector3d& initial_rRWw) {
