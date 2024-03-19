@@ -121,6 +121,8 @@ export class LocalisationRobotModel {
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
+  // Both bottom and top points of goal are in world space.
+  @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
 
   constructor({
     model,
@@ -132,6 +134,7 @@ export class LocalisationRobotModel {
     motors,
     fieldLinePoints,
     ball,
+    goals,
   }: {
     model: RobotModel;
     name: string;
@@ -142,6 +145,7 @@ export class LocalisationRobotModel {
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
+    goals: { points: { bottom: Vector3; top: Vector3 }[] };
   }) {
     this.model = model;
     this.name = name;
@@ -152,6 +156,7 @@ export class LocalisationRobotModel {
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
+    this.goals = goals;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -163,6 +168,7 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
+      goals: { points: [] },
     });
   });
 
@@ -190,5 +196,14 @@ export class LocalisationRobotModel {
   @computed
   get rBFf(): Vector3 | undefined {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
+  }
+
+  /** Goal positions in field space */
+  @computed
+  get rGFf(): { bottom: Vector3; top: Vector3 }[] {
+    return this.goals?.points.map((pair) => ({
+      bottom: pair?.bottom.applyMatrix4(this.Hfw),
+      top: pair?.top.applyMatrix4(this.Hfw),
+    }));
   }
 }
