@@ -45,21 +45,20 @@ namespace module::vision {
 
         on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Yolo.yaml
-            this->log_level                       = config["log_level"].as<NUClear::LogLevel>();
-            cfg.model_path                        = config["model_path"].as<std::string>();
+            log_level                             = config["log_level"].as<NUClear::LogLevel>();
             cfg.ball_confidence_threshold         = config["ball_confidence_threshold"].as<double>();
             cfg.goal_confidence_threshold         = config["goal_confidence_threshold"].as<double>();
             cfg.robot_confidence_threshold        = config["robot_confidence_threshold"].as<double>();
             cfg.intersection_confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            cfg.device                            = config["device"].as<std::string>();
+
+            // Compile the model and create inference request object
+            ov::Core core;
+            compiled_model =
+                core.compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
+            infer_request = compiled_model.create_infer_request();
         });
 
-        on<Startup>().then("Load Yolo Model", [this] {
-            compiled_model = core.compile_model(cfg.model_path, cfg.device);
-            infer_request  = compiled_model.create_infer_request();
-        });
-
-        on<Trigger<Image>, Single>().then([this](const Image& img) {
+        on<Trigger<Image>, Single>().then("Yolo Main Loop", [this](const Image& img) {
             // Start timer for benchmarking
             auto start = std::chrono::high_resolution_clock::now();
 

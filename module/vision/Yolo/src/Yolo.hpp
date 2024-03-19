@@ -11,10 +11,6 @@ namespace module::vision {
     private:
         /// @brief Stores configuration values
         struct Config {
-            /// @brief The path to the model file
-            std::string model_path = "";
-            /// @brief The device (GPU or CPU) to run the model on
-            std::string device = "";
             /// @brief The confidence threshold for the ball
             double ball_confidence_threshold = 0.0;
             /// @brief The confidence threshold for the goal
@@ -25,10 +21,7 @@ namespace module::vision {
             double intersection_confidence_threshold = 0.0;
         } cfg;
 
-        /// @brief OpenVINO Core runtime Core entity, used to generate the compiled model object
-        ov::Core core{};
-
-        /// @brief OpenVINO compiled model, used create inference request object
+        /// @brief OpenVINO compiled model, used to create inference request object
         ov::CompiledModel compiled_model{};
 
         /// @brief Inference request, used to run the model (inference)
