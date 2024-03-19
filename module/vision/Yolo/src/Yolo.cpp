@@ -237,13 +237,13 @@ namespace module::vision {
 
                     Goal g;
                     g.measurements.emplace_back();
-                    g.measurements.back().type  = Goal::MeasurementType::CENTRE;
-                    g.measurements.back().srGCc = cartesianToReciprocalSpherical(rGbCc);
-                    g.post.top                  = top_centre_ray;
-                    g.post.bottom               = bottom_centre_ray;
-                    g.post.distance             = rGbCc.norm();
-                    g.side                      = Goal::Side::UNKNOWN_SIDE;
-                    g.screen_angular            = cartesianToSpherical(g.post.bottom).tail<2>();
+                    g.measurements.back().type = Goal::MeasurementType::CENTRE;
+                    g.measurements.back().rGCc = rGbCc;
+                    g.post.top                 = top_centre_ray;
+                    g.post.bottom              = bottom_centre_ray;
+                    g.post.distance            = rGbCc.norm();
+                    g.side                     = Goal::Side::UNKNOWN_SIDE;
+                    g.screen_angular           = cartesianToSpherical(g.post.bottom).tail<2>();
                     goals->goals.push_back(std::move(g));
                     // Set the bounding box colour to the goal post colour
                     bbox->colour = rgba_colour;
