@@ -30,7 +30,7 @@ targets:
 
     # Localisation Messages
     message.localisation.Ball: true
-    message.localisation.Field: false
+    message.localisation.Field: true
 
     # Log messages
     message.nuclear.LogMessage: true
