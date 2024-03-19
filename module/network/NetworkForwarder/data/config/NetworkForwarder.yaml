@@ -25,12 +25,12 @@ targets:
     message.vision.Goals: true
     message.vision.Robots: true
     message.vision.GreenHorizon: true
-    message.vision.FieldLines: true
+    message.vision.FieldLines: false
     message.vision.VisualMesh: false
 
     # Localisation Messages
     message.localisation.Ball: true
-    message.localisation.Field: true
+    message.localisation.Field: false
 
     # Log messages
     message.nuclear.LogMessage: true

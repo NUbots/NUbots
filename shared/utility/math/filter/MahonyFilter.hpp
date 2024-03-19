@@ -59,13 +59,13 @@ namespace utility {
              * @param bias:    gyroscope bias
              */
             template <typename Scalar>
-            void MahonyUpdate(const Eigen::Matrix<Scalar, 3, 1>& acc,
-                              const Eigen::Matrix<Scalar, 3, 1>& gyro,
-                              Eigen::Isometry3d& Hwb,
-                              const Scalar ts,
-                              const Scalar Ki,
-                              const Scalar Kp,
-                              Eigen::Matrix<Scalar, 3, 1>& bias) {
+            void mahony_update(const Eigen::Matrix<Scalar, 3, 1>& acc,
+                               const Eigen::Matrix<Scalar, 3, 1>& gyro,
+                               Eigen::Isometry3d& Hwb,
+                               const Scalar ts,
+                               const Scalar Ki,
+                               const Scalar Kp,
+                               Eigen::Matrix<Scalar, 3, 1>& bias) {
                 // Normalize the accelerometer reading
                 Eigen::Matrix<Scalar, 3, 1> rGBb = acc.normalized();
 
