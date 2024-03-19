@@ -267,6 +267,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.ballVisible && <Balls model={model} />}
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.goalVisible && <Goals model={model} />}
+      <Robots model={model} />
     </object3D>
   );
 });
@@ -380,7 +381,7 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
         robot.rBFf && (
           <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
             <sphereBufferGeometry args={[1, 20, 20]} />
-            <meshStandardMaterial color="orange" />
+            <meshStandardMaterial color="white" />
           </mesh>
         ),
     )}
@@ -402,7 +403,28 @@ const Goals = ({ model }: { model: LocalisationModel }) => (
                   rotation={[Math.PI / 2, 0, 0]}
                 >
                   <cylinderBufferGeometry args={[0.05, 0.05, goal.top.z, 20]} />
-                  <meshStandardMaterial color="yellow" />
+                  <meshStandardMaterial color="magenta" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Robots = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible &&
+        robot.robots && (
+          <object3D key={robot.id}>
+            {robot.rRFf.map((r, i) => {
+              return (
+                <mesh key={String(i)} position={r.add(new Vector3(0, 0, 0.4)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderBufferGeometry args={[0.1, 0.1, 0.8, 20]} />
+                  <meshStandardMaterial color="orange" />
                 </mesh>
               );
             })}
