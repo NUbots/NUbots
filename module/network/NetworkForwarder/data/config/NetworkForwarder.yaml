@@ -25,7 +25,7 @@ targets:
     message.vision.Goals: true
     message.vision.Robots: true
     message.vision.GreenHorizon: true
-    message.vision.FieldLines: false
+    message.vision.FieldLines: true
     message.vision.VisualMesh: false
 
     # Localisation Messages
