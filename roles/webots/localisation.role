@@ -30,6 +30,7 @@ nuclear_role(
   # Localisation
   localisation::BallLocalisation
   localisation::FieldLocalisation
+  localisation::RobotLocalisation
   # Director
   extension::Director
   # Servos

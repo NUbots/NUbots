@@ -1,2 +1,19 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
+
+# UKF config
+ukf:
+  noise:
+    measurement:
+      robot_position: [0.1, 0.1]
+    process:
+      position: [1e-2, 1e-2]
+      velocity: [1e-2, 1e-2]
+
+  initial:
+    mean:
+      position: [5.0, 0.0]
+      velocity: [0.0, 0.0]
+    covariance:
+      position: [1e-3, 1e-3]
+      velocity: [1e-3, 1e-3]
