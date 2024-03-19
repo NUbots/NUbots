@@ -60,6 +60,7 @@ namespace module::input {
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::filter::mahony_update;
     using utility::nusight::graph;
     using utility::platform::getRawServo;
     using utility::platform::make_packet_error_string;
@@ -157,6 +158,9 @@ namespace module::input {
 
             /// @brief Mahony filter integral gain
             double Kp = 0.0;
+
+            /// @brief Bool to determine whether to use ground truth from the simulator
+            bool use_ground_truth = false;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot

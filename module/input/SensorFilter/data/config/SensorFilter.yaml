@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 buttons:
   debounce_threshold: 7
@@ -7,22 +7,23 @@ foot_down:
   method: FSR
   known_methods:
     - name: FSR # Literal FSR
-      certainty_threshold: 30 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
+      certainty_threshold: 1 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
     - name: Z_HEIGHT # This uses the difference in Z height of the feet
       certainty_threshold: 0.01 # Height difference of the Z for the Z height method
 
+# Mahony filter for roll + Pitch
 mahony:
-  # Mahony "Proportional" Gain on error
+  # Proportional gain
   Kp: 1
-  # Mahony "Integral" Gain used to compute bias
+  # Integral gain
   Ki: 0.3
   # Initial bias
   initial_bias: [0, 0, 0]
   # Initial orientation (roll, pitch, yaw)
-  initial_rpy: [0, 0.3839, 0]
+  initial_rpy: [0, 0.2, 0]
 
 # Specify whether or not to use ground truth odometry from simulator
-use_ground_truth_odomerty: false
+use_ground_truth: false
 
 # Path to URDF file
 urdf_path: "models/robot.urdf"
