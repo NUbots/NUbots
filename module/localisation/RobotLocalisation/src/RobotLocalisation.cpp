@@ -14,7 +14,6 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-
     RobotLocalisation::RobotLocalisation(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -76,6 +75,7 @@ namespace module::localisation {
                 }
 
                 // If a robot has not been seen for a certain number of frames, remove it
+                // TODO: Check if the filtered robot is in the field of view of the camera before adding missed count
                 for (auto& filtered_robot : filtered_robots) {
                     if (!filtered_robot.seen) {
                         filtered_robot.missed_count++;
@@ -91,9 +91,9 @@ namespace module::localisation {
                                                      }),
                                       filtered_robots.end());
 
-
                 // Emit the localisation of the robots
                 auto localisation_robots = std::make_unique<LocalisationRobots>();
+                log<NUClear::DEBUG>("Current number of robots: ", filtered_robots.size());
                 for (auto& filtered_robot : filtered_robots) {
                     auto state = RobotModel<double>::StateVec(filtered_robot.ukf.get_state());
                     LocalisationRobot localisation_robot;
@@ -103,7 +103,9 @@ namespace module::localisation {
                     localisation_robot.covariance          = filtered_robot.ukf.get_covariance();
                     localisation_robot.time_of_measurement = filtered_robot.last_time_update;
                     localisation_robots->robots.push_back(localisation_robot);
-                    emit(graph("Robot " + std::to_string(filtered_robot.id) + " rRWw", state.rRWw.x(), state.rRWw.y()));
+                    emit(graph("Robots/Id: " + std::to_string(filtered_robot.id) + " rRWw:",
+                               state.rRWw.x(),
+                               state.rRWw.y()));
                 }
                 emit(std::move(localisation_robots));
             }
@@ -139,19 +141,19 @@ namespace module::localisation {
             return filtered_robots.back();
         }
 
-        // Find the filtered robot which is closest to the current vision robot
+        // Find the filtered robot which is closest to the current robot vision estimate
         double closest_distance      = std::numeric_limits<double>::max();
         FilteredRobot& closest_robot = filtered_robots.front();
         for (const auto& filtered_robot : filtered_robots) {
             auto filtered_robot_rRWw = RobotModel<double>::StateVec(filtered_robot.ukf.get_state()).rRWw;
-            double current_distance  = (rRWw.head<2>() - filtered_robot_rRWw).squaredNorm();
+            double current_distance  = (rRWw.head<2>() - filtered_robot_rRWw).norm();
             if (current_distance < closest_distance) {
                 closest_distance = current_distance;
                 closest_robot    = filtered_robot;
             }
         }
 
-        // If the distance is too large, add a new robot to the filtered robot list
+        // If the distance is too large, add a new robot to the filtered robot list associated with the measurement
         if (closest_distance > cfg.max_association_distance) {
             log<NUClear::DEBUG>("Robot detection ",
                                 std::to_string(closest_distance),
