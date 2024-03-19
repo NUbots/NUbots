@@ -174,7 +174,7 @@ network={
 network={
 	ssid="epsilon-x"
 	#psk="9181918191"
-	psk=cf34016f6c385ae99246e5213cca8194f4b0aad498326ee1fb4f787271b84b8f
+	psk=16b94ff6df37aa31d74bf1cafb60d091a3e70806ea9584af4562c6244c175bea
     priority=1
 }
 EOF

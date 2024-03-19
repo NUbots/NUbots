@@ -21,6 +21,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.localisation.Ball, this.onBall);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.vision.Goals, this.onGoals);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -68,6 +69,17 @@ export class LocalisationNetwork {
 
       return new FieldIntersection({ type: intersection_type, position: Vector3.from(intersection.rIWw) });
     });
+  }
+
+  @action.bound
+  private onGoals(robotModel: RobotModel, goalsMessage: message.vision.Goals) {
+    const { Hcw, goals } = goalsMessage;
+    const Hwc = Matrix4.from(Hcw).invert();
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.goals.points = goals.map((goal) => ({
+      bottom: Vector3.from(goal.post?.bottom).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+      top: Vector3.from(goal.post?.top).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+    }));
   }
 
   @action
