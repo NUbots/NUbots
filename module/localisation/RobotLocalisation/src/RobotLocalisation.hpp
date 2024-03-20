@@ -52,16 +52,19 @@ namespace module::localisation {
             /// @brief Initial covariance of the for the UKF filter
             RobotModel<double>::StateVec initial_covariance;
 
-            /// @brief The maximum distance a robot can be from a filtered robot to be associated
+            /// @brief The maximum distance a robot can be from a tracked robot to be associated
             double max_association_distance = 0.0;
 
-            /// @brief The maximum number of times a robot can be missed before it is removed
+            /// @brief The maximum number of times a robot can be missed consecutively before it is removed
             int max_missed_count = 0;
+
+            /// @brief The minimum number of times a robot must be seen consecutively before it is confirmed
+            int min_seen_count = 0;
 
         } cfg;
 
-        struct FilteredRobot {
-            FilteredRobot() = default;
+        struct TrackedRobot {
+            TrackedRobot() = default;
             /// @brief Id of the robot
             int id = 0;
             /// @brief Time of the last time update
@@ -70,12 +73,19 @@ namespace module::localisation {
             utility::math::filter::UKF<double, RobotModel> ukf{};
             /// @brief Whether the robot was and should have been seen in the last vision update
             bool seen = false;
-            /// @brief Count of the number of times the robot has not been seen, but should have been
+            /// @brief The number of times in a row the robot has been seen
+            int seen_count = 0;
+            /// @brief The number of times in a row the robot has not been seen, but should have been
             int missed_count = 0;
+            /// @brief Whether this tracked robot is confirmed
+            bool confirmed = false;
         };
 
-        /// @brief List of filtered robots
-        std::vector<FilteredRobot> filtered_robots;
+        /// @brief Unique id counter for robots
+        int robot_id = 0;
+
+        /// @brief List of tracked robots
+        std::vector<TrackedRobot> tracked_robots;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
@@ -88,9 +98,9 @@ namespace module::localisation {
 
         /// @brief Data association function
         /// @param vision_robot The robot detection from the vision system
-        /// @param filtered_robots The list of current filtered robots
-        /// @return The filtered robot that the vision robot is associated with
-        FilteredRobot& data_association(const Eigen::Vector3d& rRWw, std::vector<FilteredRobot>& filtered_robots);
+        /// @param tracked_robots The list of current tracked robots
+        /// @return The tracked robot that the vision robot is associated with
+        TrackedRobot& data_association(const Eigen::Vector3d& rRWw, std::vector<TrackedRobot>& tracked_robots);
     };
 
 }  // namespace module::localisation
