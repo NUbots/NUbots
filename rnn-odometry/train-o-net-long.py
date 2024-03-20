@@ -116,8 +116,18 @@ def main():
     # plt.show()
 
     # Split into data and targets
-    input_data = joined_data[:, :26]  # imu and servos
-    input_targets = joined_data[:, 26:]  # truth
+    # Training
+    input_data_train = train_arr[:, :26]  # imu and servos
+    input_targets_train = train_arr[:, 26:]  # truth
+    # Validation
+    input_data_validate = validate_arr[:, :26]  # imu and servos
+    input_targets_validate = validate_arr[:, 26:]  # truth
+    # Testing
+    input_data_test= test_arr[:, :26]  # imu and servos
+    input_targets_test = test_arr[:, 26:]  # truth
+
+    # TODO: Create tensorflow datasets
+
 
 
 if __name__ == "__main__":
