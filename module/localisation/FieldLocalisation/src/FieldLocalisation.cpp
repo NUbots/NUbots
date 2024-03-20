@@ -114,12 +114,15 @@ namespace module::localisation {
                     std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
                 bool fallen = stability == Stability::FALLEN || stability == Stability::FALLING;
 
+                // Emit field message using ground truth if available
                 if (cfg.use_ground_truth_localisation) {
                     auto field(std::make_unique<Field>());
                     field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
                     emit(field);
                     return;
                 }
+
+                // Otherwise calculate using field lines
                 if (!fallen && field_lines.rPWw.size() > cfg.min_observations
                     && time_since_startup > cfg.start_time_delay) {
 
