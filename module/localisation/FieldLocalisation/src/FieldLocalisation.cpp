@@ -118,31 +118,30 @@ namespace module::localisation {
                     auto field(std::make_unique<Field>());
                     field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
                     emit(field);
+                    return;
                 }
-                else {
-                    if (!fallen && field_lines.rPWw.size() > cfg.min_observations
-                        && time_since_startup > cfg.start_time_delay) {
+                if (!fallen && field_lines.rPWw.size() > cfg.min_observations
+                    && time_since_startup > cfg.start_time_delay) {
 
-                        // Measurement update (using field line observations)
-                        for (int i = 0; i < cfg.n_particles; i++) {
-                            auto weight = calculate_weight(filter.get_particle(i), field_lines.rPWw);
-                            filter.set_particle_weight(weight, i);
-                        }
-
-                        // Time update (includes resampling)
-                        const double dt =
-                            duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
-                        last_time_update_time = NUClear::clock::now();
-                        filter.time(dt);
-
-                        auto field(std::make_unique<Field>());
-                        field->Hfw = compute_Hfw(filter.get_state());
-                        if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
-                            debug_field_localisation(field->Hfw, raw_sensors);
-                        }
-                        field->covariance = filter.get_covariance();
-                        emit(field);
+                    // Measurement update (using field line observations)
+                    for (int i = 0; i < cfg.n_particles; i++) {
+                        auto weight = calculate_weight(filter.get_particle(i), field_lines.rPWw);
+                        filter.set_particle_weight(weight, i);
                     }
+
+                    // Time update (includes resampling)
+                    const double dt =
+                        duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
+                    last_time_update_time = NUClear::clock::now();
+                    filter.time(dt);
+
+                    auto field(std::make_unique<Field>());
+                    field->Hfw = compute_Hfw(filter.get_state());
+                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                        debug_field_localisation(field->Hfw, raw_sensors);
+                    }
+                    field->covariance = filter.get_covariance();
+                    emit(field);
                 }
             });
     }
