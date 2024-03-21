@@ -256,7 +256,7 @@ namespace module::vision {
                     Eigen::Vector3d rRCc = Hwc.inverse() * rRWw;
 
                     Robot r;
-                    r.rRCc   = rRCc.normalized();
+                    r.rRCc   = rRCc;
                     r.radius = 0.3;
                     robots->robots.push_back(r);
                     // Set the bounding box colour to the robot colour
