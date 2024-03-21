@@ -4,6 +4,7 @@ import argparse
 import os
 import subprocess
 
+import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
@@ -126,8 +127,69 @@ def main():
     input_data_test= test_arr[:, :26]  # imu and servos
     input_targets_test = test_arr[:, 26:]  # truth
 
+    # print dataset shapes
+    print(f"input_data_train: {input_data_train.shape}")
+    print(f"input_data_train 2: {input_data_train.shape[1]}")
+    print(f"input_targets_train: {input_targets_train.shape}")
+    print(f"input_data_validate: {input_data_validate.shape}")
+    print(f"input_targets_validate: {input_targets_validate.shape}")
+    print(f"input_data_test: {input_data_test.shape}")
+    print(f"input_targets_test: {input_targets_test.shape}")
+
     # TODO: Create tensorflow datasets
 
+    # Plot and inspect
+    # num_channels = input_targets_train.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(input_targets_train[200000:250000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
+
+    # NOTE: Samples are roughly 115/sec
+    system_sample_rate = 115
+    sequence_length = system_sample_rate * 3    # Look back 3 seconds
+    sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
+    sampling_rate = 1                           # Used for downsampling
+    batch_size = 32                             # Number of samples per gradient update
+
+    train_dataset = tf.keras.utils.timeseries_dataset_from_array(
+        data=input_data_train,
+        targets=input_targets_train,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+
+    validate_dataset = tf.keras.utils.timeseries_dataset_from_array(
+        data=input_data_validate,
+        targets=input_targets_validate,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+
+    test_dataset = tf.keras.utils.timeseries_dataset_from_array(
+        data=input_data_test,
+        targets=input_targets_test,
+        sequence_length=sequence_length,
+        sequence_stride=sequence_stride,
+        sampling_rate=sampling_rate,
+        batch_size=batch_size
+    )
+    # Model parameters
+    learning_rate = 0.001   # Arbitrary. Controls how much to change the model in response to error.
+    # Model Layers
+    inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
+    lstm_out = keras.layers.LSTM(32)(inputs)    # 32 is arbitrary for now
+    outputs = keras.layers.Dense(3)(lstm_out)   # Target shape[1] is 3
+    model = keras.Model(inputs=inputs, outputs=outputs)
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
+    model.summary()
 
 
 if __name__ == "__main__":
