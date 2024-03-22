@@ -68,6 +68,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldVisibility={this.toggleFieldVisibility}
           toggleRobotVisibility={this.toggleRobotVisibility}
           toggleBallVisibility={this.toggleBallVisibility}
+          toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
         ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
@@ -140,6 +141,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleBallVisibility(this.props.model);
   };
 
+  private toggleGoalVisibility = () => {
+    this.props.controller.toggleGoalVisibility(this.props.model);
+  };
+
   private toggleFieldLinePointsVisibility = () => {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
   };
@@ -155,6 +160,7 @@ interface LocalisationMenuBarProps {
   toggleFieldVisibility(): void;
   toggleRobotVisibility(): void;
   toggleBallVisibility(): void;
+  toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
 }
 
@@ -187,6 +193,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
         <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
+        <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
         <MenuItem
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
@@ -247,6 +254,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         })}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
+      {model.goalVisible && <Goals model={model} />}
     </object3D>
   );
 });
@@ -281,6 +289,31 @@ const Balls = ({ model }: { model: LocalisationModel }) => (
             <sphereBufferGeometry args={[1, 20, 20]} />
             <meshStandardMaterial color="orange" />
           </mesh>
+        ),
+    )}
+  </>
+);
+
+const Goals = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible &&
+        robot.rGFf && (
+          <object3D key={robot.id}>
+            {robot.rGFf.map((goal, i) => {
+              return (
+                <mesh
+                  key={String(i)}
+                  position={goal.bottom.add(new Vector3(0, 0, goal.top.z / 2)).toArray()}
+                  rotation={[Math.PI / 2, 0, 0]}
+                >
+                  <cylinderBufferGeometry args={[0.05, 0.05, goal.top.z, 20]} />
+                  <meshStandardMaterial color="yellow" />
+                </mesh>
+              );
+            })}
+          </object3D>
         ),
     )}
   </>

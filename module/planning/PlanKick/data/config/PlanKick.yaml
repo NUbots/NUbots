@@ -1,13 +1,13 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # How long since the last ball measurement before ignoring it and assuming the ball is lost, in milliseconds
 ball_timeout_threshold: 1000
 
 # Maximum distance of the ball required to kick the ball (in metres)
-ball_distance_threshold: 0.2
+ball_distance_threshold: 0.22
 # Maximum angle of the ball from the torso's x-axis required to kick the ball (in radians), both clockwise and anticlockwise
-ball_angle_threshold: 0.4
+ball_angle_threshold: 0.2
 
 # Maximum angle of the target from the torso's x-axis required to kick the ball (in radians), both clockwise and anticlockwise
 target_angle_threshold: 23 * pi / 180

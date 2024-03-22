@@ -26,6 +26,7 @@
  */
 #include "PlanKick.hpp"
 
+#include <fmt/format.h>
 #include <string>
 
 #include "extension/Behaviour.hpp"
@@ -93,6 +94,9 @@ namespace module::planning {
 
                 // Need to be near the ball to consider kicking it
                 if (ball_distance > cfg.ball_distance_threshold || ball_angle > cfg.ball_angle_threshold) {
+                    log<NUClear::DEBUG>(fmt::format("Ball not close enough, distance {}m and angle {} radians.",
+                                                    ball_distance,
+                                                    ball_angle));
                     return;
                 }
 
@@ -101,6 +105,7 @@ namespace module::planning {
 
                 // Don't kick if we should align but we're not aligned to the target
                 if (align_angle > cfg.target_angle_threshold) {
+                    log<NUClear::DEBUG>("Robot is not aligned to the kick target.");
                     return;
                 }
 
@@ -114,6 +119,7 @@ namespace module::planning {
 
                 // If the robot is not standing, make it stand before kicking
                 if (stability != Stability::STANDING) {
+                    log<NUClear::DEBUG>("Standing to kick!");
                     emit<Task>(std::make_unique<Walk>(Eigen::Vector3d::Zero()));
                     return;
                 }
@@ -121,9 +127,11 @@ namespace module::planning {
                 // If the kick leg is forced left, kick left. If the kick leg is auto,
                 // kick with left leg if ball is more to the left
                 if (cfg.kick_leg == LimbID::LEFT_LEG || (cfg.kick_leg == LimbID::UNKNOWN && rBRr.y() > 0.0)) {
+                    log<NUClear::INFO>("LEFT KICK!");
                     emit<Task>(std::make_unique<Kick>(LimbID::LEFT_LEG));
                 }
                 else {  // kick leg is forced right or ball is more to the right and kick leg is auto
+                    log<NUClear::INFO>("RIGHT KICK!");
                     emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG));
                 }
             });

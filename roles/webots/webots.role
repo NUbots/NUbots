@@ -1,11 +1,9 @@
+# This role is used to test the connection with Webots.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First.
-  extension::FileWatcher
-  support::logging::ConsoleLogHandler
-  # Support and Configuration GlobalConfig must go before Webots
-  support::configuration::GlobalConfig
-  # Image Handling
-  input::ImageDecompressor
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
   # Simulator Connection
   platform::Webots
 )

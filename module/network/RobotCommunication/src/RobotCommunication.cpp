@@ -122,8 +122,6 @@ namespace module::network {
                     default: msg->state = 2; break;
                 }
 
-                log<NUClear::DEBUG>(msg->state);
-
                 // Current pose (Position, orientation, and covariance of the player on the field)
                 if (config) {
                     msg->current_pose.player_id = config->player_id;

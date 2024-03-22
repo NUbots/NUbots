@@ -1,12 +1,15 @@
+# This module is used to playback messages from an NBS file. This is useful for logging sensor data on the real robot
+# and then playing it back without the robot, with other modules. You will likely need to add modules to this role
+# depending on your needs.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run
-  extension::FileWatcher
-  support::SignalCatcher
-  support::logging::ConsoleLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Network
   network::NUClearNet
   network::NetworkForwarder
-  support::logging::DataPlayback
   output::Overview
+  # Playback messages from an NBS file
+  support::logging::DataPlayback
 )

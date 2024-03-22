@@ -71,30 +71,32 @@ namespace module::localisation {
                                              line_width);
 
         // Add left penalty area box
-        int left_penalty_box_x0 = (fd.dimensions.border_strip_min_width) / cfg.grid_size;
-        int left_penalty_box_y0 =
-            (fd.dimensions.border_strip_min_width + (fd.dimensions.field_width - fd.dimensions.penalty_area_width) / 2)
-            / cfg.grid_size;
-        int left_penalty_box_width  = (fd.dimensions.penalty_area_width) / cfg.grid_size;
-        int left_penalty_box_length = (fd.dimensions.penalty_area_length) / cfg.grid_size;
-        fieldline_distance_map.add_rectangle(left_penalty_box_x0,
-                                             left_penalty_box_y0,
-                                             left_penalty_box_length,
-                                             left_penalty_box_width,
-                                             line_width);
+        if (fd.dimensions.penalty_area_length != 0 && fd.dimensions.penalty_area_width != 0) {
+            int left_penalty_box_x0 = (fd.dimensions.border_strip_min_width) / cfg.grid_size;
+            int left_penalty_box_y0 = (fd.dimensions.border_strip_min_width
+                                       + (fd.dimensions.field_width - fd.dimensions.penalty_area_width) / 2)
+                                      / cfg.grid_size;
+            int left_penalty_box_width  = (fd.dimensions.penalty_area_width) / cfg.grid_size;
+            int left_penalty_box_length = (fd.dimensions.penalty_area_length) / cfg.grid_size;
+            fieldline_distance_map.add_rectangle(left_penalty_box_x0,
+                                                 left_penalty_box_y0,
+                                                 left_penalty_box_length,
+                                                 left_penalty_box_width,
+                                                 line_width);
 
-        // Add right penalty area box
-        int right_penalty_box_x0 =
-            (fd.dimensions.border_strip_min_width + fd.dimensions.field_length - fd.dimensions.penalty_area_length)
-            / cfg.grid_size;
-        int right_penalty_box_y0     = left_penalty_box_y0;
-        int right_penalty_box_width  = left_penalty_box_width;
-        int right_penalty_box_length = left_penalty_box_length;
-        fieldline_distance_map.add_rectangle(right_penalty_box_x0,
-                                             right_penalty_box_y0,
-                                             right_penalty_box_length,
-                                             right_penalty_box_width,
-                                             line_width);
+            // Add right penalty area box
+            int right_penalty_box_x0 =
+                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length - fd.dimensions.penalty_area_length)
+                / cfg.grid_size;
+            int right_penalty_box_y0     = left_penalty_box_y0;
+            int right_penalty_box_width  = left_penalty_box_width;
+            int right_penalty_box_length = left_penalty_box_length;
+            fieldline_distance_map.add_rectangle(right_penalty_box_x0,
+                                                 right_penalty_box_y0,
+                                                 right_penalty_box_length,
+                                                 right_penalty_box_width,
+                                                 line_width);
+        }
 
         // Add centre line
         int centre_line_x0    = (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size;
@@ -107,34 +109,39 @@ namespace module::localisation {
                                              centre_line_width,
                                              line_width);
 
-        // Add left penalty cross in centre of penalty area
-        int left_penalty_cross_x0 =
-            (fd.dimensions.border_strip_min_width + fd.dimensions.penalty_mark_distance) / cfg.grid_size;
-        int left_penalty_cross_y0 =
-            (fd.dimensions.border_strip_min_width + fd.dimensions.field_width / 2) / cfg.grid_size;
-        int left_penalty_cross_width = 0.1 / cfg.grid_size;
-        fieldline_distance_map.add_cross(left_penalty_cross_x0,
-                                         left_penalty_cross_y0,
-                                         left_penalty_cross_width,
-                                         line_width);
 
-        // Add right penalty cross in centre of penalty area
-        int right_penalty_cross_x0 =
-            (fd.dimensions.border_strip_min_width + fd.dimensions.field_length - fd.dimensions.penalty_mark_distance)
-            / cfg.grid_size;
-        int right_penalty_cross_y0    = left_penalty_cross_y0;
-        int right_penalty_cross_width = 0.1 / cfg.grid_size;
-        fieldline_distance_map.add_cross(right_penalty_cross_x0,
-                                         right_penalty_cross_y0,
-                                         right_penalty_cross_width,
-                                         line_width);
+        if (fd.dimensions.penalty_mark_distance != 0) {
+            // Add left penalty cross in centre of penalty area
+            int left_penalty_cross_x0 =
+                (fd.dimensions.border_strip_min_width + fd.dimensions.penalty_mark_distance) / cfg.grid_size;
+            int left_penalty_cross_y0 =
+                (fd.dimensions.border_strip_min_width + fd.dimensions.field_width / 2) / cfg.grid_size;
+            int left_penalty_cross_width = 0.1 / cfg.grid_size;
+            fieldline_distance_map.add_cross(left_penalty_cross_x0,
+                                             left_penalty_cross_y0,
+                                             left_penalty_cross_width,
+                                             line_width);
 
-        // Add centre cross in centre of field
-        int centre_cross_x0 =
-            (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size + line_width / 2;
-        int centre_cross_y0    = left_penalty_cross_y0;
-        int centre_cross_width = 0.1 / cfg.grid_size;
-        fieldline_distance_map.add_cross(centre_cross_x0, centre_cross_y0, centre_cross_width, line_width);
+            // Add right penalty cross in centre of penalty area
+            int right_penalty_cross_x0 = (fd.dimensions.border_strip_min_width + fd.dimensions.field_length
+                                          - fd.dimensions.penalty_mark_distance)
+                                         / cfg.grid_size;
+            int right_penalty_cross_y0    = left_penalty_cross_y0;
+            int right_penalty_cross_width = 0.1 / cfg.grid_size;
+            fieldline_distance_map.add_cross(right_penalty_cross_x0,
+                                             right_penalty_cross_y0,
+                                             right_penalty_cross_width,
+                                             line_width);
+
+            // Add centre cross in centre of field
+            int centre_cross_x0 =
+                (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size
+                + line_width / 2;
+            int centre_cross_y0    = left_penalty_cross_y0;
+            int centre_cross_width = 0.1 / cfg.grid_size;
+            fieldline_distance_map.add_cross(centre_cross_x0, centre_cross_y0, centre_cross_width, line_width);
+        }
+
 
         // Add centre circle
         int centre_circle_x0 = (fd.dimensions.border_strip_min_width + fd.dimensions.field_length / 2) / cfg.grid_size;

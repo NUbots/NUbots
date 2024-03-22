@@ -226,6 +226,15 @@ namespace utility::io {
         return ::write(fd, buf, count);
     }
 
+    int uart::available() const {
+        if (connected()) {
+            int nbytes = 0;
+            ::ioctl(fd, FIONREAD, &nbytes);
+            return nbytes;
+        }
+        return -1;
+    }
+
     int uart::get() {
         uint8_t c = 0;
         if (read(&c, 1) == 1) {

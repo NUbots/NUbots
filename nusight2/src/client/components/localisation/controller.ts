@@ -292,6 +292,11 @@ export class LocalisationController {
   };
 
   @action
+  toggleGoalVisibility = (model: LocalisationModel) => {
+    model.goalVisible = !model.goalVisible;
+  };
+
+  @action
   toggleRobotVisibility = (model: LocalisationModel) => {
     model.robotVisible = !model.robotVisible;
   };
