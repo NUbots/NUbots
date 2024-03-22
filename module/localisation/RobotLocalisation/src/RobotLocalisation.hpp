@@ -26,15 +26,16 @@ namespace module::localisation {
         utility::math::filter::UKF<double, RobotModel> ukf{};
         /// @brief Whether the robot was and should have been seen in the last vision update
         bool seen = false;
-        /// @brief The number of times in a row the robot has not been seen, but should have been
+        /// @brief The number of times the robot has been undetected in a row
         int missed_count = 0;
 
         TrackedRobot(int id,
                      const RobotModel<double>::StateVec& initial_state,
                      const RobotModel<double>::StateVec& initial_covariance,
                      const RobotModel<double>::StateVec& process_noise,
-                     NUClear::clock::time_point last_time_update)
-            : id(id), last_time_update(last_time_update) {
+                     NUClear::clock::time_point last_time_update,
+                     bool seen = false)
+            : id(id), last_time_update(last_time_update), seen(seen) {
             ukf.set_state(initial_state.getStateVec(), initial_covariance.asDiagonal());
             ukf.model.process_noise = process_noise;
         }
@@ -58,22 +59,12 @@ namespace module::localisation {
                 } noise{};
                 struct Initial {
                     Initial() = default;
-                    struct Mean {
-                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
-                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
-                    } mean{};
                     struct Covariance {
                         Eigen::Vector2d position = Eigen::Vector2d::Zero();
                         Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
                     } covariance{};
                 } initial{};
             } ukf{};
-
-            /// @brief Initial state of the for the UKF filter
-            RobotModel<double>::StateVec initial_mean;
-
-            /// @brief Initial covariance of the for the UKF filter
-            RobotModel<double>::StateVec initial_covariance;
 
             /// @brief The maximum distance a measurement or other robot can be from another robot to be associated
             double association_distance = 0.0;
@@ -84,10 +75,7 @@ namespace module::localisation {
         } cfg;
 
         /// @brief Unique id counter for robots
-        std::atomic<int> robot_id = 0;
-
-        /// @brief Mutex for main loop
-        std::mutex mutex;
+        int robot_id = 0;
 
         /// @brief List of tracked robots
         std::vector<TrackedRobot> tracked_robots;
@@ -104,9 +92,8 @@ namespace module::localisation {
         /// @brief Data association function
         /// @param vision_robot The robot detection from the vision system
         /// @param tracked_robots The list of current tracked robots
-        /// @return The tracked robot that the vision robot is associated with
-        std::shared_ptr<TrackedRobot> data_association(const Eigen::Vector3d& rRWw,
-                                                       std::vector<TrackedRobot>& tracked_robots);
+        /// @return Pointer to the tracked robot that the vision robot is associated with
+        void data_association(const Eigen::Vector3d& rRWw, std::vector<TrackedRobot>& tracked_robots);
     };
 
 }  // namespace module::localisation

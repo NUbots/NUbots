@@ -91,12 +91,12 @@ namespace module::localisation {
 
         StateVec process_noise{};
 
-        [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar delta_T) const {
+        [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar dt) const {
 
             StateVec new_state(state);
 
             // Update position based on velocity
-            new_state.rRWw += new_state.vRw * delta_T;
+            new_state.rRWw += new_state.vRw * dt;
 
             return new_state;
         }
