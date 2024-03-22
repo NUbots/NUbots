@@ -7,7 +7,7 @@ ukf:
     measurement:
       robot_position: [0.1, 0.1]
     process:
-      position: [1e-2, 1e-2]
+      position: [1e-1, 1e-1]
       velocity: [1e-2, 1e-2]
 
   initial:
@@ -18,5 +18,6 @@ ukf:
       position: [1e-3, 1e-3]
       velocity: [1e-3, 1e-3]
 
-max_association_distance: 0.5
+association_distance: 0.25
+
 max_missed_count: 25
