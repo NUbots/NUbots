@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import os
 import subprocess
 
@@ -183,6 +184,12 @@ def main():
     )
     # Model parameters
     learning_rate = 0.001   # Arbitrary. Controls how much to change the model in response to error.
+    epochs = 5             #
+
+    # Tensorboard
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     lstm_out = keras.layers.LSTM(32)(inputs)    # 32 is arbitrary for now
@@ -191,6 +198,12 @@ def main():
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
     model.summary()
 
+    model.fit(
+        train_dataset,
+        validation_data=validate_dataset,
+        epochs=epochs,
+        callbacks=[tensorboard_callback]
+    )
 
 if __name__ == "__main__":
     main()
