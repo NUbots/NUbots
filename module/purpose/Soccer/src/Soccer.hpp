@@ -4,7 +4,8 @@
  * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
- * See https://github.com/NUbots/NUbots for further info.
+ * See https://github.com/NUbots/NUbots
+ for further info.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -84,9 +85,21 @@ namespace module::purpose {
 
         std::vector<Robot> robots;
 
+        // Counters for each robot position
+        int strikerCount = 0;
+        int goalieCount = 0;
+        int defenderCount = 0;
+
+
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
         explicit Soccer(std::unique_ptr<NUClear::Environment> environment);
+        void addStriker() {
+            log<NUClear::DEBUG>(strikerCount);
+            ++strikerCount;
+            log<NUClear::DEBUG>(strikerCount);
+        }
+        void removeStriker() { if (strikerCount > 0) --strikerCount; }
     };
 
 }  // namespace module::purpose

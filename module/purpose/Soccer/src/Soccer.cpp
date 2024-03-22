@@ -4,7 +4,8 @@
  * Copyright (c) 2023 NUbots
  *
  * This file is part of the NUbots codebase.
- * See https://github.com/NUbots/NUbots for further info.
+ * See https://github.com/NUbots/NUbots
+ for further info.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -87,17 +88,35 @@ namespace module::purpose {
         });
 
         on<Provide<FindPurpose>>().then([this] {
+            log<NUClear::DEBUG>("without robot state");
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
-                case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
-                case Position::GOALIE: emit<Task>(std::make_unique<Goalie>(cfg.force_playing)); break;
-                case Position::DEFENDER: emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
-                default: log<NUClear::ERROR>("Invalid robot position");
+                case Position::STRIKER:
+                    // Increment striker count
+                    addStriker();
+                    // Emit task
+                    emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                    break;
+                case Position::GOALIE:
+                    emit<Task>(std::make_unique<Goalie>(cfg.force_playing));
+                    break;
+                case Position::DEFENDER:
+                    emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                    break;
+                default:
+                    log<NUClear::ERROR>("Invalid robot position");
             }
         });
 
+        // on<Trigger<FindPurpose>, With<RoboCup>>().then([this](const std::shared_ptr<const RoboCup>& robot_info) {
+        //     log<NUClear::DEBUG>("robot info");
+        //     log<NUClear::DEBUG>(robot_info->current_pose.player_id);
+        //     // if < 2 defenders, assign as defender
+        //     // if
+        // });
+
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
-            log<NUClear::DEBUG>(this);
+            // log<NUClear::DEBUG>(this);
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
             if (self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
