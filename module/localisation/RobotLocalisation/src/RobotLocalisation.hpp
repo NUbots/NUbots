@@ -2,53 +2,19 @@
 #define MODULE_LOCALISATION_ROBOTLOCALISATION_HPP
 
 #include <nuclear>
+#include <vector>
 
 #include "RobotModel.hpp"
-
-#include "message/localisation/Robot.hpp"
-#include "message/vision/Robot.hpp"
 
 #include "utility/math/filter/UKF.hpp"
 
 namespace module::localisation {
-
-    using VisionRobot        = message::vision::Robot;
-    using VisionRobots       = message::vision::Robots;
-    using LocalisationRobot  = message::localisation::Robot;
-    using LocalisationRobots = message::localisation::Robots;
-
-    struct TrackedRobot {
-        /// @brief Id of the robot
-        int id;
-        /// @brief Time of the last time update
-        NUClear::clock::time_point last_time_update;
-        /// @brief Unscented Kalman Filter for this robot
-        utility::math::filter::UKF<double, RobotModel> ukf{};
-        /// @brief Whether the robot was and should have been seen in the last vision update
-        bool seen = false;
-        /// @brief The number of times the robot has been undetected in a row
-        int missed_count = 0;
-
-        TrackedRobot(int id,
-                     const RobotModel<double>::StateVec& initial_state,
-                     const RobotModel<double>::StateVec& initial_covariance,
-                     const RobotModel<double>::StateVec& process_noise,
-                     NUClear::clock::time_point last_time_update,
-                     bool seen = false)
-            : id(id), last_time_update(last_time_update), seen(seen) {
-            ukf.set_state(initial_state.getStateVec(), initial_covariance.asDiagonal());
-            ukf.model.process_noise = process_noise;
-        }
-    };
-
     class RobotLocalisation : public NUClear::Reactor {
     private:
         struct Config {
-            Config() = default;
             /// @brief UKF config
             struct UKF {
                 struct Noise {
-                    Noise() = default;
                     struct Measurement {
                         Eigen::Matrix2d position = Eigen::Matrix2d::Zero();
                     } measurement{};
@@ -57,13 +23,10 @@ namespace module::localisation {
                         Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
                     } process{};
                 } noise{};
-                struct Initial {
-                    Initial() = default;
-                    struct Covariance {
-                        Eigen::Vector2d position = Eigen::Vector2d::Zero();
-                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
-                    } covariance{};
-                } initial{};
+                struct InitialCovariance {
+                    Eigen::Vector2d position = Eigen::Vector2d::Zero();
+                    Eigen::Vector2d velocity = Eigen::Vector2d::Zero();
+                } initial_covariance{};
             } ukf{};
 
             /// @brief The maximum distance a measurement or other robot can be from another robot to be associated
@@ -74,26 +37,51 @@ namespace module::localisation {
 
         } cfg;
 
-        /// @brief Unique id counter for robots
-        int robot_id = 0;
+        struct TrackedRobot {
+            /// @brief Time of the last time update
+            NUClear::clock::time_point last_time_update = NUClear::clock::now();
+            /// @brief Unscented Kalman Filter for this robot
+            utility::math::filter::UKF<double, RobotModel> ukf{};
+            /// @brief Whether the robot was and should have been seen in the last vision update
+            bool seen = true;
+            /// @brief The number of times the robot has been undetected in a row
+            long missed_count = 0;
+            /// @brief A unique identifier for the robot
+            const unsigned long id;
+
+            /// @brief Constructor that sets the state for the UKF
+            TrackedRobot(const Eigen::Vector3d& initial_rRWw, const Config::UKF& cfg_ukf, const unsigned long next_id)
+                : id(next_id) {
+                NUClear::log<NUClear::DEBUG>("Making robot with id: ", id);
+                RobotModel<double>::StateVec initial_state = Eigen::Matrix<double, 4, 1>::Zero();
+                initial_state.rRWw                         = initial_rRWw.head<2>();
+
+                ukf.set_state(initial_state.getStateVec(),
+                              RobotModel<double>::StateVec(cfg_ukf.initial_covariance.position).asDiagonal());
+                ukf.model.process_noise = RobotModel<double>::StateVec(cfg_ukf.noise.process.position);
+            }
+
+            // Get the robot's position in world space
+            Eigen::Vector2d get_rRWw() const {
+                return RobotModel<double>::StateVec(ukf.get_state()).rRWw;
+            };
+        };
 
         /// @brief List of tracked robots
-        std::vector<TrackedRobot> tracked_robots;
+        std::vector<TrackedRobot> tracked_robots{};
+
+        /// @brief The next id to assign to a robot
+        /// This variable will increase by one each time a new robot is added
+        /// As it is unbounded, an unsigned long is used to store it
+        unsigned long next_id = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.
         explicit RobotLocalisation(std::unique_ptr<NUClear::Environment> environment);
 
-        /// @brief Function to add a robot to the list of robots
-        /// @param initial_rRWw The initial position of the robot in world space
-        /// @return The id of the robot that was added
-        void add_new_robot(const Eigen::Vector3d& initial_rRWw);
-
-        /// @brief Data association function
+        /// @brief Tests if this robot measurement is associated with a tracked robot or if it is a new robot
         /// @param vision_robot The robot detection from the vision system
-        /// @param tracked_robots The list of current tracked robots
-        /// @return Pointer to the tracked robot that the vision robot is associated with
-        void data_association(const Eigen::Vector3d& rRWw, std::vector<TrackedRobot>& tracked_robots);
+        void data_association(const Eigen::Vector3d& rRWw);
     };
 
 }  // namespace module::localisation
