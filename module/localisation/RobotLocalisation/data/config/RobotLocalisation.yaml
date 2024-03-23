@@ -10,13 +10,9 @@ ukf:
       position: [1e-1, 1e-1]
       velocity: [1e-2, 1e-2]
 
-  initial:
-    mean:
-      position: [5.0, 0.0]
-      velocity: [0.0, 0.0]
-    covariance:
-      position: [1e-3, 1e-3]
-      velocity: [1e-3, 1e-3]
+  initial_covariance:
+    position: [1e-3, 1e-3]
+    velocity: [1e-3, 1e-3]
 
 association_distance: 0.25
 
