@@ -49,6 +49,12 @@ namespace module::localisation {
 
         on<Trigger<VisionRobots>, With<GreenHorizon>, Single>().then([this](const VisionRobots& vision_robots,
                                                                             const GreenHorizon& horizon) {
+            // Print tracked_robots ids
+            log<NUClear::DEBUG>("Robots tracked:");
+            for (const auto& tracked_robot : tracked_robots) {
+                log<NUClear::DEBUG>("\t", tracked_robot.id);
+            }
+
             // Set all tracked robots to unseen
             for (auto& tracked_robot : tracked_robots) {
                 tracked_robot.seen = false;
