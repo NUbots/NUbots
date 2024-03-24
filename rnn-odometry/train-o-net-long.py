@@ -20,8 +20,21 @@ def main():
     truth_all = np.load("processed-outputs/numpy/long/1/long-truth-1.npy")
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
     print(imu.shape)
+    print("IMU max", np.max(imu))
+    print("IMU min",np.min(imu))
     print(servos.shape)
     print(truth_all.shape)
+
+    # Plot and inspect
+    # num_channels = imu.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(imu[200000:250000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.legend()
+    # plt.show()
+
     # # Reconstruct the matrices
     # # "data.odometryGroundTruth.Htw.x.x", - 0
     # # "data.odometryGroundTruth.Htw.x.y", - 1
@@ -64,6 +77,20 @@ def main():
     # plot this
     # import pdb
     # pdb.set_trace()
+
+    # Clip the IMU data to reduce spikes
+    # imu_clipped = np.clip(imu, -10, 10)
+
+    # Plot and inspect
+    # num_channels = imu_clipped.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(imu_clipped[200000:250000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # plt.autoscale(enable=True, axis="both")
+    # plt.legend()
+    # plt.show()
 
 
     # Join the data
@@ -151,10 +178,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 3    # Look back 3 seconds
+    sequence_length = system_sample_rate * 2    # Look back 3 seconds
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 512                           # Number of samples per gradient update
+    batch_size = 1024                           # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -184,8 +211,15 @@ def main():
     )
     # Model parameters
     learning_rate = 0.000001   # Controls how much to change the model in response to error.
-    epochs = 50             #
+    epochs = 100             #
+
+    # Loss functions
     loss_function = keras.losses.MeanAbsoluteError()
+    # loss_function = keras.losses.log_cosh(y_true=1,y_pred=1)
+    # loss_function = keras.losses.Quantile(quantile=0.5)
+    # loss_function = quantile_loss????
+    # loss_function = keras.losses.Huber(delta=0.5)
+
 
     # Tensorboard
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -196,8 +230,10 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    lstm_out = keras.layers.LSTM(256)(inputs)    # 32 originally
-    outputs = keras.layers.Dense(3, regulariser)(lstm_out)   # Target shape[1] is 3
+    lstm_out = keras.layers.LSTM(64, return_sequences=True)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(0.2)(lstm_out)
+    lstm_out2 = keras.layers.LSTM(32, return_sequences=True)(dropout)
+    outputs = keras.layers.Dense(3, regulariser)(lstm_out2)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss=loss_function)
     model.summary()
