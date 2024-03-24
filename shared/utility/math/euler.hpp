@@ -171,7 +171,7 @@ namespace utility::math::euler {
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
               std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 3))>* = nullptr>
-    inline Eigen::Matrix<Scalar, 3, 1> mat_to_eul_intrinsic(const T& mat) {
+    inline Eigen::Matrix<Scalar, 3, 1> mat_to_rpy_intrinsic(const T& mat) {
         // Eigen euler angles and with better range
         return Eigen::Matrix<Scalar, 3, 1>(
             // Roll
@@ -190,7 +190,7 @@ namespace utility::math::euler {
     template <typename T,
               typename Scalar                                                                 = typename T::Scalar,
               std::enable_if_t<((T::RowsAtCompileTime == 3) && (T::ColsAtCompileTime == 1))>* = nullptr>
-    inline Eigen::Matrix<Scalar, 3, 3> eul_intrinsic_to_mat(const T& angles) {
+    inline Eigen::Matrix<Scalar, 3, 3> rpy_intrinsic_to_mat(const T& angles) {
         Eigen::AngleAxis<Scalar> yaw_rot(angles.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ());
         Eigen::AngleAxis<Scalar> pitch_rot(angles.y(), Eigen::Matrix<Scalar, 3, 1>::UnitY());
         Eigen::AngleAxis<Scalar> roll_rot(angles.x(), Eigen::Matrix<Scalar, 3, 1>::UnitX());
