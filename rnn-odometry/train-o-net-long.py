@@ -140,21 +140,21 @@ def main():
     # TODO: Create tensorflow datasets
 
     # Plot and inspect
-    # num_channels = input_targets_train.shape[1]
+    # num_channels = input_data_train.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(input_targets_train[200000:250000, i], label=f'Channel {i+1}')
+    #     plt.plot(input_data_train[200000:250000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = 25#system_sample_rate * 3    # Look back 3 seconds
+    sequence_length = system_sample_rate * 3    # Look back 3 seconds
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 128                             # Number of samples per gradient update
+    batch_size = 512                           # Number of samples per gradient update
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -185,20 +185,21 @@ def main():
     # Model parameters
     learning_rate = 0.000001   # Controls how much to change the model in response to error.
     epochs = 50             #
+    loss_function = keras.losses.MeanAbsoluteError()
 
     # Tensorboard
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Regulariser
-    regulariser = keras.regularizers.L1(0.01)
+    regulariser = keras.regularizers.L2(0.01)
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    lstm_out = keras.layers.LSTM(128)(inputs)    # 32 originally
+    lstm_out = keras.layers.LSTM(256)(inputs)    # 32 originally
     outputs = keras.layers.Dense(3, regulariser)(lstm_out)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss="mse")
+    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss=loss_function)
     model.summary()
 
     model.fit(
