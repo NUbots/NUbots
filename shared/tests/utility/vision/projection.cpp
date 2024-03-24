@@ -35,7 +35,7 @@
 #include <random>
 #include <string>
 
-#include "message/input/Lens.hpp"
+#include "message/input/Image.hpp"
 
 using message::input::Lens;
 using utility::vision::project;

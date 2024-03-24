@@ -37,6 +37,7 @@
 #include <vector>
 
 #include "message/input/Image.hpp"
+#include "message/input/Lens.hpp"
 
 namespace module::vision::visualmesh {
 

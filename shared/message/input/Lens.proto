@@ -27,26 +27,21 @@
 syntax = "proto3";
 
 package message.input;
-
-import "message/platform/webots/messages.proto";
-import "google/protobuf/timestamp.proto";
 import "Vector.proto";
-import "Transform.proto";
-import "message/input/Lens.proto";
 
-message Image {
-    /// Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
-    /// see module::output::compressor::turbojpeg::Compressor::compress for currently supported formats
-    uint32 format = 1;
-    /// Number of pixels of {x, y} of the image
-    uvec2                     dimensions = 2;
-    bytes                     data       = 3;
-    uint32                    id         = 4;
-    string                    name       = 5;
-    google.protobuf.Timestamp timestamp  = 6;
-    /// World to camera Isometry3d transform
-    iso3 Hcw  = 7;
-    Lens lens = 8;
-    /// Ground truth data from webots
-    platform.webots.VisionGroundTruth vision_ground_truth = 9;
+message Lens {
+    enum Projection {
+        UNKNOWN     = 0;
+        RECTILINEAR = 1;
+        EQUIDISTANT = 2;
+        EQUISOLID   = 3;
+    }
+    Projection projection = 1;
+    /// Normalised focal length, in pixels / image width
+    float focal_length = 2;
+    /// Angular diameter that the lens covers (the area that light hits on the sensor), in radians
+    float fov = 3;
+    /// Normalised image centre offset - the number of pixels from centre to optical axis / image width
+    fvec2 centre = 4;
+    fvec2 k      = 5;
 }

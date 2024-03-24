@@ -51,6 +51,7 @@
 namespace module::vision::visualmesh {
 
     using message::input::Image;
+    using message::input::Lens;
     namespace fs = std::filesystem;
 
     struct VisualMeshModelConfig {
@@ -128,9 +129,9 @@ namespace module::vision::visualmesh {
                                float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
                 };
                 switch (img.lens.projection.value) {
-                    case Image::Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;
-                    case Image::Lens::Projection::EQUISOLID: lens.projection = ::visualmesh::EQUISOLID; break;
-                    case Image::Lens::Projection::RECTILINEAR: lens.projection = ::visualmesh::RECTILINEAR; break;
+                    case Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;
+                    case Lens::Projection::EQUISOLID: lens.projection = ::visualmesh::EQUISOLID; break;
+                    case Lens::Projection::RECTILINEAR: lens.projection = ::visualmesh::RECTILINEAR; break;
                     default: throw std::runtime_error("Unknown lens projection");
                 }
 

@@ -34,6 +34,7 @@
 #include <string>
 
 #include "message/input/Image.hpp"
+#include "message/input/Lens.hpp"
 
 extern "C" {
 #include <aravis-0.8/arv.h>
@@ -49,7 +50,7 @@ namespace module::input {
         std::string name;
         uint32_t fourcc;
         uint32_t id;
-        message::input::Image::Lens lens;
+        message::input::Lens lens;
         // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached
         // to
         Eigen::Isometry3d Hpc;
