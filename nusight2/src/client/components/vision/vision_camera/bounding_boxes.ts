@@ -5,7 +5,6 @@ import { Vector4 } from "../../../../shared/math/vector4";
 import { CameraParams } from "../../camera/camera_params";
 import { LineProjection } from "../../camera/objects/line_projection";
 import { TextViewModel } from "../../camera/objects/text/text";
-
 import { group } from "../../three/builders";
 import { Canvas } from "../../three/three";
 export interface BoundingBoxesModel {
