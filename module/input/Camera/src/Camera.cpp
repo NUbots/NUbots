@@ -41,7 +41,6 @@ extern "C" {
 #include "time_sync.hpp"
 
 #include "message/input/Image.hpp"
-#include "message/input/Lens.hpp"
 #include "message/input/Sensors.hpp"
 
 #include "utility/input/FrameID.hpp"
@@ -54,7 +53,6 @@ namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
-    using message::input::Lens;
     using message::input::Sensors;
     using utility::input::FrameID;
     using utility::input::ServoID;
@@ -145,7 +143,7 @@ namespace module::input {
                                                         name,
                                                         0,  // fourcc is set later
                                                         num_cameras++,
-                                                        Lens(),               // Lens is constructed in settings
+                                                        Image::Lens(),        // Lens is constructed in settings
                                                         Eigen::Isometry3d(),  // Hpc is set in settings
                                                         camera,
                                                         stream,
@@ -226,7 +224,7 @@ namespace module::input {
             k[1]              = k[1] * std::pow(width / full_height, 4);
 
             // Set the lens parameters from configuration
-            context.lens = Lens{
+            context.lens = Image::Lens{
                 config["lens"]["projection"].as<std::string>(),
                 focal_length,
                 fov,

@@ -37,7 +37,6 @@
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/input/Image.hpp"
-#include "message/input/Lens.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -71,7 +70,6 @@ namespace module::platform {
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::input::Image;
-    using message::input::Lens;
     using message::input::Sensors;
     using message::platform::RawSensors;
     using message::platform::ResetWebotsServos;
@@ -308,7 +306,7 @@ namespace module::platform {
             Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
 
             // Set the lens parameters from configuration
-            context.lens = Lens{
+            context.lens = Image::Lens{
                 config["lens"]["projection"].as<std::string>(),
                 focal_length,
                 fov,

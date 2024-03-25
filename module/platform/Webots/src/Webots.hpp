@@ -41,7 +41,6 @@
 #include <vector>
 
 #include "message/input/Image.hpp"
-#include "message/input/Lens.hpp"
 #include "message/platform/webots/messages.hpp"
 
 namespace module::platform {
@@ -145,7 +144,7 @@ namespace module::platform {
         struct CameraContext {
             std::string name;
             uint32_t id = 0;
-            message::input::Lens lens;
+            message::input::Image::Lens lens;
             // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is
             // attached to
             Eigen::Isometry3d Hpc;

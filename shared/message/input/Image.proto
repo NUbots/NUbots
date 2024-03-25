@@ -32,9 +32,25 @@ import "message/platform/webots/messages.proto";
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 import "Transform.proto";
-import "message/input/Lens.proto";
 
 message Image {
+
+    message Lens {
+        enum Projection {
+            UNKNOWN     = 0;
+            RECTILINEAR = 1;
+            EQUIDISTANT = 2;
+            EQUISOLID   = 3;
+        }
+        Projection projection = 1;
+        /// Normalised focal length: focal length in pixels / image width
+        float focal_length = 2;
+        /// The angular diameter that the lens covers (the area that light hits on the sensor). In radians
+        float fov = 3;
+        /// Normalised image centre offset: pixels from centre to optical axis / image width
+        fvec2 centre = 4;
+        fvec2 k      = 5;
+    }
     /// Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
     /// see module::output::compressor::turbojpeg::Compressor::compress for currently supported formats
     uint32 format = 1;
