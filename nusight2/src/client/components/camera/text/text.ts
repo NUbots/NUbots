@@ -1,12 +1,12 @@
 import { computed } from "mobx";
 import * as THREE from "three";
 
-import { Vector2 } from "../../../../../shared/math/vector2";
-import { Vector3 } from "../../../../../shared/math/vector3";
-import { Vector4 } from "../../../../../shared/math/vector4";
-import { bufferGeometry, imageTexture, mesh, rawShader, shaderMaterial } from "../../../three/builders";
-import { Canvas } from "../../../three/three";
-import { CameraParams } from "../../camera_params";
+import { Vector2 } from "../../../../shared/math/vector2";
+import { Vector3 } from "../../../../shared/math/vector3";
+import { Vector4 } from "../../../../shared/math/vector4";
+import { bufferGeometry, imageTexture, mesh, rawShader, shaderMaterial } from "../../three/builders";
+import { Canvas } from "../../three/three";
+import { CameraParams } from "../camera_params";
 
 import fragmentShader from "./shaders/text.frag";
 import vertexShader from "./shaders/text.vert";
