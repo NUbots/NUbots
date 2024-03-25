@@ -13,6 +13,7 @@ nuclear_role(
   output::Overview
   # Sensors
   platform::Webots
+  input::SensorFilter
   # Vision
   vision::Yolo
   output::ImageCompressor
