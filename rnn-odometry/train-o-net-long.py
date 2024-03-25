@@ -210,8 +210,8 @@ def main():
         batch_size=batch_size
     )
     # Model parameters
-    learning_rate = 0.000001   # Controls how much to change the model in response to error.
-    epochs = 100             #
+    learning_rate = 0.00001   # Controls how much to change the model in response to error.
+    epochs = 300             #
 
     # Loss functions
     loss_function = keras.losses.MeanAbsoluteError()
@@ -246,6 +246,7 @@ def main():
     )
 
     # Note add back the model save
+    model.save("models/model-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 
 if __name__ == "__main__":
     main()
