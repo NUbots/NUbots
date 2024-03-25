@@ -35,9 +35,9 @@
 #include <random>
 #include <string>
 
-#include "message/input/Lens.hpp"
+#include "message/input/Image.hpp"
 
-using message::input::Lens;
+using message::input::Image;
 using utility::vision::project;
 using utility::vision::unproject;
 
@@ -45,48 +45,49 @@ using Catch::Matchers::WithinAbs;
 
 using Scalar = double;
 
-Lens create_lens(const std::string& projection,
-                 const float& focal_length,
-                 const float& fov,
-                 const Eigen::Vector2f& centre,
-                 const Eigen::Vector2f& k,
-                 const Eigen::Vector2f& dimensions,
-                 const Eigen::Vector2f& full_dimensions) {
+Image::Lens create_lens(const std::string& projection,
+                        const float& focal_length,
+                        const float& fov,
+                        const Eigen::Vector2f& centre,
+                        const Eigen::Vector2f& k,
+                        const Eigen::Vector2f& dimensions,
+                        const Eigen::Vector2f& full_dimensions) {
 
     // Set the lens parameters from configuration
-    return Lens{projection,
-                // Un-normalise focal length
-                focal_length * full_dimensions.x(),
-                fov,
-                // Recentre the centre
-                (centre - (full_dimensions - dimensions - centre)) * 0.5f,
-                // Un-normalise the distortion parameters
-                k.cwiseQuotient(Eigen::Vector2f(std::pow(full_dimensions.x(), 2), std::pow(full_dimensions.x(), 4)))};
+    return Image::Lens{
+        projection,
+        // Un-normalise focal length
+        focal_length * full_dimensions.x(),
+        fov,
+        // Recentre the centre
+        (centre - (full_dimensions - dimensions - centre)) * 0.5f,
+        // Un-normalise the distortion parameters
+        k.cwiseQuotient(Eigen::Vector2f(std::pow(full_dimensions.x(), 2), std::pow(full_dimensions.x(), 4)))};
 }
 
-Lens create_normalised_lens(const std::string& projection,
-                            const float& focal_length,
-                            const float& fov,
-                            const Eigen::Vector2f& centre,
-                            const Eigen::Vector2f& k,
-                            const Eigen::Vector2f& dimensions,
-                            const Eigen::Vector2f& full_dimensions) {
-    Lens lens = create_lens(projection, focal_length, fov, centre, k, dimensions, full_dimensions);
+Image::Lens create_normalised_lens(const std::string& projection,
+                                   const float& focal_length,
+                                   const float& fov,
+                                   const Eigen::Vector2f& centre,
+                                   const Eigen::Vector2f& k,
+                                   const Eigen::Vector2f& dimensions,
+                                   const Eigen::Vector2f& full_dimensions) {
+    Image::Lens lens = create_lens(projection, focal_length, fov, centre, k, dimensions, full_dimensions);
 
     // Set the lens parameters from configuration
-    return Lens{lens.projection,
-                // Normalise focal length
-                lens.focal_length / dimensions.x(),
-                fov,
-                // Normalise the centre
-                lens.centre / dimensions.x(),
-                // Adjust the distortion parameters for the new width units
-                k.cwiseProduct(Eigen::Vector2f(std::pow(dimensions.x() / full_dimensions.x(), 2),
-                                               std::pow(dimensions.x() / full_dimensions.x(), 4)))};
+    return Image::Lens{lens.projection,
+                       // Normalise focal length
+                       lens.focal_length / dimensions.x(),
+                       fov,
+                       // Normalise the centre
+                       lens.centre / dimensions.x(),
+                       // Adjust the distortion parameters for the new width units
+                       k.cwiseProduct(Eigen::Vector2f(std::pow(dimensions.x() / full_dimensions.x(), 2),
+                                                      std::pow(dimensions.x() / full_dimensions.x(), 4)))};
 }
 
 template <typename Scalar>
-void run_round_trip(const Lens& lens,
+void run_round_trip(const Image::Lens& lens,
                     const Eigen::Matrix<Scalar, 2, 1>& dimensions,
                     const bool& normalised,
                     const Scalar& margin = 1e-5) {
@@ -169,8 +170,8 @@ void run_round_trip(const Lens& lens,
 SCENARIO("pixel and unit vector projections are accurate", "[utility][vision][projection]") {
     WHEN("width-normalised equisolid projections are roundtripped") {
         const Eigen::Matrix<Scalar, 2, 1> dimensions(1920, 1200);
-        const Lens lens =
-            create_normalised_lens(Lens::Projection("EQUISOLID"),                                  // projection
+        const Image::Lens lens =
+            create_normalised_lens(Image::Lens::Projection("EQUISOLID"),                           // projection
                                    0.20980090703929113f,                                           // focal length
                                    183.0f * M_PI / 180.0f,                                         // field of view
                                    Eigen::Vector2f(-0.017560194004901337, -0.015374040186510488),  // centre
@@ -186,8 +187,8 @@ SCENARIO("pixel and unit vector projections are accurate", "[utility][vision][pr
 
     WHEN("width-normalised equidistant projections are roundtripped") {
         const Eigen::Matrix<Scalar, 2, 1> dimensions(1920, 1200);
-        const Lens lens =
-            create_normalised_lens(Lens::Projection("EQUIDISTANT"),                                // projection
+        const Image::Lens lens =
+            create_normalised_lens(Image::Lens::Projection("EQUIDISTANT"),                         // projection
                                    0.20980090703929113f,                                           // focal length
                                    183.0f * M_PI / 180.0f,                                         // field of view
                                    Eigen::Vector2f(-0.017560194004901337, -0.015374040186510488),  // centre
@@ -204,13 +205,14 @@ SCENARIO("pixel and unit vector projections are accurate", "[utility][vision][pr
     WHEN("width-normalised rectlinear projections are roundtripped") {
         const Eigen::Matrix<Scalar, 2, 1> dimensions(2448, 2048);
         const Eigen::Matrix<Scalar, 2, 1> full_dimensions(2448, 2048);
-        const Lens lens = create_normalised_lens(Lens::Projection("RECTILINEAR"),  // projection
-                                                 1.362315898710812,                // focal length
-                                                 41.0f * M_PI / 180.0f,            // field of view
-                                                 Eigen::Vector2f(-0.0332563868776798, -0.035537119404220684),  // centre
-                                                 Eigen::Vector2f(0.08337106835599951, 0.008852751521405857),   // k
-                                                 dimensions.cast<float>(),
-                                                 full_dimensions.cast<float>());
+        const Image::Lens lens =
+            create_normalised_lens(Image::Lens::Projection("RECTILINEAR"),                       // projection
+                                   1.362315898710812,                                            // focal length
+                                   41.0f * M_PI / 180.0f,                                        // field of view
+                                   Eigen::Vector2f(-0.0332563868776798, -0.035537119404220684),  // centre
+                                   Eigen::Vector2f(0.08337106835599951, 0.008852751521405857),   // k
+                                   dimensions.cast<float>(),
+                                   full_dimensions.cast<float>());
 
         THEN("the error is small") {
             INFO("Normalised rectilinear tests");
@@ -220,13 +222,13 @@ SCENARIO("pixel and unit vector projections are accurate", "[utility][vision][pr
 
     WHEN("equisolid projections are roundtripped") {
         const Eigen::Matrix<Scalar, 2, 1> dimensions(1920, 1200);
-        const Lens lens = create_lens(Lens::Projection("EQUISOLID"),                                  // projection
-                                      0.20980090703929113f,                                           // focal length
-                                      183.0f * M_PI / 180.0f,                                         // field of view
-                                      Eigen::Vector2f(-0.017560194004901337, -0.015374040186510488),  // centre
-                                      Eigen::Vector2f(-0.1118031941066955, -0.003381828624269054),    // k
-                                      dimensions.cast<float>(),
-                                      dimensions.cast<float>());
+        const Image::Lens lens = create_lens(Image::Lens::Projection("EQUISOLID"),  // projection
+                                             0.20980090703929113f,                  // focal length
+                                             183.0f * M_PI / 180.0f,                // field of view
+                                             Eigen::Vector2f(-0.017560194004901337, -0.015374040186510488),  // centre
+                                             Eigen::Vector2f(-0.1118031941066955, -0.003381828624269054),    // k
+                                             dimensions.cast<float>(),
+                                             dimensions.cast<float>());
 
         THEN("the error is small") {
             INFO("Un-normalised equisolid tests");
@@ -236,13 +238,13 @@ SCENARIO("pixel and unit vector projections are accurate", "[utility][vision][pr
 
     WHEN("equidistant projections are roundtripped") {
         const Eigen::Matrix<Scalar, 2, 1> dimensions(1920, 1200);
-        const Lens lens = create_lens(Lens::Projection("EQUIDISTANT"),                                // projection
-                                      0.20980090703929113f,                                           // focal length
-                                      183.0f * M_PI / 180.0f,                                         // field of view
-                                      Eigen::Vector2f(-0.017560194004901337, -0.015374040186510488),  // centre
-                                      Eigen::Vector2f(-0.1118031941066955, -0.003381828624269054),    // k
-                                      dimensions.cast<float>(),
-                                      dimensions.cast<float>());
+        const Image::Lens lens = create_lens(Image::Lens::Projection("EQUIDISTANT"),  // projection
+                                             0.20980090703929113f,                    // focal length
+                                             183.0f * M_PI / 180.0f,                  // field of view
+                                             Eigen::Vector2f(-0.017560194004901337, -0.015374040186510488),  // centre
+                                             Eigen::Vector2f(-0.1118031941066955, -0.003381828624269054),    // k
+                                             dimensions.cast<float>(),
+                                             dimensions.cast<float>());
 
         THEN("the error is small") {
             INFO("Un-normalised equidistant tests");
@@ -253,13 +255,13 @@ SCENARIO("pixel and unit vector projections are accurate", "[utility][vision][pr
     WHEN("rectlinear projections are roundtripped") {
         const Eigen::Matrix<Scalar, 2, 1> dimensions(2448, 2048);
         const Eigen::Matrix<Scalar, 2, 1> full_dimensions(2448, 2048);
-        const Lens lens = create_lens(Lens::Projection("RECTILINEAR"),                              // projection
-                                      1.362315898710812f,                                           // focal length
-                                      41.0f * M_PI / 180.0f,                                        // field of view
-                                      Eigen::Vector2f(-0.0332563868776798, -0.035537119404220684),  // centre
-                                      Eigen::Vector2f(0.08337106835599951, 0.008852751521405857),   // k
-                                      dimensions.cast<float>(),
-                                      full_dimensions.cast<float>());
+        const Image::Lens lens = create_lens(Image::Lens::Projection("RECTILINEAR"),  // projection
+                                             1.362315898710812f,                      // focal length
+                                             41.0f * M_PI / 180.0f,                   // field of view
+                                             Eigen::Vector2f(-0.0332563868776798, -0.035537119404220684),  // centre
+                                             Eigen::Vector2f(0.08337106835599951, 0.008852751521405857),   // k
+                                             dimensions.cast<float>(),
+                                             full_dimensions.cast<float>());
 
         THEN("the error is small") {
             INFO("Un-normalised rectilinear tests");
