@@ -3,12 +3,12 @@ import { Meta, StoryObj } from "@storybook/react";
 import { computed, observable } from "mobx";
 import { Observer } from "mobx-react";
 
-import { Vector2 } from "../../../../../shared/math/vector2";
-import { Vector3 } from "../../../../../shared/math/vector3";
-import { Vector4 } from "../../../../../shared/math/vector4";
-import { fakeCameraModel } from "../../stories/fake_camera_model";
-import { CameraView, Renderable } from "../../view";
-import { CameraViewModel } from "../../view_model";
+import { Vector2 } from "../../../../../../shared/math/vector2";
+import { Vector3 } from "../../../../../../shared/math/vector3";
+import { Vector4 } from "../../../../../../shared/math/vector4";
+import { fakeCameraModel } from "../../../stories/fake_camera_model";
+import { CameraView, Renderable } from "../../../view";
+import { CameraViewModel } from "../../../view_model";
 import { TextOpts, TextViewModel } from "../text";
 
 const meta: Meta<typeof TextViewModel> = {
