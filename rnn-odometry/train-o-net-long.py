@@ -164,7 +164,13 @@ def main():
     print(f"input_data_test: {input_data_test.shape}")
     print(f"input_targets_test: {input_targets_test.shape}")
 
-    # TODO: Create tensorflow datasets
+     # Save the datasets (should break the dataset creation to another module eventually)
+    np.save('datasets/input_data_train.npy',input_data_train)
+    np.save('datasets/input_targets_train.npy',input_targets_train)
+    np.save('datasets/input_data_validate.npy', input_data_validate)
+    np.save('datasets/input_targets_validate.npy', input_targets_validate)
+    np.save('datasets/input_data_test.npy', input_data_test)
+    np.save('datasets/input_targets_test.npy', input_targets_test)
 
     # Plot and inspect
     # num_channels = input_data_train.shape[1]
@@ -209,6 +215,7 @@ def main():
         sampling_rate=sampling_rate,
         batch_size=batch_size
     )
+
     # Model parameters
     learning_rate = 0.00001   # Controls how much to change the model in response to error.
     epochs = 300             #
@@ -247,6 +254,7 @@ def main():
 
     # Note add back the model save
     model.save("models/model-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+
 
 if __name__ == "__main__":
     main()
