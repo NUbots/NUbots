@@ -52,9 +52,8 @@ namespace module::vision {
             cfg.intersection_confidence_threshold = config["intersection_confidence_threshold"].as<double>();
 
             // Compile the model and create inference request object
-            ov::Core core;
             compiled_model =
-                core.compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
+                ov::Core().compile_model(config["model_path"].as<std::string>(), config["device"].as<std::string>());
             infer_request = compiled_model.create_infer_request();
         });
 
