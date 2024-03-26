@@ -323,7 +323,7 @@ type TextureOpts = {
 };
 
 type ImageTextureOpts = TextureOpts & {
-  image?: HTMLImageElement | ImageBitmap;
+  image?: HTMLCanvasElement | HTMLImageElement | ImageBitmap;
   mapping?: Mapping;
   flipY?: boolean;
 };
