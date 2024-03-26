@@ -23,34 +23,21 @@ mahony:
   initial_rpy: [0, 0.2, 0]
 
 ukf:
-  update:
-    velocity_decay: [0.5, 0.5, 0.5]
   noise:
     measurement:
-      accelerometer: [0.1, 0.1, 0.1] # x, y, z
-      accelerometer_magnitude: [0.1, 0.1, 0.1] # x, y, z
-      gyroscope: [0.1, 0.1, 0.1] # x, y, z
-      # Covariance of a foot's translation
-      flat_foot_translation: [5e-8, 5e-8, 5e-8] # x, y, z
-      # Covariance of the rotation quaternion of the foot, when both feet are down
-      flat_foot_orientation: [0.1, 0.1, 0.1, 0.1] # QX, QY, QZ, QW
+      # Covariance of a foot's translation measurement update
+      flat_foot_translation: [1e-12, 1e-12, 1e-12] # x, y, z
     process:
-      position: [1e-2, 1e-2, 1e-2]
-      velocity: [1e-2, 1e-2, 1e-2]
-      rotational_velocity: [1e-5, 1e-5, 1e-5]
-      rotation: [1e-3, 1e-3, 1e-3, 1e-3]
+      position: [1e-4, 1e-4, 1e-4]
+      velocity: [1e-1, 1e-1, 1e-1]
 
   initial:
     mean:
       position: [0, 0, 0.49] # A little above the ground
       velocity: [0, 0, 0] # Not moving
-      rotational_velocity: [0, 0, 0] # Not spinning
-      rotation: [0, 0, 0, 1] # Upright (QX, QY, QZ, QW)
     covariance:
-      position: [1e-3, 1e-3, 1] # We are pretty sure of our x,y when we start
+      position: [1e-3, 1e-3, 1e-3] # We are pretty sure of our x,y when we start
       velocity: [1e-3, 1e-3, 1e-3] # We are unsure of our velocity
-      rotational_velocity: [0.1, 0.1, 0.1] # Fairly unsure about our rotational velocity
-      rotation: [0.01, 0.01, 0.01, 0.01] # Not very sure of rotation (QX, QY, QZ, QW)
 
 # Specify whether or not to use ground truth odometry from simulator
 use_ground_truth: false

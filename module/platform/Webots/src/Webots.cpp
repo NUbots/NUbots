@@ -883,6 +883,7 @@ namespace module::platform {
             if (sensor_measurements.odometry_ground_truth.exists) {
                 sensor_data->odometry_ground_truth.exists = true;
                 sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
+                sensor_data->odometry_ground_truth.vTw    = sensor_measurements.odometry_ground_truth.vTw;
             }
 
             emit(sensor_data);
