@@ -1,6 +1,6 @@
 # Check subcontroller before we build
 if(NOT SUBCONTROLLER STREQUAL "NUSense")
-    return()
+  return()
 endif()
 
 # Build our NUClear module

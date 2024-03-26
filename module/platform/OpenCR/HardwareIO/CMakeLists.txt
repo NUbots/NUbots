@@ -27,7 +27,7 @@ SOFTWARE.
 
 # Check subcontroller before we build
 if(NOT SUBCONTROLLER STREQUAL "OpenCR")
-    return()
+  return()
 endif()
 
 # Build our NUClear module
