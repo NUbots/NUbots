@@ -174,7 +174,7 @@ export class TextViewModel {
   }
 
   private static setAttributes(ctx: CanvasRenderingContext2D) {
-    ctx.font = `${TextViewModel.textSize}px Roboto`;
+    ctx.font = `${TextViewModel.textSize}px Roboto, ui-sans-serif, system-ui`;
     ctx.textBaseline = "bottom";
   }
 
