@@ -111,6 +111,15 @@ export class ServoMotorSet {
   }
 }
 
+export class FieldIntersection {
+  @observable type: string;
+  @observable position: Vector3;
+  constructor({ type, position }: { type: string; position: Vector3 }) {
+    this.type = type;
+    this.position = position;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -121,6 +130,7 @@ export class LocalisationRobotModel {
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
   @observable ball?: { rBWw: Vector3 };
+  @observable fieldIntersections?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
 
@@ -134,6 +144,7 @@ export class LocalisationRobotModel {
     motors,
     fieldLinePoints,
     ball,
+    fieldIntersections,
     goals,
   }: {
     model: RobotModel;
@@ -145,6 +156,7 @@ export class LocalisationRobotModel {
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
     ball?: { rBWw: Vector3 };
+    fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
   }) {
     this.model = model;
@@ -156,6 +168,7 @@ export class LocalisationRobotModel {
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
     this.ball = ball;
+    this.fieldIntersections = fieldIntersections;
     this.goals = goals;
   }
 
@@ -198,12 +211,22 @@ export class LocalisationRobotModel {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
   }
 
-  /** Goal positions in field space */
   @computed
   get rGFf(): { bottom: Vector3; top: Vector3 }[] {
     return this.goals?.points.map((pair) => ({
       bottom: pair?.bottom.applyMatrix4(this.Hfw),
       top: pair?.top.applyMatrix4(this.Hfw),
     }));
+  }
+
+  /** Field intersections in field space */
+  @computed
+  get fieldIntersectionsF(): FieldIntersection[] | undefined {
+    return this.fieldIntersections?.map((intersection) => {
+      return new FieldIntersection({
+        type: intersection.type,
+        position: intersection.position.applyMatrix4(this.Hfw),
+      });
+    });
   }
 }

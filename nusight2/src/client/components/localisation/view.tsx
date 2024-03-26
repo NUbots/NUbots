@@ -70,6 +70,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleBallVisibility={this.toggleBallVisibility}
           toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
         ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -148,6 +149,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   private toggleFieldLinePointsVisibility = () => {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
   };
+
+  private toggleFieldIntersectionsVisibility = () => {
+    this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
@@ -162,6 +167,7 @@ interface LocalisationMenuBarProps {
   toggleBallVisibility(): void;
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
+  toggleFieldIntersectionsVisibility(): void;
 }
 
 const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
@@ -198,6 +204,11 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
           onClick={props.toggleFieldLinePointsVisibility}
+        />
+        <MenuItem
+          label="Field Intersections"
+          isVisible={model.fieldIntersectionsVisible}
+          onClick={props.toggleFieldIntersectionsVisibility}
         />
       </ul>
     </Menu>
@@ -254,6 +265,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         })}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
+      {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.goalVisible && <Goals model={model} />}
     </object3D>
   );
@@ -278,6 +290,87 @@ const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
     )}
   </>
 );
+
+const FieldIntersections = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible && (
+            <object3D key={robot.id}>
+              {robot.fieldIntersectionsF?.map((intersection) => {
+                const createShapeForIntersection = (intersectionType: string, position: Vector3) => {
+                  const basePosition = position.add(new Vector3(0.1, 0.1, 0)).toArray();
+                  switch (intersectionType) {
+                    case "L_INTERSECTION":
+                      return (
+                        <>
+                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
+                            <circleBufferGeometry args={[0.04, 20]} />
+                            <meshBasicMaterial color="red" />
+                          </mesh>
+                          <mesh position={[basePosition[0], basePosition[1] - 0.05, basePosition[2]]}>
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                          <mesh position={[basePosition[0] - 0.04, basePosition[1], basePosition[2]]}>
+                            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                        </>
+                      );
+                    case "T_INTERSECTION":
+                      return (
+                        <>
+                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
+                            <circleBufferGeometry args={[0.04, 20]} />
+                            <meshBasicMaterial color="red" />
+                          </mesh>
+                          <mesh position={[basePosition[0], basePosition[1] + 0.05, basePosition[2]]}>
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                          <mesh position={[basePosition[0], basePosition[1], basePosition[2]]}>
+                            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                        </>
+                      );
+                    case "X_INTERSECTION":
+                      return (
+                        <>
+                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
+                            <circleBufferGeometry args={[0.04, 20]} />
+                            <meshBasicMaterial color="red" />
+                          </mesh>
+                          <mesh
+                            position={[basePosition[0], basePosition[1], basePosition[2]]}
+                            rotation={[0, 0, Math.PI / 4]}
+                          >
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                          <mesh
+                            position={[basePosition[0], basePosition[1], basePosition[2]]}
+                            rotation={[0, 0, -Math.PI / 4]}
+                          >
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                        </>
+                      );
+                    default:
+                      return null;
+                  }
+                };
+                return createShapeForIntersection(intersection.type, intersection.position);
+              })}
+            </object3D>
+          ),
+      )}
+    </>
+  );
+};
 
 const Balls = ({ model }: { model: LocalisationModel }) => (
   <>

@@ -4,6 +4,7 @@ import { CameraViewModel } from "../../camera/view_model";
 import { VisionRobotModel } from "../model";
 
 import { BallsViewModel } from "./balls";
+import { BoundingBoxesViewModel } from "./bounding_boxes";
 import { GoalsViewModel } from "./goals";
 import { GreenHorizonViewModel } from "./green_horizon";
 import { VisionCameraModel } from "./model";
@@ -27,6 +28,7 @@ export class VisionCameraViewModel extends CameraViewModel {
       drawOptions.drawBalls && this.balls?.balls(),
       drawOptions.drawGoals && this.goals?.goals(),
       drawOptions.drawRobots && this.robots?.robots(),
+      drawOptions.drawBoundingBoxes && this.boundingBoxes?.boundingBoxes(),
     ];
   };
 
@@ -60,6 +62,20 @@ export class VisionCameraViewModel extends CameraViewModel {
     return (
       this.model.robots &&
       OtherRobotsViewModel.of(this.model.robots, this.model.params, this.canvas, this.imageAspectRatio)
+    );
+  }
+
+  @computed
+  private get boundingBoxes(): BoundingBoxesViewModel | undefined {
+    return (
+      this.model.boundingBoxes &&
+      BoundingBoxesViewModel.of(
+        this.model.boundingBoxes,
+        this.model.params,
+        this.canvas,
+        this.imageAspectRatio,
+        this.model.image,
+      )
     );
   }
 
