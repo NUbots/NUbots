@@ -340,6 +340,8 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+RUN install-package lame
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -400,7 +402,7 @@ RUN chmod 440 /etc/sudoers.d/user
 ARG user_uid=1000
 ARG user_gid=$user_uid
 RUN groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid $user_gid -m nubots
+    && useradd --uid $user_uid --gid $user_gid -G audio -m nubots
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user
