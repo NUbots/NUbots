@@ -30,6 +30,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/Limbs.hpp"
+#include "message/input/Buttons.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/skill/Script.hpp"
@@ -40,7 +41,7 @@ namespace module::purpose {
     using extension::behaviour::Task;
 
     using message::actuation::BodySequence;
-    using message::platform::ButtonMiddleDown;
+    using message::input::ButtonMiddleDown;
     using NUClear::message::CommandLineArguments;
 
     using utility::skill::load_script;

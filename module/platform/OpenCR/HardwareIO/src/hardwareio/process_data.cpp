@@ -29,12 +29,14 @@
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
+#include "message/input/Buttons.hpp"
 #include "message/output/Buzzer.hpp"
 
 #include "utility/math/comparison.hpp"
 
 namespace module::platform::OpenCR {
 
+    using message::input::ButtonLeftDown;
     using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;

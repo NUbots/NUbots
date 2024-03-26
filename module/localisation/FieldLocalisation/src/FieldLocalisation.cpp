@@ -31,6 +31,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/input/Buttons.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/output/Buzzer.hpp"
+#include "message/support/FieldDescription.hpp"
 
 namespace module::localisation {
 
@@ -39,8 +43,16 @@ namespace module::localisation {
     using message::behaviour::state::Stability;
     using message::localisation::Field;
     using message::localisation::ResetFieldLocalisation;
+    using message::support::FieldDescription;
     using message::vision::FieldLines;
 
+    using message::input::ButtonLeftDown;
+    using message::input::ButtonLeftUp;
+    using message::localisation::ResetFieldLocalisation;
+    using message::output::Buzzer;
+
+    using utility::math::stats::MultivariateNormal;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     using namespace std::chrono;
@@ -60,6 +72,7 @@ namespace module::localisation {
             cfg.start_time_delay                = config["start_time_delay"].as<double>();
             filter.model.process_noise_diagonal = config["process_noise"].as<Expression>();
             filter.model.n_particles            = config["n_particles"].as<int>();
+            cfg.buzzer.localisation_reset_frequency = config["buzzer"]["localisation_reset_frequency"].as<float>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -98,7 +111,20 @@ namespace module::localisation {
             startup_time          = NUClear::clock::now();
         });
 
-        on<Trigger<ResetFieldLocalisation>>().then([this] { filter.set_state(cfg.initial_hypotheses); });
+        // When the left (black) button is pressed, reset localisation and ring the buzzer after
+        on<Trigger<ButtonLeftDown>>().then([this]() {
+            // Reset localisation and ring the buzzer
+            emit(std::make_unique<ResetFieldLocalisation>());
+            emit(std::make_unique<Buzzer>(cfg.buzzer.localisation_reset_frequency));
+        });
+
+        // Silence the buzzer after the user lets go of the left (black) pin
+        on<Trigger<ButtonLeftUp>>().then([this]() { emit(std::make_unique<Buzzer>(0)); });
+
+        on<Trigger<ResetFieldLocalisation>>().then([this] {
+            filter.set_state(cfg.initial_hypotheses);
+            log<NUClear::WARN>("Field localisation reset completed.");
+        });
 
         on<Trigger<FieldLines>, With<Stability>>().then(
             "Particle Filter",

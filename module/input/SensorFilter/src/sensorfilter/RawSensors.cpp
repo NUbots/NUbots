@@ -29,16 +29,18 @@
 
 #include "SensorFilter.hpp"
 
+#include "message/input/Buttons.hpp"
+
 namespace module::input {
 
     using utility::platform::getRawServo;
     using utility::platform::make_packet_error_string;
     using utility::platform::make_servo_hardware_error_string;
 
-    using message::platform::ButtonLeftDown;
-    using message::platform::ButtonLeftUp;
-    using message::platform::ButtonMiddleDown;
-    using message::platform::ButtonMiddleUp;
+    using message::input::ButtonLeftDown;
+    using message::input::ButtonLeftUp;
+    using message::input::ButtonMiddleDown;
+    using message::input::ButtonMiddleUp;
 
     void SensorFilter::update_raw_sensors(std::unique_ptr<Sensors>& sensors,
                                           const std::shared_ptr<const Sensors>& previous_sensors,

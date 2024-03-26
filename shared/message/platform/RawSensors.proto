@@ -186,13 +186,5 @@ message RawSensors {
     webots.OdometryGroundTruth odometry_ground_truth = 12;
 }
 
-message ButtonLeftDown {}
-
-message ButtonLeftUp {}
-
-message ButtonMiddleDown {}
-
-message ButtonMiddleUp {}
-
 // Reset sensors and servo targets in Webots
 message ResetWebotsServos {}
