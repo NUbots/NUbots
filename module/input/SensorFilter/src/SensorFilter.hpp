@@ -34,6 +34,8 @@
 #include <tinyrobotics/kinematics.hpp>
 #include <tinyrobotics/parser.hpp>
 
+#include "MotionModel.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/BodySide.hpp"
@@ -48,6 +50,7 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/filter/MahonyFilter.hpp"
+#include "utility/math/filter/UKF.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -159,6 +162,52 @@ namespace module::input {
             /// @brief Mahony filter integral gain
             double Kp = 0.0;
 
+            /// @brief Config for the UKF
+            struct UKF {
+                Eigen::Vector3d velocity_decay = Eigen::Vector3d::Zero();
+
+                struct Noise {
+                    Noise() = default;
+                    struct Measurement {
+                        Eigen::Matrix3d accelerometer           = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d accelerometer_magnitude = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d gyroscope               = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d flat_foot_translation   = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix4d flat_foot_orientation   = Eigen::Matrix4d::Zero();
+                    } measurement{};
+                    struct Process {
+                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
+                    } process{};
+                } noise{};
+                struct Initial {
+                    Initial() = default;
+                    struct Mean {
+                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
+                    } mean{};
+                    struct Covariance {
+                        Eigen::Vector3d position            = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity            = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation            = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotational_velocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscope_bias      = Eigen::Vector3d::Zero();
+                    } covariance{};
+                } initial{};
+            } ukf{};
+
+            /// @brief Initial state of the for the UKF filter
+            MotionModel<double>::StateVec initial_mean;
+
+            /// @brief Initial covariance of the for the UKF filter
+            MotionModel<double>::StateVec initial_covariance;
+
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
         } cfg;
@@ -168,6 +217,9 @@ namespace module::input {
 
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
+
+        /// @brief UKF filter for velocity estimation
+        utility::math::filter::UKF<double, MotionModel> ukf{};
 
         /// @brief Current support phase of the robot
         WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;

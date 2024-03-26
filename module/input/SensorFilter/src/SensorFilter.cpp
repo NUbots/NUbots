@@ -59,6 +59,63 @@ namespace module::input {
             bias_mahony = cfg.initial_bias;
             Hwt_mahony  = cfg.initial_Hwt;
 
+            // Configure the UKF
+            // Set our measurement noises
+            cfg.ukf.noise.measurement.accelerometer =
+                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer"].as<Expression>()).asDiagonal();
+            cfg.ukf.noise.measurement.accelerometer_magnitude =
+                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
+                    .asDiagonal();
+            cfg.ukf.noise.measurement.gyroscope =
+                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["gyroscope"].as<Expression>()).asDiagonal();
+            cfg.ukf.noise.measurement.flat_foot_translation =
+                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["flat_foot_translation"].as<Expression>())
+                    .asDiagonal();
+            cfg.ukf.noise.measurement.flat_foot_orientation =
+                Eigen::Vector4d(config["ukf"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>())
+                    .asDiagonal();
+
+            // Set our process noises
+            cfg.ukf.noise.process.position = config["ukf"]["noise"]["process"]["position"].as<Expression>();
+            cfg.ukf.noise.process.velocity = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
+            cfg.ukf.noise.process.rotation = config["ukf"]["noise"]["process"]["rotation"].as<Expression>();
+            cfg.ukf.noise.process.rotational_velocity =
+                config["ukf"]["noise"]["process"]["rotational_velocity"].as<Expression>();
+
+            // Set our motion model's process noise
+            MotionModel<double>::StateVec process_noise;
+            process_noise.rTWw      = cfg.ukf.noise.process.position;
+            process_noise.vTw       = cfg.ukf.noise.process.velocity;
+            process_noise.Rwt       = cfg.ukf.noise.process.rotation;
+            process_noise.omegaTTt  = cfg.ukf.noise.process.rotational_velocity;
+            ukf.model.process_noise = process_noise;
+
+            // Set our initial means
+            cfg.ukf.initial.mean.position = config["ukf"]["initial"]["mean"]["position"].as<Expression>();
+            cfg.ukf.initial.mean.velocity = config["ukf"]["initial"]["mean"]["velocity"].as<Expression>();
+            cfg.ukf.initial.mean.rotation = config["ukf"]["initial"]["mean"]["rotation"].as<Expression>();
+            cfg.ukf.initial.mean.rotational_velocity =
+                config["ukf"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
+
+            // Set out initial covariance
+            cfg.ukf.initial.covariance.position = config["ukf"]["initial"]["covariance"]["position"].as<Expression>();
+            cfg.ukf.initial.covariance.velocity = config["ukf"]["initial"]["covariance"]["velocity"].as<Expression>();
+            cfg.ukf.initial.covariance.rotation = config["ukf"]["initial"]["covariance"]["rotation"].as<Expression>();
+            cfg.ukf.initial.covariance.rotational_velocity =
+                config["ukf"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
+
+            // Set our initial state with the config means and covariances, flagging the filter to reset it
+            cfg.initial_mean.rTWw     = cfg.ukf.initial.mean.position;
+            cfg.initial_mean.vTw      = cfg.ukf.initial.mean.velocity;
+            cfg.initial_mean.Rwt      = cfg.ukf.initial.mean.rotation;
+            cfg.initial_mean.omegaTTt = cfg.ukf.initial.mean.rotational_velocity;
+
+            cfg.initial_covariance.rTWw     = cfg.ukf.initial.covariance.position;
+            cfg.initial_covariance.vTw      = cfg.ukf.initial.covariance.velocity;
+            cfg.initial_covariance.Rwt      = cfg.ukf.initial.covariance.rotation;
+            cfg.initial_covariance.omegaTTt = cfg.ukf.initial.covariance.rotational_velocity;
+            ukf.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
+
             // Initialise the anchor frame (left foot base)
             Hwa.translation().y() = forward_kinematics<double, n_servos>(nugus_model,
                                                                          nugus_model.home_configuration(),
@@ -357,6 +414,19 @@ namespace module::input {
             Hwr.linear()          = Eigen::AngleAxisd(rpy_anchor.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
             Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
             sensors->Hrw          = Hwr.inverse();
+
+            // UKF update for velocity
+            Eigen::Vector3d rTWw = Hwt.translation();
+            ukf.measure(rTWw,
+                        cfg.ukf.noise.measurement.flat_foot_translation,
+                        MeasurementType::FLAT_FOOT_TRANSLATION());
+            Eigen::Quaterniond Rwt(Hwt.linear());
+            ukf.measure(Rwt.coeffs(),
+                        cfg.ukf.noise.measurement.flat_foot_orientation,
+                        MeasurementType::FLAT_FOOT_ORIENTATION());
+            ukf.time(dt);
+            auto state   = MotionModel<double>::StateVec(ukf.get_state());
+            sensors->vTw = state.vTw;
         }
         else {
             // Construct world {w} to torso {t} space transform from ground truth
@@ -388,6 +458,7 @@ namespace module::input {
         Eigen::Vector3d est_Rwt  = mat_to_rpy_intrinsic(Hwt.rotation());
         emit(graph("Hwt est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
         emit(graph("Rwt est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
+        emit(graph("vTw est", sensors->vTw.x(), sensors->vTw.y(), sensors->vTw.z()));
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (raw_sensors.odometry_ground_truth.exists) {
