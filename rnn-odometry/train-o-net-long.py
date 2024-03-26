@@ -186,7 +186,7 @@ def main():
     sequence_length = system_sample_rate * 2    # Look back 3 seconds
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 1024                           # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 512                           # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -232,20 +232,30 @@ def main():
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Regulariser
-    regulariser = keras.regularizers.L2(0.01)
+    regulariser = keras.regularizers.L1L2(0.01)
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    lstm_out = keras.layers.LSTM(64, return_sequences=True)(inputs)    # 32 originally
+
+    lstm_out = keras.layers.LSTM(256, return_sequences=True)(inputs)    # 32 originally
     dropout = keras.layers.Dropout(0.2)(lstm_out)
-    lstm_out2 = keras.layers.LSTM(32, return_sequences=True)(dropout)
-    outputs = keras.layers.Dense(3, regulariser)(lstm_out2)   # Target shape[1] is 3
+
+    lstm_out2 = keras.layers.LSTM(128, return_sequences=True)(dropout)
+    dropout2 = keras.layers.Dropout(0.2)(lstm_out2)
+
+    lstm_out3 = keras.layers.LSTM(64, return_sequences=True)(dropout2)
+    dropout3 = keras.layers.Dropout(0.2)(lstm_out3)
+
+    lstm_out3 = keras.layers.LSTM(32, return_sequences=False)(dropout3)
+    dropout4 = keras.layers.Dropout(0.2)(lstm_out3)
+
+    outputs = keras.layers.Dense(3, regulariser)(dropout4)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss=loss_function)
     model.summary()
 
     model.fit(
-        train_dataset,
+        test_dataset,
         validation_data=validate_dataset,
         epochs=epochs,
         callbacks=[tensorboard_callback]
