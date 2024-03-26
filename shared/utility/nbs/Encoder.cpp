@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2021 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "Encoder.hpp"
 
 namespace utility::nbs {
@@ -11,15 +37,15 @@ namespace utility::nbs {
                        const uint64_t& message_timestamp,
                        const uint64_t& hash,
                        const uint32_t& id,
-                       const std::vector<char>& data) {
+                       const std::vector<uint8_t>& data) {
         // NBS File Format
-        // Name      | Type               |  Description
+        // Name      | Type                  |  Description
         // ------------------------------------------------------------
-        // header    | char[3]            | NBS packet header ☢ { 0xE2, 0x98, 0xA2 }
-        // length    | uint32_t           | Length of this packet after this value
-        // timestamp | uint64_t           | Timestamp the data was emitted in microseconds
-        // hash      | uint64_t           | the 64bit hash for the payload type
-        // payload   | char[length - 16]  | the data payload
+        // header    | char[3]               | NBS packet header ☢ { 0xE2, 0x98, 0xA2 }
+        // length    | uint32_t              | Length of this packet after this value
+        // timestamp | uint64_t              | Timestamp the data was emitted in microseconds
+        // hash      | uint64_t              | the 64bit hash for the payload type
+        // payload   | uint8_t[length - 16]  | the data payload
 
         // Convert the timestamp to a 64bit microsecond timestamp
         uint64_t timestamp_us =
@@ -44,7 +70,7 @@ namespace utility::nbs {
         output_file.write(reinterpret_cast<const char*>(&hash), sizeof(hash));
 
         // Write the actual packet data
-        output_file.write(data.data(), data.size());
+        output_file.write(reinterpret_cast<const char*>(data.data()), data.size());
         output_file.flush();
 
         // NBS Index File Format

@@ -73,7 +73,7 @@ mahony:
   # Mahony "Integral" Gain used to compute bias
   Ki: 0.3
   # Mahony Filter initial bias
-  bias: [0, 0, 0]
+  initial_bias: [0, 0, 0]
 
 # Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
 deadreckoning_scale: [1, 1, 0.6]
@@ -86,4 +86,4 @@ initial_rpy: [0, 0.3839, 0]
 # Specify which filtering method to use, either UKF, KF, MAHONY or GROUND_TRUTH
 filtering_method: MAHONY
 
-urdf_path: "models/nugus.urdf"
+urdf_path: "models/robot.urdf"
