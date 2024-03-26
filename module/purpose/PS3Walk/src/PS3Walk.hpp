@@ -73,7 +73,7 @@ namespace module::purpose {
         /// @brief Controls interactions with the PS3 controller
         Joystick joystick;
 
-        /// @brief Stores a vector describing the current direction to walk in. 
+        /// @brief Stores a vector describing the current direction to walk in.
         Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Stores whether the robot can move or not

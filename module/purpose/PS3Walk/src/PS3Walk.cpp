@@ -131,7 +131,6 @@ namespace module::purpose {
                             if (event.value > 0) {
                                 log<NUClear::INFO>("Do a dance move Dpad up");
                                 emit<Task>(load_script<LimbsSequence>("Clap.yaml"), 3);
-
                             }
                             break;
                         case BUTTON_DPAD_DOWN:
@@ -188,10 +187,8 @@ namespace module::purpose {
                                 emit<Task>(std::make_unique<Kick>(LimbID::RIGHT_LEG), 3);
                             }
                             break;
-                        case BUTTON_L2:
-                            break;
-                        case BUTTON_R2:
-                            break;
+                        case BUTTON_L2: break;
+                        case BUTTON_R2: break;
                     }
                 }
             }
@@ -213,7 +210,7 @@ namespace module::purpose {
             }
 
             if (moving) {
-                //walk command is set in the joystick event if the event type is axis
+                // walk command is set in the joystick event if the event type is axis
                 emit<Task>(std::make_unique<Walk>(walk_command.cast<double>()), 2);
             }
         });
