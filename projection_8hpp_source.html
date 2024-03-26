@@ -196,185 +196,241 @@ $(document).ready(function(){initNavTree('projection_8hpp_source.html',''); init
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="comment"> * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE</span></div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="comment"> * SOFTWARE.</span></div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="comment"> */</span></div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#ifndef UTILITY_VISION_PROJECTION_HPP</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#define UTILITY_VISION_PROJECTION_HPP</span></div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160; </div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="comment">// https://wiki.panotools.org/Fisheye_Projection</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &lt;Eigen/Core&gt;</span></div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;cmath&gt;</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="keyword">namespace </span>utility::vision {</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160; </div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    <span class="keyword">inline</span> T equidistant_theta(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> T&amp; f) {</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keywordflow">return</span> r / f;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    }</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160; </div>
-<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">inline</span> T equidistant_r(<span class="keyword">const</span> T&amp; theta, <span class="keyword">const</span> T&amp; f) {</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        <span class="keywordflow">return</span> f * theta;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    }</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160; </div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;    <span class="keyword">inline</span> T equisolid_theta(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> T&amp; f) {</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        <span class="keywordflow">return</span> T(2.0) * std::asin(r / (T(2.0) * f));</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    }</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160; </div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#ifndef UTILITY_VISION_PROJECTION_HPP</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#define UTILITY_VISION_PROJECTION_HPP</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment">// https://wiki.panotools.org/Fisheye_Projection</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160; </div>
+<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &lt;Eigen/Core&gt;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &lt;cmath&gt;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160; </div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;message/input/Image.hpp&quot;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="keyword">namespace </span>utility::vision {</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    <span class="keyword">namespace </span>equidistant {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keyword">inline</span> T r(<span class="keyword">const</span> T&amp; theta, <span class="keyword">const</span> T&amp; f) {</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;            <span class="keywordflow">return</span> f * theta;</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        }</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keyword">inline</span> T theta(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> T&amp; f) {</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;            <span class="keywordflow">return</span> r / f;</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        }</div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    }  <span class="comment">// namespace equidistant</span></div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160; </div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;    <span class="keyword">inline</span> T equisolid_r(<span class="keyword">const</span> T&amp; theta, <span class="keyword">const</span> T&amp; f) {</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keywordflow">return</span> T(2.0) * f * std::sin(theta * T(0.5));</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    }</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    <span class="keyword">inline</span> T rectilinear_theta(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> T&amp; f) {</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keywordflow">return</span> std::atan(r / f);</div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    }</div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keyword">inline</span> T rectilinear_r(<span class="keyword">const</span> T&amp; theta, <span class="keyword">const</span> T&amp; f) {</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keywordflow">return</span> f * std::tan(theta);</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    }</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;-ffast-math&quot;</span>))) T distort(const T&amp; r, const message::input::Image::Lens&amp; lens) {</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        <span class="comment">// Uses the math from the paper</span></div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="comment">// An Exact Formula for Calculating Inverse Radial Lens Distortions</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="comment">// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4934233/pdf/sensors-16-00807.pdf</span></div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160; </div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        <span class="comment">// Extract constants</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <span class="keyword">const</span> T&amp; k1 = lens.k[0];</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="keyword">const</span> T&amp; k2 = lens.k[1];</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        <span class="comment">// Compute powers</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;        <span class="keyword">const</span> T k1_2 = k1 * k1;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="keyword">const</span> T k1_3 = k1_2 * k1;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;        <span class="keyword">const</span> T k1_4 = k1_3 * k1;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        <span class="keyword">const</span> T k1_5 = k1_4 * k1;</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;        <span class="keyword">const</span> T k1_6 = k1_5 * k1;</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        <span class="keyword">const</span> T k1_7 = k1_6 * k1;</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keyword">const</span> T k1_8 = k1_7 * k1;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;        <span class="keyword">const</span> T k1_9 = k1_8 * k1;</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="keyword">const</span> T k2_2 = k2 * k2;</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        <span class="keyword">const</span> T k2_3 = k2_2 * k2;</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        <span class="keyword">const</span> T k2_4 = k2_3 * k2;</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160; </div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        <span class="comment">// These terms have been stripped back to only include k1 and k2</span></div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;        <span class="comment">// if more are needed in the future go and get them from the original paper</span></div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;        <span class="comment">// TODO(VisionTeam): if performance ever becomes an issue, this can be precomputed for the same k values</span></div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        <span class="comment">// clang-format off</span></div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <span class="keyword">const</span> T b1 = -k1;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="keyword">const</span> T b2 = 3.0*k1_2 - k2;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        <span class="keyword">const</span> T b3 = -12.0*k1_3 + 8.0*k1*k2;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        <span class="keyword">const</span> T b4 = 55.0*k1_4 - 55.0*k1_2*k2 + 5.0*k2_2;</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        <span class="keyword">const</span> T b5 = -273.0*k1_5 + 364.0*k1_3*k2 - 78.0*k1*k2_2;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;        <span class="keyword">const</span> T b6 = 1428.0*k1_6 - 2380.0*k1_4*k2 + 840.0*k1_2*k2_2 - 35.0*k2_3;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;        <span class="keyword">const</span> T b7 = -7752.0*k1_7 + 15504.0*k1_5*k2 - 7752.0*k1_3*k2_2 + 816.0*k1*k2_3;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;        <span class="keyword">const</span> T b8 = 43263.0*k1_8 - 100947.0*k1_6*k2 + 65835.0*k1_4*k2_2 - 11970.0*k1_2*k2_3 + 285.0*k2_4;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        <span class="keyword">const</span> T b9 = -246675.0*k1_9 + 657800.0*k1_7*k2 - 531300.0*k1_5*k2_2 + 141680.0*k1_3*k2_3 - 8855.0*k1*k2_4;</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        <span class="comment">// clang-format on</span></div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160; </div>
-<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        <span class="comment">// Perform the undistortion</span></div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        <span class="keyword">const</span> T r2  = r * r;</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;        <span class="keyword">const</span> T r4  = r2 * r2;</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;        <span class="keyword">const</span> T r8  = r4 * r4;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;        <span class="keyword">const</span> T r16 = r8 * r8;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;        <span class="keywordflow">return</span> r</div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;               * (1.0                  <span class="comment">//</span></div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                  + b1 * r2            <span class="comment">//</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                  + b2 * r4            <span class="comment">//</span></div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                  + b3 * r4 * r2       <span class="comment">//</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                  + b4 * r8            <span class="comment">//</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;                  + b5 * r8 * r2       <span class="comment">//</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;                  + b6 * r8 * r4       <span class="comment">//</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                  + b7 * r8 * r4 * r2  <span class="comment">//</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                  + b8 * r16           <span class="comment">//</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                  + b9 * r16 * r2      <span class="comment">//</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;               );</div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;    }</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160; </div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;    <span class="keyword">inline</span> T __attribute__((optimize(<span class="stringliteral">&quot;-ffast-math&quot;</span>))) undistort(const T&amp; r, const message::input::Image::Lens&amp; lens) {</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; k = lens.k;</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;        <span class="comment">// These parenthesis are important as they allow the compiler to optimise further</span></div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;        <span class="keywordflow">return</span> r * (1.0 + k[0] * (r * r) + k[1] * (r * r) * (r * r) + k[2] * (r * r) * (r * r) * (r * r));</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    }</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160; </div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">int</span> options, <span class="keywordtype">int</span> max_rows_at_compile_time, <span class="keywordtype">int</span> max_cols_at_compile_time&gt;</div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    Eigen::Matrix&lt;T, 2, 1&gt; project(</div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time&gt;&amp; ray,</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        <span class="keyword">const</span> message::input::Image::Lens&amp; lens,</div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;T, 2, 1&gt;&amp; dimensions) {</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
-<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;        <span class="comment">// Perform the projection math</span></div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;        <span class="keyword">const</span> T f         = lens.focal_length;</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;        <span class="keyword">const</span> T theta     = std::acos(ray.x());</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;        <span class="keyword">const</span> T sin_theta = std::sin(theta);</div>
-<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        T r_u;</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;        <span class="keywordflow">switch</span> (lens.projection.value) {</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;            <span class="keywordflow">case</span> message::input::Image::Lens::Projection::RECTILINEAR: r_u = rectilinear_r(theta, f); <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;            <span class="keywordflow">case</span> message::input::Image::Lens::Projection::EQUISOLID: r_u = equisolid_r(theta, f); <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;            <span class="keywordflow">case</span> message::input::Image::Lens::Projection::EQUIDISTANT: r_u = equidistant_r(theta, f); <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;            <span class="keywordflow">default</span>: <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Cannot project: Unknown lens type&quot;</span>); <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;        }</div>
-<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;        <span class="keyword">const</span> T r_d = distort(r_u, lens);</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160; </div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;        Eigen::Matrix&lt;T, 2, 1&gt; projected(r_d * ray.y() / sin_theta, r_d * ray.z() / sin_theta);</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160; </div>
-<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        <span class="comment">// Back to pixel coordinates</span></div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;        projected.x() = -projected.x() + dimensions.x() / 2;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;        projected.y() = projected.y() + dimensions.y() / 2;</div>
-<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;        <span class="keywordflow">return</span> projected;</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    }</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="comment"></span> </div>
-<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="comment">    /**</span></div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="comment">     * @brief Projects the pixel coordinates measured in coordinate system with origin in the centre of the image</span></div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="comment">     * where x is left and y is up. And projects to a coordinate system where x is forward, y is to the left and z</span></div>
-<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;<span class="comment">     * is up.</span></div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">     * @param px    the coordinates of the pixel measured as a fraction of the width</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="comment">     * @param f     the focal length measured as a ratio of the width of the image</span></div>
-<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;<span class="comment">     *</span></div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="comment">     * @return  the unit vector in the direction of this pixel</span></div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">int</span> options, <span class="keywordtype">int</span> max_rows_at_compile_time, <span class="keywordtype">int</span> max_cols_at_compile_time&gt;</div>
-<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    Eigen::Matrix&lt;T, 3, 1&gt; unproject(</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;T, 2, 1&gt;&amp; px,</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;        <span class="keyword">const</span> message::input::Image::Lens&amp; lens,</div>
-<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time&gt;&amp; dimensions) {</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160; </div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        <span class="comment">// Transform to centre of the screen:</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;        Eigen::Matrix&lt;T, 2, 1, options, max_rows_at_compile_time, max_cols_at_compile_time&gt; transformed_px = px;</div>
-<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        transformed_px.x() = -(px.x() - dimensions.x() / 2);</div>
-<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;        transformed_px.y() = px.y() - dimensions.y() / 2;</div>
-<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160; </div>
-<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;        <span class="comment">// Perform the unprojection math</span></div>
-<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        <span class="keyword">const</span> T f   = lens.focal_length;</div>
-<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        <span class="keyword">const</span> T r_d = transformed_px.norm();</div>
-<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        <span class="keyword">const</span> T r_u = undistort(r_d, lens);</div>
-<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;        T theta;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;    <span class="keyword">namespace </span>equisolid {</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">inline</span> T r(<span class="keyword">const</span> T&amp; theta, <span class="keyword">const</span> T&amp; f) {</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;            <span class="keywordflow">return</span> T(2.0) * f * std::sin(theta * T(0.5));</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;        }</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160; </div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keyword">inline</span> T theta(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> T&amp; f) {</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;            <span class="keywordflow">return</span> T(2.0) * std::asin(r / (T(2.0) * f));</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        }</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    }  <span class="comment">// namespace equisolid</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;    <span class="keyword">namespace </span>rectilinear {</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        <span class="keyword">inline</span> T r(<span class="keyword">const</span> T&amp; theta, <span class="keyword">const</span> T&amp; f) {</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;            <span class="keywordflow">return</span> f * std::tan(std::min(std::max(theta, T(0.0)), T(M_PI_2)));</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        }</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160; </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;        <span class="keyword">inline</span> T theta(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> T&amp; f) {</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;            <span class="keywordflow">return</span> std::atan(r / f);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        }</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    }  <span class="comment">// namespace rectilinear</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="comment">     * @brief Calculates polynomial coefficients that approximate the inverse distortion</span></div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">     * @details</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment">     *  These coefficients are based on math from the paper</span></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment">     *  An Exact Formula for Calculating Inverse Radial Lens Distortions</span></div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">     *  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4934233/pdf/sensors-16-00807.pdf</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">     *  These terms have been stripped back to only include k1 and k2 and only uses the first 4 terms</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment">     *  In general for most cases this provides an accuracy of around 0.2 pixels which is sufficient.</span></div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;<span class="comment">     *  If more accuracy is required in the future or more input parameters are used they can be adjusted here.</span></div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;<span class="comment">     * @tparam T the scalar type used for calculations and storage (normally one of float or double)</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="comment">     * @param lens  the paramters that describe the lens that we are using to project</span></div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;<span class="comment">     * @return the inverse coefficients that go from an undistorted image to a distorted one</span></div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Lens&gt;</div>
+<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix&lt;T, 4, 1&gt; inverse_coefficients(<span class="keyword">const</span> Lens&amp; lens) {</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; k = lens.k;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        <span class="keywordflow">return</span> Eigen::Matrix&lt;T, 4, 1&gt;(</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;            -k[0],</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;            T(3.0) * (k[0] * k[0]) - k[1],</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            T(-12.0) * (k[0] * k[0]) * k[0] + T(8.0) * k[0] * k[1],</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            T(55.0) * (k[0] * k[0]) * (k[0] * k[0]) - T(55.0) * (k[0] * k[0]) * k[1] + T(5.0) * (k[1] * k[1]));</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    }</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;<span class="comment">     * @brief Undistorts radial distortion using the provided distortion coefficients</span></div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;<span class="comment">     * @details</span></div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="comment">     *  Given a radial distance from the optical centre, this applies a polynomial distortion model in order to</span></div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="comment">     *  approximate an ideal lens. After the radial distance has gone through this function it will approximate the</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;<span class="comment">     *  equivilant radius in an ideal lens projection (depending on which base lens projection you are using).</span></div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;<span class="comment">     * @tparam T the scalar type used for calculations and storage (normally one of float or double)</span></div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="comment">     * @param r the radial distance from the optical centre</span></div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;<span class="comment">     * @param lens  the paramters that describe the lens that we are using to project</span></div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="comment">     * @return the undistorted radial distance from the optical centre</span></div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Lens&gt;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keyword">inline</span> T distort(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> Lens&amp; lens) {</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;        <span class="comment">// Uses the math from the paper</span></div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;        <span class="comment">// An Exact Formula for Calculating Inverse Radial Lens Distortions</span></div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;        <span class="comment">// https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4934233/pdf/sensors-16-00807.pdf</span></div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;        <span class="comment">// These terms have been stripped back to only include k1 and k2 and only uses the first 4 terms</span></div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;        <span class="comment">// if more are needed in the future go and get them from the original paper</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;        <span class="comment">// TODO(thouliston) if performance ever becomes an issue, this can be precomputed for the same k values</span></div>
+<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;T, 4, 1&gt; ik = inverse_coefficients&lt;T&gt;(lens);</div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;        <span class="keywordflow">return</span> r</div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;               * (1.0                                                  <span class="comment">//</span></div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;                  + ik[0] * (r * r)                                    <span class="comment">//</span></div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;                  + ik[1] * ((r * r) * (r * r))                        <span class="comment">//</span></div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;                  + ik[2] * ((r * r) * (r * r)) * (r * r)              <span class="comment">//</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;                  + ik[3] * ((r * r) * (r * r)) * ((r * r) * (r * r))  <span class="comment">//</span></div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;               );</div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;    }</div>
+<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;<span class="comment">     * @brief Undistorts radial distortion using the provided distortion coefficients</span></div>
+<div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;<span class="comment">     * @details</span></div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;<span class="comment">     *  Given a radial distance from the optical centre, this applies a polynomial distortion model in order to</span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;<span class="comment">     *  approximate an ideal lens. After the radial distance has gone through this function it will approximate the</span></div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;<span class="comment">     *  equivalent radius in an ideal lens projection (depending on which base lens projection you are using).</span></div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;<span class="comment">     * @tparam T the scalar type used for calculations and storage (normally one of float or double)</span></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="comment">     * @param r the radial distance from the optical centre</span></div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160;<span class="comment">     * @param lens  the paramters that describe the lens that we are using to project</span></div>
+<div class="line"><a name="l00148"></a><span class="lineno">  148</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;<span class="comment">     * @return the undistorted radial distance from the optical centre</span></div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Lens&gt;</div>
+<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;    <span class="keyword">inline</span> T undistort(<span class="keyword">const</span> T&amp; r, <span class="keyword">const</span> Lens&amp; lens) {</div>
+<div class="line"><a name="l00153"></a><span class="lineno">  153</span>&#160;        <span class="keyword">const</span> <span class="keyword">auto</span>&amp; k = lens.k;</div>
+<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;        <span class="comment">// These parenthesis are important as they allow the compiler to optimise further</span></div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;        <span class="keywordflow">return</span> r * (1.0 + k[0] * (r * r) + k[1] * (r * r) * (r * r));</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    }</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;<span class="comment">     * @brief Projects a unit vector into a pixel coordinate while working out which lens model to use via the lens</span></div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;<span class="comment">     *        parameters.</span></div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;<span class="comment">     * @details</span></div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;<span class="comment">     *  This function expects a unit vector in camera space. For this camera space is defined as a coordinate system</span></div>
+<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="comment">     *  with the x axis going down the viewing direction of the camera, y is to the left of the image, and z is up in</span></div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;<span class="comment">     *  the resulting image. The pixel coordinate that results will have (0,0) at the top left of the image, with x</span></div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;<span class="comment">     *  to the right and y down.</span></div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="comment">     * @tparam T the scalar type used for calculations and storage (normally one of float or double)</span></div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;<span class="comment">     * @param p     the unit vector to project</span></div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;<span class="comment">     * @param lens  the paramters that describe the lens that we are using to project</span></div>
+<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;<span class="comment">     * @return a pixel coordinate that this vector projects into</span></div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keywordtype">int</span> options, <span class="keywordtype">int</span> max_rows_at_compile_time, <span class="keywordtype">int</span> max_cols_at_compile_time, <span class="keyword">typename</span> Lens&gt;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    Eigen::Matrix&lt;T, 2, 1&gt; project(</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;T, 3, 1, options, max_rows_at_compile_time, max_cols_at_compile_time&gt;&amp; ray,</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;        <span class="keyword">const</span> Lens&amp; lens,</div>
+<div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;        <span class="keyword">const</span> Eigen::Matrix&lt;T, 2, 1&gt;&amp; dimensions) {</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160; </div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;        <span class="keyword">const</span> T f          = lens.focal_length;</div>
+<div class="line"><a name="l00182"></a><span class="lineno">  182</span>&#160;        <span class="keyword">const</span> T theta      = std::acos(ray.x());</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;        <span class="keyword">const</span> T rsin_theta = T(1) / std::sqrt(T(1) - ray.x() * ray.x());</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;        T r_u;</div>
 <div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;        <span class="keywordflow">switch</span> (lens.projection.value) {</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;            <span class="keywordflow">case</span> message::input::Image::Lens::Projection::RECTILINEAR: theta = rectilinear_theta(r_u, f); <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;            <span class="keywordflow">case</span> message::input::Image::Lens::Projection::EQUISOLID: theta = equisolid_theta(r_u, f); <span class="keywordflow">break</span>;</div>
-<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            <span class="keywordflow">case</span> message::input::Image::Lens::Projection::EQUIDISTANT: theta = equidistant_theta(r_u, f); <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;            <span class="keywordflow">case</span> Lens::Projection::RECTILINEAR: r_u = rectilinear::r(theta, f); <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;            <span class="keywordflow">case</span> Lens::Projection::EQUISOLID: r_u = equisolid::r(theta, f); <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00188"></a><span class="lineno">  188</span>&#160;            <span class="keywordflow">case</span> Lens::Projection::EQUIDISTANT: r_u = equidistant::r(theta, f); <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;            <span class="keywordflow">default</span>: <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Cannot project: Unknown lens type&quot;</span>); <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;        }</div>
-<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        <span class="keyword">const</span> T sin_theta = std::sin(theta);</div>
-<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160; </div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;        <span class="keywordflow">return</span> Eigen::Matrix&lt;T, 3, 1&gt;(std::cos(theta), sin_theta * px.x() / r_d, sin_theta * px.y() / r_d);</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;    }</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160; </div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;}  <span class="comment">// namespace utility::vision</span></div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160; </div>
-<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_VISION_PROJECTION_HPP</span></div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;        <span class="comment">// If the dimensions are not width-normalised then we need to normalise r_u and then un-normalise r_d</span></div>
+<div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;        <span class="keyword">const</span> T r_d = distort(r_u, lens);</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160; </div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        <span class="comment">// Work out our pixel coordinates as a 0 centred image with x to the left and y up (screen space)</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;        <span class="comment">// Sometimes x is greater than one due to floating point error, this almost certainly means that we are</span></div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;        <span class="comment">// facing directly forward</span></div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;        Eigen::Matrix&lt;T, 2, 1&gt; screen =</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;            ray.x() &gt;= T(1) ? Eigen::Matrix&lt;T, 2, 1&gt;::Zero()</div>
+<div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;                            : Eigen::Matrix&lt;T, 2, 1&gt;(r_d * ray.y() * rsin_theta, r_d * ray.z() * rsin_theta);</div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160; </div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;        <span class="comment">// Apply our offset to move into image space (0 at top left, x to the right, y down)</span></div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160;        <span class="comment">// Then apply the offset to the centre of our lens</span></div>
+<div class="line"><a name="l00203"></a><span class="lineno">  203</span>&#160;        <span class="keywordflow">return</span> (dimensions * T(0.5)) - screen - lens.centre.template cast&lt;T&gt;();</div>
+<div class="line"><a name="l00204"></a><span class="lineno">  204</span>&#160;    }</div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;<span class="comment">    /**</span></div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;<span class="comment">     * @brief Unprojects a pixel coordinate into a unit vector working out which lens model to use via the lens</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;<span class="comment">     * parameters.</span></div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;<span class="comment">     * @details</span></div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;<span class="comment">     *  This function expects a pixel coordinate having (0,0) at the top left of the image, with x to the right and</span></div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;<span class="comment">     *  y down. It will then convert this into a unit vector in camera space. For this camera space is defined as a</span></div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;<span class="comment">     *  coordinate system with the x axis going down the viewing direction of the camera, y is to the left of the</span></div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;<span class="comment">     *  image, and z is up.</span></div>
+<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;<span class="comment">     * @tparam T the scalar type used for calculations and storage (normally one of float or double)</span></div>
+<div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;<span class="comment">     * @param px         the pixel coordinate to unproject</span></div>
+<div class="line"><a name="l00219"></a><span class="lineno">  219</span>&#160;<span class="comment">     * @param lens       the parameters that describe the lens that we are using to unproject</span></div>
+<div class="line"><a name="l00220"></a><span class="lineno">  220</span>&#160;<span class="comment">     * @param dimensions the dimensions of the image</span></div>
+<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;<span class="comment">     *</span></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;<span class="comment">     * @return the unit vector that this pixel represents in camera space</span></div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;<span class="comment">     */</span></div>
+<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, <span class="keyword">typename</span> Lens&gt;</div>
+<div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    Eigen::Matrix&lt;T, 3, 1&gt; unproject(<span class="keyword">const</span> Eigen::Matrix&lt;T, 2, 1&gt;&amp; px,</div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;                                     <span class="keyword">const</span> Lens&amp; lens,</div>
+<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;                                     <span class="keyword">const</span> Eigen::Matrix&lt;T, 2, 1&gt;&amp; dimensions) {</div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160; </div>
+<div class="line"><a name="l00229"></a><span class="lineno">  229</span>&#160;        Eigen::Matrix&lt;T, 2, 1&gt; screen = (dimensions * T(0.5)) - px - lens.centre.template cast&lt;T&gt;();</div>
+<div class="line"><a name="l00230"></a><span class="lineno">  230</span>&#160; </div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;        <span class="comment">// Perform the unprojection math</span></div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;        <span class="keyword">const</span> T f   = lens.focal_length;</div>
+<div class="line"><a name="l00233"></a><span class="lineno">  233</span>&#160;        <span class="keyword">const</span> T r_d = screen.norm();</div>
+<div class="line"><a name="l00234"></a><span class="lineno">  234</span>&#160;        <span class="keywordflow">if</span> (r_d == T(0)) {</div>
+<div class="line"><a name="l00235"></a><span class="lineno">  235</span>&#160;            <span class="keywordflow">return</span> Eigen::Matrix&lt;T, 3, 1&gt;::UnitX();</div>
+<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;        }</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;        <span class="comment">// If the dimensions are not width-normalised then we need to normalise r_d and then un-normalise r_u</span></div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;        <span class="keyword">const</span> T r_u = undistort(r_d, lens);</div>
+<div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;        T theta;</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        <span class="keywordflow">switch</span> (lens.projection.value) {</div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;            <span class="keywordflow">case</span> Lens::Projection::RECTILINEAR: theta = rectilinear::theta(r_u, f); <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;            <span class="keywordflow">case</span> Lens::Projection::EQUISOLID: theta = equisolid::theta(r_u, f); <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;            <span class="keywordflow">case</span> Lens::Projection::EQUIDISTANT: theta = equidistant::theta(r_u, f); <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;            <span class="keywordflow">default</span>: <span class="keywordflow">throw</span> std::runtime_error(<span class="stringliteral">&quot;Cannot project: Unknown lens type&quot;</span>); <span class="keywordflow">break</span>;</div>
+<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;        }</div>
+<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160; </div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;        <span class="keyword">const</span> T sin_theta = std::sin(theta);</div>
+<div class="line"><a name="l00248"></a><span class="lineno">  248</span>&#160; </div>
+<div class="line"><a name="l00249"></a><span class="lineno">  249</span>&#160;        <span class="keywordflow">return</span> Eigen::Matrix&lt;T, 3, 1&gt;(std::cos(theta), sin_theta * screen.x() / r_d, sin_theta * screen.y() / r_d);</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;    }</div>
+<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160; </div>
+<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;}  <span class="comment">// namespace utility::vision</span></div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160; </div>
+<div class="line"><a name="l00254"></a><span class="lineno">  254</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_VISION_PROJECTION_HPP</span></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_0732c0f32685034b3208add2f1dba931.html">vision</a></li><li class="navelem"><b>projection.hpp</b></li>
-    <li class="footer">Generated on Tue Mar 26 2024 07:15:42 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Mar 26 2024 08:36:28 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
