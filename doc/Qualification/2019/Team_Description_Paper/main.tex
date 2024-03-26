@@ -37,7 +37,7 @@
         \and Peter Turner
         \and Taylor Young
         }
-
+       
 %
 \authorrunning{Amos et al.}   % abbreviated author list (for running head)
 %
@@ -73,30 +73,30 @@ The NUbots are the RoboCup team of the University of Newcastle, Australia. In 20
 \section{Introduction}
 For 16 years the Newcastle Robotics Laboratory has been hosting the NUbots robot soccer team as its central project. The NUbots previously competed at RoboCup in the Four-Legged League, the Standard Platform League and, until 2017, in the Kid-Size Humanoid League. In 2018, the NUbots debuted in the Teen-Size Humanoid League where they placed third. In 2019, the NUbots will be continuing their involvement in the Teen-Size Humanoid League.
 
-The goal of the 2019 NUbots team is to improve upon their 2018 performance with further modifications to their NUgus robot design and the software. The NUgus robot is based on the Igus-Nimbro design developed by the University of Bonn~\cite{allgeuer2016igus}.
+The goal of the 2019 NUbots team is to improve upon their 2018 performance with further modifications to their NUgus robot design and the software. The NUgus robot is based on the Igus-Nimbro design developed by the University of Bonn~\cite{allgeuer2016igus}. 
 
 The following sections describe research and history of the NUbots team. Some of the material, such as the history and previous research, was already covered by~\cite{AmosEtAl2018}.
 
 
 \section{Scientific Aspects of the NUbots team}
-
+ 
 The scientific aspects of the current NUbots system involve the implementation of deep learning on robots, software engineering for robotics and AI, and various aspects of computer vision, localisation, human-robot interaction and machine learning.
 
 \subsection{Current Research Projects in the Newcastle Robotics Lab}
 Some ome of the NUbots' current projects are listed below. Additional details on the NUbots research in the past 16 years can be found in~\cite{AmosEtAl2018} and on the NUbots homepage.\\
 
-\noindent\textbf{Stereo Visual Mesh:}
+\noindent\textbf{Stereo Visual Mesh:} 
 Recent work in the lab has resulted in the development of a high framerate obstacle detector, named The Visual Mesh~\cite{Houliston2018VisualMR}. The Visual Mesh, used in conjunction with deep learning, is capable of detecting a soccer ball in a $1280\times 1024$ image at framerates of up to $400$ fps on a humanoid robot, with little loss of accuracy when the ball is at distance. Current research being developed by a PhD student aims at increasing the detection capabilities of the Visual Mesh by considering multiple objects, distance, and stereo vision.\\
 
-\noindent\textbf{Localisation Techniques for Robotics:}
+\noindent\textbf{Localisation Techniques for Robotics:} 
 Another PhD research project is using fast Deep Learning algorithms to semantically label important navigational features to enhance visual SLAM implementations like ORB-SLAM \cite{mur2015orb}. Preliminary tests of ORB-SLAM have demonstrated that it is capable of running in real-time on our CPU while the NUgus is walking on the field, and is able to maintain tracking under the swaying and jarring motions of humanoid locomotion. The results of this testing will be presented at the AI2018 conference in New Zealand\footnote{AI 2018: \url{https://ecs.victoria.ac.nz/Events/AI2018/}}. We believe that ORB-SLAM will be able to provide localisation where visual odometry methods tested by NimbRo~\cite{Nimbro2018TDP} proved unsuitable.\\
 
-\noindent\textbf{Multi-Objective Evolutionary Algorithms for Walk Optimisation:}
-The NUbots walk engine and kick scripts were optimised by a Software Engineering Honours student using a Multi-Objective Evolutionary Algorithm (MOEA). The Gazebo simulation engine~\cite{koenig2004design} was used to allow rapid optimisation without causing undue wear and tear on the physical robots. A generic MOEA framework was implemented and utilised the Ignition Transport library\footnote{Ignition Web: \texttt{https://ignitionrobotics.org/libs/transport}} to communicate with the Gazebo simulation engine.
+\noindent\textbf{Multi-Objective Evolutionary Algorithms for Walk Optimisation:} 
+The NUbots walk engine and kick scripts were optimised by a Software Engineering Honours student using a Multi-Objective Evolutionary Algorithm (MOEA). The Gazebo simulation engine~\cite{koenig2004design} was used to allow rapid optimisation without causing undue wear and tear on the physical robots. A generic MOEA framework was implemented and utilised the Ignition Transport library\footnote{Ignition Web: \texttt{https://ignitionrobotics.org/libs/transport}} to communicate with the Gazebo simulation engine. 
 
 When tested on the robot, the resulting script doubled the kick distance, without the robot falling over afterwards. Moreover, the robot's torso sway during the kick process was decreased by 50\%. The MOEA framework was also tested on the walk engine, increasing the walk speed by 30\%, and its stability by 40\%. Further work on this system will improve the accuracy of the simulated servos as well as implementing more advanced learning techniques.\\
 
-\noindent\textbf{Semi-Synthetic Data Generation:}
+\noindent\textbf{Semi-Synthetic Data Generation:} 
 A Physics-Based Rendering (PBR) pipeline has been developed to generate semi-synthetic data for deep learning purposes as part of a PhD project. The PBR generation tool utilises $360^{\circ}$ High Dynamic Range (HDR) images to create realistic lighting for the constructed scene. Soccer balls, goals and the soccer field are synthetically generated, allowing the random placement of camera positions within the scene to create a large quantity of fully annotated semi-synthetic data.
 
 The pipeline is capable of exporting either mono or stereo raw images, segmentation images, and depth images. Currently, the NUbots team has over $1$ million stereo images with corresponding segmentation and depth ground truth images. An example output from the pipeline can be seen in Figure \ref{fig:pbrExample}.
@@ -110,7 +110,7 @@ The PBR tool facilitates easy adaptation to custom scenes. Particularly, this ha
     \label{fig:pbrExample}
 \end{figure}
 
-\noindent\textbf{Adaptive Foot Placement:}
+\noindent\textbf{Adaptive Foot Placement:} 
 A dynamic foot controller has been developed by a Mathematics undergraduate student to create a more stable walk engine for the robots. The new controller uses a vector field to dynamically keep the foot on the correct trajectory to the target. Figure \ref{fig:vec_field} shows an example of the vector field that is used to control the motion of the foot. A similar concept was used to develop a dynamic torso controller, which aims at keeping the robot's centre of mass above the robot's support polygon.\\
 
 \begin{figure}[h!]
@@ -120,12 +120,12 @@ A dynamic foot controller has been developed by a Mathematics undergraduate stud
     \label{fig:vec_field}
 \end{figure}
 
-\noindent\textbf{Advanced Subcontroller Design:}
+\noindent\textbf{Advanced Subcontroller Design:} 
 Based on comments from other teams at RoboCup 2018 and the NUbots own issues with the CM730 subcontroller, the NUbots have been developing a new subcontroller, dubbed the NUSense. The NUSense is designed to have individual communication busses for up to 6 limbs with individually fused power lines, a 4-cell battery monitor, 2 fan controllers (in case extra internal cooling is required), and a six-axis IMU. Figure \ref{fig:nusense} shows a rendering of the subcontroller PCB, with dimensions of $101.6\times 101.6\textrm{ mm}$. \\
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.80\linewidth]{NUSense3D.png}
+    \includegraphics[width=0.80\linewidth]{NUsense3D.png}
     \caption{3D render of the subcontroller PCB. Dynamixel servo connectors are along the bottom edge. The top edge has connectors for LEDs, buttons and fans. The left edge has power connections. In the center is the IMU with its $x$ and $y$ axes marked. On the inset right edge is the USB connection to a PC.}
     \label{fig:nusense}
 \end{figure}
@@ -163,7 +163,7 @@ A new Adaptive Script Tuner is being built in NUsight (a real-time diagnostic/vi
 The current NUbots team acknowledges the input of team members of previous years and other colleagues from the Newcastle Robotics Lab. Details are linked to  \texttt{www.robots.newcastle.edu.au}.
 
 \subsection{Related Research Concentrations}
-The \emph{Interdisciplinary Machine Learning Research Group (IMLRG)} investigates different aspects of machine learning and data mining in theory, experiments and applications. The IMLRG's research areas include: Dimensionality reduction, vision processing, robotics control and learning,  evolutionary computation, optimisation, reinforcement learning, kernel methods, and deep learning.
+The \emph{Interdisciplinary Machine Learning Research Group (IMLRG)} investigates different aspects of machine learning and data mining in theory, experiments and applications. The IMLRG's research areas include: Dimensionality reduction, vision processing, robotics control and learning,  evolutionary computation, optimisation, reinforcement learning, kernel methods, and deep learning. 
 
 \section{History of the NUbots and Prior Performance in RoboCup Competitions \cite{AmosEtAl2018}}
 The NUbots team competed in the Four-Legged-League from 2002-2007 using Sony AIBO ERS-210 and ERS-7 robots. The NUbots participated for the first time at RoboCup 2002 in Fukuoka in the Sony Four-Legged League (third place). At RoboCup 2006 in Bremen, Germany, the NUbots won the title.
