@@ -1,18 +1,25 @@
 #include "packet_handler.hpp"
 
+#include <iostream>
+
 namespace module::platform::NUSense {
 
     bool PacketHandler::handle() {
 
         rx_count += 1;
+        std::cout << "front: " << rx_buffer.front << std::endl;
+        std::cout << "back: " << rx_buffer.back << std::endl;
 
         // Check if we have a header and if we do extract our lengths and pb bytes
-        if ((rx_buffer.data[rx_buffer.front] == uint8_t(0xE2))
-            && (rx_buffer.data[(rx_buffer.front + 1) % RX_BUF_SIZE] == uint8_t(0x98))
-            && (rx_buffer.data[(rx_buffer.front + 2) % RX_BUF_SIZE] == uint8_t(0xA2))) {
+        if ((rx_buffer.data[rx_buffer.front] == 0xE2) && (rx_buffer.data[(rx_buffer.front + 1) % RX_BUF_SIZE] == 0x98)
+            && (rx_buffer.data[(rx_buffer.front + 2) % RX_BUF_SIZE] == 0xA2)) {
+
+            std::cout << "header found" << std::endl;
 
             pb_length = static_cast<uint16_t>(rx_buffer.data[(rx_buffer.front + 3) % RX_BUF_SIZE] << 8)
                         | static_cast<uint16_t>(rx_buffer.data[(rx_buffer.front + 4) % RX_BUF_SIZE]);
+
+            std::cout << "pb length: " << pb_length << std::endl;
 
             // If the overall packet, including the header, is smaller than
             // the current size of the buffer, then pop all of the payload.
@@ -28,29 +35,53 @@ namespace module::platform::NUSense {
                 pop((uint8_t*) pb_packets, rx_buffer.size - 5, 5);
             }
         }
-        else if ((remaining_length != 0) && (rx_buffer.size >= remaining_length)) {
+        else if ((remaining_length != 0) /*&& (rx_buffer.size >= remaining_length)*/) {
+
+            std::cout << "first else if " << std::endl;
             uint16_t old_size = pop((uint8_t*) &pb_packets[pb_length - remaining_length],
                                     remaining_length <= rx_buffer.size ? remaining_length : rx_buffer.size,
                                     0);
             remaining_length -= old_size;
-            if (remaining_length == 0)
+            if (remaining_length == 0) {
                 is_packet_ready = true;
+            }
         }
         else if (rx_buffer.size != 0) {
+            // std::cout << "rx_buffer size not 0" << std::endl;
             // Update index accessor after receiving a packet, making sure to wrap around
             // in case it exceeds the buffer's length
             rx_buffer.front = (rx_buffer.front + 1) % RX_BUF_SIZE;
             rx_buffer.size--;
         }
 
+        std::cout << "remaining length: " << remaining_length << std::endl;
+
+        if (rx_buffer.back >= 1200) {
+            for (size_t i = 0; i < rx_buffer.back; ++i) {
+                std::cout << "i: " << i << " elem: " << static_cast<int>(rx_buffer.data[i]) << "\n";
+            }
+        }
+
         if (is_packet_ready) {
             is_packet_ready = false;
-
+            std::cout << "packet ready" << std::endl;
             // Decoding time, deserialise the protocol buffer
             typename NUSense::protobuf_type pb;
-            bool stat       = pb.ParseFromArray(&pb_packets[0], pb_length);
-            NUSense nusense = pb;
+            bool stat = pb.ParseFromArray(&pb_packets[0], pb_length);
+            nusense   = pb;
 
+            // for (size_t i = 0; i < 2048; ++i) {
+            // std::cout << "i: " << i << " elem: " << static_cast<int>(rx_buffer.data[i]) << std::endl;
+            // }
+
+            std::cout << "pb length: " << pb_length << std::endl;
+
+            if (stat) {
+                std::cout << "parse success" << std::endl;
+            }
+            else {
+                std::cout << "parse fail" << std::endl;
+            }
             // Monitor the frequency of decodings and missing targets.
             // decode_count += 1;
             // if (targets.targets[0].id != near_id)

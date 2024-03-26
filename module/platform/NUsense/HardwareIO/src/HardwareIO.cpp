@@ -40,13 +40,17 @@ namespace module::platform::NUSense {
 
         // When we receive data back from NUSense, we handle it here
         on<IO>(nusense.native_handle(), IO::READ).then([this] {
-            // Read from NUSense
+            // log<NUClear::DEBUG>("In IO reaction");
+            // Read from NUsense
             uint32_t num_bytes = nusense.read(nusense_usb_bytes.data(), 512);
-
+            // log<NUClear::INFO>(fmt::format("num_bytes: {}", num_bytes));
             nusense_receiver.receive(num_bytes, nusense_usb_bytes.data());
+
+            // log<NUClear::INFO>(fmt::format("bytes received: {}", num_bytes));
 
             // If packet successfully decoded
             if (nusense_receiver.handle()) {
+
                 const auto& nusense_msg = nusense_receiver.get_nusense_message();
 
                 log<NUClear::DEBUG>(
