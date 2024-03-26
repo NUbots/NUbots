@@ -183,7 +183,8 @@ message RawSensors {
     FSRs     fsr           = 11;
 
     /// Ground truth from a simulator
-    webots.OdometryGroundTruth odometry_ground_truth = 12;
+    webots.OdometryGroundTruth     odometry_ground_truth     = 12;
+    webots.LocalisationGroundTruth localisation_ground_truth = 13;
 }
 
 message ButtonLeftDown {}
