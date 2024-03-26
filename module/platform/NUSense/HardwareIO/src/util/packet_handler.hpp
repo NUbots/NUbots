@@ -14,9 +14,9 @@
 
 #include "message/platform/NUSenseData.hpp"
 
-//#include "main.h" // for debugging on GPIO pins
+// #include "main.h" // for debugging on GPIO pins
 
-namespace module::platform::NUsense {
+namespace module::platform::NUSense {
 
     using message::platform::NUSense;
 
@@ -101,6 +101,6 @@ namespace module::platform::NUsense {
         uint16_t near_id;
     };
 
-}  // namespace module::platform::NUsense
+}  // namespace module::platform::NUSense
 
 #endif /* INC_COMMS_HPP_ */

@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-namespace module::platform::NUsense {
+namespace module::platform::NUSense {
 
     bool PacketHandler::handle() {
 
@@ -155,4 +155,4 @@ namespace module::platform::NUsense {
         return length;
     }
 
-}  // namespace module::platform::NUsense
+}  // namespace module::platform::NUSense

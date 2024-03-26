@@ -6,9 +6,12 @@
 
 #include "util/packet_handler.hpp"
 
-#include "utility/io/uart.hpp"
+#include "message/platform/RawSensors.hpp"
 
-namespace module::platform::NUsense {
+#include "utility/io/uart.hpp"
+#include "utility/platform/RawSensors.hpp"
+
+namespace module::platform::NUSense {
 
     class HardwareIO : public NUClear::Reactor {
 
@@ -32,6 +35,6 @@ namespace module::platform::NUsense {
         PacketHandler nusense_receiver;
     };
 
-}  // namespace module::platform::NUsense
+}  // namespace module::platform::NUSense
 
 #endif  // MODULE_PLATFORM_NUSENSE_HARDWAREIO_HPP

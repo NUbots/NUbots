@@ -9,12 +9,13 @@
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
 
-namespace module::platform::NUsense {
+namespace module::platform::NUSense {
 
     using extension::Configuration;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::platform::NUSense;
+    using message::platform::RawSensors;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), nusense() {
@@ -37,7 +38,7 @@ namespace module::platform::NUsense {
             }
         });
 
-        // When we receive data back from NUsense, we handle it here
+        // When we receive data back from NUSense, we handle it here
         on<IO>(nusense.native_handle(), IO::READ).then([this] {
             // log<NUClear::DEBUG>("In IO reaction");
             // Read from NUsense
@@ -82,7 +83,64 @@ namespace module::platform::NUsense {
                     log<NUClear::DEBUG>(fmt::format("  voltage: {}", val.voltage));
                     log<NUClear::DEBUG>(fmt::format("     temp: {}", val.temperature));
                 }
+
+                // emit the nusense msg to be captured by the reactino below.
+                emit<Scope::DIRECT>(std::make_unique<NUSense>(nusense_msg));
             }
+        });
+
+        // handle successfully decoded NUSense data
+        on<Trigger<NUSense>>().then([this](const NUSense& data) {
+            /* temp message to fill up */
+            RawSensors sensors;
+
+            /* Timestamp when this message was created because the incoming packet doesn't have a timestamp*/
+            sensors.timestamp = NUClear::clock::now();
+
+            /* Subcontroller data */
+            sensors.subcontroller_error = 0;  // not yet implemented
+            sensors.led_panel           = 0;  // not yet implemented
+            sensors.head_led            = 0;  // not yet implemented
+            sensors.eye_led             = 0;  // not yet implemented
+            sensors.buttons             = 0;  // not yet implemented
+
+            /* IMU */
+            sensors.accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
+            sensors.gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
+
+            /* Battery data */
+            sensors.battery = 0;  // not yet implemented
+
+            /* Servo data */
+            for (const auto& [key, val] : data.servo_map) {
+                // Get a reference to the servo we are populating
+                RawSensors::Servo& servo = utility::platform::getRawServo(val.id - 1, sensors);
+                // fill all servo values from the reference
+                servo.hardware_error        = val.hardware_error;
+                servo.torque_enabled        = val.torque_enabled;
+                servo.velocity_i_gain       = 0;  // not present in NUSense message
+                servo.velocity_p_gain       = 0;  // not present in NUSense message
+                servo.position_d_gain       = 0;  // not present in NUSense message
+                servo.position_i_gain       = 0;  // not present in NUSense message
+                servo.position_p_gain       = 0;  // not present in NUSense message
+                servo.feed_forward_1st_Gain = 0;  // not present in NUSense message
+                servo.feed_forward_2nd_Gain = 0;  // not present in NUSense message
+                servo.present_PWM           = val.present_pwm;
+                servo.present_current       = val.present_current;
+                servo.present_velocity      = val.present_velocity;
+                servo.present_position      = val.present_position;
+                servo.goal_PWM              = val.goal_pwm;
+                servo.goal_current          = val.goal_current;
+                servo.goal_velocity         = val.goal_velocity;
+                servo.goal_position         = val.goal_position;
+                servo.voltage               = val.voltage;
+                servo.temperature           = val.temperature;
+                servo.profile_acceleration  = 0;  // not present in NUSense message
+                servo.profile_velocity      = 0;  // not present in NUSense message
+            }
+
+            /* release to SensorFilter */
+            emit(std::make_unique<RawSensors>(sensors));
         });
 
 
@@ -131,4 +189,4 @@ namespace module::platform::NUsense {
         });
     }
 
-}  // namespace module::platform::NUsense
+}  // namespace module::platform::NUSense
