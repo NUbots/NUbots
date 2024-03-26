@@ -647,7 +647,7 @@
       gain: 6.63999987
       torque: 100
     - id: R_ANKLE_PITCH
-      position: -3.13768315
+      position: -0.514999986
       gain: 6.63999987
       torque: 100
     - id: L_ANKLE_PITCH
