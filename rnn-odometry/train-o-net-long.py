@@ -157,7 +157,6 @@ def main():
 
     # print dataset shapes
     print(f"input_data_train: {input_data_train.shape}")
-    print(f"input_data_train 2: {input_data_train.shape[1]}")
     print(f"input_targets_train: {input_targets_train.shape}")
     print(f"input_data_validate: {input_data_validate.shape}")
     print(f"input_targets_validate: {input_targets_validate.shape}")
@@ -218,7 +217,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00001   # Controls how much to change the model in response to error.
-    epochs = 300             #
+    epochs = 150             #
 
     # Loss functions
     loss_function = keras.losses.MeanAbsoluteError()
