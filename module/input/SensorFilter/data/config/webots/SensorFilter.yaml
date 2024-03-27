@@ -22,10 +22,10 @@ ukf:
   noise:
     measurement:
       # Covariance of a foot's translation measurement update
-      flat_foot_translation: [1e-12, 1e-12, 1e-12] # x, y, z
+      flat_foot_translation: [1e-12, 1e-13, 1e-12] # x, y, z
     process:
-      position: [1e-4, 1e-4, 1e-4]
-      velocity: [1e-1, 1e-1, 1e-1]
+      position: [1e-4, 1e-5, 1e-4]
+      velocity: [1e-1, 1e-4, 1e-1]
 
   initial:
     mean:

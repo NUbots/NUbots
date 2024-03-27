@@ -66,7 +66,7 @@ namespace module::input {
     using utility::math::filter::MahonyFilter;
     using utility::math::filter::UKF;
     using utility::nusight::graph;
-    using utility::platform::getRawServo;
+    using utility::platform::get_raw_servo;
     using utility::platform::make_packet_error_string;
     using utility::platform::make_servo_hardware_error_string;
     using utility::support::Expression;

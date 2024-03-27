@@ -146,7 +146,7 @@ namespace module::input {
 
         [[nodiscard]] Eigen::Matrix<Scalar, size, size> noise(const Scalar& deltaT) {
             // Return our process noise matrix
-            return process_noise.asDiagonal();  //* deltaT;
+            return process_noise.asDiagonal() * deltaT;
         }
     };
 }  // namespace module::input
