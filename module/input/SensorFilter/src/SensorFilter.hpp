@@ -63,7 +63,8 @@ namespace module::input {
     using utility::input::ServoID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::math::euler::rpy_intrinsic_to_mat;
-    using utility::math::filter::mahony_update;
+    using utility::math::filter::MahonyFilter;
+    using utility::math::filter::UKF;
     using utility::nusight::graph;
     using utility::platform::getRawServo;
     using utility::platform::make_packet_error_string;
@@ -80,6 +81,7 @@ namespace module::input {
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
 
+
     using tinyrobotics::forward_kinematics;
 
     class SensorFilter : public NUClear::Reactor {
@@ -87,71 +89,19 @@ namespace module::input {
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        struct FootDownMethod {
-            enum Value { UNKNOWN = 0, Z_HEIGHT = 1, FSR = 2 };
-            Value value = Value::UNKNOWN;
-
-            // Constructors
-            FootDownMethod() = default;
-            FootDownMethod(int const& v) : value(static_cast<Value>(v)) {}
-            FootDownMethod(Value const& v) : value(v) {}
-            FootDownMethod(std::string const& str) {
-                // clang-format off
-                        if      (str == "Z_HEIGHT") { value = Value::Z_HEIGHT; }
-                        else if (str == "FSR")  { value = Value::FSR; }
-                        else {
-                            value = Value::UNKNOWN;
-                            throw std::runtime_error("String " + str + " did not match any enum for FootDownMethod");
-                        }
-                // clang-format on
-            }
-
-            // Conversions
-            [[nodiscard]] operator Value() const {
-                return value;
-            }
-            [[nodiscard]] operator std::string() const {
-                switch (value) {
-                    case Value::Z_HEIGHT: return "Z_HEIGHT";
-                    case Value::FSR: return "FSR";
-                    default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
-                }
-            }
-        };
-
         struct Config {
-
             /// @brief Config for the foot down detector
             struct FootDown {
-                FootDown() = default;
-                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
-                    set_method(method, thresholds);
-                }
-                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
-                    if (thresholds.count(method) == 0) {
-                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", std::string(method)));
-                    }
-                    current_method       = method;
-                    certainty_thresholds = thresholds;
-                }
-                [[nodiscard]] float threshold() const {
-                    return certainty_thresholds.at(current_method);
-                }
-                [[nodiscard]] FootDownMethod method() const {
-                    return current_method;
-                }
-                FootDownMethod current_method                        = FootDownMethod::Z_HEIGHT;
-                std::map<FootDownMethod, float> certainty_thresholds = {
-                    {FootDownMethod::Z_HEIGHT, 0.01f},
-                    {FootDownMethod::FSR, 60.0f},
-                };
+                /// @brief The type of foot down detector to use (either "FSR" or "Z_HEIGHT")
+                std::string method = "UNKNOWN";
+                double threshold   = 0.0;
             } foot_down;
 
             /// @brief The number of times a button must be pressed before it is considered pressed
             int button_debounce_threshold = 0;
 
-            /// @brief Initial transform from torso {t} to world {w} space
-            Eigen::Isometry3d initial_Hwt = Eigen::Isometry3d::Identity();
+            /// @brief Initial rotation from torso {t} to world {w} space
+            Eigen::Matrix3d initial_Rwt = Eigen::Matrix3d::Identity();
 
             /// @brief Mahony filter bias
             Eigen::Vector3d initial_bias = Eigen::Vector3d::Zero();
@@ -212,20 +162,11 @@ namespace module::input {
         /// @brief Transform from anchor {a} to world {w} space
         Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
 
-        /// @brief Transform from torso {t} to anchor {a} space
-        Eigen::Isometry3d Hat = Eigen::Isometry3d::Identity();
-
-        /// @brief Transform from torso {t} to world {w} space using the mahony filter
-        Eigen::Isometry3d Hwt_mahony = Eigen::Isometry3d::Identity();
-
-        /// @brief Transform from torso {t} to world {w} space using mahony + anchor method
-        Eigen::Isometry3d Hwt_anchor = Eigen::Isometry3d::Identity();
+        /// @brief Mahony filter for orientation (roll and pitch) estimation
+        MahonyFilter<double> mahony_filter{};
 
         /// @brief Bias used in the mahony filter, updates with each mahony update
         Eigen::Vector3d bias_mahony = Eigen::Vector3d::Zero();
-
-        /// @brief Current walk command
-        Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
 
         /// @brief Current state of the left button
         bool left_down = false;

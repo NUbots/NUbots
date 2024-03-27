@@ -33,6 +33,7 @@ namespace module::input {
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
+
         on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -40,24 +41,19 @@ namespace module::input {
             cfg.button_debounce_threshold = config["buttons"]["debounce_threshold"].as<int>();
 
             // Foot down config
-            const FootDownMethod method = config["foot_down"]["method"].as<std::string>();
-            std::map<FootDownMethod, float> thresholds;
-            for (const auto& threshold : config["foot_down"]["known_methods"]) {
-                thresholds[threshold["name"].as<std::string>()] = threshold["certainty_threshold"].as<float>();
-            }
-            cfg.foot_down.set_method(method, thresholds);
+            cfg.foot_down.threshold = config["foot_down"]["threshold"].as<double>();
+            cfg.foot_down.method    = config["foot_down"]["method"].as<std::string>();
 
             // Import URDF model
             nugus_model = tinyrobotics::import_urdf<double, n_servos>(config["urdf_path"].as<std::string>());
 
             // Configure the Mahony filter
-            cfg.Ki           = config["mahony"]["Ki"].as<Expression>();
-            cfg.Kp           = config["mahony"]["Kp"].as<Expression>();
+            cfg.initial_Rwt  = rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>()));
             cfg.initial_bias = Eigen::Vector3d(config["mahony"]["initial_bias"].as<Expression>());
-            cfg.initial_Hwt.linear() =
-                rpy_intrinsic_to_mat(Eigen::Vector3d(config["mahony"]["initial_rpy"].as<Expression>()));
-            bias_mahony = cfg.initial_bias;
-            Hwt_mahony  = cfg.initial_Hwt;
+            mahony_filter    = MahonyFilter<double>(config["mahony"]["Kp"].as<Expression>(),
+                                                 config["mahony"]["Ki"].as<Expression>(),
+                                                 cfg.initial_bias,
+                                                 cfg.initial_Rwt);
 
             // Configure the UKF
             // Set our measurement noise
@@ -133,8 +129,7 @@ namespace module::input {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             // Reset the mahony filter
-            bias_mahony = cfg.initial_bias;
-            Hwt_mahony  = cfg.initial_Hwt;
+            mahony_filter.set_state(cfg.initial_Rwt);
 
             // Reset anchor frame
             Hwa                   = Eigen::Isometry3d::Identity();
@@ -168,29 +163,27 @@ namespace module::input {
         const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_ANKLE_ROLL]);
         const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
         const Eigen::Vector3d rRLl  = Hlr.translation();
-        switch (cfg.foot_down.method()) {
-            case FootDownMethod::Z_HEIGHT:
-                if (rRLl.z() < -cfg.foot_down.threshold()) {
-                    sensors->feet[BodySide::LEFT].down = false;
-                }
-                else if (rRLl.z() > cfg.foot_down.threshold()) {
-                    sensors->feet[BodySide::RIGHT].down = false;
-                }
-                break;
-            case FootDownMethod::FSR:
-                // Determine if any two diagonally opposite FSRs are in contact with the ground, which is either fsr1
-                // and fsr3, or fsr2 and fsr4. A FSR is in contact with the ground if its value is greater than the
-                // certainty threshold
-                sensors->feet[BodySide::LEFT].down = (raw_sensors.fsr.left.fsr1 > cfg.foot_down.threshold()
-                                                      && raw_sensors.fsr.left.fsr3 > cfg.foot_down.threshold())
-                                                     || (raw_sensors.fsr.left.fsr2 > cfg.foot_down.threshold()
-                                                         && raw_sensors.fsr.left.fsr4 > cfg.foot_down.threshold());
-                sensors->feet[BodySide::RIGHT].down = (raw_sensors.fsr.right.fsr1 > cfg.foot_down.threshold()
-                                                       && raw_sensors.fsr.right.fsr3 > cfg.foot_down.threshold())
-                                                      || (raw_sensors.fsr.right.fsr2 > cfg.foot_down.threshold()
-                                                          && raw_sensors.fsr.right.fsr4 > cfg.foot_down.threshold());
-                break;
-            default: log<NUClear::WARN>("Unknown foot down method"); break;
+
+        if (cfg.foot_down.method == "Z_HEIGHT") {
+            if (rRLl.z() < -cfg.foot_down.threshold) {
+                sensors->feet[BodySide::LEFT].down = false;
+            }
+            else if (rRLl.z() > cfg.foot_down.threshold) {
+                sensors->feet[BodySide::RIGHT].down = false;
+            }
+        }
+        else if (cfg.foot_down.method == "FSR") {
+            // Determine if any two diagonally opposite FSRs are in contact with the ground, which is either fsr1
+            // and fsr3, or fsr2 and fsr4. A FSR is in contact with the ground if its value is greater than the
+            // certainty threshold
+            auto is_foot_down = [](const auto& fsr, const double threshold) {
+                return (fsr.fsr1 > threshold && fsr.fsr3 > threshold) || (fsr.fsr2 > threshold && fsr.fsr4 > threshold);
+            };
+            sensors->feet[BodySide::LEFT].down  = is_foot_down(raw_sensors.fsr.left, cfg.foot_down.threshold);
+            sensors->feet[BodySide::RIGHT].down = is_foot_down(raw_sensors.fsr.right, cfg.foot_down.threshold);
+        }
+        else {
+            log<NUClear::WARN>("Unknown foot down method");
         }
     }
 
@@ -344,12 +337,10 @@ namespace module::input {
 
                 // Compute the new anchor frame (Hwa) (new support foot)
                 if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
-                    auto Hrl = sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
-                    Hwa      = Hwa * Hrl;
+                    Hwa = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
                 }
                 else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
-                    auto Hlr = sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
-                    Hwa      = Hwa * Hlr;
+                    Hwa = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
                 }
 
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
@@ -358,6 +349,7 @@ namespace module::input {
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
+            Eigen::Isometry3d Hat = Eigen::Isometry3d::Identity();
             if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
                 Hat = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
             }
@@ -366,16 +358,16 @@ namespace module::input {
             }
 
             // Perform Anchor Update (x, y, z, yaw)
-            Hwt_anchor                 = Hwa * Hat;
-            Eigen::Vector3d rpy_anchor = mat_to_rpy_intrinsic(Hwt_anchor.linear());
+            Eigen::Isometry3d Hwt_anchor = Hwa * Hat;
+            Eigen::Vector3d rpy_anchor   = mat_to_rpy_intrinsic(Hwt_anchor.linear());
 
             // Perform Mahony update (roll, pitch)
-            mahony_update(sensors->accelerometer, sensors->gyroscope, Hwt_mahony, dt, cfg.Ki, cfg.Kp, bias_mahony);
+            auto Rwt_mahony = mahony_filter.update(sensors->accelerometer, sensors->gyroscope, dt);
 
             // Convert the rotation matrices from anchor and mahony method into euler angles
-            Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Hwt_mahony.linear());
+            Eigen::Vector3d rpy_mahony = mat_to_rpy_intrinsic(Rwt_mahony);
             // Remove yaw from mahony filter (prevents it breaking after numerous rotations)
-            Hwt_mahony.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0));
+            mahony_filter.set_state(rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0)));
             // Construct world {w} to torso {t} space transform
             Eigen::Isometry3d Hwt = Eigen::Isometry3d::Identity();
             // Take the translation from the anchor method
@@ -420,9 +412,9 @@ namespace module::input {
             graph("Accelerometer", sensors->accelerometer.x(), sensors->accelerometer.y(), sensors->accelerometer.z()));
 
         // Foot down sensors state for each foot
-        emit(graph(fmt::format("Foot Down/{}/Left", std::string(cfg.foot_down.method())),
+        emit(graph(fmt::format("Foot Down/{}/Left", std::string(cfg.foot_down.method)),
                    sensors->feet[BodySide::LEFT].down));
-        emit(graph(fmt::format("Foot Down/{}/Right", std::string(cfg.foot_down.method())),
+        emit(graph(fmt::format("Foot Down/{}/Right", std::string(cfg.foot_down.method)),
                    sensors->feet[BodySide::RIGHT].down));
 
         // Odometry information
