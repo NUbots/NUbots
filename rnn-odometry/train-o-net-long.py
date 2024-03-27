@@ -183,7 +183,7 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 2    # Look back 3 seconds
+    sequence_length = system_sample_rate * 3   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
     batch_size = 512                           # Number of samples per gradient update (original: 64, seemed better?: 512)
@@ -216,7 +216,7 @@ def main():
     )
 
     # Model parameters
-    learning_rate = 0.00001   # Controls how much to change the model in response to error.
+    learning_rate = 0.01   # Controls how much to change the model in response to error.
     epochs = 150             #
 
     # Loss functions
@@ -226,6 +226,9 @@ def main():
     # loss_function = quantile_loss????
     # loss_function = keras.losses.Huber(delta=0.5)
 
+    # Optimizers
+    optimizer=keras.optimizers.Adam(learning_rate=learning_rate)
+    # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
 
     # Tensorboard
     log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -237,12 +240,12 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm_out = keras.layers.LSTM(256, return_sequences=True)(inputs)    # 32 originally
+    lstm_out = keras.layers.LSTM(128, return_sequences=True)(inputs)    # 32 originally
     lstm_out1 = keras.layers.LSTM(64, return_sequences=True)(lstm_out)
     lstm_out2 = keras.layers.LSTM(32, return_sequences=False)(lstm_out1)
     outputs = keras.layers.Dense(3)(lstm_out2)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
-    model.compile(optimizer=keras.optimizers.Adam(learning_rate=learning_rate), loss=loss_function)
+    model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
 
     model.fit(
