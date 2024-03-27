@@ -124,6 +124,9 @@ namespace module::localisation {
                     auto field(std::make_unique<Field>());
                     field->Hfw        = compute_Hfw(filter.get_state());
                     field->covariance = filter.get_covariance();
+                    if (log_level <= NUClear::DEBUG) {
+                        field->particles = filter.get_particles_as_vector();
+                    }
                     emit(field);
                 }
             });

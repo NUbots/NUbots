@@ -460,6 +460,18 @@ namespace utility::math::filter {
         }
 
         /**
+         * @brief Returns the underlying particle list as a vector.
+         */
+        [[nodiscard]] std::vector<Eigen::Matrix<Scalar, Model::size, 1>> get_particles_as_vector() const {
+            std::vector<Eigen::Matrix<Scalar, Model::size, 1>> vec;
+            vec.reserve(particles.cols());
+            for (int i = 0; i < particles.cols(); ++i) {
+                vec.emplace_back(particles.col(i));
+            }
+            return vec;
+        }
+
+        /**
          * @brief Returns the underlying particle weights.
          */
         [[nodiscard]] const ParticleWeights& get_particle_weights() const {
