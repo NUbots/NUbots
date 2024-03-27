@@ -53,7 +53,7 @@ namespace module::platform::OpenCR {
         /* Servos data */
         for (int i = 0; i < 20; i++) {
             // Get a reference to the servo we are populating
-            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
+            RawSensors::Servo& servo = utility::platform::get_raw_servo(i, sensors);
 
 
             // Booleans

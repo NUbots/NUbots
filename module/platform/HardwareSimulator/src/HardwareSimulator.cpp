@@ -125,7 +125,7 @@ namespace module::platform {
 
         for (int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
+            RawSensors::Servo& servo = utility::platform::get_raw_servo(i, sensors);
 
             // Error code
             servo.hardware_error = 0;
@@ -185,7 +185,7 @@ namespace module::platform {
                 }
 
                 for (int i = 0; i < 20; ++i) {
-                    auto& servo       = utility::platform::getRawServo(i, sensors);
+                    auto& servo       = utility::platform::get_raw_servo(i, sensors);
                     float movingSpeed = servo.profile_velocity == 0 ? 0.1 : servo.profile_velocity / UPDATE_FREQUENCY;
                     movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
@@ -230,7 +230,7 @@ namespace module::platform {
                 // Calculate our moving speed
                 float diff = utility::math::angle::difference(
                     command.position,
-                    utility::platform::getRawServo(command.id, sensors).present_position);
+                    utility::platform::get_raw_servo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed = 0.0f;
@@ -239,7 +239,7 @@ namespace module::platform {
                 }
 
                 // Set our variables
-                auto& servo            = utility::platform::getRawServo(command.id, sensors);
+                auto& servo            = utility::platform::get_raw_servo(command.id, sensors);
                 servo.profile_velocity = speed;
                 servo.goal_position    = utility::math::angle::normalizeAngle(command.position);
             }
