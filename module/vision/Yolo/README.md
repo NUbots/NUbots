@@ -17,6 +17,8 @@ Inference can be ran on either the CPU or GPU using OpenVino (https://github.com
 
 Include this module to detect balls, goals, robots and field line intersections in images.
 
+To run with GPU device in docker you need to include the following flags `./b run {binary} --gpus all`
+
 ## Consumes
 
 - `message::input::Image` the image to run the YOLO on.

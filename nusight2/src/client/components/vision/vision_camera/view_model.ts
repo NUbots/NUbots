@@ -64,11 +64,18 @@ export class VisionCameraViewModel extends CameraViewModel {
       OtherRobotsViewModel.of(this.model.robots, this.model.params, this.canvas, this.imageAspectRatio)
     );
   }
+
   @computed
   private get boundingBoxes(): BoundingBoxesViewModel | undefined {
     return (
       this.model.boundingBoxes &&
-      BoundingBoxesViewModel.of(this.model.boundingBoxes, this.model.params, this.canvas, this.imageAspectRatio)
+      BoundingBoxesViewModel.of(
+        this.model.boundingBoxes,
+        this.model.params,
+        this.canvas,
+        this.imageAspectRatio,
+        this.model.image,
+      )
     );
   }
 
