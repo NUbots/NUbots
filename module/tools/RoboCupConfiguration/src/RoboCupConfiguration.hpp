@@ -27,6 +27,7 @@
 #ifndef MODULE_TOOLS_ROBOCUPCONFIGURATION_HPP
 #define MODULE_TOOLS_ROBOCUPCONFIGURATION_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 #include <string>
 
@@ -34,10 +35,13 @@ namespace module::tools {
 
     class RoboCupConfiguration : public NUClear::Reactor {
     private:
-        std::string hostname   = "";
-        std::string ip_address = "";
-        int team_id            = 0;
-        int player_id          = 0;
+        std::string hostname           = "";
+        std::string ip_address         = "";
+        int team_id                    = 0;
+        int player_id                  = 0;
+        Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
+        std::string ssid               = "";
+        std::string password           = "";
 
         /// @brief Smart enum for the robot's position
         struct Position {
@@ -70,6 +74,11 @@ namespace module::tools {
             operator int() const {
                 return value;
             }
+
+            void operator++() {
+                value =
+                    value == Value::DEFENDER ? Value::STRIKER : (value == Value::STRIKER ? Value::GOALIE : DEFENDER);
+            }
         } robot_position;
 
         /// @brief The index of the item we are selecting
@@ -79,6 +88,11 @@ namespace module::tools {
         size_t column_selection = 0;
 
         void refresh_view();
+        void edit_selection();
+        void toggle_selection();
+        std::string user_input();
+        void configure();
+        std::string get_platform();
 
     public:
         /// @brief Called by the powerplant to build and setup the RoboCupConfiguration reactor.

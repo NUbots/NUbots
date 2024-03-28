@@ -26,6 +26,8 @@
  */
 #include "RoboCupConfiguration.hpp"
 
+#include <sstream>
+
 #include "extension/Configuration.hpp"
 
 extern "C" {
@@ -34,7 +36,6 @@ extern "C" {
 }
 
 #include "utility/support/hostname.hpp"
-
 
 namespace module::tools {
 
@@ -71,10 +72,10 @@ namespace module::tools {
             // Get the character the user has typed
             switch (getch()) {
                 case KEY_UP:  // Change row_selection up
-                    row_selection = column_selection ? (row_selection - 1) % 2 : (row_selection - 1) % 5;
+                    row_selection = row_selection != 0 ? row_selection - 1 : (column_selection ? 1 : 5);
                     break;
                 case KEY_DOWN:  // Change row_selection down
-                    row_selection = column_selection ? (row_selection + 1) % 2 : (row_selection + 1) % 5;
+                    row_selection = column_selection ? (row_selection + 1) % 2 : (row_selection + 1) % 6;
                     break;
                 case KEY_LEFT:  // Network config
                     column_selection = 0;
@@ -83,29 +84,24 @@ namespace module::tools {
                     column_selection = 1;
                     row_selection    = row_selection > 1 ? 1 : row_selection;
                     break;
-                // case ',':  // Move left a frame
-                //     activate_frame(frame == 0 ? frame : frame - 1);
-                //     break;
-                // case '.':  // Move right a frame
-                //     activate_frame(frame == script.frames.size() - 1 ? frame : frame + 1);
-                //     break;
-                // case '\n':       // Edit selected field
-                // case KEY_ENTER:  // Edit selected field
-                //     edit_row_selection();
-                //     break;
-                // case ' ':  // Toggle lock mode
-                //     toggle_lock_motor();
-                //     break;
-                // case 'R':  // updates visual changes
-                //     refresh_view();
-                //     break;
-                // // case 'M': mirror_script(); break;
-                // case 'G':  // allows multiple gains to be edited at once
-                //     // edit_gain();
-                //     break;
-                // case ':':  // lists commands
-                //     // help();
-                //     break;
+                case '\n':       // Edit selected field
+                case KEY_ENTER:  // Edit selected field
+                    try {
+                        edit_selection();
+                    }
+                    catch (...) {
+                        // if it didn't work, don't do anything
+                    }
+                    break;
+                case ' ':  // Toggles selection
+                    toggle_selection();
+                    break;
+                case 'R':  // updates visual changes
+                    refresh_view();
+                    break;
+                case 'C':  // configures files with the new values
+                    configure();
+                    break;
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
                     break;
@@ -114,6 +110,161 @@ namespace module::tools {
             // Update whatever visual changes we made
             refresh_view();
         });
+    }
+
+    void RoboCupConfiguration::configure() {
+        // Configure the game files
+        // Check if folder for this hostname exists
+        std::string game_folder = "";
+
+        if (std::filesystem::exists(fmt::format("config/{}/Soccer.yaml", hostname))) {
+            game_folder = fmt::format("config/{}/Soccer.yaml", hostname)
+        }
+        else if (std::filesystem::exists(fmt::format("config/{}/Soccer.yaml", get_platform()))) {
+
+            game_folder = fmt::format("config/{}/Soccer.yaml", get_platform());
+        }
+        else {
+            game_folder = "config/Soccer.yaml";
+        }
+
+        // Write to the yaml file
+        YAML::Node config  = YAML::LoadFile(folder);
+        config["position"] = std::string(robot_position);
+        std::ofstream file(folder);
+        file << config;
+        file.close();
+
+        // Configure the network files
+        // Check if we are on a robot
+        if (get_platform() != "nugus") {
+            log<NUClear::WARN>("Network configuration only available on NUgus robots.");
+            return;
+        }
+
+        // Get folder name
+        std::string folder = fmt::format("data/system/{}/etc/systemd/network", hostname);
+
+        // File 40-wifi-robocup.network rename to 30-wifi.network so it is used instead of the default
+        std::string old_file = fmt::format("{}/40-wifi-robocup.network", folder);
+        std::string new_file = fmt::format("{}/30-wifi.network", folder);
+        std::rename(old_file.c_str(), new_file.c_str());
+
+        // Change third component of ip_address with team_id and fourth component with player_id
+        std::stringstream ss(ip_address);
+        std::vector<std::string> ip_parts{};
+        std::string part;
+        while (std::getline(ss, part, '.')) {
+            ip_parts.push_back(part);
+        }
+        ip_address          = fmt::format("{}.{}.{}.{}", ip_parts[0], ip_parts[1], team_id, player_id);
+        std::string gateway = fmt::format("{}.{}.3.1", ip_parts[0], ip_parts[1]);
+
+        // Write the new ip address to the file
+        std::ofstream file(new_file);
+        file << "[Match]\nName=wlp0s20f3\n\n[Network]\nAddress=" << ip_address << "/16\nGateway=" << gateway
+             << "\nDNS=" << gateway << "\nDNS=8.8.8.8";
+        file.close();
+
+        // Configure the wpa_supplicant file
+        std::string wpa_supplicant_file = "data/system/default/etc/wpa_supplicant/wpa_supplicant-wlp0s20f3.conf";
+        std::ofstream wpa_file(wpa_supplicant_file);
+        wpa_file
+            << "ctrl_interface=/var/run/wpa_supplicant\nctrl_interface_group=wheel\nupdate_config=1\nfast_reauth=1 "
+            << "ap_scan = 1\n\nnetwork = "
+            << " { "
+            << "\n\tssid =\"" << ssid << "\"\n\tpsk=\"" << password << "\"\n\tpriority=1\n}";
+        wpa_file.close();
+    }
+    void RoboCupConfiguration::toggle_selection() {
+        // Networking configuration column
+        if (column_selection == 0) {
+            switch (row_selection) {
+                case 2:  // player_id
+                    player_id = player_id == 5 ? 1 : player_id + 1;
+                    break;
+                case 3:  // team_id
+                    team_id = team_id == 33 ? 1 : team_id + 1;
+                    break;
+            }
+            return;
+        }
+        // Game configuration column
+        if (row_selection == 0) {
+            ++robot_position;
+        }
+    }
+
+    void RoboCupConfiguration::edit_selection() {
+        // Networking configuration column
+        if (column_selection == 0) {
+            switch (row_selection) {
+                case 1:  // ip_address
+                    ip_address = user_input();
+                    break;
+                case 2:  // player_id
+                    player_id = std::stoi(user_input());
+                    break;
+                case 3:  // team_id
+                    team_id = std::stoi(user_input());
+                    break;
+                case 4:  // ssid
+                    ssid = user_input();
+                    break;
+                case 5:  // password
+                    password = user_input();
+                    break;
+            }
+            return;
+        }
+        // Game configuration column
+        switch (row_selection) {
+            case 0:  // robot_position
+                robot_position = user_input();
+                break;
+            case 1:  // ready position
+                std::stringstream ss(user_input());
+                ss >> ready_position.x() >> ready_position.y() >> ready_position.z();
+                break;
+        }
+    }
+
+    std::string RoboCupConfiguration::user_input() {
+        // Read characters until we see either esc or enter
+        std::stringstream chars;
+
+        // Keep reading until our termination case is reached
+        while (true) {
+            auto ch = getch();
+            switch (ch) {
+                case 27: return "";
+                case '\n':
+                case KEY_ENTER: return chars.str(); break;
+                default:
+                    chars << static_cast<char>(ch);
+                    addch(ch);
+                    break;
+            }
+        }
+    }
+
+    std::string RoboCupConfiguration::get_platform() {
+        // It is assumed that all hostnames are in the format <platform name><robot number>,
+        // such that the regular expression
+        // [a-z]+[0-9]+?
+        // will match all hostnames
+        std::regex re("([a-z]+)([0-9]+)?");
+        std::smatch match;
+
+        if (std::regex_match(hostname, match, re)) {
+            // match[0] will be the full string
+            // match[1] the first match (platform name)
+            // match[2] the second match (robot number)
+            return match[1].str();
+        }
+
+        // If platform cannot be found, return empty
+        return "";
     }
 
     void RoboCupConfiguration::refresh_view() {
@@ -132,20 +283,23 @@ namespace module::tools {
         mvprintw(2, 2, "Networking");
         attroff(A_ITALIC);
         mvprintw(3, 2, ("Hostname  : " + hostname).c_str());
-        mvprintw(5, 2, ("IP Address: " + ip_address).c_str());
-        mvprintw(4, 2, ("Player ID : " + std::to_string(player_id)).c_str());
-        mvprintw(5, 2, ("Team ID   : " + std::to_string(team_id)).c_str());
-        mvprintw(6, 2, ("SSID      : " + hostname).c_str());
-        mvprintw(7, 2, ("Password  : " + hostname).c_str());
+        mvprintw(4, 2, ("IP Address: " + ip_address).c_str());
+        mvprintw(5, 2, ("Player ID : " + std::to_string(player_id)).c_str());
+        mvprintw(6, 2, ("Team ID   : " + std::to_string(team_id)).c_str());
+        mvprintw(7, 2, ("SSID      : " + ssid).c_str());
+        mvprintw(8, 2, ("Password  : " + password).c_str());
 
         attron(A_ITALIC);
         mvprintw(2, 30, "Game Configuration");
         attroff(A_ITALIC);
         mvprintw(3, 30, ("Position: " + std::string(robot_position)).c_str());
-        mvprintw(4, 30, "Ready   : [1, 0, 0]");
+
+        std::stringstream ready_string{};
+        ready_string << ready_position.transpose();
+        mvprintw(4, 30, ("Ready   : " + ready_string.str()).c_str());
 
         // Highlight our selected point
-        mvchgat(row_selection + 3, 14 + (column_selection * 26), 6, A_STANDOUT, 0, nullptr);
+        mvchgat(row_selection + 3, 14 + (column_selection * 26), 8, A_STANDOUT, 0, nullptr);
 
 
         refresh();
