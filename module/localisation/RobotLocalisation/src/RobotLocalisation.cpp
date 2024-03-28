@@ -52,7 +52,7 @@ namespace module::localisation {
             // Print tracked_robots ids
             log<NUClear::DEBUG>("Robots tracked:");
             for (const auto& tracked_robot : tracked_robots) {
-                log<NUClear::DEBUG>("\t", tracked_robot.id);
+                log<NUClear::DEBUG>("\tID: ", tracked_robot.id);
             }
 
             // Set all tracked robots to unseen
