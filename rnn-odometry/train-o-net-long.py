@@ -78,16 +78,17 @@ def main():
     # import pdb
     # pdb.set_trace()
 
-    # Clip the IMU data to reduce spikes
+    # Clip the IMU data to reduce spikes - Putting this after normalisation
     # imu_clipped = np.clip(imu, -10, 10)
 
     # Plot and inspect
-    # num_channels = imu_clipped.shape[1]
+    # num_channels = imu.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(imu_clipped[200000:250000, i], label=f'Channel {i+1}')
+    #     plt.plot(imu[0:50000, i], label=f'Channel {i+1}')
     # # Add a legend
+    # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
     # plt.legend()
     # plt.show()
@@ -125,35 +126,44 @@ def main():
     # mean and std from the training run will need to be used in production for de-normalising the predictions.
     mean = train_arr.mean(axis=0)
     std = train_arr.std(axis=0)
+    print("mean: ", mean)
+    print("std: ", std)
 
     train_arr = (train_arr - mean) / std
     validate_arr = (validate_arr - mean) / std
     test_arr = (test_arr - mean) / std
 
     print(f"Training set size: {train_arr.shape}")
+    print("Training set min:", np.min(train_arr))
+    print("Training set max:", np.max(train_arr))
     print(f"Validation set size: {validate_arr.shape}")
     print(f"Test set size: {test_arr.shape}")
 
-    # Plot and inspect
+    # clip the outliers in the data
+    train_arr_clipped = np.clip(train_arr, -10, 10)
+    validate_arr_clipped = np.clip(validate_arr, -10, 10)
+    test_arr_clipped = np.clip(test_arr, -10, 10)
+
+    # Plot and inspect after normalising
     # num_channels = train_arr.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(train_arr[200000:250000, i], label=f'Channel {i+1}')
+    #     plt.plot(train_arr_clipped[100000:200000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
 
     # Split into data and targets
     # Training
-    input_data_train = train_arr[:, :26]  # imu and servos
-    input_targets_train = train_arr[:, 26:]  # truth
+    input_data_train = train_arr_clipped[:, :26]  # imu and servos
+    input_targets_train = train_arr_clipped[:, 26:]  # truth
     # Validation
-    input_data_validate = validate_arr[:, :26]  # imu and servos
-    input_targets_validate = validate_arr[:, 26:]  # truth
+    input_data_validate = validate_arr_clipped[:, :26]  # imu and servos
+    input_targets_validate = validate_arr_clipped[:, 26:]  # truth
     # Testing
-    input_data_test= test_arr[:, :26]  # imu and servos
-    input_targets_test = test_arr[:, 26:]  # truth
+    input_data_test= test_arr_clipped[:, :26]  # imu and servos
+    input_targets_test = test_arr_clipped[:, 26:]  # truth
 
     # print dataset shapes
     print(f"input_data_train: {input_data_train.shape}")
@@ -175,18 +185,18 @@ def main():
     # num_channels = input_data_train.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(input_data_train[200000:250000, i], label=f'Channel {i+1}')
+    # for i in range(6, 26):
+    #     plt.plot(input_data_train[100000:202280, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 3   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = system_sample_rate * 4   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 512                           # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 1000                           # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -216,7 +226,7 @@ def main():
     )
 
     # Model parameters
-    learning_rate = 0.01   # Controls how much to change the model in response to error.
+    learning_rate = 0.0003   # Controls how much to change the model in response to error.
     epochs = 150             #
 
     # Loss functions
@@ -231,7 +241,8 @@ def main():
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
 
     # Tensorboard
-    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = "logs/fit/" + timestamp
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Regulariser
@@ -240,9 +251,10 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm_out = keras.layers.LSTM(128, return_sequences=True)(inputs)    # 32 originally
-    lstm_out1 = keras.layers.LSTM(64, return_sequences=True)(lstm_out)
-    lstm_out2 = keras.layers.LSTM(32, return_sequences=False)(lstm_out1)
+    lstm_out = keras.layers.LSTM(64, return_sequences=True)(inputs)    # 32 originally
+
+    lstm_out2 = keras.layers.LSTM(26, return_sequences=False)(lstm_out)
+
     outputs = keras.layers.Dense(3)(lstm_out2)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
@@ -256,7 +268,7 @@ def main():
     )
 
     # Note add back the model save
-    model.save("models/model-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+    model.save("models/model-" + timestamp)
 
 
 if __name__ == "__main__":
