@@ -8,7 +8,7 @@ test_data = np.load('datasets/input_data_test.npy')
 test_targets = np.load('datasets/input_targets_test.npy')
 
 # Load model
-model = load_model('models/model-20240325-201855')
+model = load_model('models/model-20240328-202204')
 
 
 system_sample_rate = 115
@@ -31,8 +31,8 @@ predictions = model.predict(test_dataset)
 print('prediction shape:', predictions.shape)
 print('target shape:', test_targets.shape)
 # Plot and inspect
-# plt.figure(figsize=(10, 6))
-# plt.plot(predictions, 'r', label='Predictions')
-# plt.plot(test_targets, 'b', label='Targets')
-# plt.legend()
-# plt.show()
+plt.figure(figsize=(10, 6))
+plt.plot(predictions, 'r', label='Predictions')
+plt.plot(test_targets, 'b', label='Targets')
+plt.legend()
+plt.show()
