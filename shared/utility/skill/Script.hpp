@@ -37,7 +37,7 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 
 
 /**
@@ -112,7 +112,7 @@ namespace utility::skill {
     /// @throws Runtime error when the script doesn't exist.
     static YAML::Node load(const std::string& script) {
         // Set paths to the script files.
-        auto hostname      = utility::support::getHostname();
+        auto hostname      = utility::support::get_hostname();
         auto robot_path    = "scripts/" + hostname + "/" + script;
         auto platform_path = "scripts/" + get_platform(hostname) + "/" + script;
 

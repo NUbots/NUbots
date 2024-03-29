@@ -39,7 +39,7 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/strutil/strutil.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 #include "utility/support/yaml_log_level.hpp"
 
 namespace fs = ::std::filesystem;
@@ -304,7 +304,7 @@ namespace NUClear::dsl {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
-                const std::string hostname = utility::support::getHostname();
+                const std::string hostname = utility::support::get_hostname();
                 const std::string platform(::extension::Configuration::getPlatform(hostname));
 
                 // Check if there is a default config. If there isn't, try to make one
@@ -372,7 +372,7 @@ namespace NUClear::dsl {
                 }
 
                 // Get hostname, platform and binary name to check if this is not a default configuration file
-                const std::string hostname = utility::support::getHostname();
+                const std::string hostname = utility::support::get_hostname();
                 const std::string platform(::extension::Configuration::getPlatform(hostname));
                 const auto binaryName = get_first_command_line_arg();
 
@@ -420,7 +420,7 @@ namespace NUClear::dsl {
                 // Return our yaml file
                 try {
                     // Get hostname so we can find the correct per-robot config directory.
-                    const std::string hostname = utility::support::getHostname();
+                    const std::string hostname = utility::support::get_hostname();
                     const std::string platform(::extension::Configuration::getPlatform(hostname));
                     const auto binaryName = get_first_command_line_arg();
 
