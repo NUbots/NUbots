@@ -193,10 +193,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 4   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = system_sample_rate * 1   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 1000                           # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 200                           # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -226,7 +226,7 @@ def main():
     )
 
     # Model parameters
-    learning_rate = 0.0003   # Controls how much to change the model in response to error.
+    learning_rate = 0.00005   # Controls how much to change the model in response to error.
     epochs = 150             #
 
     # Loss functions
@@ -239,6 +239,11 @@ def main():
     # Optimizers
     optimizer=keras.optimizers.Adam(learning_rate=learning_rate)
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
+    # lr_schedule = keras.optimizers.schedules.ExponentialDecay(
+    #     initial_learning_rate=0.5,
+    #     decay_steps=10000,
+    #     decay_rate=0.0001)
+    # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule)
 
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -251,11 +256,9 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm_out = keras.layers.LSTM(64, return_sequences=True)(inputs)    # 32 originally
+    lstm_out = keras.layers.LSTM(120, return_sequences=False)(inputs)    # 32 originally
 
-    lstm_out2 = keras.layers.LSTM(26, return_sequences=False)(lstm_out)
-
-    outputs = keras.layers.Dense(3)(lstm_out2)   # Target shape[1] is 3
+    outputs = keras.layers.Dense(3)(lstm_out)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
