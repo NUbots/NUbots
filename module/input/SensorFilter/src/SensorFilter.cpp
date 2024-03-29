@@ -31,6 +31,27 @@ namespace module::input {
 
     using extension::Configuration;
 
+    using message::actuation::BodySide;
+    using message::localisation::ResetFieldLocalisation;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonLeftUp;
+    using message::platform::ButtonMiddleDown;
+    using message::platform::ButtonMiddleUp;
+
+    using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
+    using utility::actuation::tinyrobotics::sensors_to_configuration;
+    using utility::input::FrameID;
+    using utility::input::ServoID;
+    using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
+    using utility::nusight::graph;
+    using utility::platform::get_raw_servo;
+    using utility::platform::make_packet_error_string;
+    using utility::platform::make_servo_hardware_error_string;
+    using utility::support::Expression;
+
+    using tinyrobotics::forward_kinematics;
+
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
 
@@ -115,7 +136,7 @@ namespace module::input {
 
                 // Graph debug information
                 if (log_level <= NUClear::DEBUG) {
-                    debug_sensor_filter(sensors, raw_sensors);
+                    debug_sensor_filter(sensors, raw_sensors, walk_state);
                 }
 
                 emit(std::move(sensors));
@@ -405,7 +426,9 @@ namespace module::input {
         }
     }
 
-    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
+    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
+                                           const RawSensors& raw_sensors,
+                                           const std::shared_ptr<const WalkState>& walk_state) {
         // Raw accelerometer and gyroscope information
         emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
         emit(
@@ -416,6 +439,9 @@ namespace module::input {
                    sensors->feet[BodySide::LEFT].down));
         emit(graph(fmt::format("Foot Down/{}/Right", std::string(cfg.foot_down.method)),
                    sensors->feet[BodySide::RIGHT].down));
+
+        // Walk state information
+        emit(graph("Walk support phase", int(walk_state->support_phase)));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();

@@ -57,32 +57,13 @@
 
 namespace module::input {
 
-    using utility::actuation::tinyrobotics::forward_kinematics_to_servo_map;
-    using utility::actuation::tinyrobotics::sensors_to_configuration;
-    using utility::input::FrameID;
-    using utility::input::ServoID;
-    using utility::math::euler::mat_to_rpy_intrinsic;
-    using utility::math::euler::rpy_intrinsic_to_mat;
+
     using utility::math::filter::MahonyFilter;
     using utility::math::filter::UKF;
-    using utility::nusight::graph;
-    using utility::platform::get_raw_servo;
-    using utility::platform::make_packet_error_string;
-    using utility::platform::make_servo_hardware_error_string;
-    using utility::support::Expression;
 
-    using message::actuation::BodySide;
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
-    using message::localisation::ResetFieldLocalisation;
-    using message::platform::ButtonLeftDown;
-    using message::platform::ButtonLeftUp;
-    using message::platform::ButtonMiddleDown;
-    using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
-
-
-    using tinyrobotics::forward_kinematics;
 
     class SensorFilter : public NUClear::Reactor {
     public:
@@ -192,11 +173,6 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_kinematics(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
 
-        /// @brief Display debug information
-        /// @param sensors The sensors message to update
-        /// @param raw_sensors The raw sensor data
-        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
-
         /// @brief Updates the sensors message with odometry data filtered using MahonyFilter. This includes the
         // position, orientation, velocity and rotational velocity of the torso in world space.
         /// @param sensors The sensors message to update
@@ -206,6 +182,13 @@ namespace module::input {
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
                              const std::shared_ptr<const WalkState>& walk_state);
+
+        /// @brief Display debug information
+        /// @param sensors The sensors message to update
+        /// @param raw_sensors The raw sensor data
+        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
+                                 const RawSensors& raw_sensors,
+                                 const std::shared_ptr<const WalkState>& walk_state);
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP

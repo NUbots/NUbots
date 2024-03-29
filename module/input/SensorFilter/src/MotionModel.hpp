@@ -106,15 +106,15 @@ namespace module::input {
         // Our static process noise diagonal vector
         StateVec process_noise{};
 
-        [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar deltaT) const {
+        [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar dt) const {
 
             // Prepare our new state
-            StateVec newState(state);
+            StateVec new_state(state);
 
             // Add our velocity to our position
-            newState.rTWw += newState.vTw * deltaT;
+            new_state.rTWw += new_state.vTw * dt;
 
-            return newState;
+            return new_state;
         }
 
         [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(
@@ -144,9 +144,9 @@ namespace module::input {
             return state;
         }
 
-        [[nodiscard]] Eigen::Matrix<Scalar, size, size> noise(const Scalar& deltaT) {
+        [[nodiscard]] Eigen::Matrix<Scalar, size, size> noise(const Scalar& dt) {
             // Return our process noise matrix
-            return process_noise.asDiagonal() * deltaT;
+            return process_noise.asDiagonal() * dt;
         }
     };
 }  // namespace module::input
