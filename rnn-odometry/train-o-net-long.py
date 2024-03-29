@@ -140,9 +140,9 @@ def main():
     print(f"Test set size: {test_arr.shape}")
 
     # clip the outliers in the data
-    train_arr_clipped = np.clip(train_arr, -10, 10)
-    validate_arr_clipped = np.clip(validate_arr, -10, 10)
-    test_arr_clipped = np.clip(test_arr, -10, 10)
+    train_arr_clipped = np.clip(train_arr, -4, 4)
+    validate_arr_clipped = np.clip(validate_arr, -4, 4)
+    test_arr_clipped = np.clip(test_arr, -4, 4)
 
     # Plot and inspect after normalising
     # num_channels = train_arr.shape[1]
