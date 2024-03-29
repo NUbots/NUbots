@@ -47,7 +47,6 @@ namespace module::tools {
         on<Configuration>("RoboCupConfiguration.yaml").then([this](const Configuration& config) {
             // Use configuration here from file RoboCupConfiguration.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            hostname        = utility::support::getHostname();
         });
 
         on<Startup>().then([this] {
@@ -99,6 +98,9 @@ namespace module::tools {
                     break;
                 case 'R':  // updates visual changes
                     refresh_view();
+                    break;
+                case 'E':  // reset the values
+                    set_values();
                     break;
                 case 'C':  // configures files with the new values
                     configure();
@@ -303,25 +305,25 @@ namespace module::tools {
         attron(A_ITALIC);
         mvprintw(2, 2, "Networking");
         attroff(A_ITALIC);
-        mvprintw(4, 2, ("Hostname  : " + hostname).c_str());
+        mvprintw(4, 2, ("Hostname        : " + hostname).c_str());
         mvprintw(5, 2, ("Wifi Interface  : " + wifi_interface).c_str());
-        mvprintw(6, 2, ("IP Address: " + ip_address).c_str());
-        mvprintw(7, 2, ("Player ID : " + std::to_string(player_id)).c_str());
-        mvprintw(8, 2, ("Team ID   : " + std::to_string(team_id)).c_str());
-        mvprintw(9, 2, ("SSID      : " + ssid).c_str());
-        mvprintw(10, 2, ("Password  : " + password).c_str());
+        mvprintw(6, 2, ("IP Address      : " + ip_address).c_str());
+        mvprintw(7, 2, ("Player ID       : " + std::to_string(player_id)).c_str());
+        mvprintw(8, 2, ("Team ID         : " + std::to_string(team_id)).c_str());
+        mvprintw(9, 2, ("SSID            : " + ssid).c_str());
+        mvprintw(10, 2, ("Password        : " + password).c_str());
 
         attron(A_ITALIC);
-        mvprintw(3, 30, "Game Configuration");
+        mvprintw(2, 40, "Game Configuration");
         attroff(A_ITALIC);
-        mvprintw(4, 30, ("Position: " + std::string(robot_position)).c_str());
+        mvprintw(5, 40, ("Position: " + std::string(robot_position)).c_str());
 
         std::stringstream ready_string{};
         ready_string << ready_position.transpose();
-        mvprintw(4, 30, ("Ready   : " + ready_string.str()).c_str());
+        mvprintw(6, 40, ("Ready   : " + ready_string.str()).c_str());
 
         // Highlight our selected point
-        mvchgat(row_selection + 4, 14 + (column_selection * 26), 8, A_STANDOUT, 0, nullptr);
+        mvchgat(row_selection + 5, 20 + (column_selection * 30), 13, A_STANDOUT, 0, nullptr);
 
 
         refresh();
