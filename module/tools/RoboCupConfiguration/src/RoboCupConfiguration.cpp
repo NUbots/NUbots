@@ -35,7 +35,7 @@ extern "C" {
 #undef OK
 }
 
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 
 namespace module::tools {
 
@@ -62,6 +62,7 @@ namespace module::tools {
             // Hide the cursor
             curs_set(0);
 
+            set_values();
             refresh_view();
         });
         // When we shutdown end ncurses
@@ -112,26 +113,33 @@ namespace module::tools {
         });
     }
 
+    void RoboCupConfiguration::set_values() {
+        // Hostname
+        hostname = utility::support::get_hostname();
+
+        // Wifi interface
+        wifi_interface = utility::support::get_wireless_interface();
+
+        // IP Address
+        ip_address = utility::support::get_ip_address(wifi_interface);
+
+        // Team ID
+        YAML::Node global_config = YAML::LoadFile(get_config_file("GlobalConfig.yaml"));
+        team_id                  = global_config["team_id"].as<int>();
+        player_id                = global_config["player_id"].as<int>();
+    }
+
     void RoboCupConfiguration::configure() {
+        // For testing in docker lol
+        hostname = "nugus4";
+
         // Configure the game files
-        // Check if folder for this hostname exists
-        std::string game_folder = "";
-
-        if (std::filesystem::exists(fmt::format("config/{}/Soccer.yaml", hostname))) {
-            game_folder = fmt::format("config/{}/Soccer.yaml", hostname)
-        }
-        else if (std::filesystem::exists(fmt::format("config/{}/Soccer.yaml", get_platform()))) {
-
-            game_folder = fmt::format("config/{}/Soccer.yaml", get_platform());
-        }
-        else {
-            game_folder = "config/Soccer.yaml";
-        }
+        std::string soccer_file = get_config_file("Soccer.yaml");
 
         // Write to the yaml file
-        YAML::Node config  = YAML::LoadFile(folder);
+        YAML::Node config  = YAML::LoadFile(soccer_file);
         config["position"] = std::string(robot_position);
-        std::ofstream file(folder);
+        std::ofstream file(soccer_file);
         file << config;
         file.close();
 
@@ -143,7 +151,7 @@ namespace module::tools {
         }
 
         // Get folder name
-        std::string folder = fmt::format("data/system/{}/etc/systemd/network", hostname);
+        std::string folder = fmt::format("system/{}/etc/systemd/network", hostname);
 
         // File 40-wifi-robocup.network rename to 30-wifi.network so it is used instead of the default
         std::string old_file = fmt::format("{}/40-wifi-robocup.network", folder);
@@ -161,17 +169,17 @@ namespace module::tools {
         std::string gateway = fmt::format("{}.{}.3.1", ip_parts[0], ip_parts[1]);
 
         // Write the new ip address to the file
-        std::ofstream file(new_file);
-        file << "[Match]\nName=wlp0s20f3\n\n[Network]\nAddress=" << ip_address << "/16\nGateway=" << gateway
-             << "\nDNS=" << gateway << "\nDNS=8.8.8.8";
-        file.close();
+        std::ofstream n_file(new_file);
+        n_file << "[Match]\nName=wlp0s20f3\n\n[Network]\nAddress=" << ip_address << "/16\nGateway=" << gateway
+               << "\nDNS=" << gateway << "\nDNS=8.8.8.8";
+        n_file.close();
 
         // Configure the wpa_supplicant file
-        std::string wpa_supplicant_file = "data/system/default/etc/wpa_supplicant/wpa_supplicant-wlp0s20f3.conf";
+        std::string wpa_supplicant_file = "system/default/etc/wpa_supplicant/wpa_supplicant-wlp0s20f3.conf";
         std::ofstream wpa_file(wpa_supplicant_file);
         wpa_file
             << "ctrl_interface=/var/run/wpa_supplicant\nctrl_interface_group=wheel\nupdate_config=1\nfast_reauth=1 "
-            << "ap_scan = 1\n\nnetwork = "
+            << "\nap_scan = 1\n\nnetwork = "
             << " { "
             << "\n\tssid =\"" << ssid << "\"\n\tpsk=\"" << password << "\"\n\tpriority=1\n}";
         wpa_file.close();
@@ -199,6 +207,9 @@ namespace module::tools {
         // Networking configuration column
         if (column_selection == 0) {
             switch (row_selection) {
+                case 0:  // wifi interface
+                    wifi_interface = user_input();
+                    break;
                 case 1:  // ip_address
                     ip_address = user_input();
                     break;
@@ -267,6 +278,16 @@ namespace module::tools {
         return "";
     }
 
+    std::string RoboCupConfiguration::get_config_file(std::string filename) {
+        if (std::filesystem::exists(fmt::format("config/{}/{}", hostname, filename))) {
+            return fmt::format("config/{}/{}", hostname, filename);
+        }
+        if (std::filesystem::exists(fmt::format("config/{}/{}", get_platform(), filename))) {
+            return fmt::format("config/{}/{}", get_platform(), filename);
+        }
+        return "config/" + filename;
+    }
+
     void RoboCupConfiguration::refresh_view() {
         // Clear our window
         erase();
@@ -282,24 +303,25 @@ namespace module::tools {
         attron(A_ITALIC);
         mvprintw(2, 2, "Networking");
         attroff(A_ITALIC);
-        mvprintw(3, 2, ("Hostname  : " + hostname).c_str());
-        mvprintw(4, 2, ("IP Address: " + ip_address).c_str());
-        mvprintw(5, 2, ("Player ID : " + std::to_string(player_id)).c_str());
-        mvprintw(6, 2, ("Team ID   : " + std::to_string(team_id)).c_str());
-        mvprintw(7, 2, ("SSID      : " + ssid).c_str());
-        mvprintw(8, 2, ("Password  : " + password).c_str());
+        mvprintw(4, 2, ("Hostname  : " + hostname).c_str());
+        mvprintw(5, 2, ("Wifi Interface  : " + wifi_interface).c_str());
+        mvprintw(6, 2, ("IP Address: " + ip_address).c_str());
+        mvprintw(7, 2, ("Player ID : " + std::to_string(player_id)).c_str());
+        mvprintw(8, 2, ("Team ID   : " + std::to_string(team_id)).c_str());
+        mvprintw(9, 2, ("SSID      : " + ssid).c_str());
+        mvprintw(10, 2, ("Password  : " + password).c_str());
 
         attron(A_ITALIC);
-        mvprintw(2, 30, "Game Configuration");
+        mvprintw(3, 30, "Game Configuration");
         attroff(A_ITALIC);
-        mvprintw(3, 30, ("Position: " + std::string(robot_position)).c_str());
+        mvprintw(4, 30, ("Position: " + std::string(robot_position)).c_str());
 
         std::stringstream ready_string{};
         ready_string << ready_position.transpose();
         mvprintw(4, 30, ("Ready   : " + ready_string.str()).c_str());
 
         // Highlight our selected point
-        mvchgat(row_selection + 3, 14 + (column_selection * 26), 8, A_STANDOUT, 0, nullptr);
+        mvchgat(row_selection + 4, 14 + (column_selection * 26), 8, A_STANDOUT, 0, nullptr);
 
 
         refresh();

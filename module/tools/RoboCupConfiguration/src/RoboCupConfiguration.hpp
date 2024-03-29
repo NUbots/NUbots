@@ -36,12 +36,13 @@ namespace module::tools {
     class RoboCupConfiguration : public NUClear::Reactor {
     private:
         std::string hostname           = "";
+        std::string wifi_interface     = "";
         std::string ip_address         = "";
+        std::string ssid               = "";
+        std::string password           = "";
         int team_id                    = 0;
         int player_id                  = 0;
         Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
-        std::string ssid               = "";
-        std::string password           = "";
 
         /// @brief Smart enum for the robot's position
         struct Position {
@@ -64,9 +65,9 @@ namespace module::tools {
 
             operator std::string() const {
                 switch (value) {
-                    case Value::STRIKER: return "Striker";
-                    case Value::DEFENDER: return "Defender";
-                    case Value::GOALIE: return "Goalie";
+                    case Value::STRIKER: return "STRIKER";
+                    case Value::DEFENDER: return "DEFENDER";
+                    case Value::GOALIE: return "GOALIE";
                     default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
                 }
             }
@@ -91,8 +92,10 @@ namespace module::tools {
         void edit_selection();
         void toggle_selection();
         std::string user_input();
+        void set_values();
         void configure();
         std::string get_platform();
+        std::string get_config_file(std::string filename);
 
     public:
         /// @brief Called by the powerplant to build and setup the RoboCupConfiguration reactor.

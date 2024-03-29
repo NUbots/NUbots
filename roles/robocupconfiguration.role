@@ -4,7 +4,7 @@ nuclear_role(
   # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
   extension::FileWatcher # Watches configuration files for changes
   support::SignalCatcher # Allows for graceful shutdown
-  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  support::configuration::GlobalConfig
   # System configuration module
   tools::RoboCupConfiguration
 )
