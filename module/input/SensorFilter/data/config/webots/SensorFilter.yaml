@@ -7,7 +7,7 @@ foot_down:
   method: FSR # Foot sensor reading
   threshold: 1 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
 
-# Mahony filter for roll + Pitch
+# Mahony filter for roll + pitch
 mahony:
   # Proportional gain
   Kp: 1
