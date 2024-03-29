@@ -17,6 +17,7 @@ var classutility_1_1math_1_1filter_1_1ParticleFilter =
     [ "get_particle", "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a8fe2856373f573f2478849e32312c31f", null ],
     [ "get_particle_weights", "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a4700059d7e6f22196b2bde80566d70d7", null ],
     [ "get_particles", "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a810d5de8071b62ddb9477437d9ec0999", null ],
+    [ "get_particles_as_vector", "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a38144334248f1f5de0393a9faf7eda75", null ],
     [ "get_state", "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a7b5d5b95d4c7884dd6801bb8e981d43a", null ],
     [ "init", "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a9b2b5a5cc456afd2a7de365cd0c5fb9b", null ],
     [ "init", "classutility_1_1math_1_1filter_1_1ParticleFilter.html#aea8480fb9c6f0eff82cd1e007cae660b", null ],
