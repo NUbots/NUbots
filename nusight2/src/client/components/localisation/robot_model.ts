@@ -211,6 +211,7 @@ export class LocalisationRobotModel {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
   }
 
+  /** Goal positions in field space */
   @computed
   get rGFf(): { bottom: Vector3; top: Vector3 }[] {
     return this.goals?.points.map((pair) => ({
