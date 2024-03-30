@@ -34,7 +34,7 @@ const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
 // Ball texture obtained from https://katfetisov.wordpress.com/2014/08/08/freebies-football-textures/
 const textureLoader = new THREE.TextureLoader();
-const soccerBallTexture = textureLoader.load('/images/ball_texture.png');
+const soccerBallTexture = textureLoader.load("/images/ball_texture.png");
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
@@ -318,11 +318,7 @@ const Balls = ({ model }: { model: LocalisationModel }) => {
         (robot) =>
           robot.visible &&
           robot.rBFf && (
-            <mesh
-              position={robot.rBFf.toArray()}
-              scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]}
-              key={robot.id}
-            >
+            <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
               <sphereBufferGeometry args={[1, 32, 32]} /> {/* Increased detail for the texture */}
               <meshStandardMaterial map={soccerBallTexture} />
             </mesh>
