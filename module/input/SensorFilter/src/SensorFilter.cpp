@@ -409,8 +409,17 @@ namespace module::input {
                         cfg.ukf.noise.measurement.flat_foot_translation,
                         MeasurementType::FLAT_FOOT_TRANSLATION());
             ukf.time(dt);
-            auto state   = MotionModel<double>::StateVec(ukf.get_state());
-            sensors->vTw = state.vTw;
+            auto state = MotionModel<double>::StateVec(ukf.get_state());
+
+            // Low pass filter for y velocity
+            double y_prev    = Hwt.translation().y();
+            double y_current = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_prev;
+            double T_cutoff  = 0.01;
+            double alpha     = dt / T_cutoff;
+            double y_dot     = alpha * (y_prev - y_current) / dt + (1 - alpha) * sensors->vTw.y();
+
+            // Fuse the velocity estimates
+            sensors->vTw = Eigen::Vector3d(state.vTw.x(), y_dot, state.vTw.z());
         }
         else {
             // Construct world {w} to torso {t} space transform from ground truth
