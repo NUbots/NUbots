@@ -68,6 +68,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldVisibility={this.toggleFieldVisibility}
           toggleRobotVisibility={this.toggleRobotVisibility}
           toggleBallVisibility={this.toggleBallVisibility}
+          toggleParticleVisibility={this.toggleParticleVisibility}
           toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
         ></LocalisationMenuBar>
@@ -141,6 +142,10 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleBallVisibility(this.props.model);
   };
 
+  private toggleParticleVisibility = () => {
+    this.props.controller.toggleParticlesVisibility(this.props.model);
+  };
+
   private toggleGoalVisibility = () => {
     this.props.controller.toggleGoalVisibility(this.props.model);
   };
@@ -160,6 +165,7 @@ interface LocalisationMenuBarProps {
   toggleFieldVisibility(): void;
   toggleRobotVisibility(): void;
   toggleBallVisibility(): void;
+  toggleParticleVisibility(): void;
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
 }
@@ -193,6 +199,7 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
         <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
+        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
         <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
         <MenuItem
           label="Field Line Points"
@@ -254,6 +261,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         })}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
+      {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
     </object3D>
   );
@@ -270,6 +278,26 @@ const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
                 <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
                   <circleBufferGeometry args={[0.02, 20]} />
                   <meshBasicMaterial color="blue" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Particles = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible && (
+          <object3D key={robot.id}>
+            {robot.particles.particle.map((particle, i) => {
+              return (
+                <mesh key={String(i)} position={new Vector3(particle.x, particle.y, 0.005).toArray()}>
+                  <circleBufferGeometry args={[0.02, 20]} />
+                  <meshBasicMaterial color="red" />
                 </mesh>
               );
             })}
