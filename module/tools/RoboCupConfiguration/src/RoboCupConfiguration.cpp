@@ -36,6 +36,7 @@ extern "C" {
 }
 
 #include "utility/support/network.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::tools {
 
@@ -56,12 +57,13 @@ namespace module::tools {
             cbreak();
             // Capture arrows and function keys
             keypad(stdscr, true);
-            // Don't echo the users messages
+            // Don't echo the users log_messages
             noecho();
             // Hide the cursor
             curs_set(0);
 
-            set_values();
+            // Set the fields and show them
+            get_values();
             refresh_view();
         });
         // When we shutdown end ncurses
@@ -69,6 +71,8 @@ namespace module::tools {
 
         // Trigger when stdin has something to read
         on<IO>(STDIN_FILENO, IO::READ).then([this] {
+            log_message = "";
+
             // Get the character the user has typed
             switch (getch()) {
                 case KEY_UP:  // Change row_selection up
@@ -90,20 +94,25 @@ namespace module::tools {
                         edit_selection();
                     }
                     catch (...) {
-                        // if it didn't work, don't do anything
+                        log_message = "Warning: Invalid input!";
                     }
                     break;
                 case ' ':  // Toggles selection
                     toggle_selection();
                     break;
-                case 'R':  // updates visual changes
+                case 'F':  // updates visual changes
                     refresh_view();
+                    log_message = "The view has been refreshed.";
                     break;
-                case 'E':  // reset the values
-                    set_values();
+                case 'R':  // reset the values
+                    get_values();
+                    log_message = "Values have been reset.";
                     break;
                 case 'C':  // configures files with the new values
-                    configure();
+                    set_values();
+                    break;
+                case 'N':  // Apply any changes to the network settings
+                    configure_network();
                     break;
                 case 'X':  // shutdowns powerplant
                     powerplant.shutdown();
@@ -115,7 +124,7 @@ namespace module::tools {
         });
     }
 
-    void RoboCupConfiguration::set_values() {
+    void RoboCupConfiguration::get_values() {
         // Hostname
         hostname = utility::support::get_hostname();
 
@@ -129,63 +138,119 @@ namespace module::tools {
         YAML::Node global_config = YAML::LoadFile(get_config_file("GlobalConfig.yaml"));
         team_id                  = global_config["team_id"].as<int>();
         player_id                = global_config["player_id"].as<int>();
+
+        // SSID
+        ssid = utility::support::get_ssid(wifi_interface);
+
+        // Robot position
+        {
+            std::string soccer_file = get_config_file("Soccer.yaml");
+            YAML::Node config       = YAML::LoadFile(soccer_file);
+            robot_position          = config["position"].as<std::string>();
+        }
+        // Ready position
+        {
+            std::string ready_file = get_config_file(robot_position.get_config_name());
+            YAML::Node config      = YAML::LoadFile(ready_file);
+            ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+        }
     }
 
-    void RoboCupConfiguration::configure() {
+    void RoboCupConfiguration::configure_network() {
+        // In case values aren't set yet, set them
+        set_values();
+
+        // Check if we are on a robot
+        if (get_platform() != "nugus") {
+            log_message = "Configure Error: Network configuration only available on NUgus robots!";
+            return;
+        }
+
+        // Check if we have permissions
+        if (geteuid() != 0) {
+            log_message = "Configure Error: Insufficient permissions!";
+            return;
+        }
+
+        // Copy the network files
+        std::filesystem::copy_file(fmt::format("system/{}/etc/systemd/network/30-wifi.network", hostname),
+                                   "/etc/systemd/network/30-wifi.network",
+                                   std::filesystem::copy_options::overwrite_existing);
+        std::filesystem::copy_file(
+            fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
+            "/etc/wpa_supplicant/wpa_supplicant-{}.conf",
+            std::filesystem::copy_options::overwrite_existing);
+
+        // Restart the network
+        system("systemctl restart systemd-networkd");
+        system("systemctl restart wpa_supplicant");
+
+        log_message = "Network configured!";
+    }
+
+    void RoboCupConfiguration::set_values() {
         // For testing in docker lol
         hostname = "nugus4";
 
         // Configure the game files
-        std::string soccer_file = get_config_file("Soccer.yaml");
 
-        // Write to the yaml file
-        YAML::Node config  = YAML::LoadFile(soccer_file);
-        config["position"] = std::string(robot_position);
-        std::ofstream file(soccer_file);
-        file << config;
-        file.close();
+        {  // Write the robot's position to the soccer file
+            std::string soccer_file = get_config_file("Soccer.yaml");
+            // Write to the yaml file
+            YAML::Node config  = YAML::LoadFile(soccer_file);
+            config["position"] = std::string(robot_position);
+            std::ofstream file(soccer_file);
+            file << config;
+        }
+
+        {
+            // Write ready position to the corresponding config file
+            std::string ready_file   = get_config_file(robot_position.get_config_name());
+            YAML::Node config        = YAML::LoadFile(ready_file);
+            config["ready_position"] = YAML::Node(ready_position);
+            std::ofstream file(ready_file);
+            file << config;
+        }
 
         // Configure the network files
         // Check if we are on a robot
         if (get_platform() != "nugus") {
-            log<NUClear::WARN>("Network configuration only available on NUgus robots.");
+            log_message = "Configure Error: Network configuration only available on NUgus robots!";
             return;
         }
 
-        // Get folder name
-        std::string folder = fmt::format("system/{}/etc/systemd/network", hostname);
+        // Get folder name and rename file
+        const std::string folder = fmt::format("system/{}/etc/systemd/network", hostname);
+        std::rename(fmt::format("{}/40-wifi-robocup.network", folder).c_str(),
+                    fmt::format("{}/30-wifi.network", folder).c_str());
 
-        // File 40-wifi-robocup.network rename to 30-wifi.network so it is used instead of the default
-        std::string old_file = fmt::format("{}/40-wifi-robocup.network", folder);
-        std::string new_file = fmt::format("{}/30-wifi.network", folder);
-        std::rename(old_file.c_str(), new_file.c_str());
-
-        // Change third component of ip_address with team_id and fourth component with player_id
+        // Change third and fourth component of ip_address
         std::stringstream ss(ip_address);
-        std::vector<std::string> ip_parts{};
-        std::string part;
-        while (std::getline(ss, part, '.')) {
-            ip_parts.push_back(part);
-        }
-        ip_address          = fmt::format("{}.{}.{}.{}", ip_parts[0], ip_parts[1], team_id, player_id);
-        std::string gateway = fmt::format("{}.{}.3.1", ip_parts[0], ip_parts[1]);
+        std::string ip_part1, ip_part2;
+        std::getline(ss, ip_part1, '.');
+        std::getline(ss, ip_part2, '.');
+        ip_address = fmt::format("{}.{}.{}.{}", ip_part1, ip_part2, team_id, player_id);
 
         // Write the new ip address to the file
-        std::ofstream n_file(new_file);
-        n_file << "[Match]\nName=wlp0s20f3\n\n[Network]\nAddress=" << ip_address << "/16\nGateway=" << gateway
-               << "\nDNS=" << gateway << "\nDNS=8.8.8.8";
-        n_file.close();
+        std::ofstream(fmt::format("system/{}/etc/systemd/network/30-wifi.network", hostname))
+            << fmt::format("[Match]\nName={}\n\n[Network]\nAddress={}/16\nGateway={}.{}.3.1\nDNS=8.8.8.8",
+                           wifi_interface,
+                           ip_address,
+                           ip_part1,
+                           ip_part2);
 
         // Configure the wpa_supplicant file
-        std::string wpa_supplicant_file = "system/default/etc/wpa_supplicant/wpa_supplicant-wlp0s20f3.conf";
-        std::ofstream wpa_file(wpa_supplicant_file);
-        wpa_file
-            << "ctrl_interface=/var/run/wpa_supplicant\nctrl_interface_group=wheel\nupdate_config=1\nfast_reauth=1 "
-            << "\nap_scan = 1\n\nnetwork = "
-            << " { "
-            << "\n\tssid =\"" << ssid << "\"\n\tpsk=\"" << password << "\"\n\tpriority=1\n}";
-        wpa_file.close();
+        std::ofstream(fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface))
+            << fmt::format(
+                   "ctrl_interface=/var/run/"
+                   "wpa_supplicant\nctrl_interface_group=wheel\nupdate_config=1\nfast_reauth=1\nap_scan = 1\n\nnetwork "
+                   "= {{\n\tssid =\"{}\"\n\tpsk=\"{}\"\n\tpriority=1\n}}",
+                   ssid,
+                   password);
+
+        log_message = "Files have been configured.";
     }
+
     void RoboCupConfiguration::toggle_selection() {
         // Networking configuration column
         if (column_selection == 0) {
@@ -202,6 +267,12 @@ namespace module::tools {
         // Game configuration column
         if (row_selection == 0) {
             ++robot_position;
+            {
+                // Get ready position for this position
+                std::string ready_file = get_config_file(robot_position.get_config_name());
+                YAML::Node config      = YAML::LoadFile(ready_file);
+                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+            }
         }
     }
 
@@ -234,6 +305,12 @@ namespace module::tools {
         switch (row_selection) {
             case 0:  // robot_position
                 robot_position = user_input();
+                {
+                    // Get ready position for this position
+                    std::string ready_file = get_config_file(robot_position.get_config_name());
+                    YAML::Node config      = YAML::LoadFile(ready_file);
+                    ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+                }
                 break;
             case 1:  // ready position
                 std::stringstream ss(user_input());
@@ -322,9 +399,46 @@ namespace module::tools {
         ready_string << ready_position.transpose();
         mvprintw(6, 40, ("Ready   : " + ready_string.str()).c_str());
 
+        // Print commands
+        // Heading Commands
+        attron(A_BOLD);
+        mvprintw(LINES - 10, 2, "Commands");
+        attroff(A_BOLD);
+
+        // Each Command
+        const char* COMMANDS[] = {"ENTER", "SPACE", "F", "R", "C", "N", "X"};
+
+        // Each Meaning
+        const char* MEANINGS[] = {"Edit", "Toggle", "Refresh", "Reset", "Configure", "Network", "Shutdown"};
+
+        // Prints commands and their meanings to the screen
+        for (size_t i = 0; i < 7; i = i + 2) {
+            attron(A_BOLD);
+            attron(A_STANDOUT);
+            mvprintw(LINES - 9, 2 + ((3 + 14) * (i / 2)), COMMANDS[i]);
+            attroff(A_BOLD);
+            attroff(A_STANDOUT);
+            int gap = i == 0 ? 8 : 4;
+            mvprintw(LINES - 9, gap + ((3 + 14) * (i / 2)), MEANINGS[i]);
+        }
+
+        for (size_t i = 1; i < 7; i = i + 2) {
+            attron(A_BOLD);
+            attron(A_STANDOUT);
+            mvprintw(LINES - 8, 2 + ((3 + 14) * ((i - 1) / 2)), COMMANDS[i]);
+            attroff(A_BOLD);
+            attroff(A_STANDOUT);
+            int gap = i == 1 ? 8 : 4;
+            mvprintw(LINES - 8, gap + ((3 + 14) * ((i - 1) / 2)), MEANINGS[i]);
+        }
+
+        // Print any log_messages
+        attron(A_BOLD);
+        mvprintw(LINES - 2, 2, log_message.c_str());
+        attroff(A_BOLD);
+
         // Highlight our selected point
         mvchgat(row_selection + 5, 20 + (column_selection * 30), 13, A_STANDOUT, 0, nullptr);
-
 
         refresh();
     }

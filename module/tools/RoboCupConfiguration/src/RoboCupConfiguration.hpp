@@ -72,6 +72,15 @@ namespace module::tools {
                 }
             }
 
+            std::string get_config_name() {
+                switch (value) {
+                    case Value::STRIKER: return "Striker.yaml";
+                    case Value::DEFENDER: return "Defender.yaml";
+                    case Value::GOALIE: return "Goalie.yaml";
+                    default: throw std::runtime_error("enum Position's value is corrupt, unknown value stored");
+                }
+            }
+
             operator int() const {
                 return value;
             }
@@ -88,14 +97,17 @@ namespace module::tools {
         /// @brief Index of the column we are selecting
         size_t column_selection = 0;
 
+        std::string log_message = "";
+
         void refresh_view();
         void edit_selection();
         void toggle_selection();
         std::string user_input();
+        void get_values();
         void set_values();
-        void configure();
         std::string get_platform();
         std::string get_config_file(std::string filename);
+        void configure_network();
 
     public:
         /// @brief Called by the powerplant to build and setup the RoboCupConfiguration reactor.

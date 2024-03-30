@@ -58,7 +58,6 @@ namespace utility::support {
         char ip[NI_MAXHOST];
 
         if (getifaddrs(&ifaddr) == -1) {
-            perror("getifaddrs");
             return "";
         }
 
@@ -86,7 +85,6 @@ namespace utility::support {
         int sock = socket(AF_INET, SOCK_DGRAM, 0);
 
         if (getifaddrs(&ifaddr) == -1) {
-            perror("getifaddrs");
             close(sock);
             return "";
         }
@@ -109,6 +107,21 @@ namespace utility::support {
         freeifaddrs(ifaddr);
         close(sock);
         return "";
+    }
+
+    inline std::string get_ssid(const std::string& interface_name) {
+        int sock = socket(AF_INET, SOCK_DGRAM, 0);
+        struct iwreq pwrq;
+        memset(&pwrq, 0, sizeof(pwrq));
+        strncpy(pwrq.ifr_name, interface_name.c_str(), IFNAMSIZ);
+
+        if (ioctl(sock, SIOCGIWESSID, &pwrq) == -1) {
+            close(sock);
+            return "";
+        }
+
+        close(sock);
+        return reinterpret_cast<char*>(pwrq.u.essid.pointer);
     }
 
 }  // namespace utility::support
