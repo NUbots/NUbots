@@ -292,6 +292,10 @@ export class LocalisationController {
   };
 
   @action
+  toggleParticlesVisibility = (model: LocalisationModel) => {
+    model.particlesVisible = !model.particlesVisible;
+  };
+
   toggleGoalVisibility = (model: LocalisationModel) => {
     model.goalVisible = !model.goalVisible;
   };

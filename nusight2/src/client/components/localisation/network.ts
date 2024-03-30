@@ -37,6 +37,7 @@ export class LocalisationNetwork {
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
+    robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
   };
 
   @action.bound
