@@ -403,7 +403,7 @@ namespace module::input {
             Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
             sensors->Hrw          = Hwr.inverse();
 
-            // UKF update for velocity
+            // UKF update for velocity x and z
             Eigen::Vector3d rTWw = Hwt.translation();
             ukf.measure(rTWw,
                         cfg.ukf.noise.measurement.flat_foot_translation,
