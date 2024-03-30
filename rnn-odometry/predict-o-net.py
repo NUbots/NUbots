@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from keras.models import load_model
+from sklearn.metrics import mean_absolute_error, r2_score
 
 # Load data
 test_data = np.load('datasets/input_data_test.npy')
@@ -27,9 +28,17 @@ test_dataset = tf.keras.utils.timeseries_dataset_from_array(
     batch_size=batch_size
 )
 
+# Predict
 predictions = model.predict(test_dataset)
 print('prediction shape:', predictions.shape)
 print('target shape:', test_targets.shape)
+
+# Evaluate
+mae = mean_absolute_error(test_dataset, predictions)
+r2 = r2_score(test_dataset, predictions)
+print(f"Mean Absolute Error (MAE): {mae:.2f}")  # Print MAE
+print(f"R-squared (R2) Score: {r2:.2f}")
+
 # Plot and inspect
 plt.figure(figsize=(10, 6))
 plt.plot(predictions, 'r', label='Predictions')
