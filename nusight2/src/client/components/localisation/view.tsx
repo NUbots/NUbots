@@ -32,6 +32,10 @@ type LocalisationViewProps = {
 
 const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
 
+// Ball texture obtained from https://katfetisov.wordpress.com/2014/08/08/freebies-football-textures/
+const textureLoader = new THREE.TextureLoader();
+const soccerBallTexture = textureLoader.load("/images/ball_texture.png");
+
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
   private readonly canvas = React.createRef<HTMLCanvasElement>();
@@ -68,6 +72,8 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleFieldVisibility={this.toggleFieldVisibility}
           toggleRobotVisibility={this.toggleRobotVisibility}
           toggleBallVisibility={this.toggleBallVisibility}
+          toggleParticleVisibility={this.toggleParticleVisibility}
+          toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
         ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
@@ -140,6 +146,14 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleBallVisibility(this.props.model);
   };
 
+  private toggleParticleVisibility = () => {
+    this.props.controller.toggleParticlesVisibility(this.props.model);
+  };
+
+  private toggleGoalVisibility = () => {
+    this.props.controller.toggleGoalVisibility(this.props.model);
+  };
+
   private toggleFieldLinePointsVisibility = () => {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
   };
@@ -155,6 +169,8 @@ interface LocalisationMenuBarProps {
   toggleFieldVisibility(): void;
   toggleRobotVisibility(): void;
   toggleBallVisibility(): void;
+  toggleParticleVisibility(): void;
+  toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
 }
 
@@ -187,6 +203,8 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
         <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
         <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
+        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
+        <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
         <MenuItem
           label="Field Line Points"
           isVisible={model.fieldLinePointsVisible}
@@ -247,6 +265,8 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         })}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
+      {model.particlesVisible && <Particles model={model} />}
+      {model.goalVisible && <Goals model={model} />}
     </object3D>
   );
 });
@@ -271,16 +291,63 @@ const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
   </>
 );
 
-const Balls = ({ model }: { model: LocalisationModel }) => (
+const Particles = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible && (
+          <object3D key={robot.id}>
+            {robot.particles.particle.map((particle, i) => {
+              return (
+                <mesh key={String(i)} position={new Vector3(particle.x, particle.y, 0.005).toArray()}>
+                  <circleBufferGeometry args={[0.02, 20]} />
+                  <meshBasicMaterial color="red" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Balls = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible &&
+          robot.rBFf && (
+            <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
+              <sphereBufferGeometry args={[1, 32, 32]} /> {/* Increased detail for the texture */}
+              <meshStandardMaterial map={soccerBallTexture} />
+            </mesh>
+          ),
+      )}
+    </>
+  );
+};
+
+const Goals = ({ model }: { model: LocalisationModel }) => (
   <>
     {model.robots.map(
       (robot) =>
         robot.visible &&
-        robot.rBFf && (
-          <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
-            <sphereBufferGeometry args={[1, 20, 20]} />
-            <meshStandardMaterial color="orange" />
-          </mesh>
+        robot.rGFf && (
+          <object3D key={robot.id}>
+            {robot.rGFf.map((goal, i) => {
+              return (
+                <mesh
+                  key={String(i)}
+                  position={goal.bottom.add(new Vector3(0, 0, goal.top.z / 2)).toArray()}
+                  rotation={[Math.PI / 2, 0, 0]}
+                >
+                  <cylinderBufferGeometry args={[0.05, 0.05, goal.top.z, 20]} />
+                  <meshStandardMaterial color="yellow" />
+                </mesh>
+              );
+            })}
+          </object3D>
         ),
     )}
   </>

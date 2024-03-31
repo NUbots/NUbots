@@ -16,11 +16,11 @@ opencr:
 servos:
   - # [0]  R_SHOULDER_PITCH
     direction: -1
-    offset: 0.0
+    offset: pi / 4
     simulated: false
   - # [1]  L_SHOULDER_PITCH
     direction: 1
-    offset: 0.0
+    offset: pi / 4
     simulated: false
   - # [2]  R_SHOULDER_ROLL
     direction: -1
