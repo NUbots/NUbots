@@ -90,7 +90,7 @@ export class ProfilerView extends React.Component<{
                     <td>{profile.avg_time.toFixed(1)}</td>
                     <td>
                       <div style={controller.getPercentageStyle(profile.percentage)}>
-                        <span>{profile.percentage.toFixed(1)} %</span>
+                        <span className="px-2">{profile.percentage.toFixed(1)} %</span>
                       </div>
                     </td>
                   </tr>
@@ -134,7 +134,6 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
 export type RobotStatsProps = {
   totalTime: number;
   totalCount: number;
-  // TODO: Add device stats, CPU usage, memory usage, etc.
 };
 
 export const RobotStats = (props: RobotStatsProps) => {
@@ -142,14 +141,14 @@ export const RobotStats = (props: RobotStatsProps) => {
     <div>
       <div>
         <div className="flex justify-center">
-          <div className="px-12 py-8 border rounded-md mx-12">
+          <div className="px-12 py-4 border rounded-md mx-12">
             <div className="text-lg text-gray-500">Total Time (s)</div>
             <div className="text-3xl">{(props.totalTime / 1e3).toFixed(1)}</div>
           </div>
 
-          <div className="px-12 py-8 border rounded-md ">
+          <div className="px-12 py-4 border rounded-md ">
             <div className="text-lg text-gray-500">Total Reactions</div>
-            <div className="text-3xl">{props.totalCount}</div>
+            <div className="text-3xl">{props.totalCount.toLocaleString()}</div>
           </div>
         </div>
       </div>

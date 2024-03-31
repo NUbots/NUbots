@@ -40,9 +40,10 @@ export class ProfilerController {
   getPercentageStyle(percentage: number) {
     // Clamp the percentage between 0 and 100
     const clampedPercentage = Math.min(Math.max(percentage, 0), 100);
+    const hue = (clampedPercentage / 100) * 360;
     return {
       width: `${clampedPercentage}%`,
-      backgroundColor: "lightblue",
+      backgroundColor: `hsl(${100 - hue}, 100%, 50%)`, // Full saturation and 50% lightness for bright colors
       height: "100%",
     };
   }
