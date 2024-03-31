@@ -46,6 +46,45 @@ namespace module::planning {
     using message::planning::WalkTo;
     using message::skill::Walk;
 
+    double g(const double x, const double y, const double x0, const double y0) {
+        return 1 / std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
+    }
+
+    double f(const Eigen::Vector2d& self_position,
+             const Eigen::Vector2d& target_position,
+             const double heading,
+             std::vector obstacles,
+             double target_scalar,
+             double obstacle_scalar,
+             double heading_scalar) {
+        double x = self_position.x();
+        double y = self_position.y();
+
+        // Attraction of the target position
+        Eigen::Vector2d vector_field_direction(
+            (target_position.x() - x) * g(x, y, target_position.x(), target_position.y()),
+            (target_position.y() - y) * g(x, y, target_position.x(), target_position.y()));
+
+        // Create point next to target position at given heading
+        double x_target = target_position.x() + std::cos(heading);
+        double y_target = target_position.y() + std::sin(heading);
+
+        // Repulse the heading point
+        vector_field_direction.x() += (x - x_target) * g(x, y, x_target, y_target);
+        vector_field_direction.y() += (y - y_target) * g(x, y, x_target, y_target);
+
+        // Repulsion of the obstacles
+        for (const auto& obstacle : obstacles) {
+            vector_field_direction.x() += (x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y());
+            vector_field_direction.y() += (y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y());
+        }
+
+        // Repulsion of the walls
+        // todo
+
+        return vector_field_direction;
+    }
+
     PlanWalkPath::PlanWalkPath(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
@@ -71,7 +110,8 @@ namespace module::planning {
         });
 
         // Path to walk to a particular point
-        on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
+        on<Provide<WalkTo>, Uses<Walk>, With<Robots>, With<Field>>().then([this](const WalkTo& walk_to,
+                                                                                 const Uses<Walk>& walk) {
             // If we haven't got an active walk task, then reset the velocity to minimum velocity
             if (walk.run_state == GroupInfo::RunState::NO_TASK) {
                 velocity_magnitude = cfg.min_translational_velocity_magnitude;
