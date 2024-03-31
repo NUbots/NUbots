@@ -1,18 +1,21 @@
+# This role is used with Webots to test individual behaviours together in different configurations. Modify Tester.yaml
+# to specify which behaviours to test.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
-  extension::FileWatcher
-  support::SignalCatcher
-  support::logging::ConsoleLogHandler
-  # Config
-  support::configuration::SoccerConfig
-  actuation::KinematicsConfiguration
-  support::configuration::GlobalConfig
-  # Network
-  network::PlotJuggler
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
+  support::configuration::SoccerConfig # Field description
+  # Network (output)
   network::NUClearNet
   network::NetworkForwarder
-  # Sensors
+  output::Overview
+  output::ImageCompressor
+  # Sensors and network input
   input::GameController
+  network::RobotCommunication
   input::SensorFilter
   platform::Webots
   # Vision
@@ -34,7 +37,6 @@ nuclear_role(
   skill::SplineKick
   skill::GetUp
   skill::Look
-  skill::Dive
   skill::Say
   # Planners
   planning::PlanWalkPath
@@ -45,12 +47,10 @@ nuclear_role(
   # Strategies
   strategy::FallRecovery
   strategy::StandStill
+  strategy::WalkToFieldPosition
   strategy::StrategiseLook
   strategy::WalkToBall
-  strategy::WalkToFieldPosition
   strategy::FindObject
-  strategy::Ready
-  strategy::DiveToBall
   strategy::KickToGoal
   strategy::AlignBallToGoal
   # Purposes

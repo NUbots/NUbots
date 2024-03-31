@@ -231,6 +231,7 @@ namespace module::platform::OpenCR {
 
                         // Stop the model watchdog since we have it now
                         // Start the packet watchdog since the main loop is now starting
+                        model_watchdog.disable();
                         model_watchdog.unbind();
                         log<NUClear::WARN>("Packet watchdog enabled");
                         packet_watchdog.enable();

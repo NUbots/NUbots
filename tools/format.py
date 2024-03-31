@@ -35,49 +35,55 @@ import tempfile
 from collections import OrderedDict
 from fnmatch import fnmatch
 from functools import partial
-from subprocess import PIPE, STDOUT, CalledProcessError
+from subprocess import DEVNULL, PIPE, STDOUT, CalledProcessError
 from subprocess import run as sp_run
+
+import pygit2
 
 import b
 from utility.dockerise import run_on_docker
 
+repo = pygit2.Repository(b.project_dir)
+
 # The extensions that are handled by the various formatters
 formatters = OrderedDict()
 
-formatters["licence"] = {
-    "format": [
-        [
-            "licenseheaders",
-            "-t",
-            os.path.join(b.project_dir, ".licence.tmpl"),
-            "--years={added}",
-            "--owner=NUbots",
-            f"--projname=NUbots",
-            "--projurl=https://github.com/NUbots/NUbots",
-            "-f",
-            "{path}",
-        ]
-    ],
-    "include": [
-        "*.cpp",
-        "*.hpp",
-        "*.h",
-        "*.c",
-        "*.py",
-        "*.sh",
-        "*.cmake",
-        "*.proto",
-        "CMakeLists.txt",
-        "**/CMakeLists.txt",
-        "Dockerfile",
-        "**/Dockerfile",
-    ],
-    "exclude": [
-        "shared/utility/motion/splines/*",
-        "shared/utility/platform/models/nugus/nugus.proto",
-        "nusight2/src/assets/robot-models/nugus/nugus.proto",
-    ],  # TODO exclude files that are not ours
-}
+# TODO: Fix this
+# formatters["licence"] = {
+#     "format": [
+#         [
+#             "licenseheaders",
+#             "-t",
+#             os.path.join(b.project_dir, ".licence.tmpl"),
+#             "--years={added}",
+#             "--owner=NUbots",
+#             f"--projname=NUbots",
+#             "--projurl=https://github.com/NUbots/NUbots",
+#             "-f",
+#             "{path}",
+#         ]
+#     ],
+#     "include": [
+#         "*.cpp",
+#         "*.hpp",
+#         "*.h",
+#         "*.c",
+#         "*.py",
+#         "*.sh",
+#         "*.cmake",
+#         "*.proto",
+#         "CMakeLists.txt",
+#         "**/CMakeLists.txt",
+#         "Dockerfile",
+#         "**/Dockerfile",
+#     ],
+#     "exclude": [
+#         "shared/utility/motion/splines/*",
+#         "shared/utility/platform/models/nugus/nugus.proto",
+#         "nusight2/src/assets/robot-models/nugus/nugus.proto",
+#         "module/support/optimisation/NSGA2Optimiser/src/nsga2",
+#     ],  # TODO exclude files that are not ours
+# }
 formatters["clang-format"] = {
     "format": [["clang-format", "-i", "-style=file", "{path}"]],
     "include": ["*.h", "*.c", "*.cc", "*.cxx", "*.cpp", "*.hpp", "*.ipp", "*.frag", "*.glsl", "*.vert", "*.proto"],
@@ -110,23 +116,56 @@ formatters["prettier"] = {
 }
 
 
+def _get_history_dates(path):
+    years = []
+
+    # Keep track of the name of the file we are looking for for each commit
+    path_for_commit = {repo[repo.head.target].id: path}
+
+    for commit in (walker := repo.walk(repo[repo.head.target].id, pygit2.GIT_SORT_TOPOLOGICAL)):
+        if commit.id not in path_for_commit:
+            continue
+
+        search_path = path_for_commit[commit.id]
+        relevant = len(commit.parents) == 0
+
+        for p in commit.parents:
+            # Initially keep the path the same
+            path_for_commit[p.id] = search_path
+
+            diff = p.tree.diff_to_tree(commit.tree)
+
+            # Only bother doing a similarity search if the file was modified
+            if any(delta.new_file.path == search_path for delta in diff.deltas):
+                diff.find_similar(
+                    flags=pygit2.GIT_DIFF_FIND_RENAMES
+                    | pygit2.GIT_DIFF_FIND_RENAMES_FROM_REWRITES
+                    | pygit2.GIT_DIFF_FIND_IGNORE_WHITESPACE
+                )
+                for delta in diff.deltas:
+                    if delta.new_file.path == search_path:
+                        relevant = True
+
+                    # The file was added here, stop looking
+                    if delta.status == pygit2.GIT_DELTA_ADDED and delta.new_file.path == search_path:
+                        del path_for_commit[p.id]
+                        walker.hide(p.id)
+                    # The file was renamed, update where we are looking
+                    elif delta.status == pygit2.GIT_DELTA_RENAMED and delta.new_file.path == search_path:
+                        path_for_commit[p.id] = delta.old_file.path
+
+        if relevant:
+            tzinfo = datetime.timezone(datetime.timedelta(minutes=commit.author.offset))
+            dt = datetime.datetime.fromtimestamp(float(commit.author.time), tzinfo)
+            years.append(dt.year)
+
+    return max(years), min(years)
+
+
 # This function is used to get details of a file that might be needed in the arguments of a formatter
 # For example the year the file was added and the year it was last modified for a licence header
 def _get_args(path):
-    dates = (
-        sp_run(["git", "log", "--follow", "--format=%ad", "--date=short", path], stdout=PIPE)
-        .stdout.decode("utf-8")
-        .splitlines()
-    )
-
-    # File was never added use the current year
-    if len(dates) == 0:
-        modified = datetime.date.today().year
-        added = datetime.date.today().year
-    else:
-        modified = dates[0].split("-")[0]
-        added = dates[-1].split("-")[0]
-
+    modified, added = _get_history_dates(path)
     return {"added": f"{added}", "modified": f"{modified}"}
 
 

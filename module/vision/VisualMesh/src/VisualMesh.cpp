@@ -109,13 +109,30 @@ namespace module::vision {
                             log<NUClear::TRACE>("Hcw resulted in no mesh points being on-screen.");
                         }
                         else {
+                            // Convert rays to world space
+                            Eigen::Matrix<float, 3, Eigen::Dynamic> rPWw(3, result.rays.cols());
+
+                            // Compute once before to improve computational speed in next line
+                            Eigen::Vector3f Hwc_translation = Hcw.inverse().cast<float>().translation();
+
+                            // Use Eigen's operations to perform the calculations on the entire matrix at once
+                            // Full vector assuming the point is on the ground/observation plane
+                            // rPCw * abs(rCWw.z) / rPCw.z) + rCWw
+                            rPWw =
+                                (result.rays.array()
+                                 * (Hwc_translation.z() / result.rays.row(2).replicate(result.rays.rows(), 1).array())
+                                       .abs())
+                                    .matrix()
+                                + Hwc_translation.replicate(1, result.rays.cols());
+
                             // Move stuff into the emit message
                             auto msg             = std::make_unique<message::vision::VisualMesh>();
                             msg->timestamp       = image.timestamp;
                             msg->id              = image.id;
                             msg->name            = image.name;
                             msg->Hcw             = image.Hcw;
-                            msg->rays            = result.rays;
+                            msg->rPWw            = rPWw;
+                            msg->uPCw            = result.rays;
                             msg->coordinates     = result.coordinates;
                             msg->neighbourhood   = std::move(result.neighbourhood);
                             msg->indices         = std::move(result.indices);

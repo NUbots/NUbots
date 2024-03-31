@@ -60,18 +60,10 @@ namespace module::vision {
             // Convenience variables
             const auto& cls                                      = mesh.classifications;
             const auto& neighbours                               = mesh.neighbourhood;
-            const Eigen::Matrix<double, 3, Eigen::Dynamic>& uPCw = mesh.rays.cast<double>();
-            const Eigen::Isometry3d Hwc                          = mesh.Hcw.inverse();
+            const Eigen::Matrix<double, 3, Eigen::Dynamic>& rPWw = mesh.rPWw.cast<double>();
+            const Eigen::Isometry3d Hcw                          = mesh.Hcw;
             const uint32_t LINE_INDEX                            = mesh.class_map.at("line");
             const uint32_t FIELD_INDEX                           = mesh.class_map.at("field");
-
-            // Convert rays to world space
-            Eigen::Matrix<double, 3, Eigen::Dynamic> rPWw(3, uPCw.cols());
-
-            // Loop over each position and add the transformed ray
-            for (int idx = 0; idx < uPCw.cols(); idx++) {
-                rPWw.col(idx) = uPCw.col(idx) * std::abs(Hwc.translation().z() / uPCw.col(idx).z()) + Hwc.translation();
-            }
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
@@ -103,12 +95,7 @@ namespace module::vision {
             }
 
             // Get points from the camera since we want to measure the distance from the robot
-            Eigen::Matrix<double, 3, Eigen::Dynamic> rPCc(3, rPWw.cols());
-
-            // Loop over each position and change the coordinate space
-            for (int idx = 0; idx < rPWw.cols(); idx++) {
-                rPCc.col(idx) = Hwc.inverse() * rPWw.col(idx);
-            }
+            Eigen::Matrix<double, 3, Eigen::Dynamic> rPCc = Hcw * rPWw;
 
             // Get the closest distance to the robot from all points in the cluster
             auto get_closest_distance = [&](const std::vector<int>& cluster) {
@@ -192,7 +179,7 @@ namespace module::vision {
             // Add the unit vectors of the convex hull to the green horizon message
             msg->horizon.reserve(hull_indices.size());
             for (const auto& idx : hull_indices) {
-                msg->horizon.emplace_back(uPCw.col(idx));
+                msg->horizon.emplace_back(rPWw.col(idx));
             }
 
             log<NUClear::DEBUG>(fmt::format("Calculated a convex hull with {} points from a boundary with {} points",

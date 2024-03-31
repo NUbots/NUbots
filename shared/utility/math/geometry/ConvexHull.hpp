@@ -356,49 +356,57 @@ namespace utility::math::geometry {
         return chans_convex_hull(indices, points_2d);
     }
 
-    /// @brief Projects a three-dimensional vector onto the x-y plane
-    /// @param v A three-dimensional vector
-    /// @return The two-dimensional projection of v
-    inline Eigen::Vector2d project_vector(const Eigen::Vector3d& v) {
-        return Eigen::Vector2d(v.x() / v.z(), v.y() / v.z());
+
+    /// @brief Calculates the angle between three points
+    /// @param p1
+    /// @param p2
+    /// @param p3
+    /// @return
+    double calculate_angle(const Eigen::Vector3d& p1, const Eigen::Vector3d& p2, const Eigen::Vector3d& p3) {
+        Eigen::Vector3d v1 = p2 - p1;
+        Eigen::Vector3d v2 = p3 - p1;
+        return std::atan2(v1.x() * v2.y() - v1.y() * v2.x(), v1.x() * v2.x() + v1.y() * v2.y());
     }
 
-    /// @brief Checks if a point is under the convex hull
-    /// @tparam Iterator Iterator type for the rays
-    /// @param point The point to check if it is under the convex hull
-    /// @param rays_begin The beginning of the convex hull points
-    /// @param rays_end The end of the convex hull points
-    /// @param allow_boundary If true, then the point is considered under the hull if it is on the boundary
-    /// @return True if the point is under the convex hull, false otherwise
-    template <typename Iterator>
-    inline bool point_under_hull(const Eigen::Vector3d& point,
-                                 const Iterator rays_begin,
-                                 const Iterator rays_end,
-                                 const bool& allow_boundary = false) {
-        const double theta = std::atan2(point.y(), point.x());
-        auto lower_it = std::lower_bound(rays_begin, rays_end, theta, [&](const Eigen::Vector3d& p0, const double& b) {
-            return std::atan2(p0.y(), p0.x()) < b;
-        });
-        auto upper_it = std::upper_bound(rays_begin, rays_end, theta, [&](const double& b, const Eigen::Vector3d& p0) {
-            return b < std::atan2(p0.y(), p0.x());
-        });
+    /// @brief Determine if point is in the convex hull
+    /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`, ordered
+    /// @param point The point to check if it is in the convex hull
+    /// @return True if the point is in the convex hull, false otherwise
+    bool point_in_convex_hull(const std::vector<Eigen::Vector3d>& hull, const Eigen::Vector3d& point) {
+        double winding_number = 0.0;
 
-        if ((lower_it == rays_end) || (upper_it == rays_end)) {
+        // Loop over each pair of consecutive points in the hull to find the total angle across the hull with the point
+        // If the point is outside, the angles should cancel out as it goes around the hull
+        // If the point is inside, the angles should add up to +-2pi, ie a full circle
+        for (size_t i = 0; i < hull.size(); ++i) {
+            // Get the current point and the next point in the hull
+            Eigen::Vector3d p1 = hull[i];
+            Eigen::Vector3d p2 = hull[(i + 1) % hull.size()];
+
+            // Calculate the angle between the point and the current pair of hull points and add to the total
+            double angle = calculate_angle(point, p1, p2);
+            winding_number += angle;
+        }
+
+        // Approximately zero as the angles cancel out
+        if (std::abs(winding_number) < 1e-6) {
             return false;
         }
-        // lower_bound returns the first ray that has a theta value that is >= our point_theta value
-        // taking the ray immediately before the lower_bound should give us a ray with theta < point_theta
-        // upper_bound returns the first ray that has a theta value that is > our point_theta value
-        const Eigen::Vector2d p0 = project_vector(lower_it == rays_begin ? *lower_it : *std::prev(lower_it));
-        const Eigen::Vector2d p1 = project_vector(point);
-        const Eigen::Vector2d p2 = project_vector(*upper_it);
+        else {  // Approximately +-2pi as the angles add up to a circle
+            return true;
+        }
+    }
 
-        // Point should make a clockwise turn if it is under the convex hull.
-        // It should be colinear if it is on the convex hull
-        // If we allow the boundary then we only care that it isn't counter-clockwise
-        // If we don't allow the boundary then we only care that it is clockwise
-        return (allow_boundary ? direction(p0, p1, p2) != Direction::COUNTERCLOCKWISE
-                               : direction(p0, p1, p2) == Direction::CLOCKWISE);  // Check for colinearity
+    /// @brief Determine if point is in the convex hull. Converts to 3D and calls the 3D version.
+    /// @param hull_indices The indices of the points in the convex hull, corresponding to `points`, ordered
+    /// @param point The point to check if it is in the convex hull
+    /// @return True if the point is in the convex hull, false otherwise
+    bool point_in_convex_hull(const std::vector<Eigen::Vector2d>& hull, const Eigen::Vector2d& point) {
+        std::vector<Eigen::Vector3d> hull_3d;
+        for (const auto& p : hull) {
+            hull_3d.emplace_back(p.x(), p.y(), 0.0);
+        }
+        return point_in_convex_hull(hull_3d, Eigen::Vector3d(point.x(), point.y(), 0.0));
     }
 
     /// @brief Sort the indices by theta
@@ -421,5 +429,6 @@ namespace utility::math::geometry {
             return theta0 < theta1;
         });
     }
+
 }  // namespace utility::math::geometry
 #endif  // UTILITY_MATH_GEOMETRY_CONVEXHULL_HPP
