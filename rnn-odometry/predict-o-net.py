@@ -9,7 +9,7 @@ test_data = np.load('datasets/input_data_test.npy')
 test_targets = np.load('datasets/input_targets_test.npy')
 
 # Load model
-model = load_model('models/model-20240328-202204')
+model = load_model('models/model-20240330-152126')
 
 
 system_sample_rate = 115
@@ -30,16 +30,22 @@ test_dataset = tf.keras.utils.timeseries_dataset_from_array(
 
 # Predict
 predictions = model.predict(test_dataset)
+
+# Check shapes
+print('test set shape:', test_data.shape)
 print('prediction shape:', predictions.shape)
-print('target shape:', test_targets.shape)
+print('prediction shape[0]:', predictions.shape[0])
+print('prediction shape[1]:', predictions.shape[1])
+print('target set shape:', test_targets.shape)
 
 # Evaluate
-mae = mean_absolute_error(test_dataset, predictions)
-r2 = r2_score(test_dataset, predictions)
+test_targets = test_targets[:predictions.shape[0]]
+mae = mean_absolute_error(test_targets, predictions)
+r2 = r2_score(test_targets, predictions)
 print(f"Mean Absolute Error (MAE): {mae:.2f}")  # Print MAE
 print(f"R-squared (R2) Score: {r2:.2f}")
 
-# Plot and inspect
+# # Plot and inspect
 plt.figure(figsize=(10, 6))
 plt.plot(predictions, 'r', label='Predictions')
 plt.plot(test_targets, 'b', label='Targets')
