@@ -193,10 +193,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 1   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
-    sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
+    sequence_length = system_sample_rate * 4   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_stride = 2                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 200                           # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 700                           # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -227,7 +227,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00005   # Controls how much to change the model in response to error.
-    epochs = 150             #
+    epochs = 2000             #
 
     # Loss functions
     loss_function = keras.losses.MeanAbsoluteError()
@@ -236,13 +236,22 @@ def main():
     # loss_function = quantile_loss????
     # loss_function = keras.losses.Huber(delta=0.5)
 
-    # Optimizers
+    # ** Optimizers **
+
+    # standard
     optimizer=keras.optimizers.Adam(learning_rate=learning_rate)
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
+
+    # Scheduled
     # lr_schedule = keras.optimizers.schedules.ExponentialDecay(
     #     initial_learning_rate=0.5,
-    #     decay_steps=10000,
+    #     decay_steps=500000,
     #     decay_rate=0.0001)
+    # lr_schedule = keras.optimizers.schedules.CosineDecay(
+    #     initial_learning_rate=0.0005,
+    #     decay_steps=5000000,
+    #     alpha=0.000001
+    # )
     # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule)
 
     # Tensorboard
@@ -251,14 +260,15 @@ def main():
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Regulariser
-    # regulariser = keras.regularizers.L1L2(0.01)
+    regulariser = keras.regularizers.L1L2(l1=0.095, l2=0.095)
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm_out = keras.layers.LSTM(120, return_sequences=False)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(400, return_sequences=False)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.045)(lstm)
 
-    outputs = keras.layers.Dense(3)(lstm_out)   # Target shape[1] is 3
+    outputs = keras.layers.Dense(3, kernel_regularizer=regulariser)(dropout)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
