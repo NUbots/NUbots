@@ -14,6 +14,26 @@ from sklearn.preprocessing import MinMaxScaler
 
 def main():
 
+    def convert_to_relative(data):
+        """
+        This function takes a dataset of world coordinates and converts it to relative positions
+        based on the starting position (assumed to be the first index).
+
+        Args:
+            data: A NumPy array of shape (num_datapoints, 3) representing world coordinates.
+
+        Returns:
+            A NumPy array of shape (num_datapoints, 3) representing relative positions.
+        """
+
+        # Get the starting position (assuming first index)
+        starting_position = data[0]
+
+        # Calculate relative positions for all data points (excluding starting position)
+        relative_positions = data[1:] - starting_position
+
+        return relative_positions
+
     # numpy arrays
     imu = np.load("processed-outputs/numpy/long/1/long-imu-1.npy")
     servos = np.load("processed-outputs/numpy/long/1/long-servos-1.npy")
@@ -158,12 +178,20 @@ def main():
     # Training
     input_data_train = train_arr_clipped[:, :26]  # imu and servos
     input_targets_train = train_arr_clipped[:, 26:]  # truth
+    # Convert targets to relative position
+    input_targets_train = convert_to_relative(input_targets_train)
+
     # Validation
     input_data_validate = validate_arr_clipped[:, :26]  # imu and servos
     input_targets_validate = validate_arr_clipped[:, 26:]  # truth
+    # Convert targets to relative position
+    input_targets_validate = convert_to_relative(input_targets_validate)
+
     # Testing
     input_data_test= test_arr_clipped[:, :26]  # imu and servos
     input_targets_test = test_arr_clipped[:, 26:]  # truth
+    # Convert targets to relative position
+    input_targets_test = convert_to_relative(input_targets_test)
 
     # print dataset shapes
     print(f"input_data_train: {input_data_train.shape}")
@@ -182,11 +210,11 @@ def main():
     np.save('datasets/input_targets_test.npy', input_targets_test)
 
     # Plot and inspect
-    # num_channels = input_data_train.shape[1]
+    # num_channels = input_targets_validate.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
-    # for i in range(6, 26):
-    #     plt.plot(input_data_train[100000:202280, i], label=f'Channel {i+1}')
+    # for i in range(num_channels):
+    #     plt.plot(input_targets_validate[:20000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
@@ -196,7 +224,7 @@ def main():
     sequence_length = system_sample_rate * 4   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 2                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 700                           # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 500                           # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -229,8 +257,9 @@ def main():
     learning_rate = 0.00005   # Controls how much to change the model in response to error.
     epochs = 2000             #
 
-    # Loss functions
-    loss_function = keras.losses.MeanAbsoluteError()
+    # ** Loss functions **
+    # loss_function = keras.losses.MeanAbsoluteError()
+    loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.log_cosh(y_true=1,y_pred=1)
     # loss_function = keras.losses.Quantile(quantile=0.5)
     # loss_function = quantile_loss????
@@ -241,6 +270,7 @@ def main():
     # standard
     optimizer=keras.optimizers.Adam(learning_rate=learning_rate)
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.SGD(learning_rate=learning_rate)
 
     # Scheduled
     # lr_schedule = keras.optimizers.schedules.ExponentialDecay(
@@ -252,7 +282,10 @@ def main():
     #     decay_steps=5000000,
     #     alpha=0.000001
     # )
-    # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule)
+
+    # optimizer = keras.optimizers.RMSprop(learning_rate=learning_rate)
+
+    # ** Activation functions **
 
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -260,15 +293,21 @@ def main():
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Regulariser
-    regulariser = keras.regularizers.L1L2(l1=0.095, l2=0.095)
+    regularizer = keras.regularizers.L1L2(l1=0.003, l2=0.05)
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm = keras.layers.LSTM(400, return_sequences=False)(inputs)    # 32 originally
-    dropout = keras.layers.Dropout(rate=0.045)(lstm)
+    lstm = keras.layers.LSTM(120, return_sequences=True)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.20)(lstm)
 
-    outputs = keras.layers.Dense(3, kernel_regularizer=regulariser)(dropout)   # Target shape[1] is 3
+    lstm1 = keras.layers.LSTM(60, return_sequences=True)(dropout)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.20)(lstm1)
+
+    lstm2 = keras.layers.LSTM(20, return_sequences=False)(dropout2)    # 32 originally
+    dropout3 = keras.layers.Dropout(rate=0.10)(lstm2)
+
+    outputs = keras.layers.Dense(3, kernel_regularizer=regularizer)(dropout3)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
