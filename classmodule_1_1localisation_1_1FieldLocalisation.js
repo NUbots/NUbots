@@ -4,6 +4,7 @@ var classmodule_1_1localisation_1_1FieldLocalisation =
     [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html#a45bd53aeb8a3cdadbbcca05e5715ad27", null ],
     [ "calculate_weight", "classmodule_1_1localisation_1_1FieldLocalisation.html#a35bf2023beca8d29ff5e1fa084a65db3", null ],
     [ "compute_Hfw", "classmodule_1_1localisation_1_1FieldLocalisation.html#a78b0225cda7e145d91d5f83ae48271a5", null ],
+    [ "debug_field_localisation", "classmodule_1_1localisation_1_1FieldLocalisation.html#abd6ee8f1d58c59665920bdd99312cd23", null ],
     [ "position_in_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#a356274a0a3eee7cdbd9705948f39ea33", null ],
     [ "setup_fieldline_distance_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#abc278764495056c24aa87ce54561f6da", null ],
     [ "cfg", "classmodule_1_1localisation_1_1FieldLocalisation.html#adf5d1af90cac7a1c998dcaa5f4adbb08", null ],
