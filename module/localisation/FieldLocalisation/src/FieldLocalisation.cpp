@@ -99,17 +99,6 @@ namespace module::localisation {
 
             // ******** Landmarks ********
             setup_field_landmarks(fd);
-            for (auto& landmark : landmarks) {
-                if (landmark.type == message::vision::FieldIntersection::IntersectionType::L_INTERSECTION) {
-                    emit(graph("L Landmark", landmark.position.x(), landmark.position.y()));
-                }
-                else if (landmark.type == message::vision::FieldIntersection::IntersectionType::T_INTERSECTION) {
-                    emit(graph("T Landmark", landmark.position.x(), landmark.position.y()));
-                }
-                else if (landmark.type == message::vision::FieldIntersection::IntersectionType::X_INTERSECTION) {
-                    emit(graph("X Landmark", landmark.position.x(), landmark.position.y()));
-                }
-            }
 
             last_time_update_time = NUClear::clock::now();
             startup_time          = NUClear::clock::now();
@@ -157,27 +146,14 @@ namespace module::localisation {
                 if (!fallen && time_since_startup > cfg.start_time_delay) {
 
 
-                    // Data association (find the closest field intersection of same type in list of particles)
+                    // Measurement update
                     for (auto& intersection : field_intersections.intersections) {
-                        auto associated_rLFf = find_closest_field_intersection(intersection);
-                        if (associated_rLFf) {
-                            Eigen::Vector2d rIWw = intersection.rIWw.head<2>();
-                            auto rLFf            = associated_rLFf.value();
-                            auto state           = filter.get_state();
-                            auto Hfw             = Eigen::Translation<double, 2>(state.x(), state.y())
-                                       * Eigen::Rotation2D<double>(state.z());
-                            auto associated_rLWw = Hfw.inverse() * rLFf;
-
-                            auto rIFf = Hfw * intersection.rIWw.head<2>();
-                            emit(graph("Observation", rIFf.x(), rIFf.y()));
-
-                            // log<NUClear::DEBUG>("Associated observation rIWw: ",
-                            //                     rIWw.transpose().head<2>(),
-                            //                     " with landmark rLWw: ",
-                            //                     associated_rLWw.transpose());
-
-                            filter.measure(rIWw, cfg.measurement_noise, associated_rLFf.value());
-                        }
+                        Eigen::Vector2d rIWw = intersection.rIWw.head<2>();
+                        filter.measure(rIWw,
+                                       cfg.measurement_noise,
+                                       intersection,
+                                       landmarks,
+                                       cfg.min_association_distance);
                     }
 
                     // Time update (includes resampling)
@@ -189,6 +165,9 @@ namespace module::localisation {
                     auto field(std::make_unique<Field>());
                     field->Hfw        = compute_Hfw(filter.get_state());
                     field->covariance = filter.get_covariance();
+                    if (log_level <= NUClear::DEBUG) {
+                        field->particles = filter.get_particles_as_vector();
+                    }
                     emit(field);
                 }
             });
@@ -220,128 +199,5 @@ namespace module::localisation {
         }
         return 1.0 / (weight + std::numeric_limits<double>::epsilon());
     }
-
-    void FieldLocalisation::setup_field_landmarks(const FieldDescription& fd) {
-        // Half dimensions for easier calculation
-        double half_length = fd.dimensions.field_length / 2;
-        double half_width  = fd.dimensions.field_width / 2;
-
-        // Corners of the field
-        landmarks.push_back({Eigen::Vector2d(-half_length, half_width),
-                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(-half_length, -half_width),
-                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(half_length, half_width),
-                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(half_length, -half_width),
-                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-
-        // Mid-points of each sideline
-        landmarks.push_back(
-            {Eigen::Vector2d(0, half_width), message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(0, -half_width), message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-
-        // X intersection at the center
-        landmarks.push_back(
-            {Eigen::Vector2d(0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(0, fd.dimensions.center_circle_diameter / 2),
-                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(0, -fd.dimensions.center_circle_diameter / 2),
-                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
-
-        if (fd.dimensions.penalty_area_length != 0 && fd.dimensions.penalty_area_width != 0) {
-            // T intersections from the penalty areas
-            landmarks.push_back({Eigen::Vector2d(half_length, fd.dimensions.penalty_area_width / 2),
-                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-            landmarks.push_back({Eigen::Vector2d(half_length, -fd.dimensions.penalty_area_width / 2),
-                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-            landmarks.push_back({Eigen::Vector2d(-half_length, fd.dimensions.penalty_area_width / 2),
-                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-            landmarks.push_back({Eigen::Vector2d(-half_length, -fd.dimensions.penalty_area_width / 2),
-                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-        }
-
-        // T intersections from the goal areas
-        landmarks.push_back({Eigen::Vector2d(half_length, fd.dimensions.goal_area_width / 2),
-                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(half_length, -fd.dimensions.goal_area_width / 2),
-                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(-half_length, fd.dimensions.goal_area_width / 2),
-                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(-half_length, -fd.dimensions.goal_area_width / 2),
-                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
-
-        // L intersections from the penalty areas
-        landmarks.push_back(
-            {Eigen::Vector2d(half_length - fd.dimensions.penalty_area_length, fd.dimensions.penalty_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(half_length - fd.dimensions.penalty_area_length, -fd.dimensions.penalty_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(-half_length + fd.dimensions.penalty_area_length, fd.dimensions.penalty_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(-half_length + fd.dimensions.penalty_area_length, -fd.dimensions.penalty_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-
-        // L intersections from the goal areas
-        landmarks.push_back(
-            {Eigen::Vector2d(half_length - fd.dimensions.goal_area_length, fd.dimensions.goal_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(half_length - fd.dimensions.goal_area_length, -fd.dimensions.goal_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(-half_length + fd.dimensions.goal_area_length, fd.dimensions.goal_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(-half_length + fd.dimensions.goal_area_length, -fd.dimensions.goal_area_width / 2),
-             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
-
-        // X intersections from penalty spots
-        landmarks.push_back({Eigen::Vector2d(half_length - fd.dimensions.penalty_mark_distance, 0),
-                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
-        landmarks.push_back({Eigen::Vector2d(-half_length + fd.dimensions.penalty_mark_distance, 0),
-                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
-        landmarks.push_back(
-            {Eigen::Vector2d(0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
-    }
-
-    std::optional<Eigen::Vector2d> FieldLocalisation::find_closest_field_intersection(
-        const FieldIntersection& observed_intersection) {
-        double min_distance = std::numeric_limits<double>::max();
-        std::optional<Eigen::Vector2d> closest_landmark_position;
-
-        for (const auto& landmark : landmarks) {
-            // Check if the landmark is of the same type as the observed intersection
-            if (landmark.type == observed_intersection.type) {
-                // Calculate Euclidean distance between the observed intersection and the landmark
-
-                // TODO: This should be done for each particle in the filter, not just the mean
-                auto state = filter.get_state();
-                auto Hfw   = Eigen::Translation<double, 2>(state.x(), state.y()) * Eigen::Rotation2D<double>(state.z());
-                double distance = (landmark.position - Hfw * observed_intersection.rIWw.head<2>())
-                                      .norm();  // Adjust for your actual observed intersection position access method
-
-                // If this landmark is closer than the previous closest, update min_distance and
-                // closest_landmark_position
-                if (distance < min_distance) {
-                    min_distance              = distance;
-                    closest_landmark_position = landmark.position;
-                }
-            }
-        }
-
-        if (min_distance > cfg.min_association_distance || !closest_landmark_position.has_value()) {
-            log<NUClear::DEBUG>("No close landmark found for intersection", observed_intersection.type);
-            log<NUClear::DEBUG>("Distance to closest landmark", min_distance);
-            return std::nullopt;
-        }
-
-        return closest_landmark_position;
-    }
-
 
 }  // namespace module::localisation

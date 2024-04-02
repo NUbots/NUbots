@@ -17,7 +17,7 @@ initial_state: [0.0, 0.0, 0.0]
 initial_covariance: [0.5, 0.5, 0.5]
 
 # Amount of noise added to the particles (how much world can move to adjust for drift) at each time update
-process_noise: [1e-2, 1e-2, 1e-2]
+process_noise: [5e-2, 5e-2, 5e-2]
 
 # Field intersection measurement noise
 measurement_noise: [1e-2, 1e-2]
@@ -28,6 +28,7 @@ save_map: false
 # Minimum number of field line points for a measurement update
 min_observations: 50
 
+# Minimum distance an associated landmark needs to be for measurement update
 min_association_distance: 0.5
 
 # Delay before the particle filter starts (allows odometry to settle)

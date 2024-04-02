@@ -153,4 +153,92 @@ namespace module::localisation {
         fieldline_distance_map.create_distance_map(cfg.grid_size);
     }
 
+    void FieldLocalisation::setup_field_landmarks(const FieldDescription& fd) {
+        // Half dimensions for easier calculation
+        double half_length = fd.dimensions.field_length / 2;
+        double half_width  = fd.dimensions.field_width / 2;
+
+        // Corners of the field
+        landmarks.push_back({Eigen::Vector2d(-half_length, half_width),
+                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(-half_length, -half_width),
+                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(half_length, half_width),
+                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(half_length, -half_width),
+                             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+
+        // Mid-points of each sideline
+        landmarks.push_back(
+            {Eigen::Vector2d(0, half_width), message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(0, -half_width), message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+
+        // X intersection at the center
+        landmarks.push_back(
+            {Eigen::Vector2d(0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(0, fd.dimensions.center_circle_diameter / 2),
+                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(0, -fd.dimensions.center_circle_diameter / 2),
+                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+
+        if (fd.dimensions.penalty_area_length != 0 && fd.dimensions.penalty_area_width != 0) {
+            // T intersections from the penalty areas
+            landmarks.push_back({Eigen::Vector2d(half_length, fd.dimensions.penalty_area_width / 2),
+                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+            landmarks.push_back({Eigen::Vector2d(half_length, -fd.dimensions.penalty_area_width / 2),
+                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+            landmarks.push_back({Eigen::Vector2d(-half_length, fd.dimensions.penalty_area_width / 2),
+                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+            landmarks.push_back({Eigen::Vector2d(-half_length, -fd.dimensions.penalty_area_width / 2),
+                                 message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+        }
+
+        // T intersections from the goal areas
+        landmarks.push_back({Eigen::Vector2d(half_length, fd.dimensions.goal_area_width / 2),
+                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(half_length, -fd.dimensions.goal_area_width / 2),
+                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(-half_length, fd.dimensions.goal_area_width / 2),
+                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(-half_length, -fd.dimensions.goal_area_width / 2),
+                             message::vision::FieldIntersection::IntersectionType::T_INTERSECTION});
+
+        // L intersections from the penalty areas
+        landmarks.push_back(
+            {Eigen::Vector2d(half_length - fd.dimensions.penalty_area_length, fd.dimensions.penalty_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(half_length - fd.dimensions.penalty_area_length, -fd.dimensions.penalty_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(-half_length + fd.dimensions.penalty_area_length, fd.dimensions.penalty_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(-half_length + fd.dimensions.penalty_area_length, -fd.dimensions.penalty_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+
+        // L intersections from the goal areas
+        landmarks.push_back(
+            {Eigen::Vector2d(half_length - fd.dimensions.goal_area_length, fd.dimensions.goal_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(half_length - fd.dimensions.goal_area_length, -fd.dimensions.goal_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(-half_length + fd.dimensions.goal_area_length, fd.dimensions.goal_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(-half_length + fd.dimensions.goal_area_length, -fd.dimensions.goal_area_width / 2),
+             message::vision::FieldIntersection::IntersectionType::L_INTERSECTION});
+
+        // X intersections from penalty spots
+        landmarks.push_back({Eigen::Vector2d(half_length - fd.dimensions.penalty_mark_distance, 0),
+                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+        landmarks.push_back({Eigen::Vector2d(-half_length + fd.dimensions.penalty_mark_distance, 0),
+                             message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+        landmarks.push_back(
+            {Eigen::Vector2d(0, 0), message::vision::FieldIntersection::IntersectionType::X_INTERSECTION});
+    }
+
 }  // namespace module::localisation

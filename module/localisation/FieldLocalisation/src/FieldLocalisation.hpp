@@ -90,14 +90,14 @@ namespace module::localisation {
     };
 
     /// @brief Landmark struct
-    struct Landmark {
-        /// @brief Landmark position in field space
-        Eigen::Vector2d position{};
+    // struct Landmark {
+    //     /// @brief Landmark position in field space
+    //     Eigen::Vector2d position{};
 
-        /// @brief Landmark type
-        message::vision::FieldIntersection::IntersectionType type =
-            message::vision::FieldIntersection::IntersectionType::UNKNOWN;
-    };
+    //     /// @brief Landmark type
+    //     message::vision::FieldIntersection::IntersectionType type =
+    //         message::vision::FieldIntersection::IntersectionType::UNKNOWN;
+    // };
 
     class FieldLocalisation : public NUClear::Reactor {
     private:
@@ -197,9 +197,6 @@ namespace module::localisation {
          * @param fd The field dimensions
          */
         void setup_field_landmarks(const FieldDescription& fd);
-
-
-        std::optional<Eigen::Vector2d> find_closest_field_intersection(const FieldIntersection& observed_intersection);
     };
 }  // namespace module::localisation
 

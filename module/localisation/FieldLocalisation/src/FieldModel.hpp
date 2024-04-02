@@ -30,7 +30,20 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
+#include "message/vision/FieldIntersections.hpp"
+
 namespace module::localisation {
+
+    /// @brief Landmark struct
+    struct Landmark {
+        /// @brief Landmark position in field space
+        Eigen::Vector2d position{};
+
+        /// @brief Landmark type
+        message::vision::FieldIntersection::IntersectionType type =
+            message::vision::FieldIntersection::IntersectionType::UNKNOWN;
+    };
+
 
     template <typename Scalar>
     class FieldModel {
@@ -80,14 +93,38 @@ namespace module::localisation {
             return process_noise_diagonal.asDiagonal() * dt;
         }
 
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(
+            const StateVec& state,
+            const message::vision::FieldIntersection& observed_intersection,
+            const std::vector<Landmark>& landmarks,
+            const double min_association_distance) {
 
-        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(const StateVec& state,
-                                                         const Eigen::Matrix<Scalar, 2, 1>& rLFf) {
-            // Create a transform from the field state
-            auto Hfw = Eigen::Translation<Scalar, 2>(state.x(), state.y()) * Eigen::Rotation2D<Scalar>(state.z());
+            double min_distance = std::numeric_limits<double>::max();
+            Eigen::Vector2d closest_landmark_position =
+                Eigen::Vector2d(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+
+            auto Hfw = Eigen::Translation<double, 2>(state.x(), state.y()) * Eigen::Rotation2D<double>(state.z());
+            for (const auto& landmark : landmarks) {
+                // Check if the landmark is of the same type as the observed intersection
+                if (landmark.type == observed_intersection.type) {
+                    // Calculate Euclidean distance between the observed intersection and the landmark
+                    double distance = (landmark.position - Hfw * observed_intersection.rIWw.head<2>()).norm();
+
+                    // If this landmark is closer update
+                    if (distance < min_distance) {
+                        min_distance              = distance;
+                        closest_landmark_position = landmark.position;
+                    }
+                }
+            }
+
+            // If the closest landmark is too far away, return a landmark far away, which should have little effect
+            if (min_distance > min_association_distance) {
+                return Eigen::Vector2d(std::numeric_limits<double>::max(), std::numeric_limits<double>::max());
+            }
 
             // Transform the landmark position from the field to the world
-            Eigen::Matrix<Scalar, 2, 1> rLWw = Hfw.inverse() * rLFf;
+            Eigen::Matrix<Scalar, 2, 1> rLWw = Hfw.inverse() * closest_landmark_position;
             return rLWw;
         }
 
