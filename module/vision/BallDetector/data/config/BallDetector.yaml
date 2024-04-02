@@ -1,13 +1,13 @@
 # Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-confidence_threshold: 0.7 # Minimum confidence required for a ball point to be a ball point
-cluster_points: 3 # Minimum number of points for a cluster to be a viable ball
-minimum_ball_distance: 0.20 # Minimum distance for a cluster to be a viable ball
+confidence_threshold: 0.6 # Minimum confidence required for a ball point to be a ball point
+cluster_points: 1 # Minimum number of points for a cluster to be a viable ball
+minimum_ball_distance: 0.1 # Minimum distance for a cluster to be a viable ball
 distance_disagreement:
-  0.30 # Percentage difference between width and projection based distances. 0.0 means
+  1.0 # Percentage difference between width and projection based distances. 0.0 means
   # the distance measurements must match perfectly
 maximum_deviation:
-  0.17 # A threshold on how large the standard deviation of the angle between ray and
+  0.3 # A threshold on how large the standard deviation of the angle between ray and
   # cone axis can be
 ball_angular_cov: [0.01, 0.01, 0.01] # Measurement certainties for ball localisation

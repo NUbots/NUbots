@@ -4,86 +4,40 @@ buttons:
   debounce_threshold: 7
 
 foot_down:
-  method: FSR
-  known_methods:
-    - name: FSR # Literal FSR
-      certainty_threshold: 30 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
-    - name: Z_HEIGHT # This uses the difference in Z height of the feet
-      certainty_threshold: 0.01 # Height difference of the Z for the Z height method
-    - name: LOAD # This uses the loads from the servos through a NN
-      noise_factor: 1e-4
-      certainty_threshold: 0.5
-      uncertainty_threshold: 0.5
+  # Either (Z_HEIGHT or FSR)
+  method: Z_HEIGHT # Foot sensor reading
+  threshold: 0.01 # Height difference of the Z for the Z height method
+
+# Mahony filter for roll + pitch
+mahony:
+  # Proportional gain
+  Kp: 0.5
+  # Integral gain
+  Ki: 0.3
+  # Initial bias
+  initial_bias: [0, 0, 0]
+  # Initial orientation (roll, pitch, yaw)
+  initial_rpy: [0, 0.2, 0]
 
 ukf:
-  update:
-    velocity_decay: [0.5, 0.5, 0.5]
   noise:
     measurement:
-      accelerometer: [0.1, 0.1, 0.1] # x, y, z
-      accelerometer_magnitude: [0.1, 0.1, 0.1] # x, y, z
-      gyroscope: [0.1, 0.1, 0.1] # x, y, z
-      # Covariance of a foot's translation
-      flat_foot_odometry: [5e-8, 5e-8, 5e-8] # x, y, z
-      # Covariance of the rotation quaternion of the foot, when both feet are down
-      flat_foot_orientation: [0.1, 0.1, 0.1, 0.1] # QX, QY, QZ, QW
+      # Covariance of a foot's translation measurement update
+      flat_foot_translation: [1e-12, 1e-13, 1e-12] # x, y, z
     process:
-      position: [1e-2, 1e-2, 1e-2]
-      velocity: [1e-2, 1e-2, 1e-2]
-      rotational_velocity: [1e-5, 1e-5, 1e-5]
-      rotation: [1e-3, 1e-3, 1e-3, 1e-3]
+      position: [1e-4, 1e-5, 1e-4]
+      velocity: [1e-1, 1e-4, 1e-1]
 
   initial:
     mean:
       position: [0, 0, 0.49] # A little above the ground
       velocity: [0, 0, 0] # Not moving
-      rotational_velocity: [0, 0, 0] # Not spinning
-      rotation: [0, 0, 0, 1] # Upright (QX, QY, QZ, QW)
     covariance:
-      position: [1e-3, 1e-3, 1] # We are pretty sure of our x,y when we start
-      velocity: [1e-3, 1e-3, 1e-3] # We are unsure of our velocity
-      rotational_velocity: [0.1, 0.1, 0.1] # Fairly unsure about our rotational velocity
-      rotation: [0.01, 0.01, 0.01, 0.01] # Not very sure of rotation (QX, QY, QZ, QW)
+      position: [1e-3, 1e-3, 1e-3]
+      velocity: [1e-3, 1e-3, 1e-3]
 
-# State = [roll, pitch, roll rate, pitch rate]'
-kalman:
-  # Continuous time process model: dx = Ac*x Essentially results in dx = [roll rate, pitch rate, 0, 0]'
-  Ac:
-    - [0, 0, 1, 0]
-    - [0, 0, 0, 1]
-    - [0, 0, 0, 0]
-    - [0, 0, 0, 0]
-  # Continuous time input model: No inputs
-  Bc: []
-  # Continuous time measurement model: Essentially selects states from state vector which we measure
-  # We can measure all our states so: y = I*x = [roll, pitch, roll rate, pitch rate]'
-  C:
-    - [1, 0, 0, 0]
-    - [0, 1, 0, 0]
-    - [0, 0, 1, 0]
-    - [0, 0, 0, 1]
-  # Process model noise
-  Q: [1e-6, 1e-6, 1e-5, 1e-5]
-  # Measurement model noise
-  R: [0.000011025, 0.000011025, 0.0018284176, 0.0018284176]
+# Specify whether or not to use ground truth odometry from simulator
+use_ground_truth: false
 
-mahony:
-  # Mahony "Proportional" Gain on error
-  Kp: 1
-  # Mahony "Integral" Gain used to compute bias
-  Ki: 0.3
-  # Mahony Filter initial bias
-  bias: [0, 0, 0]
-
-# Tuning parameters to scale walk command to match actual achieved velocity for deckreckoning x, y, theta
-deadreckoning_scale: [1, 1, 0.6]
-initial_anchor_frame: "left_foot_base"
-
-# Kalman/Mahony filter initial pose
-initial_rTWw: [0, 0, 0.49]
-initial_rpy: [0, 0.3839, 0]
-
-# Specify which filtering method to use, either UKF, KF, MAHONY or GROUND_TRUTH
-filtering_method: MAHONY
-
+# Path to URDF file
 urdf_path: "models/robot.urdf"

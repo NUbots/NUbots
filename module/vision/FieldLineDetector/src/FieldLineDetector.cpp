@@ -90,9 +90,14 @@ namespace module::vision {
                                                         clusters);
             log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-            // Remove clusters above the green horizon and then resize the vector to remove them
-            auto green_boundary =
-                utility::vision::visualmesh::check_green_horizon_side(clusters, horizon.horizon, rPWw, false, true);
+            // Partition the clusters such that clusters above the green horizons are removed,
+            // and then resize the vector to remove them
+            auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters,
+                                                                                        horizon.horizon,
+                                                                                        rPWw,
+                                                                                        false,
+                                                                                        true,
+                                                                                        false);
             clusters.resize(std::distance(clusters.begin(), green_boundary));
             log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
 

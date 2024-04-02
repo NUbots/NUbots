@@ -121,12 +121,15 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
+  @observable particles: { particle: Vector3[] }; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
   @observable swingFootTrajectory: { rSPp: Vector3[] };
   @observable swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[]; walkPhase: number }[] };
   @observable torsoTrajectory: { rTPp: Vector3[] };
   @observable torsoTrajectoryHistory: { trajectories: Vector3[][] };
   @observable walkPhase: number;
+  // Both bottom and top points of goal are in world space.
+  @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
 
   constructor({
     model,
@@ -138,12 +141,14 @@ export class LocalisationRobotModel {
     Rwt,
     motors,
     fieldLinePoints,
+    particles,
     ball,
     swingFootTrajectory,
     swingFootTrajectoryHistory,
     torsoTrajectory,
     torsoTrajectoryHistory,
     walkPhase,
+    goals,
   }: {
     model: RobotModel;
     name: string;
@@ -154,12 +159,14 @@ export class LocalisationRobotModel {
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
+    particles: { particle: Vector3[] };
     ball?: { rBWw: Vector3 };
     swingFootTrajectory: { rSPp: Vector3[] };
     swingFootTrajectoryHistory: { trajectories: { trajectory: Vector3[]; walkPhase: number }[] };
     torsoTrajectory: { rTPp: Vector3[] };
     torsoTrajectoryHistory: { trajectories: Vector3[][] };
     walkPhase: number;
+    goals: { points: { bottom: Vector3; top: Vector3 }[] };
   }) {
     this.model = model;
     this.name = name;
@@ -170,12 +177,14 @@ export class LocalisationRobotModel {
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
+    this.particles = particles;
     this.ball = ball;
     this.swingFootTrajectory = swingFootTrajectory;
     this.swingFootTrajectoryHistory = swingFootTrajectoryHistory;
     this.torsoTrajectory = torsoTrajectory;
     this.torsoTrajectoryHistory = torsoTrajectoryHistory;
     this.walkPhase = walkPhase;
+    this.goals = goals;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -193,6 +202,8 @@ export class LocalisationRobotModel {
       torsoTrajectory: { rTPp: [] },
       torsoTrajectoryHistory: { trajectories: [] },
       walkPhase: 0,
+      particles: { particle: [] },
+      goals: { points: [] },
     });
   });
 
@@ -238,5 +249,14 @@ export class LocalisationRobotModel {
   @computed
   get rTFf(): Vector3[] {
     return this.torsoTrajectory.rTPp.map((rTPp) => rTPp.applyMatrix4(this.Hfp));
+  }
+
+  /** Goal positions in field space */
+  @computed
+  get rGFf(): { bottom: Vector3; top: Vector3 }[] {
+    return this.goals?.points.map((pair) => ({
+      bottom: pair?.bottom.applyMatrix4(this.Hfw),
+      top: pair?.top.applyMatrix4(this.Hfw),
+    }));
   }
 }

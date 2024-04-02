@@ -61,7 +61,7 @@ namespace module::skill {
 
     using utility::input::LimbID;
     using utility::input::ServoID;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -177,14 +177,14 @@ namespace module::skill {
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
-                    Eigen::Vector3d thetaTL = MatrixToEulerIntrinsic(Htl.linear());
+                    Eigen::Vector3d thetaTL = mat_to_rpy_intrinsic(Htl.linear());
                     emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
                     emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
-                    Eigen::Vector3d thetaTR = MatrixToEulerIntrinsic(Htr.linear());
+                    Eigen::Vector3d thetaTR = mat_to_rpy_intrinsic(Htr.linear());
                     emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
                     emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
                     Eigen::Isometry3d Hpt   = walk_generator.get_torso_pose();
-                    Eigen::Vector3d thetaPT = MatrixToEulerIntrinsic(Hpt.linear());
+                    Eigen::Vector3d thetaPT = mat_to_rpy_intrinsic(Hpt.linear());
                     emit(graph("Torso desired position (x,y,z)",
                                Hpt.translation().x(),
                                Hpt.translation().y(),

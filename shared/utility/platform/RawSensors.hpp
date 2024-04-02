@@ -97,7 +97,7 @@ namespace utility::platform {
         return s.str();
     }
 
-    inline const RawSensors::Servo& getRawServo(ServoID servoId, const RawSensors& sensors) {
+    inline const RawSensors::Servo& get_raw_servo(ServoID servoId, const RawSensors& sensors) {
 
         switch (servoId.value) {
             case ServoID::R_SHOULDER_PITCH: return sensors.servo.r_shoulder_pitch;
@@ -125,7 +125,7 @@ namespace utility::platform {
         }
     }
 
-    inline RawSensors::Servo& getRawServo(ServoID servoId, RawSensors& sensors) {
+    inline RawSensors::Servo& get_raw_servo(ServoID servoId, RawSensors& sensors) {
 
         switch (servoId.value) {
             case ServoID::R_SHOULDER_PITCH: return sensors.servo.r_shoulder_pitch;

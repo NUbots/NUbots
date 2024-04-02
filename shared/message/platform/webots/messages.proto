@@ -31,6 +31,9 @@ package message.platform.webots;
 import "Matrix.proto";
 import "Vector.proto";
 
+import "message/support/optimisation/OptimisationRobotPosition.proto";
+import "message/support/optimisation/OptimisationCommand.proto";
+
 // Copy of cyberbotics/webots projects/samples/contests/robocup/controllers/player/messages.proto
 
 
@@ -97,9 +100,11 @@ message Message {
 message OdometryGroundTruth {
     /// Indicates if this message exists
     bool exists = 1;
-    /// Isometry3d transform from odometry (world) space to the robot (torso) space.
+    /// Affine3d transform from odometry (world) space to the robot (torso) space.
     /// It measures the world in robot space
     mat4 Htw = 2;
+    /// Velocity of the robot torso in the world space
+    vec3 vTw = 3;
 }
 
 message VisionGroundTruth {
@@ -124,8 +129,12 @@ message SensorMeasurements {
     repeated GyroMeasurement           gyros            = 10;
     repeated PositionSensorMeasurement position_sensors = 11;
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
+    // Ground truth data
     OdometryGroundTruth odometry_ground_truth = 100;
     VisionGroundTruth   vision_ground_truth   = 101;
+    // Walk optimisation data
+    support.optimisation.OptimisationRobotPosition robot_position = 102;
+    bool                                           reset_done     = 103;
 }
 
 message MotorPosition {
@@ -177,4 +186,8 @@ message ActuatorRequests {
     repeated SensorTimeStep sensor_time_steps = 6;
     repeated CameraQuality  camera_qualities  = 7;
     repeated CameraExposure camera_exposures  = 8;
+
+    // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
+    // Walk optimisation data
+    support.optimisation.OptimisationCommand optimisation_command = 100;
 }

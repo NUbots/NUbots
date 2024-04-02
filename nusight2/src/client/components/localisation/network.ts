@@ -20,6 +20,7 @@ export class LocalisationNetwork {
     this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.behaviour.state.WalkState, this.onWalkState);
     this.network.on(message.localisation.Ball, this.onBall);
+    this.network.on(message.vision.Goals, this.onGoals);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -35,6 +36,7 @@ export class LocalisationNetwork {
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
+    robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
   };
 
   @action.bound
@@ -62,6 +64,17 @@ export class LocalisationNetwork {
   private onBall(robotModel: RobotModel, ball: message.localisation.Ball) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.ball = { rBWw: Vector3.from(ball.rBWw) };
+  }
+
+  @action.bound
+  private onGoals(robotModel: RobotModel, goalsMessage: message.vision.Goals) {
+    const { Hcw, goals } = goalsMessage;
+    const Hwc = Matrix4.from(Hcw).invert();
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.goals.points = goals.map((goal) => ({
+      bottom: Vector3.from(goal.post?.bottom).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+      top: Vector3.from(goal.post?.top).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+    }));
   }
 
   @action

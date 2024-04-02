@@ -1,16 +1,11 @@
+# This role is used to test the connection with the OptiTrack Motive motion capture software.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run
-  extension::FileWatcher
-  # support::SignalCatcher
-  support::logging::ConsoleLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  actuation::KinematicsConfiguration
-  support::configuration::GlobalConfig
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Network
   network::NUClearNet
   network::NetworkForwarder
-  platform::${SUBCONTROLLER}::HardwareIO
-  input::SensorFilter
-  input::NatNet
-  support::logging::DataLogging
+  input::NatNet # Motion capture networking module
 )

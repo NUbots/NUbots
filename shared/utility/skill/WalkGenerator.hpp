@@ -41,7 +41,7 @@ namespace utility::skill {
 
     using message::behaviour::state::WalkState;
     using utility::input::LimbID;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::Waypoint;
 
@@ -311,7 +311,7 @@ namespace utility::skill {
             waypoint.time_point       = 0.0;
             waypoint.position         = Hps_start.translation();
             waypoint.velocity         = Eigen::Matrix<Scalar, 3, 1>::Zero();
-            waypoint.orientation      = MatrixToEulerIntrinsic(Hps_start.rotation());
+            waypoint.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
             waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
             swingfoot_trajectory.add_waypoint(waypoint);
 
@@ -339,7 +339,7 @@ namespace utility::skill {
             waypoint.time_point       = 0.0;
             waypoint.position         = Hpt_start.translation();
             waypoint.velocity         = Eigen::Matrix<Scalar, 3, 1>::Zero();
-            waypoint.orientation      = MatrixToEulerIntrinsic(Hpt_start.rotation());
+            waypoint.orientation      = mat_to_rpy_intrinsic(Hpt_start.rotation());
             waypoint.angular_velocity = Eigen::Matrix<Scalar, 3, 1>::Zero();
             torso_trajectory.add_waypoint(waypoint);
 
