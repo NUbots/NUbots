@@ -171,10 +171,10 @@ namespace module::localisation {
                             auto rIFf = Hfw * intersection.rIWw.head<2>();
                             emit(graph("Observation", rIFf.x(), rIFf.y()));
 
-                            log<NUClear::DEBUG>("Associated observation rIWw: ",
-                                                rIWw.transpose().head<2>(),
-                                                " with landmark rLWw: ",
-                                                associated_rLWw.transpose());
+                            // log<NUClear::DEBUG>("Associated observation rIWw: ",
+                            //                     rIWw.transpose().head<2>(),
+                            //                     " with landmark rLWw: ",
+                            //                     associated_rLWw.transpose());
 
                             filter.measure(rIWw, cfg.measurement_noise, associated_rLFf.value());
                         }
@@ -318,7 +318,11 @@ namespace module::localisation {
             // Check if the landmark is of the same type as the observed intersection
             if (landmark.type == observed_intersection.type) {
                 // Calculate Euclidean distance between the observed intersection and the landmark
-                double distance = (landmark.position - observed_intersection.rIWw.head<2>())
+
+                // TODO: This should be done for each particle in the filter, not just the mean
+                auto state = filter.get_state();
+                auto Hfw   = Eigen::Translation<double, 2>(state.x(), state.y()) * Eigen::Rotation2D<double>(state.z());
+                double distance = (landmark.position - Hfw * observed_intersection.rIWw.head<2>())
                                       .norm();  // Adjust for your actual observed intersection position access method
 
                 // If this landmark is closer than the previous closest, update min_distance and
@@ -331,6 +335,8 @@ namespace module::localisation {
         }
 
         if (min_distance > cfg.min_association_distance || !closest_landmark_position.has_value()) {
+            log<NUClear::DEBUG>("No close landmark found for intersection", observed_intersection.type);
+            log<NUClear::DEBUG>("Distance to closest landmark", min_distance);
             return std::nullopt;
         }
 
