@@ -140,56 +140,67 @@ def main():
     # num_train = train_arr.size
     # num_val = validate_arr.size
 
-    # Normalise -
-    # NOTE: mean and std from training dataset is used to normalise
+    # Normalisation  #
+    # Standardise -
+    # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
-    # mean and std from the training run will need to be used in production for de-normalising the predictions.
-    mean = train_arr.mean(axis=0)
-    std = train_arr.std(axis=0)
-    print("mean: ", mean)
-    print("std: ", std)
+    # mean and std from the training run will need to be used in production for de-standardise the predictions.
+    # mean = train_arr.mean(axis=0)
+    # std = train_arr.std(axis=0)
+    # print("mean: ", mean)
+    # print("std: ", std)
 
-    train_arr = (train_arr - mean) / std
-    validate_arr = (validate_arr - mean) / std
-    test_arr = (test_arr - mean) / std
+    # train_arr = (train_arr - mean) / std
+    # validate_arr = (validate_arr - mean) / std
+    # test_arr = (test_arr - mean) / std
+    # # # # #
 
-    print(f"Training set size: {train_arr.shape}")
-    print("Training set min:", np.min(train_arr))
-    print("Training set max:", np.max(train_arr))
-    print(f"Validation set size: {validate_arr.shape}")
-    print(f"Test set size: {test_arr.shape}")
+    # print(f"Training set size: {train_arr.shape}")
+    # print("Training set min:", np.min(train_arr))
+    # print("Training set max:", np.max(train_arr))
+    # print(f"Validation set size: {validate_arr.shape}")
+    # print(f"Test set size: {test_arr.shape}")
 
-    # clip the outliers in the data
-    train_arr_clipped = np.clip(train_arr, -4, 4)
-    validate_arr_clipped = np.clip(validate_arr, -4, 4)
-    test_arr_clipped = np.clip(test_arr, -4, 4)
+    # # clip the outliers in the data
+    # train_arr_clipped = np.clip(train_arr, -4, 4)
+    # validate_arr_clipped = np.clip(validate_arr, -4, 4)
+    # test_arr_clipped = np.clip(test_arr, -4, 4)
+
+    # Min/Max Scaling
+    scaler = MinMaxScaler()
+    # Fit scaler to training data only
+    scaler.fit(train_arr)
+    # Transform the data
+    train_arr_scaled = scaler.transform(train_arr)
+    validate_arr_scaled = scaler.transform(validate_arr)
+    test_arr_scaled = scaler.transform(test_arr)
 
     # Plot and inspect after normalising
     # num_channels = train_arr.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(train_arr_clipped[100000:200000, i], label=f'Channel {i+1}')
+    #     plt.plot(train_arr_scaled[100000:200000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
 
     # Split into data and targets
     # Training
-    input_data_train = train_arr_clipped[:, :26]  # imu and servos
-    input_targets_train = train_arr_clipped[:, 26:]  # truth
+    input_data_train = train_arr_scaled[:, :26]  # imu and servos
+    input_targets_train = train_arr_scaled[:, 26:]  # truth
     # Convert targets to relative position
     input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
-    input_data_validate = validate_arr_clipped[:, :26]  # imu and servos
-    input_targets_validate = validate_arr_clipped[:, 26:]  # truth
+    input_data_validate = validate_arr_scaled[:, :26]  # imu and servos
+    input_targets_validate = validate_arr_scaled[:, 26:]  # truth
     # Convert targets to relative position
     input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
-    input_data_test= test_arr_clipped[:, :26]  # imu and servos
-    input_targets_test = test_arr_clipped[:, 26:]  # truth
+    input_data_test= test_arr_scaled[:, :26]  # imu and servos
+    input_targets_test = test_arr_scaled[:, 26:]  # truth
     # Convert targets to relative position
     input_targets_test = convert_to_relative(input_targets_test)
 
@@ -210,21 +221,21 @@ def main():
     np.save('datasets/input_targets_test.npy', input_targets_test)
 
     # Plot and inspect
-    # num_channels = input_targets_validate.shape[1]
+    # num_channels = input_targets_train.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(input_targets_validate[:20000, i], label=f'Channel {i+1}')
+    #     plt.plot(input_targets_train[:20000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 4   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
-    sequence_stride = 2                         # Shift one sequence_length at a time (rolling window)
+    sequence_length = system_sample_rate * 3   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 500                           # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 1000                           # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -293,21 +304,18 @@ def main():
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
     # Regulariser
-    regularizer = keras.regularizers.L1L2(l1=0.003, l2=0.05)
+    regularizer = keras.regularizers.L1L2(l1=0.01, l2=0.05)
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm = keras.layers.LSTM(120, return_sequences=True)(inputs)    # 32 originally
-    dropout = keras.layers.Dropout(rate=0.20)(lstm)
+    lstm = keras.layers.LSTM(60, return_sequences=True)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.1)(lstm)
 
-    lstm1 = keras.layers.LSTM(60, return_sequences=True)(dropout)    # 32 originally
-    dropout2 = keras.layers.Dropout(rate=0.20)(lstm1)
+    lstm2 = keras.layers.LSTM(20, return_sequences=True)(dropout)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.1)(lstm2)
 
-    lstm2 = keras.layers.LSTM(20, return_sequences=False)(dropout2)    # 32 originally
-    dropout3 = keras.layers.Dropout(rate=0.10)(lstm2)
-
-    outputs = keras.layers.Dense(3, kernel_regularizer=regularizer)(dropout3)   # Target shape[1] is 3
+    outputs = keras.layers.Dense(3, kernel_regularizer=regularizer)(dropout2)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
