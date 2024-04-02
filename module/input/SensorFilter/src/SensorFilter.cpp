@@ -76,37 +76,9 @@ namespace module::input {
                                                  cfg.initial_bias,
                                                  cfg.initial_Rwt);
 
-            // Configure the UKF
-            // Set our measurement noise
-            cfg.ukf.noise.measurement.flat_foot_translation =
-                Eigen::Vector3d(config["ukf"]["noise"]["measurement"]["flat_foot_translation"].as<Expression>())
-                    .asDiagonal();
-
-            // Set our process noises
-            cfg.ukf.noise.process.position = config["ukf"]["noise"]["process"]["position"].as<Expression>();
-            cfg.ukf.noise.process.velocity = config["ukf"]["noise"]["process"]["velocity"].as<Expression>();
-
-            // Set our motion model's process noise
-            MotionModel<double>::StateVec process_noise;
-            process_noise.rTWw      = cfg.ukf.noise.process.position;
-            process_noise.vTw       = cfg.ukf.noise.process.velocity;
-            ukf.model.process_noise = process_noise;
-
-            // Set our initial means
-            cfg.ukf.initial.mean.position = config["ukf"]["initial"]["mean"]["position"].as<Expression>();
-            cfg.ukf.initial.mean.velocity = config["ukf"]["initial"]["mean"]["velocity"].as<Expression>();
-
-            // Set out initial covariance
-            cfg.ukf.initial.covariance.position = config["ukf"]["initial"]["covariance"]["position"].as<Expression>();
-            cfg.ukf.initial.covariance.velocity = config["ukf"]["initial"]["covariance"]["velocity"].as<Expression>();
-
-            // Set our initial state with the config means and covariances, flagging the filter to reset it
-            cfg.initial_mean.rTWw = cfg.ukf.initial.mean.position;
-            cfg.initial_mean.vTw  = cfg.ukf.initial.mean.velocity;
-
-            cfg.initial_covariance.rTWw = cfg.ukf.initial.covariance.position;
-            cfg.initial_covariance.vTw  = cfg.ukf.initial.covariance.velocity;
-            ukf.set_state(cfg.initial_mean.getStateVec(), cfg.initial_covariance.asDiagonal());
+            // Velocity filter config
+            cfg.x_cut_off_frequency = config["velocity_low_pass"]["x_cut_off_frequency"].as<double>();
+            cfg.y_cut_off_frequency = config["velocity_low_pass"]["y_cut_off_frequency"].as<double>();
 
             // Initialise the anchor frame (left foot base)
             Hwa.translation().y() = forward_kinematics<double, n_servos>(nugus_model,
@@ -352,6 +324,7 @@ namespace module::input {
                 0.0);
 
             // Update the current support phase is not the same as the walk state, a support phase change has occurred
+            bool support_phase_change = false;
             if (current_support_phase != walk_state->support_phase && walk_state != nullptr) {
                 // Update the current support phase to the new support phase
                 current_support_phase = walk_state->support_phase;
@@ -367,6 +340,8 @@ namespace module::input {
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
                 Hwa.translation().z() = 0;
                 Hwa.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwa.linear()).z()));
+
+                support_phase_change = true;
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
@@ -403,23 +378,29 @@ namespace module::input {
             Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
             sensors->Hrw          = Hwr.inverse();
 
-            // UKF update for velocity x and z
-            Eigen::Vector3d rTWw = Hwt.translation();
-            ukf.measure(rTWw,
-                        cfg.ukf.noise.measurement.flat_foot_translation,
-                        MeasurementType::FLAT_FOOT_TRANSLATION());
-            ukf.time(dt);
-            auto state = MotionModel<double>::StateVec(ukf.get_state());
+            if (!support_phase_change) {
+                // Low pass filter for torso y velocity
+                double y_current     = Hwt.translation().y();
+                double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
+                double y_dot_current = (y_current - y_prev) / dt;
+                emit(graph("y_dot_current", y_dot_current));
+                double y_dot = (dt / cfg.y_cut_off_frequency) * y_dot_current
+                               + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
 
-            // Low pass filter for y velocity
-            double y_prev    = Hwt.translation().y();
-            double y_current = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_prev;
-            double T_cutoff  = 0.01;
-            double alpha     = dt / T_cutoff;
-            double y_dot     = alpha * (y_prev - y_current) / dt + (1 - alpha) * sensors->vTw.y();
+                // Low pass filter for torso x velocity
+                double x_current     = Hwt.translation().x();
+                double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
+                double x_dot_current = (x_current - x_prev) / dt;
+                emit(graph("x_dot_current", x_dot_current));
+                double x_dot = (dt / cfg.x_cut_off_frequency) * x_dot_current
+                               + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
 
-            // Fuse the velocity estimates
-            sensors->vTw = Eigen::Vector3d(state.vTw.x(), y_dot, state.vTw.z());
+                // Fuse the velocity estimates
+                sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
+            }
+            else {
+                sensors->vTw = previous_sensors->vTw;
+            }
         }
         else {
             // Construct world {w} to torso {t} space transform from ground truth
