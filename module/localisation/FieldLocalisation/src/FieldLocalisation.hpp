@@ -29,12 +29,14 @@
 
 #include <Eigen/Core>
 #include <nuclear>
+#include <optional>
 
 #include "FieldModel.hpp"
 
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/vision/FieldIntersections.hpp"
 #include "message/vision/FieldLines.hpp"
 
 #include "utility/localisation/OccupancyMap.hpp"
@@ -47,6 +49,9 @@
 namespace module::localisation {
 
     using message::support::FieldDescription;
+
+    using message::vision::FieldIntersection;
+    using message::vision::FieldIntersections;
 
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
@@ -84,6 +89,16 @@ namespace module::localisation {
         }
     };
 
+    /// @brief Landmark struct
+    struct Landmark {
+        /// @brief Landmark position in field space
+        Eigen::Vector2d position{};
+
+        /// @brief Landmark type
+        message::vision::FieldIntersection::IntersectionType type =
+            message::vision::FieldIntersection::IntersectionType::UNKNOWN;
+    };
+
     class FieldLocalisation : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
@@ -96,6 +111,9 @@ namespace module::localisation {
 
             /// @brief Uncertainty in the process model (adds noise to the particles}
             Eigen::Matrix3d process_noise = Eigen::Matrix3d::Zero();
+
+            /// @brief Uncertainty in the measurement model
+            Eigen::Matrix2d measurement_noise = Eigen::Matrix2d::Identity();
 
             /// @brief Initial state (x,y,theta) of the robot, saved for resetting
             Eigen::Vector3d initial_state{};
@@ -117,6 +135,8 @@ namespace module::localisation {
 
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
+
+            double min_association_distance = 0.0;
         } cfg;
 
         /// @brief Last time filter was updated
@@ -130,6 +150,9 @@ namespace module::localisation {
 
         /// @brief Time at startup
         NUClear::clock::time_point startup_time;
+
+        /// @brief List of landmarks (field intersections rLFf) in field space
+        std::vector<Landmark> landmarks;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
@@ -167,6 +190,16 @@ namespace module::localisation {
          * @param fd The field dimensions
          */
         void setup_fieldline_distance_map(const FieldDescription& fd);
+
+        /**
+         * @brief Setup field landmarks
+         *
+         * @param fd The field dimensions
+         */
+        void setup_field_landmarks(const FieldDescription& fd);
+
+
+        std::optional<Eigen::Vector2d> find_closest_field_intersection(const FieldIntersection& observed_intersection);
     };
 }  // namespace module::localisation
 

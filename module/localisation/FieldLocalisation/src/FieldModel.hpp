@@ -80,6 +80,22 @@ namespace module::localisation {
             return process_noise_diagonal.asDiagonal() * dt;
         }
 
+
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(const StateVec& state,
+                                                         const Eigen::Matrix<Scalar, 2, 1>& rLFf) {
+            // Create a transform from the field state
+            auto Hfw = Eigen::Translation<Scalar, 2>(state.x(), state.y()) * Eigen::Rotation2D<Scalar>(state.z());
+
+            // Transform the landmark position from the field to the world
+            Eigen::Matrix<Scalar, 2, 1> rLWw = Hfw.inverse() * rLFf;
+            return rLWw;
+        }
+
+        template <typename T, typename U>
+        static auto difference(const T& a, const U& b) {
+            return a - b;
+        }
+
         // Getters
         [[nodiscard]] int get_rogue_count() const {
             return n_rogues;
