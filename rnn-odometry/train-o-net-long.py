@@ -5,6 +5,7 @@ import datetime
 import os
 import subprocess
 
+import joblib
 import keras
 import matplotlib.pyplot as plt
 import numpy as np
@@ -266,7 +267,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00005   # Controls how much to change the model in response to error.
-    epochs = 2000             #
+    epochs = 200             #
 
     # ** Loss functions **
     # loss_function = keras.losses.MeanAbsoluteError()
@@ -309,11 +310,11 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm = keras.layers.LSTM(60, return_sequences=True)(inputs)    # 32 originally
-    dropout = keras.layers.Dropout(rate=0.1)(lstm)
+    lstm = keras.layers.LSTM(100, return_sequences=True)(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.2)(lstm)
 
-    lstm2 = keras.layers.LSTM(20, return_sequences=True)(dropout)    # 32 originally
-    dropout2 = keras.layers.Dropout(rate=0.1)(lstm2)
+    lstm2 = keras.layers.LSTM(20, return_sequences=False)(dropout)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
     outputs = keras.layers.Dense(3, kernel_regularizer=regularizer)(dropout2)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
@@ -329,6 +330,8 @@ def main():
 
     # Note add back the model save
     model.save("models/model-" + timestamp)
+    # Save the scaler object
+    joblib.dump(scaler, 'scalers/scaler-' + timestamp)
 
 
 if __name__ == "__main__":
