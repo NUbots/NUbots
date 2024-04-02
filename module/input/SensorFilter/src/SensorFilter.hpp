@@ -138,10 +138,10 @@ namespace module::input {
         utility::math::filter::UKF<double, MotionModel> ukf{};
 
         /// @brief Current support phase of the robot
-        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+        WalkState::Phase current_walk_phase = WalkState::Phase::LEFT;
 
-        /// @brief Transform from anchor {a} to world {w} space
-        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+        /// @brief Transform from planted {p} foot frame to world {w} space
+        Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
