@@ -74,7 +74,7 @@
 }
 
 .buttonNormal .iconBefore {
-  color: #1197d3;
+  color: #F9A50D;
 }
 
 .buttonNormal .iconAfter {
@@ -84,7 +84,7 @@
 /* Type: primary ================================= */
 
 .buttonPrimary {
-  background-color: #1197d3;
+  background-color: #F9A50D;
   border-color: #0f86bd;
   color: #fff;
 }

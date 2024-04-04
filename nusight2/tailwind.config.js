@@ -16,8 +16,15 @@ const config = {
         primary: "rgba(0, 0, 0, 0.87)",
         icon: "rgba(0, 0, 0, 0.54)",
         divider: "rgba(0, 0, 0, 0.12)",
+        navigation: "rgba(0,0,0,.87)",
 
         nusight: {
+          // Red
+          100: "#ff0000",
+          // Grey
+          200: "#000000d9",
+          // Orange
+          300: "#F9A50D",
           400: "#2bb1ee",
           500: "#1197d3",
           600: "#0d76a6",
