@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 from keras.models import load_model
 from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.preprocessing import MinMaxScaler
 
 # Load data
 test_data = np.load('datasets/input_data_test.npy')
