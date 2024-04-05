@@ -5,6 +5,7 @@ import { Image } from "../../camera/image";
 import { CameraDefaultDrawOptions, CameraModel } from "../../camera/model";
 
 import { BallModel } from "./balls";
+import { BoundingBoxesModel } from "./bounding_boxes";
 import { GoalModel } from "./goals";
 import { GreenHorizonModel } from "./green_horizon";
 import { OtherRobotsModel } from "./other_robots";
@@ -16,6 +17,7 @@ type DrawOptions = CameraDefaultDrawOptions & {
   drawBalls: boolean;
   drawGoals: boolean;
   drawRobots: boolean;
+  drawBoundingBoxes: boolean;
 };
 
 export interface VisionCameraModelOpts {
@@ -28,6 +30,7 @@ export interface VisionCameraModelOpts {
   balls?: BallModel[];
   goals?: GoalModel[];
   robots?: OtherRobotsModel[];
+  boundingBoxes?: BoundingBoxesModel[];
   selected?: boolean;
 }
 
@@ -43,6 +46,7 @@ export class VisionCameraModel implements CameraModel {
   @observable.ref balls?: BallModel[];
   @observable.ref goals?: GoalModel[];
   @observable.ref robots?: OtherRobotsModel[];
+  @observable.ref boundingBoxes?: BoundingBoxesModel[];
 
   @observable drawOptions: DrawOptions;
 
@@ -56,6 +60,7 @@ export class VisionCameraModel implements CameraModel {
     this.balls = opts.balls;
     this.goals = opts.goals;
     this.robots = opts.robots;
+    this.boundingBoxes = opts.boundingBoxes;
     this.drawOptions = opts.drawOptions;
     this.selected = opts.selected ?? false;
   }
@@ -73,6 +78,7 @@ export class VisionCameraModel implements CameraModel {
         drawBalls: true,
         drawGoals: true,
         drawRobots: true,
+        drawBoundingBoxes: true,
       },
     });
   }
@@ -87,6 +93,7 @@ export class VisionCameraModel implements CameraModel {
     this.balls = that.balls;
     this.goals = that.goals;
     this.robots = that.robots;
+    this.boundingBoxes = that.boundingBoxes;
     return this;
   }
 }
