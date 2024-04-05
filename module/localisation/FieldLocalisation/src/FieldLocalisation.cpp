@@ -31,6 +31,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/state/Stability.hpp"
+#include "message/platform/RawSensors.hpp"
+
+#include "utility/math/euler.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::localisation {
 
@@ -41,6 +45,8 @@ namespace module::localisation {
     using message::localisation::ResetFieldLocalisation;
     using message::vision::FieldLines;
 
+    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     using namespace std::chrono;
@@ -58,6 +64,7 @@ namespace module::localisation {
             cfg.process_noise.diagonal()        = Eigen::Vector3d(config["process_noise"].as<Expression>());
             cfg.starting_side                   = config["starting_side"].as<std::string>();
             cfg.start_time_delay                = config["start_time_delay"].as<double>();
+            cfg.use_ground_truth_localisation   = config["use_ground_truth_localisation"].as<bool>();
             filter.model.process_noise_diagonal = config["process_noise"].as<Expression>();
             filter.model.n_particles            = config["n_particles"].as<int>();
         });
@@ -100,12 +107,22 @@ namespace module::localisation {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] { filter.set_state(cfg.initial_hypotheses); });
 
-        on<Trigger<FieldLines>, With<Stability>>().then(
+        on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
             "Particle Filter",
-            [this](const FieldLines& field_lines, const Stability& stability) {
+            [this](const FieldLines& field_lines, const Stability& stability, const RawSensors& raw_sensors) {
                 auto time_since_startup =
                     std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
                 bool fallen = stability == Stability::FALLEN || stability == Stability::FALLING;
+
+                // Emit field message using ground truth if available
+                if (cfg.use_ground_truth_localisation) {
+                    auto field(std::make_unique<Field>());
+                    field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
+                    emit(field);
+                    return;
+                }
+
+                // Otherwise calculate using field lines
                 if (!fallen && field_lines.rPWw.size() > cfg.min_observations
                     && time_since_startup > cfg.start_time_delay) {
 
@@ -122,7 +139,10 @@ namespace module::localisation {
                     filter.time(dt);
 
                     auto field(std::make_unique<Field>());
-                    field->Hfw        = compute_Hfw(filter.get_state());
+                    field->Hfw = compute_Hfw(filter.get_state());
+                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                        debug_field_localisation(field->Hfw, raw_sensors);
+                    }
                     field->covariance = filter.get_covariance();
                     if (log_level <= NUClear::DEBUG) {
                         field->particles = filter.get_particles_as_vector();
@@ -130,6 +150,27 @@ namespace module::localisation {
                     emit(field);
                 }
             });
+    }
+
+    void FieldLocalisation::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {
+        const Eigen::Isometry3d true_Hfw = Eigen::Isometry3d(raw_sensors.localisation_ground_truth.Hfw);
+        // Determine translational distance error
+        Eigen::Vector3d true_rFWw  = true_Hfw.translation();
+        Eigen::Vector3d rFWw       = (Hfw.translation());
+        Eigen::Vector3d error_rFWw = (true_rFWw - rFWw).cwiseAbs();
+        // Determine yaw, pitch, and roll error
+        Eigen::Vector3d true_Rfw  = MatrixToEulerIntrinsic(true_Hfw.rotation());
+        Eigen::Vector3d Rfw       = MatrixToEulerIntrinsic(Hfw.rotation());
+        Eigen::Vector3d error_Rfw = (true_Rfw - Rfw).cwiseAbs();
+        double quat_rot_error     = Eigen::Quaterniond(true_Hfw.linear() * Hfw.inverse().linear()).w();
+
+        // Graph translation and error from ground truth
+        emit(graph("Hfw true translation (rFWw)", true_rFWw.x(), true_rFWw.y(), true_rFWw.z()));
+        emit(graph("Hfw translation error", error_rFWw.x(), error_rFWw.y(), error_rFWw.z()));
+        // Graph rotation and error from ground truth
+        emit(graph("Rfw true angles (rpy)", true_Rfw.x(), true_Rfw.y(), true_Rfw.z()));
+        emit(graph("Rfw error (rpy)", error_Rfw.x(), error_Rfw.y(), error_Rfw.z()));
+        emit(graph("Quaternion rotational error", quat_rot_error));
     }
 
     Eigen::Isometry3d FieldLocalisation::compute_Hfw(const Eigen::Vector3d& particle) {
@@ -158,5 +199,4 @@ namespace module::localisation {
         }
         return 1.0 / (weight + std::numeric_limits<double>::epsilon());
     }
-
 }  // namespace module::localisation
