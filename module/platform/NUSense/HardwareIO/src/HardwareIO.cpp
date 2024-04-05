@@ -14,6 +14,8 @@ namespace module::platform::NUSense {
     using extension::Configuration;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
+    using message::actuation::SubcontrollerServoTarget;
+    using message::actuation::SubcontrollerServoTargets;
     using message::platform::NUSense;
     using message::platform::RawSensors;
 
@@ -145,6 +147,18 @@ namespace module::platform::NUSense {
 
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+            // Copy the data into a new message so we can use a duration instead of a timepoint
+            auto servo_targets = SubcontrollerServoTargets();
+
+            // Change the timestamp in servo targets to the difference between the timestamp and now
+            for (auto& target : commands.targets) {
+                servo_targets.targets.emplace_back(target.time - NUClear::clock::now(),
+                                                   target.id,
+                                                   target.position,
+                                                   target.gain,
+                                                   target.torque);
+            }
+
             // Write the command as one vector. ServoTargets messages are usually greater than 512 bytes but less
             // than 1024. This means that the USB2.0 protocol will split this up and will be received on the nusense
             // side as chunks of 512 as 512 bytes is the maximum bulk size that 2.0 allows. This also implies that the
@@ -152,7 +166,8 @@ namespace module::platform::NUSense {
             // is about 700).
             std::array<char, 3> header = {(char) 0xE2, (char) 0x98, (char) 0xA2};
 
-            std::vector<uint8_t> payload = NUClear::util::serialise::Serialise<ServoTargets>::serialise(commands);
+            std::vector<uint8_t> payload =
+                NUClear::util::serialise::Serialise<SubcontrollerServoTargets>::serialise(servo_targets);
 
             int payload_length                  = payload.size();
             uint8_t high_byte                   = (payload_length >> 8) & 0xFF;
