@@ -122,30 +122,30 @@ namespace module::platform::NUSense {
 
         // Handle successfully decoded NUSense data
         on<Trigger<NUSense>>().then([this](const NUSense& data) {
-            // Will contain data from the NUSense
-            RawSensors sensors;
+            // Will contain data from the NUSense to emit to the rest of the system
+            auto sensors = std::make_unique<RawSensors>();
 
             // Timestamp when this message was created because the incoming packet doesn't have a timestamp
-            sensors.timestamp = NUClear::clock::now();
+            sensors->timestamp = NUClear::clock::now();
 
             // Subcontroller data
-            sensors.subcontroller_error = 0;  // not yet implemented
-            sensors.led_panel           = 0;  // not yet implemented
-            sensors.head_led            = 0;  // not yet implemented
-            sensors.eye_led             = 0;  // not yet implemented
-            sensors.buttons             = 0;  // not yet implemented
+            sensors->subcontroller_error = 0;  // not yet implemented
+            sensors->led_panel           = 0;  // not yet implemented
+            sensors->head_led            = 0;  // not yet implemented
+            sensors->eye_led             = 0;  // not yet implemented
+            sensors->buttons             = 0;  // not yet implemented
 
             // Set IMU
-            sensors.accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
-            sensors.gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
+            sensors->accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
+            sensors->gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
 
             // Battery data
-            sensors.battery = 0;  // not yet implemented
+            sensors->battery = 0;  // not yet implemented
 
             // Servo data
             for (const auto& [key, val] : data.servo_map) {
                 // Get a reference to the servo we are populating
-                RawSensors::Servo& servo = utility::platform::getRawServo(val.id - 1, sensors);
+                RawSensors::Servo& servo = utility::platform::getRawServo(val.id - 1, *sensors);
                 // fill all servo values from the reference
                 servo.hardware_error        = val.hardware_error;
                 servo.torque_enabled        = val.torque_enabled;
@@ -175,7 +175,7 @@ namespace module::platform::NUSense {
             }
 
             // Emit the raw sensor data
-            emit(std::make_unique<RawSensors>(sensors));
+            emit(std::move(sensors));
         });
 
 
