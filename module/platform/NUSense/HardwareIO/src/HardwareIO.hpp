@@ -27,16 +27,13 @@
 #ifndef MODULE_PLATFORM_NUSENSE_HARDWAREIO_HPP
 #define MODULE_PLATFORM_NUSENSE_HARDWAREIO_HPP
 
+#include <array>
 #include <nuclear>
-#include <vector>
 
 #include "NUgus.hpp"
 #include "util/PacketHandler.hpp"
 
-#include "message/platform/RawSensors.hpp"
-
 #include "utility/io/uart.hpp"
-#include "utility/platform/RawSensors.hpp"
 
 namespace module::platform::NUSense {
 

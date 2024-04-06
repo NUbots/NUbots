@@ -26,15 +26,17 @@
  */
 #include "HardwareIO.hpp"
 
-#include <cmath>
+#include <Eigen/Core>
 #include <fmt/format.h>
-#include <sstream>
+#include <vector>
 
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
+#include "message/platform/RawSensors.hpp"
 
+#include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::platform::NUSense {

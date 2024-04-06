@@ -29,8 +29,6 @@
 #define MODULE_PLATFORM_NUSENSE_PACKETHANDLER
 
 #include <algorithm>
-#include <cstdint>
-#include <iterator>
 
 #include "message/platform/NUSenseData.hpp"
 
