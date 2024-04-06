@@ -22,7 +22,8 @@ export class LocalisationNetwork {
     this.network.on(message.localisation.Robots, this.onRobots);
     this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
-    this.network.on(message.vision.Goals, this.onGoals);
+    this.network.on(message.vision.Goals, this.onVisionGoals);
+    this.network.on(message.localisation.Goals, this.onLocalisationGoals);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
   }
 
@@ -84,13 +85,24 @@ export class LocalisationNetwork {
   }
 
   @action.bound
-  private onGoals(robotModel: RobotModel, goalsMessage: message.vision.Goals) {
-    const { Hcw, goals } = goalsMessage;
+  private onVisionGoals(robotModel: RobotModel, vision_goals: message.vision.Goals) {
+    const { Hcw, goals } = vision_goals;
     const Hwc = Matrix4.from(Hcw).invert();
     const robot = LocalisationRobotModel.of(robotModel);
     robot.goals.points = goals.map((goal) => ({
       bottom: Vector3.from(goal.post?.bottom).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
       top: Vector3.from(goal.post?.top).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+    }));
+  }
+
+  @action.bound
+  private onLocalisationGoals(robotModel: RobotModel, localisation_goals: message.vision.Goals) {
+    const { Hcw, goals } = localisation_goals;
+    const Hwc = Matrix4.from(Hcw).invert();
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.goals.points = goals.map((goal) => ({
+      bottom: Vector3.from(goal.rGWw),
+      top: Vector3.from(goal.rGWW).add(new Vector3(0, 0, 1)),
     }));
   }
 
