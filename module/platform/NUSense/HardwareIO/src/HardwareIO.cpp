@@ -82,7 +82,6 @@ namespace module::platform::NUSense {
 
             // If packet successfully decoded
             if (nusense_receiver.handle()) {
-
                 const auto& nusense_msg = nusense_receiver.get_nusense_message();
 
                 log<NUClear::DEBUG>(
