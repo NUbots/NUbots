@@ -15,25 +15,36 @@ export type RobotSelectorProps = {
   selectRobot(robot: RobotModel): void;
 };
 
+// const svgStyle = {
+//   fill: "#F9A50D",
+//   height: "2.85em",
+//   margin: "0 auto",
+//   padding: "0.25em",
+//   transition: "fill 0.25s ease-out",
+//   width: "auto",
+// };
+
 export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props;
+
   const dropdownToggle = (
-    <button className={style.button}>
-      <IconRobot />
+    <button className="{style.button}">
+      {/* <IconRobot style={svgStyle} /> */}
+      <IconRobot className="h-9 p-1 w-auto transition duration-75 ease-in-out fill-grey-100 hover:fill-orange-100" />
       Select robots
     </button>
   );
   return (
-    <div className={style.robotSelector}>
+    <div className="{style.robotSelector}">
       <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
-        <div className={style.robots}>
+        <div className="{style.robots}">
           {robots.length === 0 && (
-            <div className={style.empty}>
-              <div className={style.emptyIcon}>
+            <div className="{style.empty}">
+              <div className="{style.emptyIcon}">
                 <IconPlug />
               </div>
-              <div className={style.emptyTitle}>No connected robots</div>
-              <span className={style.emptyDescription}>Run yarn start:sim to simulate robots</span>
+              <div className="{style.emptyTitle}">No connected robots</div>
+              <span className="{style.emptyDescription}">Run yarn start:sim to simulate robots</span>
             </div>
           )}
           {robots.map((robot) => (
