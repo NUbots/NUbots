@@ -12,12 +12,16 @@ import { RobotModel } from "../robot/model";
 
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
+import { FieldIntersection } from "./robot_model";
 
 export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.vision.FieldLines, this.onFieldLines);
+    this.network.on(message.localisation.Ball, this.onBall);
+    this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
+    this.network.on(message.vision.Goals, this.onGoals);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -33,12 +37,50 @@ export class LocalisationNetwork {
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
+    robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
   };
 
   @action.bound
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
     const robot = LocalisationRobotModel.of(robotModel);
-    robot.fieldLinesDots.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw).applyMatrix4(robot.Hfw));
+    robot.fieldLinePoints.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw));
+  }
+
+  @action.bound
+  private onBall(robotModel: RobotModel, ball: message.localisation.Ball) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.ball = { rBWw: Vector3.from(ball.rBWw) };
+  }
+
+  @action.bound
+  private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+      let intersection_type = "";
+      if (intersection.type === 0) {
+        intersection_type = "UNKNOWN";
+      } else if (intersection.type === 1) {
+        intersection_type = "L_INTERSECTION";
+      } else if (intersection.type === 2) {
+        intersection_type = "T_INTERSECTION";
+      } else if (intersection.type === 3) {
+        intersection_type = "X_INTERSECTION";
+      }
+
+      return new FieldIntersection({ type: intersection_type, position: Vector3.from(intersection.rIWw) });
+    });
+  }
+
+  @action.bound
+  private onGoals(robotModel: RobotModel, goalsMessage: message.vision.Goals) {
+    const { Hcw, goals } = goalsMessage;
+    const Hwc = Matrix4.from(Hcw).invert();
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.goals.points = goals.map((goal) => ({
+      bottom: Vector3.from(goal.post?.bottom).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+      top: Vector3.from(goal.post?.top).multiplyScalar(goal.post!.distance!).applyMatrix4(Hwc),
+    }));
   }
 
   @action

@@ -1,16 +1,15 @@
+# This role is used for testing VisualMesh output with an image. It does not require any physical robot hardware or
+# external simulation.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run
-  support::SignalCatcher
-  support::logging::ConsoleLogHandler
-  extension::FileWatcher
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  actuation::KinematicsConfiguration
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   # Support
   network::NUClearNet
   network::NetworkForwarder
-  # support::VirtualCamera
-  support::configuration::SoccerConfig
   # Sensors
   input::FakeCamera
   input::ImageDecompressor

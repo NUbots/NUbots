@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Check for c++ changes
         uses: dorny/paths-filter@v2
@@ -84,7 +84,7 @@ jobs:
 
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Setup docker buildx
       - name: 🐳 Set up docker buildx 🐳
@@ -152,7 +152,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: CCache Directory
         run: ccache -k cache_dir
@@ -196,7 +196,10 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        # Need to fetch everything in order to know when files were added/updated
+        with:
+          fetch-depth: 0
 
       - name: Set Git Security
         run: git config --global --add safe.directory '*'

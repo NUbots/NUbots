@@ -1,12 +1,41 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include <fmt/format.h>
 
 #include "Convert.hpp"
 #include "HardwareIO.hpp"
 
+#include "message/output/Buzzer.hpp"
+
 #include "utility/math/comparison.hpp"
 
 namespace module::platform::OpenCR {
 
+    using message::output::Buzzer;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
 
@@ -55,7 +84,7 @@ namespace module::platform::OpenCR {
                                            -convert::acc(data.acc[1]),   // Y
                                            -convert::acc(data.acc[2]));  // Z
         // Command send/receive errors only
-        opencr_state.error_flags = packet.error;
+        opencr_state.packet_error = packet.error;
 
         // Work out a battery charged percentage
         battery_state.current_voltage = convert::voltage(data.voltage);
@@ -127,6 +156,21 @@ namespace module::platform::OpenCR {
             convert::position(servo_index, data.present_position, nugus.servo_direction, nugus.servo_offset);
         servo_states[servo_index].voltage     = convert::voltage(data.present_voltage);
         servo_states[servo_index].temperature = convert::temperature(data.present_temperature);
+
+        // Buzz if any servo is hot, use the boolean flag to turn the buzzer off once the servo is no longer hot
+        // A servo is defined to be hot if the detected temperature exceeds the maximum tolerance in the configuration
+        bool any_servo_hot = false;
+        for (const auto& servo : servo_states) {
+            if (servo.temperature > cfg.alarms.temperature.level) {
+                any_servo_hot = true;
+                emit(std::make_unique<Buzzer>(cfg.alarms.temperature.buzzer_frequency));
+                break;
+            }
+        }
+
+        if (!any_servo_hot) {
+            emit(std::make_unique<Buzzer>(0));
+        }
 
         // If this servo has not been initialised yet, set the goal states to the current states
         if (!servo_states[servo_index].initialised) {

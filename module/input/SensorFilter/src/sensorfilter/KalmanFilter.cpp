@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2023 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "SensorFilter.hpp"
@@ -23,7 +31,7 @@
 
 #include "message/actuation/BodySide.hpp"
 
-#include "utility/actuation/ForwardKinematics.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -34,7 +42,7 @@ namespace module::input {
 
     using extension::Configuration;
 
-    using utility::actuation::kinematics::calculateGroundSpace;
+    using utility::input::FrameID;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
@@ -49,13 +57,20 @@ namespace module::input {
         // Initialise the Kalman filter
         kf.update(cfg.Ac, cfg.Bc, cfg.C, cfg.Q, cfg.R);
         kf.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
-        Hwt.translation() = Eigen::VectorXd(config["kalman"]["initial_rTWw"].as<Expression>());
+        Hwt = cfg.initial_Hwt;
         update_loop.enable();
+    }
+
+    void SensorFilter::reset_kf() {
+        kf.reset(Eigen::VectorXd::Zero(n_states), Eigen::MatrixXd::Identity(n_states, n_states));
+        Hwt = cfg.initial_Hwt;
     }
 
     void SensorFilter::update_odometry_kf(std::unique_ptr<Sensors>& sensors,
                                           const std::shared_ptr<const Sensors>& previous_sensors,
-                                          const RawSensors& raw_sensors) {
+                                          const RawSensors& raw_sensors,
+                                          const std::shared_ptr<const Stability>& stability,
+                                          const std::shared_ptr<const WalkState>& walk_state) {
         // **************** Time Update ****************
         // Calculate our time offset from the last read then update the filter's time
         const double dt = std::max(
@@ -65,7 +80,9 @@ namespace module::input {
             0.0);
 
         // Integrate the walk command to estimate the change in position (x,y) and yaw orientation
-        integrate_walkcommand(dt);
+        if (walk_state != nullptr && stability != nullptr) {
+            integrate_walkcommand(dt, *stability, *walk_state);
+        }
 
         // Integrate the rotational velocity to predict the change in orientation (roll, pitch)
         Eigen::Matrix<double, n_inputs, 1> u;
@@ -83,12 +100,12 @@ namespace module::input {
         y << est_roll, est_pitch, sensors->gyroscope.x(), sensors->gyroscope.y();
         kf.measure(y);
 
-        // Update the height of the torso using the kinematics from a foot which is on the ground
+        // Compute the height of the torso using the kinematics from a foot which is on the ground
         if (sensors->feet[BodySide::LEFT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::L_ANKLE_ROLL]).inverse().translation().z();
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE]).inverse().translation().z();
         }
         else if (sensors->feet[BodySide::RIGHT].down) {
-            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[ServoID::R_ANKLE_ROLL].inverse()).translation().z();
+            Hwt.translation().z() = Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse()).translation().z();
         }
 
         // **************** Construct Odometry Output ****************

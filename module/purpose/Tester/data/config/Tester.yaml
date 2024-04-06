@@ -1,0 +1,26 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Tasks to emit on startup. Note: 0 priority will not emit the task.
+tasks:
+  # Strategies
+  align_ball_to_goal_priority: 0
+  find_ball_priority: 0
+  look_at_ball_priority: 0
+  walk_to_ball_priority: 0
+  walk_to_field_position_priority: 0
+  kick_to_goal_priority: 0
+  stand_still_priority: 0
+
+  # Planners
+  kick_to_priority: 0
+  look_around_priority: 0
+
+  # Skills
+  say_priority: 0
+
+# Position to walk to when emitting WalkToFieldPosition [x, y, theta]
+walk_to_field_position_position: [0, 0, 0]
+
+# What to have the robot say when speaking
+say_text: "Hello!"

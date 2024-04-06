@@ -4,9 +4,11 @@ import { CameraViewModel } from "../../camera/view_model";
 import { VisionRobotModel } from "../model";
 
 import { BallsViewModel } from "./balls";
+import { BoundingBoxesViewModel } from "./bounding_boxes";
 import { GoalsViewModel } from "./goals";
 import { GreenHorizonViewModel } from "./green_horizon";
 import { VisionCameraModel } from "./model";
+import { OtherRobotsViewModel } from "./other_robots";
 import { VisualMeshViewModel } from "./visual_mesh";
 
 export class VisionCameraViewModel extends CameraViewModel {
@@ -25,6 +27,8 @@ export class VisionCameraViewModel extends CameraViewModel {
       drawOptions.drawGreenHorizon && this.greenHorizon?.greenHorizon(),
       drawOptions.drawBalls && this.balls?.balls(),
       drawOptions.drawGoals && this.goals?.goals(),
+      drawOptions.drawRobots && this.robots?.robots(),
+      drawOptions.drawBoundingBoxes && this.boundingBoxes?.boundingBoxes(),
     ];
   };
 
@@ -54,8 +58,30 @@ export class VisionCameraViewModel extends CameraViewModel {
   }
 
   @computed
+  private get robots(): OtherRobotsViewModel | undefined {
+    return (
+      this.model.robots &&
+      OtherRobotsViewModel.of(this.model.robots, this.model.params, this.canvas, this.imageAspectRatio)
+    );
+  }
+
+  @computed
+  private get boundingBoxes(): BoundingBoxesViewModel | undefined {
+    return (
+      this.model.boundingBoxes &&
+      BoundingBoxesViewModel.of(
+        this.model.boundingBoxes,
+        this.model.params,
+        this.canvas,
+        this.imageAspectRatio,
+        this.model.image,
+      )
+    );
+  }
+
+  @computed
   private get visualMesh(): VisualMeshViewModel | undefined {
     const { visualMesh, params } = this.model;
-    return visualMesh && VisualMeshViewModel.of(visualMesh, params, this.canvas);
+    return visualMesh && VisualMeshViewModel.of(visualMesh, params, this.canvas, this.imageAspectRatio);
   }
 }

@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "HardwareIO.hpp"
 
 #include <fmt/format.h>
@@ -8,12 +34,11 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
+#include "message/output/Buzzer.hpp"
 
 #include "utility/math/angle.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/support/yaml_expression.hpp"
-
-#define DEBUG_ENABLE_BUTTON_SPOOF 1
 
 namespace module::platform::OpenCR {
 
@@ -22,22 +47,92 @@ namespace module::platform::OpenCR {
     using message::actuation::ServoTargets;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
+    using utility::input::ServoID;
     using utility::support::Expression;
 
-    using message::platform::ButtonMiddleDown;
+    using message::output::Buzzer;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
+
+        packet_watchdog =
+            on<Watchdog<PacketWatchdog, 20, std::chrono::milliseconds>, Sync<PacketWatchdog>>()
+                .then([this] {
+                    // This is a hacky fix because the watchdog is not disabled quickly enough at the beginning. This
+                    // may be related to the out of order packets with Sync within NUClear. This should be fixed in a
+                    // later version of NUClear.
+                    if (model_watchdog.enabled()) {
+                        log<NUClear::WARN>(
+                            "Packet watchdog cannot be enabled while model watchdog is enabled. You may see this "
+                            "warning at the start of the program. This is expected as the watchdog reaction may still "
+                            "be disabling.");
+                        packet_watchdog.disable();
+                        return;
+                    }
+
+                    // Check what the hangup was
+
+                    int num_packets_dropped        = 0;                 // keep track of how many we dropped
+                    NUgus::ID first_dropped_packet = NUgus::ID::NO_ID;  // keep track in case we have a chain
+
+                    // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
+                    // any packets, otherwise is the nonzero ID of the timed out device
+                    for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
+
+                        // Delete the packet we're waiting on
+                        packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
+
+                        // notify with ID and servo name
+                        log<NUClear::WARN>(fmt::format("Dropped packet from ID {} ({})",
+                                                       int(dropout_id),
+                                                       nugus.device_name(dropout_id)));
+
+                        // if this is the first packet, set our flag
+                        if (num_packets_dropped == 0) {
+                            first_dropped_packet = dropout_id;
+                        }
+
+                        // increment our counter
+                        num_packets_dropped++;
+                    }
+
+                    // if this is the first packet then send a warning
+                    if (num_packets_dropped > 1) {
+                        log<NUClear::WARN>(
+                            fmt::format("NOTE: A dropped response packet by a dynamixel device in a SYNC READ/WRITE "
+                                        "chain will cause all later packets (of higher ID) to be dropped. Consider "
+                                        "checking cables for ID {} ({})",
+                                        int(first_dropped_packet),
+                                        nugus.device_name(first_dropped_packet)));
+                    }
+
+                    // Send a request for all servo packets, only if there were packets dropped
+                    // In case the system stops for some other reason, we don't want the watchdog
+                    // to make it automatically restart
+                    if (num_packets_dropped > 0) {
+                        log<NUClear::WARN>("Requesting servo packets to restart system");
+                        send_servo_request();
+                    }
+                })
+                .disable();
+
+        model_watchdog =
+            on<Watchdog<ModelWatchdog, 500, std::chrono::milliseconds>, Sync<ModelWatchdog>>()
+                .then([this] {
+                    log<NUClear::WARN>(fmt::format("OpenCR model information not received, restarting system"));
+                    // Clear all packet queues just in case
+                    queue_clear_all();
+                    // Restart the system and exit the watchdog
+                    startup();
+                    return;
+                })
+                .enable();
+
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Make sure OpenCR is operating at the correct baud rate (based on config params)
-            if (opencr.connected()) {
-                opencr.close();
-            }
-
-            opencr.open(config["opencr"]["device"], config["opencr"]["baud"]);
+            opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
             byte_wait   = config["opencr"]["byte_wait"];
             packet_wait = config["opencr"]["packet_wait"];
 
@@ -57,56 +152,32 @@ namespace module::platform::OpenCR {
                 nugus.servo_direction[i]  = config["servos"][i]["direction"].as<Expression>();
                 servo_states[i].simulated = config["servos"][i]["simulated"].as<bool>();
             }
+
+            // populate alarm config levels
+            cfg.alarms.temperature.level            = config["alarms"]["temperature"]["level"].as<float>();
+            cfg.alarms.temperature.buzzer_frequency = config["alarms"]["temperature"]["buzzer_frequency"].as<float>();
+
+            // populate battery config levels
+            battery_state.charged_voltage = config["battery"]["charged_voltage"].as<float>();
+            battery_state.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
+            battery_state.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
         });
 
         on<Startup>().then("HardwareIO Startup", [this] {
-            startup();
+            // The first thing to do is get the model information
+            // The model watchdog is started, which has a longer time than the packet watchdog
+            // The packet watchdog is disabled until we start the main loop
+            model_watchdog.enable();
+            packet_watchdog.disable();
 
-#if DEBUG_ENABLE_BUTTON_SPOOF
-            // trigger scriptrunner
-            log<NUClear::INFO>("Simulating Middle Button Down in 3 seconds");
-            emit<Scope::DELAY>(std::make_unique<ButtonMiddleDown>(), std::chrono::seconds(3));
-#endif  // DEBUG_ENABLE_BUTTON_SPOOF
+            // The startup function sets up the subcontroller state
+            startup();
         });
 
         on<Shutdown>().then("HardwareIO Shutdown", [this] {
             // Close our connection to the OpenCR
             if (opencr.connected()) {
                 opencr.close();
-            }
-        });
-
-        on<Watchdog<HardwareIO, 2, std::chrono::seconds>, Sync<HardwareIO>>().then([this] {
-            // First, check if this is the model info packet, because if it is, the system
-            // startup failed, and we need to re-trigger it.
-            if (opencr_waiting() && packet_queue[NUgus::ID::OPENCR].front() == PacketTypes::MODEL_INFORMATION) {
-                log<NUClear::WARN>(fmt::format("OpenCR model information not recieved, restarting system"));
-                // Clear all packet queues just in case
-                queue_clear_all();
-                // Restart the system and exit the watchdog
-                startup();
-                return;
-            }
-
-            // Check what the hangup was
-            bool packet_dropped = false;
-            // The result of the assignment is 0 (NUgus::ID::NO_ID) if we aren't waiting on
-            // any packets, otherwise is the nonzero ID of the timed out device
-            for (NUgus::ID dropout_id; (dropout_id = queue_item_waiting()) != NUgus::ID::NO_ID;) {
-                // delete the packet we're waiting on
-                packet_queue[dropout_id].erase(packet_queue[dropout_id].begin());
-                log<NUClear::WARN>(fmt::format("Dropped packet from ID {}", int(dropout_id)));
-                // set flag
-                packet_dropped = true;
-            }
-
-
-            // Send a request for all servo packets, only if there were packets dropped
-            // In case the system stops for some other reason, we don't want the watchdog
-            // to make it automatically restart
-            if (packet_dropped) {
-                log<NUClear::WARN>("Requesting servo packets to restart system");
-                send_servo_request();
             }
         });
 
@@ -124,7 +195,7 @@ namespace module::platform::OpenCR {
 
             // Check we can process this packet
             if (packet_queue.find(packet_id) == packet_queue.end()) {
-                log<NUClear::WARN>(fmt::format("Recieved packet for unexpected ID {}.", packet.id));
+                log<NUClear::WARN>(fmt::format("received packet for unexpected ID {}.", packet.id));
                 return;
             }
 
@@ -136,15 +207,12 @@ namespace module::platform::OpenCR {
 
             /* All good now */
 
-            // Service the watchdog because we recieved a valid packet
-            emit<Scope::WATCHDOG>(ServiceWatchdog<HardwareIO>());
-
             // Pop the front of the packet queue
             auto& info = packet_queue[packet_id].front();
             packet_queue[packet_id].erase(packet_queue[packet_id].begin());
 
             /// @brief handle incoming packets, and send next request if all packets were handled
-            // -> Recieved model information packet
+            // -> received model information packet
             //    -> Trigger first servo request
             // -> Received all servo packets
             //    -> Request OpenCR packet
@@ -153,12 +221,20 @@ namespace module::platform::OpenCR {
             switch (info) {
                 // Handles OpenCR model and version information
                 case PacketTypes::MODEL_INFORMATION:
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<ModelWatchdog>());
                     // call packet handler
                     process_model_information(packet);
 
-                    // check if we recieved the final packet we are expecting
+                    // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("Initial data received, kickstarting system");
+
+                        // Stop the model watchdog since we have it now
+                        // Start the packet watchdog since the main loop is now starting
+                        model_watchdog.disable();
+                        model_watchdog.unbind();
+                        log<NUClear::WARN>("Packet watchdog enabled");
+                        packet_watchdog.enable();
 
                         // At the start, we want to query the motors so we can store their state internally
                         // This will start the loop of reading and writing to the servos and opencr
@@ -174,10 +250,11 @@ namespace module::platform::OpenCR {
 
                 // Handles OpenCR sensor data
                 case PacketTypes::OPENCR_DATA:
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<PacketWatchdog>());
                     // call packet handler
                     process_opencr_data(packet);
 
-                    // check if we recieved the final packet we are expecting
+                    // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("OpenCR data received, requesting servo data");
                         send_servo_request();
@@ -187,10 +264,11 @@ namespace module::platform::OpenCR {
 
                 // Handles servo data
                 case PacketTypes::SERVO_DATA:
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<PacketWatchdog>());
                     // call packet handler
                     process_servo_data(packet);
 
-                    // check if we recieved the final packet we are expecting
+                    // check if we received the final packet we are expecting
                     if (queue_item_waiting() == NUgus::ID::NO_ID) {
                         log<NUClear::TRACE>("All servos received, requesting OpenCR data");
                         send_opencr_request();
@@ -265,6 +343,11 @@ namespace module::platform::OpenCR {
             opencr_state.led_panel.led3 = led.led3;
             opencr_state.led_panel.led4 = led.led4;
             opencr_state.dirty          = true;
+        });
+
+        on<Trigger<Buzzer>>().then([this](const Buzzer& buzzer_msg) {
+            // Fill the necessary field within the opencr_state struct
+            opencr_state.buzzer = buzzer_msg.frequency;
         });
     }
 

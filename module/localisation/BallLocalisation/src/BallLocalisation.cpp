@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2022 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "BallLocalisation.hpp"
 
 #include <Eigen/Geometry>
@@ -81,9 +107,8 @@ namespace module::localisation {
                 Eigen::Vector3d rBWw   = Eigen::Vector3d::Zero();
                 double lowest_distance = std::numeric_limits<double>::max();
                 for (const auto& ball : balls.balls) {
-                    Eigen::Vector3d current_rBWw =
-                        Hwc * reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<double>());
-                    double current_distance = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
+                    Eigen::Vector3d current_rBWw = Hwc * ball.measurements[0].rBCc.cast<double>();
+                    double current_distance      = (current_rBWw.head<2>() - state.rBWw).squaredNorm();
                     if (current_distance < lowest_distance) {
                         lowest_distance = current_distance;
                         rBWw            = current_rBWw;

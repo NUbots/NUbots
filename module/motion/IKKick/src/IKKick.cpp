@@ -1,20 +1,28 @@
 /*
- * This file is part of NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2015 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "IKKick.hpp"
@@ -31,6 +39,7 @@
 
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/behaviour/Action.hpp"
+#include "utility/input/FrameID.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -41,6 +50,7 @@ namespace module::motion {
 
     using message::input::Sensors;
     using LimbID  = utility::input::LimbID;
+    using FrameID = utility::input::FrameID;
     using ServoID = utility::input::ServoID;
     using message::behaviour::KickPlan;
     using message::behaviour::ServoCommands;
@@ -52,7 +62,7 @@ namespace module::motion {
     using message::actuation::KinematicsModel;
     using message::support::FieldDescription;
 
-    using utility::actuation::kinematics::calculateLegJoints;
+    using utility::actuation::kinematics::calculate_leg_joints;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
     using utility::nusight::graph;
@@ -117,8 +127,8 @@ namespace module::motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Eigen::Isometry3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                Eigen::Isometry3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                Eigen::Isometry3d leftFoot(sensors.Htx[FrameID::L_ANKLE_ROLL]);
+                Eigen::Isometry3d rightFoot(sensors.Htx[FrameID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -214,8 +224,8 @@ namespace module::motion {
                 std::vector<std::pair<ServoID, float>> joints;
 
                 // IK
-                auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
-                auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
+                auto kickJoints    = calculate_leg_joints(kinematicsModel, kickFootGoal, kickFoot);
+                auto supportJoints = calculate_leg_joints(kinematicsModel, supportFootGoal, supportFoot);
 
                 // Combine left and right legs
                 joints.insert(joints.end(), kickJoints.begin(), kickJoints.end());
