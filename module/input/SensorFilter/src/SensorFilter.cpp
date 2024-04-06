@@ -313,8 +313,6 @@ namespace module::input {
                                        const std::shared_ptr<const Sensors>& previous_sensors,
                                        const RawSensors& raw_sensors,
                                        const std::shared_ptr<const WalkState>& walk_state) {
-
-
         if (!cfg.use_ground_truth) {
             // Compute time since last update
             const double dt = std::max(
@@ -323,9 +321,9 @@ namespace module::input {
                     .count(),
                 0.0);
 
-            // Update the current support phase is not the same as the walk state, a support phase change has occurred
-            bool support_phase_change = false;
-            if (current_support_phase != walk_state->support_phase && walk_state != nullptr) {
+            // Update the current support phase is not the same as the walk state, a support phase change has
+            // occurred
+            if (walk_state != nullptr && current_support_phase != walk_state->support_phase) {
                 // Update the current support phase to the new support phase
                 current_support_phase = walk_state->support_phase;
 
@@ -340,8 +338,6 @@ namespace module::input {
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
                 Hwa.translation().z() = 0;
                 Hwa.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwa.linear()).z()));
-
-                support_phase_change = true;
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
@@ -378,29 +374,24 @@ namespace module::input {
             Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
             sensors->Hrw          = Hwr.inverse();
 
-            if (!support_phase_change) {
-                // Low pass filter for torso y velocity
-                double y_current     = Hwt.translation().y();
-                double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
-                double y_dot_current = (y_current - y_prev) / dt;
-                emit(graph("y_dot_current", y_dot_current));
-                double y_dot = (dt / cfg.y_cut_off_frequency) * y_dot_current
-                               + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
+            // Low pass filter for torso y velocity
+            double y_current     = Hwt.translation().y();
+            double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
+            double y_dot_current = (y_current - y_prev) / dt;
+            emit(graph("y_dot_current", y_dot_current));
+            double y_dot = (dt / cfg.y_cut_off_frequency) * y_dot_current
+                           + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
 
-                // Low pass filter for torso x velocity
-                double x_current     = Hwt.translation().x();
-                double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
-                double x_dot_current = (x_current - x_prev) / dt;
-                emit(graph("x_dot_current", x_dot_current));
-                double x_dot = (dt / cfg.x_cut_off_frequency) * x_dot_current
-                               + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
+            // Low pass filter for torso x velocity
+            double x_current     = Hwt.translation().x();
+            double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
+            double x_dot_current = (x_current - x_prev) / dt;
+            emit(graph("x_dot_current", x_dot_current));
+            double x_dot = (dt / cfg.x_cut_off_frequency) * x_dot_current
+                           + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
 
-                // Fuse the velocity estimates
-                sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
-            }
-            else {
-                sensors->vTw = previous_sensors->vTw;
-            }
+            // Fuse the velocity estimates
+            sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
         }
         else {
             // Construct world {w} to torso {t} space transform from ground truth
