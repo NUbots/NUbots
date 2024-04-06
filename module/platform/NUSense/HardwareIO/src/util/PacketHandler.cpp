@@ -103,12 +103,12 @@ namespace module::platform::NUSense {
         if (rx_buffer.size < RX_BUF_SIZE) {
             // If the max buffer size is exceeded, wrap around using 2 memcpy calls
             if (rx_buffer.back + len > RX_BUF_SIZE) {
-                memcpy(&rx_buffer.data[rx_buffer.back], &buf[0], RX_BUF_SIZE - rx_buffer.back);
-                memcpy(&rx_buffer.data[0], &buf[RX_BUF_SIZE - rx_buffer.back], rx_buffer.back + len - RX_BUF_SIZE);
+                std::copy(&rx_buffer.data[rx_buffer.back], &buf[0], RX_BUF_SIZE - rx_buffer.back);
+                std::copy(&rx_buffer.data[0], &buf[RX_BUF_SIZE - rx_buffer.back], rx_buffer.back + len - RX_BUF_SIZE);
             }
             // If not then 1 memcpy call should suffice
             else {
-                memcpy(&rx_buffer.data[rx_buffer.back], &buf[0], len);
+                std::copy(&rx_buffer.data[rx_buffer.back], &buf[0], len);
             }
 
             rx_buffer.back = (rx_buffer.back + len) % RX_BUF_SIZE;
