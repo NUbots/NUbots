@@ -30,25 +30,21 @@ namespace module::platform::NUSense {
 
             nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
 
-            log<NUClear::INFO>("PORT OPENED");
+            log<NUClear::INFO>("Port to NUSense opened.");
         });
 
         on<Shutdown>().then("NUSense HardwareIO Shutdown", [this] {
-            // Close our connection to the OpenCR
+            // Close our connection to NUSense
             if (nusense.connected()) {
                 nusense.close();
             }
         });
 
-        // When we receive data back from NUSense, we handle it here
+        // Handle data sent from NUSense
         on<IO>(nusense.native_handle(), IO::READ).then([this] {
-            // log<NUClear::DEBUG>("In IO reaction");
             // Read from NUsense
             uint32_t num_bytes = nusense.read(nusense_usb_bytes.data(), 512);
-            // log<NUClear::INFO>(fmt::format("num_bytes: {}", num_bytes));
             nusense_receiver.receive(num_bytes, nusense_usb_bytes.data());
-
-            // log<NUClear::INFO>(fmt::format("bytes received: {}", num_bytes));
 
             // If packet successfully decoded
             if (nusense_receiver.handle()) {
@@ -86,34 +82,34 @@ namespace module::platform::NUSense {
                     log<NUClear::DEBUG>(fmt::format("     temp: {}", val.temperature));
                 }
 
-                // emit the nusense msg to be captured by the reactino below.
+                // Emit the NUSense msg to be captured by the reaction below.
                 emit<Scope::DIRECT>(std::make_unique<NUSense>(nusense_msg));
             }
         });
 
-        // handle successfully decoded NUSense data
+        // Handle successfully decoded NUSense data
         on<Trigger<NUSense>>().then([this](const NUSense& data) {
-            /* temp message to fill up */
+            // Will contain data from the NUSense
             RawSensors sensors;
 
-            /* Timestamp when this message was created because the incoming packet doesn't have a timestamp*/
+            // Timestamp when this message was created because the incoming packet doesn't have a timestamp
             sensors.timestamp = NUClear::clock::now();
 
-            /* Subcontroller data */
+            // Subcontroller data
             sensors.subcontroller_error = 0;  // not yet implemented
             sensors.led_panel           = 0;  // not yet implemented
             sensors.head_led            = 0;  // not yet implemented
             sensors.eye_led             = 0;  // not yet implemented
             sensors.buttons             = 0;  // not yet implemented
 
-            /* IMU */
+            // Set IMU
             sensors.accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
             sensors.gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
 
-            /* Battery data */
+            // Battery data
             sensors.battery = 0;  // not yet implemented
 
-            /* Servo data */
+            // Servo data
             for (const auto& [key, val] : data.servo_map) {
                 // Get a reference to the servo we are populating
                 RawSensors::Servo& servo = utility::platform::getRawServo(val.id - 1, sensors);
@@ -141,7 +137,7 @@ namespace module::platform::NUSense {
                 servo.profile_velocity      = 0;  // not present in NUSense message
             }
 
-            /* release to SensorFilter */
+            // Emit the raw sensor data
             emit(std::make_unique<RawSensors>(sensors));
         });
 
@@ -181,7 +177,7 @@ namespace module::platform::NUSense {
 
             nusense.write(full_msg.data(), full_msg.size());
 
-            // Logging
+            // Logs for debugging
             log<NUClear::DEBUG>("Servo targets received");
 
             uint16_t total_length = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
