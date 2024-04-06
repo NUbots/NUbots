@@ -9,6 +9,8 @@
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
 
+#include "utility/support/yaml_expression.hpp"
+
 namespace module::platform::NUSense {
 
     using extension::Configuration;
@@ -16,6 +18,7 @@ namespace module::platform::NUSense {
     using message::actuation::ServoTargets;
     using message::platform::NUSense;
     using message::platform::RawSensors;
+    using utility::support::Expression;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), nusense() {
@@ -29,6 +32,11 @@ namespace module::platform::NUSense {
             nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
 
             log<NUClear::INFO>("PORT OPENED");
+
+            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
+                nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
+                nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
+            }
         });
 
         on<Shutdown>().then("NUSense HardwareIO Shutdown", [this] {
@@ -137,6 +145,10 @@ namespace module::platform::NUSense {
                 servo.temperature           = val.temperature;
                 servo.profile_acceleration  = 0;  // not present in NUSense message
                 servo.profile_velocity      = 0;  // not present in NUSense message
+
+                // Add the offsets and switch the direction.
+                servo.present_position *= nugus.servo_direction[val.id - 1];
+                servo.present_position += nugus.servo_offset[val.id - 1];
             }
 
             /* release to SensorFilter */
@@ -145,6 +157,13 @@ namespace module::platform::NUSense {
 
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+            // Take the offsets and switch the direction.
+            ServoTargets new_commands(commands);
+            for (auto& target : new_commands.targets) {
+                target.position -= nugus.servo_offset[target.id];
+                target.position *= nugus.servo_direction[target.id];
+            }
+
             // Write the command as one vector. ServoTargets messages are usually greater than 512 bytes but less
             // than 1024. This means that the USB2.0 protocol will split this up and will be received on the nusense
             // side as chunks of 512 as 512 bytes is the maximum bulk size that 2.0 allows. This also implies that the
@@ -152,7 +171,7 @@ namespace module::platform::NUSense {
             // is about 700).
             std::array<char, 3> header = {(char) 0xE2, (char) 0x98, (char) 0xA2};
 
-            std::vector<uint8_t> payload = NUClear::util::serialise::Serialise<ServoTargets>::serialise(commands);
+            std::vector<uint8_t> payload = NUClear::util::serialise::Serialise<ServoTargets>::serialise(new_commands);
 
             int payload_length                  = payload.size();
             uint8_t high_byte                   = (payload_length >> 8) & 0xFF;

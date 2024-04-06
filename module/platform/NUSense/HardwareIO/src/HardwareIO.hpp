@@ -4,6 +4,7 @@
 #include <nuclear>
 #include <vector>
 
+#include "NUgus.hpp"
 #include "util/packet_handler.hpp"
 
 #include "message/platform/RawSensors.hpp"
@@ -33,6 +34,9 @@ namespace module::platform::NUSense {
         /// @brief Manage desired port for NUSense
         utility::io::uart nusense;
         PacketHandler nusense_receiver;
+
+        /// @brief Contains device information specific to the NUgus robot
+        NUgus nugus{};
     };
 
 }  // namespace module::platform::NUSense
