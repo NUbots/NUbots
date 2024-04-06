@@ -1,5 +1,10 @@
 var NAVTREEINDEX15 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca3b83bd71d463264467d1da6f897e0a92":[2,0,3,8,0,5,0,15],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca3e95d36229cba341096ebed87c72532c":[2,0,3,8,0,5,0,0],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca429899397757f3ec49b9a0fd4c5ae924":[2,0,3,8,0,5,0,19],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca53e0dbc06e48e3d381ac224fa8bae3df":[2,0,3,8,0,5,0,8],
+"structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca5523d309ee6f4029c6316ee67b23b06f":[2,0,3,8,0,5,0,7],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca5c2b94896d63477cb0e1da0756b98c8b":[2,0,3,8,0,5,0,20],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca7285524269e9aea3c995ed14d0db6407":[2,0,3,8,0,5,0,17],
 "structmodule_1_1platform_1_1OpenCR_1_1FSR.html#ae4e673629b0c120dc003d7e5004a40dca7dde650ec913ac7f289ebe05196e4a0a":[2,0,3,8,0,5,0,1],
@@ -244,10 +249,5 @@ var NAVTREEINDEX15 =
 "structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html":[2,0,3,13,0,0],
 "structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html#a9fcb28da4b35ef25ba3d8bac2944474b":[2,0,3,13,0,0,1],
 "structmodule_1_1tools_1_1FirmwareInstaller_1_1Firmware.html#aca948317e00e847612d1174fc3e68420":[2,0,3,13,0,0,0],
-"structmodule_1_1tools_1_1FlashCM730.html":[2,0,3,13,1],
-"structmodule_1_1tools_1_1FlashComplete.html":[2,0,3,13,2],
-"structmodule_1_1vision_1_1RobotDetector_1_1Config.html":[2,0,3,14,5,0],
-"structmodule_1_1vision_1_1RobotDetector_1_1Config.html#a15eb8d3070a77413095bc6df19472c01":[2,0,3,14,5,0,2],
-"structmodule_1_1vision_1_1RobotDetector_1_1Config.html#a2ec6283907b6eea4c6865231cd1598dc":[2,0,3,14,5,0,3],
-"structmodule_1_1vision_1_1RobotDetector_1_1Config.html#a402f56c58e45de1d13f761c00c236e1a":[2,0,3,14,5,0,0]
+"structmodule_1_1tools_1_1FlashCM730.html":[2,0,3,13,1]
 };

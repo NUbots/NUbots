@@ -1,5 +1,10 @@
 var NAVTREEINDEX16 =
 {
+"structmodule_1_1tools_1_1FlashComplete.html":[2,0,3,13,2],
+"structmodule_1_1vision_1_1RobotDetector_1_1Config.html":[2,0,3,14,5,0],
+"structmodule_1_1vision_1_1RobotDetector_1_1Config.html#a15eb8d3070a77413095bc6df19472c01":[2,0,3,14,5,0,2],
+"structmodule_1_1vision_1_1RobotDetector_1_1Config.html#a2ec6283907b6eea4c6865231cd1598dc":[2,0,3,14,5,0,3],
+"structmodule_1_1vision_1_1RobotDetector_1_1Config.html#a402f56c58e45de1d13f761c00c236e1a":[2,0,3,14,5,0,0],
 "structmodule_1_1vision_1_1RobotDetector_1_1Config.html#ac1b60e0e27936f362ad2f14d2e864535":[2,0,3,14,5,0,1],
 "structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html":[2,0,3,14,6,0],
 "structmodule_1_1vision_1_1VisualMesh_1_1EngineContext.html#a63aeedcaed39f62c6ce7f7cc9b3e1194":[2,0,3,14,6,0,1],
@@ -244,10 +249,5 @@ var NAVTREEINDEX16 =
 "structutility_1_1input_1_1ServoID.html#a69f57bf78853e92faf4a13561c9e987e":[2,0,7,3,2,8],
 "structutility_1_1input_1_1ServoID.html#a6cd4ede4baac487e614653d791f7365e":[2,0,7,3,2,3],
 "structutility_1_1input_1_1ServoID.html#a708f29a79af8e1d650990921e3c6aa01":[2,0,7,3,2,22],
-"structutility_1_1input_1_1ServoID.html#a7110ae84340ad95d2494505712280791":[2,0,7,3,2,26],
-"structutility_1_1input_1_1ServoID.html#a745fcdc4b7203e375958f15a563fc147":[2,0,7,3,2,17],
-"structutility_1_1input_1_1ServoID.html#a771399306a5e2fab14ea6609e29da39b":[2,0,7,3,2,12],
-"structutility_1_1input_1_1ServoID.html#a7745a0f2e593fd787f46554b5c74f312":[2,0,7,3,2,15],
-"structutility_1_1input_1_1ServoID.html#a7936cbc5fdfe222298bbed233470b350":[2,0,7,3,2,13],
-"structutility_1_1input_1_1ServoID.html#a7a363bb9ce823219f88bb7c1b8c500d8":[2,0,7,3,2,24]
+"structutility_1_1input_1_1ServoID.html#a7110ae84340ad95d2494505712280791":[2,0,7,3,2,26]
 };

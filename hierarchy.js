@@ -351,6 +351,7 @@ var hierarchy =
       [ "module::purpose::ScriptTuner", "classmodule_1_1purpose_1_1ScriptTuner.html", null ],
       [ "module::support::LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", null ],
       [ "module::support::NUsightHarness", "classmodule_1_1support_1_1NUsightHarness.html", null ],
+      [ "module::support::Profiler", "classmodule_1_1support_1_1Profiler.html", null ],
       [ "module::support::ReactionTimer", "classmodule_1_1support_1_1ReactionTimer.html", null ],
       [ "module::support::SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", null ],
       [ "module::support::configuration::GlobalConfig", "classmodule_1_1support_1_1configuration_1_1GlobalConfig.html", null ],

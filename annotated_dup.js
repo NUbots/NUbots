@@ -280,6 +280,7 @@ var annotated_dup =
         ] ],
         [ "LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", "classmodule_1_1support_1_1LocalisationSimulator" ],
         [ "NUsightHarness", "classmodule_1_1support_1_1NUsightHarness.html", "classmodule_1_1support_1_1NUsightHarness" ],
+        [ "Profiler", "classmodule_1_1support_1_1Profiler.html", "classmodule_1_1support_1_1Profiler" ],
         [ "ReactionTimer", "classmodule_1_1support_1_1ReactionTimer.html", "classmodule_1_1support_1_1ReactionTimer" ],
         [ "SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", "classmodule_1_1support_1_1SignalCatcher" ]
       ] ],

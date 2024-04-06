@@ -1,5 +1,10 @@
 var NAVTREEINDEX9 =
 {
+"functions_vars_d.html":[2,3,2,3],
+"functions_vars_e.html":[2,3,2,4],
+"functions_vars_f.html":[2,3,2,5],
+"functions_vars_g.html":[2,3,2,6],
+"functions_vars_h.html":[2,3,2,7],
 "functions_vars_i.html":[2,3,2,8],
 "functions_vars_k.html":[2,3,2,9],
 "functions_vars_l.html":[2,3,2,10],
@@ -244,10 +249,5 @@ var NAVTREEINDEX9 =
 "projection_8hpp.html#a7c1a1b5d406bcda0a5afb65e75eb1431":[1,0,7,18,1,0],
 "projection_8hpp.html#ac1d8abb43c6cff23bebb6fe53df0b284":[1,0,7,18,31],
 "projection_8hpp.html#af3b1634471d1023315524daa1ed829b7":[1,0,7,18,10],
-"pure__evil_8cpp.html#a3fd8278f34dc4be3729275c2082fa569":[1,0,7,16,0,1],
-"pure__evil_8cpp.html#ae19fa2fe95aea29bb47634a53b5b5341":[1,0,7,16,0,2],
-"quantization__matrix_8cpp.html#aaa85ed4fef1efdc929e3ddde853719e0":[1,0,3,6,0,1,1,7],
-"quaternion_8hpp.html#a125dc8461b108045bb8763abaf1019ff":[1,0,7,6,5,0],
-"quaternion_8hpp.html#a85b29996c0d776de35dc74b241911f20":[1,0,7,6,5,1],
-"quaternion_8hpp.html#ab77fdf01cc1ef83f3be36c92f8d9cf77":[1,0,7,6,5,2]
+"pure__evil_8cpp.html#a3fd8278f34dc4be3729275c2082fa569":[1,0,7,16,0,1]
 };

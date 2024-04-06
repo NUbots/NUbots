@@ -1,5 +1,10 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1input_1_1ReadData.html":[2,0,3,2,10],
+"structmodule_1_1input_1_1ReadData.html#ade1603d967ca4e75d4aa78c6d761c1e4":[2,0,3,2,10,0],
+"structmodule_1_1input_1_1ReadData_3_01Device_01_4.html":[2,0,3,2,11],
+"structmodule_1_1input_1_1ReadData_3_01Device_01_4.html#a81c20b0f0fd3ec2802d2af5ea2403837":[2,0,3,2,11,0],
+"structmodule_1_1input_1_1ReadData_3_01Eigen_1_1Matrix_3_01Scalar_00_01rows_00_01cols_01_4_01_4.html":[2,0,3,2,12],
 "structmodule_1_1input_1_1ReadData_3_01Eigen_1_1Matrix_3_01Scalar_00_01rows_00_01cols_01_4_01_4.html#a4de26c20e9a6ca49b901710bc8ce5fd1":[2,0,3,2,12,0],
 "structmodule_1_1input_1_1ReadData_3_01ForcePlate_01_4.html":[2,0,3,2,13],
 "structmodule_1_1input_1_1ReadData_3_01ForcePlate_01_4.html#aa5fe5f2afd66dabc790e9744d20b7fd3":[2,0,3,2,13,0],
@@ -244,10 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1localisation_1_1StartingSide.html#a82dc453db1246782f3c5dc7dd4bdc022":[2,0,3,3,6,1],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3d":[2,0,3,3,6,0],
 "structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da137c85e0ab6db9ae271dd6121eebdc47":[2,0,3,3,6,0,2],
-"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da50a34d38a64a86b6e49202d8a28eb844":[2,0,3,3,6,0,1],
-"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da9b72e1e05b51ed08ee03a27706cf54d5":[2,0,3,3,6,0,3],
-"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3daf077f00bfe3a54fef1387dbd9606ee12":[2,0,3,3,6,0,0],
-"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3dafb2511dc5741f4d39adc4cab849ed27e":[2,0,3,3,6,0,4],
-"structmodule_1_1localisation_1_1StartingSide.html#ad36e4980cf704a25b8c331bb9caad940":[2,0,3,3,6,4],
-"structmodule_1_1localisation_1_1StartingSide.html#ae0bc23d0cb6aff5e828867a8577129b2":[2,0,3,3,6,2]
+"structmodule_1_1localisation_1_1StartingSide.html#ab242f4081ad3ed22c48abd3ed8859a3da50a34d38a64a86b6e49202d8a28eb844":[2,0,3,3,6,0,1]
 };
