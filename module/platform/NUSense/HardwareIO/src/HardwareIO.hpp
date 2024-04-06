@@ -24,8 +24,10 @@ namespace module::platform::NUSense {
         /// @brief  Configuration variables for this reactor
         struct Config {
             struct {
+                /// @brief The port to connect to the NUSense device
                 std::string port = "";
-                int baud         = 0;
+                /// @brief The baud rate to communication with the NUSense device
+                int baud = 0;
             } nusense;
         } cfg;
 
@@ -33,6 +35,8 @@ namespace module::platform::NUSense {
 
         /// @brief Manage desired port for NUSense
         utility::io::uart nusense;
+
+        /// @brief The handler for the NUSense packet
         PacketHandler nusense_receiver;
 
         /// @brief Contains device information specific to the NUgus robot

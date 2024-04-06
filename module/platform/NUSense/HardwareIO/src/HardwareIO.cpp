@@ -16,6 +16,8 @@ namespace module::platform::NUSense {
     using extension::Configuration;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
+    using message::actuation::SubcontrollerServoTarget;
+    using message::actuation::SubcontrollerServoTargets;
     using message::platform::NUSense;
     using message::platform::RawSensors;
     using utility::support::Expression;
@@ -31,7 +33,7 @@ namespace module::platform::NUSense {
 
             nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
 
-            log<NUClear::INFO>("PORT OPENED");
+            log<NUClear::INFO>(fmt::format("Port {} successfully opened.", cfg.nusense.port));
 
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
@@ -40,21 +42,17 @@ namespace module::platform::NUSense {
         });
 
         on<Shutdown>().then("NUSense HardwareIO Shutdown", [this] {
-            // Close our connection to the OpenCR
+            // Close our connection to NUSense
             if (nusense.connected()) {
                 nusense.close();
             }
         });
 
-        // When we receive data back from NUSense, we handle it here
+        // Handle data sent from NUSense
         on<IO>(nusense.native_handle(), IO::READ).then([this] {
-            // log<NUClear::DEBUG>("In IO reaction");
             // Read from NUsense
             uint32_t num_bytes = nusense.read(nusense_usb_bytes.data(), 512);
-            // log<NUClear::INFO>(fmt::format("num_bytes: {}", num_bytes));
             nusense_receiver.receive(num_bytes, nusense_usb_bytes.data());
-
-            // log<NUClear::INFO>(fmt::format("bytes received: {}", num_bytes));
 
             // If packet successfully decoded
             if (nusense_receiver.handle()) {
@@ -92,34 +90,34 @@ namespace module::platform::NUSense {
                     log<NUClear::DEBUG>(fmt::format("     temp: {}", val.temperature));
                 }
 
-                // emit the nusense msg to be captured by the reactino below.
+                // Emit the NUSense msg to be captured by the reaction below.
                 emit<Scope::DIRECT>(std::make_unique<NUSense>(nusense_msg));
             }
         });
 
-        // handle successfully decoded NUSense data
+        // Handle successfully decoded NUSense data
         on<Trigger<NUSense>>().then([this](const NUSense& data) {
-            /* temp message to fill up */
+            // Will contain data from the NUSense
             RawSensors sensors;
 
-            /* Timestamp when this message was created because the incoming packet doesn't have a timestamp*/
+            // Timestamp when this message was created because the incoming packet doesn't have a timestamp
             sensors.timestamp = NUClear::clock::now();
 
-            /* Subcontroller data */
+            // Subcontroller data
             sensors.subcontroller_error = 0;  // not yet implemented
             sensors.led_panel           = 0;  // not yet implemented
             sensors.head_led            = 0;  // not yet implemented
             sensors.eye_led             = 0;  // not yet implemented
             sensors.buttons             = 0;  // not yet implemented
 
-            /* IMU */
+            // Set IMU
             sensors.accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
             sensors.gyroscope     = Eigen::Vector3f(data.imu.gyro.x, data.imu.gyro.y, data.imu.gyro.z);
 
-            /* Battery data */
+            // Battery data
             sensors.battery = 0;  // not yet implemented
 
-            /* Servo data */
+            // Servo data
             for (const auto& [key, val] : data.servo_map) {
                 // Get a reference to the servo we are populating
                 RawSensors::Servo& servo = utility::platform::getRawServo(val.id - 1, sensors);
@@ -151,17 +149,25 @@ namespace module::platform::NUSense {
                 servo.present_position += nugus.servo_offset[val.id - 1];
             }
 
-            /* release to SensorFilter */
+            // Emit the raw sensor data
             emit(std::make_unique<RawSensors>(sensors));
         });
 
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            // Take the offsets and switch the direction.
-            ServoTargets new_commands(commands);
-            for (auto& target : new_commands.targets) {
-                target.position -= nugus.servo_offset[target.id];
-                target.position *= nugus.servo_direction[target.id];
+            // Copy the data into a new message so we can use a duration instead of a timepoint
+            // and take the offsets and switch the direction.
+            auto servo_targets = SubcontrollerServoTargets();
+
+            // Change the timestamp in servo targets to the difference between the timestamp and now
+            // Take away the offset and switch the direction if needed
+            for (auto& target : commands.targets) {
+                servo_targets.targets.emplace_back(
+                    target.time - NUClear::clock::now(),
+                    target.id,
+                    (target.position - nugus.servo_offset[target.id]) * nugus.servo_direction[target.id],
+                    target.gain,
+                    target.torque);
             }
 
             // Write the command as one vector. ServoTargets messages are usually greater than 512 bytes but less
@@ -171,7 +177,8 @@ namespace module::platform::NUSense {
             // is about 700).
             std::array<char, 3> header = {(char) 0xE2, (char) 0x98, (char) 0xA2};
 
-            std::vector<uint8_t> payload = NUClear::util::serialise::Serialise<ServoTargets>::serialise(new_commands);
+            std::vector<uint8_t> payload =
+                NUClear::util::serialise::Serialise<SubcontrollerServoTargets>::serialise(servo_targets);
 
             int payload_length                  = payload.size();
             uint8_t high_byte                   = (payload_length >> 8) & 0xFF;
@@ -185,7 +192,7 @@ namespace module::platform::NUSense {
 
             nusense.write(full_msg.data(), full_msg.size());
 
-            // Logging
+            // Logs for debugging
             log<NUClear::DEBUG>("Servo targets received");
 
             uint16_t total_length = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
