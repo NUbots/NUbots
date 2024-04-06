@@ -25,8 +25,8 @@
  * SOFTWARE.
  */
 
-#ifndef INC_COMMS_HPP_
-#define INC_COMMS_HPP_
+#ifndef MODULE_PLATFORM_NUSENSE_PACKETHANDLER
+#define MODULE_PLATFORM_NUSENSE_PACKETHANDLER
 
 #include <algorithm>
 #include <cstdint>
@@ -40,15 +40,12 @@ namespace module::platform::NUSense {
 
     using message::platform::NUSense;
 
-    /**
-     * @brief   Handles the USB protobuf packets.
-     */
+
+    /// @brief Handles the USB protobuf packets.
     class PacketHandler {
 
     public:
-        /**
-         * @brief   Constructs the packet-handler.
-         */
+        /// @brief Constructs the packet-handler.
         PacketHandler()
             : pb_length(0)
             , remaining_length(0)
@@ -57,16 +54,20 @@ namespace module::platform::NUSense {
             , decode_count(0)
             , missing_count(0) {}
 
-        /**
-         * @brief   Handle outgoing bytes from the ring-buffer, parse any packet, and decode it.
-         * @return  whether the packet has been decoded,
-         */
+        /// @brief   Handle outgoing bytes from the ring-buffer, parse any packet, and decode it.
+        /// @return  Whether or not the packet has been decoded
         bool handle();
 
+        /// @brief
+        /// @param len
+        /// @param buf
         void receive(const uint32_t& len, uint8_t* buf);
 
+        /// @brief
+        /// @return
         const NUSense& get_nusense_message();
 
+        /// @brief
         static constexpr uint16_t RX_BUF_SIZE = 2048;
 
     private:
@@ -74,12 +75,12 @@ namespace module::platform::NUSense {
          * @brief   Removes bytes from the ring-buffer of a given length, passing from a given
          *          offset.
          * @note    This is a helper function; it is not meant to encapsulate anything.
-         * @param   bytes the bytes that would be taken,
-         * @param   length the number of bytes to take,
-         * @param   offset the number of bytes skipped first,
+         * @param   bytes the bytes that would be taken
+         * @param   length the number of bytes to take
+         * @param   offset the number of bytes skipped first
          * @note    Normally, offset would be either zero for a traditional pop, or 5 to ignore the
          *          header.
-         * @return  the number of bytes removed,
+         * @return  The number of bytes removed.
          */
         uint16_t pop(uint8_t* bytes, uint16_t length, uint16_t offset);
 
@@ -96,9 +97,10 @@ namespace module::platform::NUSense {
             uint16_t back;
             /// @brief  the number of bytes in the ring-buffer,
             uint16_t size;
-        } rx_buffer;
+        } rx_buffer{};
 
-        NUSense nusense;
+        /// @brief
+        NUSense nusense{};
 
         /// @brief  the buffer for the protobuf payload to be decoded,
         char pb_packets[RX_BUF_SIZE];
@@ -123,4 +125,4 @@ namespace module::platform::NUSense {
 
 }  // namespace module::platform::NUSense
 
-#endif /* INC_COMMS_HPP_ */
+#endif  // MODULE_PLATFORM_NUSENSE_PACKETHANDLER

@@ -100,25 +100,28 @@ namespace module::platform::NUSense {
 
     void PacketHandler::receive(const uint32_t& len, uint8_t* buf) {
         // Move the back backwards (higher) in the array unless there is no more room left.
-        if (rx_buffer.size < RX_BUF_SIZE) {
-            // If the max buffer size is exceeded, wrap around using 2 memcpy calls
-            if (rx_buffer.back + len > RX_BUF_SIZE) {
-                std::copy(&rx_buffer.data[rx_buffer.back], &buf[0], RX_BUF_SIZE - rx_buffer.back);
-                std::copy(&rx_buffer.data[0], &buf[RX_BUF_SIZE - rx_buffer.back], rx_buffer.back + len - RX_BUF_SIZE);
-            }
-            // If not then 1 memcpy call should suffice
-            else {
-                std::copy(&rx_buffer.data[rx_buffer.back], &buf[0], len);
-            }
+        if (rx_buffer.size > RX_BUF_SIZE) {
+            return;
+        }
 
-            rx_buffer.back = (rx_buffer.back + len) % RX_BUF_SIZE;
-            if ((rx_buffer.size + len) >= RX_BUF_SIZE) {
-                rx_buffer.size  = RX_BUF_SIZE;
-                rx_buffer.front = rx_buffer.back;
-            }
-            else {
-                rx_buffer.size += len;
-            }
+        // If the max buffer size is exceeded, wrap around using 2 copy calls
+        if (rx_buffer.back + len > RX_BUF_SIZE) {
+            std::copy(&rx_buffer.data[rx_buffer.back], &buf[0], RX_BUF_SIZE - rx_buffer.back);
+            std::copy(&rx_buffer.data[0], &buf[RX_BUF_SIZE - rx_buffer.back], rx_buffer.back + len - RX_BUF_SIZE);
+        }
+        // If not then 1 copy call should suffice
+        else {
+            std::copy(&rx_buffer.data[rx_buffer.back], &buf[0], len);
+        }
+
+        rx_buffer.back = (rx_buffer.back + len) % RX_BUF_SIZE;
+
+        if ((rx_buffer.size + len) >= RX_BUF_SIZE) {
+            rx_buffer.size  = RX_BUF_SIZE;
+            rx_buffer.front = rx_buffer.back;
+        }
+        else {
+            rx_buffer.size += len;
         }
     }
 
@@ -126,27 +129,30 @@ namespace module::platform::NUSense {
     uint16_t PacketHandler::pop(uint8_t* bytes, uint16_t length, uint16_t offset) {
         // Update the front to move back (higher) in the array unless there
         // is nothing left in the buffer.
-        if (rx_buffer.size >= (length + offset)) {
-            // If the bytes to be popped span across No Man's Land, then use two distinct
-            // copies.
-            if (((rx_buffer.front + length + offset) >= RX_BUF_SIZE) && ((rx_buffer.front + offset) < RX_BUF_SIZE)) {
-                std::copy(&rx_buffer.data[(rx_buffer.front + offset) % RX_BUF_SIZE],
-                          &rx_buffer.data[RX_BUF_SIZE],
-                          &bytes[0]);
-                std::copy(&rx_buffer.data[0],
-                          &rx_buffer.data[length - RX_BUF_SIZE + rx_buffer.front + offset],
-                          &bytes[RX_BUF_SIZE - rx_buffer.front - offset]);
-            }
-            // Else, use one straightforward copy.
-            else {
-                std::copy(&rx_buffer.data[(rx_buffer.front + offset) % RX_BUF_SIZE],
-                          &rx_buffer.data[(rx_buffer.front + offset + length) % RX_BUF_SIZE],
-                          &bytes[0]);
-            }
-            // Move the front forward and decrease the size.
-            rx_buffer.front = (rx_buffer.front + length + offset) % RX_BUF_SIZE;
-            rx_buffer.size -= length + offset;
+        if (rx_buffer.size < (length + offset)) {
+            return length;
         }
+
+        // If the bytes to be popped span across No Man's Land, then use two distinct
+        // copies.
+        if (((rx_buffer.front + length + offset) >= RX_BUF_SIZE) && ((rx_buffer.front + offset) < RX_BUF_SIZE)) {
+            std::copy(&rx_buffer.data[(rx_buffer.front + offset) % RX_BUF_SIZE],
+                      &rx_buffer.data[RX_BUF_SIZE],
+                      &bytes[0]);
+            std::copy(&rx_buffer.data[0],
+                      &rx_buffer.data[length - RX_BUF_SIZE + rx_buffer.front + offset],
+                      &bytes[RX_BUF_SIZE - rx_buffer.front - offset]);
+        }
+        // Else, use one straightforward copy.
+        else {
+            std::copy(&rx_buffer.data[(rx_buffer.front + offset) % RX_BUF_SIZE],
+                      &rx_buffer.data[(rx_buffer.front + offset + length) % RX_BUF_SIZE],
+                      &bytes[0]);
+        }
+        // Move the front forward and decrease the size.
+        rx_buffer.front = (rx_buffer.front + length + offset) % RX_BUF_SIZE;
+        rx_buffer.size -= length + offset;
+
         return length;
     }
 
