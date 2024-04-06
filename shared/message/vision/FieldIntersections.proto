@@ -41,7 +41,7 @@ message FieldIntersection {
     }
 
     IntersectionType type = 1;
-    // Position of the intersection in world space
+    /// Position of the intersection in world space
     vec3 rIWw = 2;
 }
 

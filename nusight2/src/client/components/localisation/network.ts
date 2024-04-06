@@ -21,6 +21,7 @@ export class LocalisationNetwork {
     this.network.on(message.localisation.Ball, this.onBall);
     this.network.on(message.localisation.Robots, this.onRobots);
     this.network.on(message.vision.FieldLines, this.onFieldLines);
+    this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
   }
@@ -38,6 +39,7 @@ export class LocalisationNetwork {
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.Hfw = Matrix4.from(field.Hfw);
+    robot.particles.particle = field.particles.map((particle) => Vector3.from(particle));
   };
 
   @action.bound

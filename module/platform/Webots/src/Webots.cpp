@@ -803,6 +803,11 @@ namespace module::platform {
             log<NUClear::TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
         }
 
+        if (sensor_measurements.localisation_ground_truth.exists) {
+            log<NUClear::TRACE>("  sm.localisation_ground_truth:");
+            log<NUClear::TRACE>("    Hfw:\n", sensor_measurements.localisation_ground_truth.Hfw);
+        }
+
         // Parse the errors and warnings from Webots and log them.
         // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
         // Or check if those messages have specific information
@@ -883,6 +888,10 @@ namespace module::platform {
             if (sensor_measurements.odometry_ground_truth.exists) {
                 sensor_data->odometry_ground_truth.exists = true;
                 sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
+            }
+            if (sensor_measurements.localisation_ground_truth.exists) {
+                sensor_data->localisation_ground_truth.exists = true;
+                sensor_data->localisation_ground_truth.Hfw    = sensor_measurements.localisation_ground_truth.Hfw;
             }
 
             emit(sensor_data);

@@ -129,6 +129,7 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
+  @observable particles: { particle: Vector3[] }; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
   @observable fieldIntersections?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
@@ -144,6 +145,7 @@ export class LocalisationRobotModel {
     Rwt,
     motors,
     fieldLinePoints,
+    particles,
     ball,
     fieldIntersections,
     goals,
@@ -157,6 +159,7 @@ export class LocalisationRobotModel {
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
+    particles: { particle: Vector3[] };
     ball?: { rBWw: Vector3 };
     fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
@@ -170,6 +173,7 @@ export class LocalisationRobotModel {
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
+    this.particles = particles;
     this.ball = ball;
     this.fieldIntersections = fieldIntersections;
     this.goals = goals;
@@ -185,6 +189,7 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
+      particles: { particle: [] },
       goals: { points: [] },
       robots: [],
     });
@@ -216,6 +221,7 @@ export class LocalisationRobotModel {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
   }
 
+  /** Goal positions in field space */
   @computed
   get rGFf(): { bottom: Vector3; top: Vector3 }[] {
     return this.goals?.points.map((pair) => ({
@@ -224,6 +230,7 @@ export class LocalisationRobotModel {
     }));
   }
 
+  /** Robot positions in field space */
   @computed
   get rRFf(): Vector3[] {
     return this.robots?.map((robot) => robot.rRWw.applyMatrix4(this.Hfw));
