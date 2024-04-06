@@ -9,6 +9,8 @@
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
 
+#include "utility/support/yaml_expression.hpp"
+
 namespace module::platform::NUSense {
 
     using extension::Configuration;
@@ -18,6 +20,7 @@ namespace module::platform::NUSense {
     using message::actuation::SubcontrollerServoTargets;
     using message::platform::NUSense;
     using message::platform::RawSensors;
+    using utility::support::Expression;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), nusense() {
@@ -31,6 +34,11 @@ namespace module::platform::NUSense {
             nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
 
             log<NUClear::INFO>("Port to NUSense opened.");
+
+            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
+                nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
+                nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
+            }
         });
 
         on<Shutdown>().then("NUSense HardwareIO Shutdown", [this] {
@@ -135,6 +143,10 @@ namespace module::platform::NUSense {
                 servo.temperature           = val.temperature;
                 servo.profile_acceleration  = 0;  // not present in NUSense message
                 servo.profile_velocity      = 0;  // not present in NUSense message
+
+                // Add the offsets and switch the direction.
+                servo.present_position *= nugus.servo_direction[val.id - 1];
+                servo.present_position += nugus.servo_offset[val.id - 1];
             }
 
             // Emit the raw sensor data
@@ -143,6 +155,13 @@ namespace module::platform::NUSense {
 
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+            // Take the offsets and switch the direction.
+            ServoTargets new_commands(commands);
+            for (auto& target : new_commands.targets) {
+                target.position -= nugus.servo_offset[target.id];
+                target.position *= nugus.servo_direction[target.id];
+            }
+
             // Copy the data into a new message so we can use a duration instead of a timepoint
             auto servo_targets = SubcontrollerServoTargets();
 
@@ -164,6 +183,7 @@ namespace module::platform::NUSense {
 
             std::vector<uint8_t> payload =
                 NUClear::util::serialise::Serialise<SubcontrollerServoTargets>::serialise(servo_targets);
+            std::vector<uint8_t> payload = NUClear::util::serialise::Serialise<ServoTargets>::serialise(new_commands);
 
             int payload_length                  = payload.size();
             uint8_t high_byte                   = (payload_length >> 8) & 0xFF;
