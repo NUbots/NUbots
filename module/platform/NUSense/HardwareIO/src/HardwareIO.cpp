@@ -33,7 +33,7 @@ namespace module::platform::NUSense {
 
             nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
 
-            log<NUClear::INFO>("Port to NUSense opened.");
+            log<NUClear::INFO>(fmt::format("Port {} successfully opened.", cfg.nusense.port));
 
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
