@@ -236,7 +236,7 @@ def main():
     sequence_length = system_sample_rate * 2   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 100                          # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 250                          # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
@@ -315,19 +315,16 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm = keras.layers.LSTM(64, return_sequences=True, bias_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(inputs)    # 32 originally
-    activation_layer = keras.layers.LeakyReLU(alpha=0.5)(lstm)
-    dropout = keras.layers.Dropout(rate=0.5)(activation_layer)
+    lstm = keras.layers.LSTM(200, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.008))(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.2)(lstm)
 
-    lstm2 = keras.layers.LSTM(32, return_sequences=True, bias_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(dropout)    # 32 originally
-    activation_layer2 = keras.layers.LeakyReLU(alpha=0.5)(lstm2)
-    dropout2 = keras.layers.Dropout(rate=0.5)(activation_layer2)
+    lstm2 = keras.layers.LSTM(80, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006))(dropout)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
-    lstm3 = keras.layers.LSTM(8, return_sequences=False, bias_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(dropout2)    # 32 originally
-    activation_layer3 = keras.layers.LeakyReLU(alpha=0.5)(lstm3)
-    dropout3 = keras.layers.Dropout(rate=0.5)(activation_layer3)
+    lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.004))(dropout2)    # 32 originally
+    dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
 
-    outputs = keras.layers.Dense(3, bias_regularizer=keras.regularizers.L1L2(l1=0.00005, l2=0.0005), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(dropout3)   # Target shape[1] is 3
+    outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(dropout3)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
