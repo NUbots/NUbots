@@ -155,23 +155,19 @@ namespace module::platform::NUSense {
 
 
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            // Take the offsets and switch the direction.
-            ServoTargets new_commands(commands);
-            for (auto& target : new_commands.targets) {
-                target.position -= nugus.servo_offset[target.id];
-                target.position *= nugus.servo_direction[target.id];
-            }
-
             // Copy the data into a new message so we can use a duration instead of a timepoint
+            // and take the offsets and switch the direction.
             auto servo_targets = SubcontrollerServoTargets();
 
             // Change the timestamp in servo targets to the difference between the timestamp and now
+            // Take away the offset and switch the direction if needed
             for (auto& target : commands.targets) {
-                servo_targets.targets.emplace_back(target.time - NUClear::clock::now(),
-                                                   target.id,
-                                                   target.position,
-                                                   target.gain,
-                                                   target.torque);
+                servo_targets.targets.emplace_back(
+                    target.time - NUClear::clock::now(),
+                    target.id,
+                    (target.position - nugus.servo_offset[target.id]) * nugus.servo_direction[target.id],
+                    target.gain,
+                    target.torque);
             }
 
             // Write the command as one vector. ServoTargets messages are usually greater than 512 bytes but less
@@ -183,7 +179,6 @@ namespace module::platform::NUSense {
 
             std::vector<uint8_t> payload =
                 NUClear::util::serialise::Serialise<SubcontrollerServoTargets>::serialise(servo_targets);
-            std::vector<uint8_t> payload = NUClear::util::serialise::Serialise<ServoTargets>::serialise(new_commands);
 
             int payload_length                  = payload.size();
             uint8_t high_byte                   = (payload_length >> 8) & 0xFF;
