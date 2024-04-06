@@ -63,7 +63,7 @@ namespace module::platform::NUSense {
          */
         bool handle();
 
-        void receive(const uint32_t& Len, uint8_t* Buf);
+        void receive(const uint32_t& len, uint8_t* buf);
 
         const NUSense& get_nusense_message();
 
