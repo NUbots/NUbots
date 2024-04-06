@@ -1,0 +1,55 @@
+// MIT License
+//
+// Copyright (c) 2024 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+
+syntax = "proto3";
+
+package message.vision;
+
+import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+import "Transform.proto";
+
+message BoundingBox {
+    /// Class name of the object
+    string name = 1;
+    /// Confidence of the detection
+    double confidence = 2;
+    /// Unit vectors pointing to all 4 corners of the bounding box
+    repeated vec3 corners = 3;
+    /// Colour of the bounding box
+    vec4 colour = 4;
+}
+
+message BoundingBoxes {
+    /// ID of the camera that took the image containing the bounding boxes
+    uint32 id = 1;
+    /// When the image was taken that this measurement is derived from
+    google.protobuf.Timestamp timestamp = 2;
+    /// Isometry3d transform from world space to camera space at the time that the image was taken
+    iso3 Hcw = 3;
+    /// Could be empty, if there were no objects detected
+    repeated BoundingBox bounding_boxes = 4;
+}

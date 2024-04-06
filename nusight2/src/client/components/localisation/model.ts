@@ -109,8 +109,10 @@ export class LocalisationModel {
   @observable gridVisible = true;
   @observable robotVisible = true;
   @observable ballVisible = true;
+  @observable particlesVisible = true;
   @observable goalVisible = true;
   @observable fieldLinePointsVisible = true;
+  @observable fieldIntersectionsVisible = true;
 
   constructor(
     appModel: AppModel,
