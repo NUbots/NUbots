@@ -292,6 +292,10 @@ export class LocalisationController {
   };
 
   @action
+  toggleParticlesVisibility = (model: LocalisationModel) => {
+    model.particlesVisible = !model.particlesVisible;
+  };
+
   toggleGoalVisibility = (model: LocalisationModel) => {
     model.goalVisible = !model.goalVisible;
   };
@@ -304,5 +308,10 @@ export class LocalisationController {
   @action
   toggleFieldLinePointsVisibility = (model: LocalisationModel) => {
     model.fieldLinePointsVisible = !model.fieldLinePointsVisible;
+  };
+
+  @action
+  toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
+    model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
   };
 }
