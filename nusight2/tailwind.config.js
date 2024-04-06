@@ -11,15 +11,22 @@ const config = {
 
   theme: {
     colors: {
-      gray: colors.neutral,
-      primary: "rgba(0, 0, 0, 0.87)",
-      icon: "rgba(0, 0, 0, 0.54)",
-      divider: "rgba(0, 0, 0, 0.12)",
-      navigation: "rgba(0,0,0,.87)",
+      // gray: colors.neutral,
+      white: "#ffffff",
+      black: "#000000",
+      accent: "#F9A50D",
+      icon: "#0000008a",
+      divider: "#0000001f",
+      navigation: "#e508a6de",
 
-      grey: {
-        100: "#000000d9",
-        200: "#00000099",
+      gray: {
+        100: "#f4f4f4ff",
+        200: "#fcfcfcff",
+        300: "#e0e0e0ff",
+        400: "#888888ff",
+        600: "#232323ff",
+        800: "#000000ff",
+        900: "#00000099",
       },
 
       orange: {
