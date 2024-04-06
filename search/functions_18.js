@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['zero_5forder_5fhold_2039',['zero_order_hold',['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#acf3dad1df15678ec9b23b1825f9b26e8',1,'utility::math::filter::KalmanFilter']]]
+  ['yolo_2048',['Yolo',['../classmodule_1_1vision_1_1Yolo.html#a4ce7b2c2301535b1f56f46efe9c6d4a7',1,'module::vision::Yolo']]]
 ];

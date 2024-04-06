@@ -277,6 +277,8 @@ var hierarchy =
     [ "module::vision::visualmesh::VisualMeshModelConfig", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html", null ],
     [ "module::vision::visualmesh::VisualMeshResults", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html", null ],
     [ "module::vision::visualmesh::VisualMeshRunner", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html", null ],
+    [ "module::vision::Yolo::Config", "structmodule_1_1vision_1_1Yolo_1_1Config.html", null ],
+    [ "module::vision::Yolo::Object", "structmodule_1_1vision_1_1Yolo_1_1Object.html", null ],
     [ "module::input::MotionModel< double >", "classmodule_1_1input_1_1MotionModel.html", null ],
     [ "nsga2::Individual", "classnsga2_1_1Individual.html", null ],
     [ "nsga2::IndividualConfigurator", "structnsga2_1_1IndividualConfigurator.html", null ],
@@ -368,6 +370,7 @@ var hierarchy =
       [ "module::vision::GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", null ],
       [ "module::vision::RobotDetector", "classmodule_1_1vision_1_1RobotDetector.html", null ],
       [ "module::vision::VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", null ],
+      [ "module::vision::Yolo", "classmodule_1_1vision_1_1Yolo.html", null ],
       [ "utility::reactor::StreamReactor< T, Parser, TimeoutTicks, TimeoutPeriod >", "classutility_1_1reactor_1_1StreamReactor.html", null ]
     ] ],
     [ "module::localisation::OccupancyMap< double >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],

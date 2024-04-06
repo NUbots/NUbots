@@ -306,7 +306,8 @@ var annotated_dup =
         [ "GoalDetector", "classmodule_1_1vision_1_1GoalDetector.html", "classmodule_1_1vision_1_1GoalDetector" ],
         [ "GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", "classmodule_1_1vision_1_1GreenHorizonDetector" ],
         [ "RobotDetector", "classmodule_1_1vision_1_1RobotDetector.html", "classmodule_1_1vision_1_1RobotDetector" ],
-        [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ]
+        [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ],
+        [ "Yolo", "classmodule_1_1vision_1_1Yolo.html", "classmodule_1_1vision_1_1Yolo" ]
       ] ]
     ] ],
     [ "nsga2", null, [
