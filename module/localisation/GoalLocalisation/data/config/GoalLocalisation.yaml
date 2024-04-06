@@ -1,0 +1,19 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# UKF config
+ukf:
+  noise:
+    measurement:
+      goal_position: [0.1, 0.1]
+    process:
+      position: [1e-1, 1e-1]
+      velocity: [1e-2, 1e-2]
+
+  initial_covariance:
+    position: [1e-3, 1e-3]
+    velocity: [1e-3, 1e-3]
+
+association_distance: 1.25
+
+max_missed_count: 25

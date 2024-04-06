@@ -23,13 +23,13 @@ nuclear_role(
   vision::VisualMesh
   vision::GreenHorizonDetector
   vision::FieldLineDetector
-  vision::GoalDetector
   vision::BallDetector
   vision::Yolo
   # Localisation
   localisation::BallLocalisation
   localisation::FieldLocalisation
   localisation::RobotLocalisation
+  localisation::GoalLocalisation
   # Director
   extension::Director
   # Servos
