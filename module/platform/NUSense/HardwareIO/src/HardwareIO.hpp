@@ -54,16 +54,17 @@ namespace module::platform::NUSense {
                 std::string port = "";
                 /// @brief The baud rate to communication with the NUSense device
                 int baud = 0;
-            } nusense;
-        } cfg;
+            } nusense{};
+        } cfg{};
 
+        /// @brief The buffer to store the incoming bytes from the NUSense device
         std::array<uint8_t, 512> nusense_usb_bytes{};
 
         /// @brief Manage desired port for NUSense
-        utility::io::uart nusense;
+        utility::io::uart nusense{};
 
         /// @brief The handler for the NUSense packet
-        PacketHandler nusense_receiver;
+        PacketHandler nusense_receiver{};
 
         /// @brief Contains device information specific to the NUgus robot
         NUgus nugus{};

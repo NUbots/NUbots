@@ -41,7 +41,7 @@ namespace module::platform::NUSense {
     using message::platform::NUSense;
 
 
-    /// @brief Handles the USB protobuf packets.
+    /// @brief Handles USB protobuf packets.
     class PacketHandler {
 
     public:
@@ -58,69 +58,80 @@ namespace module::platform::NUSense {
         /// @return  Whether or not the packet has been decoded
         bool handle();
 
-        /// @brief
-        /// @param len
-        /// @param buf
+        /// @brief Handles the reception of packets and stores them in a buffer.
+        ///
+        /// This function receives a packet of data and stores it in a circular buffer. If the buffer is full, it
+        /// discards the packet. If the packet size exceeds the remaining space at the end of the buffer, it wraps
+        /// around and stores the rest of the packet at the beginning of the buffer.
+        ///
+        /// @param len The length of the incoming packet.
+        /// @param buf A pointer to the incoming packet data.
         void receive(const uint32_t& len, uint8_t* buf);
 
-        /// @brief
-        /// @return
+        /// @brief Getter for the received NUSense protobuf message
+        /// @return The NUSense protobuf message
         const NUSense& get_nusense_message();
 
-        /// @brief
+        /// @brief The size of the receive buffer.
         static constexpr uint16_t RX_BUF_SIZE = 2048;
 
     private:
-        /**
-         * @brief   Removes bytes from the ring-buffer of a given length, passing from a given
-         *          offset.
-         * @note    This is a helper function; it is not meant to encapsulate anything.
-         * @param   bytes the bytes that would be taken
-         * @param   length the number of bytes to take
-         * @param   offset the number of bytes skipped first
-         * @note    Normally, offset would be either zero for a traditional pop, or 5 to ignore the
-         *          header.
-         * @return  The number of bytes removed.
-         */
+        /// @brief   Removes bytes from the ring-buffer of a given length, passing from a given
+        ///          offset.
+        /// @note    This is a helper function; it is not meant to encapsulate anything.
+        /// @param   bytes the bytes that would be taken
+        /// @param   length the number of bytes to take
+        /// @param   offset the number of bytes skipped first
+        /// @note    Normally, offset would be either zero for a traditional pop, or 5 to ignore the
+        ///          header.
+        /// @return  The number of bytes removed.
+
         uint16_t pop(uint8_t* bytes, uint16_t length, uint16_t offset);
 
         struct RingBuffer {
             /// @brief  the data of the buffer:
-            uint8_t data[RX_BUF_SIZE];
+            uint8_t data[RX_BUF_SIZE]{};
             /// @brief  the front of the 'queue' where bytes are read or popped,
             /// @note   This is inclusive of the first byte.
             /// @note   "I have been waiting for so long; I am nearly at the front of the queue."
-            uint16_t front;
+            uint16_t front = 0;
             /// @brief  the back of the 'queue' where bytes are added or pushed,
             /// @note   This is exclusive of the last byte.
             /// @note   "That rude man just cut in line; he should go at the back of the queue."
-            uint16_t back;
+            uint16_t back = 0;
             /// @brief  the number of bytes in the ring-buffer,
-            uint16_t size;
+            uint16_t size = 0;
         } rx_buffer{};
 
-        /// @brief
+        /// @brief The NUSense protobuf message received from the NUSense.
         NUSense nusense{};
 
-        /// @brief  the buffer for the protobuf payload to be decoded,
-        char pb_packets[RX_BUF_SIZE];
-        /// @brief  the length of the protobuf packet,
-        uint16_t pb_length;
-        /// @brief  the remaining length of the protobuf packet to be gathered by the lower-level
-        ///         firmware, namely CDC_Receive_HS.
-        uint16_t remaining_length;
-        /// @brief  whether a complete protobuf packet has been gathered to be decoded,
-        bool is_packet_ready;
-        /// @brief  debugging count for the number of received chunks of bytes, i.e. everytime when
-        ///         rx_flag is set and cleared,
-        uint16_t rx_count;
-        /// @brief  debugging count for the number of packets decoded,
-        uint16_t decode_count;
-        /// @brief  debugging count of packets that had missing targets, i.e. not twenty,
-        uint16_t missing_count;
-        /// @brief  debugging variable of the count of true packets based on incremental ID, purely
-        ///         for testing a specific version of code,
-        uint16_t near_id;
+        /// @brief The buffer for the protobuf payload to be decoded.
+        char pb_packets[RX_BUF_SIZE]{};
+
+        /// @brief The length of the protobuf packet.
+        uint16_t pb_length = 0;
+
+        /// @brief The remaining length of the protobuf packet to be gathered by the lower-level
+        ///        firmware, CDC_Receive_HS.
+        uint16_t remaining_length = 0;
+
+        /// @brief Whether a complete protobuf packet has been gathered to be decoded.
+        bool is_packet_ready = false;
+
+        /// @brief Debugging count for the number of received chunks of bytes, i.e. everytime when
+        ///        rx_flag is set and cleared.
+        uint16_t rx_count = 0;
+
+        /// @brief Debugging count for the number of packets decoded.
+        uint16_t decode_count = 0;
+
+        /// @brief  Debugging count of packets that had missing targets, i.e. not twenty.
+        uint16_t missing_count = 0;
+
+        /// @brief Debugging variable of the count of true packets based on incremental ID, purely
+        ///        for testing a specific version of code.
+        uint16_t near_id = 0;
     };
 
 }  // namespace module::platform::NUSense

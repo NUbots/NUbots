@@ -70,6 +70,7 @@ namespace module::platform::NUSense {
             rx_buffer.size--;
         }
 
+        // If we have a packet ready, then decode it
         if (is_packet_ready) {
             is_packet_ready = false;
             //  Decoding time, deserialise the protocol buffer
@@ -114,12 +115,15 @@ namespace module::platform::NUSense {
             std::copy(&buf[0], &buf[len], &rx_buffer.data[rx_buffer.back]);
         }
 
+        // Move the back forward and increase the size.
         rx_buffer.back = (rx_buffer.back + len) % RX_BUF_SIZE;
 
+        // If the buffer is full, then set the front to the back to overwrite the oldest data.
         if ((rx_buffer.size + len) >= RX_BUF_SIZE) {
             rx_buffer.size  = RX_BUF_SIZE;
             rx_buffer.front = rx_buffer.back;
         }
+        // Else, just increase the size.
         else {
             rx_buffer.size += len;
         }
