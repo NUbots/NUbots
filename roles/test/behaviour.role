@@ -36,7 +36,6 @@ nuclear_role(
   skill::SplineKick
   skill::GetUp
   skill::Look
-  skill::Dive
   skill::Say
   skill::GPT
   # Planners
