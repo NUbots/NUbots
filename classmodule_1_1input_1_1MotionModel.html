@@ -201,12 +201,12 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>StateMat</b> = Eigen
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a40e8f360d78292ed7365bd1fa45b3703"><td class="memItemLeft" align="right" valign="top"><a id="a40e8f360d78292ed7365bd1fa45b3703"></a>
-Eigen::Matrix&lt; Scalar, size, size &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>noise</b> (const Scalar &amp;deltaT)</td></tr>
-<tr class="separator:a40e8f360d78292ed7365bd1fa45b3703"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d57e4ddd6f7b5ebbdabef5c2119e1da"><td class="memItemLeft" align="right" valign="top"><a id="a7d57e4ddd6f7b5ebbdabef5c2119e1da"></a>
-Eigen::Matrix&lt; Scalar, size, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>time</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state, const Scalar deltaT) const</td></tr>
-<tr class="separator:a7d57e4ddd6f7b5ebbdabef5c2119e1da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeadc176e5b3bd438787bdd2dcbd6a09b"><td class="memItemLeft" align="right" valign="top"><a id="aeadc176e5b3bd438787bdd2dcbd6a09b"></a>
+Eigen::Matrix&lt; Scalar, size, size &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>noise</b> (const Scalar &amp;dt)</td></tr>
+<tr class="separator:aeadc176e5b3bd438787bdd2dcbd6a09b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a30a16cf1eb7debe891b0650181ea38a8"><td class="memItemLeft" align="right" valign="top"><a id="a30a16cf1eb7debe891b0650181ea38a8"></a>
+Eigen::Matrix&lt; Scalar, size, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>time</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state, const Scalar dt) const</td></tr>
+<tr class="separator:a30a16cf1eb7debe891b0650181ea38a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -219,27 +219,15 @@ static Eigen::Matrix&lt; Scalar, 4, 1 &gt;&#160;</td><td class="memItemRight" va
 <tr class="memitem:aee073b598e14689da4159853683fa341"><td class="memItemLeft" align="right" valign="top"><a id="aee073b598e14689da4159853683fa341"></a>
 static <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>limit</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state)</td></tr>
 <tr class="separator:aee073b598e14689da4159853683fa341"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a19424ae917132415545e160d909d8b7c"><td class="memItemLeft" align="right" valign="top"><a id="a19424ae917132415545e160d909d8b7c"></a>
-static Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>predict</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state, const <a class="el" href="structmodule_1_1input_1_1MeasurementType_1_1ACCELEROMETER.html">MeasurementType::ACCELEROMETER</a> &amp;)</td></tr>
-<tr class="separator:a19424ae917132415545e160d909d8b7c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53a53c6e11eb49bba32115f873c35591"><td class="memItemLeft" align="right" valign="top"><a id="a53a53c6e11eb49bba32115f873c35591"></a>
-static Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>predict</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state, const <a class="el" href="structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__ODOMETRY.html">MeasurementType::FLAT_FOOT_ODOMETRY</a> &amp;)</td></tr>
-<tr class="separator:a53a53c6e11eb49bba32115f873c35591"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac897ebe8cd265ccdd2e1d59c7e31f229"><td class="memItemLeft" align="right" valign="top"><a id="ac897ebe8cd265ccdd2e1d59c7e31f229"></a>
-static Eigen::Matrix&lt; Scalar, 4, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>predict</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state, const <a class="el" href="structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__ORIENTATION.html">MeasurementType::FLAT_FOOT_ORIENTATION</a> &amp;)</td></tr>
-<tr class="separator:ac897ebe8cd265ccdd2e1d59c7e31f229"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0440fd085fb30a833462f03dc95fab2"><td class="memItemLeft" align="right" valign="top"><a id="ac0440fd085fb30a833462f03dc95fab2"></a>
-static Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>predict</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state, const <a class="el" href="structmodule_1_1input_1_1MeasurementType_1_1GYROSCOPE.html">MeasurementType::GYROSCOPE</a> &amp;)</td></tr>
-<tr class="separator:ac0440fd085fb30a833462f03dc95fab2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b84a9043a69332499dd2389cb6b1739"><td class="memItemLeft" align="right" valign="top"><a id="a5b84a9043a69332499dd2389cb6b1739"></a>
+static Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>predict</b> (const <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a> &amp;state, const <a class="el" href="structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__TRANSLATION.html">MeasurementType::FLAT_FOOT_TRANSLATION</a> &amp;)</td></tr>
+<tr class="separator:a5b84a9043a69332499dd2389cb6b1739"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a57d477eafcb1032d2fa81497aad9de14"><td class="memItemLeft" align="right" valign="top"><a id="a57d477eafcb1032d2fa81497aad9de14"></a>
 <a class="el" href="structmodule_1_1input_1_1MotionModel_1_1StateVec.html">StateVec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>process_noise</b> {}</td></tr>
 <tr class="separator:a57d477eafcb1032d2fa81497aad9de14"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a119fbe83e9a6601253624ebef63ba7ca"><td class="memItemLeft" align="right" valign="top"><a id="a119fbe83e9a6601253624ebef63ba7ca"></a>
-Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>timeUpdateVelocityDecay</b> = Eigen::Matrix&lt;Scalar, 3, 1&gt;::Ones()</td></tr>
-<tr class="separator:a119fbe83e9a6601253624ebef63ba7ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
@@ -256,7 +244,7 @@ static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>si
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1MotionModel.html">MotionModel</a></li>
-    <li class="footer">Generated on Sat Apr 6 2024 23:34:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 7 2024 02:00:30 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

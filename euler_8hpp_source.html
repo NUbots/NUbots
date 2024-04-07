@@ -238,7 +238,7 @@ $(document).ready(function(){initNavTree('euler_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;<span class="comment">     * @return false if angles are not valid</span></div>
 <div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;<span class="comment">     */</span></div>
 <div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T, std::enable_if_t&lt;((T::RowsAtCompileTime == 3) &amp;&amp; (T::ColsAtCompileTime == 1))&gt;* = <span class="keywordtype">nullptr</span>&gt;</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> CheckEulerBounds(<span class="keyword">const</span> T&amp; angles) {</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <span class="keyword">inline</span> <span class="keywordtype">bool</span> check_euler_bounds(<span class="keyword">const</span> T&amp; angles) {</div>
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;        <span class="keywordflow">return</span> (angles(0) &gt;= -M_PI &amp;&amp; angles(0) &lt;= M_PI)</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;               &amp;&amp; ((angles(1) &gt; -M_PI / 2.0 &amp;&amp; angles(1) &lt; M_PI / 2.0)</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;                   || (angles(0) == 0 &amp;&amp; angles(2) == 0 &amp;&amp; (angles(1) == -M_PI / 2.0 || angles(1) == M_PI / 2.0)))</div>
@@ -254,44 +254,44 @@ $(document).ready(function(){initNavTree('euler_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T,</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;              <span class="keyword">typename</span> Scalar                                                                 = <span class="keyword">typename</span> T::Scalar,</div>
 <div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;              std::enable_if_t&lt;((T::RowsAtCompileTime == 3) &amp;&amp; (T::ColsAtCompileTime == 1))&gt;* = <span class="keyword">nullptr</span>&gt;</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix3d EulerToMatrix(<span class="keyword">const</span> T&amp; angles, EulerType eulerType) {</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix3d eul_to_mat(<span class="keyword">const</span> T&amp; angles, EulerType eulerType) {</div>
 <div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        Eigen::Quaternion&lt;Scalar&gt; quat;</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="keywordflow">switch</span> (eulerType) {</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;            <span class="keywordflow">case</span> EulerYawPitchRoll: {</div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yawRot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitchRot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; rollRot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                quat = rollRot * pitchRot * yawRot;</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yaw_rot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitch_rot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; roll_rot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;                quat = roll_rot * pitch_rot * yaw_rot;</div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;            } <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;            <span class="keywordflow">case</span> EulerYawRollPitch: {</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yawRot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitchRot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; rollRot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                quat = pitchRot * rollRot * yawRot;</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yaw_rot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitch_rot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; roll_rot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;                quat = pitch_rot * roll_rot * yaw_rot;</div>
 <div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;            } <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;            <span class="keywordflow">case</span> EulerRollPitchYaw: {</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yawRot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitchRot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; rollRot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                quat = yawRot * pitchRot * rollRot;</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yaw_rot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitch_rot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; roll_rot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;                quat = yaw_rot * pitch_rot * roll_rot;</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;            } <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;            <span class="keywordflow">case</span> EulerRollYawPitch: {</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yawRot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitchRot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; rollRot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                quat = pitchRot * yawRot * rollRot;</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yaw_rot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitch_rot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; roll_rot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;                quat = pitch_rot * yaw_rot * roll_rot;</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;            } <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;            <span class="keywordflow">case</span> EulerPitchRollYaw: {</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yawRot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitchRot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; rollRot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                quat = yawRot * rollRot * pitchRot;</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yaw_rot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitch_rot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; roll_rot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;                quat = yaw_rot * roll_rot * pitch_rot;</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;            } <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;            <span class="keywordflow">case</span> EulerPitchYawRoll: {</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yawRot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitchRot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; rollRot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;                quat = rollRot * yawRot * pitchRot;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; yaw_rot(angles(1), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; pitch_rot(angles(0), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;                Eigen::AngleAxis&lt;Scalar&gt; roll_rot(angles(2), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;                quat = roll_rot * yaw_rot * pitch_rot;</div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;            } <span class="keywordflow">break</span>;</div>
 <div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;            <span class="keywordflow">default</span>: {</div>
 <div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;                <span class="keywordflow">throw</span> std::logic_error(<span class="stringliteral">&quot;Euler invalid type&quot;</span>);</div>
@@ -309,7 +309,7 @@ $(document).ready(function(){initNavTree('euler_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T,</div>
 <div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;              <span class="keyword">typename</span> Scalar                                                                 = <span class="keyword">typename</span> T::Scalar,</div>
 <div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;              std::enable_if_t&lt;((T::RowsAtCompileTime == 3) &amp;&amp; (T::ColsAtCompileTime == 3))&gt;* = <span class="keyword">nullptr</span>&gt;</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; MatrixToEuler(<span class="keyword">const</span> T&amp; mat, EulerType eulerType) {</div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; mat_to_eul(<span class="keyword">const</span> T&amp; mat, EulerType eulerType) {</div>
 <div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;        Eigen::Matrix&lt;Scalar, 3, 1&gt; tmp(0.0, 0.0, 0.0);</div>
 <div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;        <span class="keywordflow">switch</span> (eulerType) {</div>
 <div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;            <span class="keywordflow">case</span> EulerYawPitchRoll: {</div>
@@ -343,7 +343,7 @@ $(document).ready(function(){initNavTree('euler_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T,</div>
 <div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;              <span class="keyword">typename</span> Scalar                                                                 = <span class="keyword">typename</span> T::Scalar,</div>
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;              std::enable_if_t&lt;((T::RowsAtCompileTime == 3) &amp;&amp; (T::ColsAtCompileTime == 3))&gt;* = <span class="keyword">nullptr</span>&gt;</div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; MatrixToEulerIntrinsic(<span class="keyword">const</span> T&amp; mat) {</div>
+<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix&lt;Scalar, 3, 1&gt; mat_to_rpy_intrinsic(<span class="keyword">const</span> T&amp; mat) {</div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        <span class="comment">// Eigen euler angles and with better range</span></div>
 <div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;        <span class="keywordflow">return</span> Eigen::Matrix&lt;Scalar, 3, 1&gt;(</div>
 <div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;            <span class="comment">// Roll</span></div>
@@ -362,11 +362,11 @@ $(document).ready(function(){initNavTree('euler_8hpp_source.html',''); initResiz
 <div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T,</div>
 <div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;              <span class="keyword">typename</span> Scalar                                                                 = <span class="keyword">typename</span> T::Scalar,</div>
 <div class="line"><a name="l00192"></a><span class="lineno">  192</span>&#160;              std::enable_if_t&lt;((T::RowsAtCompileTime == 3) &amp;&amp; (T::ColsAtCompileTime == 1))&gt;* = <span class="keyword">nullptr</span>&gt;</div>
-<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix&lt;Scalar, 3, 3&gt; EulerIntrinsicToMatrix(<span class="keyword">const</span> T&amp; angles) {</div>
-<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        Eigen::AngleAxis&lt;Scalar&gt; yawRot(angles.z(), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
-<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;        Eigen::AngleAxis&lt;Scalar&gt; pitchRot(angles.y(), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;        Eigen::AngleAxis&lt;Scalar&gt; rollRot(angles.x(), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;        Eigen::Quaternion&lt;Scalar&gt; quat = yawRot * pitchRot * rollRot;</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    <span class="keyword">inline</span> Eigen::Matrix&lt;Scalar, 3, 3&gt; rpy_intrinsic_to_mat(<span class="keyword">const</span> T&amp; angles) {</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;        Eigen::AngleAxis&lt;Scalar&gt; yaw_rot(angles.z(), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitZ());</div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;        Eigen::AngleAxis&lt;Scalar&gt; pitch_rot(angles.y(), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitY());</div>
+<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;        Eigen::AngleAxis&lt;Scalar&gt; roll_rot(angles.x(), Eigen::Matrix&lt;Scalar, 3, 1&gt;::UnitX());</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;        Eigen::Quaternion&lt;Scalar&gt; quat = yaw_rot * pitch_rot * roll_rot;</div>
 <div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;        <span class="keywordflow">return</span> quat.matrix();</div>
 <div class="line"><a name="l00199"></a><span class="lineno">  199</span>&#160;    }</div>
 <div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;}  <span class="comment">// namespace utility::math::euler</span></div>
@@ -378,7 +378,7 @@ $(document).ready(function(){initNavTree('euler_8hpp_source.html',''); initResiz
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_5224ab8e38918af5170b4d41508acb75.html">math</a></li><li class="navelem"><b>euler.hpp</b></li>
-    <li class="footer">Generated on Sat Apr 6 2024 23:34:04 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 7 2024 02:00:29 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

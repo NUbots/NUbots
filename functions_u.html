@@ -174,8 +174,7 @@ $(document).ready(function(){initNavTree('functions_u.html',''); initResizable()
 , <a class="el" href="structutility_1_1reactor_1_1StreamReactor_1_1SerialConnection.html#a6d7479ef19aa28523dcc6463c1964541">utility::reactor::StreamReactor&lt; T, Parser, TimeoutTicks, TimeoutPeriod &gt;::SerialConnection</a>
 </li>
 <li>ukf
-: <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a66c82048dee96b89d1febe7260060423">module::input::SensorFilter</a>
-, <a class="el" href="classmodule_1_1localisation_1_1BallLocalisation.html#a0d2ad24495d922de17be6a79bf308760">module::localisation::BallLocalisation</a>
+: <a class="el" href="classmodule_1_1localisation_1_1BallLocalisation.html#a0d2ad24495d922de17be6a79bf308760">module::localisation::BallLocalisation</a>
 </li>
 <li>unique_id_source
 : <a class="el" href="classmodule_1_1extension_1_1Director.html#a5d146d3ea9f1fb47cb37d9bc0dcee07d">module::extension::Director</a>
@@ -194,6 +193,7 @@ $(document).ready(function(){initNavTree('functions_u.html',''); initResizable()
 </li>
 <li>update()
 : <a class="el" href="classutility_1_1math_1_1filter_1_1KalmanFilter.html#aee8ef36f51310c6e00e921a75a5637ff">utility::math::filter::KalmanFilter&lt; Scalar, NumStates, NumInputs, NumMeasurements &gt;</a>
+, <a class="el" href="classutility_1_1math_1_1filter_1_1MahonyFilter.html#a25faf2506af03ccdb055a56216291b6d">utility::math::filter::MahonyFilter&lt; Scalar &gt;</a>
 , <a class="el" href="classutility_1_1skill_1_1KickGenerator.html#adf8e4b6c884420db93295e02b49f67e3">utility::skill::KickGenerator&lt; Scalar &gt;</a>
 , <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ac8faeae1a9af29ff6a6f41e971d89bd9">utility::skill::WalkGenerator&lt; Scalar &gt;</a>
 , <a class="el" href="classutility_1_1support_1_1ProgressBar.html#ac927f0e3e836c732af784a4bd9f5eb83">utility::support::ProgressBar</a>
@@ -215,17 +215,8 @@ $(document).ready(function(){initNavTree('functions_u.html',''); initResizable()
 , <a class="el" href="classmodule_1_1support_1_1optimisation_1_1StrafeEvaluator.html#a6ad73ee043d49e2007ac61aba5d96e2a">module::support::optimisation::StrafeEvaluator</a>
 , <a class="el" href="classmodule_1_1support_1_1optimisation_1_1WalkEvaluator.html#ae1c7f5960b20f770c68ab2b33d626f43">module::support::optimisation::WalkEvaluator</a>
 </li>
-<li>update_odometry_ground_truth()
-: <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a02988d6e1c81b5fa00fcfc62a307af51">module::input::SensorFilter</a>
-</li>
-<li>update_odometry_kf()
-: <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#ac06898456fb4022878eafbd3344de3b9">module::input::SensorFilter</a>
-</li>
-<li>update_odometry_mahony()
-: <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a436f5527f30e86ef7f181a5e2e9a44ce">module::input::SensorFilter</a>
-</li>
-<li>update_odometry_ukf()
-: <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#ae9b2d07b30f8986dc9cb79b5aeb9f671">module::input::SensorFilter</a>
+<li>update_odometry()
+: <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#aa8f8119847b5f2d4da589477c7d96a69">module::input::SensorFilter</a>
 </li>
 <li>update_raw_sensors()
 : <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba">module::input::SensorFilter</a>
@@ -244,7 +235,9 @@ $(document).ready(function(){initNavTree('functions_u.html',''); initResizable()
 </li>
 <li>urdf_path
 : <a class="el" href="structmodule_1_1actuation_1_1Kinematics_1_1Config.html#aea765f11fa685fc05e49d823e86aa555">module::actuation::Kinematics::Config</a>
-, <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#adc8ccce9b96e525fa2026c4bb7a1ed2b">module::input::SensorFilter::Config</a>
+</li>
+<li>use_ground_truth
+: <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html#ad4963d41519183a4ce47a32cebdbe06f">module::input::SensorFilter::Config</a>
 </li>
 <li>use_ground_truth_localisation
 : <a class="el" href="structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#aae7cbbfb27ee9cdeba8f328273a10b34">module::localisation::FieldLocalisation::Config</a>
@@ -268,7 +261,7 @@ $(document).ready(function(){initNavTree('functions_u.html',''); initResizable()
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Sat Apr 6 2024 23:34:05 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 7 2024 02:00:30 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

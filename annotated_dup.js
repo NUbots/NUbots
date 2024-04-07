@@ -89,10 +89,7 @@ var annotated_dup =
           [ "Team", "structmodule_1_1input_1_1gamecontroller_1_1Team.html", "structmodule_1_1input_1_1gamecontroller_1_1Team" ]
         ] ],
         [ "MeasurementType", null, [
-          [ "ACCELEROMETER", "structmodule_1_1input_1_1MeasurementType_1_1ACCELEROMETER.html", null ],
-          [ "FLAT_FOOT_ODOMETRY", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__ODOMETRY.html", null ],
-          [ "FLAT_FOOT_ORIENTATION", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__ORIENTATION.html", null ],
-          [ "GYROSCOPE", "structmodule_1_1input_1_1MeasurementType_1_1GYROSCOPE.html", null ]
+          [ "FLAT_FOOT_TRANSLATION", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__TRANSLATION.html", null ]
         ] ],
         [ "Camera", "classmodule_1_1input_1_1Camera.html", "classmodule_1_1input_1_1Camera" ],
         [ "CameraContext", "structmodule_1_1input_1_1CameraContext.html", "structmodule_1_1input_1_1CameraContext" ],
@@ -123,8 +120,7 @@ var annotated_dup =
         [ "SettingsFunctions< ArvGcBoolean >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4" ],
         [ "SettingsFunctions< ArvGcEnumeration >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4" ],
         [ "SettingsFunctions< ArvGcFloat >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4" ],
-        [ "SettingsFunctions< ArvGcInteger >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4" ],
-        [ "VirtualLoadSensor", "classmodule_1_1input_1_1VirtualLoadSensor.html", "classmodule_1_1input_1_1VirtualLoadSensor" ]
+        [ "SettingsFunctions< ArvGcInteger >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4" ]
       ] ],
       [ "localisation", null, [
         [ "MeasurementType", null, [
@@ -376,6 +372,7 @@ var annotated_dup =
       [ "math", null, [
         [ "filter", null, [
           [ "KalmanFilter", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", "classutility_1_1math_1_1filter_1_1KalmanFilter" ],
+          [ "MahonyFilter", "classutility_1_1math_1_1filter_1_1MahonyFilter.html", "classutility_1_1math_1_1filter_1_1MahonyFilter" ],
           [ "ParticleFilter", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", "classutility_1_1math_1_1filter_1_1ParticleFilter" ],
           [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ]
         ] ],

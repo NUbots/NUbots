@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1DHT.html" title=" " alt="" coords="5,5,211,61"/>
+<area shape="rect" id="node1" href="$classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html" title=" " alt="" coords="5,129,200,171"/>
+<area shape="rect" id="node2" href="$structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html" title=" " alt="" coords="264,71,459,112"/>
+<area shape="rect" id="node6" href="$structmodule_1_1platform_1_1OpenCR_1_1FSR.html" title=" " alt="" coords="248,137,475,163"/>
+<area shape="rect" id="node7" href="$classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html" title=" " alt="" coords="264,188,459,229"/>
+<area shape="rect" id="node3" href="$structmodule_1_1platform_1_1OpenCR_1_1MX106.html" title=" " alt="" coords="523,5,717,47"/>
+<area shape="rect" id="node4" href="$structmodule_1_1platform_1_1OpenCR_1_1MX64.html" title=" " alt="" coords="523,71,717,112"/>
+<area shape="rect" id="node5" href="$structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html" title=" " alt="" coords="523,136,717,177"/>
 </map>

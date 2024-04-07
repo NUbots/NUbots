@@ -1,5 +1,0 @@
-<map id="module::input::SensorFilter::Config::UKF::Initial" name="module::input::SensorFilter::Config::UKF::Initial">
-<area shape="rect" id="node1" title=" " alt="" coords="327,43,524,84"/>
-<area shape="rect" id="node2" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1UKF_1_1Initial_1_1Mean.html" title=" " alt="" coords="5,5,203,47"/>
-<area shape="rect" id="node3" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1UKF_1_1Initial_1_1Covariance.html" title=" " alt="" coords="5,71,203,127"/>
-</map>

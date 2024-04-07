@@ -188,10 +188,7 @@ var namespaces_dup =
           [ "SPL_COACH_MESSAGE_SIZE", "GameControllerData_8hpp.html#a24f013b41c05c2fdbe08dfdd8378f8e8", null ]
         ] ],
         [ "MeasurementType", null, [
-          [ "ACCELEROMETER", "structmodule_1_1input_1_1MeasurementType_1_1ACCELEROMETER.html", null ],
-          [ "FLAT_FOOT_ODOMETRY", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__ODOMETRY.html", null ],
-          [ "FLAT_FOOT_ORIENTATION", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__ORIENTATION.html", null ],
-          [ "GYROSCOPE", "structmodule_1_1input_1_1MeasurementType_1_1GYROSCOPE.html", null ]
+          [ "FLAT_FOOT_TRANSLATION", "structmodule_1_1input_1_1MeasurementType_1_1FLAT__FOOT__TRANSLATION.html", null ]
         ] ],
         [ "Camera", "classmodule_1_1input_1_1Camera.html", "classmodule_1_1input_1_1Camera" ],
         [ "CameraContext", "structmodule_1_1input_1_1CameraContext.html", "structmodule_1_1input_1_1CameraContext" ],
@@ -223,7 +220,6 @@ var namespaces_dup =
         [ "SettingsFunctions< ArvGcEnumeration >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4" ],
         [ "SettingsFunctions< ArvGcFloat >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcFloat_01_4" ],
         [ "SettingsFunctions< ArvGcInteger >", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4.html", "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcInteger_01_4" ],
-        [ "VirtualLoadSensor", "classmodule_1_1input_1_1VirtualLoadSensor.html", "classmodule_1_1input_1_1VirtualLoadSensor" ],
         [ "BallKickedOut", "GameController_8cpp.html#ae0f29ffd8b2d3111f112fe87c2d34ca1", null ],
         [ "CoachMessage", "GameController_8cpp.html#a3bc1c01e45d01179878a01c28205418b", null ],
         [ "Device", "Parse_8hpp.html#aa65603961328a2fabede3c79195ea028", null ],
@@ -826,18 +822,17 @@ var namespaces_dup =
             [ "EulerPitchRollYaw", "euler_8hpp.html#af8f62fbe60c57dd0eea969f0717d8228a44ba4b890f9637adc37dcf07c7ea6029", null ],
             [ "EulerPitchYawRoll", "euler_8hpp.html#af8f62fbe60c57dd0eea969f0717d8228a70de2a085ed80a2b69d3cdf79129311b", null ]
           ] ],
-          [ "CheckEulerBounds", "euler_8hpp.html#a9d6469486836804f66fea0b6c72ff40c", null ],
-          [ "EulerIntrinsicToMatrix", "euler_8hpp.html#adcfd08768efa66ed08cae6e8cd39d76e", null ],
-          [ "EulerToMatrix", "euler_8hpp.html#a577ca29d628308cc91c33f5f40cb0824", null ],
-          [ "MatrixToEuler", "euler_8hpp.html#a7926a57b4e7ca474efb23a32ca24c9fe", null ],
-          [ "MatrixToEulerIntrinsic", "euler_8hpp.html#a9924fe7f0d6191e3db36d9eaad37b7f2", null ]
+          [ "check_euler_bounds", "euler_8hpp.html#a1b53a64a50bb65934038d2862bcef3c8", null ],
+          [ "eul_to_mat", "euler_8hpp.html#a367fd71e844bdd6387273f5ec8c3a43a", null ],
+          [ "mat_to_eul", "euler_8hpp.html#a22862eb7c5c15af692cd93b38c840686", null ],
+          [ "mat_to_rpy_intrinsic", "euler_8hpp.html#a6d265b25e381876c0c143be10ce44124", null ],
+          [ "rpy_intrinsic_to_mat", "euler_8hpp.html#ae87216cf1fb407dbfe1b7d6f09ca879d", null ]
         ] ],
         [ "filter", null, [
           [ "KalmanFilter", "classutility_1_1math_1_1filter_1_1KalmanFilter.html", "classutility_1_1math_1_1filter_1_1KalmanFilter" ],
+          [ "MahonyFilter", "classutility_1_1math_1_1filter_1_1MahonyFilter.html", "classutility_1_1math_1_1filter_1_1MahonyFilter" ],
           [ "ParticleFilter", "classutility_1_1math_1_1filter_1_1ParticleFilter.html", "classutility_1_1math_1_1filter_1_1ParticleFilter" ],
-          [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ],
-          [ "MahonyUpdate", "MahonyFilter_8hpp.html#a18007f2896cd23ddb50268e15dbdcc7a", null ],
-          [ "skew", "MahonyFilter_8hpp.html#aebfeab9b0ce237e16a2c9f088826f635", null ]
+          [ "UKF", "classutility_1_1math_1_1filter_1_1UKF.html", "classutility_1_1math_1_1filter_1_1UKF" ]
         ] ],
         [ "geometry", null, [
           [ "Quad", "classutility_1_1math_1_1geometry_1_1Quad.html", "classutility_1_1math_1_1geometry_1_1Quad" ],
@@ -964,8 +959,8 @@ var namespaces_dup =
         [ "graph", "NUhelpers_8hpp.html#aac2d4f8c0c2aa3defb6820b2bdef61b0", null ]
       ] ],
       [ "platform", null, [
-        [ "getRawServo", "RawSensors_8hpp.html#a4491aa6f2306030dc4618a6619ac883f", null ],
-        [ "getRawServo", "RawSensors_8hpp.html#ae7bf0471458b00e7d35f04826dbd90e7", null ],
+        [ "get_raw_servo", "RawSensors_8hpp.html#aa4ab65d6601361d1522bca695f9efa68", null ],
+        [ "get_raw_servo", "RawSensors_8hpp.html#af5589a17b45a3543f82530a2d2353bcb", null ],
         [ "make_packet_error_string", "RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
         [ "make_servo_hardware_error_string", "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
       ] ],
