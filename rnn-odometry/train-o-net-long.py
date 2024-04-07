@@ -15,34 +15,6 @@ from sklearn.preprocessing import MinMaxScaler
 
 def main():
 
-    def convert_to_relative_aligned(data):
-        """
-        This function takes a dataset of world coordinates and converts it to relative positions
-        based on the starting position (assumed to be the first index), while maintaining
-        alignment with the original data size.
-        Args:
-            data: A NumPy array of shape (num_datapoints, 3) representing world coordinates.
-
-        Returns:
-            A NumPy array of shape (num_datapoints, 3) representing relative positions with
-            the starting position included as the first element (all zeros).
-        """
-
-        # Get the starting position (assuming first index)
-        starting_position = data[0]
-        print("Start pos shape: ", starting_position.shape)
-
-        # Calculate relative positions for all data points
-        relative_positions = data - starting_position
-        print("Relative pos shape: ", relative_positions.shape)
-
-        # Create an array with all zeros to represent starting position (aligned)
-        aligned_starting_position = np.zeros_like(relative_positions[0])
-        print("aligned starting pos shape: ", aligned_starting_position.shape)
-
-        # Combine starting position and relative positions
-        return np.vstack((aligned_starting_position, relative_positions))
-
     def convert_to_relative(data):
         """
         This function takes a dataset of world coordinates and converts it to relative positions
@@ -57,12 +29,9 @@ def main():
 
         # Get the starting position (assuming first index)
         starting_position = data[0]
-        print("Start shape: ", starting_position.shape)
-        print("Start pos value: ", starting_position)
 
         # Calculate relative positions for all data points (excluding starting position)
         relative_positions = data - starting_position
-        print("Relative pos shape: ", relative_positions.shape)
 
         return relative_positions
 
@@ -71,6 +40,9 @@ def main():
     servos_long = np.load("processed-outputs/numpy/long/1/long-servos-1.npy")
     truth_all_long = np.load("processed-outputs/numpy/long/1/long-truth-1.npy")
     # More data
+    imu_long_2 = np.load("processed-outputs/numpy/long/2/long-imu-2.npy")
+    servos_long_2 = np.load("processed-outputs/numpy/long/2/long-servos-2.npy")
+    truth_all_long_2 = np.load("processed-outputs/numpy/long/2/long-truth-2.npy")
 
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
     print("IMU long: ", imu_long.shape)
@@ -78,6 +50,12 @@ def main():
     print("IMU min: ", np.min(imu_long))
     print("Servos long: ", servos_long.shape)
     print("Truth long: ", truth_all_long.shape)
+
+    print("IMU long 2: ", imu_long_2.shape)
+    print("IMU max 2: ", np.max(imu_long_2))
+    print("IMU min 2: ", np.min(imu_long_2))
+    print("Servos long 2: ", servos_long_2.shape)
+    print("Truth long 2: ", truth_all_long_2.shape)
 
     # Plot and inspect
     # num_channels = imu.shape[1]
@@ -113,10 +91,14 @@ def main():
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
     truth_long = truth_all_long[:, 9:12]
     print("Truth long shape: ", truth_long.shape)
+    truth_long_2 = truth_all_long_2[:, 9:12]
+    print("Truth long 2 shape: ", truth_long_2.shape)
 
     # Convert truth arrays to relative based on starting position
-    truth_long = convert_to_relative(truth_long)
-    print("Truth long shape: ", truth_long.shape)
+    # truth_long = convert_to_relative(truth_long)
+    # print("Truth long shape after relative conversion: ", truth_long.shape)
+    # truth_long_2 = convert_to_relative(truth_long_2)
+    # print("Truth long shape after relative conversion: ", truth_long_2.shape)
 
     # "data.accelerometer.x",
     # "data.accelerometer.y",
@@ -141,20 +123,24 @@ def main():
     # imu_clipped = np.clip(imu, -10, 10)
 
     # Plot and inspect
-    num_channels = truth_long.shape[1]
-    plt.figure(figsize=(10, 5))
-    # Plot each channel
-    for i in range(num_channels):
-        plt.plot(truth_long[0:1000, i], label=f'Channel {i+1}')
-    # Add a legend
-    # plt.ylim(np.min(imu), np.max(imu))
-    plt.autoscale(enable=True, axis="both")
-    plt.legend()
-    plt.show()
+    # num_channels = truth_long_2.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(truth_long_2[0:1000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # # plt.ylim(np.min(imu), np.max(imu))
+    # plt.autoscale(enable=True, axis="both")
+    # plt.legend()
+    # plt.show()
 
+    # join separate arrays
+    imu_joined = np.concatenate([imu_long, imu_long_2], axis=0)
+    servos_joined = np.concatenate([servos_long, servos_long_2], axis=0)
+    truth_joined = np.concatenate([truth_long, truth_long_2], axis=0)
 
     # Join the data
-    joined_data = np.concatenate([imu_long, servos_long, truth_long], axis=1)
+    joined_data = np.concatenate([imu_joined, servos_joined, truth_joined], axis=1)
     print(joined_data.shape)
 
     # Split the training data into training, validation and test sets
@@ -229,19 +215,19 @@ def main():
     input_data_train = train_arr_scaled[:, :26]  # imu and servos
     input_targets_train = train_arr_scaled[:, 26:]  # truth
     # Convert targets to relative position
-    # input_targets_train = convert_to_relative(input_targets_train)
+    input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     input_data_validate = validate_arr_scaled[:, :26]  # imu and servos
     input_targets_validate = validate_arr_scaled[:, 26:]  # truth
     # Convert targets to relative position
-    # input_targets_validate = convert_to_relative(input_targets_validate)
+    input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     input_data_test= test_arr_scaled[:, :26]  # imu and servos
     input_targets_test = test_arr_scaled[:, 26:]  # truth
     # Convert targets to relative position
-    # input_targets_test = convert_to_relative(input_targets_test)
+    input_targets_test = convert_to_relative(input_targets_test)
 
     # print dataset shapes
     print(f"input_data_train: {input_data_train.shape}")
@@ -260,11 +246,11 @@ def main():
     np.save('datasets/input_targets_test.npy', input_targets_test)
 
     # Plot and inspect
-    # num_channels = input_data_train.shape[1]
+    # num_channels = input_targets_train.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(input_data_train[20000:40000, i], label=f'Channel {i+1}')
+    #     plt.plot(input_data_train[200000:400000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
@@ -340,39 +326,39 @@ def main():
     # activation = tf.keras.activations.relu()
 
     # Tensorboard
-    # timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    # log_dir = "logs/fit/" + timestamp
-    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = "logs/fit/" + timestamp
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-    # # Regulariser
-    # # regularizer1 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # # regularizer2 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
+    # Regulariser
+    # regularizer1 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # regularizer2 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
 
-    # # Model Layers
-    # inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
+    # Model Layers
+    inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    # lstm = keras.layers.LSTM(200, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.00025, l2=0.0085))(inputs)    # 32 originally
-    # dropout = keras.layers.Dropout(rate=0.2)(lstm)
+    lstm = keras.layers.LSTM(200, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.00025, l2=0.0085))(inputs)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.2)(lstm)
 
-    # lstm2 = keras.layers.LSTM(80, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006))(dropout)    # 32 originally
-    # dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
+    lstm2 = keras.layers.LSTM(80, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006))(dropout)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
-    # lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.004))(dropout2)    # 32 originally
-    # dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
+    lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.004))(dropout2)    # 32 originally
+    dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
 
-    # outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(dropout3)   # Target shape[1] is 3
-    # model = keras.Model(inputs=inputs, outputs=outputs)
-    # model.compile(optimizer=optimizer, loss=loss_function)
-    # model.summary()
+    outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(dropout3)   # Target shape[1] is 3
+    model = keras.Model(inputs=inputs, outputs=outputs)
+    model.compile(optimizer=optimizer, loss=loss_function)
+    model.summary()
 
-    # model.fit(
-    #     train_dataset,
-    #     validation_data=validate_dataset,
-    #     epochs=epochs,
-    #     callbacks=[tensorboard_callback]
-    # )
+    model.fit(
+        train_dataset,
+        validation_data=validate_dataset,
+        epochs=epochs,
+        callbacks=[tensorboard_callback]
+    )
 
     # Note add back the model save
     model.save("models/model-" + timestamp)
