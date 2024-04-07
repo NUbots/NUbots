@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2016 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,24 +24,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef MODULE_SUPPORT_PROFILER_HPP
+#define MODULE_SUPPORT_PROFILER_HPP
 
-#include "SensorFilter.hpp"
+#include <nuclear>
 
-#include "utility/math/euler.hpp"
+#include "message/support/nuclear/ReactionProfile.hpp"
 
-namespace module::input {
+namespace module::support {
 
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using message::support::nuclear::ReactionProfile;
 
-    void SensorFilter::update_odometry_ground_truth(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
-        // **************** Construct Odometry Output ****************
-        Eigen::Isometry3d Hwt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
-        sensors->Htw          = Hwt.inverse().matrix();
+    class Profiler : public NUClear::Reactor {
 
-        Eigen::Vector3d Hwt_rpy = MatrixToEulerIntrinsic(Hwt.rotation());
-        Eigen::Isometry3d Hwr   = Eigen::Isometry3d::Identity();
-        Hwr.linear()            = Eigen::AngleAxisd(Hwt_rpy.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-        Hwr.translation()       = Eigen::Vector3d(Hwt.translation().x(), Hwt.translation().y(), 0.0);
-        sensors->Hrw            = Hwr.inverse().matrix();
-    }
-}  // namespace module::input
+    public:
+        /// @brief Called by the powerplant to build and setup the Profiler reactor.
+        explicit Profiler(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Map to store the reaction profiles
+        std::map<uint64_t, ReactionProfile> reaction_profiles;
+
+        /// @brief Total time of all reactions
+        double total_time_all = 0;
+
+        /// @brief Total count of all reactions
+        int total_count = 0;
+    };
+}  // namespace module::support
+
+#endif  // MODULE_SUPPORT_PROFILER_HPP

@@ -142,7 +142,7 @@ namespace module::motion {
                 Eigen::Isometry3d torsoPose =
                     (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
 
-                Eigen::Isometry3d Htg = Eigen::Isometry3d(sensors.Hgt).inverse();
+                Eigen::Isometry3d Htg = sensors.Htw * sensors.Hrw.inverse();
 
                 // Put the ball position from vision into torso coordinates by transforming the command target
                 Eigen::Vector3d targetTorso = Htg * command.target;
