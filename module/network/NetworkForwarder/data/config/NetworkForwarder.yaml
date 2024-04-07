@@ -11,6 +11,7 @@ targets:
     # Overview packets for the overview screen
     message.support.nusight.Overview: true
     message.support.FieldDescription: true
+    message.support.nuclear.ReactionProfiles: true
 
     # DataPoints power the chart view
     message.eye.DataPoint: true
