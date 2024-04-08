@@ -32,6 +32,7 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/skill/Look.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
@@ -58,6 +59,7 @@ namespace module::purpose {
     using message::purpose::PenaltyKickStriker;
     using message::purpose::PenaltyShootoutStriker;
     using message::purpose::ThrowInStriker;
+    using message::skill::Look;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
@@ -122,7 +124,14 @@ namespace module::purpose {
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<NormalStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<NormalStriker>>().then([this] { 
+        	emit<Task>(std::make_unique<StandStill>()); 
+        	//make the robot look forward 
+        	Eigen::Vector3d uPCt = (Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ())                                        
+			* Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())).toRotationMatrix()
+			* Eigen::Vector3d::UnitX();
+        	emit<Task>(std::make_unique<Look>(uPCt,true));
+        });
 
         // Penalty shootout PLAYING state
         on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
@@ -132,7 +141,14 @@ namespace module::purpose {
             [this] { log<NUClear::WARN>("Unknown penalty shootout game phase."); });
 
         // Default for INITIAL, READY, SET, FINISHED, TIMEOUT
-        on<Provide<PenaltyShootoutStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
+        on<Provide<PenaltyShootoutStriker>>().then([this] { 
+        	emit<Task>(std::make_unique<StandStill>()); 
+        	//make the robot look forward 
+        	Eigen::Vector3d uPCt = (Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ())                                        
+			* Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())).toRotationMatrix()
+			* Eigen::Vector3d::UnitX();
+        	emit<Task>(std::make_unique<Look>(uPCt,true));
+        	});
 
         // Direct free kick
         on<Provide<DirectFreeKickStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });

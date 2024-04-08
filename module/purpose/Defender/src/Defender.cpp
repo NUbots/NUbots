@@ -31,6 +31,7 @@
 
 #include "message/input/GameState.hpp"
 #include "message/purpose/Defender.hpp"
+#include "message/skill/Look.hpp"
 #include "message/strategy/AlignBallToGoal.hpp"
 #include "message/strategy/FindFeature.hpp"
 #include "message/strategy/KickToGoal.hpp"
@@ -55,6 +56,7 @@ namespace module::purpose {
     using message::purpose::NormalDefender;
     using message::purpose::PenaltyKickDefender;
     using message::purpose::ThrowInDefender;
+    using message::skill::Look;
     using message::strategy::AlignBallToGoal;
     using message::strategy::FindBall;
     using message::strategy::KickToGoal;
@@ -122,6 +124,11 @@ namespace module::purpose {
         on<Provide<NormalDefender>>().then([this] {
             log<NUClear::DEBUG>("INITIAL");
             emit<Task>(std::make_unique<StandStill>());
+            //make the robot look forward 
+            Eigen::Vector3d uPCt = (Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ())                                        
+	    	* Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY())).toRotationMatrix()
+		* Eigen::Vector3d::UnitX();
+            emit<Task>(std::make_unique<Look>(uPCt,true));
         });
 
         // Direct free kick
