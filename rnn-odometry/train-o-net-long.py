@@ -290,8 +290,16 @@ def main():
     )
 
     # Model parameters
-    learning_rate = 0.00001   # Controls how much to change the model in response to error.
+    learning_rate = 0.00005   # Controls how much to change the model in response to error.
     epochs = 200             #
+    # Scheduler function keeps the initial learning rate for the first ten epochs
+    # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
+    # def scheduler(epoch, lr):
+    #     if epoch < 10:
+    #         return lr
+    #     else:
+    #         return lr * tf.exp(-0.1)
+    # lr_callback = keras.callbacks.LearningRateScheduler(scheduler)
 
     # ** Loss functions **
     # loss_function = keras.losses.MeanAbsoluteError()
@@ -304,7 +312,12 @@ def main():
     # ** Optimizers **
 
     # standard
-    optimizer=keras.optimizers.Adam(learning_rate=learning_rate)
+    # size_of_dataset = train_arr.shape[0]
+    # decay_over_epochs = epochs * size_of_dataset / batch_size
+    # print(f"Number of epochs for LR to decay over: ", decay_over_epochs)
+    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=8080, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
+    optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.99)
+
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
     # optimizer = keras.optimizers.SGD(learning_rate=learning_rate, momentum=0.1)
 
@@ -339,10 +352,10 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     # lstm = Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
-    lstm = keras.layers.LSTM(200, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.00025, l2=0.0085), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003))(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(100, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.00025, l2=0.0085), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003))(inputs)    # 32 originally
     dropout = keras.layers.Dropout(rate=0.2)(lstm)
 
-    lstm2 = keras.layers.LSTM(80, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003))(dropout)    # 32 originally
+    lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003))(dropout)    # 32 originally
     dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
     lstm3 = keras.layers.Bidirectional(keras.layers.LSTM(10, return_sequences=False, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.004), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003)))(dropout2)    # 32 originally
