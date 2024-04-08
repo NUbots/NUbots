@@ -1,0 +1,30 @@
+log_level: DEBUG
+
+buttons:
+  debounce_threshold: 7
+
+foot_down:
+  method: FSR # Foot sensor reading
+  threshold: 1 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
+
+# Mahony filter for roll + pitch
+mahony:
+  # Proportional gain
+  Kp: 0.5
+  # Integral gain
+  Ki: 0.3
+  # Initial bias
+  initial_bias: [0, 0, 0]
+  # Initial orientation (roll, pitch, yaw)
+  initial_rpy: [0, 0.2, 0]
+
+# Cut off frequency for low-pass filter on torso y velocity
+velocity_low_pass:
+  y_cut_off_frequency: 0.01
+  x_cut_off_frequency: 0.015
+
+# Specify whether or not to use ground truth odometry from simulator
+use_ground_truth: false
+
+# Path to URDF file
+urdf_path: "models/robot.urdf"
