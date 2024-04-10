@@ -339,8 +339,8 @@ def main():
     # optimizer = keras.optimizers.RMSprop(learning_rate=learning_rate)
 
     # ** Activation functions **
-    # activation = tf.keras.activations.leaky_relu()
-    # activation = tf.keras.activations.relu()
+    # activation = tf.keras.activations.leaky_relu(negative_slope=0.01)
+    # activation = tf.keras.activations.relu(negative_slope=0.0, max_value=None, threshold=0.0)
 
     # Tensorboard
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -356,16 +356,16 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     # lstm = Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
-    lstm = keras.layers.LSTM(100, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.00025, l2=0.0085), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003))(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(100, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(inputs)    # 32 originally
     dropout = keras.layers.Dropout(rate=0.2)(lstm)
 
-    lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003))(dropout)    # 32 originally
+    lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
     dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
-    lstm3 = keras.layers.Bidirectional(keras.layers.LSTM(10, return_sequences=False, kernel_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.004), recurrent_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.003)))(dropout2)    # 32 originally
+    lstm3 = keras.layers.LSTM(10, return_sequences=False, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)    # 32 originally
     dropout3 = keras.layers.Dropout(rate=0.2)(lstm3)
 
-    outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.001))(dropout3)   # Target shape[1] is 3
+    outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), activation="relu")(dropout3)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function)
     model.summary()
