@@ -356,7 +356,7 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     # lstm = Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
-    lstm = keras.layers.LSTM(100, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(100,activation="leaky_relu", return_sequences=True, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(inputs)    # 32 originally
     dropout = keras.layers.Dropout(rate=0.2)(lstm)
 
     lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
