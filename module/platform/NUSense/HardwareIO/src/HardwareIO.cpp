@@ -147,7 +147,7 @@ namespace module::platform::NUSense {
             // Servo data
             for (const auto& [key, val] : data.servo_map) {
                 // Get a reference to the servo we are populating
-                RawSensors::Servo& servo = utility::platform::getRawServo(val.id - 1, *sensors);
+                RawSensors::Servo& servo = utility::platform::get_raw_servo(val.id - 1, *sensors);
                 // fill all servo values from the reference
                 servo.hardware_error        = val.hardware_error;
                 servo.torque_enabled        = val.torque_enabled;
@@ -181,7 +181,8 @@ namespace module::platform::NUSense {
         });
 
 
-        on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+        // Sync is used because uart write is a shared resource
+        on<Trigger<ServoTargets>, Sync<HardwareIO>>().then([this](const ServoTargets& commands) {
             // Copy the data into a new message so we can use a duration instead of a timepoint
             // and take the offsets and switch the direction.
             auto servo_targets = SubcontrollerServoTargets();
@@ -217,18 +218,10 @@ namespace module::platform::NUSense {
             full_msg.insert(full_msg.end(), byte_lengths.begin(), byte_lengths.end());
             full_msg.insert(full_msg.end(), payload.begin(), payload.end());
 
-            nusense.write(full_msg.data(), full_msg.size());
-
-            // Logs for debugging
-            log<NUClear::DEBUG>("Servo targets received");
-
-            uint16_t total_length = static_cast<uint16_t>(high_byte << 8) | static_cast<uint16_t>(low_byte);
-
-            log<NUClear::DEBUG>(total_length);
-            log<NUClear::DEBUG>(fmt::format("header length: {}  length length: {}  payload length: {}",
-                                            header.size(),
-                                            byte_lengths.size(),
-                                            payload.size()));
+            // Check if the write failed
+            if (nusense.write(full_msg.data(), full_msg.size()) == -1) {
+                log<NUClear::INFO>(fmt::format("Write error: {}", strerror(errno)));
+            }
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
@@ -237,8 +230,6 @@ namespace module::platform::NUSense {
 
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(command_list));
-
-            log<NUClear::DEBUG>("Servo target received");
         });
     }
 
