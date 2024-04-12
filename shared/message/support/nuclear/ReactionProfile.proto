@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 NUbots
+// Copyright (c) 2024 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -25,30 +25,36 @@
 
 syntax = "proto3";
 
-package message.behaviour.state;
+package message.support.nuclear;
 
-import "Vector.proto";
+message ReactionProfile {
+    /// Name of the reaction
+    string name = 1;
+    /// Name of the reactor
+    string reactor = 2;
+    /// ID of the reaction
+    uint32 reaction_id = 3;
+    /// Total time spent in the reaction
+    double total_time = 4;
+    /// Number of times the reaction was called
+    uint64 count = 5;
+    /// Maximum time spent in the reaction
+    double max_time = 6;
+    /// Minimum time spent in the reaction
+    double min_time = 7;
+    /// Average time spent in the reaction
+    double avg_time = 8;
+    /// Percentage of time spent in the reaction (total_time / total time since start)
+    double percentage = 9;
+}
 
-message WalkState {
-    enum State {
-        UNKNOWN  = 0;
-        WALKING  = 1;
-        STOPPING = 2;
-        STOPPED  = 3;
-    }
+message ReactionProfiles {
+    /// List of reaction profiles
+    repeated ReactionProfile reaction_profiles = 1;
 
-    enum SupportPhase {
-        LEFT   = 0;
-        RIGHT  = 1;
-        DOUBLE = 2;
-    }
+    /// Total time for all reactions
+    double total_time = 2;
 
-    /// Walking state
-    State state = 1;
-
-    /// Current requested velocity target (dx, dy, dtheta)
-    vec3 velocity_target = 2;
-
-    /// Support phase
-    SupportPhase support_phase = 3;
+    /// Total number of reactions
+    uint64 total_count = 3;
 }

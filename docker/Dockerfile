@@ -43,10 +43,7 @@
 ### Date format is ISO year/month/day
 FROM --platform=linux/amd64 archlinux:base-devel-20220710.0.67642
 
-# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
-# If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
-# needs to be altered.
+COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
 # Setup pacman first before we install so we can turn off pgp
 COPY etc/pacman.conf /etc/pacman.conf

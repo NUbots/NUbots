@@ -90,7 +90,7 @@ namespace module::platform {
 
     using utility::input::FrameID;
     using utility::input::ServoID;
-    using utility::platform::getRawServo;
+    using utility::platform::get_raw_servo;
     using utility::support::Expression;
     using utility::vision::fourcc;
 
@@ -351,7 +351,7 @@ namespace module::platform {
                 // Get the difference between the current servo position and our servo target
                 const double diff = utility::math::angle::difference(
                     double(target.position),
-                    utility::platform::getRawServo(target.id, sensors).present_position);
+                    utility::platform::get_raw_servo(target.id, sensors).present_position);
                 // Get the difference between the current time and the time the servo should reach its target
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
@@ -888,6 +888,7 @@ namespace module::platform {
             if (sensor_measurements.odometry_ground_truth.exists) {
                 sensor_data->odometry_ground_truth.exists = true;
                 sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
+                sensor_data->odometry_ground_truth.vTw    = sensor_measurements.odometry_ground_truth.vTw;
             }
             if (sensor_measurements.localisation_ground_truth.exists) {
                 sensor_data->localisation_ground_truth.exists = true;
