@@ -109,7 +109,7 @@ namespace module::purpose {
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
-                emit<Task>(std::make_unique<FindPurpose>());
+                emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
 
@@ -119,7 +119,7 @@ namespace module::purpose {
             if (!cfg.force_playing) {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
-                emit<Task>(std::make_unique<FindPurpose>());
+                emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
     }
