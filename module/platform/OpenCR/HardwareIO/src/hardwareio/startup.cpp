@@ -60,7 +60,7 @@ namespace module::platform::OpenCR {
         dynamixel::v2::SyncWriteData<uint8_t> data[20];
         for (int i = 0; i < 20; ++i) {
             // ensure write command targets the ID (ID != i)
-            data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 1);
+            data[i] = dynamixel::v2::SyncWriteData<uint8_t>(nugus.servo_ids()[i], 0);
         }
         opencr.write(
             dynamixel::v2::SyncWriteCommand<uint8_t, 20>(uint16_t(DynamixelServo::Address::STATUS_RETURN_LEVEL), data));
@@ -87,13 +87,14 @@ namespace module::platform::OpenCR {
         dynamixel::v2::SyncWriteData<uint8_t> min_position_limits_data[20];
         for (int i = 0; i < 20; ++i) {
             // Ensure write command targets the ID (ID != i)
+
             const uint8_t id = nugus.servo_ids()[i];
             // Set the max rotation limits on all servos
             // max_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(
             //     id,
             //     convert::position(id, nugus.servo_max_position_limits[i], nugus.servo_direction,
             //     nugus.servo_offset));
-            max_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, 1000);
+            max_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, uint8_t(5));
 
             // **** DEBUG max_pos ****
             log<NUClear::DEBUG>(fmt::format(
@@ -106,7 +107,7 @@ namespace module::platform::OpenCR {
             //     id,
             //     convert::position(id, nugus.servo_min_position_limits[i], nugus.servo_direction,
             //     nugus.servo_offset));
-            min_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, 1000);
+            min_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, uint8_t(5));
 
             // **** DEBUG min_pos ****
             log<NUClear::DEBUG>(fmt::format(
@@ -122,9 +123,9 @@ namespace module::platform::OpenCR {
         //                                                  min_position_limits_data));
 
         // TEST - writing a single servo's position limit
-        opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(DynamixelServo::Address::MAX_POSITION_LIMIT_L),
-                                                          uint16_t(nugus.servo_ids()[19]),
-                                                          uint8_t(10)));
+        // opencr.write(dynamixel::v2::WriteCommand<uint8_t>(uint8_t(DynamixelServo::Address::MAX_POSITION_LIMIT_L),
+        //                                                   uint16_t(nugus.servo_ids()[19]),
+        //                                                   uint8_t(5)));
 
         // Set up indirect addressing for read addresses for each dynamixel
         dynamixel::v2::SyncWriteData<std::array<uint16_t, 17>> read_data[20];

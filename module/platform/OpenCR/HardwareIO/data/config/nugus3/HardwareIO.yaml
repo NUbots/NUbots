@@ -132,5 +132,5 @@ servos:
     direction: 1
     offset: 0.0
     simulated: false
-    max_position_limit: pi/2
+    max_position_limit: 10
     min_position_limit: 0
