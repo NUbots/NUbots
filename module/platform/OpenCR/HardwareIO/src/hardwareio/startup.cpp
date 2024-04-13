@@ -94,7 +94,9 @@ namespace module::platform::OpenCR {
             //     id,
             //     convert::position(id, nugus.servo_max_position_limits[i], nugus.servo_direction,
             //     nugus.servo_offset));
-            max_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, uint8_t(5));
+
+            // DEBUG
+            // max_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, 100);
 
             // **** DEBUG max_pos ****
             log<NUClear::DEBUG>(fmt::format(
@@ -107,7 +109,9 @@ namespace module::platform::OpenCR {
             //     id,
             //     convert::position(id, nugus.servo_min_position_limits[i], nugus.servo_direction,
             //     nugus.servo_offset));
-            min_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, uint8_t(5));
+
+            //DEBUG
+            // min_position_limits_data[i] = dynamixel::v2::SyncWriteData<uint8_t>(id, 100);
 
             // **** DEBUG min_pos ****
             log<NUClear::DEBUG>(fmt::format(
