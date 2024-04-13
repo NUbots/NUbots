@@ -100,9 +100,19 @@ message Message {
 message OdometryGroundTruth {
     /// Indicates if this message exists
     bool exists = 1;
-    /// Isometry3d transform from odometry (world) space to the robot (torso) space.
+    /// Affine3d transform from odometry (world) space to the robot (torso) space.
     /// It measures the world in robot space
     mat4 Htw = 2;
+    /// Velocity of the robot torso in the world space
+    vec3 vTw = 3;
+}
+
+/// NUbots specific data sent from our own controllers rather than the official RoboCup Webots controller
+message LocalisationGroundTruth {
+    /// Indicates if this message exists
+    bool exists = 1;
+    /// Isometry3d transform from localisation (world) space to field space
+    mat4 Hfw = 2;
 }
 
 message VisionGroundTruth {
@@ -128,11 +138,12 @@ message SensorMeasurements {
     repeated PositionSensorMeasurement position_sensors = 11;
     // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
     // Ground truth data
-    OdometryGroundTruth odometry_ground_truth = 100;
-    VisionGroundTruth   vision_ground_truth   = 101;
+    OdometryGroundTruth     odometry_ground_truth     = 100;
+    LocalisationGroundTruth localisation_ground_truth = 101;
+    VisionGroundTruth       vision_ground_truth       = 102;
     // Walk optimisation data
-    support.optimisation.OptimisationRobotPosition robot_position = 102;
-    bool                                           reset_done     = 103;
+    support.optimisation.OptimisationRobotPosition robot_position = 103;
+    bool                                           reset_done     = 104;
 }
 
 message MotorPosition {

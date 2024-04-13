@@ -79,7 +79,7 @@ namespace module::strategy {
                 // If we have goals, with at least one measurement and the goals are recent, look at the goals
                 if (!goals.goals.empty() && (NUClear::clock::now() - goals.timestamp < cfg.goal_search_timeout)) {
                     // Convert goal measurement to cartesian coordinates
-                    Eigen::Vector3d rGCc = sphericalToCartesian(goals.goals[0].measurements[0].srGCc.cast<double>());
+                    Eigen::Vector3d rGCc = goals.goals[0].measurements[0].rGCc;
                     // Convert to torso space
                     Eigen::Vector3d rGCt = (sensors.Htw * goals.Hcw.inverse()).rotation() * rGCc;
                     // Look at the goal

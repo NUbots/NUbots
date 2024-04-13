@@ -38,9 +38,9 @@ message WalkState {
     }
 
     enum SupportPhase {
-        DOUBLE = 0;
-        LEFT   = 1;
-        RIGHT  = 2;
+        LEFT   = 0;
+        RIGHT  = 1;
+        DOUBLE = 2;
     }
 
     /// Walking state

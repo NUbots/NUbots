@@ -116,9 +116,9 @@ def update_config_files(args: dict) -> None:
     os.chdir(args["config_dir"])
 
     # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
-    global_config = read_config("GlobalConfig.yaml")
+    global_config = read_config("webots/GlobalConfig.yaml")
     global_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
-    write_config("GlobalConfig.yaml", global_config)
+    write_config("webots/GlobalConfig.yaml", global_config)
 
     # Set `player_id` in GameController.yaml from ROBOCUP_ROBOT_ID
     game_controller_config = read_config("GameController.yaml")
@@ -137,9 +137,9 @@ def update_config_files(args: dict) -> None:
 
     # Set `team_id` if it is provided
     if "ROBOCUP_TEAM_ID" in env_vars:
-        global_config = read_config("GlobalConfig.yaml")
+        global_config = read_config("webots/GlobalConfig.yaml")
         global_config["team_id"] = int(env_vars["ROBOCUP_TEAM_ID"])
-        write_config("GlobalConfig.yaml", global_config)
+        write_config("webots/GlobalConfig.yaml", global_config)
 
     # Configure logging to /robocup-logs if it exists
     if os.path.exists("/robocup-logs"):

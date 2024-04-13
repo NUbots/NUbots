@@ -16,13 +16,13 @@ opencr:
 servos:
   - # [0]  R_SHOULDER_PITCH
     direction: -1
-    offset: 0.0
+    offset: pi / 4
     simulated: false
     max_position_limit: pi/2
     min_position_limit: 0
   - # [1]  L_SHOULDER_PITCH
     direction: 1
-    offset: 0.0
+    offset: pi / 4
     simulated: false
     max_position_limit: pi/2
     min_position_limit: 0
