@@ -53,7 +53,7 @@ message Goal {
     message Measurement {
         MeasurementType type = 1;
         /// Normal vectors point inwards towards the centre of the object
-        vec3 srGCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+        vec3 rGCc       = 2;  // Bottom of goal from camera in camera {c} space
         mat3 covariance = 3;
     }
     message Post {
@@ -74,7 +74,7 @@ message Goal {
 message Goals {
     uint32                    id        = 1;
     google.protobuf.Timestamp timestamp = 2;
-    /// Isometry3d transform from world space to camera space at the time that the image was taken
+    /// Isometry3d transform from world {w} space to camera {c} space at the time that the image was taken
     iso3 Hcw = 3;
 
     repeated Goal goals = 4;

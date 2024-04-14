@@ -146,12 +146,12 @@ message Sensors {
     /// A set of transforms; one for each frame (All the joints, cameras and base of feet)
     repeated mat4 Htx = 12 [(array_size) = 24];
 
-    /// Homogeneous transform: torso {t} from ground {g}
-    iso3 Hgt = 13;
+    /// Homogeneous transform: world {w} to robot {r}
+    iso3 Hrw = 13;
 
-    /// Homogeneous transform: world {w} from robot {r}
-    iso3 Hrw = 14;
+    /// Homogeneous transform: world {w} to torso {t}
+    iso3 Htw = 14;
 
-    /// Homogeneous transform: world {w} from torso {t}
-    iso3 Htw = 15;
+    /// Translational velocity of torso {t} in world {w} space
+    vec3 vTw = 15;
 }
