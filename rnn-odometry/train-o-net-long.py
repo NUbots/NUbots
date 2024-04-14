@@ -369,15 +369,23 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002), return_sequences=True)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00006, l2=0.0009), return_sequences=True)(inputs)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.2)(normalise)
+    dropout = keras.layers.Dropout(rate=0.35)(normalise)
 
-    lstm2 = keras.layers.LSTM(50, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002), return_sequences=False)(dropout)    # 32 originally
+    lstm2 = keras.layers.LSTM(50, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00006, l2=0.0009), return_sequences=True)(dropout)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
-    dropout2 = keras.layers.Dropout(rate=0.2)(normalise2)
+    dropout2 = keras.layers.Dropout(rate=0.35)(normalise2)
 
-    outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)   # Target shape[1] is 3
+    lstm3 = keras.layers.LSTM(25, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00006, l2=0.0009), return_sequences=True)(dropout2)    # 32 originally
+    normalise3 = keras.layers.LayerNormalization()(lstm3)
+    dropout3 = keras.layers.Dropout(rate=0.35)(normalise3)
+
+    lstm4 = keras.layers.LSTM(6, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00006, l2=0.0009), return_sequences=False)(dropout3)    # 32 originally
+    normalise4 = keras.layers.LayerNormalization()(lstm4)
+    dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
+
+    outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout4)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
     model.summary()
