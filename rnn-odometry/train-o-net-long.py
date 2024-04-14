@@ -43,6 +43,10 @@ def main():
     imu_long_2 = np.load("processed-outputs/numpy/long/2/long-imu-2.npy")
     servos_long_2 = np.load("processed-outputs/numpy/long/2/long-servos-2.npy")
     truth_all_long_2 = np.load("processed-outputs/numpy/long/2/long-truth-2.npy")
+    # Even more data
+    imu_long_3 = np.load("processed-outputs/numpy/long/2/long-imu-3.npy")
+    servos_long_3 = np.load("processed-outputs/numpy/long/2/long-servos-3.npy")
+    truth_all_long_3 = np.load("processed-outputs/numpy/long/2/long-truth-3.npy")
 
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
     print("IMU long: ", imu_long.shape)
@@ -56,6 +60,12 @@ def main():
     print("IMU min 2: ", np.min(imu_long_2))
     print("Servos long 2: ", servos_long_2.shape)
     print("Truth long 2: ", truth_all_long_2.shape)
+
+    print("IMU long 3: ", imu_long_3.shape)
+    print("IMU max 3: ", np.max(imu_long_3))
+    print("IMU min 3: ", np.min(imu_long_3))
+    print("Servos long 3: ", servos_long_3.shape)
+    print("Truth long 3: ", truth_all_long_3.shape)
 
     # Plot and inspect
     # num_channels = imu.shape[1]
@@ -93,6 +103,8 @@ def main():
     print("Truth long shape: ", truth_long.shape)
     truth_long_2 = truth_all_long_2[:, 9:12]
     print("Truth long 2 shape: ", truth_long_2.shape)
+    truth_long_3 = truth_all_long_3[:, 9:12]
+    print("Truth long 3 shape: ", truth_long_3.shape)
 
     # Convert truth arrays to relative based on starting position
     # truth_long = convert_to_relative(truth_long)
@@ -135,9 +147,9 @@ def main():
     # plt.show()
 
     # join separate arrays
-    imu_joined = np.concatenate([imu_long, imu_long_2], axis=0)
-    servos_joined = np.concatenate([servos_long, servos_long_2], axis=0)
-    truth_joined = np.concatenate([truth_long, truth_long_2], axis=0)
+    imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3], axis=0)
+    servos_joined = np.concatenate([servos_long, servos_long_2, servos_long_3], axis=0)
+    truth_joined = np.concatenate([truth_long, truth_long_2, truth_long_3], axis=0)
 
     # Join the data
     joined_data = np.concatenate([imu_joined, servos_joined, truth_joined], axis=1)
