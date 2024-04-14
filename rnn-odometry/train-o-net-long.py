@@ -44,9 +44,9 @@ def main():
     servos_long_2 = np.load("processed-outputs/numpy/long/2/long-servos-2.npy")
     truth_all_long_2 = np.load("processed-outputs/numpy/long/2/long-truth-2.npy")
     # Even more data
-    imu_long_3 = np.load("processed-outputs/numpy/long/2/long-imu-3.npy")
-    servos_long_3 = np.load("processed-outputs/numpy/long/2/long-servos-3.npy")
-    truth_all_long_3 = np.load("processed-outputs/numpy/long/2/long-truth-3.npy")
+    imu_long_3 = np.load("processed-outputs/numpy/long/3/long-imu-3.npy")
+    servos_long_3 = np.load("processed-outputs/numpy/long/3/long-servos-3.npy")
+    truth_all_long_3 = np.load("processed-outputs/numpy/long/3/long-truth-3.npy")
 
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
     print("IMU long: ", imu_long.shape)
@@ -323,16 +323,17 @@ def main():
 
     # ** Optimizers **
     # LR schedules
-    # size_of_dataset = input_data_train.shape[0]
-    # decay_to_epoch = 4                                         # Number of epochs for learning rate to decay over before it resets
-    # steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
-    # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
-    # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
+    size_of_dataset = input_data_train.shape[0]
+    decay_to_epoch = 10                                         # Number of epochs for learning rate to decay over before it resets
+    steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
+    decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
+    print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
+    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
 
     # standard optimisers
     # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
-    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
     # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
     # optimizer = keras.optimizers.SGD(learning_rate=learning_rate, momentum=0.1)
@@ -378,7 +379,7 @@ def main():
 
     outputs = keras.layers.Dense(3, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=outputs)
-    model.compile(optimizer=optimizer, loss=loss_function)
+    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
     model.summary()
 
     # lstm = Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
