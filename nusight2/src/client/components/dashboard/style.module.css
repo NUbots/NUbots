@@ -28,6 +28,19 @@
   cursor: pointer;
   transition: background-color 0.3s, border 0.3s;
 }
+/*
+.menuButton {
+  @apply bg-transparent text-black p-4 text-sm border border-transparent cursor-pointer transition duration-300 ease-in-out;
+
+  &:hover {
+    @apply bg-gray-200 border-gray-300;
+  }
+
+  &:focus,
+  &:active {
+    @apply outline-none border-gray-400;
+  }
+} */
 
 .menuButton:hover {
   background-color: #f9f9f9;

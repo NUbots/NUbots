@@ -17,7 +17,6 @@ const config = {
       accent: "#F9A50D",
       icon: "#0000008a",
       divider: "#0000001f",
-      navigation: "#e508a6de",
 
       gray: {
         100: "#f4f4f4ff",
@@ -33,17 +32,13 @@ const config = {
         100: "#F9A50D",
       },
 
+      transparent: "transparent",
+
       nusight: {
-        // Red
-        100: "#ff0000",
-        // Grey
-        200: "#000000d9",
-        // Orange
-        300: "#F9A50D",
-        400: "#2bb1ee",
-        500: "#1197d3",
-        600: "#0d76a6",
-        700: "#004363",
+        100: "#2bb1ee",
+        200: "#1197d3",
+        300: "#0d76a6",
+        400: "#004363",
       },
 
       fontFamily: {

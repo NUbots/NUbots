@@ -9,7 +9,6 @@ import { DashboardModel } from "./model";
 import { DashboardNetwork } from "./network";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
-import style from "./style.module.css";
 
 export type DashboardProps = {
   controller: DashboardController;
@@ -30,27 +29,29 @@ export class Dashboard extends Component<DashboardProps> {
     const showPanels = model.robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
-      <div className={style.page}>
+      <div className="flex flex-col w-full">
         <Menu>
-          <ul className={style.menu}>
-            <li className={style.menuItem}>
-              <button className={style.menuButton} onClick={this.onToggleOrientationClick}>
+          <ul className="list-none m-0 p-0 h-full flex items-stretch">
+            <li className="flex m-0 p-0">
+              {/* <button className={style.menuButton} onClick={this.onToggleOrientationClick}></button> */}
+              <button className="bg-transparent text-black p-4 text-sm border-2 border-transparent cursor-pointer transition-colors duration-75 ease-in-out hover:border-gray-300" onClick={this.onToggleOrientationClick}>
                 Flip Orientation
               </button>
             </li>
           </ul>
         </Menu>
-        <div className={style.dashboard}>
-          <div className={style.field}>
+        {/* Difference between flex + flex-1 and flex-1 alone?*/}
+        <div className="flex flex-1 flex-col">
+          <div className="flex-1 relative">
             <Field />
           </div>
           {showPanels && (
-            <div className={style.panels}>
+            <div className="flex p-3.5">
               {model.robots.map((robot) => {
                 const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
-                    <div className={style.panel} key={robot.id}>
+                    <div className="flex-1 mx-1 rounded-lg shadow-md" key={robot.id}>
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}
