@@ -57,10 +57,10 @@ mkdir -p /mnt/boot/efi
 mount ${BOOT} /mnt/boot/efi
 
 # Use pacman configuration from dockerfile
-wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pacman.conf \
-    -O /etc/pacman.conf
-wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pacman.d/mirrorlist \
-    -O /etc/pacman.d/mirrorlist
+curl -L https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pacman.conf \
+    -o /etc/pacman.conf
+curl -L https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pacman.d/mirrorlist \
+    -o /etc/pacman.d/mirrorlist
 # Bootstrap Pacman and copy pacman config files to new root location
 pacstrap /mnt base linux linux-firmware
 cp /etc/pacman.conf /mnt/etc/pacman.conf
