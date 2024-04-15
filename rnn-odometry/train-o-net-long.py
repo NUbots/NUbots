@@ -47,6 +47,10 @@ def main():
     imu_long_3 = np.load("processed-outputs/numpy/long/3/long-imu-3.npy")
     servos_long_3 = np.load("processed-outputs/numpy/long/3/long-servos-3.npy")
     truth_all_long_3 = np.load("processed-outputs/numpy/long/3/long-truth-3.npy")
+    # Even more data
+    imu_long_4 = np.load("processed-outputs/numpy/long/4/long-imu-4.npy")
+    servos_long_4 = np.load("processed-outputs/numpy/long/4/long-servos-4.npy")
+    truth_all_long_4 = np.load("processed-outputs/numpy/long/4/long-truth-4.npy")
 
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
     print("IMU long: ", imu_long.shape)
@@ -67,13 +71,31 @@ def main():
     print("Servos long 3: ", servos_long_3.shape)
     print("Truth long 3: ", truth_all_long_3.shape)
 
+    print("IMU long 4: ", imu_long_4.shape)
+    print("IMU max 4: ", np.max(imu_long_4))
+    print("IMU min 4: ", np.min(imu_long_4))
+    print("Servos long 4: ", servos_long_4.shape)
+    print("Truth long 4: ", truth_all_long_4.shape)
+
     # Plot and inspect
-    # num_channels = imu.shape[1]
+    # num_channels = truth_long_4.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
     #     plt.plot(imu[200000:250000, i], label=f'Channel {i+1}')
     # # Add a legend
+    # plt.legend()
+    # plt.show()
+
+    # Plot and inspect
+    # num_channels = truth_all_long_4.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(truth_all_long_4[0:1000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # # plt.ylim(np.min(imu), np.max(imu))
+    # plt.autoscale(enable=True, axis="both")
     # plt.legend()
     # plt.show()
 
@@ -105,6 +127,8 @@ def main():
     print("Truth long 2 shape: ", truth_long_2.shape)
     truth_long_3 = truth_all_long_3[:, 9:12]
     print("Truth long 3 shape: ", truth_long_3.shape)
+    truth_long_4 = truth_all_long_4[:, 9:12]
+    print("Truth long 4 shape: ", truth_long_4.shape)
 
     # Convert truth arrays to relative based on starting position
     # truth_long = convert_to_relative(truth_long)
@@ -135,11 +159,11 @@ def main():
     # imu_clipped = np.clip(imu, -10, 10)
 
     # Plot and inspect
-    # num_channels = truth_long_2.shape[1]
+    # num_channels = truth_long_4.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(truth_long_2[0:1000, i], label=f'Channel {i+1}')
+    #     plt.plot(truth_long_4[0:10000, i], label=f'Channel {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -147,13 +171,13 @@ def main():
     # plt.show()
 
     # join separate arrays
-    imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3], axis=0)
-    servos_joined = np.concatenate([servos_long, servos_long_2, servos_long_3], axis=0)
-    truth_joined = np.concatenate([truth_long, truth_long_2, truth_long_3], axis=0)
+    imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3, imu_long_4], axis=0)
+    servos_joined = np.concatenate([servos_long, servos_long_2, servos_long_3, servos_long_4], axis=0)
+    truth_joined = np.concatenate([truth_long, truth_long_2, truth_long_3, truth_long_4], axis=0)
 
     # Join the data
     joined_data = np.concatenate([imu_joined, servos_joined, truth_joined], axis=1)
-    print(joined_data.shape)
+    print("Total joined data shape: ", joined_data.shape)
 
     # Split the training data into training, validation and test sets
     training_size = 0.5
@@ -217,7 +241,7 @@ def main():
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(train_arr_scaled[100000:200000, i], label=f'Channel {i+1}')
+    #     plt.plot(train_arr_scaled[900000:935479, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
@@ -258,11 +282,11 @@ def main():
     np.save('datasets/input_targets_test.npy', input_targets_test)
 
     # Plot and inspect
-    # num_channels = input_targets_train.shape[1]
+    # num_channels = input_targets_validate.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(input_data_train[200000:400000, i], label=f'Channel {i+1}')
+    #     plt.plot(input_targets_validate[0:10000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
