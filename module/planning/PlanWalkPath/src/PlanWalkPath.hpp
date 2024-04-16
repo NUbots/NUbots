@@ -45,6 +45,8 @@ namespace module::planning {
             double acceleration = 0;
             /// @brief Region around ball to begin decelerating in
             double approach_radius = 0;
+            /// @brief Region around robots to avoid
+            double avoidance_radius = 0;
             /// @brief Maximum angular velocity command for walking to ball
             double max_angular_velocity = 0;
             /// @brief Minimum angular velocity command for walking to ball

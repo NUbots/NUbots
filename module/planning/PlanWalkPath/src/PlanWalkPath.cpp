@@ -29,22 +29,30 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
+#include "message/strategy/StandStill.hpp"
 
 #include "utility/math/comparison.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module::planning {
 
     using extension::Configuration;
 
+    using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::Field;
     using message::planning::TurnAroundBall;
     using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
     using message::skill::Walk;
+    using message::strategy::StandStill;
+    using utility::nusight::graph;
 
     PlanWalkPath::PlanWalkPath(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -57,6 +65,7 @@ namespace module::planning {
             cfg.min_translational_velocity_magnitude = config["min_translational_velocity_magnitude"].as<double>();
             cfg.acceleration                         = config["acceleration"].as<double>();
             cfg.approach_radius                      = config["approach_radius"].as<double>();
+            cfg.avoidance_radius                     = config["avoidance_radius"].as<double>();
 
             cfg.max_angular_velocity = config["max_angular_velocity"].as<double>();
             cfg.min_angular_velocity = config["min_angular_velocity"].as<double>();
@@ -71,34 +80,53 @@ namespace module::planning {
         });
 
         // Path to walk to a particular point
-        on<Provide<WalkTo>, Uses<Walk>>().then([this](const WalkTo& walk_to, const Uses<Walk>& walk) {
-            // If we haven't got an active walk task, then reset the velocity to minimum velocity
-            if (walk.run_state == GroupInfo::RunState::NO_TASK) {
-                velocity_magnitude = cfg.min_translational_velocity_magnitude;
-            }
+        on<Provide<WalkTo>, Uses<Walk>, With<Sensors>, With<Field>>().then(
+            [this](const WalkTo& walk_to, const Uses<Walk>& walk, const Sensors& sensors, const Field& field) {
+                // Robot to other robot in robot space
+                // Eigen::Vector3d rORr = sensors.Hrw * Eigen::Vector3d(0.0, 0.0, 0.0);
+                // Robot space to field space
+                Eigen::Vector3d rOFf = Eigen::Vector3d(0.0, 0.0, 0.0);
+                Eigen::Vector3d rOWw = field.Hfw.inverse() * rOFf;
+                Eigen::Vector3d rORr = sensors.Hrw * rOWw;
+                // Eigen::Vector3d rORw =
 
-            // If robot getting close to the point, begin to decelerate to minimum velocity
-            if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
-                velocity_magnitude -= cfg.acceleration;
-                velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
-            }
-            else {
-                // If robot is far away from the point, accelerate to max velocity
-                velocity_magnitude += cfg.acceleration;
-                velocity_magnitude = std::max(cfg.min_translational_velocity_magnitude,
-                                              std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
-            }
 
-            // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+                // If we haven't got an active walk task, then reset the velocity to minimum velocity
+                if (walk.run_state == GroupInfo::RunState::NO_TASK) {
+                    velocity_magnitude = cfg.min_translational_velocity_magnitude;
+                }
 
-            // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
-            // value cfg.max_angular_velocity
-            velocity_target.z() =
-                utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
+                // graph norm
+                emit(graph("rORr.norm", rORr.norm()));
+                // if (rORw.norm() < 0.0) {
+                if (false) {
+                    emit<Task>(std::make_unique<StandStill>());
+                }
+                else {
+                    // If robot getting close to the point, begin to decelerate to minimum velocity
+                    if (walk_to.rPRr.head(2).norm() < cfg.approach_radius) {
+                        velocity_magnitude -= cfg.acceleration;
+                        velocity_magnitude = std::max(velocity_magnitude, cfg.min_translational_velocity_magnitude);
+                    }
+                    else {
+                        // If robot is far away from the point, accelerate to max velocity
+                        velocity_magnitude += cfg.acceleration;
+                        velocity_magnitude =
+                            std::max(cfg.min_translational_velocity_magnitude,
+                                     std::min(velocity_magnitude, cfg.max_translational_velocity_magnitude));
+                    }
 
-            emit<Task>(std::make_unique<Walk>(velocity_target));
-        });
+                    // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
+                    Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+
+                    // Set the angular velocity component of the velocity_target with the angular displacement and
+                    // saturate with value cfg.max_angular_velocity
+                    velocity_target.z() =
+                        utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
+
+                    emit<Task>(std::make_unique<Walk>(velocity_target));
+                }
+            });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {
             // Determine the direction of rotation
