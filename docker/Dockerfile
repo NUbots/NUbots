@@ -378,6 +378,9 @@ RUN npm install -g \
     prettier@2.7.1 \
     eslint@8.27.0
 
+RUN install-package \
+    cgal
+
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 RUN install-package clinfo
