@@ -160,16 +160,16 @@ def main():
     # imu_clipped = np.clip(imu, -10, 10)
 
     # Plot and inspect
-    num_channels = truth_long_4.shape[1]
-    plt.figure(figsize=(10, 5))
-    # Plot each channel
-    for i in range(num_channels):
-        plt.plot(truth_long_4[0:10000, i], label=f'Channel {i+1}')
-    # Add a legend
-    # plt.ylim(np.min(imu), np.max(imu))
-    plt.autoscale(enable=True, axis="both")
-    plt.legend()
-    plt.show()
+    # num_channels = truth_long_4.shape[1]
+    # plt.figure(figsize=(10, 5))
+    # # Plot each channel
+    # for i in range(num_channels):
+    #     plt.plot(truth_long_4[0:10000, i], label=f'Channel {i+1}')
+    # # Add a legend
+    # # plt.ylim(np.min(imu), np.max(imu))
+    # plt.autoscale(enable=True, axis="both")
+    # plt.legend()
+    # plt.show()
 
     # join separate arrays
     imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3, imu_long_4], axis=0)
@@ -410,8 +410,9 @@ def main():
     normalise4 = keras.layers.LayerNormalization()(lstm4)
     dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
-    outputs = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout4)   # Target shape[1] is 3
-    model = keras.Model(inputs=inputs, outputs=outputs)
+    dense1 = keras.layers.Dense(6, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout4)
+    dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
+    model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
     model.summary()
 
