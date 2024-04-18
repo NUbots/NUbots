@@ -17,19 +17,28 @@ const config = {
       accent: "#F9A50D",
       icon: "#0000008a",
       divider: "#0000001f",
+      danger: "#ff0000ff",
+      warning: "#ffaa00",
 
       gray: {
         100: "#f4f4f4ff",
         200: "#fcfcfcff",
         300: "#e0e0e0ff",
-        400: "#888888ff",
-        600: "#232323ff",
-        800: "#000000ff",
+        400: "#5d5d5dff",
+        500: "#484848ff",
+        600: "#373737ff",
+        700: "#2a2a2aff",
+        800: "#232323ff",
         900: "#00000099",
       },
 
+      green: {
+        100: "#0c7700",
+        200: "#00de46"
+      },
+
       orange: {
-        100: "#F9A50D",
+        100: "#ffae00",
       },
 
       transparent: "transparent",
@@ -47,7 +56,7 @@ const config = {
     },
     extend: {
       spacing: {
-        // 11: "2.85rem",
+        11: "2.85rem",
       }
     },
 

@@ -21,7 +21,7 @@ export class GroundModel {
     return new GroundModel({
       bottomGoalColor: "#0000ff",
       dimensions: FieldDimensions.of(),
-      fieldColor: "#009688",
+      fieldColor: "#269354",
       lineColor: "#ffffff",
       topGoalColor: "#ffff00",
     });
