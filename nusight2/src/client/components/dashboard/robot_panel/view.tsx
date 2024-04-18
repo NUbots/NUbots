@@ -6,6 +6,7 @@ import { Icon } from "../../icon/view";
 
 import GoalIcon from "./icon/goal";
 
+
 export type LastStatus = "okay" | "warning" | "danger";
 
 export type RobotPanelProps = {

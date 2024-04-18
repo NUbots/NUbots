@@ -20,6 +20,11 @@ const config = {
       danger: "#ff0000ff",
       warning: "#ffaa00",
 
+      orangegray: {
+        200: "#fdfbf9",
+        300: "#fdf7f2",
+      },
+
       gray: {
         100: "#f4f4f4ff",
         200: "#fcfcfcff",

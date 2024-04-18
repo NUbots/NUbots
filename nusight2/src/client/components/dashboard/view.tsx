@@ -46,12 +46,12 @@ export class Dashboard extends Component<DashboardProps> {
             <Field />
           </div>
           {showPanels && (
-            <div className="flex p-3.5">
+            <div className="flex p-3.5 bg-orangegray-200">
               {model.robots.map((robot) => {
                 const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
-                    <div className="flex-1 mx-1 rounded-lg shadow-md" key={robot.id}>
+                    <div className="flex-1 mx-1 rounded-lg shadow-md bg-white" key={robot.id}>
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}
@@ -62,7 +62,7 @@ export class Dashboard extends Component<DashboardProps> {
                         penalised={model.penalised}
                         penalty={model.penalty}
                         phase={model.phase}
-                        title={model.title}
+                        title={"model.title"}
                         walkCommand={model.walkCommand}
                       />
                     </div>
