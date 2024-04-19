@@ -394,23 +394,23 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
 
-    lstm = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(inputs)    # 32 originally
+    lstm = keras.layers.LSTM(500, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=False)(inputs)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
     dropout = keras.layers.Dropout(rate=0.35)(normalise)
 
-    lstm2 = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(dropout)    # 32 originally
-    normalise2 = keras.layers.LayerNormalization()(lstm2)
-    dropout2 = keras.layers.Dropout(rate=0.35)(normalise2)
+    # lstm2 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(dropout)    # 32 originally
+    # normalise2 = keras.layers.LayerNormalization()(lstm2)
+    # dropout2 = keras.layers.Dropout(rate=0.35)(normalise2)
 
-    lstm3 = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(dropout2)    # 32 originally
-    normalise3 = keras.layers.LayerNormalization()(lstm3)
-    dropout3 = keras.layers.Dropout(rate=0.35)(normalise3)
+    # lstm3 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(dropout2)    # 32 originally
+    # normalise3 = keras.layers.LayerNormalization()(lstm3)
+    # dropout3 = keras.layers.Dropout(rate=0.35)(normalise3)
 
-    lstm4 = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=False)(dropout3)    # 32 originally
-    normalise4 = keras.layers.LayerNormalization()(lstm4)
-    dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
+    # lstm4 = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=False)(dropout3)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
-    dense1 = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout4)
+    dense1 = keras.layers.Dense(64, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)
     dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
