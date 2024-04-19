@@ -50,7 +50,6 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/math/filter/MahonyFilter.hpp"
-#include "utility/math/filter/UKF.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -59,7 +58,6 @@ namespace module::input {
 
 
     using utility::math::filter::MahonyFilter;
-    using utility::math::filter::UKF;
 
     using message::behaviour::state::WalkState;
     using message::input::Sensors;
@@ -93,36 +91,11 @@ namespace module::input {
             /// @brief Mahony filter integral gain
             double Kp = 0.0;
 
-            /// @brief Config for the UKF
-            struct UKF {
-                struct Noise {
-                    Noise() = default;
-                    struct Measurement {
-                        Eigen::Matrix3d flat_foot_translation = Eigen::Matrix3d::Zero();
-                    } measurement{};
-                    struct Process {
-                        Eigen::Vector3d position = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
-                    } process{};
-                } noise{};
-                struct Initial {
-                    Initial() = default;
-                    struct Mean {
-                        Eigen::Vector3d position = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
-                    } mean{};
-                    struct Covariance {
-                        Eigen::Vector3d position = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity = Eigen::Vector3d::Zero();
-                    } covariance{};
-                } initial{};
-            } ukf{};
+            /// @brief Cutoff frequency for the low pass filter of torso x velocity
+            double x_cut_off_frequency = 0.0;
 
-            /// @brief Initial state of the for the UKF filter
-            MotionModel<double>::StateVec initial_mean{};
-
-            /// @brief Initial covariance of the for the UKF filter
-            MotionModel<double>::StateVec initial_covariance{};
+            /// @brief Cutoff frequency for the low pass filter of torso y velocity
+            double y_cut_off_frequency = 0.0;
 
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
@@ -134,14 +107,11 @@ namespace module::input {
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
 
-        /// @brief UKF filter for velocity estimation
-        utility::math::filter::UKF<double, MotionModel> ukf{};
-
         /// @brief Current support phase of the robot
-        WalkState::Phase current_walk_phase = WalkState::Phase::LEFT;
+        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
 
-        /// @brief Transform from planted {p} foot frame to world {w} space
-        Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
+        /// @brief Transform from anchor {a} to world {w} space
+        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};

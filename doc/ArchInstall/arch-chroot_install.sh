@@ -109,7 +109,6 @@ pacman -S --noconfirm --needed \
 	vim \
 	nano \
 	rsync \
-	zsh
 
 ##############
 # NETWORKING #
@@ -186,25 +185,11 @@ systemctl enable wpa_supplicant
 systemctl enable wpa_supplicant@${WIFI_INTERFACE}
 
 #############
-# ZSH SHELL #
+# LIBRARIES #
 #############
 
-# Change user shell to zsh
-chsh -s /usr/bin/zsh ${USER}
-
-############
-# SSH KEYS #
-############
-
-# Create user ssh directory
-mkdir -p ${HOME}/.ssh
-
-# Register docker client as an authorized user
-wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/home/nubots/.ssh/id_rsa.pub \
-    -O ${HOME}/.ssh/authorized_keys
-
-# Fix permissions so ssh will accept our authorized keys
-chmod 600 ${HOME}/.ssh/authorized_keys
+# Use local user libraries so systemconfiguration can run
+echo "/usr/local/lib" > /etc/ld.so.conf.d/usrlocal.conf
 
 ###############
 # PERMISSIONS #

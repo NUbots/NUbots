@@ -113,6 +113,7 @@ export class LocalisationModel {
   @observable goalVisible = true;
   @observable fieldLinePointsVisible = true;
   @observable trajectoryVisible = true;
+  @observable fieldIntersectionsVisible = true;
 
   constructor(
     appModel: AppModel,
