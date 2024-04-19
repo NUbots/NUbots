@@ -112,7 +112,6 @@ export class LocalisationModel {
   @observable particlesVisible = true;
   @observable goalVisible = true;
   @observable fieldLinePointsVisible = true;
-  @observable trajectoryVisible = true;
   @observable fieldIntersectionsVisible = true;
 
   constructor(

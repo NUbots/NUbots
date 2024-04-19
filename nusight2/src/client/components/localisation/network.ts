@@ -19,7 +19,6 @@ export class LocalisationNetwork {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
     this.network.on(message.vision.FieldLines, this.onFieldLines);
-    this.network.on(message.behaviour.state.WalkState, this.onWalkState);
     this.network.on(message.localisation.Ball, this.onBall);
     this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
@@ -45,21 +44,6 @@ export class LocalisationNetwork {
   private onFieldLines(robotModel: RobotModel, fieldLines: message.vision.FieldLines) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.fieldLinePoints.rPWw = fieldLines.rPWw.map((rPWw) => Vector3.from(rPWw));
-  }
-
-  @action.bound
-  private onWalkState(robotModel: RobotModel, walkState: message.behaviour.state.WalkState) {
-    const robot = LocalisationRobotModel.of(robotModel);
-    // Add trajectory points to history if support switch occurred
-    if (robot.walkPhase != walkState.phase) {
-      robot.swingFootTrajectoryHistory.trajectories.push({ trajectory: robot.rSFf, walkPhase: robot.walkPhase });
-      robot.torsoTrajectoryHistory.trajectories.push(robot.rTFf);
-    }
-    robot.walkPhase = walkState.phase;
-    // Add current trajectory points
-    robot.Hwp = Matrix4.from(walkState.Hwp);
-    robot.swingFootTrajectory.rSPp = walkState.swingFootTrajectory.map((rSPp) => Vector3.from(rSPp));
-    robot.torsoTrajectory.rTPp = walkState.torsoTrajectory.map((rTPp) => Vector3.from(rTPp));
   }
 
   @action.bound
@@ -108,6 +92,7 @@ export class LocalisationNetwork {
     }
 
     const robot = LocalisationRobotModel.of(robotModel);
+
     const { rotation: Rwt } = decompose(new THREE.Matrix4().copy(fromProtoMat44(sensors.Htw!)).invert());
     robot.Htw = Matrix4.from(sensors.Htw);
     robot.Rwt = new Quaternion(Rwt.x, Rwt.y, Rwt.z, Rwt.w);

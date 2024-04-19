@@ -75,7 +75,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
           toggleParticleVisibility={this.toggleParticleVisibility}
           toggleGoalVisibility={this.toggleGoalVisibility}
           toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
-          toggleTrajectoryVisibility={this.toggleTrajectoryVisibility}
           toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
         ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
@@ -160,10 +159,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
   };
 
-  private toggleTrajectoryVisibility = () => {
-    this.props.controller.toggleTrajectoryVisibility(this.props.model);
-  };
-
   private toggleFieldIntersectionsVisibility = () => {
     this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
   };
@@ -182,7 +177,6 @@ interface LocalisationMenuBarProps {
   toggleParticleVisibility(): void;
   toggleGoalVisibility(): void;
   toggleFieldLinePointsVisibility(): void;
-  toggleTrajectoryVisibility(): void;
   toggleFieldIntersectionsVisibility(): void;
 }
 
@@ -222,7 +216,6 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
           isVisible={model.fieldLinePointsVisible}
           onClick={props.toggleFieldLinePointsVisibility}
         />
-        <MenuItem label="Trajectories" isVisible={model.trajectoryVisible} onClick={props.toggleTrajectoryVisibility} />
         <MenuItem
           label="Field Intersections"
           isVisible={model.fieldIntersectionsVisible}
@@ -283,61 +276,6 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
         })}
       {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
       {model.ballVisible && <Balls model={model} />}
-
-      {model.trajectoryVisible &&
-        model.robots.map((robotModel) => {
-          const swingFootTrajectory = robotModel.rSFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-          if (swingFootTrajectory.length > 0 && robotModel.visible) {
-            const color = robotModel.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
-            return (
-              <Trajectory trajectory={swingFootTrajectory} key={robotModel.id} lineColor={color} tubeRadius={0.005} />
-            );
-          }
-        })}
-      {model.robots.map((robotModel) => {
-        const torsoTrajectory = robotModel.rTFf.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-        if (torsoTrajectory.length > 0 && robotModel.visible) {
-          return <Trajectory trajectory={torsoTrajectory} key={robotModel.id} lineColor="grey" tubeRadius={0.005} />;
-        }
-      })}
-
-      {model.trajectoryVisible &&
-        model.robots.map((robotModel) => {
-          if (robotModel.visible && robotModel.swingFootTrajectoryHistory.trajectories.length > 0) {
-            return robotModel.swingFootTrajectoryHistory.trajectories.map((traj, index) => {
-              const swingFootTrajectory = traj.trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-              if (swingFootTrajectory.length > 0) {
-                const color = traj.walkPhase == 1 ? "#9A99D7" : "#8AC48E";
-                return (
-                  <Trajectory
-                    trajectory={swingFootTrajectory}
-                    key={`${robotModel.id}-trajectory-${index}`}
-                    lineColor={color}
-                    tubeRadius={0.005}
-                  />
-                );
-              }
-            });
-          }
-        })}
-      {model.trajectoryVisible &&
-        model.robots.map((robotModel) => {
-          if (robotModel.visible && robotModel.torsoTrajectoryHistory.trajectories.length > 0) {
-            return robotModel.torsoTrajectoryHistory.trajectories.map((trajectory, index) => {
-              const torsoTrajectory = trajectory.map((d) => new THREE.Vector3(d.x, d.y, d.z));
-              if (torsoTrajectory.length > 0) {
-                return (
-                  <Trajectory
-                    trajectory={torsoTrajectory}
-                    key={`${robotModel.id}-trajectory-${index}`}
-                    lineColor="grey"
-                    tubeRadius={0.005}
-                  />
-                );
-              }
-            });
-          }
-        })}
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
@@ -507,38 +445,6 @@ const Goals = ({ model }: { model: LocalisationModel }) => (
     )}
   </>
 );
-
-const Trajectory = ({
-  trajectory,
-  lineColor,
-  tubeRadius,
-}: {
-  trajectory: THREE.Vector3[];
-  lineColor: any;
-  tubeRadius: number;
-}) => {
-  // Create ref
-  const trajectoryRef = React.useRef<THREE.Mesh>(null);
-
-  // React effect
-  React.useEffect(() => {
-    if (trajectoryRef.current) {
-      // Generate spline
-      const curve = new THREE.CatmullRomCurve3(trajectory);
-
-      // Create the tube geometry along the spline
-      const geometry = new THREE.TubeGeometry(curve, 50, tubeRadius, 8, false);
-      const material = new THREE.MeshStandardMaterial({ color: lineColor });
-      const newTrajectory = new THREE.Mesh(geometry, material);
-
-      // Clear the old trajectory and add the new one
-      trajectoryRef.current?.clear();
-      trajectoryRef.current?.add(newTrajectory);
-    }
-  }, [trajectory, tubeRadius]);
-
-  return <object3D ref={trajectoryRef} />;
-};
 
 const Robot = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);

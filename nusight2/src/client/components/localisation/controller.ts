@@ -311,11 +311,6 @@ export class LocalisationController {
   };
 
   @action
-  toggleTrajectoryVisibility = (model: LocalisationModel) => {
-    model.trajectoryVisible = !model.trajectoryVisible;
-  };
-
-  @action
   toggleFieldIntersectionsVisibility = (model: LocalisationModel) => {
     model.fieldIntersectionsVisible = !model.fieldIntersectionsVisible;
   };
