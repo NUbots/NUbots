@@ -122,12 +122,11 @@ namespace module::skill {
 
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
-           With<Sensors>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
+            .then([this](const WalkTask& walk_task) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -190,19 +189,7 @@ namespace module::skill {
                                Hpt.translation().y(),
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
-
-                    if (walk_task.velocity_target.norm() > 0) {
-                        // Generate a set of 10 swing and torso foot poses over the step period
-                        for (double t = 0; t < cfg.walk_generator_parameters.step_period;
-                             t += cfg.walk_generator_parameters.step_period / 10) {
-                            auto Hps = walk_generator.get_swing_foot_pose(t);
-                            auto Hpt = walk_generator.get_torso_pose(t);
-                            walk_state->swing_foot_trajectory.push_back(Hps.translation());
-                            walk_state->torso_trajectory.push_back(Hpt.translation());
-                        }
-                    }
                 }
-                walk_state->Hwp = sensors.Hwp;
                 emit(walk_state);
             });
     }

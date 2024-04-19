@@ -35,8 +35,6 @@ targets:
     message.localisation.Ball: true
     message.localisation.Field: true
 
-    message.behaviour.state.WalkState: true
-
     # Log messages
     message.nuclear.LogMessage: true
     message.nuclear.ReactionStatistics: false

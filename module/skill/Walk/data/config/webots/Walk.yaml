@@ -1,8 +1,8 @@
-log_level: DEBUG
+log_level: INFO
 
 walk:
   # Time for one complete step (in seconds).
-  period: 0.5
+  period: 0.39
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.2, 0.4]
@@ -20,7 +20,7 @@ walk:
     # Torso constant position offset
     position_offset: [0, 0, 0]
     # Torso offset from the planted foot [x,y,z] (in meters), at time = torso_sway_ratio*step_period
-    sway_offset: [0, 0.09, 0]
+    sway_offset: [0, 0.05, 0]
     # Ratio of the step_period where the torso should be at its maximum sway, between [0 1]
     sway_ratio: 0.5
     # Determines where to position the torso at the end of the step using a ratio of the next step placement.

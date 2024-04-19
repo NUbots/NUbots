@@ -152,9 +152,6 @@ message Sensors {
     /// Homogeneous transform: world {w} to torso {t}
     iso3 Htw = 14;
 
-    /// Homogeneous transform: planted foot {p} to world {w}
-    iso3 Hwp = 15;
-
     /// Translational velocity of torso {t} in world {w} space
     vec3 vTw = 16;
 }
