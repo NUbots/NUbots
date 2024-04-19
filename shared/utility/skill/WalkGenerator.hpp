@@ -112,7 +112,7 @@ namespace utility::skill {
          * @return Trajectory of torso.
          */
         Iso3<Scalar> get_swing_foot_pose() const {
-            return swingfoot_trajectory.pose(t);
+            return swing_foot_trajectory.pose(t);
         }
 
         /**
@@ -121,7 +121,7 @@ namespace utility::skill {
          * @return Swing foot pose at time t.
          */
         Iso3<Scalar> get_swing_foot_pose(Scalar t) const {
-            return swingfoot_trajectory.pose(t);
+            return swing_foot_trajectory.pose(t);
         }
 
         /**
@@ -280,7 +280,7 @@ namespace utility::skill {
         // ******************************** Trajectories ********************************
 
         /// @brief 6D piecewise polynomial trajectory for swing foot.
-        Trajectory<Scalar> swingfoot_trajectory{};
+        Trajectory<Scalar> swing_foot_trajectory{};
 
         /// @brief 6D piecewise polynomial trajectory for torso.
         Trajectory<Scalar> torso_trajectory{};
@@ -294,47 +294,15 @@ namespace utility::skill {
         }
 
         /**
-         * @brief Generate walking trajectories for the torso and swing foot.
+         * @brief Generate torso trajectory for the current step.
+         * @param step Step placement in the planted foot frame.
          * @param velocity_target Requested velocity target (dx, dy, dtheta).
          */
-        void generate_walking_trajectories(const Vec3<Scalar>& velocity_target) {
-            // Compute the next step placement in the planted foot frame based on the requested velocity target
-            Vec3<Scalar> step = Vec3<Scalar>::Zero();
-            step.x() = std::max(std::min(velocity_target.x() * p.step_period, p.step_limits.x()), -p.step_limits.x());
-            step.y() = std::max(std::min(velocity_target.y() * p.step_period, p.step_limits.y()), -p.step_limits.y());
-            step.z() = std::max(std::min(velocity_target.z() * p.step_period, p.step_limits.z()), -p.step_limits.z());
-
+        void generate_torso_trajectory(const Vec3<Scalar>& step, const Vec3<Scalar>& velocity_target) {
             // Create a waypoint variable to use for all waypoints
             Waypoint<Scalar> wp;
 
-            // ******************************** Swing Foot Trajectory ********************************
-            swingfoot_trajectory.clear();
-
-            // Start waypoint: Start from the current swing foot position at time = 0
-            wp.time_point       = 0.0;
-            wp.position         = Hps_start.translation();
-            wp.velocity         = Vec3<Scalar>::Zero();
-            wp.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
-            wp.angular_velocity = Vec3<Scalar>::Zero();
-            swingfoot_trajectory.add_waypoint(wp);
-
-            // Middle waypoint: Raise foot to step height at time = p.step_apex_ratio * p.step_period
-            wp.time_point       = p.step_apex_ratio * p.step_period;
-            wp.position         = Vec3<Scalar>(0, get_foot_width_offset(), p.step_height);
-            wp.velocity         = Vec3<Scalar>(velocity_target.x(), velocity_target.y(), 0);
-            wp.orientation      = Vec3<Scalar>(0.0, 0.0, velocity_target.z() * p.step_apex_ratio * p.step_period);
-            wp.angular_velocity = Vec3<Scalar>(0.0, 0.0, velocity_target.z());
-            swingfoot_trajectory.add_waypoint(wp);
-
-            // End waypoint: End at next foot placement on ground at time = p.step_period
-            wp.time_point       = p.step_period;
-            wp.position         = Vec3<Scalar>(step.x(), get_foot_width_offset() + step.y(), 0);
-            wp.velocity         = Vec3<Scalar>::Zero();
-            wp.orientation      = Vec3<Scalar>(0, 0, step.z());
-            wp.angular_velocity = Vec3<Scalar>::Zero();
-            swingfoot_trajectory.add_waypoint(wp);
-
-            //  ******************************** Torso Trajectory ********************************
+            // ******************************** Torso Trajectory ********************************
             torso_trajectory.clear();
 
             // Start waypoint: Start from the current torso position at time = 0
@@ -366,6 +334,60 @@ namespace utility::skill {
             wp.angular_velocity = Vec3<Scalar>::Zero();
             wp.orientation      = Vec3<Scalar>(0.0, p.torso_pitch, p.torso_final_position_ratio.z() * step.z());
             torso_trajectory.add_waypoint(wp);
+        }
+
+        /**
+         * @brief Generate swing foot trajectory for the current step.
+         * @param step Step placement in the planted foot frame.
+         * @param velocity_target Requested velocity target (dx, dy, dtheta).
+         */
+        void generate_swing_foot_trajectory(const Vec3<Scalar>& step, const Vec3<Scalar>& velocity_target) {
+            // Create a waypoint variable to use for all waypoints
+            Waypoint<Scalar> wp;
+
+            // ******************************** Swing Foot Trajectory ********************************
+            swing_foot_trajectory.clear();
+
+            // Start waypoint: Start from the current swing foot position at time = 0
+            wp.time_point       = 0.0;
+            wp.position         = Hps_start.translation();
+            wp.velocity         = Vec3<Scalar>::Zero();
+            wp.orientation      = mat_to_rpy_intrinsic(Hps_start.rotation());
+            wp.angular_velocity = Vec3<Scalar>::Zero();
+            swing_foot_trajectory.add_waypoint(wp);
+
+            // Middle waypoint: Raise foot to step height at time = p.step_apex_ratio * p.step_period
+            wp.time_point       = p.step_apex_ratio * p.step_period;
+            wp.position         = Vec3<Scalar>(0, get_foot_width_offset(), p.step_height);
+            wp.velocity         = Vec3<Scalar>(velocity_target.x(), velocity_target.y(), 0);
+            wp.orientation      = Vec3<Scalar>(0.0, 0.0, velocity_target.z() * p.step_apex_ratio * p.step_period);
+            wp.angular_velocity = Vec3<Scalar>(0.0, 0.0, velocity_target.z());
+            swing_foot_trajectory.add_waypoint(wp);
+
+            // End waypoint: End at next foot placement on ground at time = p.step_period
+            wp.time_point       = p.step_period;
+            wp.position         = Vec3<Scalar>(step.x(), get_foot_width_offset() + step.y(), 0);
+            wp.velocity         = Vec3<Scalar>::Zero();
+            wp.orientation      = Vec3<Scalar>(0, 0, step.z());
+            wp.angular_velocity = Vec3<Scalar>::Zero();
+            swing_foot_trajectory.add_waypoint(wp);
+        }
+
+        /**
+         * @brief Generate walking trajectories for the torso and swing foot.
+         * @param velocity_target Requested velocity target (dx, dy, dtheta).
+         */
+        void generate_walking_trajectories(const Vec3<Scalar>& velocity_target) {
+            // Compute the next step placement in the planted foot frame based on the requested velocity target
+            Vec3<Scalar> step = Vec3<Scalar>::Zero();
+            step.x() = std::max(std::min(velocity_target.x() * p.step_period, p.step_limits.x()), -p.step_limits.x());
+            step.y() = std::max(std::min(velocity_target.y() * p.step_period, p.step_limits.y()), -p.step_limits.y());
+            step.z() = std::max(std::min(velocity_target.z() * p.step_period, p.step_limits.z()), -p.step_limits.z());
+
+            // Generate torso trajectory
+            generate_torso_trajectory(step, velocity_target);
+            // Generate swing foot trajectory
+            generate_swing_foot_trajectory(step, velocity_target);
         }
 
         /**
