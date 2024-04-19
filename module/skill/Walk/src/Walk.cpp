@@ -191,15 +191,14 @@ namespace module::skill {
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
 
-                    // Generate a set of swing foot poses for visually debugging
                     if (walk_task.velocity_target.norm() > 0) {
-                        double t = 0;
-                        while (t < cfg.walk_generator_parameters.step_period) {
+                        // Generate a set of 10 swing and torso foot poses over the step period
+                        for (double t = 0; t < cfg.walk_generator_parameters.step_period;
+                             t += cfg.walk_generator_parameters.step_period / 10) {
                             auto Hps = walk_generator.get_swing_foot_pose(t);
                             auto Hpt = walk_generator.get_torso_pose(t);
                             walk_state->swing_foot_trajectory.push_back(Hps.translation());
                             walk_state->torso_trajectory.push_back(Hpt.translation());
-                            t += cfg.walk_generator_parameters.step_period / 10;
                         }
                     }
                 }

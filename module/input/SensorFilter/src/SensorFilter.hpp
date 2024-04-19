@@ -107,11 +107,11 @@ namespace module::input {
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
 
-        /// @brief Current support phase of the robot
-        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+        /// @brief Current walk phase of the robot
+        WalkState::Phase current_walk_phase = WalkState::Phase::LEFT;
 
-        /// @brief Transform from anchor {a} to world {w} space
-        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+        /// @brief Transform from planted foot {a} to world {w} space
+        Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};

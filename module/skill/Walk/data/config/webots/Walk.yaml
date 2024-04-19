@@ -2,7 +2,7 @@ log_level: DEBUG
 
 walk:
   # Time for one complete step (in seconds).
-  period: 0.39
+  period: 0.5
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.2, 0.4]

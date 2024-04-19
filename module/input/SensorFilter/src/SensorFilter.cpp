@@ -81,7 +81,7 @@ namespace module::input {
             cfg.y_cut_off_frequency = config["velocity_low_pass"]["y_cut_off_frequency"].as<double>();
 
             // Initialise the anchor frame (left foot base)
-            Hwa.translation().y() = forward_kinematics<double, n_servos>(nugus_model,
+            Hwp.translation().y() = forward_kinematics<double, n_servos>(nugus_model,
                                                                          nugus_model.home_configuration(),
                                                                          std::string("left_foot_base"))
                                         .translation()
@@ -125,8 +125,8 @@ namespace module::input {
             mahony_filter.set_state(cfg.initial_Rwt);
 
             // Reset anchor frame
-            Hwa                   = Eigen::Isometry3d::Identity();
-            Hwa.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
+            Hwp                   = Eigen::Isometry3d::Identity();
+            Hwp.translation().y() = tinyrobotics::forward_kinematics<double, n_servos>(nugus_model,
                                                                                        nugus_model.home_configuration(),
                                                                                        std::string("left_foot_base"))
                                         .translation()
@@ -323,34 +323,34 @@ namespace module::input {
 
             // Update the current support phase is not the same as the walk state, a support phase change has
             // occurred
-            if (walk_state != nullptr && current_support_phase != walk_state->support_phase) {
+            if (walk_state != nullptr && current_walk_phase != walk_state->phase) {
                 // Update the current support phase to the new support phase
-                current_support_phase = walk_state->support_phase;
+                current_walk_phase = walk_state->phase;
 
-                // Compute the new anchor frame (Hwa) (new support foot)
-                if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
-                    Hwa = Hwa * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                // Compute the new anchor frame (Hwp) (new support foot)
+                if (current_walk_phase.value == WalkState::Phase::LEFT) {
+                    Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
                 }
-                else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
-                    Hwa = Hwa * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
+                else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
+                    Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
                 }
 
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
-                Hwa.translation().z() = 0;
-                Hwa.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwa.linear()).z()));
+                Hwp.translation().z() = 0;
+                Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
             Eigen::Isometry3d Hat = Eigen::Isometry3d::Identity();
-            if (current_support_phase.value == WalkState::SupportPhase::LEFT) {
+            if (current_walk_phase.value == WalkState::Phase::LEFT) {
                 Hat = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
             }
-            else if (current_support_phase.value == WalkState::SupportPhase::RIGHT) {
+            else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
                 Hat = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
             }
 
             // Perform Anchor Update (x, y, z, yaw)
-            Eigen::Isometry3d Hwt_anchor = Hwa * Hat;
+            Eigen::Isometry3d Hwt_anchor = Hwp * Hat;
             Eigen::Vector3d rpy_anchor   = mat_to_rpy_intrinsic(Hwt_anchor.linear());
 
             // Perform Mahony update (roll, pitch)
@@ -422,7 +422,7 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Walk state information
-        emit(graph("Walk support phase", int(walk_state->support_phase)));
+        emit(graph("Walk support phase", int(walk_state->phase)));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
