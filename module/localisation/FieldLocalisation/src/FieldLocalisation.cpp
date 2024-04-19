@@ -45,7 +45,7 @@ namespace module::localisation {
     using message::localisation::ResetFieldLocalisation;
     using message::vision::FieldLines;
 
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -159,8 +159,8 @@ namespace module::localisation {
         Eigen::Vector3d rFWw       = (Hfw.translation());
         Eigen::Vector3d error_rFWw = (true_rFWw - rFWw).cwiseAbs();
         // Determine yaw, pitch, and roll error
-        Eigen::Vector3d true_Rfw  = MatrixToEulerIntrinsic(true_Hfw.rotation());
-        Eigen::Vector3d Rfw       = MatrixToEulerIntrinsic(Hfw.rotation());
+        Eigen::Vector3d true_Rfw  = mat_to_rpy_intrinsic(true_Hfw.rotation());
+        Eigen::Vector3d Rfw       = mat_to_rpy_intrinsic(Hfw.rotation());
         Eigen::Vector3d error_Rfw = (true_Rfw - Rfw).cwiseAbs();
         double quat_rot_error     = Eigen::Quaterniond(true_Hfw.linear() * Hfw.inverse().linear()).w();
 

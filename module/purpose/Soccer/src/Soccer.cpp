@@ -78,10 +78,12 @@ namespace module::purpose {
             // Without these emis, modules that need a Stability and WalkState messages may not run
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
+            // Idle stand if not doing anything
+            emit<Task>(std::make_unique<StandStill>());
             // This emit starts the tree to play soccer
-            emit<Task>(std::make_unique<FindPurpose>());
+            emit<Task>(std::make_unique<FindPurpose>(), 1);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
-            emit<Task>(std::make_unique<FallRecovery>(), 1);
+            emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
         on<Provide<FindPurpose>>().then([this] {
@@ -101,15 +103,13 @@ namespace module::purpose {
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
                 emit<Task>(std::unique_ptr<FindPurpose>(nullptr));
-                // emit<Task>(std::make_unique<StandStill>());
             }
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
-                // emit<Task>(std::unique_ptr<StandStill>(nullptr));
-                emit<Task>(std::make_unique<FindPurpose>());
+                emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
 
@@ -119,8 +119,7 @@ namespace module::purpose {
             if (!cfg.force_playing) {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
-                emit<Task>(std::make_unique<FindPurpose>());
-                // emit<Task>(std::unique_ptr<StandStill>(nullptr));
+                emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
     }
