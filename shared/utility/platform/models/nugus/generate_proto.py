@@ -63,8 +63,7 @@ for file in mesh_files:
     ms.save_current_mesh(file)
 
 # Find all collision STL files
-collision_files = [
-    file for file in mesh_files if file.endswith("_collision.stl")]
+collision_files = [file for file in mesh_files if file.endswith("_collision.stl")]
 
 # Process collision elements
 for collision in root.findall(".//collision"):
@@ -141,8 +140,7 @@ urdf_file_path = "robot.urdf"
 proto_file_path = "nugus.proto"
 
 # Convert URDF to PROTO using urdf2webots library
-convertUrdfFile(input=urdf_file_path, output=proto_file_path,
-                boxCollision=False, normal=False)
+convertUrdfFile(input=urdf_file_path, output=proto_file_path, boxCollision=False, normal=False)
 
 # Read the existing proto file
 with open(proto_file_path, "r") as file:
@@ -219,8 +217,7 @@ filedata = filedata.replace(
     "HingeJointParameters {",
     "HingeJointParameters {\n                    dampingConstant IS MX106-damping\n                    staticFriction IS MX106-friction",
 )
-filedata = filedata.replace(
-    "PositionSensor {", "PositionSensor {\n                 resolution IS DYNAMIXEL-RESOLUTION")
+filedata = filedata.replace("PositionSensor {", "PositionSensor {\n                 resolution IS DYNAMIXEL-RESOLUTION")
 
 # Add gyro and accelerometer to torso
 filedata = filedata.replace(
@@ -509,14 +506,10 @@ filedata = filedata.replace(
                                         name "left_foot [foot]"''',
 )
 # Rename limbs
-filedata = filedata.replace(
-    '''name "right_shoulder_pitch"''', '''name "right_shoulder_pitch [shoulder]"''')
-filedata = filedata.replace(
-    '''name "left_shoulder_pitch"''', '''name "left_shoulder_pitch [shoulder]"''')
-filedata = filedata.replace(
-    '''name "right_hip_roll"''', '''name "right_hip_roll [hip]"''')
-filedata = filedata.replace(
-    '''name "left_hip_roll"''', '''name "left_hip_roll [hip]"''')
+filedata = filedata.replace('''name "right_shoulder_pitch"''', '''name "right_shoulder_pitch [shoulder]"''')
+filedata = filedata.replace('''name "left_shoulder_pitch"''', '''name "left_shoulder_pitch [shoulder]"''')
+filedata = filedata.replace('''name "right_hip_roll"''', '''name "right_hip_roll [hip]"''')
+filedata = filedata.replace('''name "left_hip_roll"''', '''name "left_hip_roll [hip]"''')
 
 # Fix naming issue of bounding object caused by urdf2webots tool
 filedata = filedata.replace("boundingObject Pose", "boundingObject Transform")
@@ -526,8 +519,7 @@ filedata = filedata.replace("mass 0.000000", "mass 1e-8")
 filedata = filedata.replace("mass -1", "mass 1e-8")
 
 # Update colours
-filedata = filedata.replace(
-    "baseColor 0.286275 0.286275 0.286275", "baseColor 0.125 0.125 0.125")
+filedata = filedata.replace("baseColor 0.286275 0.286275 0.286275", "baseColor 0.125 0.125 0.125")
 
 # Write the update proto file
 with open(proto_file_path, "w") as file:
