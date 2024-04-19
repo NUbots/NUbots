@@ -33,7 +33,6 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
@@ -54,7 +53,6 @@ namespace module::skill {
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
-    using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using WalkTask = message::skill::Walk;
