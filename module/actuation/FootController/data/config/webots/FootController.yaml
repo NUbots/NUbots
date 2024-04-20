@@ -1,24 +1,17 @@
 log_level: INFO
 
-mode: ADAPTIVE # Options: IK, ADAPTIVE
+mode: IK # Options: IK
 
 servo_gains:
-  L_HIP_YAW: 15
-  L_HIP_ROLL: 15
-  L_HIP_PITCH: 15
-  L_KNEE: 15
-  L_ANKLE_PITCH: 15
-  L_ANKLE_ROLL: 15
-  R_HIP_YAW: 15
-  R_HIP_ROLL: 15
-  R_HIP_PITCH: 15
-  R_KNEE: 15
-  R_ANKLE_PITCH: 15
-  R_ANKLE_ROLL: 15
-
-tune:
-  min_gain: 10
-  max_gain: 500
-  p_gain: 0.1
-
-config_path: "config/webots/FootController.yaml"
+  L_HIP_YAW: 30
+  L_HIP_ROLL: 30
+  L_HIP_PITCH: 30
+  L_KNEE: 30
+  L_ANKLE_PITCH: 30
+  L_ANKLE_ROLL: 30
+  R_HIP_YAW: 30
+  R_HIP_ROLL: 30
+  R_HIP_PITCH: 30
+  R_KNEE: 30
+  R_ANKLE_PITCH: 30
+  R_ANKLE_ROLL: 30

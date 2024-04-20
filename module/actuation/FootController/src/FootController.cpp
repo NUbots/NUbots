@@ -48,13 +48,6 @@ namespace module::actuation {
                 utility::input::ServoID servo_id(key);
                 cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
             }
-
-            // Tuning parameters
-            cfg.max_gain         = config["tune"]["max_gain"].as<double>();
-            cfg.min_gain         = config["tune"]["min_gain"].as<double>();
-            cfg.p_gain           = config["tune"]["p_gain"].as<double>();
-            cfg.yaml_config_path = config["config_path"].as<std::string>();
-            yaml_config          = YAML::LoadFile(cfg.yaml_config_path);
         });
 
         on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
