@@ -78,14 +78,12 @@ namespace module::strategy {
 
                 // If we have stopped and our position and heading error is below resume tolerance, then remain stopped
                 if (stopped && position_error < cfg.resume_tolerance && heading_error < cfg.resume_tolerance) {
-                    emit<Task>(std::make_unique<StandStill>());
                     stopped = true;
                     return;
                 }
 
                 // If the error in the desired field position and heading is low enough, stand still
                 if (!stopped && position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
-                    emit<Task>(std::make_unique<StandStill>());
                     stopped = true;
                     return;
                 }
@@ -96,11 +94,13 @@ namespace module::strategy {
                     const Eigen::Vector3d uHRr(Hfr.inverse().linear() * uHFf);
                     const double desired_heading = std::atan2(uHRr.y(), uHRr.x());
                     emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
+                    emit(std::make_unique<WalkTo>(rPRr, desired_heading));
                 }
                 // Otherwise, walk directly to the field position
                 else {
                     const double desired_heading = std::atan2(rPRr.y(), rPRr.x());
                     emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
+                    emit(std::make_unique<WalkTo>(rPRr, desired_heading));
                 }
 
                 if (log_level <= NUClear::DEBUG) {

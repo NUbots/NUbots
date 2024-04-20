@@ -8,4 +8,4 @@ align_radius: 0.5
 stop_tolerance: 0.25
 
 # Resume walking to field position tolerance
-resume_tolerance: 0.5
+resume_tolerance: 0.35

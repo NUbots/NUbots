@@ -32,8 +32,8 @@ import "Vector.proto";
 /// Robot walks to position on field
 message WalkToFieldPosition {
     /// Position on the field to walk to (x, y, 0)
-    fvec3 rPFf = 1;
+    vec3 rPFf = 1;
 
     /// Orientation of the robot on the field (in radians)
-    float heading = 2;
+    double heading = 2;
 }

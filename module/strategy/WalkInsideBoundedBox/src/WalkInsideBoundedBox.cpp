@@ -87,7 +87,7 @@ namespace module::strategy {
                     }
 
                     // Emit task to walk to desired position with heading facing opponents side of field
-                    emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(rDFf.x(), rDFf.y(), 0), -M_PI));
+                    emit<Task>(std::make_unique<WalkToFieldPosition>(Eigen::Vector3d(rDFf.x(), rDFf.y(), 0), -M_PI));
                 }
             });
     }
