@@ -52,7 +52,6 @@ namespace module::actuation {
 
         on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
             [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {
-                // Construct Leg IK tasks
                 auto left_leg = std::make_unique<LeftLegIK>();
 
                 control_foot(left_foot, left_leg, sensors, LimbID::LimbID::LEFT_LEG);

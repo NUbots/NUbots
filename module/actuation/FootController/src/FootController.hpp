@@ -48,7 +48,6 @@
 
 namespace module::actuation {
 
-
     using message::actuation::LeftLegIK;
     using message::actuation::RightLegIK;
     using message::actuation::ServoState;

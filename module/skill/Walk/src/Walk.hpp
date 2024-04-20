@@ -33,15 +33,11 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoCommand.hpp"
-#include "message/behaviour/state/WalkState.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/skill/WalkGenerator.hpp"
 
 namespace module::skill {
-
-
-    using message::behaviour::state::WalkState;
 
     class Walk : public ::extension::behaviour::BehaviourReactor {
 
@@ -69,9 +65,6 @@ namespace module::skill {
 
         /// @brief Generates swing foot and torso trajectories for given walk velocity target
         utility::skill::WalkGenerator<double> walk_generator{};
-
-        /// @brief Current internal state of the walk engine
-        WalkState::Phase walk_state_phase = WalkState::Phase::LEFT;
     };
 }  // namespace module::skill
 
