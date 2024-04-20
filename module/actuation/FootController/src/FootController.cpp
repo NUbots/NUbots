@@ -28,8 +28,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "utility/nusight/NUhelpers.hpp"
-
 namespace module::actuation {
 
     using extension::Configuration;
@@ -41,6 +39,7 @@ namespace module::actuation {
         on<Configuration>("FootController.yaml").then([this](const Configuration& config) {
             // Set log level from the configuration
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            cfg.mode        = config["mode"].as<std::string>();
 
             // Read servo gains from the configuration
             auto servo_gains_config = config["servo_gains"].as<std::map<std::string, double>>();
@@ -49,6 +48,12 @@ namespace module::actuation {
                 utility::input::ServoID servo_id(key);
                 cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
             }
+
+            // Tuning parameters
+            cfg.max_gain = config["tune"]["max_gain"].as<double>();
+            cfg.min_gain = config["tune"]["min_gain"].as<double>();
+            cfg.p_gain   = config["tune"]["p_gain"].as<double>();
+            cfg.i_gain   = config["tune"]["i_gain"].as<double>();
         });
 
         on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
