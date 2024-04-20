@@ -53,33 +53,34 @@ def main():
     truth_all_long_4 = np.load("processed-outputs/numpy/long/4/long-truth-4.npy")
 
     # Slice out the arm and head servos
-    servos_long = servos_long[:, 4:18]
-    servos_long_2 = servos_long_2[:, 4:18]
-    servos_long_4 = servos_long_3[:, 4:18]
-    servos_long_4 = servos_long_4[:, 4:18]
+    # NOTE: Remember to reshape if adding or removing features
+    servos_long = servos_long[:, 6:18]
+    servos_long_2 = servos_long_2[:, 6:18]
+    servos_long_3 = servos_long_3[:, 6:18]
+    servos_long_4 = servos_long_4[:, 6:18]
 
     # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
     print("IMU long: ", imu_long.shape)
-    print("IMU max: ", np.max(imu_long))
-    print("IMU min: ", np.min(imu_long))
+    # print("IMU max: ", np.max(imu_long))
+    # print("IMU min: ", np.min(imu_long))
     print("Servos long: ", servos_long.shape)
     print("Truth long: ", truth_all_long.shape)
 
     print("IMU long 2: ", imu_long_2.shape)
-    print("IMU max 2: ", np.max(imu_long_2))
-    print("IMU min 2: ", np.min(imu_long_2))
+    # print("IMU max 2: ", np.max(imu_long_2))
+    # print("IMU min 2: ", np.min(imu_long_2))
     print("Servos long 2: ", servos_long_2.shape)
     print("Truth long 2: ", truth_all_long_2.shape)
 
     print("IMU long 3: ", imu_long_3.shape)
-    print("IMU max 3: ", np.max(imu_long_3))
-    print("IMU min 3: ", np.min(imu_long_3))
+    # print("IMU max 3: ", np.max(imu_long_3))
+    # print("IMU min 3: ", np.min(imu_long_3))
     print("Servos long 3: ", servos_long_3.shape)
     print("Truth long 3: ", truth_all_long_3.shape)
 
     print("IMU long 4: ", imu_long_4.shape)
-    print("IMU max 4: ", np.max(imu_long_4))
-    print("IMU min 4: ", np.min(imu_long_4))
+    # print("IMU max 4: ", np.max(imu_long_4))
+    # print("IMU min 4: ", np.min(imu_long_4))
     print("Servos long 4: ", servos_long_4.shape)
     print("Truth long 4: ", truth_all_long_4.shape)
 
@@ -128,6 +129,7 @@ def main():
     # NOTE: Using only position for first tests to see what happens. May add in heading later.
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
     # NOTE: 17/04/2024 - Due to fluctuations in the z component, trying with just x, y
+    # NOTE: Remember to reshape if adding or removing features
     truth_long = truth_all_long[:, 9:11]
     print("Truth long shape: ", truth_long.shape)
     truth_long_2 = truth_all_long_2[:, 9:11]
@@ -253,22 +255,24 @@ def main():
     # plt.legend()
     # plt.show()
 
+    # NOTE: Remember to reshape if adding or removing features
+
     # Split into data and targets
     # Training
-    input_data_train = train_arr_scaled[:, :26]  # imu and servos
-    input_targets_train = train_arr_scaled[:, 26:]  # truth
+    input_data_train = train_arr_scaled[:, :18]  # imu and servos
+    input_targets_train = train_arr_scaled[:, 18:]  # truth
     # Convert targets to relative position
     input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
-    input_data_validate = validate_arr_scaled[:, :26]  # imu and servos
-    input_targets_validate = validate_arr_scaled[:, 26:]  # truth
+    input_data_validate = validate_arr_scaled[:, :18]  # imu and servos
+    input_targets_validate = validate_arr_scaled[:, 18:]  # truth
     # Convert targets to relative position
     input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
-    input_data_test= test_arr_scaled[:, :26]  # imu and servos
-    input_targets_test = test_arr_scaled[:, 26:]  # truth
+    input_data_test= test_arr_scaled[:, :18]  # imu and servos
+    input_targets_test = test_arr_scaled[:, 18:]  # truth
     # Convert targets to relative position
     input_targets_test = convert_to_relative(input_targets_test)
 
@@ -289,11 +293,11 @@ def main():
     np.save('datasets/input_targets_test.npy', input_targets_test)
 
     # Plot and inspect
-    # num_channels = input_targets_validate.shape[1]
+    # num_channels = joined_data.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
-    # for i in range(num_channels):
-    #     plt.plot(input_targets_validate[0:100000, i], label=f'Channel {i+1}')
+    # for i in range(num_channels -2, num_channels):
+    #     plt.plot(joined_data[10000:50000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
