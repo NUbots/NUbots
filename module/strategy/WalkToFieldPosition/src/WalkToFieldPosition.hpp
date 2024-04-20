@@ -38,11 +38,15 @@ namespace module::strategy {
         /// @brief Stores configuration values
         struct Config {
             /// @brief Radius to begin aligning with desired field heading
-            double align_radius = 0.0f;
+            double align_radius = 0.0;
             /// @brief Tolerance for stopping at the field position
-            double stop_tolerance = 0.0f;
+            double stop_tolerance_position = 0.0;
+            /// @brief Tolerance for stopping at the field heading
+            double stop_tolerance_heading = 0.0;
             /// @brief Tolerance for resuming walking to the field position if stopped
-            double resume_tolerance = 0.0f;
+            double resume_tolerance_position = 0.0;
+            /// @brief Tolerance for resuming walking to the field heading if stopped
+            double resume_tolerance_heading = 0.0;
         } cfg;
 
         /// @brief Whether or not we are stopped

@@ -10,7 +10,7 @@ acceleration: 0.005 # maximum increment in walk command velocity
 approach_radius: 0.75 # region around ball to begin decelerating
 
 # Rotate on the spot tuning values
-rotate_velocity: 0.3
+rotate_velocity: 0.4
 rotate_velocity_x: 0.0
 rotate_velocity_y: 0.0
 

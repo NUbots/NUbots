@@ -104,8 +104,11 @@ namespace module::strategy {
                     // Get position to ball to kick
                     Eigen::Vector3d rKFf = rBFf - uGBf * cfg.ball_kick_distance;
 
+                    // Get position of ball from kicking position
+                    Eigen::Vector3d rKBf = rBFf - rKFf;
+
                     // Compute the heading (angle between the x-axis and the vector from the kick position to the goal)
-                    double heading = std::atan2(rGBf.y(), rGBf.x());
+                    double heading = std::atan2(rKBf.y(), rKBf.x());
 
                     // Add an offset to
                     emit<Task>(std::make_unique<WalkToFieldPosition>(rKFf, heading));

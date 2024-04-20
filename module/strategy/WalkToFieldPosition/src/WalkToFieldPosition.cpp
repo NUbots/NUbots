@@ -40,6 +40,7 @@ namespace module::strategy {
     using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Field;
+    using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
     using message::strategy::StandStill;
     using WalkToFieldPositionTask = message::strategy::WalkToFieldPosition;
@@ -49,10 +50,11 @@ namespace module::strategy {
 
         on<Configuration>("WalkToFieldPosition.yaml").then([this](const Configuration& config) {
             // Use configuration here from file WalkToFieldPosition.yaml
-            this->log_level      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.align_radius     = config["align_radius"].as<double>();
-            cfg.stop_tolerance   = config["stop_tolerance"].as<double>();
-            cfg.resume_tolerance = config["resume_tolerance"].as<double>();
+            this->log_level               = config["log_level"].as<NUClear::LogLevel>();
+            cfg.stop_tolerance_position   = config["stop_tolerance"]["position"].as<double>();
+            cfg.stop_tolerance_heading    = config["stop_tolerance"]["heading"].as<double>();
+            cfg.resume_tolerance_position = config["resume_tolerance"]["position"].as<double>();
+            cfg.resume_tolerance_heading  = config["resume_tolerance"]["heading"].as<double>();
         });
 
         on<Provide<WalkToFieldPositionTask>, With<Field>, With<Sensors>, Every<30, Per<std::chrono::seconds>>>().then(
@@ -76,35 +78,44 @@ namespace module::strategy {
                 Eigen::Vector2d uXRf        = Hfr.rotation().col(0).head<2>();
                 const double heading_error  = std::acos(std::max(-1.0, std::min(1.0, uXRf.dot(uHFf.head<2>()))));
 
-                // If we have stopped and our position and heading error is below resume tolerance, then remain stopped
-                if (stopped && position_error < cfg.resume_tolerance && heading_error < cfg.resume_tolerance) {
+                // If we have stopped but our position and heading error is now above resume tolerance, resume walking
+                if (stopped && position_error < cfg.resume_tolerance_position
+                    && heading_error < cfg.resume_tolerance_heading) {
                     stopped = true;
                     return;
                 }
 
-                // If the error in the desired field position and heading is low enough, stand still
-                if (!stopped && position_error < cfg.stop_tolerance && heading_error < cfg.stop_tolerance) {
+                // If the error in the desired field position and heading is low enough, don't do anything
+                if (!stopped && position_error < cfg.stop_tolerance_position
+                    && heading_error < cfg.stop_tolerance_heading) {
                     stopped = true;
                     return;
                 }
 
-                // If we are getting close to the field position begin to align with the desired heading in field space
-                if (position_error < cfg.align_radius) {
+                // If we are at position, but not at heading, then rotate in place in the direction of the desired
+                // heading
+                log<NUClear::INFO>("cfg.stop_tolerance_position: {}", cfg.stop_tolerance_position);
+                if (position_error < cfg.stop_tolerance_position) {
                     // Rotate the desired heading in field {f} space to robot space
                     const Eigen::Vector3d uHRr(Hfr.inverse().linear() * uHFf);
                     const double desired_heading = std::atan2(uHRr.y(), uHRr.x());
-                    emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
-                    emit(std::make_unique<WalkTo>(rPRr, desired_heading));
+                    bool clockwise               = desired_heading < 0;
+                    // Emit a TurnOnSpot task
+                    if (heading_error > cfg.stop_tolerance_heading) {
+                        emit<Task>(std::make_unique<TurnOnSpot>(clockwise));
+                        log<NUClear::INFO>("Rotating in place to desired heading");
+                    }
                 }
                 // Otherwise, walk directly to the field position
                 else {
+                    log<NUClear::INFO>("Walking directly to field position");
                     const double desired_heading = std::atan2(rPRr.y(), rPRr.x());
                     emit<Task>(std::make_unique<WalkTo>(rPRr, desired_heading));
                     emit(std::make_unique<WalkTo>(rPRr, desired_heading));
                 }
 
-                if (log_level <= NUClear::DEBUG) {
-                    log<NUClear::DEBUG>("Position error: ", position_error, " Heading error: ", heading_error);
+                if (log_level <= NUClear::INFO) {
+                    log<NUClear::INFO>("Position error: ", position_error, " Heading error: ", heading_error);
                 }
             });
     }
