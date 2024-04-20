@@ -349,8 +349,8 @@ def main():
     # lr_callback = keras.callbacks.LearningRateScheduler(scheduler)
 
     # ** Loss functions **
-    # loss_function = keras.losses.MeanAbsoluteError()
-    loss_function = keras.losses.MeanSquaredError()
+    loss_function = keras.losses.MeanAbsoluteError()
+    # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.log_cosh(y_true=1,y_pred=1)
     # loss_function = keras.losses.Quantile(quantile=0.5)
     # loss_function = quantile_loss????
@@ -403,10 +403,10 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-
-    lstm = keras.layers.LSTM(500, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=False)(inputs)    # 32 originally
+    dropout1 = keras.layers.Dropout(rate=0.38)(inputs)
+    lstm = keras.layers.Bidirectional(keras.layers.LSTM(250, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0004), return_sequences=False))(dropout1)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
-    dropout = keras.layers.Dropout(rate=0.35)(normalise)
+    dropout2 = keras.layers.Dropout(rate=0.38)(normalise)
 
     # lstm2 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(dropout)    # 32 originally
     # normalise2 = keras.layers.LayerNormalization()(lstm2)
@@ -420,14 +420,14 @@ def main():
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
     # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
-    dense1 = keras.layers.Dense(64, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)
+    dense1 = keras.layers.Dense(64, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)
     dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
     model.summary()
 
     # Examples
-    # lstm = Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
+    # lstm = keras.layers.Bidirectional(LSTM(200, return_sequences=True, recurrent_regularizer=keras.regularizers.L1L2(l1=0.0002, l2=0.006)))(dropout)
     # lstm2 = keras.layers.LSTM(50, return_sequences=True, kernel_initializer=keras.initializers.HeUniform(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002), recurrent_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout)    # 32 originally
     # dropout2 = keras.layers.Dropout(rate=0.2)(lstm2)
 
