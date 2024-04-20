@@ -39,12 +39,17 @@ namespace module::actuation {
         : BehaviourReactor(std::move(environment)) {
 
         on<Configuration>("FootController.yaml").then([this](const Configuration& config) {
-            // Use configuration here from file FootController.yaml
+            // Set log level from the configuration
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            cfg.servo_gain  = config["servo_gain"].as<double>();
-            cfg.mode        = config["mode"].as<std::string>();
-        });
 
+            // Read servo gains from the configuration
+            auto servo_gains_config = config["servo_gains"].as<std::map<std::string, double>>();
+            cfg.servo_states.clear();
+            for (const auto& [key, gain] : servo_gains_config) {
+                utility::input::ServoID servo_id(key);
+                cfg.servo_states[servo_id] = ServoState(gain, TORQUE_ENABLED);
+            }
+        });
 
         on<Provide<ControlLeftFoot>, With<Sensors>, Needs<LeftLegIK>>().then(
             [this](const ControlLeftFoot& left_foot, const Sensors& sensors) {
