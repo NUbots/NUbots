@@ -246,7 +246,7 @@ namespace module::input {
         // throw massive numbers without an error flag and if our hardware is working as intended, it should never
         // read that we're spinning at 2 revs/s
         if (raw_sensors.gyroscope.norm() > 4.0 * M_PI) {
-            NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
+            // NUClear::log<NUClear::WARN>("Bad gyroscope value", raw_sensors.gyroscope.norm());
             if (previous_sensors) {
                 sensors->gyroscope = previous_sensors->gyroscope;
             }

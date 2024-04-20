@@ -29,6 +29,7 @@ package message.skill;
 
 import "Transform.proto";
 import "google/protobuf/timestamp.proto";
+import "message/behaviour/state/WalkState.proto";
 
 message ControlLeftFoot {
     // Desired left foot {f} pose in torso {t} space
@@ -37,6 +38,8 @@ message ControlLeftFoot {
     google.protobuf.Timestamp time = 2;
     // Bool to indicate whether or not to attempt to keep foot level with ground
     bool keep_level = 3;
+    // Walk phase used to indicate whether to perform gain update in tuning mode
+    uint32 walk_phase = 4;
 }
 
 message ControlRightFoot {
@@ -46,4 +49,7 @@ message ControlRightFoot {
     google.protobuf.Timestamp time = 2;
     // Bool to indicate whether or not to attempt to keep foot level with ground
     bool keep_level = 3;
+
+    // Walk phase used to indicate whether to perform gain update in tuning mode
+    uint32 walk_phase = 4;
 }

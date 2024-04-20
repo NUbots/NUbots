@@ -31,7 +31,6 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
 #include "message/behaviour/state/Stability.hpp"
-#include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
@@ -52,7 +51,6 @@ namespace module::skill {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkState;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using WalkTask = message::skill::Walk;
@@ -148,9 +146,21 @@ namespace module::skill {
                 Eigen::Isometry3d Htl = walk_generator.get_foot_pose(LimbID::LEFT_LEG);
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
+
+                WalkState::Phase phase =
+                    walk_generator.is_left_foot_planted() ? WalkState::Phase::LEFT : WalkState::Phase::RIGHT;
+
+                uint32_t phase_int = walk_generator.is_left_foot_planted() ? 0 : 1;
+
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_generator.is_left_foot_planted()));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_generator.is_left_foot_planted()));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl,
+                                                             goal_time,
+                                                             walk_generator.is_left_foot_planted(),
+                                                             phase_int));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr,
+                                                              goal_time,
+                                                              !walk_generator.is_left_foot_planted(),
+                                                              phase_int));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
@@ -167,10 +177,9 @@ namespace module::skill {
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
                 // Emit the walk state
-                WalkState::Phase phase =
-                    walk_generator.is_left_foot_planted() ? WalkState::Phase::LEFT : WalkState::Phase::RIGHT;
                 auto walk_state =
                     std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase);
+
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
