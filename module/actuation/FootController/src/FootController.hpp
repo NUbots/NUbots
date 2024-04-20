@@ -31,21 +31,72 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/actuation/LimbsIK.hpp"
+#include "message/actuation/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/skill/ControlFoot.hpp"
+
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+
 namespace module::actuation {
+
+
+    using message::actuation::LeftLegIK;
+    using message::actuation::RightLegIK;
+    using message::actuation::ServoState;
+    using message::input::Sensors;
+    using message::skill::ControlLeftFoot;
+    using message::skill::ControlRightFoot;
+
+    using utility::input::LimbID;
 
     class FootController : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Mode of operation
+            std::string mode = "IK";
             /// @brief Gains for the servos
             double servo_gain = 0.0;
-            /// @brief Whether or not to level the foot with the ground
-            bool keep_level = false;
         } cfg;
+
+        // /// @brief Map between ServoID and ServoState
+        // std::map<utility::input::ServoID, message::actuation::ServoState> servo_states = {
+        //     {utility::input::ServoID::LEFT_HIP_YAW, message::actuation::ServoState()},
+        //     {utility::input::ServoID::LEFT_HIP_ROLL, message::actuation::ServoState()},
+        //     {utility::input::ServoID::LEFT_HIP_PITCH, message::actuation::ServoState()},
+        //     {utility::input::ServoID::LEFT_KNEE, message::actuation::ServoState()},
+        //     {utility::input::ServoID::LEFT_ANKLE_PITCH, message::actuation::ServoState()},
+        //     {utility::input::ServoID::LEFT_ANKLE_ROLL, message::actuation::ServoState()},
+        //     {utility::input::ServoID::RIGHT_HIP_YAW, message::actuation::ServoState()},
+        //     {utility::input::ServoID::RIGHT_HIP_ROLL, message::actuation::ServoState()},
+        //     {utility::input::ServoID::RIGHT_HIP_PITCH, message::actuation::ServoState()},
+        //     {utility::input::ServoID::RIGHT_KNEE, message::actuation::ServoState()},
+        //     {utility::input::ServoID::RIGHT_ANKLE_PITCH, message::actuation::ServoState()},
+        //     {utility::input::ServoID::RIGHT_ANKLE_ROLL, message::actuation::ServoState()},
+        // };
 
     public:
         /// @brief Called by the powerplant to build and setup the FootController reactor.
         explicit FootController(std::unique_ptr<NUClear::Environment> environment);
+
+        /// @brief Foot controller logic
+        template <typename FootControlTask, typename IKTask>
+        void control_foot(const FootControlTask& foot_control_task,
+                          IKTask& ik_task,
+                          const Sensors& sensors,
+                          LimbID limb_id) {
+            // Set the time
+            ik_task->time = foot_control_task.time;
+
+            // Set the IK target
+            ik_task->Htf = foot_control_task.Htf;
+
+            for (auto id : utility::input::LimbID::servos_for_limb(limb_id)) {
+                ik_task->servos[id] = ServoState(cfg.servo_gain, 100);
+            }
+        }
     };
 
 }  // namespace module::actuation

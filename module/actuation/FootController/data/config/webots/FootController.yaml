@@ -3,4 +3,4 @@ log_level: INFO
 
 servo_gain: 30
 
-keep_level: false
+mode: TUNE # IK, KEEP_LEVEL (IK + keep foot orientated with ground), TUNE (Iteratively tune P gain to improve tracking)
