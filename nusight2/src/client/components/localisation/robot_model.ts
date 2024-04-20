@@ -125,7 +125,9 @@ export class LocalisationRobotModel {
   @observable name: string;
   @observable color?: string;
   @observable Htw: Matrix4; // World to torso
+  @observable Hrw: Matrix4; // World to robot
   @observable Hfw: Matrix4; // World to field
+  @observable rZRr: Vector3; // Walk path point in robot space.
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
@@ -140,7 +142,9 @@ export class LocalisationRobotModel {
     name,
     color,
     Htw,
+    Hrw,
     Hfw,
+    rZRr,
     Rwt,
     motors,
     fieldLinePoints,
@@ -153,7 +157,9 @@ export class LocalisationRobotModel {
     name: string;
     color?: string;
     Htw: Matrix4;
+    Hrw: Matrix4;
     Hfw: Matrix4;
+    rZRr: Vector3;
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
@@ -166,7 +172,9 @@ export class LocalisationRobotModel {
     this.name = name;
     this.color = color;
     this.Htw = Htw;
+    this.Hrw = Hrw;
     this.Hfw = Hfw;
+    this.rZRr = rZRr;
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
@@ -181,7 +189,9 @@ export class LocalisationRobotModel {
       model,
       name: model.name,
       Htw: Matrix4.of(),
+      Hrw: Matrix4.of(),
       Hfw: Matrix4.of(),
+      rZRr: Vector3.of(),
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
@@ -208,6 +218,12 @@ export class LocalisationRobotModel {
   @computed
   get rPFf(): Vector3[] {
     return this.fieldLinePoints.rPWw.map((rPWw) => rPWw.applyMatrix4(this.Hfw));
+  }
+
+  /** Walk path point in field space */
+  @computed
+  get rZFf(): Vector3 {
+    return this.rZRr.applyMatrix4(this.Hrw.invert()).applyMatrix4(this.Hfw);
   }
 
   /** Ball position in field space */

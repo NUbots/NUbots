@@ -279,6 +279,7 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
       {model.particlesVisible && <Particles model={model} />}
       {model.goalVisible && <Goals model={model} />}
+      <WalkPathGoals model={model} />
     </object3D>
   );
 });
@@ -445,6 +446,27 @@ const Goals = ({ model }: { model: LocalisationModel }) => (
     )}
   </>
 );
+
+const WalkPathGoals = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(robot => {
+      if (robot.visible && robot.rZFf) {
+        return (
+          <object3D key={robot.id}>
+            <mesh
+              position={robot.rZFf.toArray()} // Ensure this is compatible with Three.js
+              rotation={[Math.PI / 2, 0, 0]} // Correct rotation to display the cylinder
+            >
+              <cylinderBufferGeometry args={[0.05, 0.05, 0.1, 20]} />
+              <meshStandardMaterial color="purple" />
+            </mesh>
+          </object3D>
+        );
+      }
+    })}
+  </>
+);
+
 
 const Robot = ({ model }: { model: LocalisationRobotModel }) => {
   const robotRef = React.useRef<URDFRobot | null>(null);
