@@ -29,6 +29,7 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/behaviour/state/Stability.hpp"
 #include "message/planning/KickTo.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/skill/Say.hpp"
@@ -47,6 +48,7 @@ namespace module::purpose {
 
     using extension::Configuration;
 
+    using message::behaviour::state::Stability;
     using message::planning::KickTo;
     using message::planning::LookAround;
     using message::skill::Say;
@@ -58,6 +60,7 @@ namespace module::purpose {
     using message::strategy::StandStill;
     using message::strategy::WalkToBall;
     using message::strategy::WalkToFieldPosition;
+    using message::strategy::WalkToKickBall;
 
     using utility::support::Expression;
 
@@ -69,6 +72,7 @@ namespace module::purpose {
             cfg.find_ball_priority              = config["tasks"]["find_ball_priority"].as<int>();
             cfg.look_at_ball_priority           = config["tasks"]["look_at_ball_priority"].as<int>();
             cfg.walk_to_ball_priority           = config["tasks"]["walk_to_ball_priority"].as<int>();
+            cfg.walk_to_kick_ball_priority      = config["tasks"]["walk_to_kick_ball_priority"].as<int>();
             cfg.align_ball_to_goal_priority     = config["tasks"]["align_ball_to_goal_priority"].as<int>();
             cfg.kick_to_goal_priority           = config["tasks"]["kick_to_goal_priority"].as<int>();
             cfg.walk_to_field_position_priority = config["tasks"]["walk_to_field_position_priority"].as<int>();
@@ -81,6 +85,7 @@ namespace module::purpose {
         });
 
         on<Startup>().then([this] {
+            emit(std::make_unique<Stability>(Stability::STANDING));
             // Emit all the tasks with priorities higher than 0
             if (cfg.find_ball_priority > 0) {
                 emit<Task>(std::make_unique<FindBall>(), cfg.find_ball_priority);
@@ -91,6 +96,10 @@ namespace module::purpose {
             if (cfg.walk_to_ball_priority > 0) {
                 emit<Task>(std::make_unique<WalkToBall>(), cfg.walk_to_ball_priority);
             }
+            if (cfg.walk_to_kick_ball_priority > 0) {
+                log<NUClear::INFO>("Walk to kick ball");
+                emit<Task>(std::make_unique<WalkToKickBall>(), cfg.walk_to_kick_ball_priority);
+            }
             if (cfg.align_ball_to_goal_priority > 0) {
                 emit<Task>(std::make_unique<AlignBallToGoal>(), cfg.align_ball_to_goal_priority);
             }
@@ -99,7 +108,7 @@ namespace module::purpose {
             }
             if (cfg.walk_to_field_position_priority > 0) {
                 emit<Task>(
-                    std::make_unique<WalkToFieldPosition>(Eigen::Vector3f(cfg.walk_to_field_position_position.x(),
+                    std::make_unique<WalkToFieldPosition>(Eigen::Vector3d(cfg.walk_to_field_position_position.x(),
                                                                           cfg.walk_to_field_position_position.y(),
                                                                           0),
                                                           cfg.walk_to_field_position_position.z()),

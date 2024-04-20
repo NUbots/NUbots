@@ -44,6 +44,8 @@ namespace module::purpose {
             int look_at_ball_priority = 0;
             /// @brief Priority of StandStill task
             int walk_to_ball_priority = 0;
+            /// @brief Priority of StandStill task
+            int walk_to_kick_ball_priority = 0;
             /// @brief Priority of AlignBallToGoal task
             int align_ball_to_goal_priority = 0;
             /// @brief Priority of KickToGoal task
@@ -60,7 +62,7 @@ namespace module::purpose {
             int say_priority = 0;
 
             /// @brief Position to walk to when emitting WalkToFieldPosition task
-            Eigen::Vector3f walk_to_field_position_position = Eigen::Vector3f::Zero();
+            Eigen::Vector3d walk_to_field_position_position = Eigen::Vector3d::Zero();
 
             /// @brief Text to say when emitting Say task
             std::string say_text = "";
