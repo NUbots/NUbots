@@ -159,6 +159,71 @@ namespace module::platform {
         throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo id: {}", id));
     }
 
+    [[nodiscard]] uint32_t translate_name_to_id(const std::string& name) {
+        if (name == "right_shoulder_pitch_sensor") {
+            return 0;
+        }
+        if (name == "left_shoulder_pitch_sensor") {
+            return 1;
+        }
+        if (name == "right_shoulder_roll_sensor") {
+            return 2;
+        }
+        if (name == "left_shoulder_roll_sensor") {
+            return 3;
+        }
+        if (name == "right_elbow_pitch_sensor") {
+            return 4;
+        }
+        if (name == "left_elbow_pitch_sensor") {
+            return 5;
+        }
+        if (name == "right_hip_yaw_sensor") {
+            return 6;
+        }
+        if (name == "left_hip_yaw_sensor") {
+            return 7;
+        }
+        if (name == "right_hip_roll_sensor") {
+            return 8;
+        }
+        if (name == "left_hip_roll_sensor") {
+            return 9;
+        }
+        if (name == "right_hip_pitch_sensor") {
+            return 10;
+        }
+        if (name == "left_hip_pitch_sensor") {
+            return 11;
+        }
+        if (name == "right_knee_pitch_sensor") {
+            return 12;
+        }
+        if (name == "left_knee_pitch_sensor") {
+            return 13;
+        }
+        if (name == "right_ankle_pitch_sensor") {
+            return 14;
+        }
+        if (name == "left_ankle_pitch_sensor") {
+            return 15;
+        }
+        if (name == "right_ankle_roll_sensor") {
+            return 16;
+        }
+        if (name == "left_ankle_roll_sensor") {
+            return 17;
+        }
+        if (name == "neck_yaw_sensor") {
+            return 18;
+        }
+        if (name == "head_pitch_sensor") {
+            return 19;
+        }
+
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo name: {}", name));
+    }
+
     [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
                                                             const uint32_t& camera_timestep) {
         message::platform::webots::ActuatorRequests msg;
@@ -829,7 +894,9 @@ namespace module::platform {
             sensor_data->timestamp = NUClear::clock::now();
 
             for (const auto& position : sensor_measurements.position_sensors) {
-                translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
+                auto& servo            = translate_servo_id(position.name, sensor_data->servo);
+                servo.present_position = position.value;
+                servo.goal_position    = servo_state[translate_name_to_id(position.name)].goal_position;
             }
 
             if (!sensor_measurements.accelerometers.empty()) {
