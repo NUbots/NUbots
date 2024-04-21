@@ -10,6 +10,7 @@ import keras
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+from scipy.ndimage import gaussian_filter1d
 from sklearn.preprocessing import MinMaxScaler
 
 
@@ -34,6 +35,21 @@ def main():
         relative_positions = data - starting_position
 
         return relative_positions
+
+    def gaussian_smooth(data, window_size):
+        "Takes an array and separately applies gaussian filter to each dimension"
+
+        # Output array
+        smoothed_data = np.empty_like(data)
+
+        # Apply gaussian filter to each dimension
+        for i in range(data.shape[1]):
+            smoothed_data[:, i] = gaussian_filter1d(data[:, i], window_size, axis=0)
+
+        # print shapes to verify i didn't f up
+        print("Original data shape: ", data.shape)
+        print("Smoothed data shape: ", smoothed_data.shape)
+        return smoothed_data
 
     # numpy arrays
     imu_long = np.load("processed-outputs/numpy/long/1/long-imu-1.npy")
@@ -139,40 +155,19 @@ def main():
     truth_long_4 = truth_all_long_4[:, 9:11]
     print("Truth long 4 shape: ", truth_long_4.shape)
 
-    # Convert truth arrays to relative based on starting position
-    # truth_long = convert_to_relative(truth_long)
-    # print("Truth long shape after relative conversion: ", truth_long.shape)
-    # truth_long_2 = convert_to_relative(truth_long_2)
-    # print("Truth long shape after relative conversion: ", truth_long_2.shape)
-
-    # "data.accelerometer.x",
-    # "data.accelerometer.y",
-    # "data.accelerometer.z",
-    # "data.gyroscope.x",
-    # "data.gyroscope.y",
-    # "data.gyroscope.z"
-
-    # Add buffers to the imu data (maybe not needed?)
-
-    # imu_buffers = [10.0, 10.0, 10.0, 50.0, 50.0, 50.0]
-    # imu_maxes = np.max(imu, axis = 0) + imu_buffers
-    # imu_mins = np.min(imu, axis = 0) - imu_buffers
-    # # Cap the imu data off to remove outliers
-    # imu_capped = np.maximum(np.minimum(imu, imu_maxes, axis = 1), imu_mins, axis = 1)
-    # normalized_imu  = ((imu_capped + imu_mins) / (imu_maxes + imu_mins)) - 0.5
-    # plot this
-    # import pdb
-    # pdb.set_trace()
-
-    # Clip the IMU data to reduce spikes - Putting this after normalisation
-    # imu_clipped = np.clip(imu, -10, 10)
+    # Smooth targets using gaussian filter
+    truth_long_smoothed = gaussian_smooth(truth_long, 50)
+    truth_long_2_smoothed = gaussian_smooth(truth_long_2, 50)
+    truth_long_3_smoothed = gaussian_smooth(truth_long_2, 50)
+    truth_long_4_smoothed = gaussian_smooth(truth_long_2, 50)
 
     # Plot and inspect
-    # num_channels = truth_long_4.shape[1]
+    # num_channels = truth_long.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(truth_long_4[0:10000, i], label=f'Channel {i+1}')
+    #     plt.plot(truth_long[0:10000, i], label=f'Unsmoothed {i+1}')
+    #     plt.plot(truth_long_smoothed[0:10000, i], label=f'Smoothed {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -182,7 +177,7 @@ def main():
     # join separate arrays
     imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3, imu_long_4], axis=0)
     servos_joined = np.concatenate([servos_long, servos_long_2, servos_long_3, servos_long_4], axis=0)
-    truth_joined = np.concatenate([truth_long, truth_long_2, truth_long_3, truth_long_4], axis=0)
+    truth_joined = np.concatenate([truth_long_smoothed , truth_long_2_smoothed , truth_long_3_smoothed , truth_long_4_smoothed ], axis=0)
 
     # Join the data
     joined_data = np.concatenate([imu_joined, servos_joined, truth_joined], axis=1)
@@ -297,7 +292,7 @@ def main():
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(input_targets_train[10000:50000, i], label=f'Channel {i+1}')
+    #     plt.plot(input_targets_train[0:50000, i], label=f'Channel {i+1}')
     # # Add a legend
     # plt.legend()
     # plt.show()
@@ -391,26 +386,26 @@ def main():
     # activation = tf.keras.activations.relu(negative_slope=0.0, max_value=None, threshold=0.0)
 
     # Tensorboard
-    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    log_dir = "logs/fit/" + timestamp
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    # timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    # log_dir = "logs/fit/" + timestamp
+    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-    # Regulariser
-    # regularizer1 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # regularizer2 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
+    # # Regulariser
+    # # regularizer1 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # # regularizer2 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
 
-    # Model Layers
+    # # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    dropout1 = keras.layers.Dropout(rate=0.38)(inputs)
-    lstm = keras.layers.Bidirectional(keras.layers.LSTM(250, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0004), return_sequences=False))(dropout1)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.4)(inputs)
+    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00005, l2=0.0009), return_sequences=False)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
-    dropout2 = keras.layers.Dropout(rate=0.38)(normalise)
+    dropout1 = keras.layers.Dropout(rate=0.4)(normalise)
 
-    # lstm2 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(dropout)    # 32 originally
+    # lstm2 = keras.layers.LSTM(32, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=False)(dropout1)    # 32 originally
     # normalise2 = keras.layers.LayerNormalization()(lstm2)
-    # dropout2 = keras.layers.Dropout(rate=0.35)(normalise2)
+    # dropout2 = keras.layers.Dropout(rate=0.4)(normalise2)
 
     # lstm3 = keras.layers.LSTM(200, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00002, l2=0.0003), return_sequences=True)(dropout2)    # 32 originally
     # normalise3 = keras.layers.LayerNormalization()(lstm3)
@@ -420,7 +415,7 @@ def main():
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
     # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
-    dense1 = keras.layers.Dense(64, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout2)
+    dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout1)
     dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
