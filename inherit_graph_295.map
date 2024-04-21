@@ -1,3 +1,30 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structutility_1_1skill_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip..." alt="" coords="5,5,197,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="228,5,279,32"/>
+<area shape="rect" id="node2" href="$structutility_1_1reactor_1_1StreamReactor_1_1Do.html" title="Aliasing type for sanity and brevity purposes." alt="" coords="435,28,678,84"/>
+<area shape="rect" id="node3" title=" " alt="" coords="12,621,65,648"/>
+<area shape="rect" id="node4" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,341,375,411"/>
+<area shape="rect" id="node6" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,435,375,506"/>
+<area shape="rect" id="node8" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,57,375,127"/>
+<area shape="rect" id="node9" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,530,375,601"/>
+<area shape="rect" id="node11" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,625,375,695"/>
+<area shape="rect" id="node13" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,719,375,790"/>
+<area shape="rect" id="node15" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,895,375,966"/>
+<area shape="rect" id="node17" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,990,375,1061"/>
+<area shape="rect" id="node19" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,1085,375,1155"/>
+<area shape="rect" id="node21" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,1179,375,1250"/>
+<area shape="rect" id="node23" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,151,375,222"/>
+<area shape="rect" id="node25" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title=" " alt="" coords="132,246,375,317"/>
+<area shape="rect" id="node27" href="$structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html" title="Common inheritance for all StreamReactor steps." alt="" coords="120,815,387,871"/>
+<area shape="rect" id="node5" href="$structutility_1_1reactor_1_1StreamReactor_1_1Reconnect.html" title="A message struct to tell the system to reconnect to the device." alt="" coords="435,348,678,404"/>
+<area shape="rect" id="node7" href="$structutility_1_1reactor_1_1StreamReactor_1_1TransmitData.html" title="A message struct to tell the system to transmit data to the device." alt="" coords="435,443,678,499"/>
+<area shape="rect" id="node10" href="$structutility_1_1reactor_1_1StreamReactor_1_1Disconnect.html" title="A message to tell the system to disconnect from a device." alt="" coords="435,537,678,593"/>
+<area shape="rect" id="node12" href="$structutility_1_1reactor_1_1StreamReactor_1_1DoConnect.html" title="Internal message used to perform connection logic." alt="" coords="435,632,678,688"/>
+<area shape="rect" id="node14" href="$structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html" title="A message to tell the system to establish a connection to a TCP server." alt="" coords="435,727,678,783"/>
+<area shape="rect" id="node16" href="$structutility_1_1reactor_1_1StreamReactor_1_1PreDisconnect.html" title="A message struct that is emitted immediately before a connection is torn down." alt="" coords="435,903,678,959"/>
+<area shape="rect" id="node18" href="$structutility_1_1reactor_1_1StreamReactor_1_1PostDisconnect.html" title="A message struct that is emitted immediately after a connection is torn down." alt="" coords="435,997,679,1053"/>
+<area shape="rect" id="node20" href="$structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html" title="A message to tell the system to establish a connection to a serial device." alt="" coords="435,1092,678,1148"/>
+<area shape="rect" id="node22" href="$structutility_1_1reactor_1_1StreamReactor_1_1PreConnect.html" title="A message struct that is emitted immediately before a connection is established." alt="" coords="435,1187,678,1243"/>
+<area shape="rect" id="node24" href="$structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html" title="A message struct that is emitted immediately after a connection is established." alt="" coords="435,159,678,215"/>
+<area shape="rect" id="node26" href="$structutility_1_1reactor_1_1StreamReactor_1_1DoDisconnect.html" title="Internal message used to perform disconnection logic." alt="" coords="435,253,678,309"/>
+<area shape="rect" id="node28" title=" " alt="" coords="5,672,72,699"/>
 </map>

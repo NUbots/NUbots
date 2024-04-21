@@ -1,0 +1,294 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module/localisation/RobotLocalisation/src/RobotLocalisation.hpp Source File</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('RobotLocalisation_8hpp_source.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="headertitle">
+<div class="title">RobotLocalisation.hpp</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef MODULE_LOCALISATION_ROBOTLOCALISATION_HPP</span></div>
+<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define MODULE_LOCALISATION_ROBOTLOCALISATION_HPP</span></div>
+<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160; </div>
+<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
+<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160; </div>
+<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="preprocessor">#include &quot;RobotModel.hpp&quot;</span></div>
+<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160; </div>
+<div class="line"><a name="l00009"></a><span class="lineno">    9</span>&#160;<span class="preprocessor">#include &quot;utility/math/filter/UKF.hpp&quot;</span></div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160; </div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="keyword">namespace </span>module::localisation {</div>
+<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1RobotLocalisation.html">   12</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classmodule_1_1localisation_1_1RobotLocalisation.html">RobotLocalisation</a> : <span class="keyword">public</span> NUClear::Reactor {</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;    <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html">   14</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html">Config</a> {<span class="comment"></span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;<span class="comment">            /// @brief UKF config</span></div>
+<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html">   16</a></span>&#160;<span class="comment"></span>            <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html">UKF</a> {</div>
+<div class="line"><a name="l00017"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html">   17</a></span>&#160;                <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html">Noise</a> {</div>
+<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html">   18</a></span>&#160;                    <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html">Measurement</a> {</div>
+<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;                        Eigen::Matrix2d position = Eigen::Matrix2d::Zero();</div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;                    } measurement{};</div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html">   21</a></span>&#160;                    <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html">Process</a> {</div>
+<div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160;                        Eigen::Vector2d position = Eigen::Vector2d::Zero();</div>
+<div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;                        Eigen::Vector2d velocity = Eigen::Vector2d::Zero();</div>
+<div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;                    } process{};</div>
+<div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;                } noise{};</div>
+<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html">   26</a></span>&#160;                <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html">InitialCovariance</a> {</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;                    Eigen::Vector2d position = Eigen::Vector2d::Zero();</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;                    Eigen::Vector2d velocity = Eigen::Vector2d::Zero();</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;                } initial_covariance{};</div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;            } ukf{};</div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="comment">            /// @brief The maximum distance a measurement or other robot can be from another robot to be associated</span></div>
+<div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#aa7fe138e00442bdbd062a1dd9e494ea1">   33</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">double</span> <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#aa7fe138e00442bdbd062a1dd9e494ea1">association_distance</a> = 0.0;</div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="comment">            /// @brief The maximum number of times a robot can be missed consecutively before it is removed</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#af27c4782b650b9c0f48bf214a447a1b9">   36</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">int</span> <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#af27c4782b650b9c0f48bf214a447a1b9">max_missed_count</a> = 0;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160; </div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        } cfg;</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
+<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html">   40</a></span>&#160;        <span class="keyword">struct </span><a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html">TrackedRobot</a> {<span class="comment"></span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="comment">            /// @brief Time of the last time update</span></div>
+<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a426ffc5eaeecb31002d3794c404eef">   42</a></span>&#160;<span class="comment"></span>            NUClear::clock::time_point <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a426ffc5eaeecb31002d3794c404eef">last_time_update</a> = NUClear::clock::now();<span class="comment"></span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment">            /// @brief Unscented Kalman Filter for this robot</span></div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76">   44</a></span>&#160;<span class="comment"></span>            <a class="code" href="classutility_1_1math_1_1filter_1_1UKF.html">utility::math::filter::UKF&lt;double, RobotModel&gt;</a> <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76">ukf</a>{};<span class="comment"></span></div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;<span class="comment">            /// @brief Whether the robot was and should have been seen in the last vision update</span></div>
+<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#abbd5ead6444a9e92181221310ec2a17e">   46</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">bool</span> <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#abbd5ead6444a9e92181221310ec2a17e">seen</a> = <span class="keyword">true</span>;<span class="comment"></span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;<span class="comment">            /// @brief The number of times the robot has been undetected in a row</span></div>
+<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a300e5fbc842cfdc2b57439f4486b10d8">   48</a></span>&#160;<span class="comment"></span>            <span class="keywordtype">long</span> <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a300e5fbc842cfdc2b57439f4486b10d8">missed_count</a> = 0;<span class="comment"></span></div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;<span class="comment">            /// @brief A unique identifier for the robot</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aba1bf61f3c2e9f27bbd265886cf2b1d9">   50</a></span>&#160;<span class="comment"></span>            <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aba1bf61f3c2e9f27bbd265886cf2b1d9">id</a>;</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;<span class="comment">            /// @brief Constructor that sets the state for the UKF</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a3a946b37374b045096ae00f6683db7">   53</a></span>&#160;<span class="comment"></span>            <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a3a946b37374b045096ae00f6683db7">TrackedRobot</a>(<span class="keyword">const</span> Eigen::Vector3d&amp; initial_rRWw, <span class="keyword">const</span> <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html">Config::UKF</a>&amp; cfg_ukf, <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="classmodule_1_1localisation_1_1RobotLocalisation.html#aab06b0696a61ce1f8895bacf35d82bde">next_id</a>)</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                : <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aba1bf61f3c2e9f27bbd265886cf2b1d9">id</a>(<a class="code" href="classmodule_1_1localisation_1_1RobotLocalisation.html#aab06b0696a61ce1f8895bacf35d82bde">next_id</a>) {</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;                NUClear::log&lt;NUClear::DEBUG&gt;(<span class="stringliteral">&quot;Making robot with id: &quot;</span>, <span class="keywordtype">id</span>);</div>
+<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;                <a class="code" href="structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html">RobotModel&lt;double&gt;::StateVec</a> initial_state = Eigen::Matrix&lt;double, 4, 1&gt;::Zero();</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;                initial_state.rRWw                         = initial_rRWw.head&lt;2&gt;();</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160; </div>
+<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;                <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76">ukf</a>.set_state(initial_state.getStateVec(),</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;                              <a class="code" href="structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html">RobotModel&lt;double&gt;::StateVec</a>(cfg_ukf.initial_covariance.position).asDiagonal());</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;                <a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76">ukf</a>.model.process_noise = <a class="code" href="structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html">RobotModel&lt;double&gt;::StateVec</a>(cfg_ukf.noise.process.position);</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;            }</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160; </div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;            <span class="comment">// Get the robot&#39;s position in world space</span></div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;            Eigen::Vector2d get_rRWw()<span class="keyword"> const </span>{</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;                <span class="keywordflow">return</span> <a class="code" href="structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html">RobotModel&lt;double&gt;::StateVec</a>(<a class="code" href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76">ukf</a>.get_state()).rRWw;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;            };</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        };</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="comment">        /// @brief List of tracked robots</span></div>
+<div class="line"><a name="l00071"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1RobotLocalisation.html#ad38e2ef06617a1ec28699f7131ec589e">   71</a></span>&#160;<span class="comment"></span>        std::vector&lt;TrackedRobot&gt; <a class="code" href="classmodule_1_1localisation_1_1RobotLocalisation.html#ad38e2ef06617a1ec28699f7131ec589e">tracked_robots</a>{};</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="comment">        /// @brief The next id to assign to a robot</span></div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="comment">        /// This variable will increase by one each time a new robot is added</span></div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;<span class="comment">        /// As it is unbounded, an unsigned long is used to store it</span></div>
+<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="classmodule_1_1localisation_1_1RobotLocalisation.html#aab06b0696a61ce1f8895bacf35d82bde">   76</a></span>&#160;<span class="comment"></span>        <span class="keywordtype">unsigned</span> <span class="keywordtype">long</span> <a class="code" href="classmodule_1_1localisation_1_1RobotLocalisation.html#aab06b0696a61ce1f8895bacf35d82bde">next_id</a> = 0;</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160; </div>
+<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;    <span class="keyword">public</span>:<span class="comment"></span></div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="comment">        /// @brief Called by the powerplant to build and setup the RobotLocalisation reactor.</span></div>
+<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;<span class="comment"></span>        <span class="keyword">explicit</span> <a class="code" href="classmodule_1_1localisation_1_1RobotLocalisation.html#af046bea223f24f0d09055cc54bfd6d77">RobotLocalisation</a>(std::unique_ptr&lt;NUClear::Environment&gt; environment);</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="comment"></span> </div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;<span class="comment">        /// @brief Tests if this robot measurement is associated with a tracked robot or if it is a new robot</span></div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;<span class="comment">        /// @param vision_robot The robot detection from the vision system</span></div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;<span class="comment"></span>        <span class="keywordtype">void</span> <a class="code" href="classmodule_1_1localisation_1_1RobotLocalisation.html#a4851e95a87c7372db55791c797858f37">data_association</a>(<span class="keyword">const</span> Eigen::Vector3d&amp; rRWw);</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    };</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160; </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;}  <span class="comment">// namespace module::localisation</span></div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160; </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// MODULE_LOCALISATION_ROBOTLOCALISATION_HPP</span></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1RobotLocalisation_html"><div class="ttname"><a href="classmodule_1_1localisation_1_1RobotLocalisation.html">module::localisation::RobotLocalisation</a></div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:12</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1RobotLocalisation_html_a4851e95a87c7372db55791c797858f37"><div class="ttname"><a href="classmodule_1_1localisation_1_1RobotLocalisation.html#a4851e95a87c7372db55791c797858f37">module::localisation::RobotLocalisation::data_association</a></div><div class="ttdeci">void data_association(const Eigen::Vector3d &amp;rRWw)</div><div class="ttdoc">Tests if this robot measurement is associated with a tracked robot or if it is a new robot.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.cpp:131</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1RobotLocalisation_html_aab06b0696a61ce1f8895bacf35d82bde"><div class="ttname"><a href="classmodule_1_1localisation_1_1RobotLocalisation.html#aab06b0696a61ce1f8895bacf35d82bde">module::localisation::RobotLocalisation::next_id</a></div><div class="ttdeci">unsigned long next_id</div><div class="ttdoc">The next id to assign to a robot This variable will increase by one each time a new robot is added As...</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:76</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1RobotLocalisation_html_ad38e2ef06617a1ec28699f7131ec589e"><div class="ttname"><a href="classmodule_1_1localisation_1_1RobotLocalisation.html#ad38e2ef06617a1ec28699f7131ec589e">module::localisation::RobotLocalisation::tracked_robots</a></div><div class="ttdeci">std::vector&lt; TrackedRobot &gt; tracked_robots</div><div class="ttdoc">List of tracked robots.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:71</div></div>
+<div class="ttc" id="aclassmodule_1_1localisation_1_1RobotLocalisation_html_af046bea223f24f0d09055cc54bfd6d77"><div class="ttname"><a href="classmodule_1_1localisation_1_1RobotLocalisation.html#af046bea223f24f0d09055cc54bfd6d77">module::localisation::RobotLocalisation::RobotLocalisation</a></div><div class="ttdeci">RobotLocalisation(std::unique_ptr&lt; NUClear::Environment &gt; environment)</div><div class="ttdoc">Called by the powerplant to build and setup the RobotLocalisation reactor.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.cpp:31</div></div>
+<div class="ttc" id="aclassutility_1_1math_1_1filter_1_1UKF_html"><div class="ttname"><a href="classutility_1_1math_1_1filter_1_1UKF.html">utility::math::filter::UKF</a></div><div class="ttdef"><b>Definition:</b> UKF.hpp:39</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1InitialCovariance.html">module::localisation::RobotLocalisation::Config::UKF::InitialCovariance</a></div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:26</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Measurement.html">module::localisation::RobotLocalisation::Config::UKF::Noise::Measurement</a></div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:18</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_1_1Process.html">module::localisation::RobotLocalisation::Config::UKF::Noise::Process</a></div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:21</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_1_1Noise.html">module::localisation::RobotLocalisation::Config::UKF::Noise</a></div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:17</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config_1_1UKF.html">module::localisation::RobotLocalisation::Config::UKF</a></div><div class="ttdoc">UKF config.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:16</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html">module::localisation::RobotLocalisation::Config</a></div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:14</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_html_aa7fe138e00442bdbd062a1dd9e494ea1"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#aa7fe138e00442bdbd062a1dd9e494ea1">module::localisation::RobotLocalisation::Config::association_distance</a></div><div class="ttdeci">double association_distance</div><div class="ttdoc">The maximum distance a measurement or other robot can be from another robot to be associated.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:33</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1Config_html_af27c4782b650b9c0f48bf214a447a1b9"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#af27c4782b650b9c0f48bf214a447a1b9">module::localisation::RobotLocalisation::Config::max_missed_count</a></div><div class="ttdeci">int max_missed_count</div><div class="ttdoc">The maximum number of times a robot can be missed consecutively before it is removed.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:36</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html">module::localisation::RobotLocalisation::TrackedRobot</a></div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:40</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot_html_a15f1b519be15ec304c3b262356627f76"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a15f1b519be15ec304c3b262356627f76">module::localisation::RobotLocalisation::TrackedRobot::ukf</a></div><div class="ttdeci">utility::math::filter::UKF&lt; double, RobotModel &gt; ukf</div><div class="ttdoc">Unscented Kalman Filter for this robot.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:44</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot_html_a300e5fbc842cfdc2b57439f4486b10d8"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a300e5fbc842cfdc2b57439f4486b10d8">module::localisation::RobotLocalisation::TrackedRobot::missed_count</a></div><div class="ttdeci">long missed_count</div><div class="ttdoc">The number of times the robot has been undetected in a row.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:48</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot_html_a6a3a946b37374b045096ae00f6683db7"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a3a946b37374b045096ae00f6683db7">module::localisation::RobotLocalisation::TrackedRobot::TrackedRobot</a></div><div class="ttdeci">TrackedRobot(const Eigen::Vector3d &amp;initial_rRWw, const Config::UKF &amp;cfg_ukf, const unsigned long next_id)</div><div class="ttdoc">Constructor that sets the state for the UKF.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:53</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot_html_a6a426ffc5eaeecb31002d3794c404eef"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#a6a426ffc5eaeecb31002d3794c404eef">module::localisation::RobotLocalisation::TrackedRobot::last_time_update</a></div><div class="ttdeci">NUClear::clock::time_point last_time_update</div><div class="ttdoc">Time of the last time update.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:42</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot_html_aba1bf61f3c2e9f27bbd265886cf2b1d9"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#aba1bf61f3c2e9f27bbd265886cf2b1d9">module::localisation::RobotLocalisation::TrackedRobot::id</a></div><div class="ttdeci">const unsigned long id</div><div class="ttdoc">A unique identifier for the robot.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:50</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot_html_abbd5ead6444a9e92181221310ec2a17e"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotLocalisation_1_1TrackedRobot.html#abbd5ead6444a9e92181221310ec2a17e">module::localisation::RobotLocalisation::TrackedRobot::seen</a></div><div class="ttdeci">bool seen</div><div class="ttdoc">Whether the robot was and should have been seen in the last vision update.</div><div class="ttdef"><b>Definition:</b> RobotLocalisation.hpp:46</div></div>
+<div class="ttc" id="astructmodule_1_1localisation_1_1RobotModel_1_1StateVec_html"><div class="ttname"><a href="structmodule_1_1localisation_1_1RobotModel_1_1StateVec.html">module::localisation::RobotModel::StateVec</a></div><div class="ttdef"><b>Definition:</b> RobotModel.hpp:42</div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_033e104c2ead1f4a62ad583bb66b5a18.html">localisation</a></li><li class="navelem"><a class="el" href="dir_b3ffdd9320e663653ad1654062606248.html">RobotLocalisation</a></li><li class="navelem"><a class="el" href="dir_82baf46403b541c91d7597b40b8262f1.html">src</a></li><li class="navelem"><b>RobotLocalisation.hpp</b></li>
+    <li class="footer">Generated on Sun Apr 21 2024 07:59:33 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

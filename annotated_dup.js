@@ -124,13 +124,16 @@ var annotated_dup =
       ] ],
       [ "localisation", null, [
         [ "MeasurementType", null, [
-          [ "BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ]
+          [ "BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ],
+          [ "ROBOT_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1ROBOT__POSITION.html", null ]
         ] ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
         [ "FieldModel", "classmodule_1_1localisation_1_1FieldModel.html", "classmodule_1_1localisation_1_1FieldModel" ],
         [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
+        [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html", "classmodule_1_1localisation_1_1RobotLocalisation" ],
+        [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ]
       ] ],
       [ "motion", null, [

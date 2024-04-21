@@ -250,17 +250,24 @@ var namespaces_dup =
       ] ],
       [ "localisation", null, [
         [ "MeasurementType", null, [
-          [ "BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ]
+          [ "BALL_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1BALL__POSITION.html", null ],
+          [ "ROBOT_POSITION", "structmodule_1_1localisation_1_1MeasurementType_1_1ROBOT__POSITION.html", null ]
         ] ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
         [ "FieldModel", "classmodule_1_1localisation_1_1FieldModel.html", "classmodule_1_1localisation_1_1FieldModel" ],
         [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
+        [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html", "classmodule_1_1localisation_1_1RobotLocalisation" ],
+        [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ],
         [ "Ball", "BallLocalisation_8cpp.html#a166ffc812dedb579bbb1dcbf0c921d8a", null ],
+        [ "LocalisationRobot", "RobotLocalisation_8cpp.html#a7137bee73270988498c35b99c9007c44", null ],
+        [ "LocalisationRobots", "RobotLocalisation_8cpp.html#aba13498fd60767a1850e1db2aaf87ed7", null ],
         [ "VisionBall", "BallLocalisation_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
-        [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ]
+        [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ],
+        [ "VisionRobot", "RobotLocalisation_8cpp.html#a3f0996cc36d1916267841766556b79fb", null ],
+        [ "VisionRobots", "RobotLocalisation_8cpp.html#a3227cfc5a27f79496dff606608bccaa0", null ]
       ] ],
       [ "motion", null, [
         [ "Animator", "classmodule_1_1motion_1_1Animator.html", "classmodule_1_1motion_1_1Animator" ],
