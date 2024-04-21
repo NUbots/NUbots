@@ -8,15 +8,12 @@ scripts:
     - "StandUpFront.yaml"
     - "Stand.yaml"
   getup_back:
-    - "RollOverBack.yaml"
-    - "StandUpFront.yaml"
+    - "StandUpBack.yaml"
     - "Stand.yaml"
   getup_left:
-    - "RollLeft.yaml"
     - "StandUpFront.yaml"
     - "Stand.yaml"
   getup_right:
-    - "RollRight.yaml"
     - "StandUpFront.yaml"
     - "Stand.yaml"
   # We run relax when we are upside down
