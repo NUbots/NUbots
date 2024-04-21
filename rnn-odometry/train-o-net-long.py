@@ -158,8 +158,11 @@ def main():
     # Smooth targets using gaussian filter
     truth_long_smoothed = gaussian_smooth(truth_long, 50)
     truth_long_2_smoothed = gaussian_smooth(truth_long_2, 50)
-    truth_long_3_smoothed = gaussian_smooth(truth_long_2, 50)
-    truth_long_4_smoothed = gaussian_smooth(truth_long_2, 50)
+    truth_long_3_smoothed = gaussian_smooth(truth_long_3, 50)
+    truth_long_4_smoothed = gaussian_smooth(truth_long_4, 50)
+
+    # print("truth 1: ", truth_long.shape)
+    # print("Smoothed truth 1: ", truth_long_smoothed.shape)
 
     # Plot and inspect
     # num_channels = truth_long.shape[1]
@@ -177,7 +180,12 @@ def main():
     # join separate arrays
     imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3, imu_long_4], axis=0)
     servos_joined = np.concatenate([servos_long, servos_long_2, servos_long_3, servos_long_4], axis=0)
-    truth_joined = np.concatenate([truth_long_smoothed , truth_long_2_smoothed , truth_long_3_smoothed , truth_long_4_smoothed ], axis=0)
+    truth_joined = np.concatenate([truth_long_smoothed, truth_long_2_smoothed, truth_long_3_smoothed, truth_long_4_smoothed], axis=0)
+
+    # debugs
+    print("imu_joined: ", imu_joined.shape)
+    print("servos_joined: ",servos_joined.shape)
+    print("truth_joined: ",truth_joined.shape)
 
     # Join the data
     joined_data = np.concatenate([imu_joined, servos_joined, truth_joined], axis=1)
@@ -396,7 +404,7 @@ def main():
     # # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
     # # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
 
-    # # Model Layers
+    # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.4)(inputs)
     lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00005, l2=0.0009), return_sequences=False)(dropout)    # 32 originally
@@ -415,7 +423,7 @@ def main():
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
     # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
-    dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout1)
+    dense1 = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout1)
     dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
