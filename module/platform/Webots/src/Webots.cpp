@@ -132,97 +132,52 @@ namespace module::platform {
         throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
     }
 
-    [[nodiscard]] std::string translate_id_servo(const uint32_t& id) {
-        switch (id) {
-            case 0: return "right_shoulder_pitch [shoulder]";
-            case 1: return "left_shoulder_pitch [shoulder]";
-            case 2: return "right_shoulder_roll";
-            case 3: return "left_shoulder_roll";
-            case 4: return "right_elbow_pitch";
-            case 5: return "left_elbow_pitch";
-            case 6: return "right_hip_yaw";
-            case 7: return "left_hip_yaw";
-            case 8: return "right_hip_roll [hip]";
-            case 9: return "left_hip_roll [hip]";
-            case 10: return "right_hip_pitch";
-            case 11: return "left_hip_pitch";
-            case 12: return "right_knee_pitch";
-            case 13: return "left_knee_pitch";
-            case 14: return "right_ankle_pitch";
-            case 15: return "left_ankle_pitch";
-            case 16: return "right_ankle_roll";
-            case 17: return "left_ankle_roll";
-            case 18: return "neck_yaw";
-            case 19: return "head_pitch";
-        }
+    // Joint id to joint name map
+    std::map<uint32_t, std::string> id_to_joint_name = {{0, "right_shoulder_pitch [shoulder]"},
+                                                        {1, "left_shoulder_pitch [shoulder]"},
+                                                        {2, "right_shoulder_roll"},
+                                                        {3, "left_shoulder_roll"},
+                                                        {4, "right_elbow_pitch"},
+                                                        {5, "left_elbow_pitch"},
+                                                        {6, "right_hip_yaw"},
+                                                        {7, "left_hip_yaw"},
+                                                        {8, "right_hip_roll [hip]"},
+                                                        {9, "left_hip_roll [hip]"},
+                                                        {10, "right_hip_pitch"},
+                                                        {11, "left_hip_pitch"},
+                                                        {12, "right_knee_pitch"},
+                                                        {13, "left_knee_pitch"},
+                                                        {14, "right_ankle_pitch"},
+                                                        {15, "left_ankle_pitch"},
+                                                        {16, "right_ankle_roll"},
+                                                        {17, "left_ankle_roll"},
+                                                        {18, "neck_yaw"},
+                                                        {19, "head_pitch"}};
 
-        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo id: {}", id));
-    }
 
-    [[nodiscard]] uint32_t translate_name_to_id(const std::string& name) {
-        if (name == "right_shoulder_pitch_sensor") {
-            return 0;
-        }
-        if (name == "left_shoulder_pitch_sensor") {
-            return 1;
-        }
-        if (name == "right_shoulder_roll_sensor") {
-            return 2;
-        }
-        if (name == "left_shoulder_roll_sensor") {
-            return 3;
-        }
-        if (name == "right_elbow_pitch_sensor") {
-            return 4;
-        }
-        if (name == "left_elbow_pitch_sensor") {
-            return 5;
-        }
-        if (name == "right_hip_yaw_sensor") {
-            return 6;
-        }
-        if (name == "left_hip_yaw_sensor") {
-            return 7;
-        }
-        if (name == "right_hip_roll_sensor") {
-            return 8;
-        }
-        if (name == "left_hip_roll_sensor") {
-            return 9;
-        }
-        if (name == "right_hip_pitch_sensor") {
-            return 10;
-        }
-        if (name == "left_hip_pitch_sensor") {
-            return 11;
-        }
-        if (name == "right_knee_pitch_sensor") {
-            return 12;
-        }
-        if (name == "left_knee_pitch_sensor") {
-            return 13;
-        }
-        if (name == "right_ankle_pitch_sensor") {
-            return 14;
-        }
-        if (name == "left_ankle_pitch_sensor") {
-            return 15;
-        }
-        if (name == "right_ankle_roll_sensor") {
-            return 16;
-        }
-        if (name == "left_ankle_roll_sensor") {
-            return 17;
-        }
-        if (name == "neck_yaw_sensor") {
-            return 18;
-        }
-        if (name == "head_pitch_sensor") {
-            return 19;
-        }
-
-        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo name: {}", name));
-    }
+    // Sensor name to joint id map
+    std::map<std::string, uint32_t> sensor_name_to_id = {
+        {"right_shoulder_pitch_sensor", 0},
+        {"left_shoulder_pitch_sensor", 1},
+        {"right_shoulder_roll_sensor", 2},
+        {"left_shoulder_roll_sensor", 3},
+        {"right_elbow_pitch_sensor", 4},
+        {"left_elbow_pitch_sensor", 5},
+        {"right_hip_yaw_sensor", 6},
+        {"left_hip_yaw_sensor", 7},
+        {"right_hip_roll_sensor", 8},
+        {"left_hip_roll_sensor", 9},
+        {"right_hip_pitch_sensor", 10},
+        {"left_hip_pitch_sensor", 11},
+        {"right_knee_pitch_sensor", 12},
+        {"left_knee_pitch_sensor", 13},
+        {"right_ankle_pitch_sensor", 14},
+        {"left_ankle_pitch_sensor", 15},
+        {"right_ankle_roll_sensor", 16},
+        {"left_ankle_roll_sensor", 17},
+        {"neck_yaw_sensor", 18},
+        {"head_pitch_sensor", 19},
+    };
 
     [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
                                                             const uint32_t& camera_timestep) {
@@ -446,7 +401,7 @@ namespace module::platform {
 
                     servo_state[target.id].dirty = true;
                     servo_state[target.id].id    = target.id;
-                    servo_state[target.id].name  = translate_id_servo(target.id);
+                    servo_state[target.id].name  = id_to_joint_name[target.id];
 
                     servo_state[target.id].p_gain = target.gain;
                     // `i` and `d` gains are always 0
@@ -896,7 +851,7 @@ namespace module::platform {
             for (const auto& position : sensor_measurements.position_sensors) {
                 auto& servo            = translate_servo_id(position.name, sensor_data->servo);
                 servo.present_position = position.value;
-                servo.goal_position    = servo_state[translate_name_to_id(position.name)].goal_position;
+                servo.goal_position    = servo_state[sensor_name_to_id[position.name]].goal_position;
             }
 
             if (!sensor_measurements.accelerometers.empty()) {
