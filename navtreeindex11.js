@@ -1,9 +1,5 @@
 var NAVTREEINDEX11 =
 {
-"structmodule_1_1extension_1_1Director_1_1OkSolution.html#afc350a20b0e2f55c952858806b25734e":[2,0,3,1,1,0,1],
-"structmodule_1_1extension_1_1Director_1_1RunResult.html":[2,0,3,1,1,1],
-"structmodule_1_1extension_1_1Director_1_1RunResult.html#a5e59292fbed41dc9505bf11df836dfdf":[2,0,3,1,1,1,1],
-"structmodule_1_1extension_1_1Director_1_1RunResult.html#af7b01fbfcc80e9878ad8e637c9888b28":[2,0,3,1,1,1,0],
 "structmodule_1_1extension_1_1Director_1_1Solution.html":[2,0,3,1,1,2],
 "structmodule_1_1extension_1_1Director_1_1Solution.html#a6ba12a246a29d9cf9b130879de902bef":[2,0,3,1,1,2,2],
 "structmodule_1_1extension_1_1Director_1_1Solution.html#abcff273d3b8e0e7613c512a6444f5609":[2,0,3,1,1,2,1],
@@ -249,5 +245,9 @@ var NAVTREEINDEX11 =
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html#afaf910cd23cb0d3a22cba3ea0ffe7c9a":[2,0,3,2,27,0,0,1],
 "structmodule_1_1input_1_1SettingsFunctions.html":[2,0,3,2,28],
 "structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html":[2,0,3,2,29],
-"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a59a3f3a77c2d564d898386f0d56b170f":[2,0,3,2,29,3]
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a59a3f3a77c2d564d898386f0d56b170f":[2,0,3,2,29,3],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a6ddac61550fb83583267be431f80fc63":[2,0,3,2,29,1],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a7db602e5ffe547bab8cb8ebc9384ff91":[2,0,3,2,29,0],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcBoolean_01_4.html#a7e80a5e9928a980dee712a0ecbbc08e8":[2,0,3,2,29,2],
+"structmodule_1_1input_1_1SettingsFunctions_3_01ArvGcEnumeration_01_4.html":[2,0,3,2,30]
 };

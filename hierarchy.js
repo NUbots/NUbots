@@ -430,6 +430,7 @@ var hierarchy =
       [ "utility::reactor::StreamReactor< T, Parser, TimeoutTicks, TimeoutPeriod >::NUClearArgs< U >", "structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html", null ]
     ] ],
     [ "Timer", "classTimer.html", null ],
+    [ "utility::motion::splines::Trajectory< double >", "classutility_1_1motion_1_1splines_1_1Trajectory.html", null ],
     [ "Trigger", null, [
       [ "utility::reactor::StreamReactor< T, Parser, TimeoutTicks, TimeoutPeriod >::NUClearArgs< Reconnect >", "structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html", null ],
       [ "utility::reactor::StreamReactor< T, Parser, TimeoutTicks, TimeoutPeriod >::NUClearArgs< TransmitData >", "structutility_1_1reactor_1_1StreamReactor_1_1NUClearArgs.html", null ],
@@ -512,7 +513,7 @@ var hierarchy =
     [ "utility::skill::Script< Sequence >", "structutility_1_1skill_1_1Script.html", null ],
     [ "utility::skill::ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", null ],
     [ "utility::skill::WalkGenerator< Scalar >", "classutility_1_1skill_1_1WalkGenerator.html", null ],
-    [ "utility::skill::WalkGeneratorOptions< Scalar >", "structutility_1_1skill_1_1WalkGeneratorOptions.html", null ],
+    [ "utility::skill::WalkGenerator< Scalar >::WalkParameters", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html", null ],
     [ "utility::skill::WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", null ],
     [ "utility::strutil::ANSISGR< First, Codes >", "structutility_1_1strutil_1_1ANSISGR.html", null ],
     [ "utility::strutil::ANSISGR< First, Codes >::Apply", "structutility_1_1strutil_1_1ANSISGR_1_1Apply.html", null ],

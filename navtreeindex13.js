@@ -1,9 +1,5 @@
 var NAVTREEINDEX13 =
 {
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a878a3b35853f80d23f34fe20d907b61f":[2,0,3,6,0,1,1,0,6,3],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a99b0d66d5d227c5b739c41f89694ac58":[2,0,3,6,0,1,1,0,6,8],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aaf543d6f3fd9f89f58c0b625af5787a7":[2,0,3,6,0,1,1,0,6,11],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#ace872e809ad95d433e8e24bce0032bf8":[2,0,3,6,0,1,1,0,6,4],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aedae29c5b347dfcb84afeafbf4ed4586":[2,0,3,6,0,1,1,0,6,10],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html":[2,0,3,6,0,1,1,0,7],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a349fc4ab373b980cbd8d0ac0e8b43f81":[2,0,3,6,0,1,1,0,7,0],
@@ -249,5 +245,9 @@ var NAVTREEINDEX13 =
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da9f12c9d76841c6b58aa3cd170c49cf16":[2,0,3,8,0,1,0,73],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa0fba18705570b9e2a773b648358ed97":[2,0,3,8,0,1,0,263],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa2a574870d0034232463461bf106bac7":[2,0,3,8,0,1,0,218],
-"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa3ba6f87b2251c157f7bb4e772e31efd":[2,0,3,8,0,1,0,30]
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa3ba6f87b2251c157f7bb4e772e31efd":[2,0,3,8,0,1,0,30],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa3e72656dfd3b37d2ff5e95ce18ff9e0":[2,0,3,8,0,1,0,226],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa453cba319739039e059bf2518b140c3":[2,0,3,8,0,1,0,8],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa49b26e5a8cbb5e66f9fa39677222ef9":[2,0,3,8,0,1,0,172],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227daa596d771e004ab86fbb7c0b40abc8860":[2,0,3,8,0,1,0,55]
 };

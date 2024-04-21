@@ -1,8 +1,5 @@
 var NAVTREEINDEX16 =
 {
-"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a028525e6443f1a46956b4154b74770d7":[2,0,7,3,0,0,16],
-"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a09050b7016f0cecfef5e22a278f8a240":[2,0,7,3,0,0,18],
-"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a0dc773a439c2c41c13ec75fce5503a93":[2,0,7,3,0,0,19],
 "structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a0fa3f93d007cee33dc611b64f221434f":[2,0,7,3,0,0,4],
 "structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a21858d9b78c078f851f4db1264d88ead":[2,0,7,3,0,0,8],
 "structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a2ed76fc0e23968239a1ddf405ae7ee6a":[2,0,7,3,0,0,13],
@@ -249,5 +246,8 @@ var NAVTREEINDEX16 =
 "structutility_1_1nbs_1_1IndexItem.html#acfdcaa7eb0338f61db8f2614b33961fb":[2,0,7,7,3,1],
 "structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html":[2,0,7,8,0,0],
 "structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html#a03d3144acb01a313f9cd060651be861b":[2,0,7,8,0,0,0],
-"structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html#a7d11bd42a9af1068c964d6dc1cde5de2":[2,0,7,8,0,0,2]
+"structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html#a7d11bd42a9af1068c964d6dc1cde5de2":[2,0,7,8,0,0,2],
+"structutility_1_1reactor_1_1StreamReactor_1_1ConnectSerial.html#acc4bce04f5ebc903ff321b6fa4b60d80":[2,0,7,8,0,0,1],
+"structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html":[2,0,7,8,0,1],
+"structutility_1_1reactor_1_1StreamReactor_1_1ConnectTCP.html#a4c55ce72cc118fe4de47658ad7c1fb15":[2,0,7,8,0,1,0]
 };

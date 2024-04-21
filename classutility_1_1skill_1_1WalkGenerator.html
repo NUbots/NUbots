@@ -167,6 +167,8 @@ $(document).ready(function(){initNavTree('classutility_1_1skill_1_1WalkGenerator
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
@@ -175,30 +177,56 @@ $(document).ready(function(){initNavTree('classutility_1_1skill_1_1WalkGenerator
 <div class="title">utility::skill::WalkGenerator&lt; Scalar &gt; Class Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+<div class="dynheader">
+Collaboration diagram for utility::skill::WalkGenerator&lt; Scalar &gt;:</div>
+<div class="dyncontent">
+<div class="center"><img src="classutility_1_1skill_1_1WalkGenerator__coll__graph.png" border="0" usemap="#autility_1_1skill_1_1WalkGenerator_3_01Scalar_01_4_coll__map" alt="Collaboration graph"/></div>
+<map name="autility_1_1skill_1_1WalkGenerator_3_01Scalar_01_4_coll__map" id="autility_1_1skill_1_1WalkGenerator_3_01Scalar_01_4_coll__map">
+<area shape="rect" title=" " alt="" coords="9,109,208,151"/>
+<area shape="rect" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html" title=" " alt="" coords="5,5,212,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:ad071f35adbd7687051b46998617ce8fe"><td class="memItemLeft" align="right" valign="top"><a id="ad071f35adbd7687051b46998617ce8fe"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Iso3</b> = Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;</td></tr>
+<tr class="separator:ad071f35adbd7687051b46998617ce8fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa6b41240eb93694a73a9900cfdb0226f"><td class="memItemLeft" align="right" valign="top"><a id="aa6b41240eb93694a73a9900cfdb0226f"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>Vec3</b> = Eigen::Matrix&lt; Scalar, 3, 1 &gt;</td></tr>
+<tr class="separator:aa6b41240eb93694a73a9900cfdb0226f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aa72d43e542afe7e211f5ad0d1f0ccad3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#aa72d43e542afe7e211f5ad0d1f0ccad3">configure</a> (const <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html">WalkGeneratorOptions</a>&lt; Scalar &gt; &amp;options)</td></tr>
-<tr class="memdesc:aa72d43e542afe7e211f5ad0d1f0ccad3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure motion generation options.  <a href="classutility_1_1skill_1_1WalkGenerator.html#aa72d43e542afe7e211f5ad0d1f0ccad3">More...</a><br /></td></tr>
-<tr class="separator:aa72d43e542afe7e211f5ad0d1f0ccad3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a912962aa7e7a1e4d9f64784569eafb38"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a912962aa7e7a1e4d9f64784569eafb38">get_foot_pose</a> (const <a class="el" href="structutility_1_1input_1_1LimbID.html">LimbID</a> &amp;limb) const</td></tr>
-<tr class="memdesc:a912962aa7e7a1e4d9f64784569eafb38"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the left or right foot pose at the given time in the torso {t} frame.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a912962aa7e7a1e4d9f64784569eafb38">More...</a><br /></td></tr>
-<tr class="separator:a912962aa7e7a1e4d9f64784569eafb38"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5dee0f79529dc611ca665ae84dd0c35"><td class="memItemLeft" align="right" valign="top">Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#af5dee0f79529dc611ca665ae84dd0c35">get_foot_pose</a> (const <a class="el" href="structutility_1_1input_1_1LimbID.html">LimbID</a> &amp;limb) const</td></tr>
+<tr class="memdesc:af5dee0f79529dc611ca665ae84dd0c35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the left or right foot pose at the current time in the torso {t} frame.  <a href="classutility_1_1skill_1_1WalkGenerator.html#af5dee0f79529dc611ca665ae84dd0c35">More...</a><br /></td></tr>
+<tr class="separator:af5dee0f79529dc611ca665ae84dd0c35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4a2cf23845d5ccc8550db4b29028447"><td class="memItemLeft" align="right" valign="top">Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ae4a2cf23845d5ccc8550db4b29028447">get_foot_pose</a> (Scalar <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410">t</a>, const <a class="el" href="structutility_1_1input_1_1LimbID.html">LimbID</a> &amp;limb) const</td></tr>
+<tr class="memdesc:ae4a2cf23845d5ccc8550db4b29028447"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the left or right foot pose at the given time in the torso {t} frame.  <a href="classutility_1_1skill_1_1WalkGenerator.html#ae4a2cf23845d5ccc8550db4b29028447">More...</a><br /></td></tr>
+<tr class="separator:ae4a2cf23845d5ccc8550db4b29028447"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd7f26d8f7eada562239f7f92f5b70ab"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#acd7f26d8f7eada562239f7f92f5b70ab">get_parameters</a> () const</td></tr>
+<tr class="memdesc:acd7f26d8f7eada562239f7f92f5b70ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the <a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a>.  <a href="classutility_1_1skill_1_1WalkGenerator.html#acd7f26d8f7eada562239f7f92f5b70ab">More...</a><br /></td></tr>
+<tr class="separator:acd7f26d8f7eada562239f7f92f5b70ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0a9662552bcfec8fc609503bd86f2942"><td class="memItemLeft" align="right" valign="top">WalkState::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a0a9662552bcfec8fc609503bd86f2942">get_state</a> () const</td></tr>
 <tr class="memdesc:a0a9662552bcfec8fc609503bd86f2942"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the current state of the walk engine.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a0a9662552bcfec8fc609503bd86f2942">More...</a><br /></td></tr>
 <tr class="separator:a0a9662552bcfec8fc609503bd86f2942"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a83a98342f79e3f6ab229894fbd7670ec"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a83a98342f79e3f6ab229894fbd7670ec">get_swing_foot_pose</a> () const</td></tr>
-<tr class="memdesc:a83a98342f79e3f6ab229894fbd7670ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the swing foot pose at the current time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a83a98342f79e3f6ab229894fbd7670ec">More...</a><br /></td></tr>
-<tr class="separator:a83a98342f79e3f6ab229894fbd7670ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4680a334b76a7a0114f0903d886dae59"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a4680a334b76a7a0114f0903d886dae59">get_swing_foot_pose</a> (Scalar <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410">t</a>) const</td></tr>
-<tr class="memdesc:a4680a334b76a7a0114f0903d886dae59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the swing foot pose at the given time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a4680a334b76a7a0114f0903d886dae59">More...</a><br /></td></tr>
-<tr class="separator:a4680a334b76a7a0114f0903d886dae59"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a59bd3e34eea270ebdf84baa12ca4b7f1"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a59bd3e34eea270ebdf84baa12ca4b7f1">get_torso_pose</a> () const</td></tr>
-<tr class="memdesc:a59bd3e34eea270ebdf84baa12ca4b7f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the torso pose object at the current time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a59bd3e34eea270ebdf84baa12ca4b7f1">More...</a><br /></td></tr>
-<tr class="separator:a59bd3e34eea270ebdf84baa12ca4b7f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad441e97b35fcfbb975d35762e030f3b0"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ad441e97b35fcfbb975d35762e030f3b0">get_torso_pose</a> (Scalar <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410">t</a>) const</td></tr>
-<tr class="memdesc:ad441e97b35fcfbb975d35762e030f3b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the torso pose object at the given time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#ad441e97b35fcfbb975d35762e030f3b0">More...</a><br /></td></tr>
-<tr class="separator:ad441e97b35fcfbb975d35762e030f3b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5090024ceeb8df8ad9f23b3f2e53a5f9"><td class="memItemLeft" align="right" valign="top">Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a5090024ceeb8df8ad9f23b3f2e53a5f9">get_swing_foot_pose</a> () const</td></tr>
+<tr class="memdesc:a5090024ceeb8df8ad9f23b3f2e53a5f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the swing foot (Hps) pose at the current time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a5090024ceeb8df8ad9f23b3f2e53a5f9">More...</a><br /></td></tr>
+<tr class="separator:a5090024ceeb8df8ad9f23b3f2e53a5f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a619111a6b275259e3a66873f72771a6c"><td class="memItemLeft" align="right" valign="top">Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a619111a6b275259e3a66873f72771a6c">get_swing_foot_pose</a> (Scalar <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410">t</a>) const</td></tr>
+<tr class="memdesc:a619111a6b275259e3a66873f72771a6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the swing foot (Hps) pose at the given time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a619111a6b275259e3a66873f72771a6c">More...</a><br /></td></tr>
+<tr class="separator:a619111a6b275259e3a66873f72771a6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8229901752ee039de0c6281f4d0b3cad"><td class="memItemLeft" align="right" valign="top">Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a8229901752ee039de0c6281f4d0b3cad">get_torso_pose</a> () const</td></tr>
+<tr class="memdesc:a8229901752ee039de0c6281f4d0b3cad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the torso pose (Hpt) object at the current time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a8229901752ee039de0c6281f4d0b3cad">More...</a><br /></td></tr>
+<tr class="separator:a8229901752ee039de0c6281f4d0b3cad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae47a916707d4792fbd52ab62b7819c93"><td class="memItemLeft" align="right" valign="top">Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ae47a916707d4792fbd52ab62b7819c93">get_torso_pose</a> (Scalar <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410">t</a>) const</td></tr>
+<tr class="memdesc:ae47a916707d4792fbd52ab62b7819c93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the torso pose (Hpt) object at the given time.  <a href="classutility_1_1skill_1_1WalkGenerator.html#ae47a916707d4792fbd52ab62b7819c93">More...</a><br /></td></tr>
+<tr class="separator:ae47a916707d4792fbd52ab62b7819c93"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e46446b6c0398a0be01a53da023882a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a4e46446b6c0398a0be01a53da023882a">is_left_foot_planted</a> () const</td></tr>
 <tr class="memdesc:a4e46446b6c0398a0be01a53da023882a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get whether or not the left foot is planted.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a4e46446b6c0398a0be01a53da023882a">More...</a><br /></td></tr>
 <tr class="separator:a4e46446b6c0398a0be01a53da023882a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,15 +234,24 @@ Public Member Functions</h2></td></tr>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ad8ad2da1eeeae5b00f87eb1b3b06a641">reset</a> ()</td></tr>
 <tr class="memdesc:ad8ad2da1eeeae5b00f87eb1b3b06a641"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reset walk engine time and initial poses. <br /></td></tr>
 <tr class="separator:ad8ad2da1eeeae5b00f87eb1b3b06a641"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8faeae1a9af29ff6a6f41e971d89bd9"><td class="memItemLeft" align="right" valign="top">WalkState::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ac8faeae1a9af29ff6a6f41e971d89bd9">update</a> (const Scalar &amp;dt, const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;velocity_target)</td></tr>
-<tr class="memdesc:ac8faeae1a9af29ff6a6f41e971d89bd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run an update of the walk engine, updating the time and engine state and trajectories.  <a href="classutility_1_1skill_1_1WalkGenerator.html#ac8faeae1a9af29ff6a6f41e971d89bd9">More...</a><br /></td></tr>
-<tr class="separator:ac8faeae1a9af29ff6a6f41e971d89bd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82745fc952e44ee783fb8b7e0d271a75"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a82745fc952e44ee783fb8b7e0d271a75">set_parameters</a> (const <a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a> &amp;params)</td></tr>
+<tr class="memdesc:a82745fc952e44ee783fb8b7e0d271a75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure motion generation options.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a82745fc952e44ee783fb8b7e0d271a75">More...</a><br /></td></tr>
+<tr class="separator:a82745fc952e44ee783fb8b7e0d271a75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90e0247f2eab6a6058883cd552ca7ab5"><td class="memItemLeft" align="right" valign="top">WalkState::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a90e0247f2eab6a6058883cd552ca7ab5">update</a> (const Scalar &amp;dt, const Vec3 &amp;velocity_target)</td></tr>
+<tr class="memdesc:a90e0247f2eab6a6058883cd552ca7ab5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run an update of the walk engine, updating the time and engine state and trajectories.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a90e0247f2eab6a6058883cd552ca7ab5">More...</a><br /></td></tr>
+<tr class="separator:a90e0247f2eab6a6058883cd552ca7ab5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a95923ba2ff3676ad3fdb275f93a0e0ae"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a95923ba2ff3676ad3fdb275f93a0e0ae">generate_walking_trajectories</a> (const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;velocity_target)</td></tr>
-<tr class="memdesc:a95923ba2ff3676ad3fdb275f93a0e0ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate walking trajectories for the torso and swing foot.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a95923ba2ff3676ad3fdb275f93a0e0ae">More...</a><br /></td></tr>
-<tr class="separator:a95923ba2ff3676ad3fdb275f93a0e0ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c478870afce86d744b6bf49c7ba480f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a4c478870afce86d744b6bf49c7ba480f">generate_swing_foot_trajectory</a> (const Vec3 &amp;step, const Vec3 &amp;velocity_target)</td></tr>
+<tr class="memdesc:a4c478870afce86d744b6bf49c7ba480f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate swing foot trajectory for the current step.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a4c478870afce86d744b6bf49c7ba480f">More...</a><br /></td></tr>
+<tr class="separator:a4c478870afce86d744b6bf49c7ba480f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1fad8838ebc38f9280655f24ca1a664c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a1fad8838ebc38f9280655f24ca1a664c">generate_torso_trajectory</a> (const Vec3 &amp;step, const Vec3 &amp;velocity_target)</td></tr>
+<tr class="memdesc:a1fad8838ebc38f9280655f24ca1a664c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate torso trajectory for the current step.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a1fad8838ebc38f9280655f24ca1a664c">More...</a><br /></td></tr>
+<tr class="separator:a1fad8838ebc38f9280655f24ca1a664c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a66a6f0e7e13ad66efea23a04401b7820"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a66a6f0e7e13ad66efea23a04401b7820">generate_walking_trajectories</a> (const Vec3 &amp;velocity_target)</td></tr>
+<tr class="memdesc:a66a6f0e7e13ad66efea23a04401b7820"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate walking trajectories for the torso and swing foot.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a66a6f0e7e13ad66efea23a04401b7820">More...</a><br /></td></tr>
+<tr class="separator:a66a6f0e7e13ad66efea23a04401b7820"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0cfb789b00c4546d9561ca3f5e1d476"><td class="memItemLeft" align="right" valign="top">Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476">get_foot_width_offset</a> () const</td></tr>
 <tr class="memdesc:aa0cfb789b00c4546d9561ca3f5e1d476"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the lateral distance between feet in current planted foot frame.  <a href="classutility_1_1skill_1_1WalkGenerator.html#aa0cfb789b00c4546d9561ca3f5e1d476">More...</a><br /></td></tr>
 <tr class="separator:aa0cfb789b00c4546d9561ca3f5e1d476"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -231,76 +268,38 @@ Private Attributes</h2></td></tr>
 WalkState::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a74bc403fbcbd75c02e1d671db00f33ae">engine_state</a> = WalkState::State::STOPPED</td></tr>
 <tr class="memdesc:a74bc403fbcbd75c02e1d671db00f33ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current engine state. <br /></td></tr>
 <tr class="separator:a74bc403fbcbd75c02e1d671db00f33ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4d77d1edddbdf2a0d3affb1df0b666a0"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a4d77d1edddbdf2a0d3affb1df0b666a0">Hps_start</a></td></tr>
-<tr class="memdesc:a4d77d1edddbdf2a0d3affb1df0b666a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform from planted {p} foot to swing {s} foot current placement at start of step.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a4d77d1edddbdf2a0d3affb1df0b666a0">More...</a><br /></td></tr>
-<tr class="separator:a4d77d1edddbdf2a0d3affb1df0b666a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a684028c2142bdc93dad10ba7eba4dc4c"><td class="memItemLeft" align="right" valign="top">Eigen::Transform&lt; Scalar, 3, Eigen::Isometry &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a684028c2142bdc93dad10ba7eba4dc4c">Hpt_start</a></td></tr>
-<tr class="memdesc:a684028c2142bdc93dad10ba7eba4dc4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform from planted {p} foot to the torso {t} at start of step.  <a href="classutility_1_1skill_1_1WalkGenerator.html#a684028c2142bdc93dad10ba7eba4dc4c">More...</a><br /></td></tr>
-<tr class="separator:a684028c2142bdc93dad10ba7eba4dc4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab88f060ced6d8d8aa6420e3ada9faeea"><td class="memItemLeft" align="right" valign="top"><a id="ab88f060ced6d8d8aa6420e3ada9faeea"></a>
+Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ab88f060ced6d8d8aa6420e3ada9faeea">Hps_start</a> = Iso3::Identity()</td></tr>
+<tr class="memdesc:ab88f060ced6d8d8aa6420e3ada9faeea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform from planted {p} foot to swing {s} foot current placement at start of step. <br /></td></tr>
+<tr class="separator:ab88f060ced6d8d8aa6420e3ada9faeea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf8bf794c460f2f03f89790501e429c4"><td class="memItemLeft" align="right" valign="top"><a id="aaf8bf794c460f2f03f89790501e429c4"></a>
+Iso3&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#aaf8bf794c460f2f03f89790501e429c4">Hpt_start</a> = Iso3::Identity()</td></tr>
+<tr class="memdesc:aaf8bf794c460f2f03f89790501e429c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform from planted {p} foot to the torso {t} at start of step. <br /></td></tr>
+<tr class="separator:aaf8bf794c460f2f03f89790501e429c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1231bc750ec3cf29c8f4e6f7760b04b"><td class="memItemLeft" align="right" valign="top"><a id="ab1231bc750ec3cf29c8f4e6f7760b04b"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ab1231bc750ec3cf29c8f4e6f7760b04b">left_foot_is_planted</a> = true</td></tr>
 <tr class="memdesc:ab1231bc750ec3cf29c8f4e6f7760b04b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the left foot is planted. <br /></td></tr>
 <tr class="separator:ab1231bc750ec3cf29c8f4e6f7760b04b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a554d82c414e5fb7ed3054635580421b0"><td class="memItemLeft" align="right" valign="top"><a id="a554d82c414e5fb7ed3054635580421b0"></a>
-Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a554d82c414e5fb7ed3054635580421b0">step_apex_ratio</a> = 0.0</td></tr>
-<tr class="memdesc:a554d82c414e5fb7ed3054635580421b0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ratio of the step_period where the swing foot should be at its maximum height, between [0 1]. <br /></td></tr>
-<tr class="separator:a554d82c414e5fb7ed3054635580421b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a293910dbbf5f59ec845e8b238ba77a3c"><td class="memItemLeft" align="right" valign="top"><a id="a293910dbbf5f59ec845e8b238ba77a3c"></a>
-Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a293910dbbf5f59ec845e8b238ba77a3c">step_height</a> = 0.0</td></tr>
-<tr class="memdesc:a293910dbbf5f59ec845e8b238ba77a3c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step height. <br /></td></tr>
-<tr class="separator:a293910dbbf5f59ec845e8b238ba77a3c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2cddea1ab51177e503ab4d134d01e3d3"><td class="memItemLeft" align="right" valign="top"><a id="a2cddea1ab51177e503ab4d134d01e3d3"></a>
-Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a2cddea1ab51177e503ab4d134d01e3d3">step_limits</a> = Eigen::Matrix&lt;Scalar, 3, 1&gt;::Zero()</td></tr>
-<tr class="memdesc:a2cddea1ab51177e503ab4d134d01e3d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maximum step limits in x, y, and theta. <br /></td></tr>
-<tr class="separator:a2cddea1ab51177e503ab4d134d01e3d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66d2d2857dc063fcdfe28a09ed683ea8"><td class="memItemLeft" align="right" valign="top"><a id="a66d2d2857dc063fcdfe28a09ed683ea8"></a>
-Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a66d2d2857dc063fcdfe28a09ed683ea8">step_period</a> = 0.0</td></tr>
-<tr class="memdesc:a66d2d2857dc063fcdfe28a09ed683ea8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Step period (in seconds). Time for one complete step. <br /></td></tr>
-<tr class="separator:a66d2d2857dc063fcdfe28a09ed683ea8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a690826b0069c8ee72ad9ad78ca9352ed"><td class="memItemLeft" align="right" valign="top"><a id="a690826b0069c8ee72ad9ad78ca9352ed"></a>
-Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a690826b0069c8ee72ad9ad78ca9352ed">step_width</a> = 0.0</td></tr>
-<tr class="memdesc:a690826b0069c8ee72ad9ad78ca9352ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lateral distance between feet. (how spread apart the feet should be) <br /></td></tr>
-<tr class="separator:a690826b0069c8ee72ad9ad78ca9352ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7c0d17a50ab3b598c2a8b43db7701098"><td class="memItemLeft" align="right" valign="top"><a id="a7c0d17a50ab3b598c2a8b43db7701098"></a>
-<a class="el" href="classutility_1_1motion_1_1splines_1_1Trajectory.html">Trajectory</a>&lt; Scalar &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a7c0d17a50ab3b598c2a8b43db7701098">swingfoot_trajectory</a> {}</td></tr>
-<tr class="memdesc:a7c0d17a50ab3b598c2a8b43db7701098"><td class="mdescLeft">&#160;</td><td class="mdescRight">6D piecewise polynomial trajectory for swing foot. <br /></td></tr>
-<tr class="separator:a7c0d17a50ab3b598c2a8b43db7701098"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e84d6ae317dd7cb6fde160ea3bf0875"><td class="memItemLeft" align="right" valign="top"><a id="a8e84d6ae317dd7cb6fde160ea3bf0875"></a>
+<a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a8e84d6ae317dd7cb6fde160ea3bf0875">p</a></td></tr>
+<tr class="memdesc:a8e84d6ae317dd7cb6fde160ea3bf0875"><td class="mdescLeft">&#160;</td><td class="mdescRight">Walk engine parameters. <br /></td></tr>
+<tr class="separator:a8e84d6ae317dd7cb6fde160ea3bf0875"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a19d2f815e75ad6be90211968592887cb"><td class="memItemLeft" align="right" valign="top"><a id="a19d2f815e75ad6be90211968592887cb"></a>
+<a class="el" href="classutility_1_1motion_1_1splines_1_1Trajectory.html">Trajectory</a>&lt; Scalar &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a19d2f815e75ad6be90211968592887cb">swing_foot_trajectory</a> {}</td></tr>
+<tr class="memdesc:a19d2f815e75ad6be90211968592887cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">6D piecewise polynomial trajectory for swing foot. <br /></td></tr>
+<tr class="separator:a19d2f815e75ad6be90211968592887cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a107204493239d59494658812a6a0f410"><td class="memItemLeft" align="right" valign="top"><a id="a107204493239d59494658812a6a0f410"></a>
 Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a107204493239d59494658812a6a0f410">t</a> = 0.0</td></tr>
-<tr class="memdesc:a107204493239d59494658812a6a0f410"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current time in the step cycle [0, step_period]. <br /></td></tr>
+<tr class="memdesc:a107204493239d59494658812a6a0f410"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current time in the step cycle [0, p.step_period]. <br /></td></tr>
 <tr class="separator:a107204493239d59494658812a6a0f410"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a9b779b5d6d08b833d6799d5e4f5f6e"><td class="memItemLeft" align="right" valign="top"><a id="a4a9b779b5d6d08b833d6799d5e4f5f6e"></a>
-Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a4a9b779b5d6d08b833d6799d5e4f5f6e">torso_final_position_ratio</a> = Eigen::Matrix&lt;Scalar, 3, 1&gt;::Zero()</td></tr>
-<tr class="memdesc:a4a9b779b5d6d08b833d6799d5e4f5f6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ratio of where to position the torso relative to the next step position [x,y] (in meters) <br /></td></tr>
-<tr class="separator:a4a9b779b5d6d08b833d6799d5e4f5f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af1e8b298c244bf5710e4a53faeb94749"><td class="memItemLeft" align="right" valign="top"><a id="af1e8b298c244bf5710e4a53faeb94749"></a>
-Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#af1e8b298c244bf5710e4a53faeb94749">torso_height</a> = 0.0</td></tr>
-<tr class="memdesc:af1e8b298c244bf5710e4a53faeb94749"><td class="mdescLeft">&#160;</td><td class="mdescRight">Torso height. <br /></td></tr>
-<tr class="separator:af1e8b298c244bf5710e4a53faeb94749"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a468826eac375a5e94f6b8c6b3a882eda"><td class="memItemLeft" align="right" valign="top"><a id="a468826eac375a5e94f6b8c6b3a882eda"></a>
-Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a468826eac375a5e94f6b8c6b3a882eda">torso_pitch</a> = 0.0</td></tr>
-<tr class="memdesc:a468826eac375a5e94f6b8c6b3a882eda"><td class="mdescLeft">&#160;</td><td class="mdescRight">Torso pitch. <br /></td></tr>
-<tr class="separator:a468826eac375a5e94f6b8c6b3a882eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9d5b4a4f249bde88349289d3e53b777"><td class="memItemLeft" align="right" valign="top"><a id="ab9d5b4a4f249bde88349289d3e53b777"></a>
-Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#ab9d5b4a4f249bde88349289d3e53b777">torso_position_offset</a> = Eigen::Matrix&lt;Scalar, 3, 1&gt;::Zero()</td></tr>
-<tr class="memdesc:ab9d5b4a4f249bde88349289d3e53b777"><td class="mdescLeft">&#160;</td><td class="mdescRight">Torso constant position offset [x,y,z] (in meters) <br /></td></tr>
-<tr class="separator:ab9d5b4a4f249bde88349289d3e53b777"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a851daf84b801e7794ae9f2aadbe62c09"><td class="memItemLeft" align="right" valign="top"><a id="a851daf84b801e7794ae9f2aadbe62c09"></a>
-Eigen::Matrix&lt; Scalar, 3, 1 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#a851daf84b801e7794ae9f2aadbe62c09">torso_sway_offset</a> = Eigen::Matrix&lt;Scalar, 3, 1&gt;::Zero()</td></tr>
-<tr class="memdesc:a851daf84b801e7794ae9f2aadbe62c09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Torso offset at half step period from the planted foot, at time = step_apex_ratio * step_period. <br /></td></tr>
-<tr class="separator:a851daf84b801e7794ae9f2aadbe62c09"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adab66fcd798c318b35cb9e933820eabd"><td class="memItemLeft" align="right" valign="top"><a id="adab66fcd798c318b35cb9e933820eabd"></a>
-Scalar&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#adab66fcd798c318b35cb9e933820eabd">torso_sway_ratio</a> = 0.0</td></tr>
-<tr class="memdesc:adab66fcd798c318b35cb9e933820eabd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ratio of the step_period where the torso should be at its maximum sway, between [0 1]. <br /></td></tr>
-<tr class="separator:adab66fcd798c318b35cb9e933820eabd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2d39521a2eb7b71ededc319f688f4fc"><td class="memItemLeft" align="right" valign="top"><a id="af2d39521a2eb7b71ededc319f688f4fc"></a>
 <a class="el" href="classutility_1_1motion_1_1splines_1_1Trajectory.html">Trajectory</a>&lt; Scalar &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html#af2d39521a2eb7b71ededc319f688f4fc">torso_trajectory</a> {}</td></tr>
 <tr class="memdesc:af2d39521a2eb7b71ededc319f688f4fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">6D piecewise polynomial trajectory for torso. <br /></td></tr>
 <tr class="separator:af2d39521a2eb7b71ededc319f688f4fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="aa72d43e542afe7e211f5ad0d1f0ccad3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa72d43e542afe7e211f5ad0d1f0ccad3">&#9670;&nbsp;</a></span>configure()</h2>
+<a id="a4c478870afce86d744b6bf49c7ba480f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c478870afce86d744b6bf49c7ba480f">&#9670;&nbsp;</a></span>generate_swing_foot_trajectory()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -311,32 +310,90 @@ template&lt;typename Scalar &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::configure </td>
+          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::generate_swing_foot_trajectory </td>
           <td>(</td>
-          <td class="paramtype">const <a class="el" href="structutility_1_1skill_1_1WalkGeneratorOptions.html">WalkGeneratorOptions</a>&lt; Scalar &gt; &amp;&#160;</td>
-          <td class="paramname"><em>options</em></td><td>)</td>
+          <td class="paramtype">const Vec3 &amp;&#160;</td>
+          <td class="paramname"><em>step</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">const Vec3 &amp;&#160;</td>
+          <td class="paramname"><em>velocity_target</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Configure motion generation options. </p>
+<p>Generate swing foot trajectory for the current step. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">options</td><td>Motion generation options. </td></tr>
+    <tr><td class="paramname">step</td><td>Step placement in the planted foot frame. </td></tr>
+    <tr><td class="paramname">velocity_target</td><td>Requested velocity target (dx, dy, dtheta). </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="a95923ba2ff3676ad3fdb275f93a0e0ae"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a95923ba2ff3676ad3fdb275f93a0e0ae">&#9670;&nbsp;</a></span>generate_walking_trajectories()</h2>
+<a id="a1fad8838ebc38f9280655f24ca1a664c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1fad8838ebc38f9280655f24ca1a664c">&#9670;&nbsp;</a></span>generate_torso_trajectory()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::generate_torso_trajectory </td>
+          <td>(</td>
+          <td class="paramtype">const Vec3 &amp;&#160;</td>
+          <td class="paramname"><em>step</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Vec3 &amp;&#160;</td>
+          <td class="paramname"><em>velocity_target</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Generate torso trajectory for the current step. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">step</td><td>Step placement in the planted foot frame. </td></tr>
+    <tr><td class="paramname">velocity_target</td><td>Requested velocity target (dx, dy, dtheta). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a66a6f0e7e13ad66efea23a04401b7820"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a66a6f0e7e13ad66efea23a04401b7820">&#9670;&nbsp;</a></span>generate_walking_trajectories()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -349,7 +406,7 @@ template&lt;typename Scalar &gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::generate_walking_trajectories </td>
           <td>(</td>
-          <td class="paramtype">const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vec3 &amp;&#160;</td>
           <td class="paramname"><em>velocity_target</em></td><td>)</td>
           <td></td>
         </tr>
@@ -371,8 +428,8 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
-<a id="a912962aa7e7a1e4d9f64784569eafb38"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a912962aa7e7a1e4d9f64784569eafb38">&#9670;&nbsp;</a></span>get_foot_pose()</h2>
+<a id="af5dee0f79529dc611ca665ae84dd0c35"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5dee0f79529dc611ca665ae84dd0c35">&#9670;&nbsp;</a></span>get_foot_pose() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -383,11 +440,58 @@ template&lt;typename Scalar &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_foot_pose </td>
+          <td class="memname">Iso3 <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_foot_pose </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="structutility_1_1input_1_1LimbID.html">LimbID</a> &amp;&#160;</td>
           <td class="paramname"><em>limb</em></td><td>)</td>
           <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the left or right foot pose at the current time in the torso {t} frame. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">limb</td><td>Limb ID of foot to get pose of. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Swing foot pose at time t. </dd></dl>
+
+</div>
+</div>
+<a id="ae4a2cf23845d5ccc8550db4b29028447"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4a2cf23845d5ccc8550db4b29028447">&#9670;&nbsp;</a></span>get_foot_pose() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Iso3 <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_foot_pose </td>
+          <td>(</td>
+          <td class="paramtype">Scalar&#160;</td>
+          <td class="paramname"><em>t</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structutility_1_1input_1_1LimbID.html">LimbID</a> &amp;&#160;</td>
+          <td class="paramname"><em>limb</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
   </td>
@@ -439,6 +543,36 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
+<a id="acd7f26d8f7eada562239f7f92f5b70ab"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd7f26d8f7eada562239f7f92f5b70ab">&#9670;&nbsp;</a></span>get_parameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a> <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_parameters </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Get the <a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a>. </p>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a>. </dd></dl>
+
+</div>
+</div>
 <a id="a0a9662552bcfec8fc609503bd86f2942"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0a9662552bcfec8fc609503bd86f2942">&#9670;&nbsp;</a></span>get_state()</h2>
 
@@ -469,8 +603,8 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
-<a id="a83a98342f79e3f6ab229894fbd7670ec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83a98342f79e3f6ab229894fbd7670ec">&#9670;&nbsp;</a></span>get_swing_foot_pose() <span class="overload">[1/2]</span></h2>
+<a id="a5090024ceeb8df8ad9f23b3f2e53a5f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5090024ceeb8df8ad9f23b3f2e53a5f9">&#9670;&nbsp;</a></span>get_swing_foot_pose() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -481,7 +615,7 @@ template&lt;typename Scalar &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_swing_foot_pose </td>
+          <td class="memname">Iso3 <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_swing_foot_pose </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -494,13 +628,13 @@ template&lt;typename Scalar &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Get the swing foot pose at the current time. </p>
+<p>Get the swing foot (Hps) pose at the current time. </p>
 <dl class="section return"><dt>Returns</dt><dd>Trajectory of torso. </dd></dl>
 
 </div>
 </div>
-<a id="a4680a334b76a7a0114f0903d886dae59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4680a334b76a7a0114f0903d886dae59">&#9670;&nbsp;</a></span>get_swing_foot_pose() <span class="overload">[2/2]</span></h2>
+<a id="a619111a6b275259e3a66873f72771a6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a619111a6b275259e3a66873f72771a6c">&#9670;&nbsp;</a></span>get_swing_foot_pose() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -511,7 +645,7 @@ template&lt;typename Scalar &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_swing_foot_pose </td>
+          <td class="memname">Iso3 <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_swing_foot_pose </td>
           <td>(</td>
           <td class="paramtype">Scalar&#160;</td>
           <td class="paramname"><em>t</em></td><td>)</td>
@@ -525,7 +659,7 @@ template&lt;typename Scalar &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Get the swing foot pose at the given time. </p>
+<p>Get the swing foot (Hps) pose at the given time. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">t</td><td>Time. </td></tr>
@@ -536,8 +670,8 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
-<a id="a59bd3e34eea270ebdf84baa12ca4b7f1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a59bd3e34eea270ebdf84baa12ca4b7f1">&#9670;&nbsp;</a></span>get_torso_pose() <span class="overload">[1/2]</span></h2>
+<a id="a8229901752ee039de0c6281f4d0b3cad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8229901752ee039de0c6281f4d0b3cad">&#9670;&nbsp;</a></span>get_torso_pose() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -548,7 +682,7 @@ template&lt;typename Scalar &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_torso_pose </td>
+          <td class="memname">Iso3 <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_torso_pose </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -561,13 +695,13 @@ template&lt;typename Scalar &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Get the torso pose object at the current time. </p>
+<p>Get the torso pose (Hpt) object at the current time. </p>
 <dl class="section return"><dt>Returns</dt><dd>Pose of torso. </dd></dl>
 
 </div>
 </div>
-<a id="ad441e97b35fcfbb975d35762e030f3b0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad441e97b35fcfbb975d35762e030f3b0">&#9670;&nbsp;</a></span>get_torso_pose() <span class="overload">[2/2]</span></h2>
+<a id="ae47a916707d4792fbd52ab62b7819c93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae47a916707d4792fbd52ab62b7819c93">&#9670;&nbsp;</a></span>get_torso_pose() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -578,7 +712,7 @@ template&lt;typename Scalar &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_torso_pose </td>
+          <td class="memname">Iso3 <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::get_torso_pose </td>
           <td>(</td>
           <td class="paramtype">Scalar&#160;</td>
           <td class="paramname"><em>t</em></td><td>)</td>
@@ -592,7 +726,7 @@ template&lt;typename Scalar &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Get the torso pose object at the given time. </p>
+<p>Get the torso pose (Hpt) object at the given time. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">t</td><td>Time. </td></tr>
@@ -633,6 +767,42 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
+<a id="a82745fc952e44ee783fb8b7e0d271a75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a82745fc952e44ee783fb8b7e0d271a75">&#9670;&nbsp;</a></span>set_parameters()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Scalar &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::set_parameters </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html">WalkParameters</a> &amp;&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Configure motion generation options. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">options</td><td>Motion generation options. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a35e577b3fe6e10120d423480ad645b86"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a35e577b3fe6e10120d423480ad645b86">&#9670;&nbsp;</a></span>switch_planted_foot()</h2>
 
@@ -663,8 +833,8 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
-<a id="ac8faeae1a9af29ff6a6f41e971d89bd9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac8faeae1a9af29ff6a6f41e971d89bd9">&#9670;&nbsp;</a></span>update()</h2>
+<a id="a90e0247f2eab6a6058883cd552ca7ab5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90e0247f2eab6a6058883cd552ca7ab5">&#9670;&nbsp;</a></span>update()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -683,7 +853,7 @@ template&lt;typename Scalar &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const Eigen::Matrix&lt; Scalar, 3, 1 &gt; &amp;&#160;</td>
+          <td class="paramtype">const Vec3 &amp;&#160;</td>
           <td class="paramname"><em>velocity_target</em>&#160;</td>
         </tr>
         <tr>
@@ -747,63 +917,6 @@ template&lt;typename Scalar &gt; </div>
 
 </div>
 </div>
-<h2 class="groupheader">Member Data Documentation</h2>
-<a id="a4d77d1edddbdf2a0d3affb1df0b666a0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4d77d1edddbdf2a0d3affb1df0b666a0">&#9670;&nbsp;</a></span>Hps_start</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Scalar &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::Hps_start</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">=</div>
-<div class="line">            Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;::Identity()</div>
-</div><!-- fragment -->
-<p>Transform from planted {p} foot to swing {s} foot current placement at start of step. </p>
-
-</div>
-</div>
-<a id="a684028c2142bdc93dad10ba7eba4dc4c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a684028c2142bdc93dad10ba7eba4dc4c">&#9670;&nbsp;</a></span>Hpt_start</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename Scalar &gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; <a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">utility::skill::WalkGenerator</a>&lt; Scalar &gt;::Hpt_start</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">private</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">=</div>
-<div class="line">            Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;::Identity()</div>
-</div><!-- fragment -->
-<p>Transform from planted {p} foot to the torso {t} at start of step. </p>
-
-</div>
-</div>
 <hr/>The documentation for this class was generated from the following file:<ul>
 <li>shared/utility/skill/<a class="el" href="WalkGenerator_8hpp_source.html">WalkGenerator.hpp</a></li>
 </ul>
@@ -813,7 +926,7 @@ template&lt;typename Scalar &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><a class="el" href="namespaceutility_1_1skill.html">skill</a></li><li class="navelem"><a class="el" href="classutility_1_1skill_1_1WalkGenerator.html">WalkGenerator</a></li>
-    <li class="footer">Generated on Fri Apr 12 2024 07:38:24 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun Apr 21 2024 07:59:17 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

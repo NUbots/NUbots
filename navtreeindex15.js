@@ -1,9 +1,5 @@
 var NAVTREEINDEX15 =
 {
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a2e1c331f5a6e557ba77ca856f7d24ff9":[2,0,3,9,9,0,11],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a52573463cb681cec293aa3a6eafea122":[2,0,3,9,9,0,3],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a53945c4e4eb46fc0b107f22ae21dfbbe":[2,0,3,9,9,0,2],
-"structmodule_1_1purpose_1_1Tester_1_1Config.html#a6dbad76fc414f4b24f011b528f1c3023":[2,0,3,9,9,0,9],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a86e05d9221cd1bce85c21845e76ddb8f":[2,0,3,9,9,0,0],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#a8ee4a61dad4c38bf08ebc783cdcf16d3":[2,0,3,9,9,0,4],
 "structmodule_1_1purpose_1_1Tester_1_1Config.html#abe71c6d70405b5761a30ad6c9dcf0bb1":[2,0,3,9,9,0,6],
@@ -37,6 +33,7 @@ var NAVTREEINDEX15 =
 "structmodule_1_1skill_1_1SplineKick_1_1Config.html#af8010f448df5bdd61e1ed59d846e8289":[2,0,3,10,6,0,0],
 "structmodule_1_1skill_1_1Walk_1_1Config.html":[2,0,3,10,7,0],
 "structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087":[2,0,3,10,7,0,0],
+"structmodule_1_1skill_1_1Walk_1_1Config.html#ac3e157e8398d2fab854ef92459d9e6d1":[2,0,3,10,7,0,2],
 "structmodule_1_1skill_1_1Walk_1_1Config.html#ae7ba1c4e2415aa67e85d22c4fc1c6252":[2,0,3,10,7,0,1],
 "structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html":[2,0,3,11,0,0],
 "structmodule_1_1strategy_1_1AlignBallToGoal_1_1Config.html#a9071a554cc6a41123f346fd865f32b18":[2,0,3,11,0,0,1],
@@ -249,5 +246,8 @@ var NAVTREEINDEX15 =
 "structutility_1_1input_1_1FrameID.html#a41738b1fd3548b3e5a22066aed328679":[2,0,7,3,0,9],
 "structutility_1_1input_1_1FrameID.html#a4ec9632c8a2f5c41c0a9caf143d59005":[2,0,7,3,0,24],
 "structutility_1_1input_1_1FrameID.html#a5f2c3ed7a4015ec555f69b97a390de0f":[2,0,7,3,0,7],
-"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27":[2,0,7,3,0,0]
+"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27":[2,0,7,3,0,0],
+"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a028525e6443f1a46956b4154b74770d7":[2,0,7,3,0,0,16],
+"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a09050b7016f0cecfef5e22a278f8a240":[2,0,7,3,0,0,18],
+"structutility_1_1input_1_1FrameID.html#a67d0680c8c65b74d443f9918ade70b27a0dc773a439c2c41c13ec75fce5503a93":[2,0,7,3,0,0,19]
 };

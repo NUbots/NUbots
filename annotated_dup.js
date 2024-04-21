@@ -427,7 +427,6 @@ var annotated_dup =
         [ "Script", "structutility_1_1skill_1_1Script.html", "structutility_1_1skill_1_1Script" ],
         [ "ScriptRequest", "structutility_1_1skill_1_1ScriptRequest.html", "structutility_1_1skill_1_1ScriptRequest" ],
         [ "WalkGenerator", "classutility_1_1skill_1_1WalkGenerator.html", "classutility_1_1skill_1_1WalkGenerator" ],
-        [ "WalkGeneratorOptions", "structutility_1_1skill_1_1WalkGeneratorOptions.html", "structutility_1_1skill_1_1WalkGeneratorOptions" ],
         [ "WalkingParameter", "structutility_1_1skill_1_1WalkingParameter.html", "structutility_1_1skill_1_1WalkingParameter" ]
       ] ],
       [ "strutil", "namespaceutility_1_1strutil.html", [
