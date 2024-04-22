@@ -9,6 +9,7 @@ import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
@@ -22,7 +23,6 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
-import { dropdownContainer } from "../dropdown_container/view";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -39,30 +39,29 @@ const soccerBallTexture = textureLoader.load("/images/ball_texture.png");
 
 const FieldDimensionOptions = [
   { label: "Lab", value: "lab" },
-  { label: "Robocup", value: "robocup" }
+  { label: "Robocup", value: "robocup" },
 ];
 
 export const FieldDimensionSelector = observer(({ model, controller }) => {
   const handleChange = (value: string) => {
-    controller.setFieldDimensions(value, model);  // Use controller to change dimensions
+    controller.setFieldDimensions(value, model); // Use controller to change dimensions
   };
 
-  const dropdownToggle = (
-    <button className={style.localisation__menuButton}>
-      Field Type
-    </button>
-  );
+  const dropdownToggle = <button className={style.localisation__menuButton}>Field Type</button>;
 
   return (
-      <EnhancedDropdown dropdownToggle={dropdownToggle} className={style.localisation__menuItem}>
-        {FieldDimensionOptions.map(option => (
-            <div key={option.value} className={`${style.fieldOption} ${model.field.fieldType === option.value ? style.selected : ''}`}
-                 onClick={() => handleChange(option.value)}>
-              {option.label}
-              {model.field.fieldType === option.value && <span className={style.checkmark}>✔</span>}
-            </div>
-        ))}
-      </EnhancedDropdown>
+    <EnhancedDropdown dropdownToggle={dropdownToggle} className={style.localisation__menuItem}>
+      {FieldDimensionOptions.map((option) => (
+        <div
+          key={option.value}
+          className={`${style.fieldOption} ${model.field.fieldType === option.value ? style.selected : ""}`}
+          onClick={() => handleChange(option.value)}
+        >
+          {option.label}
+          {model.field.fieldType === option.value && <span className={style.checkmark}>✔</span>}
+        </div>
+      ))}
+    </EnhancedDropdown>
   );
 });
 
@@ -97,20 +96,20 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     return (
       <div className={style.localisation}>
         <div className="flex">
-        <LocalisationMenuBar
-          model={this.props.model}
-          Menu={this.props.Menu}
-          controller={this.props.controller}
-          onHawkEyeClick={this.onHawkEyeClick}
-          toggleGridVisibility={this.toggleGridVisibility}
-          toggleFieldVisibility={this.toggleFieldVisibility}
-          toggleRobotVisibility={this.toggleRobotVisibility}
-          toggleBallVisibility={this.toggleBallVisibility}
-          toggleParticleVisibility={this.toggleParticleVisibility}
-          toggleGoalVisibility={this.toggleGoalVisibility}
-          toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
-          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
-        ></LocalisationMenuBar>
+          <LocalisationMenuBar
+            model={this.props.model}
+            Menu={this.props.Menu}
+            controller={this.props.controller}
+            onHawkEyeClick={this.onHawkEyeClick}
+            toggleGridVisibility={this.toggleGridVisibility}
+            toggleFieldVisibility={this.toggleFieldVisibility}
+            toggleRobotVisibility={this.toggleRobotVisibility}
+            toggleBallVisibility={this.toggleBallVisibility}
+            toggleParticleVisibility={this.toggleParticleVisibility}
+            toggleGoalVisibility={this.toggleGoalVisibility}
+            toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+            toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+          ></LocalisationMenuBar>
         </div>
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
@@ -242,8 +241,8 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
             Hawk Eye
           </button>
         </li>
-        <li  className={style.localisation__menuItem}>
-        <FieldDimensionSelector controller={controller} model={model} />
+        <li className={style.localisation__menuItem}>
+          <FieldDimensionSelector controller={controller} model={model} />
         </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />

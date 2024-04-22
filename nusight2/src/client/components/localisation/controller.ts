@@ -1,12 +1,12 @@
 import { action } from "mobx";
 import * as THREE from "three";
 
+import { FieldDimensions } from "../../../shared/field/dimensions";
 import { Vector3 } from "../../../shared/math/vector3";
 
 import { KeyCode } from "./keycodes";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
-import { FieldDimensions } from "../../../shared/field/dimensions";
 
 interface KeyModifiers {
   shiftKey: boolean;
@@ -162,7 +162,7 @@ export class LocalisationController {
           penaltyAreaLength: 0,
           penaltyAreaWidth: 0,
           goalCrossbarHeight: 0.55,
-          goalPostDiameter: 0.10,
+          goalPostDiameter: 0.1,
           goalNetHeight: 1.0,
           penaltyMarkDistance: 0,
           centerCircleDiameter: 1.2,
