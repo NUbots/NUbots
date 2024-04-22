@@ -339,6 +339,7 @@ namespace module::input {
                 Hwp.translation().z() = 0;
                 Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
             }
+            sensors->Hwp = Hwp;
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
             Eigen::Isometry3d Hat = Eigen::Isometry3d::Identity();
@@ -394,6 +395,25 @@ namespace module::input {
             sensors->vTw = Eigen::Vector3d(x_dot, y_dot, 0);
         }
         else {
+            // Update the current support phase is not the same as the walk state, a support phase change has
+            // occurred
+            if (walk_state != nullptr && current_walk_phase != walk_state->phase) {
+                // Update the current support phase to the new support phase
+                current_walk_phase = walk_state->phase;
+
+                // Compute the new anchor frame (Hwp) (new support foot)
+                if (current_walk_phase.value == WalkState::Phase::LEFT) {
+                    Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                }
+                else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
+                    Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
+                }
+
+                // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
+                Hwp.translation().z() = 0;
+                Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
+            }
+            sensors->Hwp = Hwp;
             // Construct world {w} to torso {t} space transform from ground truth
             Eigen::Isometry3d Hwt = Eigen::Isometry3d(raw_sensors.odometry_ground_truth.Htw).inverse();
             sensors->Htw          = Hwt.inverse();

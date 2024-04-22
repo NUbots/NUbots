@@ -34,6 +34,8 @@
 
 #include "message/actuation/ServoCommand.hpp"
 
+#include "utility/input/FrameID.hpp"
+#include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/skill/WalkGenerator.hpp"
 

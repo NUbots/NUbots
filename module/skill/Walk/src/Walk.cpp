@@ -33,6 +33,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
@@ -52,8 +53,11 @@ namespace module::skill {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
+    using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
+    using utility::input::FrameID;
+    using utility::input::ServoID;
     using WalkTask  = message::skill::Walk;
     using WalkState = message::behaviour::state::WalkState;
 
@@ -122,23 +126,98 @@ namespace module::skill {
         on<Provide<WalkTask>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
+           With<Sensors>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk_task) {
+            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
                         .count();
                 last_update_time = NUClear::clock::now();
 
+                Eigen::Vector3d step = Eigen::Vector3d::Zero();
+                step.x() = std::max(std::min(walk_task.velocity_target.x() * cfg.walk_generator_parameters.step_period,
+                                             cfg.walk_generator_parameters.step_limits.x()),
+                                    -cfg.walk_generator_parameters.step_limits.x());
+                step.y() = std::max(std::min(walk_task.velocity_target.y() * cfg.walk_generator_parameters.step_period,
+                                             cfg.walk_generator_parameters.step_limits.y()),
+                                    -cfg.walk_generator_parameters.step_limits.y())
+                           + walk_generator.get_foot_width_offset();
+                step.z() = std::max(std::min(walk_task.velocity_target.z() * cfg.walk_generator_parameters.step_period,
+                                             cfg.walk_generator_parameters.step_limits.z()),
+                                    -cfg.walk_generator_parameters.step_limits.z());
+
+                double t = walk_generator.get_time();
+                double T = cfg.walk_generator_parameters.step_period - t;
+
+                // Get current desired torso pose
+                Eigen::Isometry3d Hpt_t = walk_generator.get_torso_pose();
+
+                // Get the desired torso pose at the end of the step
+                Eigen::Isometry3d Hpt_T_desired =
+                    walk_generator.get_torso_pose(cfg.walk_generator_parameters.step_period);
+
+                // Get the current torso pose from the sensors
+                Eigen::Isometry3d Hpt_t_sensors = walk_generator.is_left_foot_planted()
+                                                      ? Eigen::Isometry3d(sensors.Htx[FrameID::L_FOOT_BASE].inverse())
+                                                      : Eigen::Isometry3d(sensors.Htx[FrameID::R_FOOT_BASE].inverse());
+
+                // Get the current torso velocity from the sensors
+                Eigen::Vector3d vTp_t_sensors = sensors.Hwp.inverse().linear() * sensors.vTw;
+
+
+                // Get the estimated torso pose at the end of the step using LIPM from sensors initial state
+                double w                       = std::sqrt(9.81 / cfg.walk_generator_parameters.torso_height);
+                Eigen::Vector3d rTPp_t_sensors = Hpt_t_sensors.translation();
+                Eigen::Vector3d rPTt_T_est = rTPp_t_sensors * std::cosh(w * T) + vTp_t_sensors / w * std::sinh(w * T);
+
+                // Get the estimated torso velocity at the end of the step using LIPM from sensors initial state
+                Eigen::Vector3d vTp_T_est = rTPp_t_sensors * w * std::sinh(w * T) + vTp_t_sensors * std::cosh(w * T);
+
+
+                Eigen::Vector3d rTPp_t         = Hpt_t.translation();
+                Eigen::Vector3d rTPp_T_desired = Hpt_T_desired.translation();
+
+
+                // Compute capture point at t and T
+                Eigen::Vector3d capture_point_t =
+                    vTp_t_sensors * std::sqrt(cfg.walk_generator_parameters.torso_height / 9.81);
+                Eigen::Vector3d capture_point_T =
+                    vTp_T_est * std::sqrt(cfg.walk_generator_parameters.torso_height / 9.81);
+                emit(graph("t: ", t));
+                emit(graph("T: ", T));
+                emit(graph("Step: ", step.x(), step.y(), step.z()));
+                emit(graph("rTPp_t_sensors: ", rTPp_t_sensors.x(), rTPp_t_sensors.y(), rTPp_t_sensors.z()));
+                emit(graph("rTPp_t: ", rTPp_t.x(), rTPp_t.y(), rTPp_t.z()));
+                emit(graph("rPTt_T_est: ", rPTt_T_est.x(), rPTt_T_est.y(), rPTt_T_est.z()));
+                emit(graph("rTPp_T_desired: ", rTPp_T_desired.x(), rTPp_T_desired.y(), rTPp_T_desired.z()));
+                emit(graph("vTp_t_sensors: ", vTp_t_sensors.x(), vTp_t_sensors.y(), vTp_t_sensors.z()));
+                emit(graph("vTp_T_est: ", vTp_T_est.x(), vTp_T_est.y(), vTp_T_est.z()));
+                emit(graph("Capture_point_t: ", capture_point_t.x(), capture_point_t.y(), 0));
+                emit(graph("Capture point_T: ", capture_point_T.x(), capture_point_T.y(), 0));
+
+                if (t > cfg.walk_generator_parameters.step_period * 0.8 && walk_task.velocity_target.norm() > 0.0) {
+                    // Move the step to the capture point when the step is halfway through
+                    // step = step + 0.05 * (capture_point_T - step);
+                    // walk_generator.set_step(capture_point_T);
+                    step.x() = capture_point_T.x();
+                    walk_generator.set_step(step);
+                }
+                else {
+                    walk_generator.set_step(step);
+                }
+
+
                 // Update the walk engine and emit the stability state
-                switch (walk_generator.update(time_delta, walk_task.velocity_target).value) {
+                switch (walk_generator.update(time_delta, walk_task.velocity_target, vTp_t_sensors).value) {
                     case WalkState::State::WALKING:
                     case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
                     case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
                     case WalkState::State::UNKNOWN:
                     default: NUClear::log<NUClear::WARN>("Unknown state."); break;
                 }
+
 
                 // Compute the goal position time
                 const NUClear::clock::time_point goal_time =

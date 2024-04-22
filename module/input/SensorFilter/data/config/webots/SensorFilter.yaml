@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: DEBUG
 
 buttons:
   debounce_threshold: 7
@@ -24,7 +24,7 @@ velocity_low_pass:
   x_cut_off_frequency: 0.015
 
 # Specify whether or not to use ground truth odometry from simulator
-use_ground_truth: false
+use_ground_truth: true
 
 # Path to URDF file
 urdf_path: "models/robot.urdf"
