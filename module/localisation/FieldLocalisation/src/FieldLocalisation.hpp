@@ -28,9 +28,8 @@
 #define MODULE_LOCALISATION_FIELDLOCALISATION_HPP
 
 #include <Eigen/Core>
+#include <nlopt.hpp>
 #include <nuclear>
-
-#include "FieldModel.hpp"
 
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
@@ -39,11 +38,8 @@
 #include "message/vision/FieldLines.hpp"
 
 #include "utility/localisation/OccupancyMap.hpp"
-#include "utility/math/filter/ParticleFilter.hpp"
-#include "utility/math/stats/multivariate.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
-
 
 namespace module::localisation {
 
@@ -161,7 +157,6 @@ namespace module::localisation {
         return result;
     }
 
-
     class FieldLocalisation : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
@@ -169,20 +164,11 @@ namespace module::localisation {
             /// @brief Size of the grid cells in the occupancy grid [m]
             double grid_size = 0.0;
 
-            /// @brief Number of particles to use in the particle filter
-            int n_particles = 0;
-
-            /// @brief Uncertainty in the process model (adds noise to the particles}
-            Eigen::Matrix3d process_noise = Eigen::Matrix3d::Zero();
+            /// @brief Initial hypothesis of the robot's state (x,y,theta), saved for resetting
+            std::vector<Eigen::Vector3d> initial_hypotheses{};
 
             /// @brief Initial state (x,y,theta) of the robot, saved for resetting
             Eigen::Vector3d initial_state{};
-
-            /// @brief Initial covariance matrix of the robot's state, saved for resetting
-            Eigen::Matrix3d initial_covariance = Eigen::Matrix3d::Identity();
-
-            /// @brief Initial hypothesis of the robot's state (x,y,theta) and covariance, saved for resetting
-            std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> initial_hypotheses{};
 
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
@@ -191,7 +177,7 @@ namespace module::localisation {
             size_t min_observations = 0;
 
             /// @brief Start time delay for the particle filter
-            double start_time_delay = 0.0;
+            std::chrono::seconds start_time_delay = std::chrono::seconds(0);
 
             /// @brief Bool to enable/disable using ground truth for localisation
             bool use_ground_truth_localisation;
@@ -199,25 +185,37 @@ namespace module::localisation {
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
 
-            double distance_weight   = 0.0;
+            /// @brief Scalar weighting of cost associated with distance to field lines
+            double distance_weight = 0.0;
+
+            /// @brief Scalar weighting of cost associated with change in state
             double last_state_weight = 0.0;
-            double change_limit      = 0.0;
+
+            /// @brief Constraint on the maximum change in state
+            Eigen::Vector3d change_limit = Eigen::Vector3d::Zero();
+
+            /// @brief Relative tolerance on the optimization parameters
+            double xtol_rel = 0.0;
+
+            /// @brief Relative tolerance on the optimization function value
+            double ftol_rel = 0.0;
+
+            /// @brief Maximum number of evaluations for the optimization
+            size_t maxeval = 0;
 
         } cfg;
 
-        /// @brief Last time filter was updated
-        NUClear::clock::time_point last_time_update_time;
 
-        /// @brief Particle filter class
-        utility::math::filter::ParticleFilter<double, FieldModel> filter;
-
-        Eigen::Vector3d last_state = Eigen::Vector3d::Zero();
+        /// @brief State vector (x,y,yaw) of the Hfw transform
+        Eigen::Vector3d state = Eigen::Vector3d::Zero();
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map;
 
-        /// @brief Time at startup
-        NUClear::clock::time_point startup_time;
+        /// @brief Bool indicating where or not this is the first update
+        bool startup = true;
+
+        ReactionHandle main_loop_handle;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
@@ -229,7 +227,7 @@ namespace module::localisation {
          * @param state The state vector (x,y,theta)
          * @return Hfw, the homogenous transformation matrix from world {w} to field {f} space
          */
-        Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& particle);
+        Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& state);
 
         /**
          * @brief Find error between computed Hfw and ground truth if available
@@ -248,16 +246,8 @@ namespace module::localisation {
          */
         Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
-        /**
-         * @brief Calculate the weight of a particle given a set of observations
-         *
-         * @param particle The state of the particle (x,y,theta)
-         * @param observations The observations (x, y) in the robot's coordinate frame [m]
-         * @return Weight of the particle
-         */
-        double calculate_weight(const Eigen::Vector3d& particle, const std::vector<Eigen::Vector3d>& observations);
-
-        Eigen::Vector3d optimise_Hfw(const std::vector<Eigen::Vector3d>& observations);
+        std::pair<Eigen::Vector3d, double> optimise_Hfw(const Eigen::Vector3d& initial_guess,
+                                                        const std::vector<Eigen::Vector3d>& observations);
 
         /**
          * @brief Setup field line distance map
