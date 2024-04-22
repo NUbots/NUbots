@@ -30,3 +30,7 @@ start_time_delay: 5
 
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
+
+distance_weight: 1
+last_state_weight: 0.5
+change_limit: 0.5

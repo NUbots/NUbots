@@ -198,6 +198,11 @@ namespace module::localisation {
 
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
+
+            double distance_weight   = 0.0;
+            double last_state_weight = 0.0;
+            double change_limit      = 0.0;
+
         } cfg;
 
         /// @brief Last time filter was updated

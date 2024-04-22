@@ -66,6 +66,9 @@ namespace module::localisation {
             cfg.starting_side                   = config["starting_side"].as<std::string>();
             cfg.start_time_delay                = config["start_time_delay"].as<double>();
             cfg.use_ground_truth_localisation   = config["use_ground_truth_localisation"].as<bool>();
+            cfg.distance_weight                 = config["distance_weight"].as<double>();
+            cfg.change_limit                    = config["change_limit"].as<double>();
+            cfg.last_state_weight               = config["last_state_weight"].as<double>();
             filter.model.process_noise_diagonal = config["process_noise"].as<Expression>();
             filter.model.n_particles            = config["n_particles"].as<int>();
         });
@@ -170,7 +173,11 @@ namespace module::localisation {
                 // Otherwise calculate using field lines
                 if (!fallen && field_lines.rPWw.size() > cfg.min_observations
                     && time_since_startup > cfg.start_time_delay) {
-                    last_state = optimise_Hfw(field_lines.rPWw);
+                    auto start    = NUClear::clock::now();
+                    last_state    = optimise_Hfw(field_lines.rPWw);
+                    auto end      = NUClear::clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                    log<NUClear::DEBUG>("Optimisation took ", duration, "ms");
                     auto field(std::make_unique<Field>());
                     field->Hfw = compute_Hfw(last_state);
                     if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
@@ -241,20 +248,36 @@ namespace module::localisation {
             (void) data;  // Unused in this case
 
             // Compute the cost and gradient
-            double cost = 0.0;
+            double distance_cost = 0.0;
             for (auto rORr : observations) {
                 // Get the position [x, y] of the observation in the map for this particle
                 Eigen::Vector2i map_position = position_in_map(x, rORr);
-                cost += std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
+                distance_cost +=
+                    std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
             }
+            distance_cost = cfg.distance_weight * distance_cost;
 
             // Cost = sum of squared distances from observations to field line map + distance from last state
-            // cost += (x - last_state).norm();
+            double last_state_cost = cfg.last_state_weight * (x - last_state).norm();
+            double cost            = distance_cost + last_state_cost;
             log<NUClear::INFO>("Cost: {}", cost);
             return cost;
         };
         // Set the objective function
         opt.set_min_objective(eigen_objective_wrapper<double, 3>, &obj_fun);
+
+        // Define the allowable change range
+        Eigen::Vector3d lower_bounds = last_state - Eigen::Vector3d::Constant(cfg.change_limit);
+        Eigen::Vector3d upper_bounds = last_state + Eigen::Vector3d::Constant(cfg.change_limit);
+
+        // Convert bounds to std::vector for NLopt
+        std::vector<double> lb(3), ub(3);
+        eigen_to_nlopt<double, 3>(lower_bounds, lb);
+        eigen_to_nlopt<double, 3>(upper_bounds, ub);
+
+        // Set bounds in the optimizer
+        opt.set_lower_bounds(lb);
+        opt.set_upper_bounds(ub);
 
         // Set the optimization tolerances
         opt.set_xtol_rel(1e-6);
