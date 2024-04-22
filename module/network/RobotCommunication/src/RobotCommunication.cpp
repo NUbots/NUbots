@@ -86,6 +86,9 @@ namespace module::network {
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
 
+                            // keep track of who is alive
+                            updateRobotInfo(incoming_msg.current_pose.player_id);
+
                             // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
@@ -185,5 +188,46 @@ namespace module::network {
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
+
+        on<Every<2, Per<std::chrono::seconds>>>().then([this] {
+            auto now = std::chrono::steady_clock::now();
+            constexpr auto timeout = std::chrono::seconds(4); // or std::chrono::seconds(3) for a tighter threshold
+
+            auto it = robots.begin();
+            while (it != robots.end()) {
+                if (now - it->lastHeardFrom > timeout) {
+                    it = robots.erase(it); // Remove robot and move to the next
+                } else {
+                    ++it;
+                }
+            }
+
+            // Loop through each robot and print its info DELETE ME
+            for (const auto& robot : robots) {
+                // Calculate the time difference in seconds
+                auto timeDiff = std::chrono::duration_cast<std::chrono::seconds>(now - robot.lastHeardFrom).count();
+                log<NUClear::DEBUG>("Robot ID", robot.robotId);
+                log<NUClear::DEBUG>("Last heard from", timeDiff);
+            }
+            // DELETE ME END
+        });
     }
+
+
+    void RobotCommunication::updateRobotInfo(int robotId) {
+        auto now = std::chrono::steady_clock::now();
+
+        std::vector<RobotInfo>::iterator it = std::find_if(robots.begin(), robots.end(), [robotId](const RobotInfo& info) {
+            return info.robotId == robotId;
+        });
+
+        if (it != robots.end()) {
+            // Update existing robot's lastHeardFrom
+            it->lastHeardFrom = now;
+        } else {
+            // Add new robot info
+            robots.push_back({robotId, now});
+        }
+    }
+
 }  // namespace module::network
