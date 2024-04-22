@@ -66,43 +66,41 @@ namespace utility::math::stats::resample {
      * @param residual_sample The sampler to use when resampling the residual particles
      */
     template <typename Iterator, typename ResidualSampler>
-    [[nodiscard]] std::vector<int> residual(const int& count,
-                                            Iterator&& begin,
-                                            Iterator&& end,
-                                            ResidualSampler&& residual_sampler) {
-        using Scalar = std::remove_reference_t<decltype(*begin)>;
+    std::vector<int> residual(int count, Iterator begin, Iterator end, ResidualSampler&& residual_sampler) {
+        using Scalar = typename std::iterator_traits<Iterator>::value_type;
 
         // Get number of weights
         const auto n_weights = std::distance(begin, end);
 
-        // Normalise the weights and multiply out by our count
-        std::vector<Scalar> normalised(n_weights, Scalar(0));
-        const Scalar factor = Scalar(count) / std::accumulate(begin, end, Scalar(0));
-        std::transform(begin, end, normalised.begin(), [&](const Scalar& w) { return w * factor; });
-
-        // Replicate the particle counts
-        std::vector<int> idx{};
-        for (int i = 0; i < int(normalised.size()); ++i) {
-            for (int n = 0; n < int(normalised[i]); ++n) {
-                idx.push_back(i);
-            }
-        }
-
-        // Now sample the residual particles
-        const int residual_count = count - idx.size();
-
-        // Adjust the weights
-        std::transform(normalised.begin(), normalised.end(), normalised.begin(), [&](const Scalar& w) {
-            return w - std::floor(w);
+        // Normalize the weights and multiply by count
+        std::vector<Scalar> scaled_weights(n_weights);
+        const Scalar sum_weights = std::accumulate(begin, end, Scalar(0));
+        std::transform(begin, end, scaled_weights.begin(), [count, sum_weights](const Scalar& w) {
+            return w * count / sum_weights;
         });
 
-        // Sample the residual particles
-        const auto residual_elements = residual_sampler(residual_count, normalised.begin(), normalised.end());
+        // Calculate integer parts and residuals
+        std::vector<int> indices;
+        std::vector<Scalar> residuals(n_weights);
+        int total_int_parts = 0;
 
-        // Append residual particles
-        idx.insert(idx.end(), residual_elements.begin(), residual_elements.end());
+        for (int i = 0; i < n_weights; ++i) {
+            int int_part = static_cast<int>(scaled_weights[i]);
+            indices.insert(indices.end(), int_part, i);
+            total_int_parts += int_part;
+            residuals[i] = scaled_weights[i] - int_part;
+        }
 
-        return idx;
+        // Determine how many additional samples to draw
+        int residual_count = count - total_int_parts;
+
+        // Use the residual sampler to sample additional indices based on residuals
+        if (residual_count > 0) {
+            auto additional_indices = residual_sampler(residual_count, residuals.begin(), residuals.end());
+            indices.insert(indices.end(), additional_indices.begin(), additional_indices.end());
+        }
+
+        return indices;
     }
 
 }  // namespace utility::math::stats::resample
