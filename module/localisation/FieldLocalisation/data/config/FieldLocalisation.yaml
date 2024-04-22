@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
 # Size of each cell in the occupancy map, each cell has an area of grid_size x grid_size [metres]
 grid_size: 1e-2
@@ -8,10 +8,10 @@ grid_size: 1e-2
 n_particles: 300
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT, EITHER or CUSTOM)
-starting_side: EITHER
+starting_side: LEFT
 
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
-initial_state: [0.0, 0.0, 0.0]
+initial_state: [2.0, 1.8, 0.0]
 
 # Our confidence in the initial guess of where the robot starts on the field
 initial_covariance: [0.5, 0.5, 0.5]
@@ -26,7 +26,11 @@ save_map: false
 min_observations: 50
 
 # Delay before the particle filter starts (allows odometry to settle)
-start_time_delay: 5
+start_time_delay: 10
 
 # Bool to use ground truth for localisation
 use_ground_truth_localisation: false
+
+distance_weight: 1
+last_state_weight: 0.5
+change_limit: 0.05
