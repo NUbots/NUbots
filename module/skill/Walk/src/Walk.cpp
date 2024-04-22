@@ -148,6 +148,8 @@ namespace module::skill {
                                              cfg.walk_generator_parameters.step_limits.z()),
                                     -cfg.walk_generator_parameters.step_limits.z());
 
+                emit(graph("Step pre adjustment:", step));
+
                 double t = walk_generator.get_time();
                 double T = cfg.walk_generator_parameters.step_period - t;
 
@@ -175,10 +177,13 @@ namespace module::skill {
                 // Get the estimated torso velocity at the end of the step using LIPM from sensors initial state
                 Eigen::Vector3d vTp_T_est = rTPp_t_sensors * w * std::sinh(w * T) + vTp_t_sensors * std::cosh(w * T);
 
+                Eigen::Vector3d vTp_t_desired = walk_generator.get_torso_velocity();
+                Eigen::Vector3d vTp_T_desired =
+                    walk_generator.get_torso_velocity(cfg.walk_generator_parameters.step_period);
+
 
                 Eigen::Vector3d rTPp_t         = Hpt_t.translation();
                 Eigen::Vector3d rTPp_T_desired = Hpt_T_desired.translation();
-
 
                 // Compute capture point at t and T
                 Eigen::Vector3d capture_point_t =
@@ -187,26 +192,36 @@ namespace module::skill {
                     vTp_T_est * std::sqrt(cfg.walk_generator_parameters.torso_height / 9.81);
                 emit(graph("t: ", t));
                 emit(graph("T: ", T));
-                emit(graph("Step: ", step.x(), step.y(), step.z()));
                 emit(graph("rTPp_t_sensors: ", rTPp_t_sensors.x(), rTPp_t_sensors.y(), rTPp_t_sensors.z()));
                 emit(graph("rTPp_t: ", rTPp_t.x(), rTPp_t.y(), rTPp_t.z()));
                 emit(graph("rPTt_T_est: ", rPTt_T_est.x(), rPTt_T_est.y(), rPTt_T_est.z()));
                 emit(graph("rTPp_T_desired: ", rTPp_T_desired.x(), rTPp_T_desired.y(), rTPp_T_desired.z()));
                 emit(graph("vTp_t_sensors: ", vTp_t_sensors.x(), vTp_t_sensors.y(), vTp_t_sensors.z()));
+                emit(graph("vTp_t_desired: ", vTp_t_desired.x(), vTp_t_desired.y(), vTp_t_desired.z()));
+                emit(graph("vTp_T_desired: ", vTp_T_desired.x(), vTp_T_desired.y(), vTp_T_desired.z()));
                 emit(graph("vTp_T_est: ", vTp_T_est.x(), vTp_T_est.y(), vTp_T_est.z()));
                 emit(graph("Capture_point_t: ", capture_point_t.x(), capture_point_t.y(), 0));
                 emit(graph("Capture point_T: ", capture_point_T.x(), capture_point_T.y(), 0));
 
-                if (t > cfg.walk_generator_parameters.step_period * 0.8 && walk_task.velocity_target.norm() > 0.0) {
-                    // Move the step to the capture point when the step is halfway through
-                    // step = step + 0.05 * (capture_point_T - step);
-                    // walk_generator.set_step(capture_point_T);
-                    step.x() = capture_point_T.x();
+                Eigen::Vector3d com_eos_error = rTPp_T_desired - rPTt_T_est;
+                emit(graph("COM EOS Error: ", com_eos_error.x(), com_eos_error.y(), com_eos_error.z()));
+                if (t > cfg.walk_generator_parameters.step_period * 0.75 && walk_task.velocity_target.norm() > 0.0) {
+                    // Position adjustment (Lateral error)
+                    double K = 1;
+                    step.x() = std::max(
+                        std::min(step.x() - K * com_eos_error.x(), cfg.walk_generator_parameters.step_limits.x()),
+                        -cfg.walk_generator_parameters.step_limits.x());
                     walk_generator.set_step(step);
+
+                    // Timing adjustment (Sagittal error)
+                    // double Kt = 10 / (cfg.walk_generator_parameters.step_period);
+                    // walk_generator.set_step_period(cfg.walk_generator_parameters.step_period
+                    //                                + 1 / (Kt * com_eos_error.y()));
                 }
                 else {
                     walk_generator.set_step(step);
                 }
+                emit(graph("Step post adjustment: ", step.x(), step.y(), step.z()));
 
 
                 // Update the walk engine and emit the stability state

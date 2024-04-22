@@ -2,7 +2,7 @@ log_level: INFO
 
 walk:
   # Time for one complete step (in seconds).
-  period: 0.45
+  period: 0.39
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.2, 0.4]
@@ -14,7 +14,7 @@ walk:
     apex_ratio: 0.4
   torso:
     # Torso height (in meters)
-    height: 0.47
+    height: 0.46
     # Torso pitch (in radians)
     pitch: 12 * pi / 180
     # Torso constant position offset

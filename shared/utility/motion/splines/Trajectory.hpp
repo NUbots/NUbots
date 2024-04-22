@@ -120,6 +120,13 @@ namespace utility::motion::splines {
             return pose;
         }
 
+        /// @brief Get velocity (x,y,z) at a given time
+        Eigen::Matrix<Scalar, 3, 1> velocity(Scalar time) const {
+            return Eigen::Matrix<Scalar, 3, 1>(eval_derivative(X, time),
+                                               eval_derivative(Y, time),
+                                               eval_derivative(Z, time));
+        }
+
         /// @brief Clear all splines, waypoints, and timepoints for all dimensions
         void clear() {
             for (auto& spline : splines) {
@@ -167,6 +174,24 @@ namespace utility::motion::splines {
             else {
                 // If time is beyond the end of the trajectory, return the end value.
                 return splines[dimension].back().position(timepoints[dimension].back());
+            }
+        }
+
+        /// @brief Evaluate the derivative of a specific dimension at the given time
+        Scalar eval_derivative(TrajectoryDimension dimension, Scalar time) const {
+            // Determine which segment the time falls into
+            size_t segment_idx = 0;
+            while (segment_idx < timepoints[dimension].size() && time > timepoints[dimension][segment_idx + 1]) {
+                segment_idx++;
+            }
+
+            if (segment_idx < timepoints[dimension].size()) {
+                Scalar segment_start_time = timepoints[dimension][segment_idx];
+                return splines[dimension][segment_idx].velocity(time - segment_start_time);
+            }
+            else {
+                // If time is beyond the end of the trajectory, return the end value.
+                return splines[dimension].back().velocity(timepoints[dimension].back());
             }
         }
 

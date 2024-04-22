@@ -140,6 +140,21 @@ namespace utility::skill {
         }
 
         /**
+         * @brief Get the torso velocity (vTp) object at the current time.
+         */
+        Vec3 get_torso_velocity() const {
+            return torso_trajectory.velocity(t);
+        }
+
+        /**
+         * @brief Get the torso velocity (vTp) object at the given time.
+         * @param t Time.
+         */
+        Vec3 get_torso_velocity(Scalar t) const {
+            return torso_trajectory.velocity(t);
+        }
+
+        /**
          * @brief Get the left or right foot pose at the current time in the torso {t} frame.
          * @param limb Limb ID of foot to get pose of.
          * @return Swing foot pose at time t.
@@ -288,6 +303,14 @@ namespace utility::skill {
             return left_foot_is_planted ? -p.step_width : p.step_width;
         }
 
+        /**
+         * @brief Set the step period.
+         * @param step_period_ Step period.
+         */
+        void set_step_period(Scalar step_period) {
+            p.step_period = step_period;
+        }
+
     private:
         /// @brief Walk engine parameters.
         WalkParameters p;
@@ -334,32 +357,37 @@ namespace utility::skill {
 
             // ******************************** Torso Trajectory ********************************
             torso_trajectory.clear();
+            Vec3 torso_start_position = Hpt_start.translation();
+            Vec3 torso_final_position = Vec3(p.torso_final_position_ratio.x() * step.x(),
+                                             p.torso_final_position_ratio.y() * step.y(),
+                                             p.torso_height);
+
+            double torso_x_vel = (torso_final_position.x() - torso_start_position.x()) / p.step_period;
 
             // Start waypoint: Start from the current torso position at time = 0
             wp.time_point       = 0.0;
             wp.position         = Hpt_start.translation();
-            wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
+            wp.velocity         = Vec3(torso_x_vel, velocity_target.y(), 0);
             wp.orientation      = mat_to_rpy_intrinsic(Hpt_start.rotation());
             wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
             torso_trajectory.add_waypoint(wp);
 
-            // Middle waypoint: Shift torso to the p.torso_sway_offset at time = p.torso_sway_ratio * p.step_period
-            wp.time_point         = p.torso_sway_ratio * p.step_period;
-            Scalar torso_offset_y = left_foot_is_planted ? -p.torso_sway_offset.y() : p.torso_sway_offset.y();
-            wp.position = Vec3(p.torso_sway_offset.x(), torso_offset_y, p.torso_height + p.torso_sway_offset.z())
-                          + p.torso_position_offset;
-            wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
-            wp.orientation      = Vec3(0.0, p.torso_pitch, velocity_target.z() * p.torso_sway_ratio * p.step_period);
-            wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
-            torso_trajectory.add_waypoint(wp);
+            // // Middle waypoint: Shift torso to the p.torso_sway_offset at time = p.torso_sway_ratio * p.step_period
+            // wp.time_point         = p.torso_sway_ratio * p.step_period;
+            // Scalar torso_offset_y = left_foot_is_planted ? -p.torso_sway_offset.y() : p.torso_sway_offset.y();
+            // wp.position           = Vec3(torso_x_vel * p.torso_sway_ratio * p.step_period,
+            //                    torso_offset_y,
+            //                    p.torso_height + p.torso_sway_offset.z())
+            //               + p.torso_position_offset;
+            // wp.velocity         = Vec3(torso_x_vel, velocity_target.y(), 0);
+            // wp.orientation      = Vec3(0.0, p.torso_pitch, velocity_target.z() * p.torso_sway_ratio * p.step_period);
+            // wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
+            // torso_trajectory.add_waypoint(wp);
 
             // End waypoint: Shift torso back to the final torso position at time = p.step_period
-            wp.time_point = p.step_period;
-            wp.position   = Vec3(p.torso_final_position_ratio.x() * step.x(),
-                               p.torso_final_position_ratio.y() * step.y(),
-                               p.torso_height)
-                          + p.torso_position_offset;
-            wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
+            wp.time_point       = p.step_period;
+            wp.position         = torso_final_position + p.torso_position_offset;
+            wp.velocity         = Vec3(torso_x_vel, velocity_target.y(), 0);
             wp.angular_velocity = Vec3(0.0, 0.0, velocity_target.z());
             wp.orientation      = Vec3(0.0, p.torso_pitch, p.torso_final_position_ratio.z() * step.z());
             torso_trajectory.add_waypoint(wp);
