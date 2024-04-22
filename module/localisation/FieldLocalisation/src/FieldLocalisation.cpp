@@ -27,6 +27,7 @@
 #include "FieldLocalisation.hpp"
 
 #include <fstream>
+#include <nlopt.hpp>
 
 #include "extension/Configuration.hpp"
 
@@ -107,6 +108,50 @@ namespace module::localisation {
 
         on<Trigger<ResetFieldLocalisation>>().then([this] { filter.set_state(cfg.initial_hypotheses); });
 
+        // on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
+        //     "Particle Filter",
+        //     [this](const FieldLines& field_lines, const Stability& stability, const RawSensors& raw_sensors) {
+        //         auto time_since_startup =
+        //             std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
+        //         bool fallen = stability == Stability::FALLEN || stability == Stability::FALLING;
+
+        //         // Emit field message using ground truth if available
+        //         if (cfg.use_ground_truth_localisation) {
+        //             auto field(std::make_unique<Field>());
+        //             field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
+        //             emit(field);
+        //             return;
+        //         }
+
+        //         // Otherwise calculate using field lines
+        //         if (!fallen && field_lines.rPWw.size() > cfg.min_observations
+        //             && time_since_startup > cfg.start_time_delay) {
+
+        //             // Measurement update (using field line observations)
+        //             for (int i = 0; i < cfg.n_particles; i++) {
+        //                 auto weight = calculate_weight(filter.get_particle(i), field_lines.rPWw);
+        //                 filter.set_particle_weight(weight, i);
+        //             }
+
+        //             // Time update (includes resampling)
+        //             const double dt =
+        //                 duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
+        //             last_time_update_time = NUClear::clock::now();
+        //             filter.time(dt);
+
+        //             auto field(std::make_unique<Field>());
+        //             field->Hfw = compute_Hfw(filter.get_state());
+        //             if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+        //                 debug_field_localisation(field->Hfw, raw_sensors);
+        //             }
+        //             field->covariance = filter.get_covariance();
+        //             if (log_level <= NUClear::DEBUG) {
+        //                 field->particles = filter.get_particles_as_vector();
+        //             }
+        //             emit(field);
+        //         }
+        //     });
+
         on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
             "Particle Filter",
             [this](const FieldLines& field_lines, const Stability& stability, const RawSensors& raw_sensors) {
@@ -125,27 +170,11 @@ namespace module::localisation {
                 // Otherwise calculate using field lines
                 if (!fallen && field_lines.rPWw.size() > cfg.min_observations
                     && time_since_startup > cfg.start_time_delay) {
-
-                    // Measurement update (using field line observations)
-                    for (int i = 0; i < cfg.n_particles; i++) {
-                        auto weight = calculate_weight(filter.get_particle(i), field_lines.rPWw);
-                        filter.set_particle_weight(weight, i);
-                    }
-
-                    // Time update (includes resampling)
-                    const double dt =
-                        duration_cast<duration<double>>(NUClear::clock::now() - last_time_update_time).count();
-                    last_time_update_time = NUClear::clock::now();
-                    filter.time(dt);
-
+                    last_state = optimise_Hfw(field_lines.rPWw);
                     auto field(std::make_unique<Field>());
-                    field->Hfw = compute_Hfw(filter.get_state());
+                    field->Hfw = compute_Hfw(last_state);
                     if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
                         debug_field_localisation(field->Hfw, raw_sensors);
-                    }
-                    field->covariance = filter.get_covariance();
-                    if (log_level <= NUClear::DEBUG) {
-                        field->particles = filter.get_particles_as_vector();
                     }
                     emit(field);
                 }
@@ -198,5 +227,53 @@ namespace module::localisation {
             weight += std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
         }
         return 1.0 / (weight + std::numeric_limits<double>::epsilon());
+    }
+
+    Eigen::Vector3d FieldLocalisation::optimise_Hfw(const std::vector<Eigen::Vector3d>& observations) {
+        // Create the NLopt optimizer and set the algorithm
+        unsigned int n             = 3;
+        nlopt::algorithm algorithm = nlopt::LN_COBYLA;
+        nlopt::opt opt(algorithm, n);
+
+        // Wrap the objective function in a lambda function
+        ObjectiveFunction<double, 3> obj_fun =
+            [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
+            (void) data;  // Unused in this case
+
+            // Compute the cost and gradient
+            double cost = 0.0;
+            for (auto rORr : observations) {
+                // Get the position [x, y] of the observation in the map for this particle
+                Eigen::Vector2i map_position = position_in_map(x, rORr);
+                cost += std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
+            }
+
+            // Cost = sum of squared distances from observations to field line map + distance from last state
+            // cost += (x - last_state).norm();
+            log<NUClear::INFO>("Cost: {}", cost);
+            return cost;
+        };
+        // Set the objective function
+        opt.set_min_objective(eigen_objective_wrapper<double, 3>, &obj_fun);
+
+        // Set the optimization tolerances
+        opt.set_xtol_rel(1e-6);
+        opt.set_ftol_rel(1e-6);
+
+        // Set the maximum number of iterations
+        opt.set_maxeval(1000);
+
+        // Convert the initial guess to NLopt format
+        std::vector<double> x(3);
+        eigen_to_nlopt<double, 3>(last_state, x);
+
+        // Find the optimal solution
+        double minf;
+        opt.optimize(x, minf);
+
+        // Convert the optimized solution back to an Eigen
+        Eigen::Matrix<double, 3, 1> optimized_solution(3);
+        nlopt_to_eigen<double, 3>(x, optimized_solution);
+        return optimized_solution;
     }
 }  // namespace module::localisation
