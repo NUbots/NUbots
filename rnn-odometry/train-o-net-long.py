@@ -146,13 +146,14 @@ def main():
     # Filter the truth down to just position -  this is the last column of the homogenous transform matrix
     # NOTE: 17/04/2024 - Due to fluctuations in the z component, trying with just x, y
     # NOTE: Remember to reshape if adding or removing features
-    truth_long = truth_all_long[:, 9:11]
+    # NOTE: Trying to just predict the x value
+    truth_long = truth_all_long[:, 9:10]
     print("Truth long shape: ", truth_long.shape)
-    truth_long_2 = truth_all_long_2[:, 9:11]
+    truth_long_2 = truth_all_long_2[:, 9:10]
     print("Truth long 2 shape: ", truth_long_2.shape)
-    truth_long_3 = truth_all_long_3[:, 9:11]
+    truth_long_3 = truth_all_long_3[:, 9:10]
     print("Truth long 3 shape: ", truth_long_3.shape)
-    truth_long_4 = truth_all_long_4[:, 9:11]
+    truth_long_4 = truth_all_long_4[:, 9:10]
     print("Truth long 4 shape: ", truth_long_4.shape)
 
     # Smooth targets using gaussian filter
@@ -361,20 +362,20 @@ def main():
 
     # ** Optimizers **
     # LR schedules
-    size_of_dataset = input_data_train.shape[0]
-    decay_to_epoch = 10                                         # Number of epochs for learning rate to decay over before it resets
-    steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
-    decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
-    print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
+    # size_of_dataset = input_data_train.shape[0]
+    # decay_to_epoch = 10                                         # Number of epochs for learning rate to decay over before it resets
+    # steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
+    # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
+    # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
+    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
 
     # standard optimisers
     # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
-    optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
-    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
-    # optimizer=keras.optimizers.Adadelta(learning_rate=learning_rate)
-    # optimizer = keras.optimizers.SGD(learning_rate=learning_rate, momentum=0.1)
+    # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
+    # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.1)
 
     # Scheduled
     # lr_schedule = keras.optimizers.schedules.ExponentialDecay(
@@ -394,20 +395,20 @@ def main():
     # activation = tf.keras.activations.relu(negative_slope=0.0, max_value=None, threshold=0.0)
 
     # Tensorboard
-    # timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    # log_dir = "logs/fit/" + timestamp
-    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    log_dir = "logs/fit/" + timestamp
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
 
-    # # Regulariser
-    # # regularizer1 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # # regularizer2 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
-    # # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
+    # Regulariser
+    # regularizer1 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # regularizer2 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # regularizer3 = keras.regularizers.L1L2(l1=0.00001, l2=0.0001)
+    # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.4)(inputs)
-    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00005, l2=0.0009), return_sequences=False)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(64, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0001), return_sequences=False)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
     dropout1 = keras.layers.Dropout(rate=0.4)(normalise)
 
@@ -424,7 +425,7 @@ def main():
     # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
     dense1 = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout1)
-    dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
+    dense2 = keras.layers.Dense(1, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
     model.summary()
