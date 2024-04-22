@@ -42,28 +42,35 @@ const FieldDimensionOptions = [
   { label: "Robocup", value: "robocup" },
 ];
 
-export const FieldDimensionSelector = observer(({ model, controller }) => {
-  const handleChange = (value: string) => {
-    controller.setFieldDimensions(value, model); // Use controller to change dimensions
-  };
+// Apply the interfaces to the component's props
+interface FieldDimensionSelectorProps {
+  model: LocalisationModel;
+  controller: LocalisationController;
+}
 
-  const dropdownToggle = <button className={style.localisation__menuButton}>Field Type</button>;
+@observer
+export class FieldDimensionSelector extends React.Component<FieldDimensionSelectorProps> {
+  private dropdownToggle = (<button className={style.localisation__menuButton}>Field Type</button>);
 
-  return (
-    <EnhancedDropdown dropdownToggle={dropdownToggle} className={style.localisation__menuItem}>
-      {FieldDimensionOptions.map((option) => (
-        <div
-          key={option.value}
-          className={`${style.fieldOption} ${model.field.fieldType === option.value ? style.selected : ""}`}
-          onClick={() => handleChange(option.value)}
-        >
-          {option.label}
-          {model.field.fieldType === option.value && <span className={style.checkmark}>✔</span>}
-        </div>
-      ))}
-    </EnhancedDropdown>
-  );
-});
+  render(): JSX.Element {
+    return (
+      <EnhancedDropdown dropdownToggle={this.dropdownToggle} className={style.localisation__menuItem}>
+        {FieldDimensionOptions.map((option) => (
+          <div
+            key={option.value}
+            className={`${style.fieldOption} ${
+              this.props.model.field.fieldType === option.value ? style.selected : ""
+            }`}
+            onClick={() => this.props.controller.setFieldDimensions(option.value, this.props.model)}
+          >
+            {option.label}
+            {this.props.model.field.fieldType === option.value && <span className={style.checkmark}>✔</span>}
+          </div>
+        ))}
+      </EnhancedDropdown>
+    );
+  }
+}
 
 const EnhancedDropdown = dropdownContainer();
 
