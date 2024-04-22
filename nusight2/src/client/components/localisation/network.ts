@@ -13,6 +13,7 @@ import { RobotModel } from "../robot/model";
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
 import { FieldIntersection } from "./robot_model";
+import { FieldModel } from "./field/model";
 
 export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
