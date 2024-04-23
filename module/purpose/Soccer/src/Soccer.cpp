@@ -34,6 +34,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameEvents.hpp"
+#include "message/input/RoboCup.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/Defender.hpp"
@@ -51,6 +52,7 @@ namespace module::purpose {
     using message::behaviour::state::Stability;
     using message::behaviour::state::WalkState;
     using message::input::GameEvents;
+    using message::input::RoboCup;
     using message::localisation::ResetFieldLocalisation;
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
@@ -86,12 +88,18 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FallRecovery>(), 2);
         });
 
-        on<Provide<FindPurpose>>().then([this] {
+        on<Provide<FindPurpose>(), Trigger<RoboCup>>().then([this] (const RoboCup robocup) {
+            log<NUClear::DEBUG>("When robocup emits?", robocup.current_pose.player_id);
+
+            // Keep track of who is alive
+            bool updated = updateRobotInfo(robocup.current_pose.player_id);
+
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
                 case Position::GOALIE: emit<Task>(std::make_unique<Goalie>(cfg.force_playing)); break;
                 case Position::DEFENDER: emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
+                case Position::DYNAMIC: findSoccerPosition(robocup); break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
         });
@@ -122,6 +130,51 @@ namespace module::purpose {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
+
+        on<Every<2, Per<std::chrono::seconds>>>().then([this] {
+            auto now = std::chrono::steady_clock::now();
+            constexpr auto timeout = std::chrono::seconds(4); // or std::chrono::seconds(3) for a tighter threshold
+
+            auto it = activeRobots.begin();
+            while (it != activeRobots.end()) {
+                if (now - it->lastHeardFrom > timeout) {
+                    it = activeRobots.erase(it); // Remove robot and move to the next
+                } else {
+                    ++it;
+                }
+            }
+
+            // Loop through each robot and print its info DELETE ME
+            for (const auto& robot : activeRobots) {
+                // Calculate the time difference in seconds
+                auto timeDiff = std::chrono::duration_cast<std::chrono::seconds>(now - robot.lastHeardFrom).count();
+                log<NUClear::DEBUG>("Robot ID", robot.robotId);
+                log<NUClear::DEBUG>("Last heard from", timeDiff);
+            }
+            // DELETE ME END
+        });
     }
+
+    bool Soccer::updateRobotInfo(uint8_t robotId) {
+        auto now = std::chrono::steady_clock::now();
+
+        std::vector<RobotInfo>::iterator it = std::find_if(activeRobots.begin(), activeRobots.end(), [robotId](const RobotInfo& info) {
+            return info.robotId == robotId;
+        });
+
+        if (it != activeRobots.end()) {
+            // Update existing robot's lastHeardFrom
+            it->lastHeardFrom = now;
+        } else {
+            // Add new robot info
+            activeRobots.push_back({robotId, now});
+            return true;
+        }
+        return false;
+    };
+
+    void Soccer::findSoccerPosition(const RoboCup& robocup) {
+
+    };
 
 }  // namespace module::purpose

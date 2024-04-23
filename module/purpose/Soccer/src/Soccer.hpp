@@ -31,6 +31,7 @@
 #include <string>
 
 #include "extension/Behaviour.hpp"
+#include "message/input/RoboCup.hpp"
 
 namespace module::purpose {
 
@@ -42,6 +43,7 @@ namespace module::purpose {
                 STRIKER,
                 GOALIE,
                 DEFENDER,
+                DYNAMIC
             };
             Value value = Value::STRIKER;
 
@@ -67,6 +69,20 @@ namespace module::purpose {
             /// @brief The soccer position of the robot
             Position position{};
         } cfg;
+
+        struct RobotInfo {
+            uint8_t robotId;
+            std::chrono::steady_clock::time_point lastHeardFrom;
+        };
+
+        /// @brief Store and remove active/inactive robots
+        bool updateRobotInfo(uint8_t robotId);
+
+        /// @brief Decide the correct soccer position
+        void findSoccerPosition(const message::input::RoboCup& robocup);
+
+        /// @brief Store active robots
+        std::vector<RobotInfo> activeRobots;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.

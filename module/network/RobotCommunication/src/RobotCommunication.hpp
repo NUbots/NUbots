@@ -44,19 +44,8 @@ namespace module::network {
             std::string broadcast_ip = "";
         } cfg;
 
-        struct RobotInfo {
-            int robotId;
-            std::chrono::steady_clock::time_point lastHeardFrom;
-        };
-
-        /// @brief Store active robots
-        std::vector<RobotInfo> robots;
-
         /// @brief Handle for incoming UDP message. This will be bound/unbound during (re)connection
         ReactionHandle listen_handle;
-
-        /// @brief Store and remove active/inactive robots
-        void updateRobotInfo(int robotId);
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotCommunication reactor.
