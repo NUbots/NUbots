@@ -172,7 +172,6 @@ namespace module::skill {
                 auto walk_state =
                     std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase);
 
-
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
                     Eigen::Vector3d thetaTL = mat_to_rpy_intrinsic(Htl.linear());
