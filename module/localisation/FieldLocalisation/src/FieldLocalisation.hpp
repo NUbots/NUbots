@@ -240,8 +240,7 @@ namespace module::localisation {
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
-        ReactionHandle line_handle;
-        ReactionHandle intersection_handle;
+        ReactionHandle main_loop_handle;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
@@ -272,12 +271,9 @@ namespace module::localisation {
          */
         Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
-        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(
-            const Eigen::Vector3d& initial_guess,
-            const std::vector<Eigen::Vector3d>& observations);
-
-        std::pair<Eigen::Vector3d, double> run_intersection_optimisation(const Eigen::Vector3d& initial_guess,
-                                                                         const FieldIntersections& field_intersections);
+        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(const Eigen::Vector3d& initial_guess,
+                                                                       const std::vector<Eigen::Vector3d>& observations,
+                                                                       const FieldIntersections& field_intersections);
 
 
         /**
