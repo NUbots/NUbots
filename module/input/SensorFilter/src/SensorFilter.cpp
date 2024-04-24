@@ -349,16 +349,16 @@ namespace module::input {
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
-            Eigen::Isometry3d Hat = Eigen::Isometry3d::Identity();
+            Eigen::Isometry3d Hpt = Eigen::Isometry3d::Identity();
             if (current_walk_phase.value == WalkState::Phase::RIGHT) {
-                Hat = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+                Hpt = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
             }
             else {
-                Hat = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+                Hpt = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
             }
 
             // Perform Anchor Update (x, y, z, yaw)
-            Eigen::Isometry3d Hwt_anchor = Hwp * Hat;
+            Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
             Eigen::Vector3d rpy_anchor   = mat_to_rpy_intrinsic(Hwt_anchor.linear());
 
             // Perform Mahony update (roll, pitch)
