@@ -122,55 +122,74 @@ namespace module::localisation {
             startup = true;
         });
 
-        main_loop_handle = on<Trigger<FieldLines>, With<Stability>, With<RawSensors>, With<FieldIntersections>>().then(
-            "NLopt field localisation",
-            [this](const FieldLines& field_lines,
-                   const Stability& stability,
-                   const RawSensors& raw_sensors,
-                   const FieldIntersections& field_intersections) {
-                // Emit field message using ground truth if available
-                if (cfg.use_ground_truth_localisation) {
-                    auto field(std::make_unique<Field>());
-                    field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
-                    emit(field);
-                    return;
-                }
+        main_loop_handle =
+            on<Last<10, Trigger<FieldLines>, With<FieldIntersections>>, With<Stability>, With<RawSensors>>().then(
+                "NLopt field localisation",
+                [this](const std::list<std::shared_ptr<const FieldLines>>& field_lines,
+                       const std::list<std::shared_ptr<const FieldIntersections>>& field_intersections,
+                       const Stability& stability,
+                       const RawSensors& raw_sensors) {
+                    // Emit field message using ground truth if available
+                    if (cfg.use_ground_truth_localisation) {
+                        auto field(std::make_unique<Field>());
+                        field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
+                        emit(field);
+                        return;
+                    }
 
-                // Otherwise calculate using field line distance map
-                bool unstable = stability == Stability::FALLEN || stability == Stability::FALLING;
-                if (!unstable && field_lines.rPWw.size() > cfg.min_field_line_points) {
-                    if (startup && cfg.starting_side == StartingSide::EITHER) {
-                        std::vector<std::pair<Eigen::Vector3d, double>> opt_results;
-                        for (auto& hypothesis : cfg.initial_hypotheses) {
-                            opt_results.push_back(
-                                run_field_line_optimisation(hypothesis, field_lines.rPWw, field_intersections));
+                    // Unpack all the field line points into a single vector
+                    std::vector<Eigen::Vector3d> field_line_points;
+                    for (const auto& field_line : field_lines) {
+                        for (const auto& rPWw : field_line->rPWw) {
+                            field_line_points.push_back(rPWw);
                         }
-                        // Find the best initial state to use based on the optimisation results of each hypothesis
-                        auto best_hypothesis =
-                            std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
-                                return a.second < b.second;
-                            });
-                        state = best_hypothesis->first;
-                        log<NUClear::DEBUG>("Initial state optimisation took ",
-                                            best_hypothesis->first.transpose(),
-                                            " with cost ",
-                                            best_hypothesis->second);
-                        startup = false;
                     }
-                    else {
-                        // Run optimisation routine
-                        std::pair<Eigen::Vector3d, double> opt_results =
-                            run_field_line_optimisation(state, field_lines.rPWw, field_intersections);
-                        state = opt_results.first;
+
+                    // Unpack all the field intersection points into a single field intersection message
+                    FieldIntersections fi;
+                    for (const auto& field_intersection : field_intersections) {
+                        fi.intersections.insert(fi.intersections.end(),
+                                                field_intersection->intersections.begin(),
+                                                field_intersection->intersections.end());
                     }
-                    auto field(std::make_unique<Field>());
-                    field->Hfw = compute_Hfw(state);
-                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
-                        debug_field_localisation(field->Hfw, raw_sensors);
+
+                    // Otherwise calculate using field line distance map
+                    bool unstable = stability == Stability::FALLEN || stability == Stability::FALLING;
+                    if (!unstable && field_line_points.size() > cfg.min_field_line_points) {
+                        if (startup && cfg.starting_side == StartingSide::EITHER) {
+                            std::vector<std::pair<Eigen::Vector3d, double>> opt_results;
+                            for (auto& hypothesis : cfg.initial_hypotheses) {
+                                opt_results.push_back(run_field_line_optimisation(hypothesis, field_line_points, fi));
+                            }
+                            // Find the best initial state to use based on the
+                            // optimisation results of each hypothesis
+                            auto best_hypothesis =
+                                std::min_element(opt_results.begin(),
+                                                 opt_results.end(),
+                                                 [](const auto& a, const auto& b) { return a.second < b.second; });
+                            state = best_hypothesis->first;
+                            // log<NUClear::DEBUG>(
+                            //     "Initial state optimisation took
+                            //     ",
+                            //     best_hypothesis->first.transpose(),
+                            //     " with cost ",
+                            //     best_hypothesis->second);
+                            startup = false;
+                        }
+                        else {
+                            // Run optimisation routine
+                            std::pair<Eigen::Vector3d, double> opt_results =
+                                run_field_line_optimisation(state, field_line_points, fi);
+                            state = opt_results.first;
+                        }
+                        auto field(std::make_unique<Field>());
+                        field->Hfw = compute_Hfw(state);
+                        if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                            debug_field_localisation(field->Hfw, raw_sensors);
+                        }
+                        emit(field);
                     }
-                    emit(field);
-                }
-            });
+                });
     }
 
     void FieldLocalisation::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {
@@ -213,7 +232,6 @@ namespace module::localisation {
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& observations,
         const FieldIntersections& field_intersections) {
-
         // Wrap the objective function in a lambda function
         ObjectiveFunction<double, 3> obj_fun =
             [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
