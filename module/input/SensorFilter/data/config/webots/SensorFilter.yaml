@@ -4,8 +4,10 @@ buttons:
   debounce_threshold: 7
 
 foot_down:
-  method: FSR # Foot sensor reading
-  threshold: 1 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
+  # method: FSR # Foot sensor reading
+  # threshold: 1 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
+  method: Z_HEIGHT # Foot sensor reading
+  threshold: 0.01 # Height difference of the Z for the Z height method
 
 # Mahony filter for roll + pitch
 mahony:
