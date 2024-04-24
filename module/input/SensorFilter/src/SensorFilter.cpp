@@ -172,7 +172,7 @@ namespace module::input {
             if (rRLl_z > cfg.foot_down.threshold) {
                 sensors->feet[BodySide::RIGHT].down = false;
             }
-            // The left foot is not down if the z height ff the right foot is below a threshold (in left foot space)
+            // The left foot is not down if the z height if the right foot is below a threshold (in left foot space)
             if (rRLl_z < -cfg.foot_down.threshold) {
                 sensors->feet[BodySide::LEFT].down = false;
             }
