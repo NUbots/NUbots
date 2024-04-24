@@ -341,16 +341,16 @@ namespace module::input {
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
-            Eigen::Isometry3d Hat = Eigen::Isometry3d::Identity();
+            Eigen::Isometry3d Hpt = Eigen::Isometry3d::Identity();
             if (current_walk_phase.value == WalkState::Phase::LEFT) {
-                Hat = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
+                Hpt = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
             }
             else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
-                Hat = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+                Hpt = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
             }
 
             // Perform Anchor Update (x, y, z, yaw)
-            Eigen::Isometry3d Hwt_anchor = Hwp * Hat;
+            Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
             Eigen::Vector3d rpy_anchor   = mat_to_rpy_intrinsic(Hwt_anchor.linear());
 
             // Perform Mahony update (roll, pitch)
@@ -378,16 +378,14 @@ namespace module::input {
             double y_current     = Hwt.translation().y();
             double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
             double y_dot_current = (y_current - y_prev) / dt;
-            emit(graph("y_dot_current", y_dot_current));
-            double y_dot = (dt / cfg.y_cut_off_frequency) * y_dot_current
+            double y_dot         = (dt / cfg.y_cut_off_frequency) * y_dot_current
                            + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
 
             // Low pass filter for torso x velocity
             double x_current     = Hwt.translation().x();
             double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
             double x_dot_current = (x_current - x_prev) / dt;
-            emit(graph("x_dot_current", x_dot_current));
-            double x_dot = (dt / cfg.x_cut_off_frequency) * x_dot_current
+            double x_dot         = (dt / cfg.x_cut_off_frequency) * x_dot_current
                            + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
 
             // Fuse the velocity estimates
