@@ -271,10 +271,16 @@ namespace module::localisation {
          */
         Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
+        /**
+         * @brief Run the field line optimisation
+         * @param initial_guess The initial guess for the field line
+         * @param observations The observations of the field line points
+         * @param field_intersections The field intersections
+         * @return Pair <optimisation solution (x,y,theta), final cost>
+         */
         std::pair<Eigen::Vector3d, double> run_field_line_optimisation(const Eigen::Vector3d& initial_guess,
                                                                        const std::vector<Eigen::Vector3d>& observations,
                                                                        const FieldIntersections& field_intersections);
-
 
         /**
          * @brief Setup field line distance map
