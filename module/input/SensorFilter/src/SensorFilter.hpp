@@ -110,7 +110,7 @@ namespace module::input {
         /// @brief Current walk phase of the robot
         WalkState::Phase current_walk_phase = WalkState::Phase::LEFT;
 
-        /// @brief Transform from planted foot {a} to world {w} space
+        /// @brief Transform from planted foot {p} to world {w} space
         Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation

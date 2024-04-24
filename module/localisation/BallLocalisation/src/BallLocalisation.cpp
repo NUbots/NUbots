@@ -36,7 +36,6 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
-#include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -50,7 +49,6 @@ namespace module::localisation {
 
     using message::eye::DataPoint;
 
-    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -58,7 +56,6 @@ namespace module::localisation {
         : Reactor(std::move(environment)) {
 
         using message::localisation::Ball;
-        using utility::math::coordinates::reciprocalSphericalToCartesian;
 
         on<Configuration>("BallLocalisation.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();

@@ -136,6 +136,7 @@ export class LocalisationRobotModel {
   @observable fieldIntersections?: FieldIntersection[];
   // Both bottom and top points of goal are in world space.
   @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
+  @observable robots: { id: number; rRWw: Vector3 }[];
 
   constructor({
     model,
@@ -152,6 +153,7 @@ export class LocalisationRobotModel {
     ball,
     fieldIntersections,
     goals,
+    robots,
   }: {
     model: RobotModel;
     name: string;
@@ -167,6 +169,7 @@ export class LocalisationRobotModel {
     ball?: { rBWw: Vector3 };
     fieldIntersections?: FieldIntersection[];
     goals: { points: { bottom: Vector3; top: Vector3 }[] };
+    robots: { id: number; rRWw: Vector3 }[];
   }) {
     this.model = model;
     this.name = name;
@@ -182,6 +185,7 @@ export class LocalisationRobotModel {
     this.ball = ball;
     this.fieldIntersections = fieldIntersections;
     this.goals = goals;
+    this.robots = robots;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -197,6 +201,7 @@ export class LocalisationRobotModel {
       fieldLinePoints: { rPWw: [] },
       particles: { particle: [] },
       goals: { points: [] },
+      robots: [],
     });
   });
 
@@ -239,6 +244,12 @@ export class LocalisationRobotModel {
       bottom: pair?.bottom.applyMatrix4(this.Hfw),
       top: pair?.top.applyMatrix4(this.Hfw),
     }));
+  }
+
+  /** Robot positions in field space */
+  @computed
+  get rRFf(): Vector3[] {
+    return this.robots?.map((robot) => robot.rRWw.applyMatrix4(this.Hfw));
   }
 
   /** Field intersections in field space */
