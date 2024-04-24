@@ -20,7 +20,7 @@ export class FieldModel {
       dimensions: FieldDimensions.of(),
       fieldColor: "#00cc00",
       lineColor: "#ffffff",
-      fieldType: "Robocup",
+      fieldType: "robocup",
     });
   }
 }
