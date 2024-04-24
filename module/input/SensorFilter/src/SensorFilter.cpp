@@ -90,11 +90,18 @@ namespace module::input {
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
         });
 
-        on<Trigger<RawSensors>, Optional<With<Sensors>>, Optional<With<WalkState>>, Single, Priority::HIGH>().then(
+        on<Startup>().then([this] {
+            // Emit an initial walk state to ensure odometry starts if no other walk state is emitted
+            emit(std::make_unique<WalkState>(message::behaviour::state::WalkState::State::UNKNOWN,
+                                             Eigen::Vector3d::Zero(),
+                                             message::behaviour::state::WalkState::Phase::DOUBLE));
+        });
+
+        on<Trigger<RawSensors>, Optional<With<Sensors>>, With<WalkState>, Single, Priority::HIGH>().then(
             "Main Sensors Loop",
             [this](const RawSensors& raw_sensors,
                    const std::shared_ptr<const Sensors>& previous_sensors,
-                   const std::shared_ptr<const WalkState>& walk_state) {
+                   const WalkState& walk_state) {
                 auto sensors = std::make_unique<Sensors>();
 
                 // Raw sensors (Accelerometer, Gyroscope, etc.)
@@ -108,7 +115,7 @@ namespace module::input {
 
                 // Graph debug information
                 if (log_level <= NUClear::DEBUG) {
-                    debug_sensor_filter(sensors, raw_sensors, walk_state);
+                    debug_sensor_filter(sensors, raw_sensors);
                 }
 
                 emit(std::move(sensors));
@@ -150,19 +157,24 @@ namespace module::input {
         sensors->rMTt = tinyrobotics::center_of_mass(nugus_model, q);
 
         // **************** Foot Down Information ****************
-        sensors->feet[BodySide::RIGHT].down = true;
-        sensors->feet[BodySide::LEFT].down  = true;
-        const Eigen::Isometry3d Htr(sensors->Htx[FrameID::R_ANKLE_ROLL]);
-        const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_ANKLE_ROLL]);
-        const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
-        const Eigen::Vector3d rRLl  = Hlr.translation();
-
         if (cfg.foot_down.method == "Z_HEIGHT") {
-            if (rRLl.z() < -cfg.foot_down.threshold) {
-                sensors->feet[BodySide::LEFT].down = false;
-            }
-            else if (rRLl.z() > cfg.foot_down.threshold) {
+            const Eigen::Isometry3d Htr(sensors->Htx[FrameID::R_FOOT_BASE]);
+            const Eigen::Isometry3d Htl(sensors->Htx[FrameID::L_FOOT_BASE]);
+            const Eigen::Isometry3d Hlr = Htl.inverse() * Htr;
+
+            const double rRLl_z = Hlr.translation().z();
+
+            emit(graph("rRLl_z", rRLl_z));
+
+            sensors->feet[BodySide::RIGHT].down = true;
+            sensors->feet[BodySide::LEFT].down  = true;
+            // The right foot is not down if the z height if the right foot is above a threshold (in left foot space)
+            if (rRLl_z > cfg.foot_down.threshold) {
                 sensors->feet[BodySide::RIGHT].down = false;
+            }
+            // The left foot is not down if the z height ff the right foot is below a threshold (in left foot space)
+            if (rRLl_z < -cfg.foot_down.threshold) {
+                sensors->feet[BodySide::LEFT].down = false;
             }
         }
         else if (cfg.foot_down.method == "FSR") {
@@ -312,7 +324,7 @@ namespace module::input {
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
                                        const RawSensors& raw_sensors,
-                                       const std::shared_ptr<const WalkState>& walk_state) {
+                                       const WalkState& walk_state) {
         if (!cfg.use_ground_truth) {
             // Compute time since last update
             const double dt = std::max(
@@ -321,12 +333,9 @@ namespace module::input {
                     .count(),
                 0.0);
 
-            // Update the current support phase is not the same as the walk state, a support phase change has
-            // occurred
-            if (walk_state != nullptr && current_walk_phase != walk_state->phase) {
-                // Update the current support phase to the new support phase
-                current_walk_phase = walk_state->phase;
-
+            // Assume support foot change has occurred if walk state has changed
+            if (current_walk_phase != walk_state.phase) {
+                current_walk_phase = walk_state.phase;
                 // Compute the new anchor frame (Hwp) (new support foot)
                 if (current_walk_phase.value == WalkState::Phase::LEFT) {
                     Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
@@ -334,7 +343,6 @@ namespace module::input {
                 else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
                     Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
                 }
-
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
                 Hwp.translation().z() = 0;
                 Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
@@ -342,11 +350,11 @@ namespace module::input {
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
             Eigen::Isometry3d Hat = Eigen::Isometry3d::Identity();
-            if (current_walk_phase.value == WalkState::Phase::LEFT) {
-                Hat = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
-            }
-            else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
+            if (current_walk_phase.value == WalkState::Phase::RIGHT) {
                 Hat = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
+            }
+            else {
+                Hat = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
             }
 
             // Perform Anchor Update (x, y, z, yaw)
@@ -378,16 +386,14 @@ namespace module::input {
             double y_current     = Hwt.translation().y();
             double y_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().y() : y_current;
             double y_dot_current = (y_current - y_prev) / dt;
-            emit(graph("y_dot_current", y_dot_current));
-            double y_dot = (dt / cfg.y_cut_off_frequency) * y_dot_current
+            double y_dot         = (dt / cfg.y_cut_off_frequency) * y_dot_current
                            + (1 - (dt / cfg.y_cut_off_frequency)) * sensors->vTw.y();
 
             // Low pass filter for torso x velocity
             double x_current     = Hwt.translation().x();
             double x_prev        = previous_sensors ? previous_sensors->Htw.inverse().translation().x() : x_current;
             double x_dot_current = (x_current - x_prev) / dt;
-            emit(graph("x_dot_current", x_dot_current));
-            double x_dot = (dt / cfg.x_cut_off_frequency) * x_dot_current
+            double x_dot         = (dt / cfg.x_cut_off_frequency) * x_dot_current
                            + (1 - (dt / cfg.x_cut_off_frequency)) * sensors->vTw.x();
 
             // Fuse the velocity estimates
@@ -407,9 +413,7 @@ namespace module::input {
         }
     }
 
-    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
-                                           const RawSensors& raw_sensors,
-                                           const std::shared_ptr<const WalkState>& walk_state) {
+    void SensorFilter::debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors) {
         // Raw accelerometer and gyroscope information
         emit(graph("Gyroscope", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
         emit(
@@ -422,7 +426,7 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Walk state information
-        emit(graph("Walk support phase", int(walk_state->phase)));
+        emit(graph("Walk support phase", int(current_walk_phase)));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
