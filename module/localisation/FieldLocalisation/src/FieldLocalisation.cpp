@@ -62,17 +62,31 @@ namespace module::localisation {
             cfg.start_time_delay              = std::chrono::seconds(config["start_time_delay"].as<int>());
             cfg.initial_state                 = Eigen::Vector3d(config["initial_state"].as<Expression>());
             cfg.use_ground_truth_localisation = config["use_ground_truth_localisation"].as<bool>();
-            cfg.distance_weight               = config["distance_weight"].as<double>();
-            cfg.change_limit                  = Eigen::Vector3d(config["change_limit"].as<Expression>());
-            cfg.last_state_weight             = config["last_state_weight"].as<double>();
-            cfg.xtol_rel                      = config["opt"]["xtol_rel"].as<double>();
-            cfg.ftol_rel                      = config["opt"]["ftol_rel"].as<double>();
-            cfg.maxeval                       = config["opt"]["maxeval"].as<int>();
+
+            // Field line optimisation parameters
+            cfg.field_line_distance_weight = config["field_line_distance_weight"].as<double>();
+            cfg.min_field_line_points      = config["min_field_line_points"].as<int>();
+
+            // Field line intersection optimisation parameters
+            cfg.field_line_intersection_weight = config["field_line_intersection_weight"].as<double>();
+            cfg.min_association_distance       = config["min_association_distance"].as<double>();
+            cfg.min_field_line_intersections   = config["min_field_line_intersections"].as<int>();
+
+            // Constraints and weighting on change in state
+            cfg.change_limit        = Eigen::Vector3d(config["change_limit"].as<Expression>());
+            cfg.state_change_weight = config["state_change_weight"].as<double>();
+
+            // Optimisation parameters
+            cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
+            cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
+            cfg.maxeval  = config["opt"]["maxeval"].as<int>();
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
             // Generate the field line distance map
             setup_fieldline_distance_map(fd);
+            // Generate the field landmarks
+            setup_field_landmarks(fd);
             if (cfg.save_map) {
                 std::ofstream file("recordings/fieldline_map.csv");
                 file << fieldline_distance_map.get_map();
@@ -96,19 +110,21 @@ namespace module::localisation {
             }
             state = cfg.initial_hypotheses[0];
 
-            main_loop_handle.disable();
+            line_handle.disable();
+            intersection_handle.disable();
             emit<Scope::DELAY>(std::make_unique<ResetFieldLocalisation>(), cfg.start_time_delay);
             emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
         on<Trigger<ResetFieldLocalisation>>().then([this] {
             log<NUClear::INFO>("Resetting field localisation");
-            main_loop_handle.enable();
+            line_handle.enable();
+            intersection_handle.enable();
             state   = cfg.initial_hypotheses[0];
             startup = true;
         });
 
-        main_loop_handle = on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
+        line_handle = on<Trigger<FieldLines>, With<Stability>, With<RawSensors>>().then(
             "NLopt field localisation",
             [this](const FieldLines& field_lines, const Stability& stability, const RawSensors& raw_sensors) {
                 // Emit field message using ground truth if available
@@ -121,11 +137,11 @@ namespace module::localisation {
 
                 // Otherwise calculate using field line distance map
                 bool unstable = stability == Stability::FALLEN || stability == Stability::FALLING;
-                if (!unstable && field_lines.rPWw.size() > cfg.min_observations) {
+                if (!unstable && field_lines.rPWw.size() > cfg.min_field_line_points) {
                     if (startup && cfg.starting_side == StartingSide::EITHER) {
                         std::vector<std::pair<Eigen::Vector3d, double>> opt_results;
                         for (auto& hypothesis : cfg.initial_hypotheses) {
-                            opt_results.push_back(optimise_Hfw(hypothesis, field_lines.rPWw));
+                            opt_results.push_back(run_field_line_optimisation(hypothesis, field_lines.rPWw));
                         }
                         // Find the best initial state to use based on the optimisation results of each hypothesis
                         auto best_hypothesis =
@@ -141,10 +157,42 @@ namespace module::localisation {
                     }
                     else {
                         // Run optimisation routine
-                        std::pair<Eigen::Vector3d, double> opt_results = optimise_Hfw(state, field_lines.rPWw);
-                        state                                          = opt_results.first;
-                        emit(graph("Cost", opt_results.second));
+                        std::pair<Eigen::Vector3d, double> opt_results =
+                            run_field_line_optimisation(state, field_lines.rPWw);
+                        state = opt_results.first;
+                        emit(graph("Cost lines", opt_results.second));
                     }
+                    auto field(std::make_unique<Field>());
+                    field->Hfw = compute_Hfw(state);
+                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                        debug_field_localisation(field->Hfw, raw_sensors);
+                    }
+                    emit(field);
+                }
+            });
+
+        intersection_handle = on<Trigger<FieldIntersections>, With<Stability>, With<RawSensors>>().then(
+            "NLopt intersection localisation",
+            [this](const FieldIntersections& field_intersections,
+                   const Stability& stability,
+                   const RawSensors& raw_sensors) {
+                // Emit field message using ground truth if available
+                if (cfg.use_ground_truth_localisation) {
+                    auto field(std::make_unique<Field>());
+                    field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
+                    emit(field);
+                    return;
+                }
+
+                // Otherwise calculate using field intersections
+                bool unstable = stability == Stability::FALLEN || stability == Stability::FALLING;
+                if (!unstable && field_intersections.intersections.size() > cfg.min_field_line_intersections) {
+                    // Run optimisation routine
+                    std::pair<Eigen::Vector3d, double> opt_results =
+                        run_intersection_optimisation(state, field_intersections);
+                    state = opt_results.first;
+                    emit(graph("Cost intersections", opt_results.second));
+
                     auto field(std::make_unique<Field>());
                     field->Hfw = compute_Hfw(state);
                     if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
@@ -191,7 +239,7 @@ namespace module::localisation {
                                fieldline_distance_map.get_width() / 2 + std::round(rPFf(0) / cfg.grid_size));
     }
 
-    std::pair<Eigen::Vector3d, double> FieldLocalisation::optimise_Hfw(
+    std::pair<Eigen::Vector3d, double> FieldLocalisation::run_field_line_optimisation(
         const Eigen::Vector3d& initial_guess,
         const std::vector<Eigen::Vector3d>& observations) {
 
@@ -209,11 +257,91 @@ namespace module::localisation {
                 distance_cost +=
                     std::pow(fieldline_distance_map.get_occupancy_value(map_position.x(), map_position.y()), 2);
             }
-            distance_cost = cfg.distance_weight * distance_cost;
+            distance_cost = cfg.field_line_distance_weight * distance_cost;
 
             // Cost = sum of squared distances from observations to field line map + distance from last state
-            double state_cost = cfg.last_state_weight * (x - initial_guess).norm();
-            double cost       = distance_cost + state_cost;
+            double state_change_cost = cfg.state_change_weight * (x - initial_guess).norm();
+            double cost              = distance_cost + state_change_cost;
+            return cost;
+        };
+        // Create the NLopt optimizer and setup the algorithm, tolerances and maximum number of evaluations
+        constexpr unsigned int n   = 3;
+        nlopt::algorithm algorithm = nlopt::LN_COBYLA;
+        nlopt::opt opt             = nlopt::opt(algorithm, n);
+        opt.set_xtol_rel(cfg.xtol_rel);
+        opt.set_ftol_rel(cfg.ftol_rel);
+        opt.set_maxeval(cfg.maxeval);
+
+        // Set the objective function
+        opt.set_min_objective(eigen_objective_wrapper<double, n>, &obj_fun);
+
+        // Define the upper and lower bounds for the change in state
+        Eigen::Vector3d lower_bounds = initial_guess - cfg.change_limit;
+        Eigen::Vector3d upper_bounds = initial_guess + cfg.change_limit;
+
+        // Convert bounds to std::vector for NLopt
+        std::vector<double> lb(n), ub(n);
+        eigen_to_nlopt<double, n>(lower_bounds, lb);
+        eigen_to_nlopt<double, n>(upper_bounds, ub);
+
+        // Set bounds in the optimizer
+        opt.set_lower_bounds(lb);
+        opt.set_upper_bounds(ub);
+
+        // Convert the initial guess to NLopt format
+        std::vector<double> x(n);
+        eigen_to_nlopt<double, n>(initial_guess, x);
+
+        // Find the optimal solution
+        double final_cost;
+        opt.optimize(x, final_cost);
+
+        // Convert the optimized solution back to an Eigen
+        Eigen::Matrix<double, n, 1> optimized_solution(n);
+        nlopt_to_eigen<double, n>(x, optimized_solution);
+        return std::make_pair(optimized_solution, final_cost);
+    }
+
+    std::pair<Eigen::Vector3d, double> FieldLocalisation::run_intersection_optimisation(
+        const Eigen::Vector3d& initial_guess,
+        const FieldIntersections& field_intersections) {
+
+        // Wrap the objective function in a lambda function
+        ObjectiveFunction<double, 3> obj_fun =
+            [&](const Eigen::Matrix<double, 3, 1>& x, Eigen::Matrix<double, 3, 1>& grad, void* data) -> double {
+            (void) data;  // Unused in this case
+            (void) grad;  // Unused in this case
+
+            // Compute the cost and gradient
+            auto Hfw             = compute_Hfw(x);
+            double distance_cost = 0.0;
+
+            // Data association
+            for (const auto& intersection : field_intersections.intersections) {
+                double min_distance = std::numeric_limits<double>::max();
+
+                for (const auto& landmark : landmarks) {
+                    // Check if the landmark is of the same type as the observed intersection
+                    if (landmark.type == intersection.type) {
+                        // Calculate Euclidean distance between the observed intersection and the landmark
+                        double distance = (landmark.rLFf - Hfw * intersection.rIWw).norm();
+
+                        // If this landmark is closer update
+                        if (distance < min_distance) {
+                            min_distance = distance;
+                        }
+                    }
+                }
+
+                // If the closest landmark is too far away, do not consider it as an association
+                if (min_distance < cfg.min_association_distance) {
+                    distance_cost += std::pow(min_distance, 2);
+                }
+            }
+            distance_cost = cfg.field_line_intersection_weight * distance_cost;
+            // Cost = sum of squared distances from observations to field line map + distance from last state
+            double state_change_cost = cfg.state_change_weight * (x - initial_guess).norm();
+            double cost              = distance_cost + state_change_cost;
             return cost;
         };
         // Create the NLopt optimizer and setup the algorithm, tolerances and maximum number of evaluations

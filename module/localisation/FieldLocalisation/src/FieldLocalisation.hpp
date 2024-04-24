@@ -35,6 +35,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
+#include "message/vision/FieldIntersections.hpp"
 #include "message/vision/FieldLines.hpp"
 
 #include "utility/localisation/OccupancyMap.hpp"
@@ -45,6 +46,8 @@ namespace module::localisation {
 
     using message::platform::RawSensors;
     using message::support::FieldDescription;
+    using message::vision::FieldIntersection;
+    using message::vision::FieldIntersections;
 
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
@@ -157,6 +160,17 @@ namespace module::localisation {
         return result;
     }
 
+
+    /// @brief Landmark struct
+    struct Landmark {
+        /// @brief Landmark position in field space
+        Eigen::Vector3d rLFf{};
+
+        /// @brief Landmark type
+        message::vision::FieldIntersection::IntersectionType type =
+            message::vision::FieldIntersection::IntersectionType::UNKNOWN;
+    };
+
     class FieldLocalisation : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
@@ -173,8 +187,11 @@ namespace module::localisation {
             /// @brief Bool to enable/disable saving the generated map as a csv file
             bool save_map = false;
 
-            /// @brief Minimum number of field line points for a measurement update
-            size_t min_observations = 0;
+            /// @brief Minimum number of field line points for an update to run
+            size_t min_field_line_points = 0;
+
+            /// @brief Minimum number of field line intersections for an update to run
+            size_t min_field_line_intersections = 0;
 
             /// @brief Start time delay for the particle filter
             std::chrono::seconds start_time_delay = std::chrono::seconds(0);
@@ -186,10 +203,15 @@ namespace module::localisation {
             StartingSide starting_side = StartingSide::UNKNOWN;
 
             /// @brief Scalar weighting of cost associated with distance to field lines
-            double distance_weight = 0.0;
+            double field_line_distance_weight = 0.0;
+
+            /// @brief Scalar weighting of cost associated with distance to field intersections
+            double field_line_intersection_weight = 0.0;
 
             /// @brief Scalar weighting of cost associated with change in state
-            double last_state_weight = 0.0;
+            double state_change_weight = 0.0;
+
+            double min_association_distance = 0.0;
 
             /// @brief Constraint on the maximum change in state
             Eigen::Vector3d change_limit = Eigen::Vector3d::Zero();
@@ -212,10 +234,14 @@ namespace module::localisation {
         /// @brief Field line distance map (encodes the minimum distance to a field line)
         OccupancyMap<double> fieldline_distance_map;
 
+        /// @brief List of landmarks (field intersections rLFf) in field space
+        std::vector<Landmark> landmarks;
+
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
 
-        ReactionHandle main_loop_handle;
+        ReactionHandle line_handle;
+        ReactionHandle intersection_handle;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisation reactor.
@@ -246,8 +272,13 @@ namespace module::localisation {
          */
         Eigen::Vector2i position_in_map(const Eigen::Vector3d& particle, const Eigen::Vector3d& rPWw);
 
-        std::pair<Eigen::Vector3d, double> optimise_Hfw(const Eigen::Vector3d& initial_guess,
-                                                        const std::vector<Eigen::Vector3d>& observations);
+        std::pair<Eigen::Vector3d, double> run_field_line_optimisation(
+            const Eigen::Vector3d& initial_guess,
+            const std::vector<Eigen::Vector3d>& observations);
+
+        std::pair<Eigen::Vector3d, double> run_intersection_optimisation(const Eigen::Vector3d& initial_guess,
+                                                                         const FieldIntersections& field_intersections);
+
 
         /**
          * @brief Setup field line distance map
@@ -255,6 +286,13 @@ namespace module::localisation {
          * @param fd The field dimensions
          */
         void setup_fieldline_distance_map(const FieldDescription& fd);
+
+        /**
+         * @brief Setup field landmarks
+         *
+         * @param fd The field dimensions
+         */
+        void setup_field_landmarks(const FieldDescription& fd);
     };
 }  // namespace module::localisation
 
