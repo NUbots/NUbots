@@ -80,6 +80,28 @@ namespace module::localisation {
             cfg.xtol_rel = config["opt"]["xtol_rel"].as<double>();
             cfg.ftol_rel = config["opt"]["ftol_rel"].as<double>();
             cfg.maxeval  = config["opt"]["maxeval"].as<int>();
+
+            // Define the process model
+            cfg.A = config["kalman"]["A"].as<Expression>();
+
+            // Define the input model
+            cfg.B = Eigen::Matrix<double, n_states, n_inputs>::Zero();
+
+            // Define the measurement model
+            cfg.C = config["kalman"]["C"].as<Expression>();
+
+            // Define the process noise covariance
+            cfg.Q = config["kalman"]["Q"].as<Expression>();
+
+            // Define the measurement noise covariance
+            cfg.R = config["kalman"]["R"].as<Expression>();
+            kf    = utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements>(cfg.initial_state,
+                                                                                                 cfg.P0,
+                                                                                                 cfg.A,
+                                                                                                 cfg.B,
+                                                                                                 cfg.C,
+                                                                                                 cfg.Q,
+                                                                                                 cfg.R);
         });
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
@@ -122,74 +144,73 @@ namespace module::localisation {
             startup = true;
         });
 
-        main_loop_handle =
-            on<Last<10, Trigger<FieldLines>, With<FieldIntersections>>, With<Stability>, With<RawSensors>>().then(
-                "NLopt field localisation",
-                [this](const std::list<std::shared_ptr<const FieldLines>>& field_lines,
-                       const std::list<std::shared_ptr<const FieldIntersections>>& field_intersections,
-                       const Stability& stability,
-                       const RawSensors& raw_sensors) {
-                    // Emit field message using ground truth if available
-                    if (cfg.use_ground_truth_localisation) {
-                        auto field(std::make_unique<Field>());
-                        field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
-                        emit(field);
-                        return;
-                    }
+        main_loop_handle = on<Trigger<FieldLines>, With<FieldIntersections>, With<Stability>, With<RawSensors>>().then(
+            "NLopt field localisation",
+            [this](const FieldLines& field_lines,
+                   const FieldIntersections& field_intersections,
+                   const Stability& stability,
+                   const RawSensors& raw_sensors) {
+                // Emit field message using ground truth if available
+                if (cfg.use_ground_truth_localisation) {
+                    auto field(std::make_unique<Field>());
+                    field->Hfw = raw_sensors.localisation_ground_truth.Hfw;
+                    emit(field);
+                    return;
+                }
+                // start timeer
+                auto start = std::chrono::steady_clock::now();
 
-                    // Unpack all the field line points into a single vector
-                    std::vector<Eigen::Vector3d> field_line_points;
-                    for (const auto& field_line : field_lines) {
-                        for (const auto& rPWw : field_line->rPWw) {
-                            field_line_points.push_back(rPWw);
+                bool unstable = stability == Stability::FALLEN || stability == Stability::FALLING;
+                if (!unstable && field_lines.rPWw.size() > cfg.min_field_line_points) {
+                    // ****** Optimisation ****** //
+                    if (startup && cfg.starting_side == StartingSide::EITHER) {
+                        std::vector<std::pair<Eigen::Vector3d, double>> opt_results;
+                        for (auto& hypothesis : cfg.initial_hypotheses) {
+                            opt_results.push_back(
+                                run_field_line_optimisation(hypothesis, field_lines.rPWw, field_intersections));
                         }
+                        // Find the best initial state to use based on the
+                        // optimisation results of each hypothesis
+                        auto best_hypothesis =
+                            std::min_element(opt_results.begin(), opt_results.end(), [](const auto& a, const auto& b) {
+                                return a.second < b.second;
+                            });
+                        state = best_hypothesis->first;
+                        log<NUClear::DEBUG>("Initial state optimisation took ",
+                                            best_hypothesis->first.transpose(),
+                                            " with cost ",
+                                            best_hypothesis->second);
+                        startup = false;
                     }
+                    else {
+                        // Run optimisation routine
+                        std::pair<Eigen::Vector3d, double> opt_results =
+                            run_field_line_optimisation(state, field_lines.rPWw, field_intersections);
+                        state = opt_results.first;
+                    }
+                    // ***** Kalman Filter ***** //
+                    // No control input
+                    Eigen::Matrix<double, n_inputs, 1> u = Eigen::Matrix<double, n_inputs, 1>::Zero();
+                    // Time update
+                    kf.time(u, 0);
+                    // Measurement update
+                    kf.measure(state);
+                    emit(graph("opt state", state.x(), state.y(), state.z()));
+                    emit(graph("kf state", kf.get_state().x(), kf.get_state().y(), kf.get_state().z()));
+                    state = kf.get_state();
+                    // ****** Emit Field Message ****** //
+                    auto stop     = std::chrono::steady_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+                    log<NUClear::DEBUG>("Field localisation took ", duration.count(), "ms");
 
-                    // Unpack all the field intersection points into a single field intersection message
-                    FieldIntersections fi;
-                    for (const auto& field_intersection : field_intersections) {
-                        fi.intersections.insert(fi.intersections.end(),
-                                                field_intersection->intersections.begin(),
-                                                field_intersection->intersections.end());
+                    auto field(std::make_unique<Field>());
+                    field->Hfw = compute_Hfw(kf.get_state());
+                    if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
+                        debug_field_localisation(field->Hfw, raw_sensors);
                     }
-
-                    // Otherwise calculate using field line distance map
-                    bool unstable = stability == Stability::FALLEN || stability == Stability::FALLING;
-                    if (!unstable && field_line_points.size() > cfg.min_field_line_points) {
-                        if (startup && cfg.starting_side == StartingSide::EITHER) {
-                            std::vector<std::pair<Eigen::Vector3d, double>> opt_results;
-                            for (auto& hypothesis : cfg.initial_hypotheses) {
-                                opt_results.push_back(run_field_line_optimisation(hypothesis, field_line_points, fi));
-                            }
-                            // Find the best initial state to use based on the
-                            // optimisation results of each hypothesis
-                            auto best_hypothesis =
-                                std::min_element(opt_results.begin(),
-                                                 opt_results.end(),
-                                                 [](const auto& a, const auto& b) { return a.second < b.second; });
-                            state = best_hypothesis->first;
-                            // log<NUClear::DEBUG>(
-                            //     "Initial state optimisation took
-                            //     ",
-                            //     best_hypothesis->first.transpose(),
-                            //     " with cost ",
-                            //     best_hypothesis->second);
-                            startup = false;
-                        }
-                        else {
-                            // Run optimisation routine
-                            std::pair<Eigen::Vector3d, double> opt_results =
-                                run_field_line_optimisation(state, field_line_points, fi);
-                            state = opt_results.first;
-                        }
-                        auto field(std::make_unique<Field>());
-                        field->Hfw = compute_Hfw(state);
-                        if (log_level <= NUClear::DEBUG && raw_sensors.localisation_ground_truth.exists) {
-                            debug_field_localisation(field->Hfw, raw_sensors);
-                        }
-                        emit(field);
-                    }
-                });
+                    emit(field);
+                }
+            });
     }
 
     void FieldLocalisation::debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors) {

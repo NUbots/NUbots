@@ -47,3 +47,28 @@ opt:
   ftol_rel: 1e-6
   # Maximum number of evaluations for the optimization
   maxeval: 1000
+
+kalman:
+  # Continuous time process model:
+  A:
+    - [1, 0, 0]
+    - [0, 1, 0]
+    - [0, 0, 1]
+  # Continuous time input model: No inputs
+  B: []
+  # Continuous time measurement model:
+  C:
+    - [1, 0, 0]
+    - [0, 1, 0]
+    - [0, 0, 1]
+
+  # Process model noise
+  Q:
+    - [1e-3, 0, 0]
+    - [0, 1e-3, 0]
+    - [0, 0, 1e-3]
+  # Measurement model noise
+  R:
+    - [1, 0, 0]
+    - [0, 1, 0]
+    - [0, 0, 1]

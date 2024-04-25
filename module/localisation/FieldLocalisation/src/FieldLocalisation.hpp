@@ -39,6 +39,7 @@
 #include "message/vision/FieldLines.hpp"
 
 #include "utility/localisation/OccupancyMap.hpp"
+#include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -173,6 +174,11 @@ namespace module::localisation {
 
     class FieldLocalisation : public NUClear::Reactor {
     private:
+        // Define the model dimensions
+        static constexpr size_t n_states       = 3;
+        static constexpr size_t n_inputs       = 0;
+        static constexpr size_t n_measurements = 3;
+
         /// @brief Stores configuration values
         struct Config {
             /// @brief Size of the grid cells in the occupancy grid [m]
@@ -225,8 +231,28 @@ namespace module::localisation {
             /// @brief Maximum number of evaluations for the optimization
             size_t maxeval = 0;
 
+            // Define the process model
+            Eigen::Matrix3d A;
+
+            // Define the input model
+            Eigen::MatrixXd B;
+
+            // Define the measurement model
+            Eigen::MatrixXd C;
+
+            // Define the process noise covariance
+            Eigen::Matrix3d Q;
+
+            // Define the measurement noise covariance
+            Eigen::Matrix3d R;
+
+            // Define the initial covariance
+            Eigen::Matrix<double, n_states, n_states> P0 = Eigen::Matrix<double, n_states, n_states>::Identity();
         } cfg;
 
+
+        // Kalman filter
+        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf;
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
         Eigen::Vector3d state = Eigen::Vector3d::Zero();
@@ -239,7 +265,6 @@ namespace module::localisation {
 
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
-
         ReactionHandle main_loop_handle;
 
     public:
