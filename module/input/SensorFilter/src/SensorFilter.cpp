@@ -439,7 +439,7 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Walk state information
-        emit(graph("Planted foot phase", int(current_planted_foot_phase)));
+        emit(graph("Planted foot phase", int(sensors->planted_foot_phase)));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
