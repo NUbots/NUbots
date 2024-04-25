@@ -228,6 +228,7 @@ var annotated_dup =
       [ "skill", null, [
         [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
+        [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
@@ -416,6 +417,24 @@ var annotated_dup =
         [ "Encoder", "classutility_1_1nbs_1_1Encoder.html", "classutility_1_1nbs_1_1Encoder" ],
         [ "Index", "classutility_1_1nbs_1_1Index.html", "classutility_1_1nbs_1_1Index" ],
         [ "IndexItem", "structutility_1_1nbs_1_1IndexItem.html", "structutility_1_1nbs_1_1IndexItem" ]
+      ] ],
+      [ "openai", null, [
+        [ "_detail", null, [
+          [ "CategoryAudio", "structutility_1_1openai_1_1__detail_1_1CategoryAudio.html", "structutility_1_1openai_1_1__detail_1_1CategoryAudio" ],
+          [ "CategoryChat", "structutility_1_1openai_1_1__detail_1_1CategoryChat.html", "structutility_1_1openai_1_1__detail_1_1CategoryChat" ],
+          [ "CategoryCompletion", "structutility_1_1openai_1_1__detail_1_1CategoryCompletion.html", "structutility_1_1openai_1_1__detail_1_1CategoryCompletion" ],
+          [ "CategoryEdit", "structutility_1_1openai_1_1__detail_1_1CategoryEdit.html", "structutility_1_1openai_1_1__detail_1_1CategoryEdit" ],
+          [ "CategoryEmbedding", "structutility_1_1openai_1_1__detail_1_1CategoryEmbedding.html", "structutility_1_1openai_1_1__detail_1_1CategoryEmbedding" ],
+          [ "CategoryFile", "structutility_1_1openai_1_1__detail_1_1CategoryFile.html", "structutility_1_1openai_1_1__detail_1_1CategoryFile" ],
+          [ "CategoryFineTune", "structutility_1_1openai_1_1__detail_1_1CategoryFineTune.html", "structutility_1_1openai_1_1__detail_1_1CategoryFineTune" ],
+          [ "CategoryImage", "structutility_1_1openai_1_1__detail_1_1CategoryImage.html", "structutility_1_1openai_1_1__detail_1_1CategoryImage" ],
+          [ "CategoryModel", "structutility_1_1openai_1_1__detail_1_1CategoryModel.html", "structutility_1_1openai_1_1__detail_1_1CategoryModel" ],
+          [ "CategoryModeration", "structutility_1_1openai_1_1__detail_1_1CategoryModeration.html", "structutility_1_1openai_1_1__detail_1_1CategoryModeration" ],
+          [ "FileRequest", "structutility_1_1openai_1_1__detail_1_1FileRequest.html", "structutility_1_1openai_1_1__detail_1_1FileRequest" ],
+          [ "OpenAI", "classutility_1_1openai_1_1__detail_1_1OpenAI.html", "classutility_1_1openai_1_1__detail_1_1OpenAI" ],
+          [ "Response", "structutility_1_1openai_1_1__detail_1_1Response.html", "structutility_1_1openai_1_1__detail_1_1Response" ],
+          [ "Session", "classutility_1_1openai_1_1__detail_1_1Session.html", "classutility_1_1openai_1_1__detail_1_1Session" ]
+        ] ]
       ] ],
       [ "reactor", null, [
         [ "StreamReactor", "classutility_1_1reactor_1_1StreamReactor.html", "classutility_1_1reactor_1_1StreamReactor" ]

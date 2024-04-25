@@ -587,6 +587,7 @@ var namespaces_dup =
       [ "skill", null, [
         [ "Dive", "classmodule_1_1skill_1_1Dive.html", "classmodule_1_1skill_1_1Dive" ],
         [ "GetUp", "classmodule_1_1skill_1_1GetUp.html", "classmodule_1_1skill_1_1GetUp" ],
+        [ "GPT", "classmodule_1_1skill_1_1GPT.html", "classmodule_1_1skill_1_1GPT" ],
         [ "Look", "classmodule_1_1skill_1_1Look.html", "classmodule_1_1skill_1_1Look" ],
         [ "QuinticWalk", "classmodule_1_1skill_1_1QuinticWalk.html", "classmodule_1_1skill_1_1QuinticWalk" ],
         [ "Say", "classmodule_1_1skill_1_1Say.html", "classmodule_1_1skill_1_1Say" ],
@@ -793,7 +794,9 @@ var namespaces_dup =
         [ "ServoID", "LimbID_8cpp.html#aa0c047925696e66fd1f5d098c744e133", null ],
         [ "operator<<", "FrameID_8cpp.html#a417f668cd797bbff60417949f5ffcf7e", null ],
         [ "operator<<", "LimbID_8cpp.html#accc0ac967dfb1eea992099c6d2ada892", null ],
-        [ "operator<<", "ServoID_8cpp.html#a11209a4933e52343c652ddd60c0d4d62", null ]
+        [ "operator<<", "ServoID_8cpp.html#a11209a4933e52343c652ddd60c0d4d62", null ],
+        [ "raw_to_mp3", "microphone_8hpp.html#a2cc78612b4b2765bd30f5311904fe534", null ],
+        [ "record_audio", "microphone_8hpp.html#a43d279e732239ae4c6b91d460ba1b80b", null ]
       ] ],
       [ "io", null, [
         [ "uart", "classutility_1_1io_1_1uart.html", "classutility_1_1io_1_1uart" ]
@@ -966,6 +969,40 @@ var namespaces_dup =
           [ "buildGraph", "NUhelpers_8hpp.html#afb4c6084208e40da11c1f15e5c51858d", null ]
         ] ],
         [ "graph", "NUhelpers_8hpp.html#aac2d4f8c0c2aa3defb6820b2bdef61b0", null ]
+      ] ],
+      [ "openai", null, [
+        [ "_detail", null, [
+          [ "CategoryAudio", "structutility_1_1openai_1_1__detail_1_1CategoryAudio.html", "structutility_1_1openai_1_1__detail_1_1CategoryAudio" ],
+          [ "CategoryChat", "structutility_1_1openai_1_1__detail_1_1CategoryChat.html", "structutility_1_1openai_1_1__detail_1_1CategoryChat" ],
+          [ "CategoryCompletion", "structutility_1_1openai_1_1__detail_1_1CategoryCompletion.html", "structutility_1_1openai_1_1__detail_1_1CategoryCompletion" ],
+          [ "CategoryEdit", "structutility_1_1openai_1_1__detail_1_1CategoryEdit.html", "structutility_1_1openai_1_1__detail_1_1CategoryEdit" ],
+          [ "CategoryEmbedding", "structutility_1_1openai_1_1__detail_1_1CategoryEmbedding.html", "structutility_1_1openai_1_1__detail_1_1CategoryEmbedding" ],
+          [ "CategoryFile", "structutility_1_1openai_1_1__detail_1_1CategoryFile.html", "structutility_1_1openai_1_1__detail_1_1CategoryFile" ],
+          [ "CategoryFineTune", "structutility_1_1openai_1_1__detail_1_1CategoryFineTune.html", "structutility_1_1openai_1_1__detail_1_1CategoryFineTune" ],
+          [ "CategoryImage", "structutility_1_1openai_1_1__detail_1_1CategoryImage.html", "structutility_1_1openai_1_1__detail_1_1CategoryImage" ],
+          [ "CategoryModel", "structutility_1_1openai_1_1__detail_1_1CategoryModel.html", "structutility_1_1openai_1_1__detail_1_1CategoryModel" ],
+          [ "CategoryModeration", "structutility_1_1openai_1_1__detail_1_1CategoryModeration.html", "structutility_1_1openai_1_1__detail_1_1CategoryModeration" ],
+          [ "FileRequest", "structutility_1_1openai_1_1__detail_1_1FileRequest.html", "structutility_1_1openai_1_1__detail_1_1FileRequest" ],
+          [ "OpenAI", "classutility_1_1openai_1_1__detail_1_1OpenAI.html", "classutility_1_1openai_1_1__detail_1_1OpenAI" ],
+          [ "Response", "structutility_1_1openai_1_1__detail_1_1Response.html", "structutility_1_1openai_1_1__detail_1_1Response" ],
+          [ "Session", "classutility_1_1openai_1_1__detail_1_1Session.html", "classutility_1_1openai_1_1__detail_1_1Session" ],
+          [ "Json", "openai_8hpp.html#a251462e855e5cb849cbded2e80dba1ab", null ],
+          [ "audio", "openai_8hpp.html#abd061a70cb9209dd75017034767e036d", null ],
+          [ "bool_to_string", "openai_8hpp.html#a105cf11c7f445f6bb224b5fe1d2d68d4", null ],
+          [ "chat", "openai_8hpp.html#a8e328280399f7fa9ba406ea3fec9a83c", null ],
+          [ "completion", "openai_8hpp.html#a84ff0365667d971d2d1e2fe0f9e1b1a2", null ],
+          [ "edit", "openai_8hpp.html#aa256704347d11381f12c970cc6045ee6", null ],
+          [ "embedding", "openai_8hpp.html#a4700595d457890608b6bb4733aec8de2", null ],
+          [ "file", "openai_8hpp.html#ada5a89a07480a4235c3d94c308fe22c0", null ],
+          [ "fineTune", "openai_8hpp.html#a3574d192ebb6fdd0410a3184066a9dcf", null ],
+          [ "get", "openai_8hpp.html#a9b4fdf13b837dc8dc1c57a6444baea94", null ],
+          [ "image", "openai_8hpp.html#a0ff3fea1e60cd52f648d3f1b2faeb5c0", null ],
+          [ "instance", "openai_8hpp.html#a2914681f6cfc5317bfe6f8d86353668c", null ],
+          [ "model", "openai_8hpp.html#a83b63ab9a519f3ced47f3759a8568b70", null ],
+          [ "moderation", "openai_8hpp.html#a837ca7db86681b4ec3a3bffc4468f126", null ],
+          [ "post", "openai_8hpp.html#ae56adad54140d2bad995a030cff1ae51", null ],
+          [ "start", "openai_8hpp.html#a74a2722da74a74bd3459eca291f604c0", null ]
+        ] ]
       ] ],
       [ "platform", null, [
         [ "get_raw_servo", "RawSensors_8hpp.html#aa4ab65d6601361d1522bca695f9efa68", null ],

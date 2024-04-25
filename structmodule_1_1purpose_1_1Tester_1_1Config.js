@@ -1,6 +1,10 @@
 var structmodule_1_1purpose_1_1Tester_1_1Config =
 [
     [ "align_ball_to_goal_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a86e05d9221cd1bce85c21845e76ddb8f", null ],
+    [ "audiogpt_listen_duration", "structmodule_1_1purpose_1_1Tester_1_1Config.html#ab9401797c800beacc4ca93e9ef50c2ff", null ],
+    [ "audiogpt_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#ac2540d0526e64abee4bbf03452d6bb02", null ],
+    [ "chatgpt_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#aa3363a277beb3445ec091a22f737aac2", null ],
+    [ "chatgpt_prompt", "structmodule_1_1purpose_1_1Tester_1_1Config.html#acc89aec53865eb5b60718828ccca5ce3", null ],
     [ "find_ball_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a10075b62d8b33a5d455b59dcf38a39c5", null ],
     [ "kick_to_goal_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a53945c4e4eb46fc0b107f22ae21dfbbe", null ],
     [ "kick_to_priority", "structmodule_1_1purpose_1_1Tester_1_1Config.html#a52573463cb681cec293aa3a6eafea122", null ],

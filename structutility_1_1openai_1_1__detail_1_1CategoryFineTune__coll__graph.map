@@ -1,0 +1,14 @@
+<map id="utility::openai::_detail::CategoryFineTune" name="utility::openai::_detail::CategoryFineTune">
+<area shape="rect" id="node1" title=" " alt="" coords="5,345,168,386"/>
+<area shape="rect" id="node2" href="$classutility_1_1openai_1_1__detail_1_1OpenAI.html" title=" " alt="" coords="281,377,444,418"/>
+<area shape="rect" id="node4" href="$structutility_1_1openai_1_1__detail_1_1CategoryFile.html" title=" " alt="" coords="573,21,735,62"/>
+<area shape="rect" id="node5" href="$structutility_1_1openai_1_1__detail_1_1CategoryChat.html" title=" " alt="" coords="573,98,735,139"/>
+<area shape="rect" id="node6" href="$structutility_1_1openai_1_1__detail_1_1CategoryModeration.html" title=" " alt="" coords="573,195,735,237"/>
+<area shape="rect" id="node7" href="$structutility_1_1openai_1_1__detail_1_1CategoryEmbedding.html" title=" " alt="" coords="573,286,735,327"/>
+<area shape="rect" id="node8" href="$structutility_1_1openai_1_1__detail_1_1CategoryImage.html" title=" " alt="" coords="573,377,735,418"/>
+<area shape="rect" id="node9" href="$structutility_1_1openai_1_1__detail_1_1CategoryAudio.html" title=" " alt="" coords="573,467,735,509"/>
+<area shape="rect" id="node10" href="$structutility_1_1openai_1_1__detail_1_1CategoryCompletion.html" title=" " alt="" coords="572,558,736,599"/>
+<area shape="rect" id="node11" href="$structutility_1_1openai_1_1__detail_1_1CategoryEdit.html" title=" " alt="" coords="573,649,735,690"/>
+<area shape="rect" id="node12" href="$structutility_1_1openai_1_1__detail_1_1CategoryModel.html" title=" " alt="" coords="573,739,735,781"/>
+<area shape="rect" id="node3" href="$classutility_1_1openai_1_1__detail_1_1Session.html" title=" " alt="" coords="5,422,168,463"/>
+</map>

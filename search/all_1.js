@@ -65,5 +65,7 @@ var searchData=
   ['arm_5fpositions_65',['arm_positions',['../structmodule_1_1skill_1_1SplineKick_1_1Config.html#af8010f448df5bdd61e1ed59d846e8289',1,'module::skill::SplineKick::Config::arm_positions()'],['../structmodule_1_1skill_1_1Walk_1_1Config.html#a03092583f297113b9af9752fb4f9f087',1,'module::skill::Walk::Config::arm_positions()']]],
   ['association_5fdistance_66',['association_distance',['../structmodule_1_1localisation_1_1RobotLocalisation_1_1Config.html#aa7fe138e00442bdbd062a1dd9e494ea1',1,'module::localisation::RobotLocalisation::Config']]],
   ['attempt_67',['attempt',['../structutility_1_1reactor_1_1StreamReactor_1_1PostConnect.html#abfbc065e34c84d1f6204475e927f8516',1,'utility::reactor::StreamReactor::PostConnect']]],
-  ['available_68',['available',['../classutility_1_1file_1_1FileDescriptor.html#a3ea2220f21d18bc73b3e739d1bb5d064',1,'utility::file::FileDescriptor::available()'],['../classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6',1,'utility::io::uart::available()']]]
+  ['audiogpt_5flisten_5fduration_68',['audiogpt_listen_duration',['../structmodule_1_1purpose_1_1Tester_1_1Config.html#ab9401797c800beacc4ca93e9ef50c2ff',1,'module::purpose::Tester::Config']]],
+  ['audiogpt_5fpriority_69',['audiogpt_priority',['../structmodule_1_1purpose_1_1Tester_1_1Config.html#ac2540d0526e64abee4bbf03452d6bb02',1,'module::purpose::Tester::Config']]],
+  ['available_70',['available',['../classutility_1_1file_1_1FileDescriptor.html#a3ea2220f21d18bc73b3e739d1bb5d064',1,'utility::file::FileDescriptor::available()'],['../classutility_1_1io_1_1uart.html#a4cbf406fe4a50cf63c835f470da777e6',1,'utility::io::uart::available()']]]
 ];

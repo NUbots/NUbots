@@ -1,0 +1,28 @@
+var classutility_1_1openai_1_1__detail_1_1Session =
+[
+    [ "Session", "classutility_1_1openai_1_1__detail_1_1Session.html#a28711f6f3df72bdccc16d13e5fdce6f9", null ],
+    [ "Session", "classutility_1_1openai_1_1__detail_1_1Session.html#abe024a9a7d043fbeeb244713e0bb2db0", null ],
+    [ "~Session", "classutility_1_1openai_1_1__detail_1_1Session.html#ae9bed6c3400a303343edc9d806a7459e", null ],
+    [ "deletePrepare", "classutility_1_1openai_1_1__detail_1_1Session.html#a02ff0a26cb410ce18f8ff70a9f1f278b", null ],
+    [ "easyEscape", "classutility_1_1openai_1_1__detail_1_1Session.html#a01676a21d3cb7ca18356a7c06830773c", null ],
+    [ "getPrepare", "classutility_1_1openai_1_1__detail_1_1Session.html#a19278f10dc2a8ec93698a09223464a40", null ],
+    [ "ignoreSSL", "classutility_1_1openai_1_1__detail_1_1Session.html#af1b482cde37da8a30447c0f5d29fb8e4", null ],
+    [ "initCurl", "classutility_1_1openai_1_1__detail_1_1Session.html#aad6eec6d024a802168c764a32b33f3af", null ],
+    [ "makeRequest", "classutility_1_1openai_1_1__detail_1_1Session.html#a21ad27eb91e43485c3687f334d6d8272", null ],
+    [ "postPrepare", "classutility_1_1openai_1_1__detail_1_1Session.html#a147be6b548f95b83f8945141fe71afe6", null ],
+    [ "setBody", "classutility_1_1openai_1_1__detail_1_1Session.html#a201cbd2e3821a86d95044f6a9022c85f", null ],
+    [ "setMultiformPart", "classutility_1_1openai_1_1__detail_1_1Session.html#aa99dcefe385a32824ced792508bdf247", null ],
+    [ "setProxyUrl", "classutility_1_1openai_1_1__detail_1_1Session.html#af3ecaad4b2e15fc1102e7b8b510ec27e", null ],
+    [ "setToken", "classutility_1_1openai_1_1__detail_1_1Session.html#a08f817c06b39322dd704ffb5536edb9f", null ],
+    [ "setUrl", "classutility_1_1openai_1_1__detail_1_1Session.html#a2d7c4cce90a9a8e68e09f73f6bebfe3a", null ],
+    [ "writeFunction", "classutility_1_1openai_1_1__detail_1_1Session.html#ad062ac8b3d204692762c8a4a0673d347", null ],
+    [ "curl_", "classutility_1_1openai_1_1__detail_1_1Session.html#aaae050b97e6ee9f6a1d5e5abc4da1a35", null ],
+    [ "mime_form_", "classutility_1_1openai_1_1__detail_1_1Session.html#a5a2fdfccfe23c4be0d17e33539be22e1", null ],
+    [ "mutex_request_", "classutility_1_1openai_1_1__detail_1_1Session.html#a54581d1979966628c97f00ebed0dfb6d", null ],
+    [ "organization_", "classutility_1_1openai_1_1__detail_1_1Session.html#aa43245067b2dd3c0405e54e680428223", null ],
+    [ "proxy_url_", "classutility_1_1openai_1_1__detail_1_1Session.html#ab6358733a7cf7419eb3368977ac3cea1", null ],
+    [ "res_", "classutility_1_1openai_1_1__detail_1_1Session.html#a7d14df4e1c38acd0666c653a912a270d", null ],
+    [ "throw_exception_", "classutility_1_1openai_1_1__detail_1_1Session.html#a47b77551fef649a957ee98807fc3fea1", null ],
+    [ "token_", "classutility_1_1openai_1_1__detail_1_1Session.html#a40106e62588bfd1f7ebe08d8ce6d7eea", null ],
+    [ "url_", "classutility_1_1openai_1_1__detail_1_1Session.html#a2963b4e1841eb8bd76d48c568e8bcf19", null ]
+];
