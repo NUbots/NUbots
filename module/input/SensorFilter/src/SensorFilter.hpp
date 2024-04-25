@@ -107,8 +107,8 @@ namespace module::input {
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
 
-        /// @brief Current walk phase of the robot
-        WalkState::Phase current_walk_phase = WalkState::Phase::LEFT;
+        /// @brief Current planted foot phase of the robot
+        WalkState::Phase current_planted_foot_phase = WalkState::Phase::LEFT;
 
         /// @brief Transform from planted foot {p} to world {w} space
         Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
@@ -150,8 +150,7 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
-                             const RawSensors& raw_sensors,
-                             const WalkState& walk_state);
+                             const RawSensors& raw_sensors);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update

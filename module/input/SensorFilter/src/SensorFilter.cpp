@@ -97,11 +97,9 @@ namespace module::input {
                                              message::behaviour::state::WalkState::Phase::DOUBLE));
         });
 
-        on<Trigger<RawSensors>, Optional<With<Sensors>>, With<WalkState>, Single, Priority::HIGH>().then(
+        on<Trigger<RawSensors>, Optional<With<Sensors>>, Single, Priority::HIGH>().then(
             "Main Sensors Loop",
-            [this](const RawSensors& raw_sensors,
-                   const std::shared_ptr<const Sensors>& previous_sensors,
-                   const WalkState& walk_state) {
+            [this](const RawSensors& raw_sensors, const std::shared_ptr<const Sensors>& previous_sensors) {
                 auto sensors = std::make_unique<Sensors>();
 
                 // Raw sensors (Accelerometer, Gyroscope, etc.)
@@ -111,7 +109,7 @@ namespace module::input {
                 update_kinematics(sensors, raw_sensors);
 
                 // Odometry (Htw and Hrw)
-                update_odometry(sensors, previous_sensors, raw_sensors, walk_state);
+                update_odometry(sensors, previous_sensors, raw_sensors);
 
                 // Graph debug information
                 if (log_level <= NUClear::DEBUG) {
@@ -189,6 +187,17 @@ namespace module::input {
         }
         else {
             log<NUClear::WARN>("Unknown foot down method");
+        }
+
+        // **************** Planted Foot Information ****************
+        if (sensors->feet[BodySide::LEFT].down && sensors->feet[BodySide::RIGHT].down) {
+            sensors->planted_foot_phase = message::behaviour::state::WalkState::Phase::DOUBLE;
+        }
+        else if (sensors->feet[BodySide::LEFT].down && !sensors->feet[BodySide::RIGHT].down) {
+            sensors->planted_foot_phase = message::behaviour::state::WalkState::Phase::LEFT;
+        }
+        else {
+            sensors->planted_foot_phase = message::behaviour::state::WalkState::Phase::RIGHT;
         }
     }
 
@@ -323,8 +332,7 @@ namespace module::input {
 
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
-                                       const RawSensors& raw_sensors,
-                                       const WalkState& walk_state) {
+                                       const RawSensors& raw_sensors) {
         if (!cfg.use_ground_truth) {
             // Compute time since last update
             const double dt = std::max(
@@ -333,24 +341,29 @@ namespace module::input {
                     .count(),
                 0.0);
 
-            // Assume support foot change has occurred if walk state has changed
-            if (current_walk_phase != walk_state.phase) {
-                current_walk_phase = walk_state.phase;
+            // If our planted foot phase has changed from a single planted foot to another single planted foot, update
+            // anchor frame
+            if (current_planted_foot_phase != sensors->planted_foot_phase
+                && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
+                current_planted_foot_phase = sensors->planted_foot_phase;
                 // Compute the new anchor frame (Hwp) (new support foot)
-                if (current_walk_phase.value == WalkState::Phase::LEFT) {
+                if (current_planted_foot_phase.value == WalkState::Phase::LEFT) {
                     Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                    // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
+                    Hwp.translation().z() = 0;
+                    Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
                 }
-                else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
+                else if (current_planted_foot_phase.value == WalkState::Phase::RIGHT) {
                     Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
+                    // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
+                    Hwp.translation().z() = 0;
+                    Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
                 }
-                // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
-                Hwp.translation().z() = 0;
-                Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
             }
 
             // Compute torso pose using kinematics from anchor frame (current support foot)
             Eigen::Isometry3d Hpt = Eigen::Isometry3d::Identity();
-            if (current_walk_phase.value == WalkState::Phase::RIGHT) {
+            if (current_planted_foot_phase.value == WalkState::Phase::RIGHT) {
                 Hpt = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
             }
             else {
@@ -426,7 +439,7 @@ namespace module::input {
                    sensors->feet[BodySide::RIGHT].down));
 
         // Walk state information
-        emit(graph("Walk support phase", int(current_walk_phase)));
+        emit(graph("Planted foot phase", int(current_planted_foot_phase)));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
