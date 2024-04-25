@@ -33,6 +33,7 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/eye/DataPoint.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/skill/ControlFoot.hpp"
 #include "message/skill/Walk.hpp"
 
@@ -52,6 +53,7 @@ namespace module::skill {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
+    using message::input::Sensors;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
     using WalkTask  = message::skill::Walk;
@@ -120,11 +122,12 @@ namespace module::skill {
 
         // Main loop - Updates the walk engine at fixed frequency of UPDATE_FREQUENCY
         on<Provide<WalkTask>,
+           With<Sensors>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
            Single>()
-            .then([this](const WalkTask& walk_task) {
+            .then([this](const WalkTask& walk_task, const Sensors& sensors) {
                 // Compute time since the last update
                 auto time_delta =
                     std::chrono::duration_cast<std::chrono::duration<double>>(NUClear::clock::now() - last_update_time)
@@ -167,10 +170,9 @@ namespace module::skill {
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
                 // Emit the walk state
-                WalkState::Phase phase =
-                    walk_generator.is_left_foot_planted() ? WalkState::Phase::LEFT : WalkState::Phase::RIGHT;
-                auto walk_state =
-                    std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase);
+                auto walk_state = std::make_unique<WalkState>(walk_generator.get_state(),
+                                                              walk_task.velocity_target,
+                                                              walk_generator.get_phase());
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
