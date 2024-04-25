@@ -34,6 +34,7 @@
 
 #include "message/eye/DataPoint.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/FieldLines.hpp"
 
@@ -46,6 +47,7 @@
 
 namespace module::localisation {
 
+    using message::platform::RawSensors;
     using message::support::FieldDescription;
 
     struct StartingSide {
@@ -115,6 +117,9 @@ namespace module::localisation {
             /// @brief Start time delay for the particle filter
             double start_time_delay = 0.0;
 
+            /// @brief Bool to enable/disable using ground truth for localisation
+            bool use_ground_truth_localisation;
+
             /// @brief Starting side of the field (LEFT, RIGHT, EITHER, or CUSTOM)
             StartingSide starting_side = StartingSide::UNKNOWN;
         } cfg;
@@ -142,6 +147,14 @@ namespace module::localisation {
          * @return Hfw, the homogenous transformation matrix from world {w} to field {f} space
          */
         Eigen::Isometry3d compute_Hfw(const Eigen::Vector3d& particle);
+
+        /**
+         * @brief Find error between computed Hfw and ground truth if available
+         *
+         * @param Hfw Computed Hfw to be compared against ground truth
+         * @param raw_sensors The raw sensor data
+         */
+        void debug_field_localisation(Eigen::Isometry3d Hfw, const RawSensors& raw_sensors);
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
