@@ -179,18 +179,48 @@ $(document).ready(function(){initNavTree('structmodule_1_1actuation_1_1FootContr
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a4a89a61b4cdbdee186a5927fce7a8c9f"><td class="memItemLeft" align="right" valign="top"><a id="a4a89a61b4cdbdee186a5927fce7a8c9f"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a4a89a61b4cdbdee186a5927fce7a8c9f">keep_level</a> = false</td></tr>
-<tr class="memdesc:a4a89a61b4cdbdee186a5927fce7a8c9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether or not to level the foot with the ground. <br /></td></tr>
-<tr class="separator:a4a89a61b4cdbdee186a5927fce7a8c9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a650b1cbc746a982646a84a768ec102fc"><td class="memItemLeft" align="right" valign="top"><a id="a650b1cbc746a982646a84a768ec102fc"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#a650b1cbc746a982646a84a768ec102fc">servo_gain</a> = 0.0</td></tr>
-<tr class="memdesc:a650b1cbc746a982646a84a768ec102fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gains for the servos. <br /></td></tr>
-<tr class="separator:a650b1cbc746a982646a84a768ec102fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7ffbc157832192edf8ac52b55d965a1"><td class="memItemLeft" align="right" valign="top"><a id="ae7ffbc157832192edf8ac52b55d965a1"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#ae7ffbc157832192edf8ac52b55d965a1">mode</a> = &quot;IK&quot;</td></tr>
+<tr class="memdesc:ae7ffbc157832192edf8ac52b55d965a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Foot controller mode. <br /></td></tr>
+<tr class="separator:ae7ffbc157832192edf8ac52b55d965a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa772658fae4ab489bb27dc7894e54054"><td class="memItemLeft" align="right" valign="top">std::map&lt; <a class="el" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>, message::actuation::ServoState &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html#aa772658fae4ab489bb27dc7894e54054">servo_states</a></td></tr>
+<tr class="memdesc:aa772658fae4ab489bb27dc7894e54054"><td class="mdescLeft">&#160;</td><td class="mdescRight">Map between ServoID and ServoState.  <a href="structmodule_1_1actuation_1_1FootController_1_1Config.html#aa772658fae4ab489bb27dc7894e54054">More...</a><br /></td></tr>
+<tr class="separator:aa772658fae4ab489bb27dc7894e54054"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Stores configuration values. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Data Documentation</h2>
+<a id="aa772658fae4ab489bb27dc7894e54054"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa772658fae4ab489bb27dc7894e54054">&#9670;&nbsp;</a></span>servo_states</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::map&lt;<a class="el" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>, message::actuation::ServoState&gt; module::actuation::FootController::Config::servo_states</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
+<div class="line">                {utility::input::ServoID::L_HIP_YAW, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::L_HIP_ROLL, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::L_HIP_PITCH, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::L_KNEE, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::L_ANKLE_PITCH, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::L_ANKLE_ROLL, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::R_HIP_YAW, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::R_HIP_ROLL, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::R_HIP_PITCH, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::R_KNEE, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::R_ANKLE_PITCH, message::actuation::ServoState()},</div>
+<div class="line">                {utility::input::ServoID::R_ANKLE_ROLL, message::actuation::ServoState()},</div>
+<div class="line">            }</div>
+</div><!-- fragment -->
+<p>Map between ServoID and ServoState. </p>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/actuation/FootController/src/<a class="el" href="FootController_8hpp_source.html">FootController.hpp</a></li>
 </ul>
 </div><!-- contents -->
@@ -199,7 +229,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="st
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>actuation</b></li><li class="navelem"><a class="el" href="classmodule_1_1actuation_1_1FootController.html">FootController</a></li><li class="navelem"><a class="el" href="structmodule_1_1actuation_1_1FootController_1_1Config.html">Config</a></li>
-    <li class="footer">Generated on Sun Apr 21 2024 07:59:34 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Apr 25 2024 02:04:47 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

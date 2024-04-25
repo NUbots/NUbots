@@ -551,8 +551,9 @@ var namespaces_dup =
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ],
         [ "centered_noise", "HardwareSimulator_8cpp.html#a2a90ad87152ba961b598132ed6dcf323", null ],
         [ "create_sensor_time_steps", "Webots_8cpp.html#aa06422bdf1cbba3ecfa22842768ccae4", null ],
-        [ "translate_id_servo", "Webots_8cpp.html#a81eded8b344d72482e2c16f89c1d4a34", null ],
-        [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ]
+        [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ],
+        [ "id_to_joint_name", "Webots_8cpp.html#a490d8e2eafeea870cb0d5fcbd180b0fb", null ],
+        [ "sensor_name_to_id", "Webots_8cpp.html#a0c7cfa92ede99edac377afc0de7e5c68", null ]
       ] ],
       [ "purpose", null, [
         [ "Defender", "classmodule_1_1purpose_1_1Defender.html", "classmodule_1_1purpose_1_1Defender" ],
@@ -596,6 +597,7 @@ var namespaces_dup =
         [ "GetUpTask", "GetUp_8cpp.html#a4ebdf745f9f6a2900437fd8e792d1f49", null ],
         [ "LookTask", "Look_8cpp.html#ab81190e8baa6823abe915bc0ba82722f", null ],
         [ "SayTask", "Say_8cpp.html#a52cce32b085db46104fee4406a26e9ac", null ],
+        [ "WalkState", "Walk_8cpp.html#afebde5e5778924a828c4aa8da384d27d", null ],
         [ "WalkTask", "Walk_8cpp.html#aed1b3430e296f2d58d0ddc7e02a06020", null ]
       ] ],
       [ "strategy", null, [

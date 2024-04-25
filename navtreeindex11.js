@@ -1,6 +1,9 @@
 var NAVTREEINDEX11 =
 {
-"structmodule_1_1actuation_1_1FootController_1_1Config.html#a650b1cbc746a982646a84a768ec102fc":[2,0,3,0,0,0,1],
+"structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html":[2,0,2,0],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html":[2,0,3,0,0,0],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#aa772658fae4ab489bb27dc7894e54054":[2,0,3,0,0,0,1],
+"structmodule_1_1actuation_1_1FootController_1_1Config.html#ae7ffbc157832192edf8ac52b55d965a1":[2,0,3,0,0,0,0],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html":[2,0,3,0,1,0],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a28a41cd2b52aead9251e89dc18c748c1":[2,0,3,0,1,0,0],
 "structmodule_1_1actuation_1_1Kinematics_1_1Config.html#a701a6b09dad69851545bff0a044f8c5a":[2,0,3,0,1,0,1],
@@ -246,8 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1input_1_1ReadData_3_01std_1_1string_01_4.html":[2,0,3,2,24],
 "structmodule_1_1input_1_1ReadData_3_01std_1_1string_01_4.html#a6d10bbddf9e4d58cb455135faf18a0a5":[2,0,3,2,24,0],
 "structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01Marker_01_4_01_4.html":[2,0,3,2,25],
-"structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01Marker_01_4_01_4.html#af2526a7a1e17866a73d7518c1252e466":[2,0,3,2,25,0],
-"structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01T_01_4_01_4.html":[2,0,3,2,26],
-"structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01T_01_4_01_4.html#a9dd6575ba26eb2a4d0bf1730ac9799c4":[2,0,3,2,26,0],
-"structmodule_1_1input_1_1SensorFilter_1_1Config.html":[2,0,3,2,27,0]
+"structmodule_1_1input_1_1ReadData_3_01std_1_1vector_3_01Marker_01_4_01_4.html#af2526a7a1e17866a73d7518c1252e466":[2,0,3,2,25,0]
 };

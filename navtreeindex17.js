@@ -1,5 +1,8 @@
 var NAVTREEINDEX17 =
 {
+"structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a8aa6305cebcaff6eaf5ddbc110704b33":[2,0,7,6,0,4,0,1],
+"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html":[2,0,7,6,0,5,0],
+"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a0dc9721d1e1f7cd0201b108189082fe2":[2,0,7,6,0,5,0,0],
 "structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a32cb7b95c46ee8404e1b9ae5401c8407":[2,0,7,6,0,5,0,1],
 "structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a5299dbe7c2dbda05e2591b5413abd5bb":[2,0,7,6,0,5,0,2],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html":[2,0,7,6,0,8],
@@ -184,12 +187,12 @@ var NAVTREEINDEX17 =
 "structutility_1_1support_1_1Expression.html#a85557b6cbcf5c7fb2465415956552b74":[2,0,7,12,1,2],
 "structutility_1_1support_1_1Expression.html#aa98ac82792d5e9302f95c379ba772372":[2,0,7,12,1,1],
 "structutility_1_1support_1_1Expression.html#acb87986fbdf5badbb3e40e983187887c":[2,0,7,12,1,9],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,5],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,3],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,7],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,8],
-"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,4],
 "structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,6],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,5],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,4],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,7],
+"structutility_1_1support_1_1Expression.html#aeafbfd3cbc9c6ba641d8a9943cc44a82":[2,0,7,12,1,3],
 "structutility_1_1support_1_1LazyEvaluation.html":[2,0,7,12,2],
 "structutility_1_1support_1_1LazyEvaluation.html#a405f3e6a7d2f4a3630296a9a291b7c46":[2,0,7,12,2,1],
 "structutility_1_1support_1_1LazyEvaluation.html#a6fc2eba1f57246dd848e823a211111ba":[2,0,7,12,2,0],
@@ -246,8 +249,5 @@ var NAVTREEINDEX17 =
 "structutility_1_1vision_1_1Colour.html#a7ac41dc4ad5e7b1717789e60e4623d5baa786e3db040f403b6748f2ab08aa8544":[2,0,7,14,0,0,4],
 "structutility_1_1vision_1_1Colour.html#a7ac41dc4ad5e7b1717789e60e4623d5baa90deb692f893fa76a28cdea31843707":[2,0,7,14,0,0,7],
 "structutility_1_1vision_1_1Colour.html#a7ac41dc4ad5e7b1717789e60e4623d5bab375819f4165ad2ca676f6041f2fadda":[2,0,7,14,0,0,6],
-"structutility_1_1vision_1_1Colour.html#a7c42174781a49a54baed92ce6df69b0e":[2,0,7,14,0,2],
-"structutility_1_1vision_1_1Colour.html#a85c1f6382613b9e410788cd8244eaf07":[2,0,7,14,0,19],
-"structutility_1_1vision_1_1Colour.html#a86045568cfcac4956e86e43b2d9d8323":[2,0,7,14,0,3],
-"structutility_1_1vision_1_1Colour.html#a89036356b9e35d8070ad9a99b29c4ca2":[2,0,7,14,0,22]
+"structutility_1_1vision_1_1Colour.html#a7c42174781a49a54baed92ce6df69b0e":[2,0,7,14,0,2]
 };

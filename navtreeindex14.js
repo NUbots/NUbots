@@ -1,5 +1,8 @@
 var NAVTREEINDEX14 =
 {
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da720eb04e053239d852ccd79ab73d6330":[2,0,3,8,0,1,0,195],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da7294a16f86e116e201356ee3bb9f105e":[2,0,3,8,0,1,0,220],
+"structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da73633d601274e2a66d68ca6083cfaa6b":[2,0,3,8,0,1,0,267],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da7365104c060d50699a1e502e989a0f8d":[2,0,3,8,0,1,0,41],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da73c1eecb212db0fd869fbd2d81b90224":[2,0,3,8,0,1,0,44],
 "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html#aa97cee3a2970d4d241056630b3a2227da76275f5bdce3f01b598d13efe6395c63":[2,0,3,8,0,1,0,211],
@@ -246,8 +249,5 @@ var NAVTREEINDEX14 =
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#aeb4e6ce2004c49838a8e83aac48e656e":[2,0,3,8,0,6,5,24],
 "structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1ServoState.html#af2bdedc873e432b27cf9ea70743f21d5":[2,0,3,8,0,6,5,1],
 "structmodule_1_1platform_1_1OpenCR_1_1MX106.html":[2,0,3,8,0,7],
-"structmodule_1_1platform_1_1OpenCR_1_1MX106.html#a33466eecac5232622111776d4a9cd630":[2,0,3,8,0,7,0],
-"structmodule_1_1platform_1_1OpenCR_1_1MX106.html#a9ca1ff281f7080ae51e43775d859c814":[2,0,3,8,0,7,1],
-"structmodule_1_1platform_1_1OpenCR_1_1MX64.html":[2,0,3,8,0,8],
-"structmodule_1_1platform_1_1OpenCR_1_1MX64.html#a2bc96a1148c1be34f4dda9468f0dd218":[2,0,3,8,0,8,1]
+"structmodule_1_1platform_1_1OpenCR_1_1MX106.html#a33466eecac5232622111776d4a9cd630":[2,0,3,8,0,7,0]
 };

@@ -1,5 +1,8 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7aa93996e465fac0d8b644278d58771e88":[2,0,3,8,0,10,0,12],
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7ab327fa796315e656bb07f5744470e2e6":[2,0,3,8,0,10,0,30],
+"classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7ab6d072f59419f3e172c8a13105b50dcf":[2,0,3,8,0,10,0,23],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7ab718adec73e04ce3ec720dd11a06a308":[2,0,3,8,0,10,0,3],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7abf8c2cf1c1c85bece9432554806b151c":[2,0,3,8,0,10,0,29],
 "classmodule_1_1platform_1_1OpenCR_1_1OpenCR.html#a737f4da756a8f4614baf6066e36f4cf7ac8f6a1360d44acaca6967c5ade331b83":[2,0,3,8,0,10,0,22],
@@ -246,8 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1support_1_1Profiler.html#aea60357fe6799910fc21ea697fcd78ac":[2,0,3,12,5,3],
 "classmodule_1_1support_1_1Profiler.html#afa2aef49980ad8b0e975ed034d54aa60":[2,0,3,12,5,0],
 "classmodule_1_1support_1_1ReactionTimer.html":[2,0,3,12,6],
-"classmodule_1_1support_1_1ReactionTimer.html#ac87535eae4b269f9b8ef9b67d9c89ba1":[2,0,3,12,6,0],
-"classmodule_1_1support_1_1SignalCatcher.html":[2,0,3,12,7],
-"classmodule_1_1support_1_1SignalCatcher.html#a20e7527f75bbe921123c826b05813513":[2,0,3,12,7,0],
-"classmodule_1_1support_1_1configuration_1_1GlobalConfig.html":[2,0,3,12,0,0]
+"classmodule_1_1support_1_1ReactionTimer.html#ac87535eae4b269f9b8ef9b67d9c89ba1":[2,0,3,12,6,0]
 };

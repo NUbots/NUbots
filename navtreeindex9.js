@@ -1,5 +1,8 @@
 var NAVTREEINDEX9 =
 {
+"functions_vars_z.html":[2,3,2,24],
+"functions_w.html":[2,3,0,23],
+"functions_x.html":[2,3,0,24],
 "functions_y.html":[2,3,0,25],
 "functions_z.html":[2,3,0,26],
 "functions_~.html":[2,3,0,27],
@@ -246,8 +249,5 @@ var NAVTREEINDEX9 =
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a14ca8bb2c0558f55aa92b525c4bd6767":[2,0,5,0,0,0,2],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a7325b6091386271d087ab70e20734509":[2,0,5,0,0,0,0],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7":[2,0,5,0,0,0,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html":[2,0,5,0,0,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#a96aea758637de7091dbad998b0a969c3":[2,0,5,0,0,1,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#ad02dc9609e3af81f7b92b854a8f5f438":[2,0,5,0,0,1,0],
-"structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Configuration_01_4_01_4.html":[2,0,5,0,1,0]
+"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html":[2,0,5,0,0,1]
 };

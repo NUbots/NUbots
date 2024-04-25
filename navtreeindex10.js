@@ -1,5 +1,8 @@
 var NAVTREEINDEX10 =
 {
+"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#a96aea758637de7091dbad998b0a969c3":[2,0,5,0,0,1,1],
+"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#ad02dc9609e3af81f7b92b854a8f5f438":[2,0,5,0,0,1,0],
+"structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Configuration_01_4_01_4.html":[2,0,5,0,1,0],
 "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_1_1extension_1_1FileWatch_01_4.html":[2,0,5,0,1,1],
 "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html":[2,0,8,0],
 "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html#a2e986fc1b3f90e500bf11f41e518fa86":[2,0,8,0,1],
@@ -246,8 +249,5 @@ var NAVTREEINDEX10 =
 "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a4627e7f15bb0a0ab98ec54b342a57082":[2,0,1,0,0,6,2],
 "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a482ea7b4e0eda6d60a57123afa8cb0f4":[2,0,1,0,0,6,4],
 "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a5a918eb5d56d6e563a89aa4432eb2ea8":[2,0,1,0,0,6,0],
-"structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#aae62c71b72ddb5532f209705478e13c5":[2,0,1,0,0,6,3],
-"structfmt_1_1formatter_3_01Eigen_1_1Transpose_3_01Derived_01_4_01_4.html":[2,0,2,0],
-"structmodule_1_1actuation_1_1FootController_1_1Config.html":[2,0,3,0,0,0],
-"structmodule_1_1actuation_1_1FootController_1_1Config.html#a4a89a61b4cdbdee186a5927fce7a8c9f":[2,0,3,0,0,0,0]
+"structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#aae62c71b72ddb5532f209705478e13c5":[2,0,1,0,0,6,3]
 };
