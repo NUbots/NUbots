@@ -343,24 +343,28 @@ namespace module::input {
                     .count(),
                 0.0);
 
-            // Assume support foot change has occurred if walk state has changed
-            if (current_planted_foot_phase != sensors->planted_foot_phase
+            // If sensors detected a new foot phase, update the anchor frame
+            if (planted_anchor_foot != sensors->planted_foot_phase
                 && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
-                current_planted_foot_phase = sensors->planted_foot_phase;
-                // Compute the new anchor frame (Hwp) (new planted foot)
-                if (current_planted_foot_phase.value == WalkState::Phase::LEFT) {
-                    Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                // Update anchor frame to the new planted foot
+                switch (planted_anchor_foot.value) {
+                    case WalkState::Phase::RIGHT:
+                        Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                        break;
+                    case WalkState::Phase::LEFT:
+                        Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
+                        break;
+                    default: log<NUClear::WARN>("Anchor frame should not be updated in double support phase"); break;
                 }
-                else if (current_planted_foot_phase.value == WalkState::Phase::RIGHT) {
-                    Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
-                }
+                // Update our current anchor foot indicator to new foot
+                planted_anchor_foot = sensors->planted_foot_phase;
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
                 Hwp.translation().z() = 0;
                 Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
             }
 
             // Compute torso pose using kinematics from anchor frame (current planted foot)
-            Eigen::Isometry3d Hpt = current_planted_foot_phase.value == WalkState::Phase::RIGHT
+            Eigen::Isometry3d Hpt = planted_anchor_foot.value == WalkState::Phase::RIGHT
                                         ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
                                         : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
 
@@ -431,10 +435,8 @@ namespace module::input {
                    sensors->feet[BodySide::LEFT].down));
         emit(graph(fmt::format("Foot Down/{}/Right", std::string(cfg.foot_down.method)),
                    sensors->feet[BodySide::RIGHT].down));
-
-        // Walk state information
-        emit(graph("Anchor phase", int(current_planted_foot_phase)));
-        emit(graph("Planted foot phase", int(sensors->planted_foot_phase)));
+        emit(graph("Foot down phase", int(sensors->planted_foot_phase)));
+        emit(graph("Anchor foot", int(planted_anchor_foot)));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();

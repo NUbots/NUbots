@@ -110,8 +110,8 @@ namespace module::input {
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
 
-        /// @brief Current planted foot phase of the robot
-        WalkState::Phase current_planted_foot_phase = WalkState::Phase::LEFT;
+        /// @brief Planted foot associated with the current anchor point (Hwp)
+        WalkState::Phase planted_anchor_foot = WalkState::Phase::LEFT;
 
         /// @brief Transform from planted foot {p} to world {w} space
         Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
