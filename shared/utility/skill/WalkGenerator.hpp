@@ -87,6 +87,9 @@ namespace utility::skill {
 
             /// @brief Ratio of where to position the torso relative to the next step position [x,y] (in meters)
             Vec3 torso_final_position_ratio = Vec3::Zero();
+
+            /// @brief Option to only switch between planted foot if the next foot is planted
+            bool only_switch_when_planted = false;
         };
 
         /**
@@ -196,9 +199,12 @@ namespace utility::skill {
          * @brief Run an update of the walk engine, updating the time and engine state and trajectories.
          * @param dt Time step.
          * @param velocity_target Requested velocity target (dx, dy, dtheta).
+         * @param sensors_planted_foot_phase Planted foot phase from sensors.
          * @return Engine state.
          */
-        WalkState::State update(const Scalar& dt, const Vec3& velocity_target) {
+        WalkState::State update(const Scalar& dt,
+                                const Vec3& velocity_target,
+                                const WalkState::Phase& sensors_planted_foot_phase) {
             if (velocity_target.isZero() && t < p.step_period) {
                 // Requested velocity target is zero and we haven't finished taking a step, continue stopping
                 engine_state = WalkState::State::STOPPING;
@@ -212,11 +218,14 @@ namespace utility::skill {
                 engine_state = WalkState::State::WALKING;
             }
 
+            // If the sensors have detected either double support or next foot planted, allow switching the planted foot
+            bool can_switch = sensors_planted_foot_phase != phase || !p.only_switch_when_planted;
+
             switch (engine_state.value) {
                 case WalkState::State::WALKING:
                     update_time(dt);
-                    // If we are at the end of the step, switch the planted foot and reset time
-                    if (t >= p.step_period) {
+                    // If we are at the end of the step and can switch feet, switch the planted foot and reset time
+                    if (t >= p.step_period && can_switch) {
                         switch_planted_foot();
                     }
                     break;
@@ -252,6 +261,14 @@ namespace utility::skill {
             return phase;
         }
 
+        /**
+         * @brief Get the current time in the step cycle [0, p.step_period].
+         * @return Current time in the step cycle.
+         */
+        Scalar get_time() const {
+            return t;
+        }
+
     private:
         /// @brief Walk engine parameters.
         WalkParameters p;
@@ -261,8 +278,11 @@ namespace utility::skill {
         /// @brief Current engine state.
         WalkState::State engine_state = WalkState::State::STOPPED;
 
-        /// @brief Walk planted foot phase.
+        /// @brief Walk engine planted foot phase.
         message::behaviour::state::WalkState::Phase phase = LEFT;
+
+        /// @brief Sensors foot planted phase.
+        message::behaviour::state::WalkState::Phase sensors_planted_foot_phase = LEFT;
 
         /// @brief Transform from planted {p} foot to swing {s} foot current placement at start of step.
         Iso3 Hps_start = Iso3::Identity();
