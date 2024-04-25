@@ -99,6 +99,9 @@ namespace module::input {
 
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+
+            /// @brief Limit on the maximum change in servo angle per update before the encoder is considered invalid
+            double max_servo_change = 0.0;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
