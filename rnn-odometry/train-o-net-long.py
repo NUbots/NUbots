@@ -157,10 +157,10 @@ def main():
     print("Truth long 4 shape: ", truth_long_4.shape)
 
     # Smooth targets using gaussian filter
-    truth_long_smoothed = gaussian_smooth(truth_long, 50)
-    truth_long_2_smoothed = gaussian_smooth(truth_long_2, 50)
-    truth_long_3_smoothed = gaussian_smooth(truth_long_3, 50)
-    truth_long_4_smoothed = gaussian_smooth(truth_long_4, 50)
+    # truth_long_smoothed = gaussian_smooth(truth_long, 50)
+    # truth_long_2_smoothed = gaussian_smooth(truth_long_2, 50)
+    # truth_long_3_smoothed = gaussian_smooth(truth_long_3, 50)
+    # truth_long_4_smoothed = gaussian_smooth(truth_long_4, 50)
 
     # print("truth 1: ", truth_long.shape)
     # print("Smoothed truth 1: ", truth_long_smoothed.shape)
@@ -181,8 +181,8 @@ def main():
     # join separate arrays
     imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3, imu_long_4], axis=0)
     servos_joined = np.concatenate([servos_long, servos_long_2, servos_long_3, servos_long_4], axis=0)
-    truth_joined = np.concatenate([truth_long_smoothed, truth_long_2_smoothed, truth_long_3_smoothed, truth_long_4_smoothed], axis=0)
-
+    # truth_joined = np.concatenate([truth_long_smoothed, truth_long_2_smoothed, truth_long_3_smoothed, truth_long_4_smoothed], axis=0)
+    truth_joined = np.concatenate([truth_long, truth_long_2, truth_long_3, truth_long_4], axis=0)
     # debugs
     print("imu_joined: ", imu_joined.shape)
     print("servos_joined: ",servos_joined.shape)
@@ -214,8 +214,8 @@ def main():
     # num_train = train_arr.size
     # num_val = validate_arr.size
 
-    # Normalisation  #
-    # Standardise -
+    #### Normalisation  ####
+    ## Standardise ##
     # NOTE: mean and std from training dataset is used to standardise
     # all of the datasets to prevent information leakage.
     # mean and std from the training run will need to be used in production for de-standardise the predictions.
@@ -227,21 +227,21 @@ def main():
     # train_arr = (train_arr - mean) / std
     # validate_arr = (validate_arr - mean) / std
     # test_arr = (test_arr - mean) / std
-    # # # # #
+    # # # #
 
-    # print(f"Training set size: {train_arr.shape}")
-    # print("Training set min:", np.min(train_arr))
-    # print("Training set max:", np.max(train_arr))
-    # print(f"Validation set size: {validate_arr.shape}")
-    # print(f"Test set size: {test_arr.shape}")
+    print(f"Training set size: {train_arr.shape}")
+    print("Training set min:", np.min(train_arr))
+    print("Training set max:", np.max(train_arr))
+    print(f"Validation set size: {validate_arr.shape}")
+    print(f"Test set size: {test_arr.shape}")
 
     # # clip the outliers in the data
     # train_arr_clipped = np.clip(train_arr, -4, 4)
     # validate_arr_clipped = np.clip(validate_arr, -4, 4)
     # test_arr_clipped = np.clip(test_arr, -4, 4)
 
-    # Min/Max Scaling
-    scaler = MinMaxScaler(feature_range=(0, 1))
+    ## Min/Max Scaling ##
+    scaler = MinMaxScaler(feature_range=(-1, 1))
     # Fit scaler to training data only
     scaler.fit(train_arr)
     # Transform the data
@@ -342,7 +342,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.00003   # Controls how much to change the model in response to error.
-    epochs = 200             #
+    epochs = 10             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -353,26 +353,26 @@ def main():
     # lr_callback = keras.callbacks.LearningRateScheduler(scheduler)
 
     # ** Loss functions **
-    # loss_function = keras.losses.MeanAbsoluteError()
+    loss_function = keras.losses.MeanAbsoluteError()
     # loss_function = keras.losses.MeanSquaredError()
     # loss_function = keras.losses.log_cosh(y_true=1,y_pred=1)
     # loss_function = keras.losses.Quantile(quantile=0.5)
     # loss_function = quantile_loss????
-    loss_function = keras.losses.Huber(delta=0.5)
+    # loss_function = keras.losses.Huber(delta=0.5)
 
     # ** Optimizers **
     # LR schedules
-    size_of_dataset = input_data_train.shape[0]
-    decay_to_epoch = 15                                         # Number of epochs for learning rate to decay over before it resets
-    steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
-    decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
-    print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
+    # size_of_dataset = input_data_train.shape[0]
+    # decay_to_epoch = 15                                         # Number of epochs for learning rate to decay over before it resets
+    # steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
+    # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
+    # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
+    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
 
     # standard optimisers
     # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
-    optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
-    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
     # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
     # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.1)
@@ -408,26 +408,26 @@ def main():
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.3)(inputs)
-    lstm = keras.layers.LSTM(40, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(180, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=False)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
     dropout1 = keras.layers.Dropout(rate=0.3)(normalise)
 
-    lstm2 = keras.layers.LSTM(40, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(dropout1)    # 32 originally
-    normalise2 = keras.layers.LayerNormalization()(lstm2)
-    dropout2 = keras.layers.Dropout(rate=0.3)(normalise2)
+    # lstm2 = keras.layers.LSTM(40, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(dropout1)    # 32 originally
+    # normalise2 = keras.layers.LayerNormalization()(lstm2)
+    # dropout2 = keras.layers.Dropout(rate=0.3)(normalise2)
 
-    lstm3 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0003), return_sequences=True)(dropout2)    # 32 originally
-    normalise3 = keras.layers.LayerNormalization()(lstm3)
-    dropout3 = keras.layers.Dropout(rate=0.35)(normalise3)
+    # lstm3 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0003), return_sequences=True)(dropout2)    # 32 originally
+    # normalise3 = keras.layers.LayerNormalization()(lstm3)
+    # dropout3 = keras.layers.Dropout(rate=0.35)(normalise3)
 
-    lstm4 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0003), return_sequences=False)(dropout3)    # 32 originally
-    normalise4 = keras.layers.LayerNormalization()(lstm4)
-    dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
+    # lstm4 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0003), return_sequences=False)(dropout3)    # 32 originally
+    # normalise4 = keras.layers.LayerNormalization()(lstm4)
+    # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
-    dense1 = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout4)
-    dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dense1)   # Target shape[1] is 3
+    # dense1 = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout4)
+    dense2 = keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
-    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
+    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
     model.summary()
 
     # Examples
@@ -448,7 +448,7 @@ def main():
     # Note add back the model save
     model.save("models/model-" + timestamp)
     # Save the scaler object
-    joblib.dump(scaler, 'scalers/scaler-' + timestamp)
+    # joblib.dump(scaler, 'scalers/scaler-' + timestamp)
 
 
 if __name__ == "__main__":
