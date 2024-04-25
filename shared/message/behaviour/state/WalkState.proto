@@ -28,7 +28,6 @@ syntax = "proto3";
 package message.behaviour.state;
 
 import "Vector.proto";
-import "Transform.proto";
 
 message WalkState {
     enum State {
