@@ -52,10 +52,10 @@ namespace module::skill {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkState;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
-    using WalkTask = message::skill::Walk;
+    using WalkTask  = message::skill::Walk;
+    using WalkState = message::behaviour::state::WalkState;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
@@ -149,8 +149,8 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_generator.is_left_foot_planted()));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_generator.is_left_foot_planted()));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
