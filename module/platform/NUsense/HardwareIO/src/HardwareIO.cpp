@@ -57,7 +57,7 @@ namespace module::platform::NUsense {
 
         on<PostConnect>().then("Apply Configuration", [this](const PostConnect& apply) {
             // Apply any configuration to the device in this lambda
-            std::string status = apply.attempt ? "successful" : "unsucessful";
+            std::string status = apply.attempt == 1 ? "successful" : "unsucessful";
             log<NUClear::INFO>(fmt::format("StreamReactor PostConnect status: {}", status));
         });
 
