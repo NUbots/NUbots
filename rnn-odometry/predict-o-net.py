@@ -33,11 +33,11 @@ sequence_length = system_sample_rate * 2    # Look back 3 seconds
 sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
 sampling_rate = 1                           # Used for downsampling
 batch_size = 250
-
+#NOTE: Using return_sequences=True. sequence_length should be = axis 0 of array (total sequence length)
 # Create test dataset
 test_dataset = tf.keras.utils.timeseries_dataset_from_array(
     data=test_data,
-    targets=test_targets,
+    targets=None,
     sequence_length=sequence_length,
     sequence_stride=sequence_stride,
     sampling_rate=sampling_rate,
