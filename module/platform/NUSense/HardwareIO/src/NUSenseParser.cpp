@@ -1,6 +1,6 @@
 #include "NUSenseParser.hpp"
 
-namespace module::platform::NUsense {
+namespace module::platform::NUSense {
 
     uint32_t read_le_32(const uint8_t* ptr) {
         return (uint32_t(ptr[0]) << 0) | (uint32_t(ptr[1]) << 8) | (uint32_t(ptr[2]) << 16) | (uint32_t(ptr[3]) << 24);

@@ -6,7 +6,7 @@
 #include <memory>
 #include <vector>
 
-namespace module::platform::NUsense {
+namespace module::platform::NUSense {
 
     struct NUSenseFrame {
         std::array<uint8_t, 3> header;  //< NBS Header, should be 0xE2, 0x98, 0xA2
