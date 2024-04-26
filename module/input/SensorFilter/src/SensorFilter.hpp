@@ -107,11 +107,11 @@ namespace module::input {
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
 
-        /// @brief Current support phase of the robot
-        WalkState::SupportPhase current_support_phase = WalkState::SupportPhase::LEFT;
+        /// @brief Current walk phase of the robot
+        WalkState::Phase current_walk_phase = WalkState::Phase::LEFT;
 
-        /// @brief Transform from anchor {a} to world {w} space
-        Eigen::Isometry3d Hwa = Eigen::Isometry3d::Identity();
+        /// @brief Transform from planted foot {p} to world {w} space
+        Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
 
         /// @brief Mahony filter for orientation (roll and pitch) estimation
         MahonyFilter<double> mahony_filter{};
@@ -151,14 +151,12 @@ namespace module::input {
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
                              const RawSensors& raw_sensors,
-                             const std::shared_ptr<const WalkState>& walk_state);
+                             const WalkState& walk_state);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update
         /// @param raw_sensors The raw sensor data
-        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors,
-                                 const RawSensors& raw_sensors,
-                                 const std::shared_ptr<const WalkState>& walk_state);
+        void debug_sensor_filter(std::unique_ptr<Sensors>& sensors, const RawSensors& raw_sensors);
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP

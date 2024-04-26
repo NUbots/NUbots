@@ -171,6 +171,8 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
             f"EDITOR={os.environ.get('EDITOR', 'nano')}",
             "--privileged",
             "--group-add",
+            "audio",
+            "--group-add",
             "dialout",
         ]
 
@@ -186,6 +188,10 @@ def run(func, image, hostname="docker", ports=[], docker_context=None):
         # Pass through GPUs if requested
         if kwargs["gpus"] is not None:
             docker_args.extend(["--gpus", kwargs["gpus"]])
+
+        # Pass through devices if requested
+        for d in kwargs["device"]:
+            docker_args.extend(["--device", d])
 
         # Check if we can find the image, and if not try to either build it or pull it
         rebuild = kwargs["rebuild"]

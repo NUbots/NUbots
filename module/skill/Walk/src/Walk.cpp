@@ -52,10 +52,10 @@ namespace module::skill {
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using message::behaviour::state::Stability;
-    using message::behaviour::state::WalkState;
     using message::skill::ControlLeftFoot;
     using message::skill::ControlRightFoot;
-    using WalkTask = message::skill::Walk;
+    using WalkTask  = message::skill::Walk;
+    using WalkState = message::behaviour::state::WalkState;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
@@ -69,20 +69,20 @@ namespace module::skill {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Configure the motion generation options
-            utility::skill::WalkGeneratorOptions<double> walk_generator_options;
-            walk_generator_options.step_period           = config["walk"]["period"].as<double>();
-            walk_generator_options.step_apex_ratio       = config["walk"]["step"]["apex_ratio"].as<double>();
-            walk_generator_options.step_limits           = config["walk"]["step"]["limits"].as<Expression>();
-            walk_generator_options.step_height           = config["walk"]["step"]["height"].as<double>();
-            walk_generator_options.step_width            = config["walk"]["step"]["width"].as<double>();
-            walk_generator_options.torso_height          = config["walk"]["torso"]["height"].as<double>();
-            walk_generator_options.torso_pitch           = config["walk"]["torso"]["pitch"].as<Expression>();
-            walk_generator_options.torso_position_offset = config["walk"]["torso"]["position_offset"].as<Expression>();
-            walk_generator_options.torso_sway_offset     = config["walk"]["torso"]["sway_offset"].as<Expression>();
-            walk_generator_options.torso_sway_ratio      = config["walk"]["torso"]["sway_ratio"].as<double>();
-            walk_generator_options.torso_final_position_ratio =
+            cfg.walk_generator_parameters.step_period     = config["walk"]["period"].as<double>();
+            cfg.walk_generator_parameters.step_apex_ratio = config["walk"]["step"]["apex_ratio"].as<double>();
+            cfg.walk_generator_parameters.step_limits     = config["walk"]["step"]["limits"].as<Expression>();
+            cfg.walk_generator_parameters.step_height     = config["walk"]["step"]["height"].as<double>();
+            cfg.walk_generator_parameters.step_width      = config["walk"]["step"]["width"].as<double>();
+            cfg.walk_generator_parameters.torso_height    = config["walk"]["torso"]["height"].as<double>();
+            cfg.walk_generator_parameters.torso_pitch     = config["walk"]["torso"]["pitch"].as<Expression>();
+            cfg.walk_generator_parameters.torso_position_offset =
+                config["walk"]["torso"]["position_offset"].as<Expression>();
+            cfg.walk_generator_parameters.torso_sway_offset = config["walk"]["torso"]["sway_offset"].as<Expression>();
+            cfg.walk_generator_parameters.torso_sway_ratio  = config["walk"]["torso"]["sway_ratio"].as<double>();
+            cfg.walk_generator_parameters.torso_final_position_ratio =
                 config["walk"]["torso"]["final_position_ratio"].as<Expression>();
-            walk_generator.configure(walk_generator_options);
+            walk_generator.set_parameters(cfg.walk_generator_parameters);
 
             // Reset the walk engine and last update time
             walk_generator.reset();
@@ -149,8 +149,8 @@ namespace module::skill {
                 Eigen::Isometry3d Htr = walk_generator.get_foot_pose(LimbID::RIGHT_LEG);
 
                 // Construct ControlFoot tasks
-                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time, walk_generator.is_left_foot_planted()));
-                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time, !walk_generator.is_left_foot_planted()));
+                emit<Task>(std::make_unique<ControlLeftFoot>(Htl, goal_time));
+                emit<Task>(std::make_unique<ControlRightFoot>(Htr, goal_time));
 
                 // Construct Arm IK tasks
                 auto left_arm  = std::make_unique<LeftArm>();
@@ -166,10 +166,11 @@ namespace module::skill {
                 emit<Task>(left_arm, 0, true, "Walk left arm");
                 emit<Task>(right_arm, 0, true, "Walk right arm");
 
-                // Emit walk engine state
-                WalkState::SupportPhase phase = walk_generator.is_left_foot_planted() ? WalkState::SupportPhase::LEFT
-                                                                                      : WalkState::SupportPhase::RIGHT;
-                emit(std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase));
+                // Emit the walk state
+                WalkState::Phase phase =
+                    walk_generator.is_left_foot_planted() ? WalkState::Phase::LEFT : WalkState::Phase::RIGHT;
+                auto walk_state =
+                    std::make_unique<WalkState>(walk_generator.get_state(), walk_task.velocity_target, phase);
 
                 // Debugging
                 if (log_level <= NUClear::DEBUG) {
@@ -187,6 +188,7 @@ namespace module::skill {
                                Hpt.translation().z()));
                     emit(graph("Torso desired orientation (r,p,y)", thetaPT.x(), thetaPT.y(), thetaPT.z()));
                 }
+                emit(walk_state);
             });
     }
 

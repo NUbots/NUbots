@@ -337,6 +337,9 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+# lame
+RUN install-package lame
+
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
@@ -431,13 +434,14 @@ ARG user_uid=1000
 ARG user_gid=$user_uid
 ARG dialout_gid=20
 
-# useradd -G is not sufficient to add the nubots user to the dialout 
-# group as docker manages to lose supplementary groups when changing 
+# useradd -G is not sufficient to add the nubots user to the dialout
+# group as docker manages to lose supplementary groups when changing
 # to the nubots user.
 # Also need to add "--group-add dialout" to the docker run command in run.py
 RUN groupadd --gid $dialout_gid dialout \
     && groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G dialout -m nubots
+    && useradd --uid $user_uid --gid nubots -G dialout -m nubots \
+    && useradd --uid $user_uid --gid $user_gid -G audio -m nubots
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user

@@ -1,6 +1,6 @@
 // MIT License
 //
-// Copyright (c) 2023 NUbots
+// Copyright (c) 2017 NUbots
 //
 // This file is part of the NUbots codebase.
 // See https://github.com/NUbots/NUbots for further info.
@@ -25,30 +25,34 @@
 
 syntax = "proto3";
 
-package message.behaviour.state;
+package message.localisation;
 
 import "Vector.proto";
+import "Matrix.proto";
+import "Transform.proto";
+import "google/protobuf/timestamp.proto";
 
-message WalkState {
-    enum State {
-        UNKNOWN  = 0;
-        WALKING  = 1;
-        STOPPING = 2;
-        STOPPED  = 3;
-    }
+message Robot {
+    /// Robot id
+    uint32 id = 1;
 
-    enum Phase {
-        DOUBLE = 0;
-        LEFT   = 1;
-        RIGHT  = 2;
-    }
+    /// Robot's filtered cartesian position measured in world space {w} from the world {W}
+    vec3 rRWw = 2;
 
-    /// Walking state
-    State state = 1;
+    /// Robot's velocity in world {w} space
+    vec3 vRw = 3;
 
-    /// Current requested velocity target (dx, dy, dtheta)
-    vec3 velocity_target = 2;
+    /// Covariance of state (rRWw, vRw)
+    mat4 covariance = 4;
 
-    /// Walk phase
-    Phase phase = 3;
+    /// Time the ball measurement was taken
+    google.protobuf.Timestamp time_of_measurement = 5;
+
+    /// Homogeneous transformation matrix from world to camera space
+    iso3 Hcw = 6;
+}
+
+message Robots {
+    /// List of localised robots
+    repeated Robot robots = 1;
 }
