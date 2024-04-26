@@ -43,10 +43,7 @@
 ### Date format is ISO year/month/day
 FROM --platform=linux/amd64 archlinux:base-devel-20220710.0.67642
 
-# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
-# If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
-# needs to be altered.
+COPY etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist
 
 # Setup pacman first before we install so we can turn off pgp
 COPY etc/pacman.conf /etc/pacman.conf
@@ -340,6 +337,42 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
 
+# lame
+RUN install-package lame
+
+# OpenCV
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
+
+# OpenVino - Dependencies
+RUN install-package opencl-clhpp && \
+    install-package opencl-headers && \
+    install-package ocl-icd
+
+# OpenVino
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1 && \
+    cd openvino &&  \
+    git submodule update --init --recursive && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DBUILD_TESTING:BOOL='OFF' \
+            -DCMAKE_BUILD_TYPE:STRING='Release' \
+            -DENABLE_AVX512F:BOOL='OFF' \
+            -DENABLE_PYTHON:BOOL='OFF' \
+            -DENABLE_CLANG_FORMAT:BOOL='OFF' \
+            -DENABLE_NCC_STYLE:BOOL='OFF' \
+            -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
+            -DENABLE_SYSTEM_TBB:BOOL='ON' \
+            -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
+            -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
+            -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+            -Wno-dev && \
+    make -j$(nproc) && \
+    make install && \
+    /usr/local/setupvars.sh
+
+# Move OpenVino libraries to our library path
+RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -401,13 +434,14 @@ ARG user_uid=1000
 ARG user_gid=$user_uid
 ARG dialout_gid=20
 
-# useradd -G is not sufficient to add the nubots user to the dialout 
-# group as docker manages to lose supplementary groups when changing 
+# useradd -G is not sufficient to add the nubots user to the dialout
+# group as docker manages to lose supplementary groups when changing
 # to the nubots user.
 # Also need to add "--group-add dialout" to the docker run command in run.py
 RUN groupadd --gid $dialout_gid dialout \
     && groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G dialout -m nubots
+    && useradd --uid $user_uid --gid nubots -G dialout -m nubots \
+    && useradd --uid $user_uid --gid $user_gid -G audio -m nubots
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user

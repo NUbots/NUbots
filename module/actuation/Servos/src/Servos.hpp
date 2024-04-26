@@ -51,11 +51,12 @@ namespace module::actuation {
         // TODO(ysims): add capability to be Done when the servo reaches the target position
         template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
-            on<Provide<Servo>, Trigger<Sensors>>().then([this](const Servo& servo, const RunInfo& info) {
-                if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
-                    if (log_level <= NUClear::DEBUG) {
-                        emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
-                                   servo.command.position,
+            on<Provide<Servo>, Every<90, Per<std::chrono::seconds>>>().then(
+                [this](const Servo& servo, const RunInfo& info) {
+                    if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
+                        if (log_level <= NUClear::DEBUG) {
+                            emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
+                                       servo.command.position,
                                    servo.command.state.gain,
                                    servo.command.state.torque));
                     }
@@ -67,9 +68,9 @@ namespace module::actuation {
                 }
                 // If the time to reach the position is over, then stop requesting the position
                 else if (NUClear::clock::now() >= servo.command.time) {
-                    emit<Task>(std::make_unique<Done>());
-                }
-            });
+                        emit<Task>(std::make_unique<Done>());
+                    }
+                });
         }
 
         /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.
