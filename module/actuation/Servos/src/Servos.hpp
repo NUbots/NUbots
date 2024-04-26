@@ -57,17 +57,17 @@ namespace module::actuation {
                         if (log_level <= NUClear::DEBUG) {
                             emit(graph("Servo " + std::to_string(ID) + " (Position, Gain, Torque Enabled): ",
                                        servo.command.position,
-                                   servo.command.state.gain,
-                                   servo.command.state.torque));
+                                       servo.command.state.gain,
+                                       servo.command.state.torque));
+                        }
+                        emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                           ID,
+                                                           servo.command.position,
+                                                           servo.command.state.gain,
+                                                           servo.command.state.torque));
                     }
-                    emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                       ID,
-                                                       servo.command.position,
-                                                       servo.command.state.gain,
-                                                       servo.command.state.torque));
-                }
-                // If the time to reach the position is over, then stop requesting the position
-                else if (NUClear::clock::now() >= servo.command.time) {
+                    // If the time to reach the position is over, then stop requesting the position
+                    else if (NUClear::clock::now() >= servo.command.time) {
                         emit<Task>(std::make_unique<Done>());
                     }
                 });
