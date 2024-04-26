@@ -30,10 +30,8 @@ namespace module::platform::NUsense {
             uint32_t size = uint32_t(payload.size() + sizeof(hash) + sizeof(timestamp_us));
 
             // Create the nbs packet
-            std::vector<uint8_t> nbs;
-            nbs.push_back(0xE2);
-            nbs.push_back(0x98);
-            nbs.push_back(0xA2);
+            std::vector<uint8_t> nbs({0xE2, 0x98, 0xA2});
+
             // Size
             for (size_t i = 0; i < sizeof(size); ++i) {
                 nbs.push_back(uint8_t((size >> (i * 8)) & 0xFF));
