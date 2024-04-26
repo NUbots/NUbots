@@ -1,16 +1,18 @@
 #include "HardwareIO.hpp"
 
+#include <string>
+
 #include "NUSenseParser.hpp"
 
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
 #include "message/reflection.hpp"
-#include <string>
 
 namespace module::platform::NUsense {
 
     using extension::Configuration;
+    using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
 
     /**
@@ -42,7 +44,7 @@ namespace module::platform::NUsense {
         on<Configuration>("NUSense.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Get the IP address and port from the config file
+            // Get the port from the config file
             auto device = config["connection"]["path"].as<std::string>();
             auto baud   = config["connection"]["baud"].as<int>();
 
