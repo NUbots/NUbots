@@ -49,7 +49,4 @@ nuclear_role(
   strategy::StandStill
   # Purpose
   purpose::KeyboardWalk
-  # Playback
-  nbs::Player
-  tools::NBSPlayback
 )
