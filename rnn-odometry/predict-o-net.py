@@ -11,7 +11,7 @@ test_data = np.load('datasets/input_data_train.npy')
 test_targets = np.load('datasets/input_targets_train.npy')
 
 # Load model
-model = load_model('models/model-20240425-204712')
+model = load_model('models/model-20240427-195446')
 
 
 # Load scaler
@@ -28,13 +28,16 @@ model = load_model('models/model-20240425-204712')
 # plt.legend()
 # plt.show()
 
-system_sample_rate = 115
-sequence_length = system_sample_rate * 2    # Look back 3 seconds
+# system_sample_rate = 115
+# sequence_length = system_sample_rate * 2    # Look back 3 seconds
 sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
 sampling_rate = 1                           # Used for downsampling
 batch_size = 250
 #NOTE: Using return_sequences=True. sequence_length should be = axis 0 of array (total sequence length)
 # Create test dataset
+
+sequence_length = test_data.shape[0]
+
 test_dataset = tf.keras.utils.timeseries_dataset_from_array(
     data=test_data,
     targets=None,
@@ -60,6 +63,9 @@ print('prediction shape:', predictions.shape)
 print('prediction shape[0]:', predictions.shape[0])
 print('prediction shape[1]:', predictions.shape[1])
 print('target set shape:', test_targets.shape)
+
+# Flatten predictions (assuming all time steps are relevant)
+predictions = predictions.reshape(-1, predictions.shape[2])
 
 # Evaluate
 test_targets = test_targets[:predictions.shape[0]]

@@ -307,21 +307,21 @@ def main():
     # plt.show()
 
     # NOTE: Samples are roughly 115/sec
-    # system_sample_rate = 115
-    # sequence_length = system_sample_rate * 2   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    system_sample_rate = 115
+    sequence_length = system_sample_rate * 2   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
     batch_size = 250                          # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Sequence lengths (for return sequences)
-    train_seq_length = input_data_train.shape[0]
-    val_seq_length = input_data_validate.shape[0]
-    test_seq_length = input_data_test.shape[0]
+    # train_seq_length = input_data_train.shape[0]
+    # val_seq_length = input_data_validate.shape[0]
+    # test_seq_length = input_data_test.shape[0]
 
     train_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_train,
         targets=input_targets_train,
-        sequence_length=train_seq_length,
+        sequence_length=sequence_length,
         sequence_stride=sequence_stride,
         sampling_rate=sampling_rate,
         batch_size=batch_size
@@ -330,7 +330,7 @@ def main():
     validate_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_validate,
         targets=input_targets_validate,
-        sequence_length=val_seq_length,
+        sequence_length=sequence_length,
         sequence_stride=sequence_stride,
         sampling_rate=sampling_rate,
         batch_size=batch_size
@@ -339,7 +339,7 @@ def main():
     test_dataset = tf.keras.utils.timeseries_dataset_from_array(
         data=input_data_test,
         targets=input_targets_test,
-        sequence_length=test_seq_length,
+        sequence_length=sequence_length,
         sequence_stride=sequence_stride,
         sampling_rate=sampling_rate,
         batch_size=batch_size
@@ -347,7 +347,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.0003   # Controls how much to change the model in response to error.
-    epochs = 800             #
+    epochs = 200             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -411,19 +411,21 @@ def main():
     # final_regularizer = keras.regularizers.L1L2(l1=0.002, l2=0.009)
 
     # Model Layers
-    inputs = keras.layers.Input(shape=(input_data_train.shape[0], input_data_train.shape[1]))
+    inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
     dropout = keras.layers.Dropout(rate=0.3)(inputs)
-    lstm = keras.layers.LSTM(180, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(dropout)    # 32 originally
+    lstm = keras.layers.LSTM(10, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
-    # dropout1 = keras.layers.Dropout(rate=0.3)(normalise)
 
-    # lstm2 = keras.layers.LSTM(40, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(dropout1)    # 32 originally
+    # lstm2 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(normalise)    # 32 originally
     # normalise2 = keras.layers.LayerNormalization()(lstm2)
-    # dropout2 = keras.layers.Dropout(rate=0.3)(normalise2)
 
-    # lstm3 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0003), return_sequences=True)(dropout2)    # 32 originally
+    # lstm3 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000035, l2=0.00035), return_sequences=True)(normalise2)    # 32 originally
     # normalise3 = keras.layers.LayerNormalization()(lstm3)
-    # dropout3 = keras.layers.Dropout(rate=0.35)(normalise3)
+
+    # Apply attention layer that considers all normalised lstm outputs
+    # attention = keras.layers.Attention()([normalise, normalise])
+    # Compute dot product between attention weights and last LSTM layer
+    # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise])
 
     # lstm4 = keras.layers.LSTM(30, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00003, l2=0.0003), return_sequences=False)(dropout3)    # 32 originally
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
