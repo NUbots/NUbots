@@ -24,26 +24,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILITY_NBS_GET_ID_HPP
-#define UTILITY_NBS_GET_ID_HPP
+#ifndef UTILITY_TYPE_TRAITS_RANGE_CONSTRUCTIBLE
+#define UTILITY_TYPE_TRAITS_RANGE_CONSTRUCTIBLE
 
+#include <concepts>
+#include <ranges>
 #include <type_traits>
+#include <utility>
 
-#include "utility/type_traits/has_id.hpp"
+namespace utility::type_traits {
 
-namespace utility::nbs {
+    /**
+     * @brief Checks that range has both, a begin method and an end method, and that the begin method returns something
+     * that can be dereferenced to a type implicitly convertible to vale_type
+     * @tparam range The type that should be checked
+     * @tparam value_type The type to be implicit converted to
+     */
+    template <typename range, typename value_type>
+    concept range_constructible =
+        std::ranges::input_range<range> && std::convertible_to<decltype(*std::declval<range>().begin()),
+                                                               std::remove_cvref_t<value_type>>;
 
-    /// @brief Returns the subtype field of data or, if subtype does not exist, 0
-    template <typename T>
-    std::enable_if_t<!utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& /*data*/) {
-        return 0;
-    }
+}  // namespace utility::type_traits
 
-    template <typename T>
-    std::enable_if_t<utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& data) {
-        return data.id;
-    }
-
-}  // namespace utility::nbs
-
-#endif  // UTILITY_NBS_GET_ID_HPP
+#endif  // UTILITY_TYPE_TRAITS_RANGE_CONSTRUCTIBLE
