@@ -346,8 +346,8 @@ def main():
     )
 
     # Model parameters
-    learning_rate = 0.00003   # Controls how much to change the model in response to error.
-    epochs = 10             #
+    learning_rate = 0.0003   # Controls how much to change the model in response to error.
+    epochs = 800             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -367,17 +367,17 @@ def main():
 
     # ** Optimizers **
     # LR schedules
-    # size_of_dataset = input_data_train.shape[0]
-    # decay_to_epoch = 15                                         # Number of epochs for learning rate to decay over before it resets
-    # steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
-    # decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
-    # print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    # lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
+    size_of_dataset = input_data_train.shape[0]
+    decay_to_epoch = 20                                         # Number of epochs for learning rate to decay over before it resets
+    steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
+    decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
+    print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
+    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.0000005)
 
     # standard optimisers
     # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)
-    # optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
-    optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
+    optimizer = keras.optimizers.AdamW(learning_rate=lr_schedule)
+    # optimizer = keras.optimizers.AdamW(learning_rate=learning_rate)
 
     # optimizer=keras.optimizers.Adadelta(learning_rate=lr_schedule)
     # optimizer = keras.optimizers.SGD(learning_rate=lr_schedule, momentum=0.1)
