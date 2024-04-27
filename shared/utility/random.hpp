@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,15 +24,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILITY_CLOCK_HPP
-#define UTILITY_CLOCK_HPP
+#ifndef UTILITY_RANDOM_HPP
+#define UTILITY_RANDOM_HPP
 
-#include <nuclear>
+#include <algorithm>
+#include <random>
 
-namespace utility::clock {
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    void update_rtf(const double& rtf);
-    extern double custom_rtf;  // Real time factor
-}  // namespace utility::clock
+namespace utility::random {
 
-#endif  // UTILITY_CLOCK_HPP
+    std::string generate_alphanum_string(unsigned int length);
+
+}
+
+#endif  // UTILITY_RANDOM_HPP

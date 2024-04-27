@@ -31,8 +31,6 @@
 #include <fmt/format.h>
 #include <string>
 
-#include "clock/clock.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
@@ -724,7 +722,10 @@ namespace module::platform {
 
         // Exponential filter to do the smoothing
         rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
-        utility::clock::update_rtf(rtf);
+        emit<Scope::DIRECT>(
+            std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
+                                                           rtf,
+                                                           NUClear::message::TimeTravel::Action::RELATIVE));
 
         // Update our current times
         current_sim_time  = sensor_measurements.time;
