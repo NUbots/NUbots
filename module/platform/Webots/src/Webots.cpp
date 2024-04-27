@@ -722,10 +722,7 @@ namespace module::platform {
 
         // Exponential filter to do the smoothing
         rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
-        emit<Scope::DIRECT>(
-            std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                           rtf,
-                                                           NUClear::message::TimeTravel::Action::RELATIVE));
+        NUClear::clock::set_clock(NUClear::clock::now(), rtf);
 
         // Update our current times
         current_sim_time  = sensor_measurements.time;
