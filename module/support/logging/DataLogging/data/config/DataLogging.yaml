@@ -2,14 +2,15 @@ log_level: INFO
 
 output:
   directory: recordings
-  split_size: 5 * GiB
+  split_size: 50 * GiB
 
 # You can put any messages that is emitted in the system here and it will be logged
 # The below ones are just the most common and here as an example
 # You can put any messages that is emitted in the system here and it will be logged
 messages:
-  # Sensors
+  # Input
   message.platform.RawSensors: true
+  message.input.Image: true
   message.output.CompressedImage: true
   # Vision
   message.vision.Balls: true
