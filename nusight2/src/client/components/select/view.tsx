@@ -77,7 +77,7 @@ export class Select extends React.Component<SelectProps> {
           isFullwidth={true}
           onToggleClick={this.onToggleClick}
         >
-          <div className={style.dropdown}>
+          <div className="bg-gray-200 border border-gray-300 border-md shadow-md">
             {options.length === 0 && <div className={style.empty}>{empty || "No options"}</div>}
             {options.length > 0 && (
               <div className={style.options}>

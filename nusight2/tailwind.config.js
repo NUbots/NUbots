@@ -26,8 +26,8 @@ const config = {
       },
 
       gray: {
-        100: "#f4f4f4ff",
-        200: "#fcfcfcff",
+        100: "#fcfcfcff",
+        200: "#f4f4f4ff",
         300: "#e0e0e0ff",
         400: "#5d5d5dff",
         500: "#484848ff",
@@ -37,13 +37,19 @@ const config = {
         900: "#00000099",
       },
 
+      blue: {
+        400: "#1197d3",
+      },
+
       green: {
         100: "#0c7700",
         200: "#00de46"
       },
 
       orange: {
-        100: "#ffae00",
+        100: "#ffd372",
+        200: "#F9A50D",
+        300: "#f09c00",
       },
 
       transparent: "transparent",

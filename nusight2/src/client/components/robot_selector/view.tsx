@@ -30,7 +30,7 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const dropdownToggle = (
     <button className="{style.button}">
       {/* <IconRobot style={svgStyle} /> */}
-      <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out fill-grey-100 hover:fill-orange-100" />
+      <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out fill-grey-100 hover:fill-orange-200" />
       Select robots
     </button>
   );

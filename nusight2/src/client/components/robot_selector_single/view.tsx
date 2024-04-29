@@ -50,7 +50,7 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
   render() {
     const { dropDirection } = this.props;
     return (
-      <div className={style.robotSelector}>
+      <div>
         <Select
           options={this.options}
           selectedOption={this.selectedOption}
