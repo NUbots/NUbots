@@ -35,9 +35,11 @@
 #include "message/actuation/ServoTarget.hpp"
 #include "message/platform/NUSenseData.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/reflection.hpp"
 
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
+
 
 namespace module::platform::NUSense {
 
@@ -50,76 +52,50 @@ namespace module::platform::NUSense {
     using message::platform::RawSensors;
     using utility::support::Expression;
 
+    /**
+     * Message reflector class that can be used to emit messages provided as NUSenseFrames to the rest of the system
+     *
+     * @tparam T The type of the message to emit
+     */
+    template <typename T>
+    struct EmitReflector;
+
+    /// Virtual base class for the emit reflector
+    template <>
+    struct EmitReflector<void> {  // NOLINT(cppcoreguidelines-special-member-functions)
+        virtual void emit(NUClear::PowerPlant& powerplant, const NUSenseFrame& frame) = 0;
+        virtual ~EmitReflector()                                                      = default;
+    };
+    template <typename T>
+    struct EmitReflector : public EmitReflector<void> {
+        void emit(NUClear::PowerPlant& powerplant, const NUSenseFrame& frame) override {
+            // Deserialise and emit
+            powerplant.emit(std::make_unique<T>(NUClear::util::serialise::Serialise<T>::deserialise(frame.payload)));
+        }
+    };
+
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), nusense() {
+        : utility::reactor::StreamReactor<HardwareIO, NUSenseParser, 5>(std::move(environment)) {
 
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             // Use configuration here from file HardwareIO.yaml
-            this->log_level  = config["log_level"].as<NUClear::LogLevel>();
-            cfg.nusense.port = config["nusense"]["port"].as<std::string>();
-            cfg.nusense.baud = config["nusense"]["baud"].as<unsigned int>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            auto device     = config["nusense"]["port"].as<std::string>();
+            auto baud       = config["nusense"]["baud"].as<int>();
 
-            nusense = utility::io::uart(cfg.nusense.port, cfg.nusense.baud);
+            // Tell the stream reactor to connect to the device
+            emit(std::make_unique<ConnectSerial>(device, baud));
 
-            log<NUClear::INFO>(fmt::format("Port {} successfully opened.", cfg.nusense.port));
-
+            // Apply servo offsets
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 nugus.servo_offset[i]    = config["servos"][i]["offset"].as<Expression>();
                 nugus.servo_direction[i] = config["servos"][i]["direction"].as<Expression>();
             }
         });
 
-        on<Shutdown>().then("NUSense HardwareIO Shutdown", [this] {
-            // Close our connection to NUSense
-            if (nusense.connected()) {
-                nusense.close();
-            }
-        });
-
-        // Handle data sent from NUSense
-        on<IO>(nusense.native_handle(), IO::READ).then([this] {
-            // Read from NUsense
-            uint32_t num_bytes = nusense.read(nusense_usb_bytes.data(), 512);
-            nusense_receiver.receive(num_bytes, nusense_usb_bytes.data());
-
-            // If packet successfully decoded
-            if (nusense_receiver.handle()) {
-                const auto& nusense_msg = nusense_receiver.get_nusense_message();
-
-                log<NUClear::DEBUG>(
-                    fmt::format("\nIMU Data\n"
-                                "\tAccel(xyz): {} - {} - {}\n"
-                                "\t Gyro(xyz): {} - {} - {}\n ",
-                                nusense_msg.imu.accel.x,
-                                nusense_msg.imu.accel.y,
-                                nusense_msg.imu.accel.z,
-                                nusense_msg.imu.gyro.x,
-                                nusense_msg.imu.gyro.y,
-                                nusense_msg.imu.gyro.z));
-
-                log<NUClear::DEBUG>("Logging servo states...");
-
-                for (const auto& [key, val] : nusense_msg.servo_map) {
-                    log<NUClear::DEBUG>(fmt::format("      key: {}", key));
-
-                    log<NUClear::DEBUG>(fmt::format("       id: {}", val.id));
-                    log<NUClear::DEBUG>(fmt::format("   hw_err: {}", val.hardware_error));
-                    log<NUClear::DEBUG>(fmt::format("torque_en: {}", val.torque_enabled));
-                    log<NUClear::DEBUG>(fmt::format("     ppwm: {}", val.present_pwm));
-                    log<NUClear::DEBUG>(fmt::format("    pcurr: {}", val.present_current));
-                    log<NUClear::DEBUG>(fmt::format("    pvelo: {}", val.present_velocity));
-                    log<NUClear::DEBUG>(fmt::format("     ppos: {}", val.present_position));
-                    log<NUClear::DEBUG>(fmt::format("     gpwm: {}", val.goal_pwm));
-                    log<NUClear::DEBUG>(fmt::format("    gcurr: {}", val.goal_current));
-                    log<NUClear::DEBUG>(fmt::format("    gvelo: {}", val.goal_velocity));
-                    log<NUClear::DEBUG>(fmt::format("     gpos: {}", val.goal_position));
-                    log<NUClear::DEBUG>(fmt::format("  voltage: {}", val.voltage));
-                    log<NUClear::DEBUG>(fmt::format("     temp: {}", val.temperature));
-                }
-
-                // Emit the NUSense msg to be captured by the reaction below.
-                emit<Scope::DIRECT>(std::make_unique<NUSense>(nusense_msg));
-            }
+        // Emit any messages sent by the device to the rest of the system
+        on<Trigger<NUSenseFrame>>().then("From NUSense", [this](const NUSenseFrame& packet) {
+            message::reflection::from_hash<EmitReflector>(packet.hash)->emit(powerplant, packet);
         });
 
         // Handle successfully decoded NUSense data
@@ -176,6 +152,39 @@ namespace module::platform::NUSense {
                 servo.present_position += nugus.servo_offset[val.id - 1];
             }
 
+            if (log_level <= NUClear::DEBUG) {
+                log<NUClear::DEBUG>(
+                    fmt::format("\nIMU Data\n"
+                                "\tAccel(xyz): {} - {} - {}\n"
+                                "\t Gyro(xyz): {} - {} - {}\n ",
+                                data.imu.accel.x,
+                                data.imu.accel.y,
+                                data.imu.accel.z,
+                                data.imu.gyro.x,
+                                data.imu.gyro.y,
+                                data.imu.gyro.z));
+
+                log<NUClear::DEBUG>("Logging servo states...");
+
+                for (const auto& [key, val] : data.servo_map) {
+                    log<NUClear::DEBUG>(fmt::format("      key: {}", key));
+
+                    log<NUClear::DEBUG>(fmt::format("       id: {}", val.id));
+                    log<NUClear::DEBUG>(fmt::format("   hw_err: {}", val.hardware_error));
+                    log<NUClear::DEBUG>(fmt::format("torque_en: {}", val.torque_enabled));
+                    log<NUClear::DEBUG>(fmt::format("     ppwm: {}", val.present_pwm));
+                    log<NUClear::DEBUG>(fmt::format("    pcurr: {}", val.present_current));
+                    log<NUClear::DEBUG>(fmt::format("    pvelo: {}", val.present_velocity));
+                    log<NUClear::DEBUG>(fmt::format("     ppos: {}", val.present_position));
+                    log<NUClear::DEBUG>(fmt::format("     gpwm: {}", val.goal_pwm));
+                    log<NUClear::DEBUG>(fmt::format("    gcurr: {}", val.goal_current));
+                    log<NUClear::DEBUG>(fmt::format("    gvelo: {}", val.goal_velocity));
+                    log<NUClear::DEBUG>(fmt::format("     gpos: {}", val.goal_position));
+                    log<NUClear::DEBUG>(fmt::format("  voltage: {}", val.voltage));
+                    log<NUClear::DEBUG>(fmt::format("     temp: {}", val.temperature));
+                }
+            }
+
             // Emit the raw sensor data
             emit(std::move(sensors));
         });
@@ -198,30 +207,7 @@ namespace module::platform::NUSense {
                     target.torque);
             }
 
-            // Write the command as one vector. ServoTargets messages are usually greater than 512 bytes but less
-            // than 1024. This means that the USB2.0 protocol will split this up and will be received on the nusense
-            // side as chunks of 512 as 512 bytes is the maximum bulk size that 2.0 allows. This also implies that the
-            // read callback in the nusense side will be triggered at least twice (avg bytes for 20 filled servo targets
-            // is about 700).
-            std::array<char, 3> header = {(char) 0xE2, (char) 0x98, (char) 0xA2};
-
-            std::vector<uint8_t> payload =
-                NUClear::util::serialise::Serialise<SubcontrollerServoTargets>::serialise(servo_targets);
-
-            int payload_length                  = payload.size();
-            uint8_t high_byte                   = (payload_length >> 8) & 0xFF;
-            uint8_t low_byte                    = payload_length & 0xFF;
-            std::array<uint8_t, 2> byte_lengths = {high_byte, low_byte};
-
-            std::vector<char> full_msg;
-            full_msg.insert(full_msg.end(), header.begin(), header.end());
-            full_msg.insert(full_msg.end(), byte_lengths.begin(), byte_lengths.end());
-            full_msg.insert(full_msg.end(), payload.begin(), payload.end());
-
-            // Check if the write failed
-            if (nusense.write(full_msg.data(), full_msg.size()) == -1) {
-                log<NUClear::INFO>(fmt::format("Write error: {}", strerror(errno)));
-            }
+            send_packet(servo_targets);
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
@@ -230,6 +216,25 @@ namespace module::platform::NUSense {
 
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(command_list));
+        });
+
+
+        // TODO (JohanneMontano) Figure out why we only receive 17 servo targets on NUSense with frequencies above 50 Hz
+        on<Every<50, Per<std::chrono::seconds>>>().then([this] {
+            auto servo_targets = std::make_unique<ServoTargets>();
+
+            for (int i = 0; i < 20; ++i) {
+                auto servo_target      = std::make_unique<ServoTarget>();
+                servo_target->time     = NUClear::clock::now();
+                servo_target->id       = i + 1;
+                servo_target->position = 100.0;
+                servo_target->gain     = 100.0;
+                servo_target->torque   = 100.0;
+
+                servo_targets->targets.push_back(*servo_target);
+            }
+
+            emit(servo_targets);
         });
     }
 

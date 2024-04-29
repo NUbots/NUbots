@@ -440,8 +440,8 @@ ARG dialout_gid=20
 # Also need to add "--group-add dialout" to the docker run command in run.py
 RUN groupadd --gid $dialout_gid dialout \
     && groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G dialout -m nubots \
-    && useradd --uid $user_uid --gid $user_gid -G audio -m nubots
+    && useradd --uid $user_uid --gid nubots -G audio,dialout -m nubots
+
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user
