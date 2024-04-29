@@ -79,6 +79,7 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
           <Icon size={20}>{logLevelToIcon.trace}</Icon>
           Trace
         </ToggleButton>
+        {console.log(model.filters.levels.trace)}
         <ToggleButton on={model.filters.levels.debug} onClick={(on) => controller.setFilter(model, "debug", !on)}>
           <Icon size={20}>{logLevelToIcon.debug}</Icon>
           Debug
@@ -102,6 +103,7 @@ const Toolbar = observer(function Toolbar(props: ToolbarProps) {
       </div>
 
       <div>
+        {/* {console.log(model.showTimestamps)} */}
         <ToggleButton on={model.showTimestamps} onClick={(on) => controller.setShowTimestamps(model, !on)}>
           <Icon size={20}>{model.showTimestamps ? "check_box" : "check_box_outline_blank"}</Icon>
           Show timestamps
@@ -124,7 +126,7 @@ const SearchBox = observer(function SearchBox(props: SearchBoxProps) {
       <Icon className="absolute left-1 top-1 text-icon pointer-events-none">search</Icon>
       <input
         type="search"
-        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 rounded bg-white focus:outline-none focus:border-transparent focus:ring-2 focus:ring-nusight-500"
+        className="pl-8 pr-2 h-7 w-[320px] border border-gray-300 rounded bg-gray-200 focus:outline-none focus:border-transparent focus:ring-2 focus:ring-gray-300"
         placeholder="Filter logs"
         value={model.filters.search}
         onChange={(e) => controller.setSearch(model, e.target.value)}
@@ -142,9 +144,8 @@ interface ToggleButtonProps {
 function ToggleButton(props: ToggleButtonProps) {
   return (
     <button
-      className={`h-7 px-2 inline-flex items-center border rounded ${
-        props.on ? "bg-nusight-500 border-nusight-500 text-white" : "bg-white border-gray-300"
-      }`}
+      className={`h-7 px-2 inline-flex items-center border rounded ${props.on ? "bg-accent text-white border-gray-300" : "bg-white border-gray-300 text-black"
+        } `}
       onClick={() => props.onClick(props.on)}
     >
       {props.children}
@@ -203,7 +204,7 @@ const LogLine = observer(function LogLine(props: LogLineProps) {
   const { model, message } = props;
 
   return (
-    <div className={`flex gap-3 items-center py-0.5 border-b border-black/10 ${logLevelToTextColor[message.level]}`}>
+    <div className={`flex gap - 3 items - center py - 0.5 border - b border - black / 10 ${logLevelToTextColor[message.level]} `}>
       <div className="inline-flex items-end self-start gap-1">
         <div className="w-12 uppercase text-right">{message.level}</div>
         <Icon fill className="text-lg/none">

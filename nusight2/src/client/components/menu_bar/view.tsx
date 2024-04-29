@@ -42,7 +42,7 @@ export const MenuBar = ({
 }) => {
   return (
     <div className="flex flex-col">
-      <div className="flex h-[60px]">
+      <div className="flex h-[60px] space-x-10 my-2 mx-2">
         <div className="flex-1">{children}</div>
         <div>
           <RobotSelector />
