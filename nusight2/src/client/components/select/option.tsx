@@ -22,7 +22,7 @@ export class SelectOption extends React.Component<SelectOptionProps> {
 
     return (
       <div
-        className={classNames([className, "items-center p-2 bg-gray-100 hover:bg-gray-200", isSelected ? "bg-orange-200 hover:bg-orange-300 text-white" : ""])}
+        className={classNames([className, "items-center p-2 bg-gray-100 hover:bg-gray-200", isSelected ? "bg-blue-300 hover:bg-blue-400 text-white" : ""])}
         onClick={this.onSelect}
       >
         {showIconPadding || icon ? <span className={style.optionIcon}>{icon}</span> : null}

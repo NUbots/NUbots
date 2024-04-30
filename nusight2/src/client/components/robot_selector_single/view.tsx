@@ -6,7 +6,7 @@ import { RobotModel } from "../robot/model";
 import { Option, Select } from "../select/view";
 
 import IconPlug from "./icon_plug";
-import IconRobot from "./icon_robot";
+import IconRobot from "../robot_selector/icon_robot";
 import style from "./style.module.css";
 
 export type RobotSelectorSingleProps = {
@@ -57,7 +57,7 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
           onChange={this.onChange}
           placeholder="Select a robot..."
           empty={this.renderEmpty}
-          icon={<IconRobot />}
+          icon={<IconRobot className="fill-blue-300" />}
           dropDirection={dropDirection}
         />
       </div>
@@ -67,10 +67,8 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
   @computed
   private get renderEmpty() {
     return (
-      <div className={style.empty}>
-        <div className={style.emptyIcon}>
-          <IconPlug />
-        </div>
+      <div className={"bg-gray-200 p-[1em] text-center"}>
+        <IconPlug className="bg-gray-400 fill-gray-200 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
         <div className={style.emptyTitle}>No connected robots</div>
         <span className={style.emptyDescription}>Run yarn start:sim to simulate robots</span>
       </div>

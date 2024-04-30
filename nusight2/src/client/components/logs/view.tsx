@@ -144,7 +144,7 @@ interface ToggleButtonProps {
 function ToggleButton(props: ToggleButtonProps) {
   return (
     <button
-      className={`h-7 px-2 inline-flex items-center border rounded ${props.on ? "bg-accent text-white border-gray-300" : "bg-white border-gray-300 text-black"
+      className={`h-7 px-2 inline-flex items-center border rounded ${props.on ? "bg-blue-200 text-white border-gray-300" : "bg-white border-gray-300 text-black"
         } `}
       onClick={() => props.onClick(props.on)}
     >

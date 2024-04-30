@@ -58,7 +58,7 @@ export class Select extends React.Component<SelectProps> {
     const button = (
       <Button
         iconBefore={icon}
-        iconAfter={<Icon className="-mr-0.5">arrow_drop_down</Icon>}
+        iconAfter={<Icon className="mr-0.5">arrow_drop_down</Icon>}
         textAlign="left"
         iconAfterAlignedRight
         fullwidth

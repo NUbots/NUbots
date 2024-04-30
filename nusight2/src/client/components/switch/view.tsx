@@ -15,23 +15,23 @@ export interface SwitchProps {
 
 export const Switch = (props: SwitchProps) => {
   const { disabled, on } = props;
-  const trackClassName = classNames("rounded-full h-4 w-full relative", {
+  const trackClassName = classNames("rounded-full h-[1.1em] w-inherit relative", {
     ["bg-gray-400"]: !on,
-    ["bg-blue-400 opacity-50"]: on,
+    ["bg-blue-200 opacity-50"]: on,
   });
-  const thumbClassName = classNames("rounded-full shadow-md h-6 left-0 absolute w-6 top-0 transition-transform duration-250 ease-in-out", {
+  const thumbClassName = classNames("rounded-full shadow-md h-[1.6em] left-0 absolute w-[1.6em] top-0 transition-transform duration-250 ease-in-out", {
     ["bg-gray-100"]: !on,
-    ["bg-blue-400 translate-x-4"]: on,
+    ["bg-blue-200 translate-x-[1.3em]"]: on,
   });
   return (
-    <span className={"flex items-center cursor-pointer h-5 relative w-10"}>
+    <span className={"flex items-center cursor-pointer h-[1.6em] relative w-[2.85em]"}>
       <span className={trackClassName} />
       <span role="thumb" className={thumbClassName} />
       <input
         type="checkbox"
         checked={on}
         disabled={disabled}
-        className={"cursor-inherit h-full opacity-0 w-full absolute"}
+        className={"cursor-inherit h-inherit opacity-0 w-inherit absolute"}
         onChange={props.onChange}
       />
     </span>

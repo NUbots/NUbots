@@ -31,11 +31,11 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
 
   return (
     <>
-      <div className={style.robot}>
-        <label className={style.robotLabel}>
-          <StatusIndicator className={style.robotStatusIndicator} connected={robot.connected} />
-          <span className={style.robotName}>{robot.name}</span>
-          <span className={style.robotSwitch}>
+      <div className={"box-border flex min-w-[256px] hover:bg-gray-200"}>
+        <label className={"flex items-center flex-grow h-12 px-4 cursor-pointer"}>
+          <StatusIndicator className={"mr-3"} connected={robot.connected} />
+          <span className={"mr-auto whitespace-nowrap"}>{robot.name}</span>
+          <span className={"px-2 mr-1"}>
             <Switch on={robot.enabled} onChange={toggleRobot(robot)} />
           </span>
         </label>
@@ -44,23 +44,23 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
         </button>
       </div>
       <Collapsible open={model.statsOpen} className={style.dataTable}>
-        <div className={style.dataCell}>
-          <div className={style.dataLabel}>Packets</div>
-          <div className={style.dataValue}>{formatSI(model.stats.packets)}</div>
+        <div className={"box-border width-full text-left"}>
+          <div className={"uppercase text-sm text-gray-400"}>Packets</div>
+          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.packets)}</div>
         </div>
         <div className={style.dataCell}>
-          <div className={style.dataLabel}>Packets/s</div>
-          <div className={style.dataValue}>{formatSI(model.stats.packetsPerSecond.rate)}</div>
+          <div className={"uppercase text-sm text-gray-400"}>Packets/s</div>
+          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.packetsPerSecond.rate)}</div>
         </div>
         <div className={style.dataCell}>
-          <div className={style.dataLabel}>Bytes</div>
-          <div className={style.dataValue}>{formatSI(model.stats.bytes)}</div>
+          <div className={"uppercase text-sm text-gray-400"}>Bytes</div>
+          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.bytes)}</div>
         </div>
         <div className={style.dataCell}>
-          <div className={style.dataLabel}>Bytes/s</div>
-          <div className={style.dataValue}>{formatSI(model.stats.bytesPerSecond.rate)}</div>
+          <div className={"uppercase text-sm text-gray-400"}>Bytes/s</div>
+          <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.bytesPerSecond.rate)}</div>
         </div>
-      </Collapsible>
+      </Collapsible >
     </>
   );
 });
