@@ -123,7 +123,7 @@ namespace module::purpose {
 
             Frame::Target target;
             target.id       = id;
-            target.position = utility::platform::getRawServo(target.id, sensors).present_position;
+            target.position = utility::platform::get_raw_servo(target.id, sensors).present_position;
             target.gain     = default_gain;
             target.torque   = 100;
 

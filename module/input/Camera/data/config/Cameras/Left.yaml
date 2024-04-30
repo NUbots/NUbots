@@ -13,7 +13,7 @@ settings:
   BalanceWhiteAuto: Off # Options: Off, Once, Continuous
   AcquisitionFrameRateEnable: true
   DeviceLinkThroughputLimit: 60000000 # Throughput can limit the framerate
-  AcquisitionFrameRate: 10.00 # Adjusting frame rate can help remove flickering from lighting
+  AcquisitionFrameRate: 30.00 # Adjusting frame rate can help remove flickering from lighting
   AutoExposureTargetGreyValueAuto: Off
   AutoExposureTargetGreyValue: 30
   BalanceRatioSelector: Red

@@ -12,14 +12,18 @@ import { RobotModel } from "../robot/model";
 
 import { LocalisationModel } from "./model";
 import { LocalisationRobotModel } from "./robot_model";
+import { FieldIntersection } from "./robot_model";
 
 export class LocalisationNetwork {
   constructor(private network: Network, private model: LocalisationModel) {
     this.network.on(message.input.Sensors, this.onSensors);
     this.network.on(message.localisation.Field, this.onField);
-    this.network.on(message.vision.FieldLines, this.onFieldLines);
     this.network.on(message.localisation.Ball, this.onBall);
+    this.network.on(message.localisation.Robots, this.onRobots);
+    this.network.on(message.vision.FieldLines, this.onFieldLines);
+    this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
     this.network.on(message.vision.Goals, this.onGoals);
+    this.network.on(message.vision.FieldIntersections, this.onFieldIntersections);
   }
 
   static of(nusightNetwork: NUsightNetwork, model: LocalisationModel): LocalisationNetwork {
@@ -48,6 +52,35 @@ export class LocalisationNetwork {
   private onBall(robotModel: RobotModel, ball: message.localisation.Ball) {
     const robot = LocalisationRobotModel.of(robotModel);
     robot.ball = { rBWw: Vector3.from(ball.rBWw) };
+  }
+
+  @action.bound
+  private onRobots(robotModel: RobotModel, localisation_robots: message.localisation.Robots) {
+    const robot = LocalisationRobotModel.of(robotModel);
+    robot.robots = localisation_robots.robots.map((localisation_robot) => ({
+      id: localisation_robot.id!,
+      rRWw: Vector3.from(localisation_robot.rRWw),
+    }));
+  }
+
+  @action.bound
+  private onFieldIntersections(robotModel: RobotModel, fieldIntersections: message.vision.FieldIntersections) {
+    const robot = LocalisationRobotModel.of(robotModel);
+
+    robot.fieldIntersections = fieldIntersections.intersections.map((intersection) => {
+      let intersection_type = "";
+      if (intersection.type === 0) {
+        intersection_type = "UNKNOWN";
+      } else if (intersection.type === 1) {
+        intersection_type = "L_INTERSECTION";
+      } else if (intersection.type === 2) {
+        intersection_type = "T_INTERSECTION";
+      } else if (intersection.type === 3) {
+        intersection_type = "X_INTERSECTION";
+      }
+
+      return new FieldIntersection({ type: intersection_type, position: Vector3.from(intersection.rIWw) });
+    });
   }
 
   @action.bound
