@@ -267,14 +267,13 @@ namespace module::extension {
                     FileWatch::FileWatchStore::value = &watch;
 
                     // Directly execute our reaction here
-                    powerplant.submit(req.reaction->get_task(), true);
-
-                    // Clear our local cache
-                    FileWatch::FileWatchStore::value = nullptr;
-
+                    auto task = req.reaction->get_task();
                     if (task) {
                         powerplant.submit(std::move(task), true);
                     }
+
+                    // Clear our local cache
+                    FileWatch::FileWatchStore::value = nullptr;
                 }
             }
             else {
@@ -287,14 +286,13 @@ namespace module::extension {
                 FileWatch::FileWatchStore::value = &watch;
 
                 // Directly execute our reaction here
-                powerplant.submit(req.reaction->get_task(), true);
-
-                // Clear our local cache
-                FileWatch::FileWatchStore::value = nullptr;
-
+                auto task = req.reaction->get_task();
                 if (task) {
                     powerplant.submit(std::move(task), true);
                 }
+
+                // Clear our local cache
+                FileWatch::FileWatchStore::value = nullptr;
             }
         });
     }
