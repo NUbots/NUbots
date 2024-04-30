@@ -26,6 +26,8 @@
  */
 #include "RoboCupConfiguration.hpp"
 
+#include <algorithm>
+#include <ranges>
 #include <sstream>
 
 #include "extension/Configuration.hpp"
@@ -66,6 +68,7 @@ namespace module::tools {
             get_values();
             refresh_view();
         });
+
         // When we shutdown end ncurses
         on<Shutdown>().then(endwin);
 
@@ -142,6 +145,9 @@ namespace module::tools {
         // SSID
         ssid = utility::support::get_ssid(wifi_interface);
 
+        // Password
+        password = utility::support::get_wifi_password(ssid, wifi_interface);
+
         // Robot position
         {
             std::string soccer_file = get_config_file("Soccer.yaml");
@@ -153,6 +159,11 @@ namespace module::tools {
             std::string ready_file = get_config_file(robot_position.get_config_name());
             YAML::Node config      = YAML::LoadFile(ready_file);
             ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+        }
+
+        // Check if we have permissions
+        if (geteuid() != 0) {
+            log_message = "Warning: To configure the network, run with sudo.";
         }
     }
 
@@ -168,7 +179,7 @@ namespace module::tools {
 
         // Check if we have permissions
         if (geteuid() != 0) {
-            log_message = "Configure Error: Insufficient permissions!";
+            log_message = "Configure Error: Insufficient permissions! Run with sudo!";
             return;
         }
 
@@ -178,22 +189,17 @@ namespace module::tools {
                                    std::filesystem::copy_options::overwrite_existing);
         std::filesystem::copy_file(
             fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
-            "/etc/wpa_supplicant/wpa_supplicant-{}.conf",
+            fmt::format("/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
             std::filesystem::copy_options::overwrite_existing);
 
         // Restart the network
-        system("systemctl restart systemd-networkd");
-        system("systemctl restart wpa_supplicant");
+        system("reboot");
 
         log_message = "Network configured!";
     }
 
     void RoboCupConfiguration::set_values() {
-        // For testing in docker lol
-        hostname = "nugus4";
-
         // Configure the game files
-
         {  // Write the robot's position to the soccer file
             std::string soccer_file = get_config_file("Soccer.yaml");
             // Write to the yaml file
@@ -219,25 +225,41 @@ namespace module::tools {
             return;
         }
 
+        // Check if any of ip_address, ssid or password are empty
+        if (ip_address.empty() || ssid.empty() || password.empty()) {
+            log_message = "Configure Error: IP Address, SSID and Password must be set!";
+            return;
+        }
+
         // Get folder name and rename file
         const std::string folder = fmt::format("system/{}/etc/systemd/network", hostname);
         std::rename(fmt::format("{}/40-wifi-robocup.network", folder).c_str(),
                     fmt::format("{}/30-wifi.network", folder).c_str());
 
-        // Change third and fourth component of ip_address
+        // Parse the IP address
         std::stringstream ss(ip_address);
-        std::string ip_part1, ip_part2;
-        std::getline(ss, ip_part1, '.');
-        std::getline(ss, ip_part2, '.');
-        ip_address = fmt::format("{}.{}.{}.{}", ip_part1, ip_part2, team_id, player_id);
+        std::vector<std::string> ip_parts{};
+        for (std::string part; std::getline(ss, part, '.');) {
+            ip_parts.push_back(part);
+        }
+
+        // Check if team_id and player_id match with third and fourth parts of the IP address
+        // This shouldn't break things, but the user should know that there may be an issue
+        // In the lab, the IP addresses of the robots are set and may not match in this way
+        // But at RoboCup, it is important that this format is followed
+        if (team_id != std::stoi(ip_parts[2]) || player_id != std::stoi(ip_parts[3])) {
+            log_message +=
+                "Warning: At RoboCup, the third position of the IP address should be the team ID and the fourth should "
+                "be the player number. ";
+        }
 
         // Write the new ip address to the file
         std::ofstream(fmt::format("system/{}/etc/systemd/network/30-wifi.network", hostname))
             << fmt::format("[Match]\nName={}\n\n[Network]\nAddress={}/16\nGateway={}.{}.3.1\nDNS=8.8.8.8",
                            wifi_interface,
                            ip_address,
-                           ip_part1,
-                           ip_part2);
+                           ip_parts[0],
+                           ip_parts[1]);
 
         // Configure the wpa_supplicant file
         std::ofstream(fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface))
@@ -248,7 +270,7 @@ namespace module::tools {
                    ssid,
                    password);
 
-        log_message = "Files have been configured.";
+        log_message += "Files have been configured.";
     }
 
     void RoboCupConfiguration::toggle_selection() {
@@ -442,6 +464,5 @@ namespace module::tools {
 
         refresh();
     }
-
 
 }  // namespace module::tools

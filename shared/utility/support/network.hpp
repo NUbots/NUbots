@@ -27,7 +27,9 @@
 #ifndef UTILITY_SUPPORT_NETWORK_HPP
 #define UTILITY_SUPPORT_NETWORK_HPP
 
+#include <fmt/format.h>
 #include <string>
+
 extern "C" {
 #include <arpa/inet.h>
 #include <cstring>
@@ -115,13 +117,72 @@ namespace utility::support {
         memset(&pwrq, 0, sizeof(pwrq));
         strncpy(pwrq.ifr_name, interface_name.c_str(), IFNAMSIZ);
 
+        char ssid[IW_ESSID_MAX_SIZE + 1];
+        pwrq.u.essid.pointer = ssid;
+        pwrq.u.essid.length  = IW_ESSID_MAX_SIZE;
+
         if (ioctl(sock, SIOCGIWESSID, &pwrq) == -1) {
             close(sock);
             return "";
         }
 
         close(sock);
-        return reinterpret_cast<char*>(pwrq.u.essid.pointer);
+        ssid[pwrq.u.essid.length] = '\0';
+        return std::string(ssid);
+    }
+
+    inline std::string get_wifi_password(const std::string& ssid, const std::string& wifi_interface) {
+        std::string wpa_supplicant_file = fmt::format("/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface);
+        std::ifstream file(wpa_supplicant_file);
+        std::string line;
+        bool ssid_found = false;
+        char c;
+        std::string buffer;
+
+        while (file.get(c)) {
+            buffer.push_back(c);
+
+            if (buffer.size() > 4) {
+                buffer.erase(buffer.begin());
+            }
+
+            if (ssid_found && buffer == "psk=") {
+                std::string psk;
+                // Skip whitespace and the opening quote
+                while (file.get(c) && isspace(c))
+                    ;
+                if (c != '\"')
+                    return "";  // Expected a quote
+
+                // Read the psk value inside the quotes
+                while (file.get(c) && c != '\"') {
+                    psk.push_back(c);
+                }
+
+                return psk;
+            }
+
+            if (!ssid_found && buffer == "ssid") {
+                std::string current_ssid;
+                // Skip whitespace and the equals sign
+                while (file.get(c) && (isspace(c) || c == '='))
+                    ;
+                if (c != '\"')
+                    return "";  // Expected a quote
+
+                // Read the ssid value inside the quotes
+                while (file.get(c) && c != '\"') {
+                    current_ssid.push_back(c);
+                }
+
+                if (current_ssid == ssid) {
+                    ssid_found = true;
+                }
+            }
+        }
+
+        // If we reach here, we didn't find the ssid or the psk
+        return "";
     }
 
 }  // namespace utility::support

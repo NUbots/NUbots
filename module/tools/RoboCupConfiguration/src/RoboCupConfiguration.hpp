@@ -108,6 +108,7 @@ namespace module::tools {
         std::string get_platform();
         std::string get_config_file(std::string filename);
         void configure_network();
+        std::string get_wifi_password(const std::string& ssid);
 
     public:
         /// @brief Called by the powerplant to build and setup the RoboCupConfiguration reactor.
