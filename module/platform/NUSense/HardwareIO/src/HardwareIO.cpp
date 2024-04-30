@@ -217,25 +217,6 @@ namespace module::platform::NUSense {
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(command_list));
         });
-
-
-        // TODO (JohanneMontano) Figure out why we only receive 17 servo targets on NUSense with frequencies above 50 Hz
-        on<Every<50, Per<std::chrono::seconds>>>().then([this] {
-            auto servo_targets = std::make_unique<ServoTargets>();
-
-            for (int i = 0; i < 20; ++i) {
-                auto servo_target      = std::make_unique<ServoTarget>();
-                servo_target->time     = NUClear::clock::now();
-                servo_target->id       = i + 1;
-                servo_target->position = 100.0;
-                servo_target->gain     = 100.0;
-                servo_target->torque   = 100.0;
-
-                servo_targets->targets.push_back(*servo_target);
-            }
-
-            emit(servo_targets);
-        });
     }
 
 }  // namespace module::platform::NUSense
