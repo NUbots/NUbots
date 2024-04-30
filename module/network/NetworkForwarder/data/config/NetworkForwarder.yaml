@@ -11,6 +11,7 @@ targets:
     # Overview packets for the overview screen
     message.support.nusight.Overview: true
     message.support.FieldDescription: true
+    message.support.nuclear.ReactionProfiles: true
 
     # DataPoints power the chart view
     message.eye.DataPoint: true
@@ -27,10 +28,13 @@ targets:
     message.vision.GreenHorizon: true
     message.vision.FieldLines: true
     message.vision.VisualMesh: false
+    message.vision.FieldIntersections: true
+    message.vision.BoundingBoxes: true
 
     # Localisation Messages
     message.localisation.Ball: true
     message.localisation.Field: true
+    message.localisation.Robots: true
 
     # Log messages
     message.nuclear.LogMessage: true
