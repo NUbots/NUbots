@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2017 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 #ifndef UTILITY_PLATFORM_RAWSENSORS_HPP
 #define UTILITY_PLATFORM_RAWSENSORS_HPP
@@ -30,7 +38,6 @@ namespace utility::platform {
 
     /**
      * @brief Functions to create log strings for packet errors and servo errors
-     * @note functions appended with `_v1` are compatibility functions for protocol v1
      */
 
     inline std::string make_packet_error_string(const std::string& src, const uint error_code) {
@@ -90,67 +97,7 @@ namespace utility::platform {
         return s.str();
     }
 
-    inline std::string make_error_string_v1(const std::string& src, const uint error_code) {
-        std::stringstream s;
-
-        s << "Error on ";
-        s << src;
-        s << ":";
-
-        if ((error_code & RawSensors::Error::INPUT_VOLTAGE_) != 0u) {
-            s << " Input Voltage ";
-        }
-        if ((error_code & RawSensors::Error::ANGLE_LIMIT_) != 0u) {
-            s << " Angle Limit ";
-        }
-        if ((error_code & RawSensors::Error::OVERHEATING_) != 0u) {
-            s << " Overheating ";
-        }
-        if ((error_code & RawSensors::Error::OVERLOAD_) != 0u) {
-            s << " Overloaded ";
-        }
-        if ((error_code & RawSensors::Error::INSTRUCTION_) != 0u) {
-            s << " Bad Instruction ";
-        }
-        if ((error_code & RawSensors::Error::CORRUPT_DATA_) != 0u) {
-            s << " Corrupt Data ";
-        }
-        if ((error_code & RawSensors::Error::TIMEOUT_) != 0u) {
-            s << " Timeout ";
-        }
-
-        return s.str();
-    }
-
-    inline std::string make_servo_error_string_v1(const RawSensors::Servo& servo, const uint32_t servo_id) {
-        std::stringstream s;
-        s << "Error on Servo " << (servo_id + 1) << " (" << static_cast<ServoID>(servo_id) << "):";
-
-        if ((servo.error_flags & RawSensors::Error::INPUT_VOLTAGE_) != 0u) {
-            s << " Input Voltage - " << servo.voltage;
-        }
-        if ((servo.error_flags & RawSensors::Error::ANGLE_LIMIT_) != 0u) {
-            s << " Angle Limit - " << servo.present_position;
-        }
-        if ((servo.error_flags & RawSensors::Error::OVERHEATING_) != 0u) {
-            s << " Overheating - " << servo.temperature;
-        }
-        if ((servo.error_flags & RawSensors::Error::OVERLOAD_) != 0u) {
-            s << " Overloaded - " << servo.present_current;
-        }
-        if ((servo.error_flags & RawSensors::Error::INSTRUCTION_) != 0u) {
-            s << " Bad Instruction ";
-        }
-        if ((servo.error_flags & RawSensors::Error::CORRUPT_DATA_) != 0u) {
-            s << " Corrupt Data ";
-        }
-        if ((servo.error_flags & RawSensors::Error::TIMEOUT_) != 0u) {
-            s << " Timeout ";
-        }
-        return s.str();
-    }
-
-    inline const RawSensors::Servo& getRawServo(ServoID servoId, const RawSensors& sensors) {
+    inline const RawSensors::Servo& get_raw_servo(ServoID servoId, const RawSensors& sensors) {
 
         switch (servoId.value) {
             case ServoID::R_SHOULDER_PITCH: return sensors.servo.r_shoulder_pitch;
@@ -178,7 +125,7 @@ namespace utility::platform {
         }
     }
 
-    inline RawSensors::Servo& getRawServo(ServoID servoId, RawSensors& sensors) {
+    inline RawSensors::Servo& get_raw_servo(ServoID servoId, RawSensors& sensors) {
 
         switch (servoId.value) {
             case ServoID::R_SHOULDER_PITCH: return sensors.servo.r_shoulder_pitch;

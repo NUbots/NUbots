@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "QuinticWalk.hpp"
 
 #include <fmt/format.h>
@@ -15,7 +41,6 @@
 #include "message/motion/GetupCommand.hpp"
 #include "message/skill/Walk.hpp"
 
-#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -38,10 +63,9 @@ namespace module::skill {
     using message::input::Sensors;
     using message::skill::Walk;
 
-    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
-    using utility::math::euler::EulerIntrinsicToMatrix;
-    using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::math::euler::mat_to_rpy_intrinsic;
+    using utility::math::euler::rpy_intrinsic_to_mat;
     using utility::nusight::graph;
     using utility::skill::WalkEngineState;
     using utility::support::Expression;
@@ -114,7 +138,7 @@ namespace module::skill {
         : BehaviourReactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
-            Eigen::Vector3d RPY = utility::math::euler::MatrixToEulerIntrinsic(sensors.Htw.rotation().cast<double>());
+            Eigen::Vector3d RPY = utility::math::euler::mat_to_rpy_intrinsic(sensors.Htw.rotation().cast<double>());
 
             // compute the pitch offset to the currently wanted pitch of the engine
             double wanted_pitch =
@@ -307,12 +331,12 @@ namespace module::skill {
         // Change goals from support foot based coordinate system to trunk based coordinate system
         // Trunk {t} from support foot {s}
         Eigen::Isometry3f Hst;
-        Hst.linear()      = EulerIntrinsicToMatrix(thetaST);
+        Hst.linear()      = rpy_intrinsic_to_mat(thetaST);
         Hst.translation() = rTSs;
 
         // Flying foot {f} from support foot {s}
         Eigen::Isometry3f Hsf;
-        Hsf.linear()      = EulerIntrinsicToMatrix(thetaSF);
+        Hsf.linear()      = rpy_intrinsic_to_mat(thetaSF);
         Hsf.translation() = rFSs;
 
         // Support foot {s} from trunk {t}
@@ -371,11 +395,11 @@ namespace module::skill {
 
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
-            Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
+            Eigen::Vector3f thetaTL = mat_to_rpy_intrinsic(Htl.linear());
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
             emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
 
-            Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
+            Eigen::Vector3f thetaTR = mat_to_rpy_intrinsic(Htr.linear());
             emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
             emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
 

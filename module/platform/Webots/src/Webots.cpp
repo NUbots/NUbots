@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2021 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "Webots.hpp"
@@ -33,7 +41,12 @@
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
+#include "message/support/optimisation/OptimisationCommand.hpp"
+#include "message/support/optimisation/OptimisationResetDone.hpp"
+#include "message/support/optimisation/OptimisationRobotPosition.hpp"
+#include "message/support/optimisation/OptimisationTimeUpdate.hpp"
 
+#include "utility/input/FrameID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -70,9 +83,14 @@ namespace module::platform {
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
     using message::platform::webots::VisionGroundTruth;
+    using message::support::optimisation::OptimisationCommand;
+    using message::support::optimisation::OptimisationResetDone;
+    using message::support::optimisation::OptimisationRobotPosition;
+    using message::support::optimisation::OptimisationTimeUpdate;
 
+    using utility::input::FrameID;
     using utility::input::ServoID;
-    using utility::platform::getRawServo;
+    using utility::platform::get_raw_servo;
     using utility::support::Expression;
     using utility::vision::fourcc;
 
@@ -114,32 +132,52 @@ namespace module::platform {
         throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
     }
 
-    [[nodiscard]] std::string translate_id_servo(const uint32_t& id) {
-        switch (id) {
-            case 0: return "right_shoulder_pitch [shoulder]";
-            case 1: return "left_shoulder_pitch [shoulder]";
-            case 2: return "right_shoulder_roll";
-            case 3: return "left_shoulder_roll";
-            case 4: return "right_elbow_pitch";
-            case 5: return "left_elbow_pitch";
-            case 6: return "right_hip_yaw";
-            case 7: return "left_hip_yaw";
-            case 8: return "right_hip_roll [hip]";
-            case 9: return "left_hip_roll [hip]";
-            case 10: return "right_hip_pitch";
-            case 11: return "left_hip_pitch";
-            case 12: return "right_knee_pitch";
-            case 13: return "left_knee_pitch";
-            case 14: return "right_ankle_pitch";
-            case 15: return "left_ankle_pitch";
-            case 16: return "right_ankle_roll";
-            case 17: return "left_ankle_roll";
-            case 18: return "neck_yaw";
-            case 19: return "head_pitch";
-        }
+    // Joint id to joint name map
+    std::map<uint32_t, std::string> id_to_joint_name = {{0, "right_shoulder_pitch [shoulder]"},
+                                                        {1, "left_shoulder_pitch [shoulder]"},
+                                                        {2, "right_shoulder_roll"},
+                                                        {3, "left_shoulder_roll"},
+                                                        {4, "right_elbow_pitch"},
+                                                        {5, "left_elbow_pitch"},
+                                                        {6, "right_hip_yaw"},
+                                                        {7, "left_hip_yaw"},
+                                                        {8, "right_hip_roll [hip]"},
+                                                        {9, "left_hip_roll [hip]"},
+                                                        {10, "right_hip_pitch"},
+                                                        {11, "left_hip_pitch"},
+                                                        {12, "right_knee_pitch"},
+                                                        {13, "left_knee_pitch"},
+                                                        {14, "right_ankle_pitch"},
+                                                        {15, "left_ankle_pitch"},
+                                                        {16, "right_ankle_roll"},
+                                                        {17, "left_ankle_roll"},
+                                                        {18, "neck_yaw"},
+                                                        {19, "head_pitch"}};
 
-        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo id: {}", id));
-    }
+
+    // Sensor name to joint id map
+    std::map<std::string, uint32_t> sensor_name_to_id = {
+        {"right_shoulder_pitch_sensor", 0},
+        {"left_shoulder_pitch_sensor", 1},
+        {"right_shoulder_roll_sensor", 2},
+        {"left_shoulder_roll_sensor", 3},
+        {"right_elbow_pitch_sensor", 4},
+        {"left_elbow_pitch_sensor", 5},
+        {"right_hip_yaw_sensor", 6},
+        {"left_hip_yaw_sensor", 7},
+        {"right_hip_roll_sensor", 8},
+        {"left_hip_roll_sensor", 9},
+        {"right_hip_pitch_sensor", 10},
+        {"left_hip_pitch_sensor", 11},
+        {"right_knee_pitch_sensor", 12},
+        {"left_knee_pitch_sensor", 13},
+        {"right_ankle_pitch_sensor", 14},
+        {"left_ankle_pitch_sensor", 15},
+        {"right_ankle_roll_sensor", 16},
+        {"left_ankle_roll_sensor", 17},
+        {"neck_yaw_sensor", 18},
+        {"head_pitch_sensor", 19},
+    };
 
     [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
                                                             const uint32_t& camera_timestep) {
@@ -260,7 +298,19 @@ namespace module::platform {
             CameraContext context;
             context.name = name;
             context.id   = num_cameras++;
-            context.Hpc  = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());  // Load Hpc from configuration
+
+            // Compute Hpc, the transform from the camera to the head pitch space
+            auto nugus_model = tinyrobotics::import_urdf<double, 20>(config["urdf_path"].as<std::string>());
+            auto Hpc         = tinyrobotics::forward_kinematics<double, 20>(nugus_model,
+                                                                    nugus_model.home_configuration(),
+                                                                    std::string("left_camera"),
+                                                                    std::string("head"));
+
+            // Apply roll and pitch offsets
+            double roll_offset  = config["roll_offset"].as<Expression>();
+            double pitch_offset = config["pitch_offset"].as<Expression>();
+            context.Hpc         = Eigen::AngleAxisd(pitch_offset, Eigen::Vector3d::UnitZ()).toRotationMatrix()
+                          * Eigen::AngleAxisd(roll_offset, Eigen::Vector3d::UnitY()).toRotationMatrix() * Hpc;
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
@@ -306,7 +356,7 @@ namespace module::platform {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htp(sensors.Htx[FrameID::HEAD_PITCH]);
             Eigen::Isometry3d Htw(sensors.Htw);
             Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
@@ -321,7 +371,7 @@ namespace module::platform {
                 // Get the difference between the current servo position and our servo target
                 const double diff = utility::math::angle::difference(
                     double(target.position),
-                    utility::platform::getRawServo(target.id, sensors).present_position);
+                    utility::platform::get_raw_servo(target.id, sensors).present_position);
                 // Get the difference between the current time and the time the servo should reach its target
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
@@ -351,7 +401,7 @@ namespace module::platform {
 
                     servo_state[target.id].dirty = true;
                     servo_state[target.id].id    = target.id;
-                    servo_state[target.id].name  = translate_id_servo(target.id);
+                    servo_state[target.id].name  = id_to_joint_name[target.id];
 
                     servo_state[target.id].p_gain = target.gain;
                     // `i` and `d` gains are always 0
@@ -405,6 +455,26 @@ namespace module::platform {
 
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(targets);
+        });
+
+        on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
+            const int msg_command = msg.command;
+            switch (msg_command) {
+                case OptimisationCommand::CommandType::RESET_ROBOT:
+                    // Set the reset world flag to send the reset command to webots with the next ActuatorRequests
+                    reset_simulation_world = true;
+                    break;
+
+                case OptimisationCommand::CommandType::RESET_TIME:
+                    // Set the reset flag to send the reset command to webots with the next ActuatorRequests
+                    reset_simulation_time = true;
+                    break;
+
+                case OptimisationCommand::CommandType::TERMINATE:
+                    // Set the termination flag to send the terminate command to webots with the next ActuatorRequests
+                    terminate_simulation = true;
+                    break;
+            }
         });
     }
 
@@ -511,7 +581,7 @@ namespace module::platform {
                                 for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
                                      length          = read_length(buffer)) {
                                     // Decode the protocol buffer and emit it as a message
-                                    char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
+                                    uint8_t* payload = buffer.data() + sizeof(length);
                                     translate_and_emit_sensor(
                                         NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload,
                                                                                                              length));
@@ -566,10 +636,33 @@ namespace module::platform {
                             actuator_requests.motor_pids.emplace_back(
                                 MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
                         }
+
+                        // Set the terminate command if the flag is set to terminate the simulator, used by the walk
+                        // simulator
+                        if (terminate_simulation) {
+                            log<NUClear::DEBUG>("Sending terminate on ActuatorRequests.");
+                            actuator_requests.optimisation_command.command =
+                                OptimisationCommand::CommandType::TERMINATE;
+                            terminate_simulation = false;
+                        }
+
+                        // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
+                        if (reset_simulation_world) {
+                            log<NUClear::DEBUG>("Sending RESET_ROBOT to ActuatorRequests.");
+                            actuator_requests.optimisation_command.command =
+                                OptimisationCommand::CommandType::RESET_ROBOT;
+                            reset_simulation_world = false;
+                        }
+                        else if (reset_simulation_time) {
+                            log<NUClear::DEBUG>("Sending RESET_TIME to ActuatorRequests.");
+                            actuator_requests.optimisation_command.command =
+                                OptimisationCommand::CommandType::RESET_TIME;
+                            reset_simulation_time = false;
+                        }
                     }
 
                     // Serialise ActuatorRequests
-                    std::vector<char> data =
+                    std::vector<uint8_t> data =
                         NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
                     // Size of the message, in network endian
@@ -602,6 +695,20 @@ namespace module::platform {
         // ****************************** TIME **************************************
         // Deal with time first
 
+        // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
+        // (which is something we do for the walk optimisation), so reset our local times
+        if (sim_delta > 0 && sensor_measurements.time == 0) {
+            log<NUClear::DEBUG>("Webots sim time reset to zero, resetting local sim_time. time before reset:",
+                                current_sim_time);
+            sim_delta         = 0;
+            real_delta        = 0;
+            current_sim_time  = 0;
+            current_real_time = 0;
+
+            // Reset the local raw sensors buffer
+            emit(std::make_unique<ResetWebotsServos>());
+        }
+
         // Save our previous deltas
         const uint32_t prev_sim_delta  = sim_delta;
         const uint64_t prev_real_delta = real_delta;
@@ -622,6 +729,13 @@ namespace module::platform {
         // Update our current times
         current_sim_time  = sensor_measurements.time;
         current_real_time = sensor_measurements.real_time;
+
+        // Emit the webots time update
+        auto time_update_msg        = std::make_unique<OptimisationTimeUpdate>();
+        time_update_msg->real_time  = current_real_time;
+        time_update_msg->sim_delta  = sim_delta;
+        time_update_msg->real_delta = real_delta;
+        emit(time_update_msg);
 
         // ************************* DEBUGGING LOGS *********************************
         log<NUClear::TRACE>("received SensorMeasurements:");
@@ -709,6 +823,11 @@ namespace module::platform {
             log<NUClear::TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
         }
 
+        if (sensor_measurements.localisation_ground_truth.exists) {
+            log<NUClear::TRACE>("  sm.localisation_ground_truth:");
+            log<NUClear::TRACE>("    Hfw:\n", sensor_measurements.localisation_ground_truth.Hfw);
+        }
+
         // Parse the errors and warnings from Webots and log them.
         // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
         // Or check if those messages have specific information
@@ -730,7 +849,9 @@ namespace module::platform {
             sensor_data->timestamp = NUClear::clock::now();
 
             for (const auto& position : sensor_measurements.position_sensors) {
-                translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
+                auto& servo            = translate_servo_id(position.name, sensor_data->servo);
+                servo.present_position = position.value;
+                servo.goal_position    = servo_state[sensor_name_to_id[position.name]].goal_position;
             }
 
             if (!sensor_measurements.accelerometers.empty()) {
@@ -789,6 +910,11 @@ namespace module::platform {
             if (sensor_measurements.odometry_ground_truth.exists) {
                 sensor_data->odometry_ground_truth.exists = true;
                 sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
+                sensor_data->odometry_ground_truth.vTw    = sensor_measurements.odometry_ground_truth.vTw;
+            }
+            if (sensor_measurements.localisation_ground_truth.exists) {
+                sensor_data->localisation_ground_truth.exists = true;
+                sensor_data->localisation_ground_truth.Hfw    = sensor_measurements.localisation_ground_truth.Hfw;
             }
 
             emit(sensor_data);
@@ -849,6 +975,16 @@ namespace module::platform {
                 image->vision_ground_truth = sensor_measurements.vision_ground_truth;
             }
             emit(image);
+        }
+
+        // Create and emit the OptimisationRobotPosition message used by the walk optimiser
+        auto robot_position   = std::make_unique<OptimisationRobotPosition>();
+        robot_position->value = sensor_measurements.robot_position.value;
+        emit(robot_position);
+
+        // Create and emit the OptimisationResetDone message used by the walk optimiser
+        if (sensor_measurements.reset_done) {
+            emit(std::make_unique<OptimisationResetDone>());
         }
     }
 }  // namespace module::platform

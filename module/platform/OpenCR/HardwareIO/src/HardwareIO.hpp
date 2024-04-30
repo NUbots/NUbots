@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef MODULE_PLATFORM_OPENCR_HARDWAREIO_HPP
 #define MODULE_PLATFORM_OPENCR_HARDWAREIO_HPP
 
@@ -74,7 +100,7 @@ namespace module::platform::OpenCR {
             uint16_t buzzer = 0;
 
             /// @brief Most recent packet error from the OpenCR device
-            uint8_t error_flags = 0;
+            uint8_t packet_error = 0;
         };
 
         /// @see battery_state
@@ -223,6 +249,18 @@ namespace module::platform::OpenCR {
 
         /// @brief Handle for our watchdog timer for packet handling
         ReactionHandle packet_watchdog;
+
+        /// @brief Stores configuration values
+        struct Config {
+            struct {
+                struct {
+                    /// @brief Container for the max tolerable temp for all servos
+                    float level = 0.0;
+                    /// @brief Container for the buzzer frequency, used if a Buzzer message is emitted
+                    float buzzer_frequency = 0.0;
+                } temperature;
+            } alarms;
+        } cfg;
     };
 
 }  // namespace module::platform::OpenCR

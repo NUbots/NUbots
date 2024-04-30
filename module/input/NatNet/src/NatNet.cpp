@@ -1,24 +1,33 @@
 /*
- * This file is part of NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2015 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2015 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "NatNet.hpp"
 
+#include <arpa/inet.h>
 #include <fmt/format.h>
 
 #include "Parse.hpp"
@@ -64,22 +73,23 @@ namespace module::input {
                         .then("NatNet Data", [this](const UDP::Packet& packet) {
                             // Test if we are "connected" to this remote
                             // And if we are we can use the data
-                            if (remote == packet.remote.address && version != 0) {
+                            std::string address = packet.remote.address;
+                            if (remote == address && version != 0) {
                                 process(packet.payload);
                             }
                             // We have started connecting but haven't received a return ping
-                            else if (remote == packet.remote.address && version == 0) {
+                            else if (remote == address && version == 0) {
                                 // TODO(HardwareTeam): maybe set a timeout here to try again
                             }
                             // We haven't connected to anything yet
-                            else if (remote == 0) {
+                            else if (remote.empty()) {
                                 // This is now our remote
-                                remote = packet.remote.address;
+                                remote = address;
 
                                 // Send a ping command
                                 send_command(Packet::Type::PING);
                             }
-                            else if (remote != packet.remote.address) {
+                            else if (remote != address) {
                                 log<NUClear::WARN>("There is more than one NatNet server running on this network");
                             }
                         });
@@ -89,7 +99,7 @@ namespace module::input {
     }
 
     void NatNet::send_command(Packet::Type type, std::vector<char> data) {
-        if (remote > 0) {
+        if (!remote.empty()) {
             // Make a vector to hold our packet
             std::vector<char> packet(sizeof(Packet) - 1);
 
@@ -104,9 +114,14 @@ namespace module::input {
             // Work out our remotes address
             sockaddr_in address{};
             memset(&address, 0, sizeof(sockaddr_in));
-            address.sin_family      = AF_INET;
-            address.sin_port        = htons(cfg.command_port);
-            address.sin_addr.s_addr = htonl(remote);
+            address.sin_family = AF_INET;
+            address.sin_port   = htons(cfg.command_port);
+
+            // Convert IP address from string to binary form
+            if (inet_pton(AF_INET, remote.c_str(), &address.sin_addr) <= 0) {
+                log<NUClear::ERROR>("Invalid remote IP address");
+                return;
+            }
 
             // Send to our remote server
             ::sendto(commandFd,
@@ -411,13 +426,8 @@ namespace module::input {
                                       + (nat_net_version[2] == 0 ? "" : "." + std::to_string(nat_net_version[2]))
                                       + (nat_net_version[3] == 0 ? "" : "." + std::to_string(nat_net_version[3]));
 
-        // Make our remote into an IP
-        std::array<char, INET_ADDRSTRLEN> str{};
-        inet_ntop(AF_INET, &remote, str.data(), str.size());
-        std::string str_remote = str.data();
-
         log<NUClear::INFO>(
-            fmt::format("Connected to {} ({} {}) over NatNet {}", str_remote, name, str_app_version, str_nat_version));
+            fmt::format("Connected to {} ({} {}) over NatNet {}", remote, name, str_app_version, str_nat_version));
 
         // Request model definitions on startup
         send_command(Packet::Type::REQUEST_MODEL_DEFINITIONS);
@@ -441,14 +451,14 @@ namespace module::input {
     }
 
 
-    void NatNet::process(const std::vector<char>& input) {
+    void NatNet::process(const std::vector<uint8_t>& input) {
         // Get our packet
         const Packet& packet = *reinterpret_cast<const Packet*>(input.data());
 
         if (cfg.dump_packets) {
             static int i = 0;
             std::ofstream output(fmt::format("natnet_{:06d}.bin", i++));
-            output.write(input.data(), input.size());
+            output.write(reinterpret_cast<const char*>(input.data()), input.size());
         }
 
         // Work out it's type

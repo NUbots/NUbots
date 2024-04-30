@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "HardwareIO.hpp"
 
 #include "utility/math/angle.hpp"
@@ -13,7 +39,7 @@ namespace module::platform::OpenCR {
         sensors.timestamp = NUClear::clock::now();
 
         /* OpenCR data */
-        sensors.subcontroller_error = opencr_state.error_flags;
+        sensors.subcontroller_error = opencr_state.packet_error;
         sensors.led_panel           = opencr_state.led_panel;
         sensors.head_led            = opencr_state.head_led;
         sensors.eye_led             = opencr_state.eye_led;
@@ -27,7 +53,7 @@ namespace module::platform::OpenCR {
         /* Servos data */
         for (int i = 0; i < 20; i++) {
             // Get a reference to the servo we are populating
-            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
+            RawSensors::Servo& servo = utility::platform::get_raw_servo(i, sensors);
 
 
             // Booleans
@@ -78,7 +104,7 @@ namespace module::platform::OpenCR {
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.error_flags = servo_states[i].hardware_error;
+                servo.hardware_error = servo_states[i].hardware_error;
 
                 // Accumulate all packet error flags to read at once
                 sensors.subcontroller_error |= servo_states[i].packet_error;
@@ -91,15 +117,12 @@ namespace module::platform::OpenCR {
                 servo.voltage     = servo_states[i].voltage;
                 servo.temperature = servo_states[i].temperature;
 
-                /* Note: removed input voltage bit clear here as it wasn't clear how it fits into the refactor. If there
-                 * are problems with input voltage errors coming up too frequently then this is likely the culprit */
+                // Clear Overvoltage flag if voltage is below the (normal) max battery voltage, as this isn't dangerous
+                if (servo.voltage <= battery_state.charged_voltage) {
+                    servo.hardware_error &= ~RawSensors::HardwareError::INPUT_VOLTAGE;
+                }
             }
         }
-
-        // handle unused compatibility fields
-        sensors.platform_error_flags  = RawSensors::Error::OK_;
-        sensors.fsr.left.error_flags  = RawSensors::Error::OK_;
-        sensors.fsr.right.error_flags = RawSensors::Error::OK_;
 
         return sensors;
     }

@@ -5,17 +5,21 @@ import { reaction } from "mobx";
 import { observer } from "mobx-react";
 import { disposeOnUnmount } from "mobx-react";
 import { now } from "mobx-utils";
+import * as THREE from "three";
+import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
 
 import { LocalisationController } from "./controller";
 import { FieldView } from "./field/view";
+import { GridView } from "./grid/view";
 import { LocalisationModel } from "./model";
 import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
-import { NUgusView } from "./nugus_robot/view";
+import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
 
@@ -25,6 +29,12 @@ type LocalisationViewProps = {
   model: LocalisationModel;
   network: LocalisationNetwork;
 };
+
+const nugusUrdfPath = "/robot-models/nugus/robot.urdf";
+
+// Ball texture obtained from https://katfetisov.wordpress.com/2014/08/08/freebies-football-textures/
+const textureLoader = new THREE.TextureLoader();
+const soccerBallTexture = textureLoader.load("/images/ball_texture.png");
 
 @observer
 export class LocalisationView extends React.Component<LocalisationViewProps> {
@@ -54,7 +64,19 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   render(): JSX.Element {
     return (
       <div className={style.localisation}>
-        <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
+        <LocalisationMenuBar
+          model={this.props.model}
+          Menu={this.props.Menu}
+          onHawkEyeClick={this.onHawkEyeClick}
+          toggleGridVisibility={this.toggleGridVisibility}
+          toggleFieldVisibility={this.toggleFieldVisibility}
+          toggleRobotVisibility={this.toggleRobotVisibility}
+          toggleBallVisibility={this.toggleBallVisibility}
+          toggleParticleVisibility={this.toggleParticleVisibility}
+          toggleGoalVisibility={this.toggleGoalVisibility}
+          toggleFieldLinePointsVisibility={this.toggleFieldLinePointsVisibility}
+          toggleFieldIntersectionsVisibility={this.toggleFieldIntersectionsVisibility}
+        ></LocalisationMenuBar>
         <div className={style.localisation__canvas}>
           <ThreeFiber ref={this.canvas} onClick={this.onClick}>
             <LocalisationViewModel model={this.props.model} />
@@ -108,16 +130,73 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
     e.preventDefault();
     this.props.controller.onWheel(this.props.model, e.deltaY);
   };
+
+  private toggleGridVisibility = () => {
+    this.props.controller.toggleGridVisibility(this.props.model);
+  };
+
+  private toggleFieldVisibility = () => {
+    this.props.controller.toggleFieldVisibility(this.props.model);
+  };
+
+  private toggleRobotVisibility = () => {
+    this.props.controller.toggleRobotVisibility(this.props.model);
+  };
+
+  private toggleBallVisibility = () => {
+    this.props.controller.toggleBallVisibility(this.props.model);
+  };
+
+  private toggleParticleVisibility = () => {
+    this.props.controller.toggleParticlesVisibility(this.props.model);
+  };
+
+  private toggleGoalVisibility = () => {
+    this.props.controller.toggleGoalVisibility(this.props.model);
+  };
+
+  private toggleFieldLinePointsVisibility = () => {
+    this.props.controller.toggleFieldLinePointsVisibility(this.props.model);
+  };
+
+  private toggleFieldIntersectionsVisibility = () => {
+    this.props.controller.toggleFieldIntersectionsVisibility(this.props.model);
+  };
 }
 
 interface LocalisationMenuBarProps {
   Menu: ComponentType<PropsWithChildren>;
 
+  model: LocalisationModel;
+
   onHawkEyeClick(): void;
+  toggleGridVisibility(): void;
+  toggleFieldVisibility(): void;
+  toggleRobotVisibility(): void;
+  toggleBallVisibility(): void;
+  toggleParticleVisibility(): void;
+  toggleGoalVisibility(): void;
+  toggleFieldLinePointsVisibility(): void;
+  toggleFieldIntersectionsVisibility(): void;
 }
 
+const MenuItem = (props: { label: string; onClick(): void; isVisible: boolean }) => {
+  return (
+    <li className={style.localisation__menuItem}>
+      <button className={style.localisation__menuButton} onClick={props.onClick}>
+        <div className="flex items-center justify-center">
+          <div className="flex items-center rounded">
+            <span className="mx-2">{props.label}</span>
+            <Icon size={24}>{props.isVisible ? "check_box" : "check_box_outline_blank"}</Icon>
+          </div>
+        </div>
+      </button>
+    </li>
+  );
+};
+
 const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
-  const { Menu } = props;
+  const { Menu, model } = props;
   return (
     <Menu>
       <ul className={style.localisation__menu}>
@@ -126,6 +205,22 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
             Hawk Eye
           </button>
         </li>
+        <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
+        <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />
+        <MenuItem label="Robots" isVisible={model.robotVisible} onClick={props.toggleRobotVisibility} />
+        <MenuItem label="Balls" isVisible={model.ballVisible} onClick={props.toggleBallVisibility} />
+        <MenuItem label="Particles" isVisible={model.particlesVisible} onClick={props.toggleParticleVisibility} />
+        <MenuItem label="Goals" isVisible={model.goalVisible} onClick={props.toggleGoalVisibility} />
+        <MenuItem
+          label="Field Line Points"
+          isVisible={model.fieldLinePointsVisible}
+          onClick={props.toggleFieldLinePointsVisibility}
+        />
+        <MenuItem
+          label="Field Intersections"
+          isVisible={model.fieldIntersectionsVisible}
+          onClick={props.toggleFieldIntersectionsVisibility}
+        />
       </ul>
     </Menu>
   );
@@ -171,24 +266,31 @@ export const LocalisationViewModel = observer(({ model }: { model: LocalisationM
       >
         <pointLight color="white" />
       </PerspectiveCamera>
-      <FieldView model={model.field} />
       <SkyboxView model={model.skybox} />
       <hemisphereLight args={["#fff", "#fff", 0.6]} />
-      {model.robots.map((robotModel) => {
-        return robotModel.visible && <NUgusView key={robotModel.id} model={robotModel} />;
-      })}
-      <FieldLineDots model={model} />
+      {model.fieldVisible && <FieldView model={model.field} />}
+      {model.gridVisible && <GridView />}
+      {model.robotVisible &&
+        model.robots.map((robotModel) => {
+          return robotModel.visible && <Robot key={robotModel.id} model={robotModel} />;
+        })}
+      {model.fieldLinePointsVisible && <FieldLinePoints model={model} />}
+      {model.ballVisible && <Balls model={model} />}
+      {model.fieldIntersectionsVisible && <FieldIntersections model={model} />}
+      {model.particlesVisible && <Particles model={model} />}
+      {model.goalVisible && <Goals model={model} />}
+      <Robots model={model} />
     </object3D>
   );
 });
 
-const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
+const FieldLinePoints = ({ model }: { model: LocalisationModel }) => (
   <>
     {model.robots.map(
       (robot) =>
         robot.visible && (
           <object3D key={robot.id}>
-            {robot.fieldLinesDots.rPWw.map((d, i) => {
+            {robot.rPFf.map((d, i) => {
               return (
                 <mesh key={String(i)} position={d.add(new Vector3(0, 0, 0.005)).toArray()}>
                   <circleBufferGeometry args={[0.02, 20]} />
@@ -201,3 +303,234 @@ const FieldLineDots = ({ model }: { model: LocalisationModel }) => (
     )}
   </>
 );
+
+const FieldIntersections = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible && (
+            <object3D key={robot.id}>
+              {robot.fieldIntersectionsF?.map((intersection) => {
+                const createShapeForIntersection = (intersectionType: string, position: Vector3) => {
+                  const basePosition = position.add(new Vector3(0.1, 0.1, 0)).toArray();
+                  switch (intersectionType) {
+                    case "L_INTERSECTION":
+                      return (
+                        <>
+                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
+                            <circleBufferGeometry args={[0.04, 20]} />
+                            <meshBasicMaterial color="red" />
+                          </mesh>
+                          <mesh position={[basePosition[0], basePosition[1] - 0.05, basePosition[2]]}>
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                          <mesh position={[basePosition[0] - 0.04, basePosition[1], basePosition[2]]}>
+                            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                        </>
+                      );
+                    case "T_INTERSECTION":
+                      return (
+                        <>
+                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
+                            <circleBufferGeometry args={[0.04, 20]} />
+                            <meshBasicMaterial color="red" />
+                          </mesh>
+                          <mesh position={[basePosition[0], basePosition[1] + 0.05, basePosition[2]]}>
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                          <mesh position={[basePosition[0], basePosition[1], basePosition[2]]}>
+                            <boxBufferGeometry args={[0.02, 0.1, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                        </>
+                      );
+                    case "X_INTERSECTION":
+                      return (
+                        <>
+                          <mesh position={intersection.position.add(new Vector3(0, 0, 0.01)).toArray()}>
+                            <circleBufferGeometry args={[0.04, 20]} />
+                            <meshBasicMaterial color="red" />
+                          </mesh>
+                          <mesh
+                            position={[basePosition[0], basePosition[1], basePosition[2]]}
+                            rotation={[0, 0, Math.PI / 4]}
+                          >
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                          <mesh
+                            position={[basePosition[0], basePosition[1], basePosition[2]]}
+                            rotation={[0, 0, -Math.PI / 4]}
+                          >
+                            <boxBufferGeometry args={[0.1, 0.02, 0.02]} />
+                            <meshBasicMaterial color="black" />
+                          </mesh>
+                        </>
+                      );
+                    default:
+                      return null;
+                  }
+                };
+                return createShapeForIntersection(intersection.type, intersection.position);
+              })}
+            </object3D>
+          ),
+      )}
+    </>
+  );
+};
+
+const Particles = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible && (
+          <object3D key={robot.id}>
+            {robot.particles.particle.map((particle, i) => {
+              return (
+                <mesh key={String(i)} position={new Vector3(particle.x, particle.y, 0.005).toArray()}>
+                  <circleBufferGeometry args={[0.02, 20]} />
+                  <meshBasicMaterial color="red" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Balls = ({ model }: { model: LocalisationModel }) => {
+  return (
+    <>
+      {model.robots.map(
+        (robot) =>
+          robot.visible &&
+          robot.rBFf && (
+            <mesh position={robot.rBFf.toArray()} scale={[robot.rBFf.z, robot.rBFf.z, robot.rBFf.z]} key={robot.id}>
+              <sphereBufferGeometry args={[1, 32, 32]} /> {/* Increased detail for the texture */}
+              <meshStandardMaterial map={soccerBallTexture} />
+            </mesh>
+          ),
+      )}
+    </>
+  );
+};
+
+const Goals = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible &&
+        robot.rGFf && (
+          <object3D key={robot.id}>
+            {robot.rGFf.map((goal, i) => {
+              return (
+                <mesh
+                  key={String(i)}
+                  position={goal.bottom.add(new Vector3(0, 0, goal.top.z / 2)).toArray()}
+                  rotation={[Math.PI / 2, 0, 0]}
+                >
+                  <cylinderBufferGeometry args={[0.05, 0.05, goal.top.z, 20]} />
+                  <meshStandardMaterial color="magenta" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Robots = ({ model }: { model: LocalisationModel }) => (
+  <>
+    {model.robots.map(
+      (robot) =>
+        robot.visible &&
+        robot.robots && (
+          <object3D key={robot.id}>
+            {robot.rRFf.map((r, i) => {
+              return (
+                <mesh key={String(i)} position={r.add(new Vector3(0, 0, 0.4)).toArray()} rotation={[Math.PI / 2, 0, 0]}>
+                  <cylinderBufferGeometry args={[0.1, 0.1, 0.8, 20]} />
+                  <meshStandardMaterial color="orange" />
+                </mesh>
+              );
+            })}
+          </object3D>
+        ),
+    )}
+  </>
+);
+
+const Robot = ({ model }: { model: LocalisationRobotModel }) => {
+  const robotRef = React.useRef<URDFRobot | null>(null);
+
+  // Load the URDF model only once
+  React.useEffect(() => {
+    const loader = new URDFLoader();
+    loader.load(nugusUrdfPath, (robot: URDFRobot) => {
+      if (robotRef.current) {
+        robotRef.current.add(robot);
+      }
+    });
+  }, [nugusUrdfPath]);
+
+  const position = model.Hft.decompose().translation;
+  const rotation = model.Hft.decompose().rotation;
+  const motors = model.motors;
+
+  React.useEffect(() => {
+    // Update robot's pose
+    if (robotRef.current) {
+      robotRef.current.position.copy(new THREE.Vector3(position.x, position.y, position.z));
+      robotRef.current.quaternion.copy(new THREE.Quaternion(rotation.x, rotation.y, rotation.z, rotation.w));
+      const joints = (robotRef.current?.children[0] as any)?.joints;
+      // Update robot's joints
+      if (joints) {
+        joints?.head_pitch.setJointValue(motors.headTilt.angle);
+        joints?.left_ankle_pitch.setJointValue(motors.leftAnklePitch.angle);
+        joints?.left_ankle_roll.setJointValue(motors.leftAnkleRoll.angle);
+        joints?.left_elbow_pitch.setJointValue(motors.leftElbow.angle);
+        joints?.left_hip_pitch.setJointValue(motors.leftHipPitch.angle);
+        joints?.left_hip_roll.setJointValue(motors.leftHipRoll.angle);
+        joints?.left_hip_yaw.setJointValue(motors.leftHipYaw.angle);
+        joints?.left_knee_pitch.setJointValue(motors.leftKnee.angle);
+        joints?.left_shoulder_pitch.setJointValue(motors.leftShoulderPitch.angle);
+        joints?.left_shoulder_roll.setJointValue(motors.leftShoulderRoll.angle);
+        joints?.neck_yaw.setJointValue(motors.headPan.angle);
+        joints?.right_ankle_pitch.setJointValue(motors.rightAnklePitch.angle);
+        joints?.right_ankle_roll.setJointValue(motors.rightAnkleRoll.angle);
+        joints?.right_elbow_pitch.setJointValue(motors.rightElbow.angle);
+        joints?.right_hip_pitch.setJointValue(motors.rightHipPitch.angle);
+        joints?.right_hip_roll.setJointValue(motors.rightHipRoll.angle);
+        joints?.right_hip_yaw.setJointValue(motors.rightHipYaw.angle);
+        joints?.right_knee_pitch.setJointValue(motors.rightKnee.angle);
+        joints?.right_shoulder_pitch.setJointValue(motors.rightShoulderPitch.angle);
+        joints?.right_shoulder_roll.setJointValue(motors.rightShoulderRoll.angle);
+      }
+    }
+  }, [position, rotation, motors]);
+
+  // Update the material of the robot
+  const material = new THREE.MeshStandardMaterial({
+    color: "#666666",
+    roughness: 0.5,
+    metalness: 0.2,
+  });
+  if (robotRef.current) {
+    robotRef.current.traverse((child) => {
+      if (child.type === "URDFVisual" && child.children.length > 0) {
+        const mesh = child.children[0] as THREE.Mesh;
+        mesh.material = material;
+      }
+    });
+  }
+
+  return <object3D ref={robotRef} />;
+};

@@ -9,6 +9,8 @@ interface FieldModelValues {
   goalWidth: number;
   goalAreaLength: number;
   goalAreaWidth: number;
+  penaltyAreaLength: number;
+  penaltyAreaWidth: number;
   goalCrossbarHeight: number;
   goalPostDiameter: number;
   goalNetHeight: number;
@@ -26,6 +28,8 @@ export class FieldDimensions {
   @observable goalWidth: number;
   @observable goalAreaLength: number;
   @observable goalAreaWidth: number;
+  @observable penaltyAreaLength: number;
+  @observable penaltyAreaWidth: number;
   @observable goalCrossbarHeight: number;
   @observable goalPostDiameter: number;
   @observable goalNetHeight: number;
@@ -42,6 +46,8 @@ export class FieldDimensions {
     this.goalWidth = values.goalWidth;
     this.goalAreaLength = values.goalAreaLength;
     this.goalAreaWidth = values.goalAreaWidth;
+    this.penaltyAreaLength = values.penaltyAreaLength;
+    this.penaltyAreaWidth = values.penaltyAreaWidth;
     this.goalCrossbarHeight = values.goalCrossbarHeight;
     this.goalPostDiameter = values.goalPostDiameter;
     this.goalNetHeight = values.goalNetHeight;
@@ -49,27 +55,7 @@ export class FieldDimensions {
     this.centerCircleDiameter = values.centerCircleDiameter;
     this.borderStripMinWidth = values.borderStripMinWidth;
   }
-
-  static preYear2014() {
-    return new FieldDimensions({
-      lineWidth: 0.05,
-      markWidth: 0.1,
-      fieldLength: 6,
-      fieldWidth: 4,
-      goalDepth: 0.5,
-      goalWidth: 1.5,
-      goalAreaLength: 0.6,
-      goalAreaWidth: 2.2,
-      goalCrossbarHeight: 1.1,
-      goalPostDiameter: 0.1,
-      goalNetHeight: 0.8,
-      penaltyMarkDistance: 1.8,
-      centerCircleDiameter: 1.2,
-      borderStripMinWidth: 0.7,
-    });
-  }
-
-  static postYear2017() {
+  static of() {
     return new FieldDimensions({
       lineWidth: 0.06,
       markWidth: 0.1,
@@ -78,13 +64,15 @@ export class FieldDimensions {
       goalDepth: 0.6,
       goalWidth: 2.6,
       goalAreaLength: 1,
-      goalAreaWidth: 5,
-      goalCrossbarHeight: 1.8,
+      goalAreaWidth: 3,
+      penaltyAreaLength: 2,
+      penaltyAreaWidth: 5,
+      goalCrossbarHeight: 1.25,
       goalPostDiameter: 0.1,
       goalNetHeight: 1,
-      penaltyMarkDistance: 2.05,
-      centerCircleDiameter: 1.56,
-      borderStripMinWidth: 0.7,
+      penaltyMarkDistance: 1.5,
+      centerCircleDiameter: 1.5,
+      borderStripMinWidth: 1.0,
     });
   }
 }

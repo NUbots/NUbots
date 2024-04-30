@@ -8,7 +8,6 @@ user: nubots
 permissions:
   /etc/sudoers.d/insults: 0440
   /etc/sudoers.d/wheel: 0440
-  /home/nubots/.ssh/authorized_keys: 0600
 
 # Pacman packages that should be installed and updated
 pacman:

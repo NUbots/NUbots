@@ -12,7 +12,7 @@ settings:
   Gain: 18
   BalanceWhiteAuto: Once # Options: Off, Once, Continuous
   AcquisitionFrameRateEnable: true
-  DeviceLinkThroughputLimit: 380000000 # Throughput can limit the framerate
-  AcquisitionFrameRate: 100.00 # Adjusting frame rate can help remove flickering from lighting
+  DeviceLinkThroughputLimit: 60000000 # Throughput can limit the framerate
+  AcquisitionFrameRate: 30.00 # Adjusting frame rate can help remove flickering from lighting
   AutoExposureTargetGreyValueAuto: Off
   AutoExposureTargetGreyValue: 30
