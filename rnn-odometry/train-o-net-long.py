@@ -311,7 +311,7 @@ def main():
     sequence_length = system_sample_rate * 2   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 500                          # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 300                          # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Sequence lengths (for return sequences)
     # train_seq_length = input_data_train.shape[0]
@@ -449,14 +449,14 @@ def main():
     lstm = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.001), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    # lstm2 = keras.layers.LSTM(60, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.001), return_sequences=True)(normalise)    # 32 originally
-    # normalise2 = keras.layers.LayerNormalization()(lstm2)
+    lstm2 = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.001), return_sequences=True)(normalise)    # 32 originally
+    normalise2 = keras.layers.LayerNormalization()(lstm2)
 
-    # lstm3 = keras.layers.LSTM(40, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.0035), return_sequences=True)(normalise2)    # 32 originally
-    # normalise3 = keras.layers.LayerNormalization()(lstm3)
+    lstm3 = keras.layers.LSTM(100, kernel_initializer=keras.initializers.HeNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.0035), return_sequences=True)(normalise2)    # 32 originally
+    normalise3 = keras.layers.LayerNormalization()(lstm3)
 
-    # # Apply attention layer that considers all normalised lstm outputs
-    # attention = keras.layers.Attention()([normalise3, normalise3])
+    # # Apply attention layer that considers lstm outputs
+    attention = keras.layers.Attention()([normalise3, normalise3])
     # # Compute dot product between attention weights and last LSTM layer
     # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
 
@@ -465,7 +465,7 @@ def main():
     # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
     # dense1 = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(dropout4)
-    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(normalise)   # Target shape[1] is 3
+    dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(attention)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mae"])
     model.summary()
