@@ -138,20 +138,28 @@ namespace module::vision {
             std::vector<int> indices;
             cv::dnn::NMSBoxes(boxes, class_confidences, cfg.nms_score_threshold, cfg.nms_threshold, indices);
 
+            log<NUClear::DEBUG>("Detected ", indices.size(), " objects");
+
             // -------- Emit Detections --------
             const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
-            auto balls               = std::make_unique<Balls>();
-            auto robots              = std::make_unique<Robots>();
-            auto goals               = std::make_unique<Goals>();
-            auto field_intersections = std::make_unique<FieldIntersections>();
-            auto bounding_boxes      = std::make_unique<BoundingBoxes>();
+            // auto balls               = std::make_unique<Balls>();
+            auto robots = std::make_unique<Robots>();
+            // auto goals               = std::make_unique<Goals>();
+            // auto field_intersections = std::make_unique<FieldIntersections>();
+            auto bounding_boxes = std::make_unique<BoundingBoxes>();
 
             // Common message fields
-            balls->id = robots->id = goals->id = field_intersections->id = bounding_boxes->id = img.id;
-            balls->timestamp = robots->timestamp = goals->timestamp = field_intersections->timestamp =
-                bounding_boxes->timestamp                           = img.timestamp;
-            balls->Hcw = robots->Hcw = goals->Hcw = field_intersections->Hcw = bounding_boxes->Hcw = img.Hcw;
+            // balls->id = robots->id = goals->id = field_intersections->id = bounding_boxes->id = img.id;
+            // balls->timestamp = robots->timestamp = goals->timestamp = field_intersections->timestamp =
+            //     bounding_boxes->timestamp                           = img.timestamp;
+            // balls->Hcw = robots->Hcw = goals->Hcw = field_intersections->Hcw = bounding_boxes->Hcw = img.Hcw;
+            bounding_boxes->id        = img.id;
+            bounding_boxes->timestamp = img.timestamp;
+            bounding_boxes->Hcw       = img.Hcw;
+            robots->id                = img.id;
+            robots->timestamp         = img.timestamp;
+            robots->Hcw               = img.Hcw;
 
             // Helper function to simplify unprojection calls
             auto pix_to_ray = [&](double x, double y) {
@@ -194,38 +202,39 @@ namespace module::vision {
                 bbox->corners.push_back(top_right_ray);
                 bbox->corners.push_back(bottom_right_ray);
                 bbox->corners.push_back(bottom_left_ray);
+                // bounding_boxes->bounding_boxes.push_back(*bbox);
+                // bbox->colour = objects[class_id].colour;
 
+                // if (objects[class_id].name == "ball") {
+                //     Ball b;
+                //     b.uBCc = ray_to_camera_space(centre_ray).normalized();
+                //     b.measurements.emplace_back();
+                //     b.measurements.back().type = Ball::MeasurementType::PROJECTION;
+                //     b.measurements.back().rBCc = ray_to_camera_space(centre_ray);
+                //     // Calculate the angular radius of the ball in camera space
+                //     b.radius = bottom_centre_ray.dot(bottom_left_ray);
+                //     b.colour.fill(1.0);
+                //     balls->balls.push_back(b);
+                //     bbox->colour = objects[class_id].colour;
+                //     bounding_boxes->bounding_boxes.push_back(*bbox);
+                // }
 
-                if (objects[class_id].name == "ball") {
-                    Ball b;
-                    b.uBCc = ray_to_camera_space(centre_ray).normalized();
-                    b.measurements.emplace_back();
-                    b.measurements.back().type = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().rBCc = ray_to_camera_space(centre_ray);
-                    // Calculate the angular radius of the ball in camera space
-                    b.radius = bottom_centre_ray.dot(bottom_left_ray);
-                    b.colour.fill(1.0);
-                    balls->balls.push_back(b);
-                    bbox->colour = objects[class_id].colour;
-                    bounding_boxes->bounding_boxes.push_back(*bbox);
-                }
+                // if (objects[class_id].name == "goal post") {
+                //     Goal g;
+                //     g.measurements.emplace_back();
+                //     g.measurements.back().type = Goal::MeasurementType::CENTRE;
+                //     g.measurements.back().rGCc = ray_to_camera_space(bottom_centre_ray);
+                //     g.post.top                 = top_centre_ray;
+                //     g.post.bottom              = bottom_centre_ray;
+                //     g.post.distance            = ray_to_camera_space(bottom_centre_ray).norm();
+                //     g.side                     = Goal::Side::UNKNOWN_SIDE;
+                //     g.screen_angular           = cartesianToSpherical(g.post.bottom).tail<2>();
+                //     goals->goals.push_back(std::move(g));
+                //     bbox->colour = objects[class_id].colour;
+                //     bounding_boxes->bounding_boxes.push_back(*bbox);
+                // }
 
-                if (objects[class_id].name == "goal post") {
-                    Goal g;
-                    g.measurements.emplace_back();
-                    g.measurements.back().type = Goal::MeasurementType::CENTRE;
-                    g.measurements.back().rGCc = ray_to_camera_space(bottom_centre_ray);
-                    g.post.top                 = top_centre_ray;
-                    g.post.bottom              = bottom_centre_ray;
-                    g.post.distance            = ray_to_camera_space(bottom_centre_ray).norm();
-                    g.side                     = Goal::Side::UNKNOWN_SIDE;
-                    g.screen_angular           = cartesianToSpherical(g.post.bottom).tail<2>();
-                    goals->goals.push_back(std::move(g));
-                    bbox->colour = objects[class_id].colour;
-                    bounding_boxes->bounding_boxes.push_back(*bbox);
-                }
-
-                if (objects[class_id].name == "robot") {
+                if (objects[class_id].name == "person") {
                     Robot r;
                     r.rRCc   = ray_to_camera_space(bottom_centre_ray);
                     r.radius = bottom_centre_ray.dot(bottom_left_ray);
@@ -234,34 +243,34 @@ namespace module::vision {
                     bounding_boxes->bounding_boxes.push_back(*bbox);
                 }
 
-                if (objects[class_id].name == "L-intersection" || objects[class_id].name == "T-intersection"
-                    || objects[class_id].name == "X-intersection") {
-                    FieldIntersection i;
-                    // Project the centre ray onto the ground plane in world {w} space
-                    Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
-                    Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
-                    i.rIWw               = rIWw;
-                    if (objects[class_id].name == "L-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
-                        bbox->colour = objects[class_id].colour;
-                    }
-                    else if (objects[class_id].name == "T-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::T_INTERSECTION;
-                        bbox->colour = objects[class_id].colour;
-                    }
-                    else if (objects[class_id].name == "X-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::X_INTERSECTION;
-                        bbox->colour = objects[class_id].colour;
-                    }
-                    field_intersections->intersections.push_back(std::move(i));
-                    bounding_boxes->bounding_boxes.push_back(*bbox);
-                }
+                // if (objects[class_id].name == "L-intersection" || objects[class_id].name == "T-intersection"
+                //     || objects[class_id].name == "X-intersection") {
+                //     FieldIntersection i;
+                //     // Project the centre ray onto the ground plane in world {w} space
+                //     Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
+                //     Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
+                //     i.rIWw               = rIWw;
+                //     if (objects[class_id].name == "L-intersection") {
+                //         i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
+                //         bbox->colour = objects[class_id].colour;
+                //     }
+                //     else if (objects[class_id].name == "T-intersection") {
+                //         i.type       = FieldIntersection::IntersectionType::T_INTERSECTION;
+                //         bbox->colour = objects[class_id].colour;
+                //     }
+                //     else if (objects[class_id].name == "X-intersection") {
+                //         i.type       = FieldIntersection::IntersectionType::X_INTERSECTION;
+                //         bbox->colour = objects[class_id].colour;
+                //     }
+                //     field_intersections->intersections.push_back(std::move(i));
+                //     bounding_boxes->bounding_boxes.push_back(*bbox);
+                // }
             }
 
-            emit(std::move(balls));
+            // emit(std::move(balls));
             emit(std::move(robots));
-            emit(std::move(goals));
-            emit(std::move(field_intersections));
+            // emit(std::move(goals));
+            // emit(std::move(field_intersections));
             emit(std::move(bounding_boxes));
 
             // -------- Benchmark --------
