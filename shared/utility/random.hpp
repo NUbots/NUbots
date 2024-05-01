@@ -24,26 +24,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILITY_NBS_GET_ID_HPP
-#define UTILITY_NBS_GET_ID_HPP
+#ifndef UTILITY_RANDOM_HPP
+#define UTILITY_RANDOM_HPP
 
-#include <type_traits>
+#include <algorithm>
+#include <random>
 
-#include "utility/type_traits/has_id.hpp"
+namespace utility::random {
 
-namespace utility::nbs {
+    std::string generate_alphanum_string(unsigned int length);
 
-    /// @brief Returns the subtype field of data or, if subtype does not exist, 0
-    template <typename T>
-    std::enable_if_t<!utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& /*data*/) {
-        return 0;
-    }
+}
 
-    template <typename T>
-    std::enable_if_t<utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& data) {
-        return data.id;
-    }
-
-}  // namespace utility::nbs
-
-#endif  // UTILITY_NBS_GET_ID_HPP
+#endif  // UTILITY_RANDOM_HPP

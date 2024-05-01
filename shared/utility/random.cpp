@@ -24,26 +24,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILITY_NBS_GET_ID_HPP
-#define UTILITY_NBS_GET_ID_HPP
+#include "random.hpp"
 
-#include <type_traits>
+namespace utility::random {
+    // Generate a random alphanumeric string of the given length
+    std::string generate_alphanum_string(unsigned int length) {
 
-#include "utility/type_traits/has_id.hpp"
+        // There isn't a way to make this an std::array without doing work that isn't needed for a constant
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+        constexpr char charset[] =
+            "0123456789"
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "abcdefghijklmnopqrstuvwxyz";
 
-namespace utility::nbs {
+        std::random_device rd;
+        std::mt19937 mt(rd());
+        // -1 to get a valid index, another -1 so that valid index does not include null
+        std::uniform_int_distribution<> dist(0, sizeof(charset) - 2);
 
-    /// @brief Returns the subtype field of data or, if subtype does not exist, 0
-    template <typename T>
-    std::enable_if_t<!utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& /*data*/) {
-        return 0;
+        auto rand_char = [&]() -> char { return charset[dist(mt)]; };
+
+        std::string str(length, 0);
+        std::generate_n(str.begin(), length, rand_char);
+        return str;
     }
-
-    template <typename T>
-    std::enable_if_t<utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& data) {
-        return data.id;
-    }
-
-}  // namespace utility::nbs
-
-#endif  // UTILITY_NBS_GET_ID_HPP
+}  // namespace utility::random

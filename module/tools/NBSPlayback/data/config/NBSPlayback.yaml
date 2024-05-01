@@ -1,16 +1,16 @@
+# Controls the minimum log level that NUClear log will display
 log_level: INFO
 
-output:
-  directory: recordings
-  split_size: 50 * GiB
+# FAST - as fast as possible
+# REALTIME - as fast as the messages were recorded
+# SEQUENTIAL - one message at a time, waits for all message sub tasks to complete before continuing
+playback_mode: FAST
 
-# You can put any messages that is emitted in the system here and it will be logged
+# You can put any messages that is emitted in the system here and it will be played back
 # The below ones are just the most common and here as an example
-# You can put any messages that is emitted in the system here and it will be logged
 messages:
-  # Input
+  # Sensors
   message.platform.RawSensors: true
-  message.input.Image: true
   message.output.CompressedImage: true
   # Vision
   message.vision.Balls: true
