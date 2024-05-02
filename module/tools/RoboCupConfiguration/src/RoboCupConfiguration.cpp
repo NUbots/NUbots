@@ -193,7 +193,8 @@ namespace module::tools {
             std::filesystem::copy_options::overwrite_existing);
 
         // Restart the network
-        system("reboot");
+        system("systemctl restart systemd-networkd");
+        system("systemctl restart wpa_supplicant");
 
         log_message = "Network configured!";
     }
@@ -266,7 +267,7 @@ namespace module::tools {
             << fmt::format(
                    "ctrl_interface=/var/run/"
                    "wpa_supplicant\nctrl_interface_group=wheel\nupdate_config=1\nfast_reauth=1\nap_scan = 1\n\nnetwork "
-                   "= {{\n\tssid =\"{}\"\n\tpsk=\"{}\"\n\tpriority=1\n}}",
+                   "={{\n\tssid =\"{}\"\n\tpsk=\"{}\"\n\tpriority=1\n}}",
                    ssid,
                    password);
 
