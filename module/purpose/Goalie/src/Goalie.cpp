@@ -32,7 +32,6 @@
 #include "message/input/GameState.hpp"
 #include "message/planning/LookAround.hpp"
 #include "message/purpose/Goalie.hpp"
-#include "message/skill/Look.hpp"
 #include "message/strategy/DiveToBall.hpp"
 #include "message/strategy/LookAtFeature.hpp"
 #include "message/strategy/StandStill.hpp"
@@ -45,7 +44,6 @@ namespace module::purpose {
     using Phase    = message::input::GameState::Data::Phase;
     using GameMode = message::input::GameState::Data::Mode;
     using message::planning::LookAround;
-    using message::skill::Look;
     using message::strategy::DiveToBall;
     using message::strategy::LookAtBall;
     using message::strategy::StandStill;
@@ -112,15 +110,7 @@ namespace module::purpose {
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<NormalGoalie>>().then([this] {
-            emit<Task>(std::make_unique<StandStill>());
-            // make the robot look forward
-            Eigen::Vector3d uPCt =
-                (Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY()))
-                    .toRotationMatrix()
-                * Eigen::Vector3d::UnitX();
-            emit<Task>(std::make_unique<Look>(uPCt, true));
-        });
+        on<Provide<NormalGoalie>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Penalty shootout PLAYING state
         on<Provide<PenaltyShootoutGoalie>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
