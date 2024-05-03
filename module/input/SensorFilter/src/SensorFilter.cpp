@@ -88,6 +88,7 @@ namespace module::input {
                                         .y();
 
             cfg.use_ground_truth = config["use_ground_truth"].as<bool>();
+            cfg.max_servo_change = config["max_servo_change"].as<double>();
         });
 
         on<Startup>().then([this] {
@@ -97,11 +98,9 @@ namespace module::input {
                                              message::behaviour::state::WalkState::Phase::DOUBLE));
         });
 
-        on<Trigger<RawSensors>, Optional<With<Sensors>>, With<WalkState>, Single, Priority::HIGH>().then(
+        on<Trigger<RawSensors>, Optional<With<Sensors>>, Single, Priority::HIGH>().then(
             "Main Sensors Loop",
-            [this](const RawSensors& raw_sensors,
-                   const std::shared_ptr<const Sensors>& previous_sensors,
-                   const WalkState& walk_state) {
+            [this](const RawSensors& raw_sensors, const std::shared_ptr<const Sensors>& previous_sensors) {
                 auto sensors = std::make_unique<Sensors>();
 
                 // Raw sensors (Accelerometer, Gyroscope, etc.)
@@ -111,7 +110,7 @@ namespace module::input {
                 update_kinematics(sensors, raw_sensors);
 
                 // Odometry (Htw and Hrw)
-                update_odometry(sensors, previous_sensors, raw_sensors, walk_state);
+                update_odometry(sensors, previous_sensors, raw_sensors);
 
                 // Graph debug information
                 if (log_level <= NUClear::DEBUG) {
@@ -190,6 +189,17 @@ namespace module::input {
         else {
             log<NUClear::WARN>("Unknown foot down method");
         }
+
+        // **************** Planted Foot Information ****************
+        if (sensors->feet[BodySide::LEFT].down && sensors->feet[BodySide::RIGHT].down) {
+            sensors->planted_foot_phase = message::behaviour::state::WalkState::Phase::DOUBLE;
+        }
+        else if (sensors->feet[BodySide::LEFT].down && !sensors->feet[BodySide::RIGHT].down) {
+            sensors->planted_foot_phase = message::behaviour::state::WalkState::Phase::LEFT;
+        }
+        else {
+            sensors->planted_foot_phase = message::behaviour::state::WalkState::Phase::RIGHT;
+        }
     }
 
     void SensorFilter::update_raw_sensors(std::unique_ptr<Sensors>& sensors,
@@ -205,6 +215,7 @@ namespace module::input {
             NUClear::log<NUClear::WARN>(make_packet_error_string("Platform", raw_sensors.subcontroller_error));
         }
 
+
         // **************** Servos ****************
         for (uint32_t id = 0; id < n_servos; ++id) {
             const auto& raw_servo       = get_raw_servo(id, raw_sensors);
@@ -215,9 +226,17 @@ namespace module::input {
                 NUClear::log<NUClear::WARN>(make_servo_hardware_error_string(raw_servo, id));
             }
 
-            // If the RawSensors message for this servo has an error, but we have a previous Sensors message available,
-            // then for some fields we will want to selectively use the old Sensors value, otherwise we just use the new
-            // values as is
+            // Determine the current position with potential fallback to the last known good position
+            double current_position = raw_servo.present_position;
+            if (previous_sensors
+                && (fabs(current_position - previous_sensors->servo[id].present_position) > cfg.max_servo_change
+                    || hardware_status == RawSensors::HardwareError::MOTOR_ENCODER)) {
+                current_position = previous_sensors->servo[id].present_position;
+                NUClear::log<NUClear::DEBUG>("Suspected encoder error on servo ",
+                                             id,
+                                             ": Using last known good position.");
+            }
+
             sensors->servo.emplace_back(
                 hardware_status,
                 id,
@@ -227,21 +246,13 @@ namespace module::input {
                 raw_servo.position_d_gain,
                 raw_servo.goal_position,
                 raw_servo.profile_velocity,
-                /* If there is an encoder error, then use the last known good position */
-                ((hardware_status == RawSensors::HardwareError::MOTOR_ENCODER) && previous_sensors)
-                    ? previous_sensors->servo[id].present_position
-                    : raw_servo.present_position,
+                current_position,
                 /* If there is an encoder error, then use the last known good velocity */
                 ((hardware_status == RawSensors::HardwareError::MOTOR_ENCODER) && previous_sensors)
                     ? previous_sensors->servo[id].present_velocity
                     : raw_servo.present_velocity,
-                /* We may get a RawSensors::HardwareError::OVERLOAD error, but in this case the load value isn't *wrong*
-                   so it doesn't make sense to use the last "good" value */
                 raw_servo.present_current,
-                /* Similarly for a RawSensors::HardwareError::INPUT_VOLTAGE error, no special action is needed */
                 raw_servo.voltage,
-                /* And similarly here for a RawSensors::HardwareError::OVERHEATING error, we still pass the temperature
-                   no matter what */
                 static_cast<float>(raw_servo.temperature));
         }
 
@@ -323,8 +334,7 @@ namespace module::input {
 
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
-                                       const RawSensors& raw_sensors,
-                                       const WalkState& walk_state) {
+                                       const RawSensors& raw_sensors) {
         if (!cfg.use_ground_truth) {
             // Compute time since last update
             const double dt = std::max(
@@ -333,29 +343,30 @@ namespace module::input {
                     .count(),
                 0.0);
 
-            // Assume support foot change has occurred if walk state has changed
-            if (current_walk_phase != walk_state.phase) {
-                current_walk_phase = walk_state.phase;
-                // Compute the new anchor frame (Hwp) (new support foot)
-                if (current_walk_phase.value == WalkState::Phase::LEFT) {
-                    Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+            // If sensors detected a new foot phase, update the anchor frame
+            if (planted_anchor_foot != sensors->planted_foot_phase
+                && sensors->planted_foot_phase != WalkState::Phase::DOUBLE) {
+                // Update anchor frame to the new planted foot
+                switch (planted_anchor_foot.value) {
+                    case WalkState::Phase::RIGHT:
+                        Hwp = Hwp * sensors->Htx[FrameID::R_FOOT_BASE].inverse() * sensors->Htx[FrameID::L_FOOT_BASE];
+                        break;
+                    case WalkState::Phase::LEFT:
+                        Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
+                        break;
+                    default: log<NUClear::WARN>("Anchor frame should not be updated in double support phase"); break;
                 }
-                else if (current_walk_phase.value == WalkState::Phase::RIGHT) {
-                    Hwp = Hwp * sensors->Htx[FrameID::L_FOOT_BASE].inverse() * sensors->Htx[FrameID::R_FOOT_BASE];
-                }
+                // Update our current anchor foot indicator to new foot
+                planted_anchor_foot = sensors->planted_foot_phase;
                 // Set the z translation, roll and pitch of the anchor frame to 0 as assumed to be on field plane
                 Hwp.translation().z() = 0;
                 Hwp.linear() = rpy_intrinsic_to_mat(Eigen::Vector3d(0, 0, mat_to_rpy_intrinsic(Hwp.linear()).z()));
             }
 
-            // Compute torso pose using kinematics from anchor frame (current support foot)
-            Eigen::Isometry3d Hpt = Eigen::Isometry3d::Identity();
-            if (current_walk_phase.value == WalkState::Phase::RIGHT) {
-                Hpt = sensors->Htx[FrameID::R_FOOT_BASE].inverse();
-            }
-            else {
-                Hpt = sensors->Htx[FrameID::L_FOOT_BASE].inverse();
-            }
+            // Compute torso pose using kinematics from anchor frame (current planted foot)
+            Eigen::Isometry3d Hpt = planted_anchor_foot.value == WalkState::Phase::RIGHT
+                                        ? Eigen::Isometry3d(sensors->Htx[FrameID::R_FOOT_BASE].inverse())
+                                        : Eigen::Isometry3d(sensors->Htx[FrameID::L_FOOT_BASE].inverse());
 
             // Perform Anchor Update (x, y, z, yaw)
             Eigen::Isometry3d Hwt_anchor = Hwp * Hpt;
@@ -424,9 +435,8 @@ namespace module::input {
                    sensors->feet[BodySide::LEFT].down));
         emit(graph(fmt::format("Foot Down/{}/Right", std::string(cfg.foot_down.method)),
                    sensors->feet[BodySide::RIGHT].down));
-
-        // Walk state information
-        emit(graph("Walk support phase", int(current_walk_phase)));
+        emit(graph("Foot down phase", int(sensors->planted_foot_phase)));
+        emit(graph("Anchor foot", int(planted_anchor_foot)));
 
         // Odometry information
         Eigen::Isometry3d Hwt    = Eigen::Isometry3d(sensors->Htw).inverse();
@@ -435,6 +445,21 @@ namespace module::input {
         emit(graph("Hwt est translation (rTWw)", est_rTWw.x(), est_rTWw.y(), est_rTWw.z()));
         emit(graph("Rwt est angles (rpy)", est_Rwt.x(), est_Rwt.y(), est_Rwt.z()));
         emit(graph("vTw est", sensors->vTw.x(), sensors->vTw.y(), sensors->vTw.z()));
+
+        Eigen::Isometry3d Hwr    = Eigen::Isometry3d(sensors->Hrw).inverse();
+        Eigen::Vector3d est_rTRw = Hwr.translation();
+        Eigen::Vector3d est_Rrw  = mat_to_rpy_intrinsic(Hwr.rotation());
+        emit(graph("Hwr est translation (rTRw)", est_rTRw.x(), est_rTRw.y(), est_rTRw.z()));
+        emit(graph("Rrw est angles (rpy)", est_Rrw.x(), est_Rrw.y(), est_Rrw.z()));
+
+        Eigen::Isometry3d Hwp    = sensors->Hwp;
+        Eigen::Vector3d est_rPWw = Hwp.translation();
+        Eigen::Vector3d est_Rpw  = mat_to_rpy_intrinsic(Hwp.rotation());
+        emit(graph("Hwp est translation (rTPw)", est_rPWw.x(), est_rPWw.y(), est_rPWw.z()));
+        emit(graph("Rpw est angles (rpy)", est_Rpw.x(), est_Rpw.y(), est_Rpw.z()));
+
+        Eigen::Vector3d vTw = sensors->vTw;
+        emit(graph("vTw est", vTw.x(), vTw.y(), vTw.z()));
 
         // If we have ground truth odometry, then we can debug the error between our estimate and the ground truth
         if (raw_sensors.odometry_ground_truth.exists) {
