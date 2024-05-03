@@ -74,15 +74,6 @@ namespace module::nbs {
                 start_time =
                     NUClear::clock::time_point(std::chrono::nanoseconds((*first_message).item->item.timestamp));
                 decoder_iterator = decoder.begin();
-                // Synchronise the clock epoch to the first message timestamp
-                if (decoder_iterator != decoder.end()) {
-                    emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
-                        NUClear::clock::time_point(std::chrono::nanoseconds((*decoder_iterator).item->item.timestamp)),
-                        playback_speed,
-                        NUClear::message::TimeTravel::Action::RELATIVE));
-                    // Emit the first message
-                    emit_next_message();
-                }
             }
             else {
                 // If no NBS files are provided, don't continue
@@ -100,6 +91,16 @@ namespace module::nbs {
                     emitters[hash](decoder);
                     log<NUClear::INFO>(" - ", message_name);
                 }
+            }
+
+            // Synchronise the clock epoch to the first message timestamp
+            if (decoder_iterator != decoder.end()) {
+                emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
+                    NUClear::clock::time_point(std::chrono::nanoseconds((*decoder_iterator).item->item.timestamp)),
+                    playback_speed,
+                    NUClear::message::TimeTravel::Action::RELATIVE));
+                // Emit the first message
+                emit_next_message();
             }
         });
 
