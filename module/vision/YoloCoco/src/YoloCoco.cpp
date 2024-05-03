@@ -118,11 +118,7 @@ namespace module::vision {
             std::vector<int> indices;
             cv::dnn::NMSBoxes(boxes, class_confidences, cfg.nms_score_threshold, cfg.nms_threshold, indices);
 
-            log<NUClear::DEBUG>("Detected ", indices.size(), " objects");
-
             // -------- Emit Detections --------
-            const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
-
             auto bounding_boxes       = std::make_unique<BoundingBoxes>();
             bounding_boxes->id        = img.id;
             bounding_boxes->timestamp = img.timestamp;
@@ -137,49 +133,32 @@ namespace module::vision {
                                  norm_dim);
             };
 
-            // Helper function to simplify projecting rays onto the field plane then transforming into camera space
-            auto ray_to_camera_space = [&](const Eigen::Matrix<double, 3, 1>& ray) {
-                Eigen::Vector3d uBCw = Hwc.rotation() * ray;
-                Eigen::Vector3d rPWw = uBCw * std::abs(Hwc.translation().z() / uBCw.z()) + Hwc.translation();
-                return Hwc.inverse() * rPWw;
-            };
-
             for (size_t i = 0; i < indices.size(); i++) {
                 // Get the index of the detected object from list of indices
-                int idx = indices[i];
-                // Get the class id associated with the detected object
-                int class_id = class_ids[idx];
-
-                // Convert the bounding box points to unit vectors (rays) in the camera {c} space
-                Eigen::Vector3d top_left_ray  = pix_to_ray(boxes[idx].x, boxes[idx].y);
-                Eigen::Vector3d top_right_ray = pix_to_ray(boxes[idx].x + boxes[idx].width, boxes[idx].y);
-                Eigen::Vector3d bottom_right_ray =
-                    pix_to_ray(boxes[idx].x + boxes[idx].width, boxes[idx].y + boxes[idx].height);
-                Eigen::Vector3d bottom_left_ray = pix_to_ray(boxes[idx].x, boxes[idx].y + boxes[idx].height);
-                Eigen::Vector3d centre_ray =
-                    pix_to_ray(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y + boxes[idx].height / 2.0);
-                Eigen::Vector3d bottom_centre_ray =
-                    pix_to_ray(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y + boxes[idx].height);
-                Eigen::Vector3d top_centre_ray = pix_to_ray(boxes[idx].x + boxes[idx].width / 2.0, boxes[idx].y);
-
+                int idx          = indices[i];
                 auto bbox        = std::make_unique<BoundingBox>();
-                bbox->name       = objects[class_id].name;
+                bbox->name       = objects[class_ids[idx]].name;
                 bbox->confidence = class_confidences[idx];
-                bbox->corners.push_back(top_left_ray);
-                bbox->corners.push_back(top_right_ray);
-                bbox->corners.push_back(bottom_right_ray);
-                bbox->corners.push_back(bottom_left_ray);
+                bbox->colour     = objects[class_ids[idx]].colour;
+                // Convert the bounding box points to unit vectors (rays) in the camera {c} space
+                bbox->corners.push_back(pix_to_ray(boxes[idx].x, boxes[idx].y));
+                bbox->corners.push_back(pix_to_ray(boxes[idx].x + boxes[idx].width, boxes[idx].y));
+                bbox->corners.push_back(pix_to_ray(boxes[idx].x + boxes[idx].width, boxes[idx].y + boxes[idx].height));
+                bbox->corners.push_back(pix_to_ray(boxes[idx].x, boxes[idx].y + boxes[idx].height));
+                bounding_boxes->bounding_boxes.push_back(*bbox);
+            }
 
-                emit(std::move(bounding_boxes));
+            emit(std::move(bounding_boxes));
 
-                // -------- Benchmark --------
-                if (log_level <= NUClear::DEBUG) {
-                    auto end      = std::chrono::high_resolution_clock::now();
-                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                    log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
-                    log<NUClear::DEBUG>("FPS: ", 1000.0 / duration);
-                }
-            });
+            // -------- Benchmark --------
+            if (log_level <= NUClear::DEBUG) {
+                auto end      = std::chrono::high_resolution_clock::now();
+                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                log<NUClear::DEBUG>("Detected ", indices.size(), " objects");
+                log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
+                log<NUClear::DEBUG>("FPS: ", 1000.0 / duration);
+            }
+        });
     }
 
-    }  // namespace module::vision
+}  // namespace module::vision
