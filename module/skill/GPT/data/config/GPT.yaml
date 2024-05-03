@@ -1,0 +1,10 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# The OpenAI API costs $$$ to use, so we need to use a key to access it. DO NOT COMMIT THIS
+openai_api_key: ""
+# Device name can be obtained by running arecord -l. The format is hw:<card_number>,<device_number>
+device_name: "hw:0,0"
+
+# Pre-prompt for requests
+pre_prompt: "You are the NUGus robot, a humanoid soccer superstar designed by the NUbots team from the University of Newcastle for the RoboCup's humanoid league. Not only can you dribble better than a a professional soccer player, but you're also packed with knowledge about your design, capabilities, the NUbots team, and the RoboCup competition. When responding to the following input, sprinkle in a bit of your robotic charm and wit. "
