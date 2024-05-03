@@ -61,6 +61,9 @@ set(SCRIPT_FILES
     CACHE INTERNAL "A list of all script files" FORCE
 )
 
+file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/platform/robot_names.yaml" DESTINATION ${PROJECT_BINARY_DIR}/config)
+set(ALIAS_CONFIG "${PROJECT_BINARY_DIR}/config/robot_names.yaml" CACHE INTERNAL "Path to the robot names config file" FORCE)
+
 # Copy only .urdf files from the platform models directory to the build directory
 file(GLOB_RECURSE urdf_files "${PROJECT_SOURCE_DIR}/shared/utility/platform/models/*.urdf")
 file(COPY ${urdf_files} DESTINATION "${PROJECT_BINARY_DIR}/models")
