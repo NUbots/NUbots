@@ -62,11 +62,11 @@ namespace extension {
         // file need only override the values that need to be overriden.
         //
         // Per-robot, per-robot-name, per-platform and per-binary files need not exist.
-        // Per-robot, per-platform and per-binary files can add new nodes to the file, but this is probably unwise.
+        // Per-robot, per-robot-name, per-platform and per-binary files can add new nodes to the file, but this is
+        // probably unwise.
         //
         // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher
         // priority tree.
-
 
         fs::path file_name{};
         std::string hostname{};
@@ -120,8 +120,8 @@ namespace extension {
                 }
             }
 
-            auto robot_name = utility::platform::get_robot_alias(hostname);
             // If the same file exists in this robot's per-robot-name config directory then load and merge.
+            auto robot_name = utility::platform::get_robot_alias(hostname);
             if (!robot_name.empty()) {
                 if (fs::exists(fs::path("config") / robot_name / file_name)) {
                     if (loaded) {
@@ -310,7 +310,7 @@ namespace NUClear::dsl {
             /// @brief Sets up the NUClear Reaction for Configuration
             /// @details Sets up a FileWatch on the file_name which is passed in
             ///          The config files are FileWatched in order from least specific to most specific:
-            ///          1. default, 2. per-robot, 3. binary
+            ///          1. default, 2. platform, 3. per-robot, 4. per-robot-name, 5. binary
             ///          The later, more specific configs (if they exist) supersede the less specific ones
             ///          If the default config file doesn't exist, we make one
             ///          The flags used during binding tell FileWatch that the config files have been changed or
@@ -326,6 +326,7 @@ namespace NUClear::dsl {
                 // Get hostname so we can find the correct per-robot config directory.
                 const std::string hostname = utility::support::getHostname();
                 const std::string platform(::extension::Configuration::get_platform(hostname));
+                const std::string robot_name = utility::platform::get_robot_alias(hostname);
 
                 // Check if there is a default config. If there isn't, try to make one
                 const fs::path default_config = fs::path("config") / file_name;
@@ -350,26 +351,32 @@ namespace NUClear::dsl {
                 // Bind our default config file path
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, default_config, flags);
 
-                // Bind our robot specific config file if it exists
-                const fs::path robotConfig = fs::path("config") / hostname / file_name;
-                if (fs::exists(robotConfig)) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
+                // Bind our robot name specific config file if it exists
+                const fs::path name_config = fs::path("config") / robot_name / file_name;
+                if (!name_config.empty() && fs::exists(name_config)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, name_config, flags);
                 }
 
                 // Bind our robot specific config file if it exists
-                const fs::path platformConfig = fs::path("config") / platform / file_name;
-                if (fs::exists(platformConfig) && !platform.empty()) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformConfig, flags);
+                const fs::path robot_config = fs::path("config") / hostname / file_name;
+                if (fs::exists(robot_config)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robot_config, flags);
+                }
+
+                // Bind our robot specific config file if it exists
+                const fs::path platform_config = fs::path("config") / platform / file_name;
+                if (fs::exists(platform_config) && !platform.empty()) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platform_config, flags);
                 }
 
                 // If there were command line arguments, we can get the binary name, and check for a binary config
                 // If not, we don't bother checking for a binary config to bind
                 const auto binary_name = get_first_command_line_arg();
                 if (!binary_name.empty()) {
-                    fs::path binaryConfig = fs::path("config") / binary_name / file_name;
+                    fs::path binary_config = fs::path("config") / binary_name / file_name;
                     // Bind our binary specific config file if it exists
-                    if (fs::exists(binaryConfig)) {
-                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
+                    if (fs::exists(binary_config)) {
+                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binary_config, flags);
                     }
                 }
             }
@@ -394,7 +401,8 @@ namespace NUClear::dsl {
                 // Get hostname, platform and binary name to check if this is not a default configuration file
                 const std::string hostname = utility::support::getHostname();
                 const std::string platform(::extension::Configuration::get_platform(hostname));
-                const auto binary_name = get_first_command_line_arg();
+                const auto binary_name       = get_first_command_line_arg();
+                const std::string robot_name = utility::platform::get_robot_alias(hostname);
 
                 // Get the components of the path
                 auto c = utility::strutil::split(watch.path, '/');
@@ -417,7 +425,6 @@ namespace NUClear::dsl {
 
                 // If it's the installation phase, and the path contains anything indicating it is not default config,
                 // then don't let the reaction run
-                auto robot_name     = utility::platform::get_robot_alias(hostname);
                 bool is_not_default = robot_name.empty()
                                           ? (str_exists(hostname) || str_exists(platform) || str_exists(binary_name))
                                           : (str_exists(hostname) || str_exists(platform) || str_exists(binary_name)

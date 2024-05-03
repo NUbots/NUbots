@@ -24,6 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #ifndef UTILITY_PLATFORM_ALIASES_HPP
 #define UTILITY_PLATFORM_ALIASES_HPP
 
@@ -31,29 +32,24 @@
 
 namespace utility::platform {
 
+    /// @brief Finds the matching alias for the hostname in the robot_names.yaml file, if it exists
+    /// @param hostname The hostname of the robot
+    /// @return The alias of the robot, if it exists, otherwise an empty string
     inline std::string get_robot_alias(std::string hostname) {
         // Get robot aliases
         YAML::Node config = YAML::LoadFile("config/robot_names.yaml");
 
         // Create a map to hold the aliases
-        std::map<std::string, std::string> robot_aliases;
+        std::map<std::string, std::string> robot_aliases{};
 
         // Get the "robot_alias" node and iterate over it
         for (const auto& node : config["robot_alias"]) {
             // Get the hostname and name from each node and add them to the map
-            std::string hostname_    = node["hostname"].as<std::string>();
-            std::string name         = node["name"].as<std::string>();
-            robot_aliases[hostname_] = name;
+            robot_aliases[node["hostname"].as<std::string>()] = node["robot_name"].as<std::string>();
         }
 
-        // Return the name of the robot
-        if (robot_aliases.find(hostname) != robot_aliases.end()) {
-            return robot_aliases[hostname];
-        }
-        // Return empty if no alias is found
-        else {
-            return "";
-        }
+        // Return the name of the robot or empty if it doesn't exist
+        return robot_aliases.find(hostname) != robot_aliases.end() ? robot_aliases[hostname] : "";
     }
 }  // namespace utility::platform
 

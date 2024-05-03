@@ -46,6 +46,7 @@
  */
 
 namespace utility::skill {
+
     using message::actuation::ServoCommand;
     using message::actuation::ServoState;
     using utility::input::ServoID;
@@ -118,12 +119,12 @@ namespace utility::skill {
         auto robot_name    = utility::platform::get_robot_alias(hostname);
         auto name_path     = "scripts/" + robot_name + "/" + script;
 
-        // If robot name exists, use this over hostname
+        // If robot name script exists, use it
         if (!robot_name.empty() && utility::file::exists(name_path)) {
             NUClear::log<NUClear::INFO>("Parsing name specific script:", script);
             return YAML::LoadFile(name_path);
         }
-        // Try getting the robot-specific script first
+        // If robot name script doesn't exist, try to use the robot-specific script
         else if (utility::file::exists(robot_path)) {
             NUClear::log<NUClear::INFO>("Parsing robot specific script:", script);
             return YAML::LoadFile(robot_path);
