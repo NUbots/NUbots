@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['y_5fcut_5foff_5ffrequency_2577',['y_cut_off_frequency',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#ac3d2ee6283e42f282b2b81ff89e3b5c8',1,'module::input::SensorFilter::Config']]]
+  ['x_5fcut_5foff_5ffrequency_2581',['x_cut_off_frequency',['../structmodule_1_1input_1_1SensorFilter_1_1Config.html#a02436cc09adb50603316b75335fb7d96',1,'module::input::SensorFilter::Config']]]
 ];

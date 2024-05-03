@@ -1,15 +1,19 @@
 var searchData=
 [
-  ['objects_2360',['objects',['../classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79',1,'module::vision::Yolo']]],
-  ['offset_2361',['offset',['../structutility_1_1nbs_1_1IndexItem.html#a24ad36421839d2e30b63b6a25af74f26',1,'utility::nbs::IndexItem']]],
-  ['openai_5fapi_5fkey_2362',['openai_api_key',['../structmodule_1_1skill_1_1GPT_1_1Config.html#ab6f64672b4eacabd35a4c974b8411d36',1,'module::skill::GPT::Config']]],
-  ['opencr_2363',['opencr',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a7e620f883e4f08dd9a3c1a6a1c0f84eb',1,'module::platform::OpenCR::HardwareIO']]],
-  ['opencr_5fstate_2364',['opencr_state',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a2dc0f40a460f7d0ab47096fb7561a5e4',1,'module::platform::OpenCR::HardwareIO']]],
-  ['optional_2365',['optional',['../structmodule_1_1extension_1_1component_1_1DirectorTask.html#aab9a71d657ab240df925087666c468c6',1,'module::extension::component::DirectorTask::optional()'],['../structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#aaf825e6734bf8f7a4b006874b00fc564',1,'extension::behaviour::commands::BehaviourTask::optional()']]],
-  ['options_2366',['options',['../classmodule_1_1actuation_1_1Kinematics.html#ae6732ee0313de027c0b34e66bca32a5d',1,'module::actuation::Kinematics::options()'],['../structmodule_1_1extension_1_1Director_1_1Solution.html#abcff273d3b8e0e7613c512a6444f5609',1,'module::extension::Director::Solution::options()']]],
-  ['orientation_2367',['orientation',['../structutility_1_1motion_1_1splines_1_1Waypoint.html#a752a2b9ad09a08b5009857a81c1c1237',1,'utility::motion::splines::Waypoint']]],
-  ['output_5ffile_2368',['output_file',['../classutility_1_1nbs_1_1Encoder.html#ac3873201b2c83404d3a8af13f9f475f8',1,'utility::nbs::Encoder']]],
-  ['output_5ffile_5fpath_2369',['output_file_path',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a1e28b802510291ebad72daedfc7ed2a1',1,'module::support::logging::DataLogging']]],
-  ['output_5ffourcc_2370',['output_fourcc',['../classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Decompressor.html#ac3b15c300111cca2635e0cca2c62d11c',1,'module::input::decompressor::turbojpeg::Decompressor']]],
-  ['over_5ftime_5fcount_2371',['over_time_count',['../structmodule_1_1input_1_1CameraContext_1_1TimeCorrection.html#afddd1659258ab2851d81998af09dff21',1,'module::input::CameraContext::TimeCorrection']]]
+  ['n_5fjoints_2349',['n_joints',['../classmodule_1_1actuation_1_1Kinematics.html#aee7d7fd4b8c9f291ddf6dd863ccfb44b',1,'module::actuation::Kinematics']]],
+  ['n_5fparticles_2350',['n_particles',['../structmodule_1_1localisation_1_1FieldLocalisation_1_1Config.html#ab1e7f3b79690f9e0095edf4aebbb4c07',1,'module::localisation::FieldLocalisation::Config::n_particles()'],['../classmodule_1_1localisation_1_1FieldModel.html#aa2774f930fbfd16b0928ef8c7d79c487',1,'module::localisation::FieldModel::n_particles()']]],
+  ['n_5frogues_2351',['n_rogues',['../classmodule_1_1localisation_1_1FieldModel.html#afa176aa983a13b0bf92f03227b7a4047',1,'module::localisation::FieldModel']]],
+  ['n_5fservos_2352',['n_servos',['../classmodule_1_1input_1_1SensorFilter.html#a56e438e8e53843877894c7cc307e4ef9',1,'module::input::SensorFilter']]],
+  ['name_2353',['name',['../structmodule_1_1extension_1_1component_1_1DirectorTask.html#a2f1f4adba91bf5d65210edc52a935935',1,'module::extension::component::DirectorTask::name()'],['../structmodule_1_1platform_1_1Webots_1_1ServoState.html#a70d167e1de57cb3e23051dd742e71624',1,'module::platform::Webots::ServoState::name()'],['../structmodule_1_1vision_1_1Yolo_1_1Object.html#a02564a7df93497b212bee8f13c8e6ab9',1,'module::vision::Yolo::Object::name()'],['../structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a18923bd51a1110850d2db581044cbcfe',1,'extension::behaviour::commands::BehaviourTask::name()']]],
+  ['needs_2354',['needs',['../structmodule_1_1extension_1_1component_1_1Provider.html#a7150373ac9ac55ad2dd633ab244dbe27',1,'module::extension::component::Provider']]],
+  ['next_5fid_2355',['next_id',['../classmodule_1_1localisation_1_1RobotLocalisation.html#aab06b0696a61ce1f8895bacf35d82bde',1,'module::localisation::RobotLocalisation']]],
+  ['nms_5fscore_5fthreshold_2356',['nms_score_threshold',['../structmodule_1_1vision_1_1Yolo_1_1Config.html#a14fee8bf29891560dc32f7e9530d7a17',1,'module::vision::Yolo::Config']]],
+  ['nms_5fthreshold_2357',['nms_threshold',['../structmodule_1_1vision_1_1Yolo_1_1Config.html#a6d3221e9d778b7ac5fda798fbea4f7f6',1,'module::vision::Yolo::Config']]],
+  ['nominal_5fvoltage_2358',['nominal_voltage',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#aa33613bbc0ecf00e9106bd00ea695a44',1,'module::platform::OpenCR::HardwareIO::Battery']]],
+  ['nsga2_5falgorithm_2359',['nsga2_algorithm',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Optimiser.html#a24c1b575fbcee5942f33d9df9bc54b0c',1,'module::support::optimisation::NSGA2Optimiser']]],
+  ['nugus_2360',['nugus',['../classmodule_1_1platform_1_1OpenCR_1_1HardwareIO.html#a6540393b52b14f13229912638180c217',1,'module::platform::OpenCR::HardwareIO']]],
+  ['nugus_5fmodel_2361',['nugus_model',['../classmodule_1_1input_1_1SensorFilter.html#a0003de7deb61302020101e9b6e569f84',1,'module::input::SensorFilter']]],
+  ['nugus_5fmodel_5fleft_2362',['nugus_model_left',['../classmodule_1_1actuation_1_1Kinematics.html#a2c73536a3eb74f5d5de9e8df770c1f70',1,'module::actuation::Kinematics']]],
+  ['nugus_5fmodel_5fright_2363',['nugus_model_right',['../classmodule_1_1actuation_1_1Kinematics.html#ae5af517f4ac0a85b9a6bca5b6f543094',1,'module::actuation::Kinematics']]],
+  ['number_2364',['number',['../classJoystickEvent.html#a74524cea9a32979dd1773bbefadb11e8',1,'JoystickEvent']]]
 ];

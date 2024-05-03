@@ -1,5 +1,5 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,969,347,1011"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="188,944,347,985"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="439,5,587,47"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="439,71,587,112"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="439,136,587,177"/>
@@ -11,31 +11,30 @@
 <area shape="rect" id="node11" href="$classmodule_1_1purpose_1_1Defender.html" title=" " alt="" coords="414,470,613,497"/>
 <area shape="rect" id="node12" href="$classmodule_1_1purpose_1_1Goalie.html" title=" " alt="" coords="423,521,604,547"/>
 <area shape="rect" id="node13" href="$classmodule_1_1purpose_1_1KeyboardWalk.html" title=" " alt="" coords="397,571,629,598"/>
-<area shape="rect" id="node14" href="$classmodule_1_1purpose_1_1PS3Walk.html" title=" " alt="" coords="416,622,611,649"/>
-<area shape="rect" id="node15" href="$classmodule_1_1purpose_1_1ScriptRunner.html" title="Executes a series of scripts provided by the command line in order." alt="" coords="402,673,625,699"/>
-<area shape="rect" id="node16" href="$classmodule_1_1purpose_1_1Soccer.html" title=" " alt="" coords="422,723,605,750"/>
-<area shape="rect" id="node17" href="$classmodule_1_1purpose_1_1Striker.html" title=" " alt="" coords="423,774,604,801"/>
-<area shape="rect" id="node18" href="$classmodule_1_1purpose_1_1Tester.html" title=" " alt="" coords="424,825,603,851"/>
-<area shape="rect" id="node19" href="$classmodule_1_1skill_1_1Dive.html" title=" " alt="" coords="441,875,585,902"/>
-<area shape="rect" id="node20" href="$classmodule_1_1skill_1_1GPT.html" title=" " alt="" coords="443,926,583,953"/>
-<area shape="rect" id="node21" href="$classmodule_1_1skill_1_1GetUp.html" title=" " alt="" coords="436,977,591,1003"/>
-<area shape="rect" id="node22" href="$classmodule_1_1skill_1_1Look.html" title=" " alt="" coords="441,1027,586,1054"/>
-<area shape="rect" id="node23" href="$classmodule_1_1skill_1_1QuinticWalk.html" title=" " alt="" coords="417,1078,609,1105"/>
-<area shape="rect" id="node24" href="$classmodule_1_1skill_1_1Say.html" title=" " alt="" coords="444,1129,583,1155"/>
-<area shape="rect" id="node25" href="$classmodule_1_1skill_1_1ScriptKick.html" title=" " alt="" coords="424,1179,603,1206"/>
-<area shape="rect" id="node26" href="$classmodule_1_1skill_1_1SplineKick.html" title=" " alt="" coords="422,1230,605,1257"/>
-<area shape="rect" id="node27" href="$classmodule_1_1skill_1_1Walk.html" title=" " alt="" coords="440,1281,587,1307"/>
-<area shape="rect" id="node28" href="$classmodule_1_1strategy_1_1AlignBallToGoal.html" title=" " alt="" coords="414,1332,613,1373"/>
-<area shape="rect" id="node29" href="$classmodule_1_1strategy_1_1DiveToBall.html" title=" " alt="" coords="409,1398,618,1425"/>
-<area shape="rect" id="node30" href="$classmodule_1_1strategy_1_1FallRecovery.html" title=" " alt="" coords="402,1449,625,1475"/>
-<area shape="rect" id="node31" href="$classmodule_1_1strategy_1_1FindObject.html" title=" " alt="" coords="409,1499,618,1526"/>
-<area shape="rect" id="node32" href="$classmodule_1_1strategy_1_1KickToGoal.html" title=" " alt="" coords="407,1550,619,1577"/>
-<area shape="rect" id="node33" href="$classmodule_1_1strategy_1_1Ready.html" title=" " alt="" coords="423,1601,604,1627"/>
-<area shape="rect" id="node34" href="$classmodule_1_1strategy_1_1StandStill.html" title=" " alt="" coords="412,1651,615,1678"/>
-<area shape="rect" id="node35" href="$classmodule_1_1strategy_1_1StrategiseLook.html" title=" " alt="" coords="395,1702,632,1729"/>
-<area shape="rect" id="node36" href="$classmodule_1_1strategy_1_1WalkInsideBoundedBox.html" title=" " alt="" coords="408,1753,619,1795"/>
-<area shape="rect" id="node37" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,1819,619,1846"/>
-<area shape="rect" id="node38" href="$classmodule_1_1strategy_1_1WalkToFieldPosition.html" title=" " alt="" coords="420,1871,607,1912"/>
-<area shape="rect" id="node39" href="$classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html" title=" " alt="" coords="404,1936,623,1977"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,977,140,1003"/>
+<area shape="rect" id="node14" href="$classmodule_1_1purpose_1_1ScriptRunner.html" title="Executes a series of scripts provided by the command line in order." alt="" coords="402,622,625,649"/>
+<area shape="rect" id="node15" href="$classmodule_1_1purpose_1_1Soccer.html" title=" " alt="" coords="422,673,605,699"/>
+<area shape="rect" id="node16" href="$classmodule_1_1purpose_1_1Striker.html" title=" " alt="" coords="423,723,604,750"/>
+<area shape="rect" id="node17" href="$classmodule_1_1purpose_1_1Tester.html" title=" " alt="" coords="424,774,603,801"/>
+<area shape="rect" id="node18" href="$classmodule_1_1skill_1_1Dive.html" title=" " alt="" coords="441,825,585,851"/>
+<area shape="rect" id="node19" href="$classmodule_1_1skill_1_1GPT.html" title=" " alt="" coords="443,875,583,902"/>
+<area shape="rect" id="node20" href="$classmodule_1_1skill_1_1GetUp.html" title=" " alt="" coords="436,926,591,953"/>
+<area shape="rect" id="node21" href="$classmodule_1_1skill_1_1Look.html" title=" " alt="" coords="441,977,586,1003"/>
+<area shape="rect" id="node22" href="$classmodule_1_1skill_1_1QuinticWalk.html" title=" " alt="" coords="417,1027,609,1054"/>
+<area shape="rect" id="node23" href="$classmodule_1_1skill_1_1Say.html" title=" " alt="" coords="444,1078,583,1105"/>
+<area shape="rect" id="node24" href="$classmodule_1_1skill_1_1ScriptKick.html" title=" " alt="" coords="424,1129,603,1155"/>
+<area shape="rect" id="node25" href="$classmodule_1_1skill_1_1SplineKick.html" title=" " alt="" coords="422,1179,605,1206"/>
+<area shape="rect" id="node26" href="$classmodule_1_1skill_1_1Walk.html" title=" " alt="" coords="440,1230,587,1257"/>
+<area shape="rect" id="node27" href="$classmodule_1_1strategy_1_1AlignBallToGoal.html" title=" " alt="" coords="414,1281,613,1323"/>
+<area shape="rect" id="node28" href="$classmodule_1_1strategy_1_1DiveToBall.html" title=" " alt="" coords="409,1347,618,1374"/>
+<area shape="rect" id="node29" href="$classmodule_1_1strategy_1_1FallRecovery.html" title=" " alt="" coords="402,1398,625,1425"/>
+<area shape="rect" id="node30" href="$classmodule_1_1strategy_1_1FindObject.html" title=" " alt="" coords="409,1449,618,1475"/>
+<area shape="rect" id="node31" href="$classmodule_1_1strategy_1_1KickToGoal.html" title=" " alt="" coords="407,1499,619,1526"/>
+<area shape="rect" id="node32" href="$classmodule_1_1strategy_1_1Ready.html" title=" " alt="" coords="423,1550,604,1577"/>
+<area shape="rect" id="node33" href="$classmodule_1_1strategy_1_1StandStill.html" title=" " alt="" coords="412,1601,615,1627"/>
+<area shape="rect" id="node34" href="$classmodule_1_1strategy_1_1StrategiseLook.html" title=" " alt="" coords="395,1651,632,1678"/>
+<area shape="rect" id="node35" href="$classmodule_1_1strategy_1_1WalkInsideBoundedBox.html" title=" " alt="" coords="408,1703,619,1744"/>
+<area shape="rect" id="node36" href="$classmodule_1_1strategy_1_1WalkToBall.html" title=" " alt="" coords="408,1769,619,1795"/>
+<area shape="rect" id="node37" href="$classmodule_1_1strategy_1_1WalkToFieldPosition.html" title=" " alt="" coords="420,1820,607,1861"/>
+<area shape="rect" id="node38" href="$classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html" title=" " alt="" coords="404,1885,623,1927"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,951,140,978"/>
 </map>

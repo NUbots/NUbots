@@ -1,5 +1,6 @@
 var classmodule_1_1purpose_1_1PS3Walk =
 [
+    [ "Config", "structmodule_1_1purpose_1_1PS3Walk_1_1Config.html", "structmodule_1_1purpose_1_1PS3Walk_1_1Config" ],
     [ "PS3Walk", "classmodule_1_1purpose_1_1PS3Walk.html#afdc7e0defd8ca73c5865afb9586aeab4", null ],
     [ "AXIS_ACCEL_X", "classmodule_1_1purpose_1_1PS3Walk.html#ac8940ed5abece0a72de4fb48f7f6c74a", null ],
     [ "AXIS_ACCEL_Y", "classmodule_1_1purpose_1_1PS3Walk.html#a76f09bc7aee285202c32bf7193d8a934", null ],
@@ -16,6 +17,7 @@ var classmodule_1_1purpose_1_1PS3Walk =
     [ "BUTTON_DPAD_LEFT", "classmodule_1_1purpose_1_1PS3Walk.html#a1584852e5a1bca4b34dd8a7ff918a477", null ],
     [ "BUTTON_DPAD_RIGHT", "classmodule_1_1purpose_1_1PS3Walk.html#ac777280d323c8dc07c835f1255e5e53b", null ],
     [ "BUTTON_DPAD_UP", "classmodule_1_1purpose_1_1PS3Walk.html#ad42d547d01b6535315a3b01812256da8", null ],
+    [ "BUTTON_HOME", "classmodule_1_1purpose_1_1PS3Walk.html#afc211d41b1ffbf77d981cd3682587617", null ],
     [ "BUTTON_L1", "classmodule_1_1purpose_1_1PS3Walk.html#a37a15979e0c8627d06865a7219610410", null ],
     [ "BUTTON_L2", "classmodule_1_1purpose_1_1PS3Walk.html#ae698bf1b62094c525dff9dc0d35d9ac2", null ],
     [ "BUTTON_LEFT_JOYSTICK", "classmodule_1_1purpose_1_1PS3Walk.html#a126efd6dc6b0e08fa4bfd884e7322296", null ],
@@ -26,11 +28,11 @@ var classmodule_1_1purpose_1_1PS3Walk =
     [ "BUTTON_SQUARE", "classmodule_1_1purpose_1_1PS3Walk.html#a6c2830627ae315b45b7fb2314a7c39a7", null ],
     [ "BUTTON_START", "classmodule_1_1purpose_1_1PS3Walk.html#a340802eb2686632c5b792f25eb092c51", null ],
     [ "BUTTON_TRIANGLE", "classmodule_1_1purpose_1_1PS3Walk.html#ace6f9cc3405c7fd38652ed930e8d5914", null ],
-    [ "headLocked", "classmodule_1_1purpose_1_1PS3Walk.html#a0ba4b3ddbbe2f0bda1c6387ed8d4463e", null ],
-    [ "headPitch", "classmodule_1_1purpose_1_1PS3Walk.html#a43ad63e3301279157e60a6cb3b90491e", null ],
-    [ "headYaw", "classmodule_1_1purpose_1_1PS3Walk.html#ac6f60b84a88edff78e93349262871cb5", null ],
+    [ "cfg", "classmodule_1_1purpose_1_1PS3Walk.html#a7e6daf74a6296113172a7697374d1df4", null ],
+    [ "head_locked", "classmodule_1_1purpose_1_1PS3Walk.html#a28d06688fa59aae0f2a0dbfa30886428", null ],
+    [ "head_pitch", "classmodule_1_1purpose_1_1PS3Walk.html#a2e7d9928b0374bb96d5730b51d7b7a9c", null ],
+    [ "head_yaw", "classmodule_1_1purpose_1_1PS3Walk.html#ab52e5fe52fa42c2db5014a26a7ce1614", null ],
     [ "joystick", "classmodule_1_1purpose_1_1PS3Walk.html#a38ebcd2e5acebabe72307365a1cdd616", null ],
     [ "moving", "classmodule_1_1purpose_1_1PS3Walk.html#ac5c3d6c5825a6c26804afc15f582a6bd", null ],
-    [ "rotationalSpeed", "classmodule_1_1purpose_1_1PS3Walk.html#a87cf70d5fe98a56048005205ccba58bf", null ],
-    [ "strafe", "classmodule_1_1purpose_1_1PS3Walk.html#a8b1f0136733416c069850276a0f97ffb", null ]
+    [ "walk_command", "classmodule_1_1purpose_1_1PS3Walk.html#a6496ebb0ead34764c2fe6fa0487745d3", null ]
 ];
