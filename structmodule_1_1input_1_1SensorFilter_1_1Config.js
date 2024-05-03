@@ -7,6 +7,7 @@ var structmodule_1_1input_1_1SensorFilter_1_1Config =
     [ "initial_Rwt", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a06b0ce7fd38c6477c44f80454b457093", null ],
     [ "Ki", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#af990e191913dc2974df0b0abcd55a0d9", null ],
     [ "Kp", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#adb0e56e3d872917261c8a525cff2fd5f", null ],
+    [ "max_servo_change", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a9983aaa97ec77dd2f2af06520c5cfe5c", null ],
     [ "use_ground_truth", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#ad4963d41519183a4ce47a32cebdbe06f", null ],
     [ "x_cut_off_frequency", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#a02436cc09adb50603316b75335fb7d96", null ],
     [ "y_cut_off_frequency", "structmodule_1_1input_1_1SensorFilter_1_1Config.html#ac3d2ee6283e42f282b2b81ff89e3b5c8", null ]

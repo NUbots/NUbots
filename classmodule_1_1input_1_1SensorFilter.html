@@ -221,9 +221,9 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a108c8864395b9e74cb4d888497ccecfc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">update_kinematics</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a108c8864395b9e74cb4d888497ccecfc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update the sensors message with kinematics data.  <a href="classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc">More...</a><br /></td></tr>
 <tr class="separator:a108c8864395b9e74cb4d888497ccecfc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afca41f5175ec62ebdec89eb18df5e21b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#afca41f5175ec62ebdec89eb18df5e21b">update_odometry</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const std::shared_ptr&lt; const Sensors &gt; &amp;previous_sensors, const RawSensors &amp;raw_sensors, const WalkState &amp;walk_state)</td></tr>
-<tr class="memdesc:afca41f5175ec62ebdec89eb18df5e21b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with odometry data filtered using MahonyFilter. This includes the.  <a href="classmodule_1_1input_1_1SensorFilter.html#afca41f5175ec62ebdec89eb18df5e21b">More...</a><br /></td></tr>
-<tr class="separator:afca41f5175ec62ebdec89eb18df5e21b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c96803f0ba75c98ab077979ab02dc2f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a4c96803f0ba75c98ab077979ab02dc2f">update_odometry</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const std::shared_ptr&lt; const Sensors &gt; &amp;previous_sensors, const RawSensors &amp;raw_sensors)</td></tr>
+<tr class="memdesc:a4c96803f0ba75c98ab077979ab02dc2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with odometry data filtered using MahonyFilter. This includes the.  <a href="classmodule_1_1input_1_1SensorFilter.html#a4c96803f0ba75c98ab077979ab02dc2f">More...</a><br /></td></tr>
+<tr class="separator:a4c96803f0ba75c98ab077979ab02dc2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a23d293bdd9daafc76437a515f76e63ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba">update_raw_sensors</a> (std::unique_ptr&lt; Sensors &gt; &amp;sensors, const std::shared_ptr&lt; const Sensors &gt; &amp;previous_sensors, const RawSensors &amp;raw_sensors)</td></tr>
 <tr class="memdesc:a23d293bdd9daafc76437a515f76e63ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the sensors message with raw sensor data, including the timestamp, battery voltage, servo sensors, accelerometer, gyroscope, buttons, and LED.  <a href="classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba">More...</a><br /></td></tr>
 <tr class="separator:a23d293bdd9daafc76437a515f76e63ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -237,10 +237,6 @@ Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <tr class="memitem:a7ce23c53225aa0b67e82cc7de8974aa5"><td class="memItemLeft" align="right" valign="top"><a id="a7ce23c53225aa0b67e82cc7de8974aa5"></a>
 struct <a class="el" href="structmodule_1_1input_1_1SensorFilter_1_1Config.html">module::input::SensorFilter::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a7ce23c53225aa0b67e82cc7de8974aa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a67c7ab632a04ea94ca79b11c152407d5"><td class="memItemLeft" align="right" valign="top"><a id="a67c7ab632a04ea94ca79b11c152407d5"></a>
-WalkState::Phase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a67c7ab632a04ea94ca79b11c152407d5">current_walk_phase</a> = WalkState::Phase::LEFT</td></tr>
-<tr class="memdesc:a67c7ab632a04ea94ca79b11c152407d5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current walk phase of the robot. <br /></td></tr>
-<tr class="separator:a67c7ab632a04ea94ca79b11c152407d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad89a3ddf9f53a76cbc876619bc7b50ac"><td class="memItemLeft" align="right" valign="top"><a id="ad89a3ddf9f53a76cbc876619bc7b50ac"></a>
 Eigen::Isometry3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#ad89a3ddf9f53a76cbc876619bc7b50ac">Hwp</a> = Eigen::Isometry3d::Identity()</td></tr>
 <tr class="memdesc:ad89a3ddf9f53a76cbc876619bc7b50ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Transform from planted foot {p} to world {w} space. <br /></td></tr>
@@ -261,6 +257,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 tinyrobotics::Model&lt; double, <a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a56e438e8e53843877894c7cc307e4ef9">n_servos</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a0003de7deb61302020101e9b6e569f84">nugus_model</a></td></tr>
 <tr class="memdesc:a0003de7deb61302020101e9b6e569f84"><td class="mdescLeft">&#160;</td><td class="mdescRight">tinyrobotics model of NUgus used for kinematics <br /></td></tr>
 <tr class="separator:a0003de7deb61302020101e9b6e569f84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a16728965d9c0ed68f27be6cb766613ee"><td class="memItemLeft" align="right" valign="top"><a id="a16728965d9c0ed68f27be6cb766613ee"></a>
+WalkState::Phase&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html#a16728965d9c0ed68f27be6cb766613ee">planted_anchor_foot</a> = WalkState::Phase::LEFT</td></tr>
+<tr class="memdesc:a16728965d9c0ed68f27be6cb766613ee"><td class="mdescLeft">&#160;</td><td class="mdescRight">Planted foot associated with the current anchor point (Hwp) <br /></td></tr>
+<tr class="separator:a16728965d9c0ed68f27be6cb766613ee"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
 Static Private Attributes</h2></td></tr>
@@ -394,8 +394,8 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 
 </div>
 </div>
-<a id="afca41f5175ec62ebdec89eb18df5e21b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afca41f5175ec62ebdec89eb18df5e21b">&#9670;&nbsp;</a></span>update_odometry()</h2>
+<a id="a4c96803f0ba75c98ab077979ab02dc2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4c96803f0ba75c98ab077979ab02dc2f">&#9670;&nbsp;</a></span>update_odometry()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -419,13 +419,7 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const RawSensors &amp;&#160;</td>
-          <td class="paramname"><em>raw_sensors</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const WalkState &amp;&#160;</td>
-          <td class="paramname"><em>walk_state</em>&#160;</td>
+          <td class="paramname"><em>raw_sensors</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -514,7 +508,7 @@ static const int&#160;</td><td class="memItemRight" valign="bottom"><a class="el
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>input</b></li><li class="navelem"><a class="el" href="classmodule_1_1input_1_1SensorFilter.html">SensorFilter</a></li>
-    <li class="footer">Generated on Fri May 3 2024 00:18:26 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Fri May 3 2024 02:26:16 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['yolo_1699',['Yolo',['../classmodule_1_1vision_1_1Yolo.html',1,'module::vision']]]
+  ['yolo_1701',['Yolo',['../classmodule_1_1vision_1_1Yolo.html',1,'module::vision']]]
 ];

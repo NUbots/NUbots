@@ -1,5 +1,6 @@
 var structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters =
 [
+    [ "only_switch_when_planted", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a88ee5b57caff244cf11957362a35ad01", null ],
     [ "step_apex_ratio", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#ab0f3fbbb38ba6bce6acb1d387033413a", null ],
     [ "step_height", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a10226bb93f88fec9249878103e6125e2", null ],
     [ "step_limits", "structutility_1_1skill_1_1WalkGenerator_1_1WalkParameters.html#a3affdb60486782c21712b922ad8e163b", null ],

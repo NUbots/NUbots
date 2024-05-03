@@ -96,6 +96,5 @@ var searchData=
   ['current_5frun_5freason_213',['current_run_reason',['../classmodule_1_1extension_1_1Director.html#aa01b93fccaf7b4ddab18ca0cff81057e',1,'module::extension::Director']]],
   ['current_5fsim_5ftime_214',['current_sim_time',['../classmodule_1_1platform_1_1Webots.html#a1ec94ff048e0cdf4b613818df78b7376',1,'module::platform::Webots']]],
   ['current_5fstate_215',['current_state',['../classmodule_1_1support_1_1optimisation_1_1NSGA2Evaluator.html#aba5f892604ec2e154ab3ef977fb3f760',1,'module::support::optimisation::NSGA2Evaluator']]],
-  ['current_5fvoltage_216',['current_voltage',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a1a5338bb611e321f9439e3ec5b5ddb0f',1,'module::platform::OpenCR::HardwareIO::Battery']]],
-  ['current_5fwalk_5fphase_217',['current_walk_phase',['../classmodule_1_1input_1_1SensorFilter.html#a67c7ab632a04ea94ca79b11c152407d5',1,'module::input::SensorFilter']]]
+  ['current_5fvoltage_216',['current_voltage',['../structmodule_1_1platform_1_1OpenCR_1_1HardwareIO_1_1Battery.html#a1a5338bb611e321f9439e3ec5b5ddb0f',1,'module::platform::OpenCR::HardwareIO::Battery']]]
 ];
