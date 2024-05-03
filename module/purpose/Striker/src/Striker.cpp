@@ -122,15 +122,7 @@ namespace module::purpose {
             [this] { log<NUClear::WARN>("Unknown normal game phase."); });
 
         // Default for INITIAL, SET, FINISHED, TIMEOUT
-        on<Provide<NormalStriker>>().then([this] {
-            emit<Task>(std::make_unique<StandStill>());
-            // make the robot look forward
-            Eigen::Vector3d uPCt =
-                (Eigen::AngleAxisd(0, Eigen::Vector3d::UnitZ()) * Eigen::AngleAxisd(0, Eigen::Vector3d::UnitY()))
-                    .toRotationMatrix()
-                * Eigen::Vector3d::UnitX();
-            emit<Task>(std::make_unique<Look>(uPCt, true));
-        });
+        on<Provide<NormalStriker>>().then([this] { emit<Task>(std::make_unique<StandStill>()); });
 
         // Penalty shootout PLAYING state
         on<Provide<PenaltyShootoutStriker>, When<Phase, std::equal_to, Phase::PLAYING>>().then([this] { play(); });
