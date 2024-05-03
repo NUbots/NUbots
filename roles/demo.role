@@ -50,5 +50,5 @@ nuclear_role(
   strategy::FallRecovery
   strategy::StandStill
   # Purpose
-  purpose::KeyboardWalk
+  purpose::PS3Walk
 )
