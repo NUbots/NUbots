@@ -61,53 +61,59 @@ namespace module::nbs {
         }
 
     public:
-        /// @brief Called by the powerplant to build and setup the Player reactor.
+        /// Called by the powerplant to build and setup the Player reactor.
         explicit Player(std::unique_ptr<NUClear::Environment> environment);
 
         // Our deserialisation functions that convert the messages and emit them
         std::map<uint64_t, std::function<void(utility::nbs::Decoder&)>> emitters;
 
-        /// @brief Register the functions that will decode and emit the message types
+        /// Register the functions that will decode and emit the message types
         void register_emitters();
 
-        /// @brief NBS file decoder
+        /// NBS file decoder
         utility::nbs::Decoder decoder;
 
-        /// @brief Playback mode
+        /// Playback mode
         message::nbs::player::PlaybackMode mode = message::nbs::player::PlaybackMode::REALTIME;
 
-        /// @brief Playback speed (clock rtf)
+        /// Playback speed (clock rtf)
         double playback_speed = 1;
 
-        /// @brief NBS file iterator
+        /// NBS file iterator
         utility::nbs::Decoder::Iterator decoder_iterator = decoder.begin();
 
-        /// @brief Mutex for the decoder and idle mutex logic
+        /// Mutex for the decoder and idle mutex logic
         std::mutex decoder_mutex;
 
-        /// @brief Idle handle
+        /// Idle handle
         NUClear::threading::ReactionHandle idle_handle;
 
-        /// @brief On always main loop handle
+        /// On always main loop handle
         NUClear::threading::ReactionHandle main_loop_handle;
 
-        /// @brief Target time for the next message emit
+        /// Target time for the next message emit
         NUClear::clock::time_point target_emit_time;
 
-        /// @brief Condition variable to signal when the decoder loop should continue
+        /// Condition variable to signal when the decoder loop should continue
         std::condition_variable cv;
 
-        /// @brief The total number of messages in the NBS file being played
+        /// The total number of messages in the NBS file being played
         uint64_t total_messages = 0;
 
-        /// @brief The earliest timestamp across all files in the player
+        /// The earliest timestamp across all files in the player
         NUClear::clock::time_point start_time = NUClear::clock::time_point::max();
 
-        /// @brief The latest timestamp across all files in the player
+        /// The latest timestamp across all files in the player
         NUClear::clock::time_point end_time = NUClear::clock::time_point::min();
 
-        /// @brief Tries to emit the next message from the decoder if it is time
+        /// Tries to emit the next message from the decoder if it is time
         void emit_next_message();
+
+        /// Adds and enables idle handle, which will run when the system is idle and try to emit the next message
+        void enable_idle_handle();
+
+        /// Adds and enable main loop handle, which will always run trying to emit the next message
+        void enable_main_loop_handle();
     };
 
 }  // namespace module::nbs

@@ -53,8 +53,6 @@ namespace module::nbs {
 
         on<Configuration>("Player.yaml").then([this](const Configuration& cfg) {
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
-            idle_handle.disable();
-            main_loop_handle.disable();
         });
 
         on<Trigger<LoadRequest>>().then([this](const LoadRequest& load_request) {
@@ -76,6 +74,15 @@ namespace module::nbs {
                 start_time =
                     NUClear::clock::time_point(std::chrono::nanoseconds((*first_message).item->item.timestamp));
                 decoder_iterator = decoder.begin();
+                // Synchronise the clock epoch to the first message timestamp
+                if (decoder_iterator != decoder.end()) {
+                    emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
+                        NUClear::clock::time_point(std::chrono::nanoseconds((*decoder_iterator).item->item.timestamp)),
+                        playback_speed,
+                        NUClear::message::TimeTravel::Action::RELATIVE));
+                    // Emit the first message
+                    emit_next_message();
+                }
             }
             else {
                 // If no NBS files are provided, don't continue
@@ -121,7 +128,37 @@ namespace module::nbs {
                                                                NUClear::message::TimeTravel::Action::RELATIVE));
         });
 
-        // Try emit the next message from the decoder if Idle
+        on<Trigger<PlayRequest>>().then([this]() {
+            // Unbind previous handles
+            main_loop_handle.unbind();
+            idle_handle.unbind();
+
+            // clang-format off
+            switch (mode.value) {
+                case FAST:
+                    enable_idle_handle();
+                    enable_main_loop_handle();
+                    break;
+
+                case REALTIME:
+                    enable_main_loop_handle();
+                    break;
+
+                case SEQUENTIAL:
+                    // Set the RTF to zero to pause time in SEQUENTIAL mode and have IDLE jump between messages/tasks
+                    playback_speed = 0.0;
+                    emit<Scope::DIRECT>(
+                        std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
+                                                                       playback_speed,
+                                                                       NUClear::message::TimeTravel::Action::RELATIVE));
+                    enable_idle_handle();
+                    break;
+            }
+            // clang-format on
+        });
+    }
+
+    void Player::enable_idle_handle() {
         idle_handle = on<Idle<>, Single>().then([this] {
             std::lock_guard<std::mutex> decoder_lock(decoder_mutex);
             if (NUClear::clock::now() < target_emit_time) {
@@ -133,49 +170,16 @@ namespace module::nbs {
             emit_next_message();
             cv.notify_all();
         });
+        idle_handle.enable();
+    }
 
-        // Try emit the next message from the decoder
+    void Player::enable_main_loop_handle() {
         main_loop_handle = on<Always>().then([this] {
             std::unique_lock<std::mutex> decoder_lock(decoder_mutex);
             emit_next_message();
-            cv.wait_for(decoder_lock, target_emit_time - NUClear::clock::now());
+            cv.wait_until(decoder_lock, target_emit_time);
         });
-
-        on<Trigger<PlayRequest>>().then([this]() {
-            // Synchronise the clock epoch to the first message timestamp
-            decoder_iterator = decoder.begin();
-            if (decoder_iterator != decoder.end()) {
-                emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::time_point(std::chrono::nanoseconds((*decoder_iterator).item->item.timestamp)),
-                    playback_speed,
-                    NUClear::message::TimeTravel::Action::RELATIVE));
-                // Emit the first message
-                emit_next_message();
-            }
-
-            // clang-format off
-            switch (mode.value) {
-                case FAST:
-                    idle_handle.enable();
-                    main_loop_handle.enable();
-                    break;
-
-                case REALTIME:
-                    main_loop_handle.enable();
-                    break;
-
-                case SEQUENTIAL:
-                    // Set the RTF to zero to pause time in SEQUENTIAL mode and have IDLE jump between messages/tasks
-                    playback_speed = 0.0;
-                    emit<Scope::DIRECT>(
-                        std::make_unique<NUClear::message::TimeTravel>(NUClear::clock::now(),
-                                                                       playback_speed,
-                                                                       NUClear::message::TimeTravel::Action::RELATIVE));
-                    idle_handle.enable();
-                    break;
-            }
-            // clang-format on
-        });
+        main_loop_handle.enable();
     }
 
     void Player::emit_next_message() {
@@ -193,7 +197,7 @@ namespace module::nbs {
                 playback_state->start           = start_time;
                 playback_state->end             = end_time;
                 playback_state->playback_state  = message::nbs::player::PlaybackState::State::PLAYING;
-                playback_state->playback_speed  = uint32_t(std::log2(playback_speed));
+                playback_state->playback_speed  = int32_t(std::log2(playback_speed));
                 emit(std::move(playback_state));
 
                 // Emit the message

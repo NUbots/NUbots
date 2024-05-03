@@ -29,6 +29,7 @@ package message.nbs.player;
 import "google/protobuf/timestamp.proto";
 import "message/eye/Rpc.proto";
 message PlaybackState {
+    /// The playback state of the player
     enum State {
         UNKNOWN = 0;
         PAUSED  = 1;
