@@ -136,6 +136,9 @@ namespace module::tools {
 
         // IP Address
         ip_address = utility::support::get_ip_address(wifi_interface);
+        if (ip_address.empty()) {
+            utility::support::get_ip_address("bond0");
+        }
 
         // Team ID
         YAML::Node global_config = YAML::LoadFile(get_config_file("GlobalConfig.yaml"));
@@ -188,7 +191,7 @@ namespace module::tools {
                                    "/etc/systemd/network/30-wifi.network",
                                    std::filesystem::copy_options::overwrite_existing);
         std::filesystem::copy_file(
-            fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
+            fmt::format("system/{}/etc/wpa_supplicant/wpa_supplicant-{}.conf", hostname, wifi_interface),
             fmt::format("/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
             std::filesystem::copy_options::overwrite_existing);
 
@@ -196,7 +199,7 @@ namespace module::tools {
         system("systemctl restart systemd-networkd");
         system("systemctl restart wpa_supplicant");
 
-        log_message = "Network configured!";
+        log_message = "Network configured! It is recommended to reboot.";
     }
 
     void RoboCupConfiguration::set_values() {
@@ -232,10 +235,8 @@ namespace module::tools {
             return;
         }
 
-        // Get folder name and rename file
+        // Get folder name
         const std::string folder = fmt::format("system/{}/etc/systemd/network", hostname);
-        std::rename(fmt::format("{}/40-wifi-robocup.network", folder).c_str(),
-                    fmt::format("{}/30-wifi.network", folder).c_str());
 
         // Parse the IP address
         std::stringstream ss(ip_address);
@@ -255,21 +256,32 @@ namespace module::tools {
         }
 
         // Write the new ip address to the file
-        std::ofstream(fmt::format("system/{}/etc/systemd/network/30-wifi.network", hostname))
+        std::ofstream(fmt::format("{}/30-wifi.network", folder))
             << fmt::format("[Match]\nName={}\n\n[Network]\nAddress={}/16\nGateway={}.{}.3.1\nDNS=8.8.8.8",
                            wifi_interface,
                            ip_address,
                            ip_parts[0],
                            ip_parts[1]);
 
-        // Configure the wpa_supplicant file
-        std::ofstream(fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface))
-            << fmt::format(
-                   "ctrl_interface=/var/run/"
-                   "wpa_supplicant\nctrl_interface_group=wheel\nupdate_config=1\nfast_reauth=1\nap_scan = 1\n\nnetwork "
-                   "={{\n\tssid =\"{}\"\n\tpsk=\"{}\"\n\tpriority=1\n}}",
-                   ssid,
-                   password);
+        // Make a new wpa_supplicant file in the robot-specific directory
+        // This is so that we don't lose the original if we need it
+        // And so when we append to it with a high priority, we are doing it from fresh
+        // And will not encounter any issues when running multiple times
+        std::string wpa_supplicant_file =
+            fmt::format("system/{}/etc/wpa_supplicant/wpa_supplicant-{}.conf", hostname, wifi_interface);
+        std::string wpa_supplicant_dir = fmt::format("system/{}/etc/wpa_supplicant", hostname);
+        std::string folder_command     = "mkdir -p " + wpa_supplicant_dir;
+        system(folder_command.c_str());
+
+        std::filesystem::copy_file(
+            fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
+            wpa_supplicant_file,
+            std::filesystem::copy_options::overwrite_existing);
+
+        // Append to the wpa_supplicant file with a high priority
+        std::string command =
+            "wpa_passphrase " + ssid + " " + password + " | sed 's/}/\tpriority=9999\\n}/' >> " + wpa_supplicant_file;
+        system(command.c_str());
 
         log_message += "Files have been configured.";
     }
