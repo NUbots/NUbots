@@ -65,7 +65,7 @@ namespace module::tools {
             curs_set(0);
 
             // Set the fields and show them
-            get_values();
+            get_config_values();
             refresh_view();
         });
 
@@ -103,21 +103,25 @@ namespace module::tools {
                 case ' ':  // Toggles selection
                     toggle_selection();
                     break;
-                case 'F':  // updates visual changes
-                    refresh_view();
-                    log_message = "The view has been refreshed.";
-                    break;
                 case 'R':  // reset the values
-                    get_values();
+                    get_config_values();
                     log_message = "Values have been reset.";
                     break;
                 case 'C':  // configures files with the new values
-                    set_values();
+                    set_config_values();
                     break;
                 case 'N':  // Apply any changes to the network settings
                     configure_network();
                     break;
-                case 'X':  // shutdowns powerplant
+                case 'S':  // starts the robocup service
+                    system("systemctl start robocup");
+                    log_message = "RoboCup service started!";
+                    break;
+                case 'D':  // stops the robocup service
+                    system("systemctl stop robocup");
+                    log_message = "RoboCup service stopped!";
+                    break;
+                case 'X':  // shutdown powerplant
                     powerplant.shutdown();
                     break;
             }
@@ -127,7 +131,7 @@ namespace module::tools {
         });
     }
 
-    void RoboCupConfiguration::get_values() {
+    void RoboCupConfiguration::get_config_values() {
         // Hostname
         hostname = utility::support::get_hostname();
 
@@ -136,9 +140,6 @@ namespace module::tools {
 
         // IP Address
         ip_address = utility::support::get_ip_address(wifi_interface);
-        if (ip_address.empty()) {
-            utility::support::get_ip_address("bond0");
-        }
 
         // Team ID
         YAML::Node global_config = YAML::LoadFile(get_config_file("GlobalConfig.yaml"));
@@ -172,7 +173,7 @@ namespace module::tools {
 
     void RoboCupConfiguration::configure_network() {
         // In case values aren't set yet, set them
-        set_values();
+        set_config_values();
 
         // Check if we are on a robot
         if (get_platform() != "nugus") {
@@ -198,12 +199,13 @@ namespace module::tools {
         // Restart the network
         system("systemctl restart systemd-networkd");
         system("systemctl restart wpa_supplicant");
+        system(("systemctl restart wpa_supplicant@" + wifi_interface).c_str());
 
-        log_message = "Network configured! It is recommended to reboot.";
+        log_message = "Network configured!";
     }
 
-    void RoboCupConfiguration::set_values() {
-        // Configure the game files
+    void RoboCupConfiguration::set_config_values() {
+        /* GAME CONFIG */
         {  // Write the robot's position to the soccer file
             std::string soccer_file = get_config_file("Soccer.yaml");
             // Write to the yaml file
@@ -222,7 +224,6 @@ namespace module::tools {
             file << config;
         }
 
-        // Configure the network files
         // Check if we are on a robot
         if (get_platform() != "nugus") {
             log_message = "Configure Error: Network configuration only available on NUgus robots!";
@@ -235,8 +236,10 @@ namespace module::tools {
             return;
         }
 
+        /* WIRELESS NETWORK SYSTEMD CONFIG */
+
         // Get folder name
-        const std::string folder = fmt::format("system/{}/etc/systemd/network", hostname);
+        const std::string systemd_folder = fmt::format("system/{}/etc/systemd/network", hostname);
 
         // Parse the IP address
         std::stringstream ss(ip_address);
@@ -245,10 +248,10 @@ namespace module::tools {
             ip_parts.push_back(part);
         }
 
-        // Check if team_id and player_id match with third and fourth parts of the IP address
-        // This shouldn't break things, but the user should know that there may be an issue
-        // In the lab, the IP addresses of the robots are set and may not match in this way
-        // But at RoboCup, it is important that this format is followed
+        // Check if team_id and player_id match with third and fourth parts of the IP address.
+        // This shouldn't break things, but the user should know that there may be an issue.
+        // In the lab, the IP addresses of the robots are set and may not match in this way,
+        // but at RoboCup, it is important that this format is followed
         if (team_id != std::stoi(ip_parts[2]) || player_id != std::stoi(ip_parts[3])) {
             log_message +=
                 "Warning: At RoboCup, the third position of the IP address should be the team ID and the fourth should "
@@ -256,22 +259,23 @@ namespace module::tools {
         }
 
         // Write the new ip address to the file
-        std::ofstream(fmt::format("{}/30-wifi.network", folder))
+        std::ofstream(fmt::format("{}/30-wifi.network", systemd_folder))
             << fmt::format("[Match]\nName={}\n\n[Network]\nAddress={}/16\nGateway={}.{}.3.1\nDNS=8.8.8.8",
                            wifi_interface,
                            ip_address,
                            ip_parts[0],
                            ip_parts[1]);
 
+
+        /* WPA_SUPPLICANT CONFIG */
+
         // Make a new wpa_supplicant file in the robot-specific directory
         // This is so that we don't lose the original if we need it
         // And so when we append to it with a high priority, we are doing it from fresh
         // And will not encounter any issues when running multiple times
-        std::string wpa_supplicant_file =
-            fmt::format("system/{}/etc/wpa_supplicant/wpa_supplicant-{}.conf", hostname, wifi_interface);
-        std::string wpa_supplicant_dir = fmt::format("system/{}/etc/wpa_supplicant", hostname);
-        std::string folder_command     = "mkdir -p " + wpa_supplicant_dir;
-        system(folder_command.c_str());
+        std::string wpa_supplicant_dir  = fmt::format("system/{}/etc/wpa_supplicant", hostname);
+        std::string wpa_supplicant_file = fmt::format("{}/wpa_supplicant-{}.conf", wpa_supplicant_dir, wifi_interface);
+        system(("mkdir -p " + wpa_supplicant_dir).c_str());
 
         std::filesystem::copy_file(
             fmt::format("system/default/etc/wpa_supplicant/wpa_supplicant-{}.conf", wifi_interface),
@@ -291,7 +295,7 @@ namespace module::tools {
         if (column_selection == 0) {
             switch (row_selection) {
                 case 2:  // player_id
-                    player_id = player_id == 5 ? 1 : player_id + 1;
+                    player_id = player_id == 6 ? 1 : player_id + 1;
                     break;
                 case 3:  // team_id
                     team_id = team_id == 33 ? 1 : team_id + 1;
@@ -393,12 +397,15 @@ namespace module::tools {
     }
 
     std::string RoboCupConfiguration::get_config_file(std::string filename) {
+        // First check hostname-specific
         if (std::filesystem::exists(fmt::format("config/{}/{}", hostname, filename))) {
             return fmt::format("config/{}/{}", hostname, filename);
         }
+        // Then check platform-specific
         if (std::filesystem::exists(fmt::format("config/{}/{}", get_platform(), filename))) {
             return fmt::format("config/{}/{}", get_platform(), filename);
         }
+        // Finally, check the default
         return "config/" + filename;
     }
 
@@ -441,13 +448,14 @@ namespace module::tools {
         attroff(A_BOLD);
 
         // Each Command
-        const char* COMMANDS[] = {"ENTER", "SPACE", "F", "R", "C", "N", "X"};
+        const char* COMMANDS[] = {"ENTER", "SPACE", "F", "R", "C", "N", "S", "D", "X"};
 
         // Each Meaning
-        const char* MEANINGS[] = {"Edit", "Toggle", "Refresh", "Reset", "Configure", "Network", "Shutdown"};
+        const char* MEANINGS[] =
+            {"Edit", "Toggle", "Refresh", "Reset", "Configure", "Network", "Start RoboCup", "Stop RoboCup", "Shutdown"};
 
         // Prints commands and their meanings to the screen
-        for (size_t i = 0; i < 7; i = i + 2) {
+        for (size_t i = 0; i < (sizeof(COMMANDS) / sizeof(COMMANDS[0])); i = i + 2) {
             attron(A_BOLD);
             attron(A_STANDOUT);
             mvprintw(LINES - 9, 2 + ((3 + 14) * (i / 2)), COMMANDS[i]);
@@ -457,7 +465,7 @@ namespace module::tools {
             mvprintw(LINES - 9, gap + ((3 + 14) * (i / 2)), MEANINGS[i]);
         }
 
-        for (size_t i = 1; i < 7; i = i + 2) {
+        for (size_t i = 1; i < (sizeof(COMMANDS) / sizeof(COMMANDS[0])); i = i + 2) {
             attron(A_BOLD);
             attron(A_STANDOUT);
             mvprintw(LINES - 8, 2 + ((3 + 14) * ((i - 1) / 2)), COMMANDS[i]);

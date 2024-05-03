@@ -35,13 +35,21 @@ namespace module::tools {
 
     class RoboCupConfiguration : public NUClear::Reactor {
     private:
-        std::string hostname           = "";
-        std::string wifi_interface     = "";
-        std::string ip_address         = "";
-        std::string ssid               = "";
-        std::string password           = "";
-        int team_id                    = 0;
-        int player_id                  = 0;
+        /// @brief The hostname of the robot
+        std::string hostname = "";
+        /// @brief The wifi interface that the robot is connected to
+        std::string wifi_interface = "";
+        /// @brief The IP address of the robot
+        std::string ip_address = "";
+        /// @brief The SSID of the wifi network that the robot is or will be connected to
+        std::string ssid = "";
+        /// @brief The password of the wifi network that the robot is or will be connected to
+        std::string password = "";
+        /// @brief The ID that the robot is player for
+        int team_id = 0;
+        /// @brief The player ID of the robot
+        int player_id = 0;
+        /// @brief The position the robot will move to in READY
         Eigen::Vector3d ready_position = Eigen::Vector3d::Zero();
 
         /// @brief Smart enum for the robot's position
@@ -63,6 +71,7 @@ namespace module::tools {
                 // clang-format on
             }
 
+            /// @brief Convert the enum to a string
             operator std::string() const {
                 switch (value) {
                     case Value::STRIKER: return "STRIKER";
@@ -72,6 +81,8 @@ namespace module::tools {
                 }
             }
 
+            /// @brief Get the full yaml name of the config for the current position
+            /// @return The full yaml name of the config for the current position
             std::string get_config_name() {
                 switch (value) {
                     case Value::STRIKER: return "Striker.yaml";
@@ -81,34 +92,56 @@ namespace module::tools {
                 }
             }
 
-            operator int() const {
-                return value;
-            }
-
+            /// @brief Increment the enum, for toggle
             void operator++() {
                 value =
                     value == Value::DEFENDER ? Value::STRIKER : (value == Value::STRIKER ? Value::GOALIE : DEFENDER);
             }
         } robot_position;
 
-        /// @brief The index of the item we are selecting
+        /// @brief The index of the item the user is selecting
         size_t row_selection = 0;
 
-        /// @brief Index of the column we are selecting
+        /// @brief Index of the column the user is selecting
         size_t column_selection = 0;
 
+        /// @brief The log message to print to the user at the bottom of the window
         std::string log_message = "";
 
+        /// @brief Displays the screen with any updated values to the user
         void refresh_view();
+
+        /// @brief Functionality for the user to edit a field in the display
         void edit_selection();
+
+        /// @brief Functionality for the user to toggle fields in the display
         void toggle_selection();
+
+        /// @brief Used in edit_selection to get user input
+        /// @return The user input
         std::string user_input();
-        void get_values();
-        void set_values();
-        std::string get_platform();
-        std::string get_config_file(std::string filename);
+
+        /// @brief Gets the current configurable values to display to the user
+        void get_config_values();
+
+        /// @brief Sets the values set by the user (ie what is shown in the display) to configuration files
+        void set_config_values();
+
+        /// @brief Using the current configuration, sets the network settings.
+        /// This needs sudo to run, as it edits the network configuration files.
+        /// set_values() is called first in this function.
         void configure_network();
-        std::string get_wifi_password(const std::string& ssid);
+
+        /// @brief Gets the platform we are currently running on, eg nugus, docker, webots, from the hostname
+        /// @return The platform we are currently running on
+        std::string get_platform();
+
+        /// @brief Gets the configuration file according to the config system's rules.
+        /// The order is: hostname-specific, platform-specific, and finally the default config.
+        /// @param filename The config file to find
+        /// @return The correct config file path according to config rules
+        std::string get_config_file(std::string filename);
+
 
     public:
         /// @brief Called by the powerplant to build and setup the RoboCupConfiguration reactor.
