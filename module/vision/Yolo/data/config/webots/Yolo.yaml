@@ -1,8 +1,8 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: INFO
 
 # Path to the model weights
-model_path: "coco.onnx"
+model_path: "yolo.onnx"
 
 # Minimum confidence required for a ball detection to be accepted
 ball_confidence_threshold: 0.5

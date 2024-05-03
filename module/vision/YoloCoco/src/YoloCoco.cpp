@@ -1,18 +1,14 @@
-#include "Yolo.hpp"
-
 #include <chrono>
 #include <getopt.h>
 #include <iostream>
 #include <vector>
 
+#include "Yolo.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
-#include "message/vision/Ball.hpp"
 #include "message/vision/BoundingBoxes.hpp"
-#include "message/vision/FieldIntersections.hpp"
-#include "message/vision/Goal.hpp"
-#include "message/vision/Robot.hpp"
 
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -25,35 +21,19 @@ namespace module::vision {
     using extension::Configuration;
 
     using message::input::Image;
-    using message::vision::Ball;
-    using message::vision::Balls;
     using message::vision::BoundingBox;
     using message::vision::BoundingBoxes;
-    using message::vision::FieldIntersection;
-    using message::vision::FieldIntersections;
-    using message::vision::Goal;
-    using message::vision::Goals;
-    using message::vision::Robot;
-    using message::vision::Robots;
 
-    using utility::math::coordinates::cartesianToReciprocalSpherical;
-    using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
     using utility::vision::unproject;
 
-    Yolo::Yolo(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    YoloCoco::YoloCoco(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Yolo.yaml
-            log_level                       = config["log_level"].as<NUClear::LogLevel>();
-            objects[0].confidence_threshold = config["ball_confidence_threshold"].as<double>();
-            objects[1].confidence_threshold = config["goalpost_confidence_threshold"].as<double>();
-            objects[2].confidence_threshold = config["robot_confidence_threshold"].as<double>();
-            objects[3].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[4].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            objects[5].confidence_threshold = config["intersection_confidence_threshold"].as<double>();
-            cfg.nms_threshold               = config["nms_threshold"].as<double>();
-            cfg.nms_score_threshold         = config["nms_score_threshold"].as<double>();
+            log_level               = config["log_level"].as<NUClear::LogLevel>();
+            cfg.nms_threshold       = config["nms_threshold"].as<double>();
+            cfg.nms_score_threshold = config["nms_score_threshold"].as<double>();
 
             // Compile the model and create inference request object
             compiled_model =
@@ -138,20 +118,15 @@ namespace module::vision {
             std::vector<int> indices;
             cv::dnn::NMSBoxes(boxes, class_confidences, cfg.nms_score_threshold, cfg.nms_threshold, indices);
 
+            log<NUClear::DEBUG>("Detected ", indices.size(), " objects");
+
             // -------- Emit Detections --------
             const Eigen::Isometry3d& Hwc = img.Hcw.inverse();
 
-            auto balls               = std::make_unique<Balls>();
-            auto robots              = std::make_unique<Robots>();
-            auto goals               = std::make_unique<Goals>();
-            auto field_intersections = std::make_unique<FieldIntersections>();
-            auto bounding_boxes      = std::make_unique<BoundingBoxes>();
-
-            // Common message fields
-            balls->id = robots->id = goals->id = field_intersections->id = bounding_boxes->id = img.id;
-            balls->timestamp = robots->timestamp = goals->timestamp = field_intersections->timestamp =
-                bounding_boxes->timestamp                           = img.timestamp;
-            balls->Hcw = robots->Hcw = goals->Hcw = field_intersections->Hcw = bounding_boxes->Hcw = img.Hcw;
+            auto bounding_boxes       = std::make_unique<BoundingBoxes>();
+            bounding_boxes->id        = img.id;
+            bounding_boxes->timestamp = img.timestamp;
+            bounding_boxes->Hcw       = img.Hcw;
 
             // Helper function to simplify unprojection calls
             auto pix_to_ray = [&](double x, double y) {
@@ -195,83 +170,16 @@ namespace module::vision {
                 bbox->corners.push_back(bottom_right_ray);
                 bbox->corners.push_back(bottom_left_ray);
 
+                emit(std::move(bounding_boxes));
 
-                if (objects[class_id].name == "ball") {
-                    Ball b;
-                    b.uBCc = ray_to_camera_space(centre_ray).normalized();
-                    b.measurements.emplace_back();
-                    b.measurements.back().type = Ball::MeasurementType::PROJECTION;
-                    b.measurements.back().rBCc = ray_to_camera_space(centre_ray);
-                    // Calculate the angular radius of the ball in camera space
-                    b.radius = bottom_centre_ray.dot(bottom_left_ray);
-                    b.colour.fill(1.0);
-                    balls->balls.push_back(b);
-                    bbox->colour = objects[class_id].colour;
-                    bounding_boxes->bounding_boxes.push_back(*bbox);
+                // -------- Benchmark --------
+                if (log_level <= NUClear::DEBUG) {
+                    auto end      = std::chrono::high_resolution_clock::now();
+                    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                    log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
+                    log<NUClear::DEBUG>("FPS: ", 1000.0 / duration);
                 }
-
-                if (objects[class_id].name == "goal post") {
-                    Goal g;
-                    g.measurements.emplace_back();
-                    g.measurements.back().type = Goal::MeasurementType::CENTRE;
-                    g.measurements.back().rGCc = ray_to_camera_space(bottom_centre_ray);
-                    g.post.top                 = top_centre_ray;
-                    g.post.bottom              = bottom_centre_ray;
-                    g.post.distance            = ray_to_camera_space(bottom_centre_ray).norm();
-                    g.side                     = Goal::Side::UNKNOWN_SIDE;
-                    g.screen_angular           = cartesianToSpherical(g.post.bottom).tail<2>();
-                    goals->goals.push_back(std::move(g));
-                    bbox->colour = objects[class_id].colour;
-                    bounding_boxes->bounding_boxes.push_back(*bbox);
-                }
-
-                if (objects[class_id].name == "robot") {
-                    Robot r;
-                    r.rRCc   = ray_to_camera_space(bottom_centre_ray);
-                    r.radius = bottom_centre_ray.dot(bottom_left_ray);
-                    robots->robots.push_back(r);
-                    bbox->colour = objects[class_id].colour;
-                    bounding_boxes->bounding_boxes.push_back(*bbox);
-                }
-
-                if (objects[class_id].name == "L-intersection" || objects[class_id].name == "T-intersection"
-                    || objects[class_id].name == "X-intersection") {
-                    FieldIntersection i;
-                    // Project the centre ray onto the ground plane in world {w} space
-                    Eigen::Vector3d uICw = Hwc.rotation() * centre_ray;
-                    Eigen::Vector3d rIWw = uICw * std::abs(Hwc.translation().z() / uICw.z()) + Hwc.translation();
-                    i.rIWw               = rIWw;
-                    if (objects[class_id].name == "L-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::L_INTERSECTION;
-                        bbox->colour = objects[class_id].colour;
-                    }
-                    else if (objects[class_id].name == "T-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::T_INTERSECTION;
-                        bbox->colour = objects[class_id].colour;
-                    }
-                    else if (objects[class_id].name == "X-intersection") {
-                        i.type       = FieldIntersection::IntersectionType::X_INTERSECTION;
-                        bbox->colour = objects[class_id].colour;
-                    }
-                    field_intersections->intersections.push_back(std::move(i));
-                    bounding_boxes->bounding_boxes.push_back(*bbox);
-                }
-            }
-
-            emit(std::move(balls));
-            emit(std::move(robots));
-            emit(std::move(goals));
-            emit(std::move(field_intersections));
-            emit(std::move(bounding_boxes));
-
-            // -------- Benchmark --------
-            if (log_level <= NUClear::DEBUG) {
-                auto end      = std::chrono::high_resolution_clock::now();
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                log<NUClear::DEBUG>("Yolo took: ", duration, "ms");
-                log<NUClear::DEBUG>("FPS: ", 1000.0 / duration);
-            }
-        });
+            });
     }
 
-}  // namespace module::vision
+    }  // namespace module::vision
