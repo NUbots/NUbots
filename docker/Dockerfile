@@ -288,7 +288,7 @@ RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/98e9dea7894525d1a50079f71dcfde379f291674.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/f6704a1f049c7a30e1b92f4cd70af219d28a4697.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
@@ -336,7 +336,7 @@ RUN install-from-source https://github.com/stevengj/nlopt/archive/refs/tags/v2.7
 # tinyrobotics
 RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/tags/0.0.1.tar.gz \
     -DBUILD_TESTS=OFF
-
+    
 # lame
 RUN install-package lame
 

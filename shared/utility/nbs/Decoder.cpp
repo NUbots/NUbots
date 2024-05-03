@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2024 NUbots
+ * Copyright (c) 2021 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -39,18 +39,22 @@
 
 namespace utility::nbs {
 
-    Decoder::Decoder(const std::vector<std::filesystem::path>& paths, const bool& show_progress)
-        : index(paths, Index::Ordering::TIME, show_progress) {
+    Decoder::Decoder(
+        const std::vector<std::filesystem::path>& paths,
+        const std::function<void(const std::filesystem::path&, const uint64_t&, const uint64_t&)>& progress)
+        : index(paths, progress) {
 
-        // Memory map all the files to access the data
+        // Memory map all the files so we can access the data
         for (const auto& path : paths) {
             // Memory map the file into ram
             mmaps.emplace_back(path.string());
         }
     }
 
-    Decoder::Decoder(const std::filesystem::path& path, const bool& show_progress)
-        : Decoder(std::vector<std::filesystem::path>({path}), show_progress) {}
+    Decoder::Decoder(
+        const std::filesystem::path& path,
+        const std::function<void(const std::filesystem::path&, const uint64_t&, const uint64_t&)>& progress)
+        : Decoder(std::vector<std::filesystem::path>({path}), progress) {}
 
     void Decoder::process(
         const std::function<void(const uint64_t&, const uint64_t&, const uint64_t&, const uint64_t&)>& progress) {
@@ -66,38 +70,36 @@ namespace utility::nbs {
         // Loop through the index
         uint64_t current_bytes   = 0;
         uint64_t current_message = 0;
+        for (const auto& i : index) {
 
-        for (const auto& e : *this) {
-            if (e.has_callback()) {
-                e();
+            // Skip decoding packets that we don't have a callback for
+            if (callbacks.count(i.type) != 0) {
+                // Where our data is in mapped memory
+                const uint8_t* data = &mmaps[i.fileno][i.offset];
+
+                // Read out the length from the packet
+                uint32_t length    = *reinterpret_cast<const uint32_t*>(data + 3);
+                uint64_t timestamp = *reinterpret_cast<const uint64_t*>(data + 3 + sizeof(length));
+
+                // Find the begining and end of the payload section
+                // Offset + 3 (header) + uint32_t (length) + uint64_t (timestamp) + uint64_t (hash)
+                const uint8_t* payload  = data + 3 + sizeof(length) + sizeof(timestamp) + sizeof(uint64_t);
+                uint64_t payload_length = length - sizeof(timestamp) - sizeof(uint64_t);
+
+                // Get the timestamp out from the index
+                NUClear::clock::time_point index_timestamp{std::chrono::nanoseconds(i.timestamp)};
+                NUClear::clock::time_point emit_timestamp{std::chrono::microseconds(timestamp)};
+
+                callbacks[i.type](emit_timestamp, index_timestamp, payload, payload_length);
             }
 
-            // Update the progress callback
-            current_bytes += e.item->item.length;
+            // Update our progress callback
+            current_bytes += i.length;
             current_message += 1;
             if (progress) {
                 progress(current_message, total_messages, current_bytes, total_bytes);
             }
         }
     }
-
-    void Decoder::unhandled(const std::function<void(const uint64_t& emit_timestamp,
-                                                     const uint64_t& index_timestamp,
-                                                     const uint64_t& hash_type,
-                                                     const uint32_t& subtype,
-                                                     const void* payload,
-                                                     const size_t& payload_length)>& callback) {
-        unhandled_callback = callback;
-    }
-
-    void Decoder::all(const std::function<void(const uint64_t& emit_timestamp,
-                                               const uint64_t& index_timestamp,
-                                               const uint64_t& hash_type,
-                                               const uint32_t& subtype,
-                                               const void* payload,
-                                               const size_t& payload_length)>& callback) {
-        all_callback = callback;
-    }
-
 
 }  // namespace utility::nbs
