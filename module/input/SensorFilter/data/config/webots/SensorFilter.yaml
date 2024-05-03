@@ -30,3 +30,6 @@ use_ground_truth: false
 
 # Path to URDF file
 urdf_path: "models/robot.urdf"
+
+# Limit on the maximum change in servo angle per update before the encoder is considered invalid
+max_servo_change: 0.1

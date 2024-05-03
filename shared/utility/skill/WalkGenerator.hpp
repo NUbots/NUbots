@@ -39,11 +39,14 @@
 
 namespace utility::skill {
 
-    using message::behaviour::state::WalkState;
     using utility::input::LimbID;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::motion::splines::Trajectory;
     using utility::motion::splines::Waypoint;
+
+    using message::behaviour::state::WalkState;
+    using message::behaviour::state::WalkState::Phase::LEFT;
+    using message::behaviour::state::WalkState::Phase::RIGHT;
 
     template <typename Scalar>
     class WalkGenerator {
@@ -84,6 +87,9 @@ namespace utility::skill {
 
             /// @brief Ratio of where to position the torso relative to the next step position [x,y] (in meters)
             Vec3 torso_final_position_ratio = Vec3::Zero();
+
+            /// @brief Option to only switch between planted foot if the next foot is planted
+            bool only_switch_when_planted = false;
         };
 
         /**
@@ -144,11 +150,9 @@ namespace utility::skill {
         Iso3 get_foot_pose(const LimbID& limb) const {
             // Return the desired pose of the specified foot
             if (limb == LimbID::LEFT_LEG)
-                return left_foot_is_planted ? get_torso_pose().inverse()
-                                            : get_torso_pose().inverse() * get_swing_foot_pose();
+                return phase == LEFT ? get_torso_pose().inverse() : get_torso_pose().inverse() * get_swing_foot_pose();
             if (limb == LimbID::RIGHT_LEG)
-                return left_foot_is_planted ? get_torso_pose().inverse() * get_swing_foot_pose()
-                                            : get_torso_pose().inverse();
+                return phase == LEFT ? get_torso_pose().inverse() * get_swing_foot_pose() : get_torso_pose().inverse();
             throw std::runtime_error("Invalid Limb ID");
         }
 
@@ -161,20 +165,12 @@ namespace utility::skill {
         Iso3 get_foot_pose(Scalar t, const LimbID& limb) const {
             // Return the desired pose of the specified foot
             if (limb == LimbID::LEFT_LEG)
-                return left_foot_is_planted ? get_torso_pose(t).inverse()
-                                            : get_torso_pose(t).inverse() * get_swing_foot_pose(t);
+                return phase == LEFT ? get_torso_pose(t).inverse()
+                                     : get_torso_pose(t).inverse() * get_swing_foot_pose(t);
             if (limb == LimbID::RIGHT_LEG)
-                return left_foot_is_planted ? get_torso_pose(t).inverse() * get_swing_foot_pose(t)
-                                            : get_torso_pose(t).inverse();
+                return phase == LEFT ? get_torso_pose(t).inverse() * get_swing_foot_pose(t)
+                                     : get_torso_pose(t).inverse();
             throw std::runtime_error("Invalid Limb ID");
-        }
-
-        /**
-         * @brief Get whether or not the left foot is planted.
-         * @return True if left foot is planted, false otherwise.
-         */
-        bool is_left_foot_planted() const {
-            return left_foot_is_planted;
         }
 
         /**
@@ -203,9 +199,12 @@ namespace utility::skill {
          * @brief Run an update of the walk engine, updating the time and engine state and trajectories.
          * @param dt Time step.
          * @param velocity_target Requested velocity target (dx, dy, dtheta).
+         * @param sensors_planted_foot_phase Planted foot phase from sensors.
          * @return Engine state.
          */
-        WalkState::State update(const Scalar& dt, const Vec3& velocity_target) {
+        WalkState::State update(const Scalar& dt,
+                                const Vec3& velocity_target,
+                                const WalkState::Phase& sensors_planted_foot_phase) {
             if (velocity_target.isZero() && t < p.step_period) {
                 // Requested velocity target is zero and we haven't finished taking a step, continue stopping
                 engine_state = WalkState::State::STOPPING;
@@ -219,11 +218,14 @@ namespace utility::skill {
                 engine_state = WalkState::State::WALKING;
             }
 
+            // If the sensors have detected either double support or next foot planted, allow switching the planted foot
+            bool can_switch = sensors_planted_foot_phase != phase || !p.only_switch_when_planted;
+
             switch (engine_state.value) {
                 case WalkState::State::WALKING:
                     update_time(dt);
-                    // If we are at the end of the step, switch the planted foot and reset time
-                    if (t >= p.step_period) {
+                    // If we are at the end of the step and can switch feet, switch the planted foot and reset time
+                    if (t >= p.step_period && can_switch) {
                         switch_planted_foot();
                     }
                     break;
@@ -251,6 +253,22 @@ namespace utility::skill {
             return engine_state;
         }
 
+        /**
+         * @brief Get the current phase of the walk engine.
+         * @return Current phase of the walk engine.
+         */
+        message::behaviour::state::WalkState::Phase get_phase() const {
+            return phase;
+        }
+
+        /**
+         * @brief Get the current time in the step cycle [0, p.step_period].
+         * @return Current time in the step cycle.
+         */
+        Scalar get_time() const {
+            return t;
+        }
+
     private:
         /// @brief Walk engine parameters.
         WalkParameters p;
@@ -260,14 +278,17 @@ namespace utility::skill {
         /// @brief Current engine state.
         WalkState::State engine_state = WalkState::State::STOPPED;
 
+        /// @brief Walk engine planted foot phase.
+        message::behaviour::state::WalkState::Phase phase = LEFT;
+
+        /// @brief Sensors foot planted phase.
+        message::behaviour::state::WalkState::Phase sensors_planted_foot_phase = LEFT;
+
         /// @brief Transform from planted {p} foot to swing {s} foot current placement at start of step.
         Iso3 Hps_start = Iso3::Identity();
 
         /// @brief Transform from planted {p} foot to the torso {t} at start of step.
         Iso3 Hpt_start = Iso3::Identity();
-
-        /// @brief Whether the left foot is planted.
-        bool left_foot_is_planted = true;
 
         /// @brief Current time in the step cycle [0, p.step_period]
         Scalar t = 0.0;
@@ -285,7 +306,7 @@ namespace utility::skill {
          * @return Lateral distance between feet.
          */
         Scalar get_foot_width_offset() const {
-            return left_foot_is_planted ? -p.step_width : p.step_width;
+            return phase == LEFT ? -p.step_width : p.step_width;
         }
 
         /**
@@ -310,7 +331,7 @@ namespace utility::skill {
 
             // Middle waypoint: Shift torso to the p.torso_sway_offset at time = p.torso_sway_ratio * p.step_period
             wp.time_point         = p.torso_sway_ratio * p.step_period;
-            Scalar torso_offset_y = left_foot_is_planted ? -p.torso_sway_offset.y() : p.torso_sway_offset.y();
+            Scalar torso_offset_y = phase == LEFT ? -p.torso_sway_offset.y() : p.torso_sway_offset.y();
             wp.position = Vec3(p.torso_sway_offset.x(), torso_offset_y, p.torso_height + p.torso_sway_offset.z())
                           + p.torso_position_offset;
             wp.velocity         = Vec3(velocity_target.x(), velocity_target.y(), 0);
@@ -397,7 +418,7 @@ namespace utility::skill {
             Hpt_start = Hps_start * get_torso_pose(p.step_period);
 
             // Switch planted foot indicator
-            left_foot_is_planted = !left_foot_is_planted;
+            phase = (phase == LEFT) ? RIGHT : LEFT;
 
             // Reset time
             t = 0;
