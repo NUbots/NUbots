@@ -1,9 +1,9 @@
+#include "YoloCoco.hpp"
+
 #include <chrono>
 #include <getopt.h>
 #include <iostream>
 #include <vector>
-
-#include "Yolo.hpp"
 
 #include "extension/Configuration.hpp"
 
@@ -29,7 +29,7 @@ namespace module::vision {
 
     YoloCoco::YoloCoco(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("Yolo.yaml").then([this](const Configuration& config) {
+        on<Configuration>("YoloCoco.yaml").then([this](const Configuration& config) {
             // Use configuration here from file Yolo.yaml
             log_level               = config["log_level"].as<NUClear::LogLevel>();
             cfg.nms_threshold       = config["nms_threshold"].as<double>();

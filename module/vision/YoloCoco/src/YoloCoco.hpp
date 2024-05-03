@@ -118,7 +118,7 @@ namespace module::vision {
 
     public:
         /// @brief Called by the powerplant to build and setup the Yolo reactor.
-        explicit Yolo(std::unique_ptr<NUClear::Environment> environment);
+        explicit YoloCoco(std::unique_ptr<NUClear::Environment> environment);
     };
 
 }  // namespace module::vision
