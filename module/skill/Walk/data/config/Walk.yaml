@@ -3,6 +3,8 @@ log_level: INFO
 walk:
   # Time for one complete step (in seconds).
   period: 0.39
+  # Bool to indicate whether or not to only switch if the next foot is planted
+  only_switch_when_planted: true
   step:
     # Maximum step limits in x and y (in meters), and theta (in radians).
     limits: [0.5, 0.2, 0.4]
