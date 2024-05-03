@@ -29,9 +29,6 @@ nuclear_role(
   vision::BallDetector
   vision::FieldLineDetector
   vision::YoloCoco
-  # Localisation
-  localisation::BallLocalisation
-  localisation::FieldLocalisation
   # Director
   extension::Director
   # Servos
