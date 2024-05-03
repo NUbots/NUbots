@@ -95,10 +95,10 @@ namespace module::nbs {
 
             // Synchronise the clock epoch to the first message timestamp
             if (decoder_iterator != decoder.end()) {
-                emit<Scope::DIRECT>(std::make_unique<NUClear::message::TimeTravel>(
-                    NUClear::clock::time_point(std::chrono::nanoseconds((*decoder_iterator).item->item.timestamp)),
-                    playback_speed,
-                    NUClear::message::TimeTravel::Action::RELATIVE));
+                emit<Scope::DIRECT>(
+                    std::make_unique<NUClear::message::TimeTravel>(start_time,
+                                                                   playback_speed,
+                                                                   NUClear::message::TimeTravel::Action::RELATIVE));
                 // Emit the first message
                 emit_next_message();
             }
