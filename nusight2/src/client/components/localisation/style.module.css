@@ -26,9 +26,12 @@
   color: #000;
   padding: 16px;
   font-size: 0.8rem;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: background-color 0.3s, border 0.3s;
+  height: 60px;
+  width: 128px;
+  justify-content: center;
+  outline: 0;
+  padding: 0 1em;
+  transition: background-color 0.3s ease;
 }
 
 .localisation__menuButton:hover {
@@ -76,4 +79,36 @@
 .localisation__viewMode {
   text-align: right;
   width: 33%;
+}
+
+.fieldOption {
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  overflow: hidden;
+  width: 128px;
+}
+
+.fieldOption {
+  box-sizing: border-box;
+  display: flex;
+  min-width: 104px;
+}
+
+.fieldOption:hover {
+  background-color: #eee;
+}
+
+.fieldOption {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  height: 40px;
+  padding: 0;
+  padding-left: 1em;
+  cursor: pointer;
+}
+
+.checkmark {
+  margin-left: 10px;
+  color: green; /* Green checkmark for visual cue */
 }
