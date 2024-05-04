@@ -29,6 +29,7 @@
 
 #include <nuclear>
 #include <string>
+#include <vector>
 
 #include "extension/Behaviour.hpp"
 #include "message/input/RoboCup.hpp"
@@ -37,6 +38,8 @@ namespace module::purpose {
 
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
+        uint PLAYER_ID;
+
         /// @brief Smart enum for the robot's position
         struct Position {
             enum Value {
@@ -53,12 +56,23 @@ namespace module::purpose {
                 if (str == "STRIKER") { value = Value::STRIKER; }
                 else if (str == "GOALIE") { value = Value::GOALIE; }
                 else if (str == "DEFENDER") { value = Value::DEFENDER; }
+                else if (str == "DYNAMIC") { value = Value::DYNAMIC; }
                 else { throw std::runtime_error("Invalid robot position"); }
                 // clang-format on
             }
 
             operator int() const {
                 return value;
+            }
+
+            std::string toString() const {
+                switch(value) {
+                    case STRIKER: return "STRIKER";
+                    case GOALIE: return "GOALIE";
+                    case DEFENDER: return "DEFENDER";
+                    case DYNAMIC: return "DYNAMIC";
+                    default: throw std::runtime_error("Invalid value for Position");
+                }
             }
         };
 
@@ -73,16 +87,30 @@ namespace module::purpose {
         struct RobotInfo {
             uint8_t robotId;
             std::chrono::steady_clock::time_point lastHeardFrom;
+            Position position;
+
+            bool operator<(const RobotInfo& other) const {
+                return robotId < other.robotId;
+            }
         };
 
         /// @brief Store and remove active/inactive robots
-        bool updateRobotInfo(uint8_t robotId);
+        bool manageActiveRobots(const uint8_t robotId);
+
+        /// @brief Add RobotInfo ordered by id
+        void addRobot(RobotInfo newRobot);
+
+        /// @brief Count the number of defenders
+        uint8_t countDefenders();
 
         /// @brief Decide the correct soccer position
         void findSoccerPosition(const message::input::RoboCup& robocup);
 
-        /// @brief Store active robots
+        /// @brief Store robots that can currently play
         std::vector<RobotInfo> activeRobots;
+
+        /// @brief Store penalized robots
+        std::list<RobotInfo> penalisedRobots;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
