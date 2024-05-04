@@ -29,7 +29,10 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/localisation/Robot.hpp"
 #include "message/planning/WalkPath.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/skill/Walk.hpp"
@@ -40,7 +43,10 @@ namespace module::planning {
 
     using extension::Configuration;
 
+    using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::Field;
+    using message::localisation::Robots;
     using message::planning::TurnAroundBall;
     using message::planning::TurnOnSpot;
     using message::planning::WalkTo;
@@ -50,37 +56,42 @@ namespace module::planning {
         return 1 / std::sqrt(std::pow(x - x0, 2) + std::pow(y - y0, 2));
     }
 
-    double f(const Eigen::Vector2d& self_position,
-             const Eigen::Vector2d& target_position,
-             const double heading,
-             std::vector obstacles,
-             double target_scalar,
-             double obstacle_scalar,
-             double heading_scalar) {
+    // https://www.desmos.com/calculator/exmrdiugxn
+    Eigen::Vector2d PlanWalkPath::vector_field(const Eigen::Vector2d& self_position,
+                                               const Eigen::Vector2d& target_position,
+                                               const double heading,
+                                               std::vector<Eigen::Vector2d> obstacles) {
         double x = self_position.x();
         double y = self_position.y();
 
         // Attraction of the target position
         Eigen::Vector2d vector_field_direction(
-            (target_position.x() - x) * g(x, y, target_position.x(), target_position.y()),
-            (target_position.y() - y) * g(x, y, target_position.x(), target_position.y()));
+            (target_position.x() - x) * g(x, y, target_position.x(), target_position.y()) * cfg.target_strength,
+            (target_position.y() - y) * g(x, y, target_position.x(), target_position.y()) * cfg.target_strength);
 
         // Create point next to target position at given heading
         double x_target = target_position.x() + std::cos(heading);
         double y_target = target_position.y() + std::sin(heading);
 
-        // Repulse the heading point
-        vector_field_direction.x() += (x - x_target) * g(x, y, x_target, y_target);
-        vector_field_direction.y() += (y - y_target) * g(x, y, x_target, y_target);
+        // // Repulse the heading point
+        // vector_field_direction.x() += ((x - x_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
+        // vector_field_direction.y() += ((y - y_target) * g(x, y, x_target, y_target)) * cfg.heading_strength;
 
         // Repulsion of the obstacles
         for (const auto& obstacle : obstacles) {
-            vector_field_direction.x() += (x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y());
-            vector_field_direction.y() += (y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y());
+            vector_field_direction.x() +=
+                ((x - obstacle.x()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
+            vector_field_direction.y() +=
+                ((y - obstacle.y()) * g(x, y, obstacle.x(), obstacle.y())) * cfg.obstacle_strength;
         }
 
         // Repulsion of the walls
-        // todo
+        vector_field_direction.x() -=
+            cfg.bounds_strength
+            * (std::abs(x - 4.5) * utility::math::sgn(x - 4.5) + std::abs(x + 4.5) * utility::math::sgn(x + 4.5));
+        vector_field_direction.y() -=
+            cfg.bounds_strength
+            * (std::abs(y - 3.0) * utility::math::sgn(y - 3.0) + std::abs(y + 3.0) * utility::math::sgn(y + 3.0));
 
         return vector_field_direction;
     }
@@ -107,11 +118,20 @@ namespace module::planning {
             cfg.pivot_ball_velocity   = config["pivot_ball_velocity"].as<double>();
             cfg.pivot_ball_velocity_x = config["pivot_ball_velocity_x"].as<double>();
             cfg.pivot_ball_velocity_y = config["pivot_ball_velocity_y"].as<double>();
+
+            cfg.target_strength   = config["target_strength"].as<double>();
+            cfg.heading_strength  = config["heading_strength"].as<double>();
+            cfg.obstacle_strength = config["obstacle_strength"].as<double>();
+            cfg.bounds_strength   = config["bounds_strength"].as<double>();
         });
 
         // Path to walk to a particular point
-        on<Provide<WalkTo>, Uses<Walk>, With<Robots>, With<Field>>().then([this](const WalkTo& walk_to,
-                                                                                 const Uses<Walk>& walk) {
+        on<Provide<WalkTo>, Uses<Walk>, With<Robots>, With<Field>, With<Sensors>>().then([this](
+                                                                                             const WalkTo& walk_to,
+                                                                                             const Uses<Walk>& walk,
+                                                                                             const Robots& robots,
+                                                                                             const Field& field,
+                                                                                             const Sensors& sensors) {
             // If we haven't got an active walk task, then reset the velocity to minimum velocity
             if (walk.run_state == GroupInfo::RunState::NO_TASK) {
                 velocity_magnitude = cfg.min_translational_velocity_magnitude;
@@ -130,14 +150,24 @@ namespace module::planning {
             }
 
             // Obtain the unit vector to desired target in robot space and scale by cfg.translational_velocity
-            Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+            // Eigen::Vector3d velocity_target = walk_to.rPRr.normalized() * velocity_magnitude;
+            Eigen::Isometry3d Hfr = field.Hfw * sensors.Hrw.inverse();
+            Eigen::Vector2d rPFf  = (Hfr * walk_to.rPRr).head(2);
+            Eigen::Vector2d rRFf  = Hfr.translation().head(2);
+
+            std::vector<Eigen::Vector2d> obstacles{};
+            for (const auto& robot : robots.robots) {
+                obstacles.push_back((field.Hfw * robot.rRWw).head(2));
+            }
+
+            // Get the vector field
+            Eigen::Vector2d velocity_target = vector_field(rRFf, rPFf, walk_to.heading, obstacles);
 
             // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
             // value cfg.max_angular_velocity
-            velocity_target.z() =
-                utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
+            double h = utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
 
-            emit<Task>(std::make_unique<Walk>(velocity_target));
+            emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(velocity_target.x(), velocity_target.y(), h)));
         });
 
         on<Provide<TurnOnSpot>>().then([this](const TurnOnSpot& turn_on_spot) {

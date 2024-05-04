@@ -27,6 +27,7 @@
 #ifndef MODULE_PLANNING_PLANWALKPATH_HPP
 #define MODULE_PLANNING_PLANWALKPATH_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
@@ -61,10 +62,24 @@ namespace module::planning {
             double pivot_ball_velocity_x = 0;
             /// @brief Pivot ball side velocity
             double pivot_ball_velocity_y = 0;
+            /// @brief Strength of the target position in the vector field
+            double target_strength = 0;
+            /// @brief Strength of the heading repulsion in the vector field
+            double heading_strength = 0;
+            /// @brief Strength of the obsticle repulsion in the vector field
+            double obstacle_strength = 0;
+            /// @brief Strength of the field bounds repulsion in the vector field
+            double bounds_strength = 0;
         } cfg;
 
         /// @brief Current magnitude of the translational velocity of the walk command
         double velocity_magnitude = 0;
+
+        /// @brief Vector field function for the walk command
+        Eigen::Vector2d vector_field(const Eigen::Vector2d& self_position,
+                                     const Eigen::Vector2d& target_position,
+                                     const double heading,
+                                     std::vector<Eigen::Vector2d> obstacles);
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanWalkPath reactor.
