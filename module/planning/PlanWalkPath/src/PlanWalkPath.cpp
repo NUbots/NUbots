@@ -162,7 +162,10 @@ namespace module::planning {
 
             // Get the vector field
             Eigen::Vector2d velocity_target = vector_field(rRFf, rPFf, walk_to.heading, obstacles);
-
+            velocity_target =
+                (Hfr.inverse().rotation() * Eigen::Vector3d(velocity_target.x(), velocity_target.y(), 0)).head(2);
+            velocity_target = velocity_target.normalized() * velocity_magnitude;
+            log<NUClear::INFO>("Vector Field", velocity_target.transpose(), velocity_magnitude, robots.robots.size());
             // Set the angular velocity component of the velocity_target with the angular displacement and saturate with
             // value cfg.max_angular_velocity
             double h = utility::math::clamp(cfg.min_angular_velocity, walk_to.heading, cfg.max_angular_velocity);
