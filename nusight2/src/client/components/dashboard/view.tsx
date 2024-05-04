@@ -29,12 +29,12 @@ export class Dashboard extends Component<DashboardProps> {
     const showPanels = model.robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
-      <div className="flex flex-col w-full">
-        <Menu>
+      <div className="flex flex-col w-full bg-gray-100">
+        <Menu className>
           <ul className="list-none m-0 p-0 h-full flex items-stretch">
             <li className="flex m-0 p-0">
               {/* <button className={style.menuButton} onClick={this.onToggleOrientationClick}></button> */}
-              <button className="bg-transparent text-black p-4 text-sm border-2 border-transparent cursor-pointer transition-colors duration-75 ease-in-out hover:border-gray-300" onClick={this.onToggleOrientationClick}>
+              <button className="bg-transparent font-bold p-4 text-md" onClick={this.onToggleOrientationClick}>
                 Flip Orientation
               </button>
             </li>

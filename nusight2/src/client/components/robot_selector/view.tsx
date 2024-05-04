@@ -15,15 +15,6 @@ export type RobotSelectorProps = {
   selectRobot(robot: RobotModel): void;
 };
 
-// const svgStyle = {
-//   fill: "#F9A50D",
-//   height: "2.85em",
-//   margin: "0 auto",
-//   padding: "0.25em",
-//   transition: "fill 0.25s ease-out",
-//   width: "auto",
-// };
-
 export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props;
 

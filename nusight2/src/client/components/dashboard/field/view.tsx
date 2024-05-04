@@ -5,7 +5,6 @@ import { observer } from "mobx-react";
 import { Renderer } from "../../../render2d/renderer";
 
 import { FieldModel } from "./model";
-import style from "./style.module.css";
 import { FieldViewModel } from "./view_model";
 
 export type FieldProps = {
@@ -18,7 +17,7 @@ export class Field extends Component<FieldProps> {
     const model = this.props.model;
     const viewModel = FieldViewModel.of(model);
     return (
-      <div className="h-full m-0 p-0 bottom-0 bg-orangegray-200 absolute w-full">
+      <div className="h-full m-0 p-0 bottom-0 absolute w-full">
         <Renderer
           engine="svg"
           className="h-full m-0 p-0 bg-orangegray-200 absolute w-full"

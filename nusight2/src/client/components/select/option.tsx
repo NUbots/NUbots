@@ -3,7 +3,6 @@ import classNames from "classnames";
 import { action } from "mobx";
 import { observer } from "mobx-react";
 
-import style from "./style.module.css";
 import { Option } from "./view";
 
 export type SelectOptionProps = {
@@ -22,10 +21,10 @@ export class SelectOption extends React.Component<SelectOptionProps> {
 
     return (
       <div
-        className={classNames([className, "items-center p-2 bg-gray-100 hover:bg-gray-200", isSelected ? "bg-blue-300 hover:bg-blue-400 text-white" : ""])}
+        className={classNames([className, "items-center p-2", isSelected ? "bg-blue-200 hover:bg-blue-300 text-white" : "bg-gray-100 hover:bg-gray-200"])}
         onClick={this.onSelect}
       >
-        {showIconPadding || icon ? <span className={style.optionIcon}>{icon}</span> : null}
+        {showIconPadding || icon ? <span className={"w-[20px] h-[20px] mr-[8px]"}><div className={"w-full h-full inline"}>{icon}</div></span> : null}
         {option.label}
       </div>
     );

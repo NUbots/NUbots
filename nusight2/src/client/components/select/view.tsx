@@ -10,7 +10,6 @@ import { Dropdown } from "../dropdown/view";
 import { Icon } from "../icon/view";
 
 import { SelectOption } from "./option";
-import style from "./style.module.css";
 
 export interface Option {
   id: string | number;
@@ -78,9 +77,9 @@ export class Select extends React.Component<SelectProps> {
           onToggleClick={this.onToggleClick}
         >
           <div className="bg-gray-200 border border-gray-300 border-md shadow-md">
-            {options.length === 0 && <div className={style.empty}>{empty || "No options"}</div>}
+            {options.length === 0 && <div className={"p-6 text-center text-gray-500"}>{empty || "No options"}</div>}
             {options.length > 0 && (
-              <div className={style.options}>
+              <div>
                 {options.map((option) => {
                   const isSelected = Boolean(selectedOption && selectedOption.id === option.id);
                   return (

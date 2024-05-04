@@ -7,7 +7,6 @@ import plugin from "tailwindcss/plugin";
 const config = {
   content: ["./index.html", "./src/client/**/*.{js,jsx,ts,tsx}"],
 
-  darkMode: "class",
 
   theme: {
     colors: {
@@ -23,6 +22,8 @@ const config = {
       orangegray: {
         200: "#fdfbf9",
         300: "#fdf7f2",
+        800: "#30302d",
+        900: "#1c1c1a"
       },
 
       gray: {
@@ -42,7 +43,7 @@ const config = {
         200: "#2F66C4",
         300: "#174CA5",
         400: "#05317D",
-        500: "#04255E"
+        500: "#04255E",
       },
 
       green: {
@@ -70,13 +71,14 @@ const config = {
 
       fontFamily: {
         sans: ["Roboto", ...defaultTheme.fontFamily.sans],
+        inherit: "inherit",
       },
     },
     extend: {
       spacing: {
         11: "2.85rem",
         inherit: "inherit",
-      }
+      },
     },
 
     plugins: [

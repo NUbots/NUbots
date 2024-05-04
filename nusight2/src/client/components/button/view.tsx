@@ -36,14 +36,14 @@ export class Button extends React.PureComponent<ButtonProps> {
         onClick={onClick}
         disabled={disabled}
         className={classNames(
-          style.button,
+          "inline-flex h-[32px] min-w-[64px] px-[12px] items-center font-inherit rounded-md text-md justify-center border disabled:opacity-50",
           {
-            [style.buttonPrimary]: type === "primary",
-            [style.buttonNormal]: type === "normal",
-            [style.fullwidth]: fullwidth,
-            [style.iconAfterAlignedRight]: iconAfterAlignedRight,
-            [style.alignLeft]: textAlign === "left",
-            [style.alignRight]: textAlign === "right",
+            ["bg-blue-200 border-blue-400 text-white " + (disabled ? "" : "hover:bg-blue-300")]: type === "primary",
+            ["bg-gray-100 border-gray-300 " + (disabled ? "" : "hover:bg-gray-200")]: type === "normal",
+            ["w-full"]: fullwidth,
+            ["ml_auto"]: iconAfterAlignedRight,
+            ["justify-start"]: textAlign === "left",
+            ["justify-end"]: textAlign === "right",
           },
           className,
         )}
