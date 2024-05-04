@@ -29,13 +29,13 @@ use_ground_truth_localisation: false
 field_line_distance_weight: 1
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 1
+field_line_intersection_weight: 0
 
 # Weighting associated with change between last solution result
 state_change_weight: 0.5
 
 # Box constraints on change in state (x, y, theta)
-change_limit: [0.5, 0.5, 0.5]
+change_limit: [0.1, 0.1, 0.1]
 
 # Minimum distance an associated landmark needs to be for measurement update
 min_association_distance: 0.5
@@ -64,9 +64,9 @@ kalman:
 
   # Process model noise
   Q:
-    - [1e-3, 0, 0]
-    - [0, 1e-3, 0]
-    - [0, 0, 1e-3]
+    - [1e-2, 0, 0]
+    - [0, 1e-2, 0]
+    - [0, 0, 1e-2]
   # Measurement model noise
   R:
     - [1, 0, 0]

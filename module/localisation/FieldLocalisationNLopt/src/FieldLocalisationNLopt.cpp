@@ -197,7 +197,7 @@ namespace module::localisation {
                     kf.measure(state);
                     emit(graph("opt state", state.x(), state.y(), state.z()));
                     emit(graph("kf state", kf.get_state().x(), kf.get_state().y(), kf.get_state().z()));
-                    state = kf.get_state();
+                    // state = kf.get_state();
                     // ****** Emit Field Message ****** //
                     auto stop     = std::chrono::steady_clock::now();
                     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);

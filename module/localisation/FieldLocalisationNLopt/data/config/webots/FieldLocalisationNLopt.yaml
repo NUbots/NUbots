@@ -5,7 +5,7 @@ log_level: DEBUG
 grid_size: 1e-2
 
 # Starting side of the field looking towards own goal from centre of field (LEFT, RIGHT, EITHER or CUSTOM)
-starting_side: CUSTOM
+starting_side: EITHER
 
 # Our initial guess of where the robot starts on the field (Used if starting_side is selected as CUSTOM)
 initial_state: [0.0, 0.0, 0.0]
@@ -29,7 +29,7 @@ use_ground_truth_localisation: false
 field_line_distance_weight: 1
 
 # Weighting associated with field intersection landmark error
-field_line_intersection_weight: 1
+field_line_intersection_weight: 0
 
 # Weighting associated with change between last solution result
 state_change_weight: 0.5
@@ -64,9 +64,9 @@ kalman:
 
   # Process model noise
   Q:
-    - [1e-3, 0, 0]
-    - [0, 1e-3, 0]
-    - [0, 0, 1e-3]
+    - [1e-2, 0, 0]
+    - [0, 1e-2, 0]
+    - [0, 0, 1e-2]
   # Measurement model noise
   R:
     - [1, 0, 0]
