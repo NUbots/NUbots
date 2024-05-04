@@ -31,7 +31,7 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
 
   return (
     <>
-      <div className={"box-border flex min-w-[256px] hover:bg-gray-200"}>
+      <div className={"box-border flex min-w-[256px] hover:bg-gray-200 dark:hover:bg-gray-600"}>
         <label className={"flex items-center flex-grow h-12 px-4 cursor-pointer"}>
           <StatusIndicator className={"mr-3"} connected={robot.connected} />
           <span className={"mr-auto whitespace-nowrap"}>{robot.name}</span>
@@ -45,19 +45,19 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
       </div>
       <Collapsible open={model.statsOpen} className={style.dataTable}>
         <div className={"box-border width-full text-left"}>
-          <div className={"uppercase text-sm text-gray-400"}>Packets</div>
+          <div className={"uppercase text-sm text-gray-400 dark:text-gray-300"}>Packets</div>
           <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.packets)}</div>
         </div>
         <div className={style.dataCell}>
-          <div className={"uppercase text-sm text-gray-400"}>Packets/s</div>
+          <div className={"uppercase text-sm text-gray-400 dark:text-gray-300"}>Packets/s</div>
           <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.packetsPerSecond.rate)}</div>
         </div>
         <div className={style.dataCell}>
-          <div className={"uppercase text-sm text-gray-400"}>Bytes</div>
+          <div className={"uppercase text-sm text-gray-400 dark:text-gray-300"}>Bytes</div>
           <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.bytes)}</div>
         </div>
         <div className={style.dataCell}>
-          <div className={"uppercase text-sm text-gray-400"}>Bytes/s</div>
+          <div className={"uppercase text-sm text-gray-400 dark:text-gray-300"}>Bytes/s</div>
           <div className={"box-border width-full text-left text-lg"}>{formatSI(model.stats.bytesPerSecond.rate)}</div>
         </div>
       </Collapsible >

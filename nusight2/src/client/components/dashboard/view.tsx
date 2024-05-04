@@ -29,29 +29,29 @@ export class Dashboard extends Component<DashboardProps> {
     const showPanels = model.robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
-      <div className="flex flex-col w-full bg-gray-100">
-        <Menu className>
-          <ul className="list-none m-0 p-0 h-full flex items-stretch">
-            <li className="flex m-0 p-0">
-              {/* <button className={style.menuButton} onClick={this.onToggleOrientationClick}></button> */}
-              <button className="bg-transparent font-bold p-4 text-md" onClick={this.onToggleOrientationClick}>
-                Flip Orientation
-              </button>
-            </li>
-          </ul>
-        </Menu>
-        {/* Difference between flex + flex-1 and flex-1 alone?*/}
-        <div className="flex flex-1 flex-col">
-          <div className="flex-1 relative">
+      <div className="flex flex-col w-full bg-gray-100 dark:bg-gray-700 dark:text-white">
+        <div className="bg-gray-200 dark:bg-gray-600">
+          <Menu>
+            <ul className="list-none h-full flex items-stretch">
+              <li className="flex">
+                <button className="bg-transparent font-bold p-4 text-md" onClick={this.onToggleOrientationClick}>
+                  Flip Orientation
+                </button>
+              </li>
+            </ul>
+          </Menu>
+        </div>
+        <div className="flex flex-1 flex-col dark:bg-gray-700">
+          <div className="flex-1 relative m-5">
             <Field />
           </div>
           {showPanels && (
-            <div className="flex p-3.5 bg-orangegray-200">
+            <div className="flex m-4">
               {model.robots.map((robot) => {
                 const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
-                    <div className="flex-1 mx-1 rounded-lg shadow-md bg-white" key={robot.id}>
+                    <div className="flex-1 mx-2 rounded-lg shadow-md bg-gray-200 dark:bg-gray-600 " key={robot.id}>
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}

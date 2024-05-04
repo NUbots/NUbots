@@ -22,6 +22,7 @@ const config = {
       orangegray: {
         200: "#fdfbf9",
         300: "#fdf7f2",
+        700: "#40403b",
         800: "#30302d",
         900: "#1c1c1a"
       },

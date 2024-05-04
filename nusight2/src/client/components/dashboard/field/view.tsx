@@ -20,7 +20,7 @@ export class Field extends Component<FieldProps> {
       <div className="h-full m-0 p-0 bottom-0 absolute w-full">
         <Renderer
           engine="svg"
-          className="h-full m-0 p-0 bg-orangegray-200 absolute w-full"
+          className="h-full m-0 p-0 absolute w-full"
           scene={viewModel.scene}
           camera={viewModel.camera}
           aspectRatio={viewModel.aspectRatio}

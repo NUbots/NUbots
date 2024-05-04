@@ -21,13 +21,13 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const dropdownToggle = (
     <button className="{style.button}">
       {/* <IconRobot style={svgStyle} /> */}
-      <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out fill-grey-100 hover:fill-blue-200" />
+      <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out fill-grey-100 hover:fill-blue-200 dark:fill-white" />
       Select robots
     </button>
   );
   return (
     <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
-      <div className="bg-white rounded-md shadow-md">
+      <div className="bg-white rounded-md shadow-md text-black dark:text-white dark:bg-gray-700">
         {robots.length === 0 && (
           <div className="bg-gray-200 p-[1em] text-center">
             <IconPlug className="bg-gray-400 fill-gray-200 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />

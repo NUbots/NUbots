@@ -25,25 +25,28 @@ export type RobotPanelProps = {
 
 export const RobotPanel = (props: RobotPanelProps) => {
   const connectionStatusClassName = classNames({
-    "w-3 h-3 rounded-full border border-green-100 mr-2": true,
+    "w-3 h-3 rounded-full border border-green-400 mr-2": true,
     "bg-green-200": props.connected,
     "bg-red": !props.connected,
   });
-  const cameraClassName = classNames({"items-center flex justify-around": true, 
+  const cameraClassName = classNames({
+    "items-center flex justify-around": true,
     ["text-warning"]: props.lastCameraImage === "warning",
     ["text-danger"]: props.lastCameraImage === "danger",
   });
-  const ballClassName = classNames({"items-center flex justify-around": true,
+  const ballClassName = classNames({
+    "items-center flex justify-around": true,
     ["text-warning"]: props.lastSeenBall === "warning",
     ["text-danger"]: props.lastSeenBall === "danger",
   });
-  const goalClassName = classNames({"items-center flex justify-around h-6 w-6": true, 
-    ["text-warning"]: props.lastSeenGoal === "warning",
-    ["text-danger"]: props.lastSeenGoal === "danger",
+  const goalClassName = classNames({
+    "items-center flex justify-around h-6 w-6": true,
+    ["fill-warning"]: props.lastSeenGoal === "warning",
+    ["fill-danger"]: props.lastSeenGoal === "danger",
   });
   return (
     <div>
-      <header className="bg-gray-500 text-white">
+      <header className="bg-gray-500 dark:bg-gray-500 text-white rounded-t-md">
         <div className="items-center flex text-sm h-7 px-2">
           <span className={connectionStatusClassName} title={props.connected ? "Connected" : "Disconnected"} />
           <span className="flex-1">{props.title}</span>
@@ -76,7 +79,7 @@ export const RobotPanel = (props: RobotPanelProps) => {
             {props.walkCommand.x.toFixed(3)}, {props.walkCommand.y.toFixed(3)}, {props.walkCommand.z.toFixed(3)}
           </div>
         </div>
-        <div className="items-center flex justify-around">
+        <div className="items-center flex justify-around fill-black dark:fill-white">
           <span className={cameraClassName}>
             <Icon>photo_camera</Icon>
           </span>
@@ -88,7 +91,7 @@ export const RobotPanel = (props: RobotPanelProps) => {
           </span>
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
