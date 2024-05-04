@@ -123,6 +123,9 @@ namespace module::planning {
             cfg.heading_strength  = config["heading_strength"].as<double>();
             cfg.obstacle_strength = config["obstacle_strength"].as<double>();
             cfg.bounds_strength   = config["bounds_strength"].as<double>();
+
+            // Emit empty Robots in case we don't get any
+            emit(std::make_unique<Robots>());
         });
 
         // Path to walk to a particular point
