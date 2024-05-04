@@ -52,56 +52,78 @@ def main():
         return smoothed_data
 
     # numpy arrays
-    imu_long = np.load("processed-outputs/numpy/long/1/long-imu-1.npy")
-    servos_long = np.load("processed-outputs/numpy/long/1/long-servos-1.npy")
-    truth_all_long = np.load("processed-outputs/numpy/long/1/long-truth-1.npy")
+    imu_s = np.load("processed-outputs/numpy/s/1/s-imu-1.npy")
+    servos_s = np.load("processed-outputs/numpy/s/1/s-servos-1.npy")
+    truth_all_s = np.load("processed-outputs/numpy/s/1/s-truth-1.npy")
     # More data
-    imu_long_2 = np.load("processed-outputs/numpy/long/2/long-imu-2.npy")
-    servos_long_2 = np.load("processed-outputs/numpy/long/2/long-servos-2.npy")
-    truth_all_long_2 = np.load("processed-outputs/numpy/long/2/long-truth-2.npy")
+    imu_s_2 = np.load("processed-outputs/numpy/s/2/s-imu-2.npy")
+    servos_s_2 = np.load("processed-outputs/numpy/s/2/s-servos-2.npy")
+    truth_all_s_2 = np.load("processed-outputs/numpy/s/2/s-truth-2.npy")
     # Even more data
-    imu_long_3 = np.load("processed-outputs/numpy/long/3/long-imu-3.npy")
-    servos_long_3 = np.load("processed-outputs/numpy/long/3/long-servos-3.npy")
-    truth_all_long_3 = np.load("processed-outputs/numpy/long/3/long-truth-3.npy")
+    imu_s_3 = np.load("processed-outputs/numpy/s/3/s-imu-3.npy")
+    servos_s_3 = np.load("processed-outputs/numpy/s/3/s-servos-3.npy")
+    truth_all_s_3 = np.load("processed-outputs/numpy/s/3/s-truth-3.npy")
     # Even more data
-    imu_long_4 = np.load("processed-outputs/numpy/long/4/long-imu-4.npy")
-    servos_long_4 = np.load("processed-outputs/numpy/long/4/long-servos-4.npy")
-    truth_all_long_4 = np.load("processed-outputs/numpy/long/4/long-truth-4.npy")
+    imu_s_4 = np.load("processed-outputs/numpy/s/4/s-imu-4.npy")
+    servos_s_4 = np.load("processed-outputs/numpy/s/4/s-servos-4.npy")
+    truth_all_s_4 = np.load("processed-outputs/numpy/s/4/s-truth-4.npy")
+    # Even more data
+    imu_s_5 = np.load("processed-outputs/numpy/s/5/s-imu-5.npy")
+    servos_s_5 = np.load("processed-outputs/numpy/s/5/s-servos-5.npy")
+    truth_all_s_5 = np.load("processed-outputs/numpy/s/5/s-truth-5.npy")
+    # Even more data
+    imu_s_6 = np.load("processed-outputs/numpy/s/6/s-imu-6.npy")
+    servos_s_6 = np.load("processed-outputs/numpy/s/6/s-servos-6.npy")
+    truth_all_s_6 = np.load("processed-outputs/numpy/s/6/s-truth-6.npy")
 
     # Slice out the arm and head servos
     # NOTE: Remember to reshape if adding or removing features
-    servos_long = servos_long[:, 6:18]
-    servos_long_2 = servos_long_2[:, 6:18]
-    servos_long_3 = servos_long_3[:, 6:18]
-    servos_long_4 = servos_long_4[:, 6:18]
+    servos_s = servos_s[:, 6:18]
+    servos_s_2 = servos_s_2[:, 6:18]
+    servos_s_3 = servos_s_3[:, 6:18]
+    servos_s_4 = servos_s_4[:, 6:18]
+    servos_s_5 = servos_s_5[:, 6:18]
+    servos_s_6 = servos_s_6[:, 6:18]
 
-    # tstamps = np.load('processed-outputs/numpy/long/1/long-tstamps-1.npy')
-    print("IMU long: ", imu_long.shape)
-    # print("IMU max: ", np.max(imu_long))
-    # print("IMU min: ", np.min(imu_long))
-    print("Servos long: ", servos_long.shape)
-    print("Truth long: ", truth_all_long.shape)
+    # tstamps = np.load('processed-outputs/numpy/s/1/s-tstamps-1.npy')
+    print("IMU s: ", imu_s.shape)
+    # print("IMU max: ", np.max(imu_s))
+    # print("IMU min: ", np.min(imu_s))
+    print("Servos s: ", servos_s.shape)
+    print("Truth s: ", truth_all_s.shape)
 
-    print("IMU long 2: ", imu_long_2.shape)
-    # print("IMU max 2: ", np.max(imu_long_2))
-    # print("IMU min 2: ", np.min(imu_long_2))
-    print("Servos long 2: ", servos_long_2.shape)
-    print("Truth long 2: ", truth_all_long_2.shape)
+    print("IMU s 2: ", imu_s_2.shape)
+    # print("IMU max 2: ", np.max(imu_s_2))
+    # print("IMU min 2: ", np.min(imu_s_2))
+    print("Servos s 2: ", servos_s_2.shape)
+    print("Truth s 2: ", truth_all_s_2.shape)
 
-    print("IMU long 3: ", imu_long_3.shape)
-    # print("IMU max 3: ", np.max(imu_long_3))
-    # print("IMU min 3: ", np.min(imu_long_3))
-    print("Servos long 3: ", servos_long_3.shape)
-    print("Truth long 3: ", truth_all_long_3.shape)
+    print("IMU s 3: ", imu_s_3.shape)
+    # print("IMU max 3: ", np.max(imu_s_3))
+    # print("IMU min 3: ", np.min(imu_s_3))
+    print("Servos s 3: ", servos_s_3.shape)
+    print("Truth s 3: ", truth_all_s_3.shape)
 
-    print("IMU long 4: ", imu_long_4.shape)
-    # print("IMU max 4: ", np.max(imu_long_4))
-    # print("IMU min 4: ", np.min(imu_long_4))
-    print("Servos long 4: ", servos_long_4.shape)
-    print("Truth long 4: ", truth_all_long_4.shape)
+    print("IMU s 4: ", imu_s_4.shape)
+    # print("IMU max 4: ", np.max(imu_s_4))
+    # print("IMU min 4: ", np.min(imu_s_4))
+    print("Servos s 4: ", servos_s_4.shape)
+    print("Truth s 4: ", truth_all_s_4.shape)
+
+    print("IMU s 5: ", imu_s_5.shape)
+    # print("IMU max 5: ", np.max(imu_s_5))
+    # print("IMU min 5: ", np.min(imu_s_5))
+    print("Servos s 5: ", servos_s_5.shape)
+    print("Truth s 5: ", truth_all_s_5.shape)
+
+    print("IMU s 6: ", imu_s_6.shape)
+    # print("IMU max 6: ", np.max(imu_s_6))
+    # print("IMU min 6: ", np.min(imu_s_6))
+    print("Servos s 6: ", servos_s_6.shape)
+    print("Truth s 6: ", truth_all_s_6.shape)
 
     # Plot and inspect
-    # num_channels = truth_long_4.shape[1]
+    # num_channels = truth_s_4.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
@@ -111,12 +133,12 @@ def main():
     # plt.show()
 
     # Plot and inspect
-    # num_channels = imu_long.shape[1]
+    # num_channels = imu_s.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(servos_long[0:100000, i], label=f'Servo {i+1}')
-    #     # plt.plot(imu_long[0:100000, i], label=f'IMU {i+1}')
+    #     plt.plot(servos_s[0:100000, i], label=f'Servo {i+1}')
+    #     # plt.plot(imu_s[0:100000, i], label=f'IMU {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -148,31 +170,37 @@ def main():
     # NOTE: 17/04/2024 - Due to fluctuations in the z component, trying with just x, y
     # NOTE: Remember to reshape if adding or removing features
 
-    truth_long = truth_all_long[:, 9:11]
-    print("Truth long shape: ", truth_long.shape)
-    truth_long_2 = truth_all_long_2[:, 9:11]
-    print("Truth long 2 shape: ", truth_long_2.shape)
-    truth_long_3 = truth_all_long_3[:, 9:11]
-    print("Truth long 3 shape: ", truth_long_3.shape)
-    truth_long_4 = truth_all_long_4[:, 9:11]
-    print("Truth long 4 shape: ", truth_long_4.shape)
+    truth_s = truth_all_s[:, 9:11]
+    print("Truth s shape: ", truth_s.shape)
+    truth_s_2 = truth_all_s_2[:, 9:11]
+    print("Truth s 2 shape: ", truth_s_2.shape)
+    truth_s_3 = truth_all_s_3[:, 9:11]
+    print("Truth s 3 shape: ", truth_s_3.shape)
+    truth_s_4 = truth_all_s_4[:, 9:11]
+    print("Truth s 4 shape: ", truth_s_4.shape)
+    truth_s_5 = truth_all_s_5[:, 9:11]
+    print("Truth s 4 shape: ", truth_s_4.shape)
+    truth_s_6 = truth_all_s_6[:, 9:11]
+    print("Truth s 4 shape: ", truth_s_4.shape)
 
     # Smooth targets using gaussian filter
-    # truth_long_smoothed = gaussian_smooth(truth_long, 50)
-    # truth_long_2_smoothed = gaussian_smooth(truth_long_2, 50)
-    # truth_long_3_smoothed = gaussian_smooth(truth_long_3, 50)
-    # truth_long_4_smoothed = gaussian_smooth(truth_long_4, 50)
+    # truth_s_smoothed = gaussian_smooth(truth_s, 50)
+    # truth_s_2_smoothed = gaussian_smooth(truth_s_2, 50)
+    # truth_s_3_smoothed = gaussian_smooth(truth_s_3, 50)
+    # truth_s_4_smoothed = gaussian_smooth(truth_s_4, 50)
+    # truth_s_5_smoothed = gaussian_smooth(truth_s_5, 50)
+    # truth_s_6_smoothed = gaussian_smooth(truth_s_6, 50)
 
-    # print("truth 1: ", truth_long.shape)
-    # print("Smoothed truth 1: ", truth_long_smoothed.shape)
+    # print("truth 1: ", truth_s.shape)
+    # print("Smoothed truth 1: ", truth_s_smoothed.shape)
 
     # Plot and inspect
-    # num_channels = truth_long.shape[1]
+    # num_channels = truth_s.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(truth_long[20000:50000, i], label=f'Unsmoothed {i+1}')
-    #     plt.plot(truth_long_smoothed[20000:50000, i], label=f'Smoothed {i+1}')
+    #     plt.plot(truth_s[20000:50000, i], label=f'Unsmoothed {i+1}')
+    #     plt.plot(truth_s_smoothed[20000:50000, i], label=f'Smoothed {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -180,10 +208,10 @@ def main():
     # plt.show()
 
     # join separate arrays
-    imu_joined = np.concatenate([imu_long, imu_long_2, imu_long_3, imu_long_4], axis=0)
-    servos_joined = np.concatenate([servos_long, servos_long_2, servos_long_3, servos_long_4], axis=0)
-    # truth_joined = np.concatenate([truth_long_smoothed, truth_long_2_smoothed, truth_long_3_smoothed, truth_long_4_smoothed], axis=0)
-    truth_joined = np.concatenate([truth_long, truth_long_2, truth_long_3, truth_long_4], axis=0)
+    imu_joined = np.concatenate([imu_s, imu_s_2, imu_s_3, imu_s_4, imu_s_5, imu_s_6], axis=0)
+    servos_joined = np.concatenate([servos_s, servos_s_2, servos_s_3, servos_s_4, servos_s_5, servos_s_6], axis=0)
+    # truth_joined = np.concatenate([truth_s_smoothed, truth_s_2_smoothed, truth_s_3_smoothed, truth_s_4_smoothed, truth_s_5_smoothed, truth_s_6_smoothed], axis=0)
+    truth_joined = np.concatenate([truth_s, truth_s_2, truth_s_3, truth_s_4, truth_s_5, truth_s_6], axis=0)
     # debugs
     print("imu_joined: ", imu_joined.shape)
     print("servos_joined: ",servos_joined.shape)
@@ -314,10 +342,10 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 2   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = system_sample_rate * 3   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 300                          # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 80                          # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Sequence lengths (for return sequences)
     # train_seq_length = input_data_train.shape[0]
@@ -385,7 +413,7 @@ def main():
     test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets))
 
     # Model parameters
-    learning_rate = 0.000035   # Controls how much to change the model in response to error.
+    learning_rate = 0.000165   # Controls how much to change the model in response to error.
     epochs = 50             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
@@ -397,10 +425,9 @@ def main():
     # lr_callback = keras.callbacks.LearningRateScheduler(scheduler)
 
     # ** Loss functions **
-    loss_function = keras.losses.MeanAbsoluteError()
-    loss_function = keras.losses.MeanSquaredError()
-    # loss_function = keras.losses.log_cosh(y_true=1,y_pred=1)
-    # loss_function = keras.losses.Quantile(quantile=0.5)
+    # loss_function = keras.losses.MeanAbsoluteError()
+    # loss_function = keras.losses.MeanSquaredError()
+    loss_function = keras.losses.LogCosh()
     # loss_function = quantile_loss????
     # loss_function = keras.losses.Huber(delta=0.5)
 
@@ -451,18 +478,19 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    dropout = keras.layers.Dropout(rate=0.3)(inputs)
-    lstm = keras.layers.LSTM(100, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.001), return_sequences=True)(dropout)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.35)(inputs)
+    lstm = keras.layers.LSTM(128, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000018, l2=0.00022), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    lstm2 = keras.layers.LSTM(60, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.001), return_sequences=True)(normalise)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.32)(normalise)
+    lstm2 = keras.layers.LSTM(128, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.000023, l2=0.00035), return_sequences=True)(dropout2)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
 
-    lstm3 = keras.layers.LSTM(60, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00035, l2=0.0035), return_sequences=True)(normalise2)    # 32 originally
+    lstm3 = keras.layers.LSTM(64, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00005, l2=0.00035), return_sequences=True)(normalise2)    # 32 originally
     normalise3 = keras.layers.LayerNormalization()(lstm3)
 
     # # Apply attention layer that considers lstm outputs
-    attention = keras.layers.Attention()([normalise3, normalise3])
+    # attention = keras.layers.Attention()([normalise, normalise])
     # # Compute dot product between attention weights and last LSTM layer
     # context_vector = keras.layers.Dot(axes=(1, 1))([attention, normalise3])
 
@@ -470,7 +498,7 @@ def main():
     # normalise4 = keras.layers.LayerNormalization()(lstm4)
     # dropout4 = keras.layers.Dropout(rate=0.35)(normalise4)
     # NOTE: Changed dense layer units to 2 due to removing z component
-    dense1 = keras.layers.Dense(16, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(attention)
+    dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002))(normalise3)
     dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(dense1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
     model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
