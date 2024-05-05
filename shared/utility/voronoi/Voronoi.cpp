@@ -6,4 +6,11 @@
 #include <queue>
 #include <vector>
 
-namespace utility::voronoi {}  // namespace utility::voronoi
+#include "boost/polygon/voronoi.hpp"
+
+namespace utility::voronoi {
+
+    using boost::polygon::voronoi_builder;
+    using boost::polygon::voronoi_diagram;
+
+}  // namespace utility::voronoi

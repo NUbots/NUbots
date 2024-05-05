@@ -379,7 +379,7 @@ RUN npm install -g \
     eslint@8.27.0
 
 RUN install-package \
-    cgal
+    boost
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
