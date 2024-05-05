@@ -1,7 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="5,879,240,920"/>
 <area shape="rect" id="node2" href="$classmodule_1_1extension_1_1Director.html" title=" " alt="" coords="353,879,504,920"/>
-<area shape="rect" id="node3" title=" " alt="" coords="55,2246,190,2273"/>
+<area shape="rect" id="node3" title=" " alt="" coords="55,2275,190,2302"/>
 <area shape="rect" id="node4" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="349,944,508,985"/>
 <area shape="rect" id="node41" href="$classmodule_1_1actuation_1_1KinematicsConfiguration.html" title=" " alt="" coords="337,1009,520,1051"/>
 <area shape="rect" id="node42" href="$classmodule_1_1extension_1_1FileWatcher.html" title=" " alt="" coords="353,1075,504,1116"/>
@@ -49,7 +49,8 @@
 <area shape="rect" id="node84" href="$classmodule_1_1vision_1_1RobotDetector.html" title=" " alt="" coords="319,3522,539,3549"/>
 <area shape="rect" id="node85" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="328,3573,529,3599"/>
 <area shape="rect" id="node86" href="$classmodule_1_1vision_1_1Yolo.html" title=" " alt="" coords="353,3623,505,3650"/>
-<area shape="rect" id="node87" href="$classutility_1_1reactor_1_1StreamReactor.html" title="This reactor implements the common pattern of connecting to a stream device such as a serial port or ..." alt="" coords="307,3674,550,3730"/>
+<area shape="rect" id="node87" href="$classmodule_1_1vision_1_1YoloCoco.html" title=" " alt="" coords="337,3674,521,3701"/>
+<area shape="rect" id="node88" href="$classutility_1_1reactor_1_1StreamReactor.html" title="This reactor implements the common pattern of connecting to a stream device such as a serial port or ..." alt="" coords="307,3725,550,3781"/>
 <area shape="rect" id="node5" href="$classmodule_1_1actuation_1_1FootController.html" title=" " alt="" coords="662,5,810,47"/>
 <area shape="rect" id="node6" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="662,71,810,112"/>
 <area shape="rect" id="node7" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="662,136,810,177"/>

@@ -1,0 +1,5 @@
+<map id="module::vision::YoloCoco" name="module::vision::YoloCoco">
+<area shape="rect" id="node1" title=" " alt="" coords="73,109,257,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,13,140,39"/>
+<area shape="rect" id="node3" href="$structmodule_1_1vision_1_1YoloCoco_1_1Config.html" title="Stores configuration values." alt="" coords="165,5,349,47"/>
+</map>

@@ -703,7 +703,8 @@ var namespaces_dup =
         [ "GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", "classmodule_1_1vision_1_1GreenHorizonDetector" ],
         [ "RobotDetector", "classmodule_1_1vision_1_1RobotDetector.html", "classmodule_1_1vision_1_1RobotDetector" ],
         [ "VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", "classmodule_1_1vision_1_1VisualMesh" ],
-        [ "Yolo", "classmodule_1_1vision_1_1Yolo.html", "classmodule_1_1vision_1_1Yolo" ]
+        [ "Yolo", "classmodule_1_1vision_1_1Yolo.html", "classmodule_1_1vision_1_1Yolo" ],
+        [ "YoloCoco", "classmodule_1_1vision_1_1YoloCoco.html", "classmodule_1_1vision_1_1YoloCoco" ]
       ] ]
     ] ],
     [ "nsga2", null, [

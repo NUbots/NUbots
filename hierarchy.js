@@ -277,6 +277,8 @@ var hierarchy =
     [ "module::vision::visualmesh::VisualMeshRunner", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html", null ],
     [ "module::vision::Yolo::Config", "structmodule_1_1vision_1_1Yolo_1_1Config.html", null ],
     [ "module::vision::Yolo::Object", "structmodule_1_1vision_1_1Yolo_1_1Object.html", null ],
+    [ "module::vision::YoloCoco::Config", "structmodule_1_1vision_1_1YoloCoco_1_1Config.html", null ],
+    [ "module::vision::YoloCoco::Object", "structmodule_1_1vision_1_1YoloCoco_1_1Object.html", null ],
     [ "nsga2::Individual", "classnsga2_1_1Individual.html", null ],
     [ "nsga2::IndividualConfigurator", "structnsga2_1_1IndividualConfigurator.html", null ],
     [ "nsga2::NSGA2", "classnsga2_1_1NSGA2.html", null ],
@@ -371,6 +373,7 @@ var hierarchy =
       [ "module::vision::RobotDetector", "classmodule_1_1vision_1_1RobotDetector.html", null ],
       [ "module::vision::VisualMesh", "classmodule_1_1vision_1_1VisualMesh.html", null ],
       [ "module::vision::Yolo", "classmodule_1_1vision_1_1Yolo.html", null ],
+      [ "module::vision::YoloCoco", "classmodule_1_1vision_1_1YoloCoco.html", null ],
       [ "utility::reactor::StreamReactor< T, Parser, TimeoutTicks, TimeoutPeriod >", "classutility_1_1reactor_1_1StreamReactor.html", null ]
     ] ],
     [ "module::localisation::OccupancyMap< double >", "classmodule_1_1localisation_1_1OccupancyMap.html", null ],

@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['object_675',['Object',['../structmodule_1_1vision_1_1Yolo_1_1Object.html',1,'module::vision::Yolo']]],
-  ['objects_676',['objects',['../classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79',1,'module::vision::Yolo']]],
+  ['object_675',['Object',['../structmodule_1_1vision_1_1Yolo_1_1Object.html',1,'module::vision::Yolo::Object'],['../structmodule_1_1vision_1_1YoloCoco_1_1Object.html',1,'module::vision::YoloCoco::Object']]],
+  ['objects_676',['objects',['../classmodule_1_1vision_1_1YoloCoco.html#afe9611c3f59724a47f5c2cdcfbae88b3',1,'module::vision::YoloCoco::objects()'],['../classmodule_1_1vision_1_1Yolo.html#a5bb57749d26ddcc00a640a7bb5220b79',1,'module::vision::Yolo::objects()']]],
   ['occupancymap_677',['OccupancyMap',['../classmodule_1_1localisation_1_1OccupancyMap.html',1,'module::localisation']]],
   ['occupancymap_3c_20double_20_3e_678',['OccupancyMap&lt; double &gt;',['../classmodule_1_1localisation_1_1OccupancyMap.html',1,'module::localisation']]],
   ['offset_679',['offset',['../structutility_1_1nbs_1_1IndexItem.html#a24ad36421839d2e30b63b6a25af74f26',1,'utility::nbs::IndexItem']]],
