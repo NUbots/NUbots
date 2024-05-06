@@ -216,6 +216,24 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-Headers/archive/r
 RUN install-package ruby
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/refs/tags/v2.3.1.tar.gz
 
+# Eigen3
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+
+# tcmalloc
+RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
+    --build-system autotools \
+    --with-tcmalloc-pagesize=64 \
+    --enable-minimal
+
+# Protobuf
+RUN install-package protobuf && \
+    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
+    --patch https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
+    -DWITH_PROTOC="/usr/sbin/protoc" \
+    -Dprotobuf_BUILD_TESTS=OFF \
+    -Dprotobuf_BUILD_LIBPROTOC=ON \
+    -DBUILD_SHARED_LIBS=OFF
+
 # OpenCV
 RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
 
@@ -248,24 +266,6 @@ RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1 
 
 # Move OpenVino libraries to our library path
 RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
-
-# Eigen3
-RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
-
-# tcmalloc
-RUN install-from-source https://github.com/gperftools/gperftools/releases/download/gperftools-2.10/gperftools-2.10.tar.gz \
-    --build-system autotools \
-    --with-tcmalloc-pagesize=64 \
-    --enable-minimal
-
-# Protobuf
-RUN install-package protobuf && \
-    install-from-source https://github.com/protocolbuffers/protobuf/releases/download/v21.4/protobuf-cpp-3.21.4.tar.gz \
-    --patch https://github.com/protocolbuffers/protobuf/commit/735221ff3a1b8e5ca1a7b38a1884043e25864f31.patch \
-    -DWITH_PROTOC="/usr/sbin/protoc" \
-    -Dprotobuf_BUILD_TESTS=OFF \
-    -Dprotobuf_BUILD_LIBPROTOC=ON \
-    -DBUILD_SHARED_LIBS=OFF
 
 # Libjpeg
 RUN install-package yasm
