@@ -54,7 +54,7 @@ export class FieldDimensionSelector extends React.Component<FieldDimensionSelect
 
   render(): JSX.Element {
     return (
-      <EnhancedDropdown dropdownToggle={this.dropdownToggle} className={style.localisation__menuItem}>
+      <EnhancedDropdown dropdownToggle={this.dropdownToggle}>
         <div className="bg-white rounded-lg w-28">
           {FieldDimensionOptions.map((option) => (
             <div
