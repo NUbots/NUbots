@@ -371,7 +371,7 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
     -DBUILD_TESTS=OFF
 
 # lame
-RUN install-package lame
+RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
