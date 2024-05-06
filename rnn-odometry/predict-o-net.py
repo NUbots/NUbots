@@ -11,7 +11,7 @@ test_data = np.load('datasets/input_data_test.npy')
 test_targets = np.load('datasets/input_targets_test.npy')
 
 # Load model
-model = load_model('models/model-20240428-184520')
+model = load_model('models/model-20240505-170750')
 
 # Plot and inspect loaded data
 # num_channels = test_data.shape[1]
@@ -24,10 +24,10 @@ model = load_model('models/model-20240428-184520')
 # plt.show()
 
 system_sample_rate = 115
-sequence_length = system_sample_rate * 2    # Look back 3 seconds
+sequence_length = system_sample_rate * 3    # Look back 3 seconds
 sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
 sampling_rate = 1                           # Used for downsampling
-batch_size = 500
+batch_size = 64
 #NOTE: Using return_sequences=True. sequence_length should be = axis 0 of array (total sequence length) (WRONG)
 # Create test dataset
 
