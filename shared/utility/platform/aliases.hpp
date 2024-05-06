@@ -36,20 +36,26 @@ namespace utility::platform {
     /// @param hostname The hostname of the robot
     /// @return The alias of the robot, if it exists, otherwise an empty string
     inline std::string get_robot_alias(std::string hostname) {
-        // Get robot aliases
-        YAML::Node config = YAML::LoadFile("config/robot_names.yaml");
+        try {
+            // Get robot aliases
+            YAML::Node config = YAML::LoadFile("config/robot_names.yaml");
 
-        // Create a map to hold the aliases
-        std::map<std::string, std::string> robot_aliases{};
+            // Create a map to hold the aliases
+            std::map<std::string, std::string> robot_aliases{};
 
-        // Get the "robot_alias" node and iterate over it
-        for (const auto& node : config["robot_alias"]) {
-            // Get the hostname and name from each node and add them to the map
-            robot_aliases[node["hostname"].as<std::string>()] = node["robot_name"].as<std::string>();
+            // Get the "robot_alias" node and iterate over it
+            for (const auto& node : config["robot_alias"]) {
+                // Get the hostname and name from each node and add them to the map
+                robot_aliases[node["hostname"].as<std::string>()] = node["robot_name"].as<std::string>();
+            }
+
+            // Return the name of the robot or empty if it doesn't exist
+            return robot_aliases.find(hostname) != robot_aliases.end() ? robot_aliases[hostname] : "";
         }
-
-        // Return the name of the robot or empty if it doesn't exist
-        return robot_aliases.find(hostname) != robot_aliases.end() ? robot_aliases[hostname] : "";
+        // If anything went wrong, return empty string
+        catch (const std::exception& e) {
+            return "";
+        }
     }
 }  // namespace utility::platform
 
