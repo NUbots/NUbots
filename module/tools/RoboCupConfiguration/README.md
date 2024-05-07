@@ -25,6 +25,8 @@ The interface has the following commands (shift-letter for uppercase)
 - N: applies network changes specified, restarts network services
 - S: starts the robocup service, which will start the robocup binary, and will rerun if it stops
 - D: stops the robocup service
+- E: enables wifi, useful for if it has been disabled and the robot is about to play a game.
+- W: disables wifi, useful for after a RoboCup game as wifi congestion is an issue at RoboCup and it is important to disconnect from any field networks when not playing.
 - X: shutdown the program
 
 ## Consumes

@@ -121,6 +121,14 @@ namespace module::tools {
                     system("systemctl stop robocup");
                     log_message = "RoboCup service stopped!";
                     break;
+                case 'E':  // enables wifi services
+                    system("systemctl enable wpa_supplicant");
+                    system("systemctl enable systemd-networkd");
+                    break;
+                case 'W':  // disables wifi services
+                    system("systemctl disable wpa_supplicant");
+                    system("systemctl disable systemd-networkd");
+                    break;
                 case 'X':  // shutdown powerplant
                     powerplant.shutdown();
                     break;
@@ -448,11 +456,20 @@ namespace module::tools {
         attroff(A_BOLD);
 
         // Each Command
-        const char* COMMANDS[] = {"ENTER", "SPACE", "F", "R", "C", "N", "S", "D", "X"};
+        const char* COMMANDS[] = {"ENTER", "SPACE", "F", "R", "C", "N", "S", "D", "E", "W", "X"};
 
         // Each Meaning
-        const char* MEANINGS[] =
-            {"Edit", "Toggle", "Refresh", "Reset", "Configure", "Network", "Start RoboCup", "Stop RoboCup", "Shutdown"};
+        const char* MEANINGS[] = {"Edit",
+                                  "Toggle",
+                                  "Refresh",
+                                  "Reset",
+                                  "Configure",
+                                  "Network",
+                                  "Start RoboCup",
+                                  "Stop RoboCup",
+                                  "Enable Wifi",
+                                  "Disable Wifi",
+                                  "Shutdown"};
 
         // Prints commands and their meanings to the screen
         for (size_t i = 0; i < (sizeof(COMMANDS) / sizeof(COMMANDS[0])); i = i + 2) {
