@@ -57,4 +57,4 @@ namespace module::platform::NUSense {
         return nullptr;
     }
 
-}  // namespace module::platform::NUsense
+}  // namespace module::platform::NUSense

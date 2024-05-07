@@ -35,6 +35,6 @@ namespace module::platform::NUSense {
         std::vector<uint8_t> buffer;
     };
 
-}  // namespace module::platform::NUsense
+}  // namespace module::platform::NUSense
 
 #endif  // MODULE_PLATFORM_NUSENSE_HARDWAREIO_NUSENSE_PARSER_HPP
