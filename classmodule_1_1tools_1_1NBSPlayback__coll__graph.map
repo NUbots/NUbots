@@ -1,0 +1,5 @@
+<map id="module::tools::NBSPlayback" name="module::tools::NBSPlayback">
+<area shape="rect" id="node1" title=" " alt="" coords="66,95,271,121"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,140,32"/>
+<area shape="rect" id="node3" href="$classutility_1_1support_1_1ProgressBar.html" title="This class displays a progress on a single line in the terminal showing rates and a bar to show progr..." alt="" coords="165,5,367,32"/>
+</map>

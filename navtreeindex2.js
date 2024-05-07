@@ -1,5 +1,11 @@
 var NAVTREEINDEX2 =
 {
+"classextension_1_1behaviour_1_1information_1_1InformationSource.html#ae0a241ca949acab1dbf830f8f7f2a75f":[2,0,1,0,1,0,2],
+"classextension_1_1behaviour_1_1information_1_1InformationSource.html#afb11f57bbc4cf64aa0f0f0ff96f2020d":[2,0,1,0,1,0,1],
+"classmodule_1_1actuation_1_1FootController.html":[2,0,3,0,0],
+"classmodule_1_1actuation_1_1FootController.html#a140fee33039e44546f260968fd9d2269":[2,0,3,0,0,2],
+"classmodule_1_1actuation_1_1FootController.html#ad0346a7f6c09509f58b61be629230bab":[2,0,3,0,0,3],
+"classmodule_1_1actuation_1_1FootController.html#af234ad3a8333c0e6ba6696bfc0454a7a":[2,0,3,0,0,1],
 "classmodule_1_1actuation_1_1Kinematics.html":[2,0,3,0,1],
 "classmodule_1_1actuation_1_1Kinematics.html#a2c73536a3eb74f5d5de9e8df770c1f70":[2,0,3,0,1,5],
 "classmodule_1_1actuation_1_1Kinematics.html#a2f6755b6573c355234bf721f129960dd":[2,0,3,0,1,2],
@@ -243,11 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1localisation_1_1FieldModel.html#ae392c9de5918161c653631a727e9ae8e":[2,0,3,3,4,6],
 "classmodule_1_1localisation_1_1FieldModel.html#ae46e208e6f9bec5d320ae475f2dde87b":[2,0,3,3,4,3],
 "classmodule_1_1localisation_1_1FieldModel.html#af4df90ecfe6aeac74157935ddde83832":[2,0,3,3,4,1],
-"classmodule_1_1localisation_1_1FieldModel.html#afa176aa983a13b0bf92f03227b7a4047":[2,0,3,3,4,11],
-"classmodule_1_1localisation_1_1FieldModel.html#afd9b0d67b46d1cee522bd1894ae0d1d9":[2,0,3,3,4,13],
-"classmodule_1_1localisation_1_1OccupancyMap.html":[2,0,3,3,5],
-"classmodule_1_1localisation_1_1OccupancyMap.html#a01726e6e4877e9d4fda1bf6104bc3a03":[2,0,3,3,5,4],
-"classmodule_1_1localisation_1_1OccupancyMap.html#a15c1432dc72c7ec98ff12b1fc689d0d8":[2,0,3,3,5,10],
-"classmodule_1_1localisation_1_1OccupancyMap.html#a2ce98900abdb784a2478820dd69ee47d":[2,0,3,3,5,7],
-"classmodule_1_1localisation_1_1OccupancyMap.html#a3b4ead5da00d9640976cfaebbd989a7f":[2,0,3,3,5,2]
+"classmodule_1_1localisation_1_1FieldModel.html#afa176aa983a13b0bf92f03227b7a4047":[2,0,3,3,4,11]
 };

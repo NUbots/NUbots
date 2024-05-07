@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: utility::clock::ClockData Struct Reference</title>
+    <title>NUbots: utility::support::enumerate&lt; T &gt; Struct Template Reference</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -147,7 +147,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('structutility_1_1clock_1_1ClockData.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structutility_1_1support_1_1enumerate.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -167,38 +167,114 @@ $(document).ready(function(){initNavTree('structutility_1_1clock_1_1ClockData.ht
 
 <div class="header">
   <div class="summary">
-<a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="structutility_1_1clock_1_1ClockData-members.html">List of all members</a>  </div>
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="structutility_1_1support_1_1enumerate-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">utility::clock::ClockData Struct Reference</div>  </div>
+<div class="title">utility::support::enumerate&lt; T &gt; Struct Template Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>Allows for python like enumeration.  
+ <a href="structutility_1_1support_1_1enumerate.html#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="enumerate_8hpp_source.html">enumerate.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for utility::support::enumerate&lt; T &gt;:</div>
+<div class="dyncontent">
+<div class="center"><img src="structutility_1_1support_1_1enumerate__coll__graph.png" border="0" usemap="#autility_1_1support_1_1enumerate_3_01T_01_4_coll__map" alt="Collaboration graph"/></div>
+<map name="autility_1_1support_1_1enumerate_3_01T_01_4_coll__map" id="autility_1_1support_1_1enumerate_3_01T_01_4_coll__map">
+<area shape="rect" title="Allows for python like enumeration." alt="" coords="5,95,239,121"/>
+<area shape="rect" title=" " alt="" coords="103,5,141,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a888a9015a04bcee16592b8ab782259a0"><td class="memItemLeft" align="right" valign="top"><a id="a888a9015a04bcee16592b8ab782259a0"></a>
-NUClear::base_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1clock_1_1ClockData.html#a888a9015a04bcee16592b8ab782259a0">epoch</a> = <a class="el" href="structutility_1_1clock_1_1ClockData.html#a5062cef5be88869cea0770715fc61615">last_update</a></td></tr>
-<tr class="memdesc:a888a9015a04bcee16592b8ab782259a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Our calculated time when the clock was last updated in simulated time. <br /></td></tr>
-<tr class="separator:a888a9015a04bcee16592b8ab782259a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5062cef5be88869cea0770715fc61615"><td class="memItemLeft" align="right" valign="top"><a id="a5062cef5be88869cea0770715fc61615"></a>
-NUClear::base_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1clock_1_1ClockData.html#a5062cef5be88869cea0770715fc61615">last_update</a> = NUClear::base_clock::now()</td></tr>
-<tr class="memdesc:a5062cef5be88869cea0770715fc61615"><td class="mdescLeft">&#160;</td><td class="mdescRight">When the clock was last updated under the true time. <br /></td></tr>
-<tr class="separator:a5062cef5be88869cea0770715fc61615"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab22ccfbeb8b16f32bfdddef32b7548ad"><td class="memItemLeft" align="right" valign="top"><a id="ab22ccfbeb8b16f32bfdddef32b7548ad"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1clock_1_1ClockData.html#ab22ccfbeb8b16f32bfdddef32b7548ad">rtf</a> = 1.0</td></tr>
-<tr class="memdesc:ab22ccfbeb8b16f32bfdddef32b7548ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">The real time factor of the simulated clock. <br /></td></tr>
-<tr class="separator:ab22ccfbeb8b16f32bfdddef32b7548ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1support_1_1enumerate_1_1iterator.html">iterator</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A wrapper for the actual iterator.  <a href="structutility_1_1support_1_1enumerate_1_1iterator.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a02a7d9937031dc75c03bcc805221ae4d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1support_1_1enumerate.html#a02a7d9937031dc75c03bcc805221ae4d">enumerate</a> (T &amp;iterable)</td></tr>
+<tr class="memdesc:a02a7d9937031dc75c03bcc805221ae4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Wraps an iterable to behave like python enumerate.  <a href="structutility_1_1support_1_1enumerate.html#a02a7d9937031dc75c03bcc805221ae4d">More...</a><br /></td></tr>
+<tr class="separator:a02a7d9937031dc75c03bcc805221ae4d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9180c340a420c4b54ffe2d6b374671d0"><td class="memItemLeft" align="right" valign="top"><a id="a9180c340a420c4b54ffe2d6b374671d0"></a>
+constexpr <a class="el" href="structutility_1_1support_1_1enumerate_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1support_1_1enumerate.html#a9180c340a420c4b54ffe2d6b374671d0">begin</a> () noexcept</td></tr>
+<tr class="memdesc:a9180c340a420c4b54ffe2d6b374671d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">An iterator to the start of the iterable. <br /></td></tr>
+<tr class="separator:a9180c340a420c4b54ffe2d6b374671d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5199379e1b16bf034ebb35b455b9f05b"><td class="memItemLeft" align="right" valign="top"><a id="a5199379e1b16bf034ebb35b455b9f05b"></a>
+constexpr <a class="el" href="structutility_1_1support_1_1enumerate_1_1iterator.html">iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structutility_1_1support_1_1enumerate.html#a5199379e1b16bf034ebb35b455b9f05b">end</a> () noexcept</td></tr>
+<tr class="memdesc:a5199379e1b16bf034ebb35b455b9f05b"><td class="mdescLeft">&#160;</td><td class="mdescRight">An iterator to the end of the iterable. <br /></td></tr>
+<tr class="separator:a5199379e1b16bf034ebb35b455b9f05b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:a498c9e7d25d1fdf8add1ad74d5e657c0"><td class="memItemLeft" align="right" valign="top"><a id="a498c9e7d25d1fdf8add1ad74d5e657c0"></a>
+T &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>iterable</b></td></tr>
+<tr class="separator:a498c9e7d25d1fdf8add1ad74d5e657c0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><h3>template&lt;std::ranges::range T&gt;<br />
+struct utility::support::enumerate&lt; T &gt;</h3>
+
+<p>Allows for python like enumeration. </p>
+<dl class="section warning"><dt>Warning</dt><dd>Will cause problems if iterable is destroyed </dd></dl>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The type of the iterable to iterate over, should be automatically deduced </td></tr>
+  </table>
+  </dd>
+</dl>
+</div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
+<a id="a02a7d9937031dc75c03bcc805221ae4d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a02a7d9937031dc75c03bcc805221ae4d">&#9670;&nbsp;</a></span>enumerate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;std::ranges::range T&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structutility_1_1support_1_1enumerate.html">utility::support::enumerate</a>&lt; T &gt;::<a class="el" href="structutility_1_1support_1_1enumerate.html">enumerate</a> </td>
+          <td>(</td>
+          <td class="paramtype">T &amp;&#160;</td>
+          <td class="paramname"><em>iterable</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Wraps an iterable to behave like python enumerate. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iterable</td><td>An iterable container to wrap </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>shared/clock/clock.cpp</li>
+<li>shared/utility/support/<a class="el" href="enumerate_8hpp_source.html">enumerate.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>utility</b></li><li class="navelem"><b>clock</b></li><li class="navelem"><a class="el" href="structutility_1_1clock_1_1ClockData.html">ClockData</a></li>
-    <li class="footer">Generated on Mon May 6 2024 10:29:13 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="navelem"><b>utility</b></li><li class="navelem"><b>support</b></li><li class="navelem"><a class="el" href="structutility_1_1support_1_1enumerate.html">enumerate</a></li>
+    <li class="footer">Generated on Tue May 7 2024 12:47:19 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -202,35 +202,35 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a8bcc18383863ce4a92b956963860c860"><td class="memItemLeft" ><a id="a8bcc18383863ce4a92b956963860c860"></a>
+<tr class="memitem:a1bd43a7e2be88f3c4924ec311af6213f"><td class="memItemLeft" ><a id="a1bd43a7e2be88f3c4924ec311af6213f"></a>
 struct {</td></tr>
-<tr class="memitem:adbfc11fd53bc51c31cbd256bdc333fbf"><td class="memItemLeft" >
+<tr class="memitem:aefc90224c7bb7237f6bcfbeab807b457"><td class="memItemLeft" >
 &#160;&#160;&#160;Eigen::Vector3d&#160;&#160;&#160;<a class="el" href="classmodule_1_1vision_1_1BallDetector.html#a07542e3c009cdbda8b747dae65de0443">ball_angular_cov</a> = Eigen::Vector3d::Zero()</td></tr>
-<tr class="memdesc:adbfc11fd53bc51c31cbd256bdc333fbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measurement certainties for ball localisation. <br /></td></tr>
-<tr class="separator:adbfc11fd53bc51c31cbd256bdc333fbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6ccb9013622449c56855fdc51a20854"><td class="memItemLeft" >
+<tr class="memdesc:aefc90224c7bb7237f6bcfbeab807b457"><td class="mdescLeft">&#160;</td><td class="mdescRight">Measurement certainties for ball localisation. <br /></td></tr>
+<tr class="separator:aefc90224c7bb7237f6bcfbeab807b457"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad094932a071489faca81bad77d6f53fb"><td class="memItemLeft" >
 &#160;&#160;&#160;int&#160;&#160;&#160;<a class="el" href="classmodule_1_1vision_1_1BallDetector.html#af27571cebdabe6fd96ca31df77a22d3a">cluster_points</a> = 0</td></tr>
-<tr class="memdesc:ad6ccb9013622449c56855fdc51a20854"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of points for a cluster to be a viable ball. <br /></td></tr>
-<tr class="separator:ad6ccb9013622449c56855fdc51a20854"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae9805309f9010aa64acb600627b9cf9e"><td class="memItemLeft" >
+<tr class="memdesc:ad094932a071489faca81bad77d6f53fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum number of points for a cluster to be a viable ball. <br /></td></tr>
+<tr class="separator:ad094932a071489faca81bad77d6f53fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0120a3dbaeda1f7b49432f812dab03d7"><td class="memItemLeft" >
 &#160;&#160;&#160;double&#160;&#160;&#160;<a class="el" href="classmodule_1_1vision_1_1BallDetector.html#ae1cf5e0a55fdd2aa990fa856a6eaf9b9">confidence_threshold</a> = 0.0f</td></tr>
-<tr class="memdesc:ae9805309f9010aa64acb600627b9cf9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum confidence required for a ball point to be a ball point. <br /></td></tr>
-<tr class="separator:ae9805309f9010aa64acb600627b9cf9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3db6d2a37781095826df6999e2688d3"><td class="memItemLeft" >
+<tr class="memdesc:a0120a3dbaeda1f7b49432f812dab03d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum confidence required for a ball point to be a ball point. <br /></td></tr>
+<tr class="separator:a0120a3dbaeda1f7b49432f812dab03d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc48eb567c4ac6d29e83b4c9f488437d"><td class="memItemLeft" >
 &#160;&#160;&#160;double&#160;&#160;&#160;<a class="el" href="classmodule_1_1vision_1_1BallDetector.html#a13c93d4c232967260da96066fa09aaa7">distance_disagreement</a> = 0.0f</td></tr>
-<tr class="memdesc:ad3db6d2a37781095826df6999e2688d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Percentage difference between width and projection based distances. 0.0 means that the distance measurements must match perfectly. <br /></td></tr>
-<tr class="separator:ad3db6d2a37781095826df6999e2688d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac39f2f2e2f35b784b3dab63ebbf3c0cc"><td class="memItemLeft" >
+<tr class="memdesc:afc48eb567c4ac6d29e83b4c9f488437d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Percentage difference between width and projection based distances. 0.0 means that the distance measurements must match perfectly. <br /></td></tr>
+<tr class="separator:afc48eb567c4ac6d29e83b4c9f488437d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac8b5bc60a28f459ed73e0c3a84c3042a"><td class="memItemLeft" >
 &#160;&#160;&#160;double&#160;&#160;&#160;<a class="el" href="classmodule_1_1vision_1_1BallDetector.html#a074f9906f5c203c67397ba469cea4869">maximum_deviation</a> = 0.0f</td></tr>
-<tr class="memdesc:ac39f2f2e2f35b784b3dab63ebbf3c0cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">A threshold on how large the standard deviation of the angle between ray and cone axis can be. <br /></td></tr>
-<tr class="separator:ac39f2f2e2f35b784b3dab63ebbf3c0cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9dd7406bdc91a6efb48da1aca7679673"><td class="memItemLeft" >
+<tr class="memdesc:ac8b5bc60a28f459ed73e0c3a84c3042a"><td class="mdescLeft">&#160;</td><td class="mdescRight">A threshold on how large the standard deviation of the angle between ray and cone axis can be. <br /></td></tr>
+<tr class="separator:ac8b5bc60a28f459ed73e0c3a84c3042a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a180cd4861359a31d93eca0433897247a"><td class="memItemLeft" >
 &#160;&#160;&#160;double&#160;&#160;&#160;<a class="el" href="classmodule_1_1vision_1_1BallDetector.html#aa2ccc4afe38b2c1772bd5fe532b0aa3b">minimum_ball_distance</a> = 0.0f</td></tr>
-<tr class="memdesc:a9dd7406bdc91a6efb48da1aca7679673"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum distance for a cluster to be a viable ball. <br /></td></tr>
-<tr class="separator:a9dd7406bdc91a6efb48da1aca7679673"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8bcc18383863ce4a92b956963860c860"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1BallDetector.html#a8bcc18383863ce4a92b956963860c860">cfg</a></td></tr>
-<tr class="memdesc:a8bcc18383863ce4a92b956963860c860"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration values. <br /></td></tr>
-<tr class="separator:a8bcc18383863ce4a92b956963860c860"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:a180cd4861359a31d93eca0433897247a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Minimum distance for a cluster to be a viable ball. <br /></td></tr>
+<tr class="separator:a180cd4861359a31d93eca0433897247a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1bd43a7e2be88f3c4924ec311af6213f"><td class="memItemLeft" valign="top">}&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1vision_1_1BallDetector.html#a1bd43a7e2be88f3c4924ec311af6213f">cfg</a></td></tr>
+<tr class="memdesc:a1bd43a7e2be88f3c4924ec311af6213f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configuration values. <br /></td></tr>
+<tr class="separator:a1bd43a7e2be88f3c4924ec311af6213f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/vision/BallDetector/src/<a class="el" href="BallDetector_8hpp_source.html">BallDetector.hpp</a></li>
@@ -242,7 +242,7 @@ struct {</td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>vision</b></li><li class="navelem"><a class="el" href="classmodule_1_1vision_1_1BallDetector.html">BallDetector</a></li>
-    <li class="footer">Generated on Mon May 6 2024 10:29:13 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue May 7 2024 12:47:19 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

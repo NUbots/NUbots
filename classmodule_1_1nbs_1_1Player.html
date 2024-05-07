@@ -1,0 +1,338 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::nbs::Player Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1nbs_1_1Player.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="classmodule_1_1nbs_1_1Player-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::nbs::Player Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+Inheritance diagram for module::nbs::Player:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1nbs_1_1Player__inherit__graph.png" border="0" usemap="#amodule_1_1nbs_1_1Player_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1nbs_1_1Player_inherit__map" id="amodule_1_1nbs_1_1Player_inherit__map">
+<area shape="rect" title=" " alt="" coords="5,80,156,107"/>
+<area shape="rect" title=" " alt="" coords="13,5,148,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::nbs::Player:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1nbs_1_1Player__coll__graph.png" border="0" usemap="#amodule_1_1nbs_1_1Player_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1nbs_1_1Player_coll__map" id="amodule_1_1nbs_1_1Player_coll__map">
+<area shape="rect" title=" " alt="" coords="159,571,309,597"/>
+<area shape="rect" title=" " alt="" coords="5,474,140,501"/>
+<area shape="rect" href="structutility_1_1nbs_1_1Decoder_1_1Iterator.html" title=" " alt="" coords="165,467,317,508"/>
+<area shape="rect" href="classutility_1_1nbs_1_1Decoder.html" title=" " alt="" coords="290,377,442,404"/>
+<area shape="rect" href="classutility_1_1nbs_1_1Index.html" title=" " alt="" coords="300,288,435,315"/>
+<area shape="rect" href="classutility_1_1nbs_1_1IndexStorage.html" title=" " alt="" coords="277,199,461,225"/>
+<area shape="rect" href="structutility_1_1nbs_1_1IndexItemFile.html" title=" " alt="" coords="167,95,354,121"/>
+<area shape="rect" href="structutility_1_1nbs_1_1IndexItem.html" title=" " alt="" coords="179,5,343,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a6cd14280f6f80f5851ea48a4856a9a53"><td class="memItemLeft" align="right" valign="top"><a id="a6cd14280f6f80f5851ea48a4856a9a53"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a6cd14280f6f80f5851ea48a4856a9a53">Player</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+<tr class="memdesc:a6cd14280f6f80f5851ea48a4856a9a53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1nbs_1_1Player.html">Player</a> reactor. <br /></td></tr>
+<tr class="separator:a6cd14280f6f80f5851ea48a4856a9a53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad111f41bdb83fb6b194b3ea4f680d1b"><td class="memItemLeft" align="right" valign="top"><a id="aad111f41bdb83fb6b194b3ea4f680d1b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#aad111f41bdb83fb6b194b3ea4f680d1b">emit_next_message</a> ()</td></tr>
+<tr class="memdesc:aad111f41bdb83fb6b194b3ea4f680d1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tries to emit the next message from the decoder if it is time. <br /></td></tr>
+<tr class="separator:aad111f41bdb83fb6b194b3ea4f680d1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f180de87766dc8785fcd5a8d51ab48f"><td class="memItemLeft" align="right" valign="top"><a id="a3f180de87766dc8785fcd5a8d51ab48f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a3f180de87766dc8785fcd5a8d51ab48f">enable_idle_handle</a> ()</td></tr>
+<tr class="memdesc:a3f180de87766dc8785fcd5a8d51ab48f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds and enables idle handle, which will run when the system is idle and try to emit the next message. <br /></td></tr>
+<tr class="separator:a3f180de87766dc8785fcd5a8d51ab48f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5819b1cc4b9de9bb79038dfacf222c75"><td class="memItemLeft" align="right" valign="top"><a id="a5819b1cc4b9de9bb79038dfacf222c75"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a5819b1cc4b9de9bb79038dfacf222c75">enable_main_loop_handle</a> ()</td></tr>
+<tr class="memdesc:a5819b1cc4b9de9bb79038dfacf222c75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds and enable main loop handle, which will always run trying to emit the next message. <br /></td></tr>
+<tr class="separator:a5819b1cc4b9de9bb79038dfacf222c75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a795356048fc939b9f673dc243eb61896"><td class="memItemLeft" align="right" valign="top"><a id="a795356048fc939b9f673dc243eb61896"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a795356048fc939b9f673dc243eb61896">register_emitters</a> ()</td></tr>
+<tr class="memdesc:a795356048fc939b9f673dc243eb61896"><td class="mdescLeft">&#160;</td><td class="mdescRight">Register the functions that will decode and emit the message types. <br /></td></tr>
+<tr class="separator:a795356048fc939b9f673dc243eb61896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
+Public Attributes</h2></td></tr>
+<tr class="memitem:a06d3d0032b49f026994fd51a10363b5a"><td class="memItemLeft" align="right" valign="top"><a id="a06d3d0032b49f026994fd51a10363b5a"></a>
+std::condition_variable&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a06d3d0032b49f026994fd51a10363b5a">cv</a></td></tr>
+<tr class="memdesc:a06d3d0032b49f026994fd51a10363b5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Condition variable to signal when the decoder loop should continue. <br /></td></tr>
+<tr class="separator:a06d3d0032b49f026994fd51a10363b5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a869d9dd08b5ad65e48649c03dbd489e7"><td class="memItemLeft" align="right" valign="top"><a id="a869d9dd08b5ad65e48649c03dbd489e7"></a>
+<a class="el" href="classutility_1_1nbs_1_1Decoder.html">utility::nbs::Decoder</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a869d9dd08b5ad65e48649c03dbd489e7">decoder</a></td></tr>
+<tr class="memdesc:a869d9dd08b5ad65e48649c03dbd489e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">NBS file decoder. <br /></td></tr>
+<tr class="separator:a869d9dd08b5ad65e48649c03dbd489e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44104b06077dcc763ac44b9afcd84435"><td class="memItemLeft" align="right" valign="top"><a id="a44104b06077dcc763ac44b9afcd84435"></a>
+<a class="el" href="structutility_1_1nbs_1_1Decoder_1_1Iterator.html">utility::nbs::Decoder::Iterator</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a44104b06077dcc763ac44b9afcd84435">decoder_iterator</a> = decoder.begin()</td></tr>
+<tr class="memdesc:a44104b06077dcc763ac44b9afcd84435"><td class="mdescLeft">&#160;</td><td class="mdescRight">NBS file iterator. <br /></td></tr>
+<tr class="separator:a44104b06077dcc763ac44b9afcd84435"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a59c01d75596965d064fa79c5c41ddbae"><td class="memItemLeft" align="right" valign="top"><a id="a59c01d75596965d064fa79c5c41ddbae"></a>
+std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a59c01d75596965d064fa79c5c41ddbae">decoder_mutex</a></td></tr>
+<tr class="memdesc:a59c01d75596965d064fa79c5c41ddbae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex for the decoder and idle mutex logic. <br /></td></tr>
+<tr class="separator:a59c01d75596965d064fa79c5c41ddbae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f3966d833406d5647eb153da0c7476f"><td class="memItemLeft" align="right" valign="top"><a id="a0f3966d833406d5647eb153da0c7476f"></a>
+std::map&lt; uint64_t, std::function&lt; void(<a class="el" href="classutility_1_1nbs_1_1Decoder.html">utility::nbs::Decoder</a> &amp;)&gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>emitters</b></td></tr>
+<tr class="separator:a0f3966d833406d5647eb153da0c7476f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0bf0f51d78fa67a2efdab7eb5d69ecdc"><td class="memItemLeft" align="right" valign="top"><a id="a0bf0f51d78fa67a2efdab7eb5d69ecdc"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a0bf0f51d78fa67a2efdab7eb5d69ecdc">end_time</a> = NUClear::clock::time_point::min()</td></tr>
+<tr class="memdesc:a0bf0f51d78fa67a2efdab7eb5d69ecdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">The latest timestamp across all files in the player. <br /></td></tr>
+<tr class="separator:a0bf0f51d78fa67a2efdab7eb5d69ecdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22d7bd96ee73564b3f2d5ceb7858eea6"><td class="memItemLeft" align="right" valign="top"><a id="a22d7bd96ee73564b3f2d5ceb7858eea6"></a>
+NUClear::threading::ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a22d7bd96ee73564b3f2d5ceb7858eea6">idle_handle</a></td></tr>
+<tr class="memdesc:a22d7bd96ee73564b3f2d5ceb7858eea6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Idle handle. <br /></td></tr>
+<tr class="separator:a22d7bd96ee73564b3f2d5ceb7858eea6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb6ffd1f6677ccdb40b935550846940b"><td class="memItemLeft" align="right" valign="top"><a id="abb6ffd1f6677ccdb40b935550846940b"></a>
+NUClear::threading::ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#abb6ffd1f6677ccdb40b935550846940b">main_loop_handle</a></td></tr>
+<tr class="memdesc:abb6ffd1f6677ccdb40b935550846940b"><td class="mdescLeft">&#160;</td><td class="mdescRight">On always main loop handle. <br /></td></tr>
+<tr class="separator:abb6ffd1f6677ccdb40b935550846940b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a460c0ea9156b7465aa0fb46f91117ec8"><td class="memItemLeft" align="right" valign="top"><a id="a460c0ea9156b7465aa0fb46f91117ec8"></a>
+message::nbs::player::PlaybackMode&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a460c0ea9156b7465aa0fb46f91117ec8">mode</a> = message::nbs::player::PlaybackMode::REALTIME</td></tr>
+<tr class="memdesc:a460c0ea9156b7465aa0fb46f91117ec8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playback mode. <br /></td></tr>
+<tr class="separator:a460c0ea9156b7465aa0fb46f91117ec8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0eb48dc9ca1ff604527deff214e1c64f"><td class="memItemLeft" align="right" valign="top"><a id="a0eb48dc9ca1ff604527deff214e1c64f"></a>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a0eb48dc9ca1ff604527deff214e1c64f">playback_speed</a> = 1</td></tr>
+<tr class="memdesc:a0eb48dc9ca1ff604527deff214e1c64f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playback speed (clock rtf) <br /></td></tr>
+<tr class="separator:a0eb48dc9ca1ff604527deff214e1c64f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ea741f91c18048deb19b6503402d2f1"><td class="memItemLeft" align="right" valign="top"><a id="a0ea741f91c18048deb19b6503402d2f1"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a0ea741f91c18048deb19b6503402d2f1">start_time</a> = NUClear::clock::time_point::max()</td></tr>
+<tr class="memdesc:a0ea741f91c18048deb19b6503402d2f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">The earliest timestamp across all files in the player. <br /></td></tr>
+<tr class="separator:a0ea741f91c18048deb19b6503402d2f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ca35883fd0a529e41d3b131a25f4a90"><td class="memItemLeft" align="right" valign="top"><a id="a2ca35883fd0a529e41d3b131a25f4a90"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a2ca35883fd0a529e41d3b131a25f4a90">target_emit_time</a></td></tr>
+<tr class="memdesc:a2ca35883fd0a529e41d3b131a25f4a90"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target time for the next message emit. <br /></td></tr>
+<tr class="separator:a2ca35883fd0a529e41d3b131a25f4a90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a839131b29981f810ae27f5744b25640c"><td class="memItemLeft" align="right" valign="top"><a id="a839131b29981f810ae27f5744b25640c"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a839131b29981f810ae27f5744b25640c">total_messages</a> = 0</td></tr>
+<tr class="memdesc:a839131b29981f810ae27f5744b25640c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The total number of messages in the NBS file being played. <br /></td></tr>
+<tr class="separator:a839131b29981f810ae27f5744b25640c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a5cf0774dfdd7920f535c341ef0f699a2"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
+<tr class="memitem:a5cf0774dfdd7920f535c341ef0f699a2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmodule_1_1nbs_1_1Player.html#a5cf0774dfdd7920f535c341ef0f699a2">register_emitter</a> ()</td></tr>
+<tr class="memdesc:a5cf0774dfdd7920f535c341ef0f699a2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Registers an emitter for a specific message type <code>T</code>.  <a href="classmodule_1_1nbs_1_1Player.html#a5cf0774dfdd7920f535c341ef0f699a2">More...</a><br /></td></tr>
+<tr class="separator:a5cf0774dfdd7920f535c341ef0f699a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a5cf0774dfdd7920f535c341ef0f699a2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5cf0774dfdd7920f535c341ef0f699a2">&#9670;&nbsp;</a></span>register_emitter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::nbs::Player::register_emitter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Registers an emitter for a specific message type <code>T</code>. </p>
+<p>This function will add a callback function for the message type <code>T</code> to the decoder such that the decoder will emit the message when it is iterated over.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">T</td><td>The type of message to register the emitter for. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/nbs/Player/src/<a class="el" href="Player_8hpp_source.html">Player.hpp</a></li>
+<li>module/nbs/Player/src/Player.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>nbs</b></li><li class="navelem"><a class="el" href="classmodule_1_1nbs_1_1Player.html">Player</a></li>
+    <li class="footer">Generated on Tue May 7 2024 12:47:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+<map id="module::nbs::Player" name="module::nbs::Player">
+<area shape="rect" id="node1" title=" " alt="" coords="159,571,309,597"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,474,140,501"/>
+<area shape="rect" id="node3" href="$structutility_1_1nbs_1_1Decoder_1_1Iterator.html" title=" " alt="" coords="165,467,317,508"/>
+<area shape="rect" id="node4" href="$classutility_1_1nbs_1_1Decoder.html" title=" " alt="" coords="290,377,442,404"/>
+<area shape="rect" id="node5" href="$classutility_1_1nbs_1_1Index.html" title=" " alt="" coords="300,288,435,315"/>
+<area shape="rect" id="node6" href="$classutility_1_1nbs_1_1IndexStorage.html" title=" " alt="" coords="277,199,461,225"/>
+<area shape="rect" id="node7" href="$structutility_1_1nbs_1_1IndexItemFile.html" title=" " alt="" coords="167,95,354,121"/>
+<area shape="rect" id="node8" href="$structutility_1_1nbs_1_1IndexItem.html" title=" " alt="" coords="179,5,343,32"/>
+</map>

@@ -1,13 +1,25 @@
 var classutility_1_1nbs_1_1Decoder =
 [
-    [ "Decoder", "classutility_1_1nbs_1_1Decoder.html#a944eb48615d5eb0fa686c4502a09402c", null ],
-    [ "Decoder", "classutility_1_1nbs_1_1Decoder.html#a9ad6a25d4312c65576d998cb75e77d56", null ],
+    [ "Iterator", "structutility_1_1nbs_1_1Decoder_1_1Iterator.html", "structutility_1_1nbs_1_1Decoder_1_1Iterator" ],
+    [ "Decoder", "classutility_1_1nbs_1_1Decoder.html#a9c17344174ce37e25e7a198649ccec88", null ],
+    [ "Decoder", "classutility_1_1nbs_1_1Decoder.html#a95b7e16dc308a6509384550b9b0c7f42", null ],
+    [ "Decoder", "classutility_1_1nbs_1_1Decoder.html#a5f841e943834327ab2b60021814f7de5", null ],
+    [ "all", "classutility_1_1nbs_1_1Decoder.html#ae77926fa8a3e2aaec16738c250262418", null ],
+    [ "begin", "classutility_1_1nbs_1_1Decoder.html#a179c25920327d379e02e49ece0239958", null ],
+    [ "end", "classutility_1_1nbs_1_1Decoder.html#aca4ab678a896bba4f1e20a3d623c820a", null ],
+    [ "has_all_callback", "classutility_1_1nbs_1_1Decoder.html#a5ddf76ec1e7111d9068ec61da1163387", null ],
+    [ "has_callback", "classutility_1_1nbs_1_1Decoder.html#aba398d23bbbaacd1db2a109921b58f4c", null ],
+    [ "has_unhandled_callback", "classutility_1_1nbs_1_1Decoder.html#ae0f446f60f83ce0fca59e96d2ee7842f", null ],
     [ "on", "classutility_1_1nbs_1_1Decoder.html#ad918623446352433e817104f1223faa0", null ],
     [ "on", "classutility_1_1nbs_1_1Decoder.html#a0d86847ec8c484adb5667cdd59b0cd02", null ],
     [ "on", "classutility_1_1nbs_1_1Decoder.html#a3aa36c610a94ff0f1a6cd16538341de3", null ],
     [ "on", "classutility_1_1nbs_1_1Decoder.html#af3fc6e739ed8e79110a59b7dd6931872", null ],
     [ "process", "classutility_1_1nbs_1_1Decoder.html#a20f4c152c1187daa6dd609b34978190d", null ],
-    [ "callbacks", "classutility_1_1nbs_1_1Decoder.html#aab37fdd21ec2a92487833acb948ff29e", null ],
+    [ "run_callbacks", "classutility_1_1nbs_1_1Decoder.html#a40606ced077f7052ffff6f05c5bec92e", null ],
+    [ "unhandled", "classutility_1_1nbs_1_1Decoder.html#af007c15c4c4980c1acb6c9a631214933", null ],
+    [ "all_callback", "classutility_1_1nbs_1_1Decoder.html#a2f76e4949f9f540832eb57528c81c27f", null ],
+    [ "callbacks", "classutility_1_1nbs_1_1Decoder.html#ab13479938f22207d548a4675c00357cd", null ],
     [ "index", "classutility_1_1nbs_1_1Decoder.html#a6ace2b14f6723bad3c2278fd3a9fc58b", null ],
-    [ "mmaps", "classutility_1_1nbs_1_1Decoder.html#ac6b92e579cd3d84021a2170ac4619ad5", null ]
+    [ "mmaps", "classutility_1_1nbs_1_1Decoder.html#ac6b92e579cd3d84021a2170ac4619ad5", null ],
+    [ "unhandled_callback", "classutility_1_1nbs_1_1Decoder.html#aa1c224cb333c11237d45b03120edd7a5", null ]
 ];

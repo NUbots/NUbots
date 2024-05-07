@@ -169,6 +169,7 @@ $(document).ready(function(){initNavTree('classutility_1_1support_1_1ProgressBar
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#pri-static-attribs">Static Private Attributes</a> &#124;
 <a href="classutility_1_1support_1_1ProgressBar-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">utility::support::ProgressBar Class Reference</div>  </div>
@@ -182,29 +183,48 @@ $(document).ready(function(){initNavTree('classutility_1_1support_1_1ProgressBar
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:aad3ec2b5fb64b837c7f8cfcd211ed32f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#aad3ec2b5fb64b837c7f8cfcd211ed32f">ProgressBar</a> (std::string <a class="el" href="classutility_1_1support_1_1ProgressBar.html#afe738a2efea2a51e9eb72f21f0da522d">unit</a>=&quot;iteration&quot;)</td></tr>
-<tr class="memdesc:aad3ec2b5fb64b837c7f8cfcd211ed32f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new Progress Bar object using the provided unit.  <a href="classutility_1_1support_1_1ProgressBar.html#aad3ec2b5fb64b837c7f8cfcd211ed32f">More...</a><br /></td></tr>
-<tr class="separator:aad3ec2b5fb64b837c7f8cfcd211ed32f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac927f0e3e836c732af784a4bd9f5eb83"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#ac927f0e3e836c732af784a4bd9f5eb83">update</a> (const double &amp;current, const double &amp;total, const std::string &amp;status=&quot;&quot;)</td></tr>
-<tr class="memdesc:ac927f0e3e836c732af784a4bd9f5eb83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the progress bar using the new values for current and total.  <a href="classutility_1_1support_1_1ProgressBar.html#ac927f0e3e836c732af784a4bd9f5eb83">More...</a><br /></td></tr>
-<tr class="separator:ac927f0e3e836c732af784a4bd9f5eb83"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a41cfa3efd0a1a73c10ca1687be39abec"><td class="memTemplParams" colspan="2">template&lt;typename T , typename U &gt; </td></tr>
-<tr class="memitem:a41cfa3efd0a1a73c10ca1687be39abec"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a41cfa3efd0a1a73c10ca1687be39abec">update</a> (const T &amp;current, const U &amp;total, const std::string &amp;status=&quot;&quot;)</td></tr>
-<tr class="memdesc:a41cfa3efd0a1a73c10ca1687be39abec"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the progress bar using the new values for current and total with types that are castable to double.  <a href="classutility_1_1support_1_1ProgressBar.html#a41cfa3efd0a1a73c10ca1687be39abec">More...</a><br /></td></tr>
-<tr class="separator:a41cfa3efd0a1a73c10ca1687be39abec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b5368ce298c5b53772488f76bac9846"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a0b5368ce298c5b53772488f76bac9846">ProgressBar</a> ()</td></tr>
+<tr class="memdesc:a0b5368ce298c5b53772488f76bac9846"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new Progress Bar object using the provided unit.  <a href="classutility_1_1support_1_1ProgressBar.html#a0b5368ce298c5b53772488f76bac9846">More...</a><br /></td></tr>
+<tr class="separator:a0b5368ce298c5b53772488f76bac9846"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a35323be7db86da4e1ae384a6b6d55035"><td class="memItemLeft" align="right" valign="top"><a id="a35323be7db86da4e1ae384a6b6d55035"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ProgressBar</b> (const <a class="el" href="classutility_1_1support_1_1ProgressBar.html">ProgressBar</a> &amp;)=delete</td></tr>
+<tr class="separator:a35323be7db86da4e1ae384a6b6d55035"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd7523d7009f163479188270e88c3e0b"><td class="memItemLeft" align="right" valign="top"><a id="acd7523d7009f163479188270e88c3e0b"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ProgressBar</b> (<a class="el" href="classutility_1_1support_1_1ProgressBar.html">ProgressBar</a> &amp;&amp;other) noexcept</td></tr>
+<tr class="separator:acd7523d7009f163479188270e88c3e0b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca2cb5ee52a5e4511471ebfcfc559c35"><td class="memItemLeft" align="right" valign="top"><a id="aca2cb5ee52a5e4511471ebfcfc559c35"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#aca2cb5ee52a5e4511471ebfcfc559c35">~ProgressBar</a> ()</td></tr>
+<tr class="memdesc:aca2cb5ee52a5e4511471ebfcfc559c35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroy the Progress Bar object, will call <a class="el" href="classutility_1_1support_1_1ProgressBar.html#aa5e366f1ee353682cbb30db7e1decc01" title="Closes the current progress bar and clears it from the screen.">close()</a> if the progress bar is still valid. <br /></td></tr>
+<tr class="separator:aca2cb5ee52a5e4511471ebfcfc559c35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa5e366f1ee353682cbb30db7e1decc01"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#aa5e366f1ee353682cbb30db7e1decc01">close</a> ()</td></tr>
+<tr class="memdesc:aa5e366f1ee353682cbb30db7e1decc01"><td class="mdescLeft">&#160;</td><td class="mdescRight">Closes the current progress bar and clears it from the screen.  <a href="classutility_1_1support_1_1ProgressBar.html#aa5e366f1ee353682cbb30db7e1decc01">More...</a><br /></td></tr>
+<tr class="separator:aa5e366f1ee353682cbb30db7e1decc01"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a123a974299157c7988f9d3dad9a26202"><td class="memItemLeft" align="right" valign="top"><a id="a123a974299157c7988f9d3dad9a26202"></a>
+<a class="el" href="classutility_1_1support_1_1ProgressBar.html">ProgressBar</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (const <a class="el" href="classutility_1_1support_1_1ProgressBar.html">ProgressBar</a> &amp;)=delete</td></tr>
+<tr class="separator:a123a974299157c7988f9d3dad9a26202"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70d0667e5036a8a5cb9d0ea7156f6049"><td class="memItemLeft" align="right" valign="top"><a id="a70d0667e5036a8a5cb9d0ea7156f6049"></a>
+<a class="el" href="classutility_1_1support_1_1ProgressBar.html">ProgressBar</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator=</b> (<a class="el" href="classutility_1_1support_1_1ProgressBar.html">ProgressBar</a> &amp;&amp;other) noexcept</td></tr>
+<tr class="separator:a70d0667e5036a8a5cb9d0ea7156f6049"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32b6fb3c3e83f6c4750ebd5cb1442ca5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a32b6fb3c3e83f6c4750ebd5cb1442ca5">update</a> (const double &amp;current, const double &amp;total, const std::string &amp;unit=&quot;&quot;, const std::string &amp;status=&quot;&quot;)</td></tr>
+<tr class="memdesc:a32b6fb3c3e83f6c4750ebd5cb1442ca5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the progress bar using the new values for current and total.  <a href="classutility_1_1support_1_1ProgressBar.html#a32b6fb3c3e83f6c4750ebd5cb1442ca5">More...</a><br /></td></tr>
+<tr class="separator:a32b6fb3c3e83f6c4750ebd5cb1442ca5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49bcb25bffae4e20e39dacc9092dfb8a"><td class="memTemplParams" colspan="2">template&lt;typename T , typename U &gt; </td></tr>
+<tr class="memitem:a49bcb25bffae4e20e39dacc9092dfb8a"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a49bcb25bffae4e20e39dacc9092dfb8a">update</a> (const T &amp;current, const U &amp;total, const std::string &amp;unit=&quot;&quot;, const std::string &amp;status=&quot;&quot;)</td></tr>
+<tr class="memdesc:a49bcb25bffae4e20e39dacc9092dfb8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the progress bar using the new values for current and total with types that are castable to double.  <a href="classutility_1_1support_1_1ProgressBar.html#a49bcb25bffae4e20e39dacc9092dfb8a">More...</a><br /></td></tr>
+<tr class="separator:a49bcb25bffae4e20e39dacc9092dfb8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a9e4c8f6233e32fabe19d2b96d445e99e"><td class="memItemLeft" align="right" valign="top"><a id="a9e4c8f6233e32fabe19d2b96d445e99e"></a>
-std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a9e4c8f6233e32fabe19d2b96d445e99e">bars</a></td></tr>
-<tr class="memdesc:a9e4c8f6233e32fabe19d2b96d445e99e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The characters used to make up the progress bar. <br /></td></tr>
-<tr class="separator:a9e4c8f6233e32fabe19d2b96d445e99e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f94984d294d9c1d560f33cb187a9114"><td class="memItemLeft" align="right" valign="top"><a id="a6f94984d294d9c1d560f33cb187a9114"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a6f94984d294d9c1d560f33cb187a9114">index</a> {-1}</td></tr>
+<tr class="memdesc:a6f94984d294d9c1d560f33cb187a9114"><td class="mdescLeft">&#160;</td><td class="mdescRight">Our index into the set of progress bars (index_list), or -1 if we are an invalid progress bar. <br /></td></tr>
+<tr class="separator:a6f94984d294d9c1d560f33cb187a9114"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42b9048858e9fa3ee071e953c8f2e2c2"><td class="memItemLeft" align="right" valign="top"><a id="a42b9048858e9fa3ee071e953c8f2e2c2"></a>
 std::chrono::steady_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a42b9048858e9fa3ee071e953c8f2e2c2">last_update</a></td></tr>
 <tr class="memdesc:a42b9048858e9fa3ee071e953c8f2e2c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The last time the update function was called so we can rate limit updates when they are too frequent. <br /></td></tr>
 <tr class="separator:a42b9048858e9fa3ee071e953c8f2e2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e36aeb10d142f2b7a25bbc2c2579fec"><td class="memItemLeft" align="right" valign="top"><a id="a2e36aeb10d142f2b7a25bbc2c2579fec"></a>
-double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a2e36aeb10d142f2b7a25bbc2c2579fec">previous</a> {0}</td></tr>
+double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a2e36aeb10d142f2b7a25bbc2c2579fec">previous</a> {0.0}</td></tr>
 <tr class="memdesc:a2e36aeb10d142f2b7a25bbc2c2579fec"><td class="mdescLeft">&#160;</td><td class="mdescRight">The previous value that was passed in for current. <br /></td></tr>
 <tr class="separator:a2e36aeb10d142f2b7a25bbc2c2579fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae51e4c30c9d81c3d8e55ebc07017f2bf"><td class="memItemLeft" align="right" valign="top"><a id="ae51e4c30c9d81c3d8e55ebc07017f2bf"></a>
@@ -212,23 +232,38 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 <tr class="memdesc:ae51e4c30c9d81c3d8e55ebc07017f2bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current calculated rate in units per second. <br /></td></tr>
 <tr class="separator:ae51e4c30c9d81c3d8e55ebc07017f2bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a17df8ecff92553eb942df291fb526837"><td class="memItemLeft" align="right" valign="top"><a id="a17df8ecff92553eb942df291fb526837"></a>
-std::chrono::steady_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a17df8ecff92553eb942df291fb526837">start_time</a></td></tr>
+std::chrono::steady_clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a17df8ecff92553eb942df291fb526837">start_time</a> {std::chrono::steady_clock::now()}</td></tr>
 <tr class="memdesc:a17df8ecff92553eb942df291fb526837"><td class="mdescLeft">&#160;</td><td class="mdescRight">The start time for this progress bar to use when calculating rates. <br /></td></tr>
 <tr class="separator:a17df8ecff92553eb942df291fb526837"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afe738a2efea2a51e9eb72f21f0da522d"><td class="memItemLeft" align="right" valign="top"><a id="afe738a2efea2a51e9eb72f21f0da522d"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#afe738a2efea2a51e9eb72f21f0da522d">unit</a></td></tr>
-<tr class="memdesc:afe738a2efea2a51e9eb72f21f0da522d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The unit to display rates and progress in. <br /></td></tr>
-<tr class="separator:afe738a2efea2a51e9eb72f21f0da522d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab73479c172156c6894b34822c659706e"><td class="memItemLeft" align="right" valign="top"><a id="ab73479c172156c6894b34822c659706e"></a>
 double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#ab73479c172156c6894b34822c659706e">updates_per_second</a> {0}</td></tr>
 <tr class="memdesc:ab73479c172156c6894b34822c659706e"><td class="mdescLeft">&#160;</td><td class="mdescRight">The number of updates we have done in the last second so we can handle burst updates. <br /></td></tr>
 <tr class="separator:ab73479c172156c6894b34822c659706e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-attribs"></a>
+Static Private Attributes</h2></td></tr>
+<tr class="memitem:a054222ef7c88efe2a156418780299f96"><td class="memItemLeft" align="right" valign="top"><a id="a054222ef7c88efe2a156418780299f96"></a>
+static constexpr std::array&lt; const char *, 9 &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a054222ef7c88efe2a156418780299f96">bars</a> = {&quot; &quot;, &quot;▏&quot;, &quot;▎&quot;, &quot;▍&quot;, &quot;▌&quot;, &quot;▋&quot;, &quot;▊&quot;, &quot;▉&quot;, &quot;█&quot;}</td></tr>
+<tr class="memdesc:a054222ef7c88efe2a156418780299f96"><td class="mdescLeft">&#160;</td><td class="mdescRight">The characters used to make up the progress bar. <br /></td></tr>
+<tr class="separator:a054222ef7c88efe2a156418780299f96"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af73b86a65519054e94ad288479abf13d"><td class="memItemLeft" align="right" valign="top"><a id="af73b86a65519054e94ad288479abf13d"></a>
+static std::set&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#af73b86a65519054e94ad288479abf13d">index_list</a> = {}</td></tr>
+<tr class="memdesc:af73b86a65519054e94ad288479abf13d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A vector holding the state of every currently active progress bar. <br /></td></tr>
+<tr class="separator:af73b86a65519054e94ad288479abf13d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a372e9087f26a62a2555d9641681903ec"><td class="memItemLeft" align="right" valign="top"><a id="a372e9087f26a62a2555d9641681903ec"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#a372e9087f26a62a2555d9641681903ec">max_index</a> = 0</td></tr>
+<tr class="memdesc:a372e9087f26a62a2555d9641681903ec"><td class="mdescLeft">&#160;</td><td class="mdescRight">The next index to use when a new progress bar is created. <br /></td></tr>
+<tr class="separator:a372e9087f26a62a2555d9641681903ec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aef91234eef4a51f58738d48b6a9f35c9"><td class="memItemLeft" align="right" valign="top"><a id="aef91234eef4a51f58738d48b6a9f35c9"></a>
+static std::mutex&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classutility_1_1support_1_1ProgressBar.html#aef91234eef4a51f58738d48b6a9f35c9">pbar_mutex</a> = {}</td></tr>
+<tr class="memdesc:aef91234eef4a51f58738d48b6a9f35c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Mutex controlling access to index_list, max_index, and printing to the screen. <br /></td></tr>
+<tr class="separator:aef91234eef4a51f58738d48b6a9f35c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This class displays a progress on a single line in the terminal showing rates and a bar to show progress. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="aad3ec2b5fb64b837c7f8cfcd211ed32f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aad3ec2b5fb64b837c7f8cfcd211ed32f">&#9670;&nbsp;</a></span>ProgressBar()</h2>
+<a id="a0b5368ce298c5b53772488f76bac9846"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b5368ce298c5b53772488f76bac9846">&#9670;&nbsp;</a></span>ProgressBar()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -236,8 +271,7 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
         <tr>
           <td class="memname">utility::support::ProgressBar::ProgressBar </td>
           <td>(</td>
-          <td class="paramtype">std::string&#160;</td>
-          <td class="paramname"><em>unit</em> = <code>&quot;iteration&quot;</code></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -254,8 +288,28 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ac927f0e3e836c732af784a4bd9f5eb83"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac927f0e3e836c732af784a4bd9f5eb83">&#9670;&nbsp;</a></span>update() <span class="overload">[1/2]</span></h2>
+<a id="aa5e366f1ee353682cbb30db7e1decc01"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa5e366f1ee353682cbb30db7e1decc01">&#9670;&nbsp;</a></span>close()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void utility::support::ProgressBar::close </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Closes the current progress bar and clears it from the screen. </p>
+<p>After calling this method this progress bar is no longer valid and calls to <a class="el" href="classutility_1_1support_1_1ProgressBar.html#a32b6fb3c3e83f6c4750ebd5cb1442ca5" title="Updates the progress bar using the new values for current and total.">update()</a> will throw an error. Calling <a class="el" href="classutility_1_1support_1_1ProgressBar.html#aa5e366f1ee353682cbb30db7e1decc01" title="Closes the current progress bar and clears it from the screen.">close()</a> on an invalid progress bar performs no action. </p>
+
+</div>
+</div>
+<a id="a32b6fb3c3e83f6c4750ebd5cb1442ca5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32b6fb3c3e83f6c4750ebd5cb1442ca5">&#9670;&nbsp;</a></span>update() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -276,6 +330,12 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>unit</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>status</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
@@ -287,10 +347,12 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 </div><div class="memdoc">
 
 <p>Updates the progress bar using the new values for current and total. </p>
+<p>Calls to this method after calling <a class="el" href="classutility_1_1support_1_1ProgressBar.html#aa5e366f1ee353682cbb30db7e1decc01" title="Closes the current progress bar and clears it from the screen.">close()</a> will throw an error.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">current</td><td>the current number of units that have been completed </td></tr>
     <tr><td class="paramname">total</td><td>the total number of units to be completed </td></tr>
+    <tr><td class="paramname">unit</td><td>the units that the measurement is displayed int </td></tr>
     <tr><td class="paramname">status</td><td>a string to display besides the progress bar </td></tr>
   </table>
   </dd>
@@ -298,8 +360,8 @@ double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="cl
 
 </div>
 </div>
-<a id="a41cfa3efd0a1a73c10ca1687be39abec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a41cfa3efd0a1a73c10ca1687be39abec">&#9670;&nbsp;</a></span>update() <span class="overload">[2/2]</span></h2>
+<a id="a49bcb25bffae4e20e39dacc9092dfb8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49bcb25bffae4e20e39dacc9092dfb8a">&#9670;&nbsp;</a></span>update() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -325,6 +387,12 @@ template&lt;typename T , typename U &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>unit</em> = <code>&quot;&quot;</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
           <td class="paramname"><em>status</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
@@ -341,6 +409,7 @@ template&lt;typename T , typename U &gt; </div>
 </div><div class="memdoc">
 
 <p>Updates the progress bar using the new values for current and total with types that are castable to double. </p>
+<p>Calls to this method after calling <a class="el" href="classutility_1_1support_1_1ProgressBar.html#aa5e366f1ee353682cbb30db7e1decc01" title="Closes the current progress bar and clears it from the screen.">close()</a> will throw an error.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">T</td><td>a type that is castable to double to be used with update(double, double) </td></tr>
@@ -352,6 +421,7 @@ template&lt;typename T , typename U &gt; </div>
   <table class="params">
     <tr><td class="paramname">current</td><td>the current number of units that have been completed </td></tr>
     <tr><td class="paramname">total</td><td>the total number of units to be completed </td></tr>
+    <tr><td class="paramname">unit</td><td>the units that the measurement is displayed int </td></tr>
     <tr><td class="paramname">status</td><td>a string to display beside the progress bar </td></tr>
   </table>
   </dd>
@@ -369,7 +439,7 @@ template&lt;typename T , typename U &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>utility</b></li><li class="navelem"><b>support</b></li><li class="navelem"><a class="el" href="classutility_1_1support_1_1ProgressBar.html">ProgressBar</a></li>
-    <li class="footer">Generated on Mon May 6 2024 10:29:13 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue May 7 2024 12:47:19 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

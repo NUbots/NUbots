@@ -289,6 +289,9 @@ var namespaces_dup =
           [ "FINISHED", "IKKickControllers_8hpp.html#a06a0964c8f2572b9128dfd46bf1cf216a0b634e34da4c66e3c16075ca4689acc0", null ]
         ] ]
       ] ],
+      [ "nbs", null, [
+        [ "Player", "classmodule_1_1nbs_1_1Player.html", "classmodule_1_1nbs_1_1Player" ]
+      ] ],
       [ "network", null, [
         [ "id", null, [
           [ "get", "NetworkForwarder_8hpp.html#a1329bd1ef232b6f1c66b43c6823a19bb", null ],
@@ -672,6 +675,7 @@ var namespaces_dup =
         [ "FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", "classmodule_1_1tools_1_1FirmwareInstaller" ],
         [ "FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
         [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
+        [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
         [ "SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", "classmodule_1_1tools_1_1SystemConfiguration" ],
         [ "big_text", "SystemConfiguration_8cpp.html#a04e3ec51060d2852b18d7b7eceed5b9e", null ],
         [ "files_equal", "SystemConfiguration_8cpp.html#a970fd9e148c3ff72e36745b5d4f3344c", null ],
@@ -778,14 +782,6 @@ var namespaces_dup =
         [ "ServoMap< RightKnee >", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4" ],
         [ "ServoMap< RightShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4" ],
         [ "ServoMap< RightShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4" ]
-      ] ],
-      [ "clock", null, [
-        [ "ClockData", "structutility_1_1clock_1_1ClockData.html", "structutility_1_1clock_1_1ClockData" ],
-        [ "dc", "clock_8cpp.html#acc90412747e3582b7c210c3999af25ac", null ],
-        [ "update_rtf", "clock_8cpp.html#a4e2fb0091345fa70859c8c03de3d2e0f", null ],
-        [ "active", "clock_8cpp.html#abffcebbd113b3df380c1006baa1d631a", null ],
-        [ "custom_rtf", "clock_8hpp.html#ac97f5461ef949723188525c4a74f45be", null ],
-        [ "data", "clock_8cpp.html#adca9c04254e1704be4e85278a7d0ced9", null ]
       ] ],
       [ "file", "namespaceutility_1_1file.html", "namespaceutility_1_1file" ],
       [ "input", null, [
@@ -954,11 +950,17 @@ var namespaces_dup =
         [ "Encoder", "classutility_1_1nbs_1_1Encoder.html", "classutility_1_1nbs_1_1Encoder" ],
         [ "Index", "classutility_1_1nbs_1_1Index.html", "classutility_1_1nbs_1_1Index" ],
         [ "IndexItem", "structutility_1_1nbs_1_1IndexItem.html", "structutility_1_1nbs_1_1IndexItem" ],
-        [ "build_index", "Index_8cpp.html#a0630c5b247fba21573c7b40cee33e635", null ],
+        [ "IndexItemFile", "structutility_1_1nbs_1_1IndexItemFile.html", "structutility_1_1nbs_1_1IndexItemFile" ],
+        [ "IndexStorage", "classutility_1_1nbs_1_1IndexStorage.html", "classutility_1_1nbs_1_1IndexStorage" ],
+        [ "__attribute__", "IndexStorage_8hpp.html#a88a7bdf7f5fd0485afa9aab9d41e2d66", null ],
+        [ "build_index", "Index_8cpp.html#a3e62b5504b26b1804d9546315f4769d5", null ],
         [ "get_id", "get__id_8hpp.html#a6c672a150ecfb474dda120d31186fe52", null ],
         [ "get_id", "get__id_8hpp.html#a6bf23b58e16a9a9f6c7e21248a198656", null ],
+        [ "get_subtype", "get__id_8hpp.html#adf861a48536696edaf0638848dcbce29", null ],
+        [ "get_subtype", "get__id_8hpp.html#ac657c10bee7859f5e57cff27fa3890b1", null ],
         [ "get_timestamp", "get__timestamp_8hpp.html#a16ad3a3febb3193fea09e24973a9fff7", null ],
-        [ "get_timestamp", "get__timestamp_8hpp.html#a771f67c5a6486f5d158328dad6588d57", null ]
+        [ "get_timestamp", "get__timestamp_8hpp.html#a771f67c5a6486f5d158328dad6588d57", null ],
+        [ "__attribute__", "IndexStorage_8hpp.html#ac22775ea47d55457ca01c4125ebfb05b", null ]
       ] ],
       [ "network", null, [
         [ "connect", "connect_8cpp.html#a8a3061591c5c998ef537a2be3f902bb3", null ]
@@ -1011,6 +1013,9 @@ var namespaces_dup =
         [ "make_packet_error_string", "RawSensors_8hpp.html#ad0a816e7a961dd0228d46eef61a8ac21", null ],
         [ "make_servo_hardware_error_string", "RawSensors_8hpp.html#af793b0b6771416634468994705d160ca", null ]
       ] ],
+      [ "random", null, [
+        [ "generate_alphanum_string", "random_8cpp.html#ade04216eaaf80b00efca9928bf8f5ebb", null ]
+      ] ],
       [ "reactor", null, [
         [ "StreamReactor", "classutility_1_1reactor_1_1StreamReactor.html", "classutility_1_1reactor_1_1StreamReactor" ]
       ] ],
@@ -1025,21 +1030,29 @@ var namespaces_dup =
           [ "exception_name", "pure__evil_8cpp.html#a3fd8278f34dc4be3729275c2082fa569", null ],
           [ "stack", "pure__evil_8cpp.html#ae19fa2fe95aea29bb47634a53b5b5341", null ]
         ] ],
+        [ "enumerate", "structutility_1_1support_1_1enumerate.html", "structutility_1_1support_1_1enumerate" ],
         [ "Expression", "structutility_1_1support_1_1Expression.html", "structutility_1_1support_1_1Expression" ],
         [ "LazyEvaluation", "structutility_1_1support_1_1LazyEvaluation.html", "structutility_1_1support_1_1LazyEvaluation" ],
         [ "ProgressBar", "classutility_1_1support_1_1ProgressBar.html", "classutility_1_1support_1_1ProgressBar" ],
+        [ "ProgressBarState", "structutility_1_1support_1_1ProgressBarState.html", null ],
         [ "duration_format", "ProgressBar_8cpp.html#a59ebcbb561e8769499753467f224fe19", null ],
         [ "getHostname", "hostname_8hpp.html#a9b905b5490689fec174458fe8a37d905", null ],
         [ "parse_math_string", "math__string_8hpp.html#aaf19de1dcdb45570182a2ed76db18c87", null ],
         [ "parse_to_double", "math__string_8cpp.html#a1811b8e9d6f01973a61e1198954dc72e", null ],
         [ "resolve_expression", "yaml__expression_8hpp.html#acacd392c1f93317cba47c512ea523d2d", null ],
         [ "resolve_expression", "yaml__expression_8hpp.html#a5c935ac5626ece49990c4a873d6c8570", null ],
-        [ "si_unit", "ProgressBar_8cpp.html#a98cdc17896fbd838d11e820acbf9942a", null ]
+        [ "si_time", "si__unit_8hpp.html#ab8e765009f64846cc16953ca01587b67", null ],
+        [ "si_unit", "si__unit_8hpp.html#a6b9566482ed5592a474e636478704b32", null ],
+        [ "CLEAR_LINE", "ProgressBar_8cpp.html#adbc260d701bd08a5e4fe54edb483b54f", null ],
+        [ "LINE_START", "ProgressBar_8cpp.html#a4281d7a98b180db2d54b8078fe2196a9", null ],
+        [ "MOVE_DOWN", "ProgressBar_8cpp.html#aefecd2844a0292e9672da51331ed7728", null ],
+        [ "MOVE_UP", "ProgressBar_8cpp.html#a8e97ee60f21e83d0fad836bb07dae9ab", null ]
       ] ],
       [ "type_traits", null, [
         [ "has_id", "structutility_1_1type__traits_1_1has__id.html", "structutility_1_1type__traits_1_1has__id" ],
         [ "has_timestamp", "structutility_1_1type__traits_1_1has__timestamp.html", "structutility_1_1type__traits_1_1has__timestamp" ],
-        [ "is_iterable", "structutility_1_1type__traits_1_1is__iterable.html", "structutility_1_1type__traits_1_1is__iterable" ]
+        [ "is_iterable", "structutility_1_1type__traits_1_1is__iterable.html", "structutility_1_1type__traits_1_1is__iterable" ],
+        [ "range_constructible", "range__constructible_8hpp.html#a39d62c6172cd200a015d52c9e86176b4", null ]
       ] ],
       [ "vision", null, [
         [ "equidistant", null, [
