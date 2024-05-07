@@ -122,12 +122,12 @@ namespace module::tools {
                     log_message = "RoboCup service stopped!";
                     break;
                 case 'E':  // enables wifi services
-                    system("systemctl enable wpa_supplicant");
-                    system("systemctl enable systemd-networkd");
+                    system("systemctl enable --now wpa_supplicant");
+                    system("systemctl enable --now systemd-networkd");
                     break;
                 case 'W':  // disables wifi services
-                    system("systemctl disable wpa_supplicant");
-                    system("systemctl disable systemd-networkd");
+                    system("systemctl disable --now wpa_supplicant");
+                    system("systemctl disable --now systemd-networkd");
                     break;
                 case 'X':  // shutdown powerplant
                     powerplant.shutdown();
