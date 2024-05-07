@@ -99,6 +99,9 @@ namespace module::input {
 
             /// @brief Bool to determine whether to use ground truth from the simulator
             bool use_ground_truth = false;
+
+            /// @brief Limit on the maximum change in servo angle per update before the encoder is considered invalid
+            double max_servo_change = 0.0;
         } cfg;
 
         /// @brief Number of actuatable joints in the NUgus robot
@@ -107,8 +110,8 @@ namespace module::input {
         /// @brief tinyrobotics model of NUgus used for kinematics
         tinyrobotics::Model<double, n_servos> nugus_model;
 
-        /// @brief Current walk phase of the robot
-        WalkState::Phase current_walk_phase = WalkState::Phase::LEFT;
+        /// @brief Planted foot associated with the current anchor point (Hwp)
+        WalkState::Phase planted_anchor_foot = WalkState::Phase::LEFT;
 
         /// @brief Transform from planted foot {p} to world {w} space
         Eigen::Isometry3d Hwp = Eigen::Isometry3d::Identity();
@@ -150,8 +153,7 @@ namespace module::input {
         /// @param raw_sensors The raw sensor data
         void update_odometry(std::unique_ptr<Sensors>& sensors,
                              const std::shared_ptr<const Sensors>& previous_sensors,
-                             const RawSensors& raw_sensors,
-                             const WalkState& walk_state);
+                             const RawSensors& raw_sensors);
 
         /// @brief Display debug information
         /// @param sensors The sensors message to update

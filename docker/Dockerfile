@@ -234,6 +234,39 @@ RUN install-package protobuf && \
     -Dprotobuf_BUILD_LIBPROTOC=ON \
     -DBUILD_SHARED_LIBS=OFF
 
+# OpenCV
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
+
+# OpenVino - Dependencies
+RUN install-package opencl-clhpp && \
+    install-package opencl-headers && \
+    install-package ocl-icd
+
+# OpenVino
+RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1 && \
+    cd openvino &&  \
+    git submodule update --init --recursive && \
+    mkdir build && \
+    cd build && \
+    cmake .. -DBUILD_TESTING:BOOL='OFF' \
+            -DCMAKE_BUILD_TYPE:STRING='Release' \
+            -DENABLE_AVX512F:BOOL='OFF' \
+            -DENABLE_PYTHON:BOOL='OFF' \
+            -DENABLE_CLANG_FORMAT:BOOL='OFF' \
+            -DENABLE_NCC_STYLE:BOOL='OFF' \
+            -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
+            -DENABLE_SYSTEM_TBB:BOOL='ON' \
+            -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
+            -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
+            -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
+            -Wno-dev && \
+    make -j$(nproc) && \
+    make install && \
+    /usr/local/setupvars.sh
+
+# Move OpenVino libraries to our library path
+RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+
 # Libjpeg
 RUN install-package yasm
 RUN install-from-source https://github.com/libjpeg-turbo/libjpeg-turbo/archive/refs/tags/2.0.7-esr.tar.gz \
@@ -338,40 +371,7 @@ RUN install-from-source https://github.com/Tom0Brien/tinyrobotics/archive/refs/t
     -DBUILD_TESTS=OFF
 
 # lame
-RUN install-package lame
-
-# OpenCV
-RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/4.9.0.tar.gz
-
-# OpenVino - Dependencies
-RUN install-package opencl-clhpp && \
-    install-package opencl-headers && \
-    install-package ocl-icd
-
-# OpenVino
-RUN git clone https://github.com/openvinotoolkit/openvino.git --branch 2023.0.1 && \
-    cd openvino &&  \
-    git submodule update --init --recursive && \
-    mkdir build && \
-    cd build && \
-    cmake .. -DBUILD_TESTING:BOOL='OFF' \
-            -DCMAKE_BUILD_TYPE:STRING='Release' \
-            -DENABLE_AVX512F:BOOL='OFF' \
-            -DENABLE_PYTHON:BOOL='OFF' \
-            -DENABLE_CLANG_FORMAT:BOOL='OFF' \
-            -DENABLE_NCC_STYLE:BOOL='OFF' \
-            -DENABLE_SYSTEM_PUGIXML:BOOL='ON' \
-            -DENABLE_SYSTEM_TBB:BOOL='ON' \
-            -DENABLE_SYSTEM_OPENCL:BOOL='ON' \
-            -DENABLE_SYSTEM_PROTOBUF:BOOL='ON' \
-            -DENABLE_SYSTEM_FLATBUFFERS:BOOL='OFF' \
-            -Wno-dev && \
-    make -j$(nproc) && \
-    make install && \
-    /usr/local/setupvars.sh
-
-# Move OpenVino libraries to our library path
-RUN sudo cp /usr/local/runtime/lib/intel64/* /usr/local/lib/ -r && sudo cp /usr/local/runtime/3rdparty/tbb/lib/* /usr/local/lib/ -r
+RUN install-from-source https://downloads.sourceforge.net/lame/lame-3.100.tar.gz
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
