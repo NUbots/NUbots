@@ -34,6 +34,8 @@ import "Neutron.proto";
 import "Vector.proto";
 import "Transform.proto";
 
+import "message/behaviour/state/WalkState.proto";
+
 message Sensors {
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/ ;
@@ -152,6 +154,11 @@ message Sensors {
     /// Homogeneous transform: world {w} to torso {t}
     iso3 Htw = 14;
 
+    /// Homogeneous transform: planted foot {p} to world {w}
+    iso3 Hwp = 15;
+
     /// Translational velocity of torso {t} in world {w} space
-    vec3 vTw = 15;
+    vec3 vTw = 16;
+
+    behaviour.state.WalkState.Phase planted_foot_phase = 17;
 }
