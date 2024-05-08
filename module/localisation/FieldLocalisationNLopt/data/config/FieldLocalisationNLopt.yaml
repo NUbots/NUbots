@@ -67,6 +67,7 @@ kalman:
     - [1e-2, 0, 0]
     - [0, 1e-2, 0]
     - [0, 0, 1e-2]
+
   # Measurement model noise
   R:
     - [1, 0, 0]

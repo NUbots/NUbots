@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -60,14 +60,14 @@ namespace module::localisation {
         StartingSide(Value const& v) : value(v) {}
         StartingSide(std::string const& str) {
             // clang-format off
-                        if      (str == "LEFT") { value = Value::LEFT; }
-                        else if (str == "RIGHT") { value = Value::RIGHT; }
-                        else if (str == "EITHER")  { value = Value::EITHER; }
-                        else if (str == "CUSTOM") { value = Value::CUSTOM; }
-                        else {
-                            value = Value::UNKNOWN;
-                            throw std::runtime_error("String " + str + " did not match any enum for StartingSide");
-                        }
+            if      (str == "LEFT") { value = Value::LEFT; }
+            else if (str == "RIGHT") { value = Value::RIGHT; }
+            else if (str == "EITHER")  { value = Value::EITHER; }
+            else if (str == "CUSTOM") { value = Value::CUSTOM; }
+            else {
+                value = Value::UNKNOWN;
+                throw std::runtime_error("String " + str + " did not match any enum for StartingSide");
+            }
             // clang-format on
         }
 
@@ -231,41 +231,40 @@ namespace module::localisation {
             /// @brief Maximum number of evaluations for the optimization
             size_t maxeval = 0;
 
-            // Define the process model
-            Eigen::Matrix3d A;
+            /// @brief Process model
+            Eigen::Matrix3d A = Eigen::Matrix3d::Identity();
 
-            // Define the input model
-            Eigen::MatrixXd B;
+            /// @brief Input model
+            Eigen::MatrixXd B = Eigen::MatrixXd::Zero(n_states, n_inputs);
 
-            // Define the measurement model
-            Eigen::MatrixXd C;
+            /// @brief Measurement model
+            Eigen::MatrixXd C = Eigen::MatrixXd::Identity(n_measurements, n_states);
 
-            // Define the process noise covariance
-            Eigen::Matrix3d Q;
+            /// @brief Process noise covariance
+            Eigen::Matrix3d Q = Eigen::Matrix3d::Identity();
 
-            // Define the measurement noise covariance
-            Eigen::Matrix3d R;
+            /// @brief Measurement noise covariance
+            Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
 
-            // Define the initial covariance
+            /// @brief initial covariance
             Eigen::Matrix<double, n_states, n_states> P0 = Eigen::Matrix<double, n_states, n_states>::Identity();
         } cfg;
 
 
         // Kalman filter
-        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf;
+        utility::math::filter::KalmanFilter<double, n_states, n_inputs, n_measurements> kf{};
 
         /// @brief State vector (x,y,yaw) of the Hfw transform
         Eigen::Vector3d state = Eigen::Vector3d::Zero();
 
         /// @brief Field line distance map (encodes the minimum distance to a field line)
-        OccupancyMap<double> fieldline_distance_map;
+        OccupancyMap<double> fieldline_distance_map{};
 
         /// @brief List of landmarks (field intersections rLFf) in field space
-        std::vector<Landmark> landmarks;
+        std::vector<Landmark> landmarks{};
 
         /// @brief Bool indicating where or not this is the first update
         bool startup = true;
-        ReactionHandle main_loop_handle;
 
     public:
         /// @brief Called by the powerplant to build and setup the FieldLocalisationNLopt reactor.
@@ -273,7 +272,6 @@ namespace module::localisation {
 
         /**
          * @brief Compute Hfw, homogenous transformation from world {w} to field {f} space from state vector (x,y,theta)
-         *
          * @param state The state vector (x,y,theta)
          * @return Hfw, the homogenous transformation matrix from world {w} to field {f} space
          */
@@ -281,7 +279,6 @@ namespace module::localisation {
 
         /**
          * @brief Find error between computed Hfw and ground truth if available
-         *
          * @param Hfw Computed Hfw to be compared against ground truth
          * @param raw_sensors The raw sensor data
          */
@@ -289,7 +286,6 @@ namespace module::localisation {
 
         /**
          * @brief Transform a field line point from world {w} to position in the distance map {m}
-         *
          * @param particle The state of the particle (x,y,theta)
          * @param rPWw The field point (x, y) in world space {w} [m]
          * @return Eigen::Vector2i
@@ -309,14 +305,12 @@ namespace module::localisation {
 
         /**
          * @brief Setup field line distance map
-         *
          * @param fd The field dimensions
          */
         void setup_fieldline_distance_map(const FieldDescription& fd);
 
         /**
          * @brief Setup field landmarks
-         *
          * @param fd The field dimensions
          */
         void setup_field_landmarks(const FieldDescription& fd);
