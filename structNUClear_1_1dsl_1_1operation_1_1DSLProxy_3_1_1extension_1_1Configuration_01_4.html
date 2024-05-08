@@ -176,10 +176,10 @@ $(document).ready(function(){initNavTree('structNUClear_1_1dsl_1_1operation_1_1D
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a7325b6091386271d087ab70e20734509"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
-<tr class="memitem:a7325b6091386271d087ab70e20734509"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a7325b6091386271d087ab70e20734509">bind</a> (const std::shared_ptr&lt; threading::Reaction &gt; &amp;reaction, const fs::path &amp;filename)</td></tr>
-<tr class="memdesc:a7325b6091386271d087ab70e20734509"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the NUClear Reaction for Configuration.  <a href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a7325b6091386271d087ab70e20734509">More...</a><br /></td></tr>
-<tr class="separator:a7325b6091386271d087ab70e20734509"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a910803ed58bd048a1e9d4328d0df9e57"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
+<tr class="memitem:a910803ed58bd048a1e9d4328d0df9e57"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a910803ed58bd048a1e9d4328d0df9e57">bind</a> (const std::shared_ptr&lt; threading::Reaction &gt; &amp;reaction, const fs::path &amp;file_name)</td></tr>
+<tr class="memdesc:a910803ed58bd048a1e9d4328d0df9e57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets up the NUClear Reaction for Configuration.  <a href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a910803ed58bd048a1e9d4328d0df9e57">More...</a><br /></td></tr>
+<tr class="separator:a910803ed58bd048a1e9d4328d0df9e57"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe09729679a99b3de222ed4f73c0cbe7"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
 <tr class="memitem:abe09729679a99b3de222ed4f73c0cbe7"><td class="memTemplItemLeft" align="right" valign="top">static std::shared_ptr&lt;::<a class="el" href="structextension_1_1Configuration.html">extension::Configuration</a> &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7">get</a> (threading::Reaction &amp;t)</td></tr>
 <tr class="memdesc:abe09729679a99b3de222ed4f73c0cbe7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Runs just before the Configuration callback to prepare the Reaction's parameters.  <a href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7">More...</a><br /></td></tr>
@@ -190,8 +190,8 @@ Static Public Member Functions</h2></td></tr>
 <tr class="separator:a14ca8bb2c0558f55aa92b525c4bd6767"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a7325b6091386271d087ab70e20734509"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a7325b6091386271d087ab70e20734509">&#9670;&nbsp;</a></span>bind()</h2>
+<a id="a910803ed58bd048a1e9d4328d0df9e57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a910803ed58bd048a1e9d4328d0df9e57">&#9670;&nbsp;</a></span>bind()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -211,7 +211,7 @@ template&lt;typename DSL &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const fs::path &amp;&#160;</td>
-          <td class="paramname"><em>filename</em>&#160;</td>
+          <td class="paramname"><em>file_name</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -227,8 +227,8 @@ template&lt;typename DSL &gt; </div>
 </div><div class="memdoc">
 
 <p>Sets up the NUClear Reaction for Configuration. </p>
-<p>Sets up a FileWatch on the filename which is passed in The config files are FileWatched in order from least specific to most specific:</p><ol type="1">
-<li>default, 2. per-robot, 3. binary The later, more specific configs (if they exist) supersede the less specific ones If the default config file doesn't exist, we make one The flags used during binding tell FileWatch that the config files have been changed or renamed, which tells FileWatch they should be updated <dl class="section see"><dt>See also</dt><dd>FileWatch </dd></dl>
+<p>Sets up a FileWatch on the file_name which is passed in The config files are FileWatched in order from least specific to most specific:</p><ol type="1">
+<li>default, 2. platform, 3. per-robot, 4. per-robot-name, 5. binary The later, more specific configs (if they exist) supersede the less specific ones If the default config file doesn't exist, we make one The flags used during binding tell FileWatch that the config files have been changed or renamed, which tells FileWatch they should be updated <dl class="section see"><dt>See also</dt><dd>FileWatch </dd></dl>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
     <tr><td class="paramname">DSL</td><td>Magic NUClear type. Ignore for the purpose of understanding this function </td></tr>
@@ -238,7 +238,7 @@ template&lt;typename DSL &gt; </div>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">reaction</td><td>The reaction we are binding which will watch the config path(s) </td></tr>
-    <tr><td class="paramname">filename</td><td>The filename of the desired config file </td></tr>
+    <tr><td class="paramname">file_name</td><td>The file_name of the desired config file </td></tr>
   </table>
   </dd>
 </dl>
@@ -354,7 +354,7 @@ template&lt;typename DSL &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>NUClear</b></li><li class="navelem"><b>dsl</b></li><li class="navelem"><b>operation</b></li><li class="navelem"><a class="el" href="structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html">DSLProxy&lt;::extension::Configuration &gt;</a></li>
-    <li class="footer">Generated on Tue May 7 2024 23:28:56 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed May 8 2024 01:19:32 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

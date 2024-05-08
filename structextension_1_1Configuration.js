@@ -1,14 +1,14 @@
 var structextension_1_1Configuration =
 [
     [ "Configuration", "structextension_1_1Configuration.html#accd8a493e719fa44a4f7acfba84318d5", null ],
-    [ "Configuration", "structextension_1_1Configuration.html#a50c4e1e1127d831c860d534a01ceb471", null ],
-    [ "Configuration", "structextension_1_1Configuration.html#ae86cb3aed1f65b8d3e851d1e06a4e775", null ],
+    [ "Configuration", "structextension_1_1Configuration.html#a50066d8e0643e81573273f01ff6117e8", null ],
+    [ "Configuration", "structextension_1_1Configuration.html#ac0eaa672897a195bbfd561c464cedcb3", null ],
     [ "as", "structextension_1_1Configuration.html#a8ded932cb794465e69b98b255a5874a0", null ],
     [ "begin", "structextension_1_1Configuration.html#a11df3dec8525314497274648822138df", null ],
     [ "begin", "structextension_1_1Configuration.html#ae1ca86ef5bf0d2a904612a6f080d1cfb", null ],
     [ "end", "structextension_1_1Configuration.html#aecd2dd07d9001a7ab49cb379b7f83a01", null ],
     [ "end", "structextension_1_1Configuration.html#a92f9b270726d4410c5fefd62519bb230", null ],
-    [ "getPlatform", "structextension_1_1Configuration.html#afa90e23bf7b6f43445b6b8676d241908", null ],
+    [ "get_platform", "structextension_1_1Configuration.html#a0dee1c419299d254a12f1cfdab01f33a", null ],
     [ "merge_yaml_nodes", "structextension_1_1Configuration.html#a7293033ce460dcfa303517295c998075", null ],
     [ "operator std::string", "structextension_1_1Configuration.html#a5dc37151c0c9e9b493087b4d123b000f", null ],
     [ "operator T", "structextension_1_1Configuration.html#af28837d74d3156332fe04c853dedfdc8", null ],
@@ -22,7 +22,7 @@ var structextension_1_1Configuration =
     [ "operator[]", "structextension_1_1Configuration.html#aae5d9401d5895c39aa9f22fc3c58e226", null ],
     [ "binary", "structextension_1_1Configuration.html#afa539a6a16d3365a37040aade8d7c4c2", null ],
     [ "config", "structextension_1_1Configuration.html#a2a6058e3314b32811a804f00875b8ff8", null ],
-    [ "fileName", "structextension_1_1Configuration.html#afecbb44e92a241b32f44a5fb697957ed", null ],
+    [ "file_name", "structextension_1_1Configuration.html#a319a618b335cd24b351428112efd1e9f", null ],
     [ "hostname", "structextension_1_1Configuration.html#a7b675d9a7f7f9a5b2b4672661372edda", null ],
     [ "platform", "structextension_1_1Configuration.html#a13f3b33d0a59edfbd0d5902840ff5956", null ]
 ];

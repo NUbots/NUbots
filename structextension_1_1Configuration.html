@@ -180,13 +180,13 @@ $(document).ready(function(){initNavTree('structextension_1_1Configuration.html'
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ae86cb3aed1f65b8d3e851d1e06a4e775"><td class="memItemLeft" align="right" valign="top"><a id="ae86cb3aed1f65b8d3e851d1e06a4e775"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1Configuration.html#ae86cb3aed1f65b8d3e851d1e06a4e775">Configuration</a> (const std::string &amp;fileName, const std::string &amp;hostname, const std::string &amp;binary, const std::string &amp;platform)</td></tr>
-<tr class="memdesc:ae86cb3aed1f65b8d3e851d1e06a4e775"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor without config node given. The correct config file has to be deduced from the params. <br /></td></tr>
-<tr class="separator:ae86cb3aed1f65b8d3e851d1e06a4e775"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a50c4e1e1127d831c860d534a01ceb471"><td class="memItemLeft" align="right" valign="top"><a id="a50c4e1e1127d831c860d534a01ceb471"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Configuration</b> (const std::string &amp;fileName, const std::string &amp;hostname, const std::string &amp;binary, const std::string &amp;platform, const YAML::Node &amp;config)</td></tr>
-<tr class="separator:a50c4e1e1127d831c860d534a01ceb471"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac0eaa672897a195bbfd561c464cedcb3"><td class="memItemLeft" align="right" valign="top"><a id="ac0eaa672897a195bbfd561c464cedcb3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1Configuration.html#ac0eaa672897a195bbfd561c464cedcb3">Configuration</a> (const std::string &amp;file_name, const std::string &amp;hostname, const std::string &amp;binary, const std::string &amp;platform)</td></tr>
+<tr class="memdesc:ac0eaa672897a195bbfd561c464cedcb3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor without config node given. The correct config file has to be deduced from the params. <br /></td></tr>
+<tr class="separator:ac0eaa672897a195bbfd561c464cedcb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50066d8e0643e81573273f01ff6117e8"><td class="memItemLeft" align="right" valign="top"><a id="a50066d8e0643e81573273f01ff6117e8"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Configuration</b> (const std::string &amp;file_name, const std::string &amp;hostname, const std::string &amp;binary, const std::string &amp;platform, const YAML::Node &amp;config)</td></tr>
+<tr class="separator:a50066d8e0643e81573273f01ff6117e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ded932cb794465e69b98b255a5874a0"><td class="memTemplParams" colspan="2"><a id="a8ded932cb794465e69b98b255a5874a0"></a>
 template&lt;typename T , typename... Args&gt; </td></tr>
 <tr class="memitem:a8ded932cb794465e69b98b255a5874a0"><td class="memTemplItemLeft" align="right" valign="top">T&#160;</td><td class="memTemplItemRight" valign="bottom"><b>as</b> (Args &amp;&amp;... args) const</td></tr>
@@ -237,9 +237,9 @@ template&lt;typename T , typename Decayed  = typename std::decay&lt;T&gt;::type,
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:afa90e23bf7b6f43445b6b8676d241908"><td class="memItemLeft" align="right" valign="top"><a id="afa90e23bf7b6f43445b6b8676d241908"></a>
-static std::string&#160;</td><td class="memItemRight" valign="bottom"><b>getPlatform</b> (const std::string &amp;hostname)</td></tr>
-<tr class="separator:afa90e23bf7b6f43445b6b8676d241908"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0dee1c419299d254a12f1cfdab01f33a"><td class="memItemLeft" align="right" valign="top"><a id="a0dee1c419299d254a12f1cfdab01f33a"></a>
+static std::string&#160;</td><td class="memItemRight" valign="bottom"><b>get_platform</b> (const std::string &amp;hostname)</td></tr>
+<tr class="separator:a0dee1c419299d254a12f1cfdab01f33a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7293033ce460dcfa303517295c998075"><td class="memItemLeft" align="right" valign="top"><a id="a7293033ce460dcfa303517295c998075"></a>
 static YAML::Node&#160;</td><td class="memItemRight" valign="bottom"><b>merge_yaml_nodes</b> (const YAML::Node &amp;base, const YAML::Node &amp;override)</td></tr>
 <tr class="separator:a7293033ce460dcfa303517295c998075"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -252,9 +252,9 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><b>binary</b> {}<
 <tr class="memitem:a2a6058e3314b32811a804f00875b8ff8"><td class="memItemLeft" align="right" valign="top"><a id="a2a6058e3314b32811a804f00875b8ff8"></a>
 YAML::Node&#160;</td><td class="memItemRight" valign="bottom"><b>config</b> {}</td></tr>
 <tr class="separator:a2a6058e3314b32811a804f00875b8ff8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afecbb44e92a241b32f44a5fb697957ed"><td class="memItemLeft" align="right" valign="top"><a id="afecbb44e92a241b32f44a5fb697957ed"></a>
-fs::path&#160;</td><td class="memItemRight" valign="bottom"><b>fileName</b> {}</td></tr>
-<tr class="separator:afecbb44e92a241b32f44a5fb697957ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a319a618b335cd24b351428112efd1e9f"><td class="memItemLeft" align="right" valign="top"><a id="a319a618b335cd24b351428112efd1e9f"></a>
+fs::path&#160;</td><td class="memItemRight" valign="bottom"><b>file_name</b> {}</td></tr>
+<tr class="separator:a319a618b335cd24b351428112efd1e9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b675d9a7f7f9a5b2b4672661372edda"><td class="memItemLeft" align="right" valign="top"><a id="a7b675d9a7f7f9a5b2b4672661372edda"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>hostname</b> {}</td></tr>
 <tr class="separator:a7b675d9a7f7f9a5b2b4672661372edda"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -273,7 +273,7 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><b>platform</b> {
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="structextension_1_1Configuration.html">Configuration</a></li>
-    <li class="footer">Generated on Tue May 7 2024 23:28:55 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed May 8 2024 01:19:32 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
