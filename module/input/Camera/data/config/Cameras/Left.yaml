@@ -9,7 +9,6 @@ settings:
   ExposureAuto: Continuous # Options: Off, Once, Continuous
   AutoExposureExposureTimeUpperLimit: 6000 # Lower time reduces motion blur
   GainAuto: Continuous # Options: Off, Once, Continuous
-  Gain: 10
   BalanceWhiteAuto: Off # Options: Off, Once, Continuous
   AcquisitionFrameRateEnable: true
   DeviceLinkThroughputLimit: 60000000 # Throughput can limit the framerate
