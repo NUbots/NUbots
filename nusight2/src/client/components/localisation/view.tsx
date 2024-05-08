@@ -9,6 +9,7 @@ import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
@@ -213,6 +214,8 @@ interface LocalisationMenuBarProps {
   Menu: ComponentType<PropsWithChildren>;
 
   model: LocalisationModel;
+  controller: LocalisationController;
+
   controller: LocalisationController;
 
   onHawkEyeClick(): void;

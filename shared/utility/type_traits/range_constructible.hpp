@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -24,15 +24,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILITY_CLOCK_HPP
-#define UTILITY_CLOCK_HPP
+#ifndef UTILITY_TYPE_TRAITS_RANGE_CONSTRUCTIBLE
+#define UTILITY_TYPE_TRAITS_RANGE_CONSTRUCTIBLE
 
-#include <nuclear>
+#include <concepts>
+#include <ranges>
+#include <type_traits>
+#include <utility>
 
-namespace utility::clock {
-    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    void update_rtf(const double& rtf);
-    extern double custom_rtf;  // Real time factor
-}  // namespace utility::clock
+namespace utility::type_traits {
 
-#endif  // UTILITY_CLOCK_HPP
+    /**
+     * @brief Checks that range has both, a begin method and an end method, and that the begin method returns something
+     * that can be dereferenced to a type implicitly convertible to vale_type
+     * @tparam range The type that should be checked
+     * @tparam value_type The type to be implicit converted to
+     */
+    template <typename range, typename value_type>
+    concept range_constructible =
+        std::ranges::input_range<range> && std::convertible_to<decltype(*std::declval<range>().begin()),
+                                                               std::remove_cvref_t<value_type>>;
+
+}  // namespace utility::type_traits
+
+#endif  // UTILITY_TYPE_TRAITS_RANGE_CONSTRUCTIBLE

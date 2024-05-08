@@ -22,9 +22,12 @@
 }
 
 .localisation__menuButton {
+  align-items: center;
   background-color: transparent;
-  color: #000;
-  padding: 16px;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
   font-size: 0.8rem;
   height: 60px;
   width: 128px;

@@ -24,32 +24,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef UTILITY_NBS_GET_TIMESTAMP_HPP
-#define UTILITY_NBS_GET_TIMESTAMP_HPP
+#ifndef UTILITY_RANDOM_HPP
+#define UTILITY_RANDOM_HPP
 
-#include <nuclear>
-#include <type_traits>
+#include <algorithm>
+#include <random>
 
-#include "utility/type_traits/has_timestamp.hpp"
+namespace utility::random {
 
-namespace utility::nbs {
+    std::string generate_alphanum_string(unsigned int length);
 
-    /// @brief Returns the timestamp field of data or, if timestamp does not exist, it returns original, both converted
-    /// to uint64_t
-    template <typename T>
-    std::enable_if_t<!utility::type_traits::has_timestamp<T>::value, uint64_t> get_timestamp(
-        const NUClear::clock::time_point& original,
-        const T& /*data*/) {
-        return std::chrono::duration_cast<std::chrono::nanoseconds>(original.time_since_epoch()).count();
-    }
+}
 
-    template <typename T>
-    std::enable_if_t<utility::type_traits::has_timestamp<T>::value, uint64_t> get_timestamp(
-        const NUClear::clock::time_point& /*original*/,
-        const T& data) {
-        return std::chrono::duration_cast<std::chrono::nanoseconds>(data.timestamp.time_since_epoch()).count();
-    }
-
-}  // namespace utility::nbs
-
-#endif  // UTILITY_NBS_GET_TIMESTAMP_HPP
+#endif  // UTILITY_RANDOM_HPP
