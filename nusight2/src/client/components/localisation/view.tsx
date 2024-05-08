@@ -9,6 +9,7 @@ import * as THREE from "three";
 import URDFLoader, { URDFRobot } from "urdf-loader";
 
 import { Vector3 } from "../../../shared/math/vector3";
+import { dropdownContainer } from "../dropdown_container/view";
 import { Icon } from "../icon/view";
 import { PerspectiveCamera } from "../three/three_fiber";
 import { ThreeFiber } from "../three/three_fiber";
@@ -22,8 +23,6 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
-import { dropdownContainer } from "../dropdown_container/view";
-
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -109,7 +108,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
       <div className={style.localisation}>
         <LocalisationMenuBar
           model={this.props.model}
-          controller={this.props.controller}
           Menu={this.props.Menu}
           controller={this.props.controller}
           onHawkEyeClick={this.onHawkEyeClick}
@@ -213,6 +211,7 @@ interface LocalisationMenuBarProps {
   Menu: ComponentType<PropsWithChildren>;
 
   model: LocalisationModel;
+
   controller: LocalisationController;
 
   onHawkEyeClick(): void;
