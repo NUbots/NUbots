@@ -23,7 +23,6 @@ import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
 import style from "./style.module.css";
-import { dropdownContainer } from "../dropdown_container/view";
 
 
 type LocalisationViewProps = {
@@ -110,7 +109,6 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
       <div className={style.localisation}>
         <LocalisationMenuBar
           model={this.props.model}
-          controller={this.props.controller}
           Menu={this.props.Menu}
           controller={this.props.controller}
           onHawkEyeClick={this.onHawkEyeClick}
@@ -214,8 +212,6 @@ interface LocalisationMenuBarProps {
   Menu: ComponentType<PropsWithChildren>;
 
   model: LocalisationModel;
-  controller: LocalisationController;
-
   controller: LocalisationController;
 
   onHawkEyeClick(): void;
