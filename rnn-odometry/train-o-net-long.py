@@ -183,6 +183,14 @@ def main():
     truth_s_6 = truth_all_s_6[:, 9:11]
     print("Truth s 4 shape: ", truth_s_4.shape)
 
+    # Convert each truth to relative (path relative to starting point)
+    truth_s = convert_to_relative(truth_s)
+    truth_s_2 = convert_to_relative(truth_s_2)
+    truth_s_3 = convert_to_relative(truth_s_3)
+    truth_s_4 = convert_to_relative(truth_s_4)
+    truth_s_5 = convert_to_relative(truth_s_5)
+    truth_s_6 = convert_to_relative(truth_s_6)
+
     # Smooth targets using gaussian filter
     truth_s_smoothed = gaussian_smooth(truth_s, 50)
     truth_s_2_smoothed = gaussian_smooth(truth_s_2, 50)
@@ -195,12 +203,12 @@ def main():
     # print("Smoothed truth 1: ", truth_s_smoothed.shape)
 
     # Plot and inspect
-    # num_channels = truth_s.shape[1]
+    # num_channels = truth_s_6.shape[1]
     # plt.figure(figsize=(10, 5))
     # # Plot each channel
     # for i in range(num_channels):
-    #     plt.plot(truth_s[:50000, i], label=f'Unsmoothed {i+1}')
-    #     plt.plot(truth_s_smoothed[0:50000, i], label=f'Smoothed {i+1}')
+    #     plt.plot(truth_s_6[:50000, i], label=f'Unsmoothed {i+1}')
+    #     plt.plot(truth_s_6_smoothed[0:50000, i], label=f'Smoothed {i+1}')
     # # Add a legend
     # # plt.ylim(np.min(imu), np.max(imu))
     # plt.autoscale(enable=True, axis="both")
@@ -294,19 +302,19 @@ def main():
     # Training
     input_data_train = train_arr_scaled[:, :18]  # imu and servos
     input_targets_train = train_arr_scaled[:, 18:]  # truth
-    # Convert targets to relative position
+    # Convert sliced targets to relative position
     input_targets_train = convert_to_relative(input_targets_train)
 
     # Validation
     input_data_validate = validate_arr_scaled[:, :18]  # imu and servos
     input_targets_validate = validate_arr_scaled[:, 18:]  # truth
-    # Convert targets to relative position
+    # Convert sliced targets to relative position
     input_targets_validate = convert_to_relative(input_targets_validate)
 
     # Testing
     input_data_test= test_arr_scaled[:, :18]  # imu and servos
     input_targets_test = test_arr_scaled[:, 18:]  # truth
-    # Convert targets to relative position
+    # Convert sliced targets to relative position
     input_targets_test = convert_to_relative(input_targets_test)
 
     # print dataset shapes
@@ -342,7 +350,7 @@ def main():
 
     # NOTE: Samples are roughly 115/sec
     system_sample_rate = 115
-    sequence_length = system_sample_rate * 6   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
+    sequence_length = system_sample_rate * 1   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
     batch_size = 100                         # Number of samples per gradient update (original: 64, seemed better?: 512)
@@ -414,7 +422,7 @@ def main():
 
     # Model parameters
     learning_rate = 0.000096   # Controls how much to change the model in response to error.
-    epochs = 200             #
+    epochs = 600             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -479,12 +487,12 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    dropout = keras.layers.Dropout(rate=0.45)(inputs)
-    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.001), return_sequences=True)(dropout)    # 32 originally
+    dropout = keras.layers.Dropout(rate=0.35)(inputs)
+    lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00039, l2=0.003), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    dropout2 = keras.layers.Dropout(rate=0.52)(normalise)
-    lstm2 = keras.layers.LSTM(60, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.001), return_sequences=True)(dropout2)    # 32 originally
+    dropout2 = keras.layers.Dropout(rate=0.32)(normalise)
+    lstm2 = keras.layers.LSTM(160, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00039, l2=0.003), return_sequences=True)(dropout2)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
 
     # lstm3 = keras.layers.LSTM(100, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00019, l2=0.0009), return_sequences=True)(normalise2)    # 32 originally
@@ -502,7 +510,7 @@ def main():
     dense1 = keras.layers.Dense(32, kernel_regularizer=keras.regularizers.L1L2(l1=0.0001, l2=0.002))(normalise2)
     dense2 = keras.layers.TimeDistributed(keras.layers.Dense(2, kernel_regularizer=keras.regularizers.L1L2(l1=0.00001, l2=0.0002)))(dense1)   # Target shape[1] is 3
     model = keras.Model(inputs=inputs, outputs=dense2)
-    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse", "mae"])
+    model.compile(optimizer=optimizer, loss=loss_function, metrics=["mse"])
     model.summary()
 
     # Examples
