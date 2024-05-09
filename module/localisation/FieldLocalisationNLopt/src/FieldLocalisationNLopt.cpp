@@ -45,6 +45,7 @@ namespace module::localisation {
     using message::localisation::ResetFieldLocalisation;
     using message::vision::FieldLines;
 
+    using utility::localisation::OccupancyMap;
     using utility::math::euler::mat_to_rpy_intrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -104,9 +105,9 @@ namespace module::localisation {
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
             // Generate the field line distance map
-            setup_fieldline_distance_map(fd);
+            fieldline_distance_map = utility::localisation::setup_fieldline_distance_map(fd, cfg.grid_size);
             // Generate the field landmarks
-            setup_field_landmarks(fd);
+            landmarks = utility::localisation::setup_field_landmarks(fd);
             if (cfg.save_map) {
                 std::ofstream file("recordings/fieldline_map.csv");
                 file << fieldline_distance_map.get_map();

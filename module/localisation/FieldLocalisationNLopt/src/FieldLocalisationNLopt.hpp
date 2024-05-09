@@ -38,6 +38,7 @@
 #include "message/vision/FieldIntersections.hpp"
 #include "message/vision/FieldLines.hpp"
 
+#include "utility/localisation/FieldLineOccupanyMap.hpp"
 #include "utility/localisation/OccupancyMap.hpp"
 #include "utility/math/filter/KalmanFilter.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -49,6 +50,9 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using message::vision::FieldIntersection;
     using message::vision::FieldIntersections;
+
+    using utility::localisation::Landmark;
+    using utility::localisation::OccupancyMap;
 
     struct StartingSide {
         enum Value { UNKNOWN = 0, LEFT = 1, RIGHT = 2, EITHER = 3, CUSTOM = 4 };
@@ -160,17 +164,6 @@ namespace module::localisation {
 
         return result;
     }
-
-
-    /// @brief Landmark struct
-    struct Landmark {
-        /// @brief Landmark position in field space
-        Eigen::Vector3d rLFf{};
-
-        /// @brief Landmark type
-        message::vision::FieldIntersection::IntersectionType type =
-            message::vision::FieldIntersection::IntersectionType::UNKNOWN;
-    };
 
     class FieldLocalisationNLopt : public NUClear::Reactor {
     private:
