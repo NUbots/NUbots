@@ -61,6 +61,27 @@ namespace utility::strutil {
     }
 
     /**
+     * @brief The overloaded version of ends_with which takes vectors of strings instead of single strings.
+     *
+     * This function compares the given string `str` with the specified `ending` substring in the vector endings
+     * and determines whether `str` ends with `ending`. The comparison is case-sensitive.
+     *
+     * @param str The string to check for the ending substring.
+     * @param ending The substring to search for at the end of the string.
+     * @return `true` if `str` ends with `ending`, `false` otherwise.
+     */
+    // http://stackoverflow.com/a/874160/1387006
+    [[nodiscard]] inline bool ends_with(const std::string& str, const std::vector<std::string>& endings) {
+
+        for (const auto& ending : endings) {
+            if (ends_with(str, ending)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @brief Checks if a string starts with a specific substring.
      *
      * This function compares the given string `str` with the specified `start` substring
