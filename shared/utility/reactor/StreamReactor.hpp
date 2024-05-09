@@ -96,7 +96,7 @@ namespace utility::reactor {
                     bytes_written += written;
                 }
                 if (log_level <= NUClear::TRACE) {
-                    std::stringstream debug_string;
+                    std::stringstream debug_string{};
                     for (const auto& byte : t.data) {
                         debug_string << std::isprint(byte) ? std::string(1, char(byte))
                                                            : fmt::format("\\{:#04x} ", byte);
