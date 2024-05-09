@@ -52,11 +52,10 @@ namespace module::platform::NUSense {
     using message::platform::RawSensors;
     using utility::support::Expression;
 
-    /**
-     * Message reflector class that can be used to emit messages provided as NUSenseFrames to the rest of the system
-     *
-     * @tparam T The type of the message to emit
-     */
+
+    /// @brief Message reflector class that can be used to emit messages provided as NUSenseFrames to the rest of the
+    /// system
+    /// @tparam T The type of the message to emit
     template <typename T>
     struct EmitReflector;
 
@@ -107,11 +106,11 @@ namespace module::platform::NUSense {
             sensors->timestamp = NUClear::clock::now();
 
             // Subcontroller data
-            sensors->subcontroller_error = 0;  // not yet implemented
-            sensors->led_panel           = 0;  // not yet implemented
-            sensors->head_led            = 0;  // not yet implemented
-            sensors->eye_led             = 0;  // not yet implemented
-            sensors->buttons             = 0;  // not yet implemented
+            sensors->subcontroller_error = 0;  // TODO (NUSense people) not yet implemented
+            sensors->led_panel           = 0;  // TODO (NUSense people) not yet implemented
+            sensors->head_led            = 0;  // TODO (NUSense people) not yet implemented
+            sensors->eye_led             = 0;  // TODO (NUSense people) not yet implemented
+            sensors->buttons             = 0;  // TODO (NUSense people) not yet implemented
 
             // Set IMU
             sensors->accelerometer = Eigen::Vector3f(data.imu.accel.x, data.imu.accel.y, data.imu.accel.z);
@@ -152,37 +151,35 @@ namespace module::platform::NUSense {
                 servo.present_position += nugus.servo_offset[val.id - 1];
             }
 
-            if (log_level <= NUClear::DEBUG) {
-                log<NUClear::DEBUG>(
-                    fmt::format("\nIMU Data\n"
-                                "\tAccel(xyz): {} - {} - {}\n"
-                                "\t Gyro(xyz): {} - {} - {}\n ",
-                                data.imu.accel.x,
-                                data.imu.accel.y,
-                                data.imu.accel.z,
-                                data.imu.gyro.x,
-                                data.imu.gyro.y,
-                                data.imu.gyro.z));
+            log<NUClear::TRACE>(
+                fmt::format("\nIMU Data\n"
+                            "\tAccel(xyz): {} - {} - {}\n"
+                            "\t Gyro(xyz): {} - {} - {}\n ",
+                            data.imu.accel.x,
+                            data.imu.accel.y,
+                            data.imu.accel.z,
+                            data.imu.gyro.x,
+                            data.imu.gyro.y,
+                            data.imu.gyro.z));
 
-                log<NUClear::DEBUG>("Logging servo states...");
+            log<NUClear::TRACE>("Logging servo states...");
 
-                for (const auto& [key, val] : data.servo_map) {
-                    log<NUClear::DEBUG>(fmt::format("      key: {}", key));
+            for (const auto& [key, val] : data.servo_map) {
+                log<NUClear::TRACE>(fmt::format("      key: {}", key));
 
-                    log<NUClear::DEBUG>(fmt::format("       id: {}", val.id));
-                    log<NUClear::DEBUG>(fmt::format("   hw_err: {}", val.hardware_error));
-                    log<NUClear::DEBUG>(fmt::format("torque_en: {}", val.torque_enabled));
-                    log<NUClear::DEBUG>(fmt::format("     ppwm: {}", val.present_pwm));
-                    log<NUClear::DEBUG>(fmt::format("    pcurr: {}", val.present_current));
-                    log<NUClear::DEBUG>(fmt::format("    pvelo: {}", val.present_velocity));
-                    log<NUClear::DEBUG>(fmt::format("     ppos: {}", val.present_position));
-                    log<NUClear::DEBUG>(fmt::format("     gpwm: {}", val.goal_pwm));
-                    log<NUClear::DEBUG>(fmt::format("    gcurr: {}", val.goal_current));
-                    log<NUClear::DEBUG>(fmt::format("    gvelo: {}", val.goal_velocity));
-                    log<NUClear::DEBUG>(fmt::format("     gpos: {}", val.goal_position));
-                    log<NUClear::DEBUG>(fmt::format("  voltage: {}", val.voltage));
-                    log<NUClear::DEBUG>(fmt::format("     temp: {}", val.temperature));
-                }
+                log<NUClear::TRACE>(fmt::format("       id: {}", val.id));
+                log<NUClear::TRACE>(fmt::format("   hw_err: {}", val.hardware_error));
+                log<NUClear::TRACE>(fmt::format("torque_en: {}", val.torque_enabled));
+                log<NUClear::TRACE>(fmt::format("     ppwm: {}", val.present_pwm));
+                log<NUClear::TRACE>(fmt::format("    pcurr: {}", val.present_current));
+                log<NUClear::TRACE>(fmt::format("    pvelo: {}", val.present_velocity));
+                log<NUClear::TRACE>(fmt::format("     ppos: {}", val.present_position));
+                log<NUClear::TRACE>(fmt::format("     gpwm: {}", val.goal_pwm));
+                log<NUClear::TRACE>(fmt::format("    gcurr: {}", val.goal_current));
+                log<NUClear::TRACE>(fmt::format("    gvelo: {}", val.goal_velocity));
+                log<NUClear::TRACE>(fmt::format("     gpos: {}", val.goal_position));
+                log<NUClear::TRACE>(fmt::format("  voltage: {}", val.voltage));
+                log<NUClear::TRACE>(fmt::format("     temp: {}", val.temperature));
             }
 
             // Emit the raw sensor data

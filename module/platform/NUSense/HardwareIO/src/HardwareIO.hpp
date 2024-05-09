@@ -59,7 +59,10 @@ namespace module::platform::NUSense {
         NUgus nugus{};
 
     private:
-        /// @brief Send message to StreamReactor so it can write the data to NUSense using uart
+        /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
+        /// NUSense.
+        /// @tparam packet A const reference to a protobuf message of type T.
+        ///                This gets serialised and turned to a vector of bytes before sending to NUSense.
         template <typename T>
         void send_packet(const T& packet) {
             // Serialize the packet
