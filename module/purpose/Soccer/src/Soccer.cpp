@@ -79,7 +79,7 @@ namespace module::purpose {
             cfg.position = Position(config["position"].as<std::string>());
 
             // initialise robot storage
-            activeRobots = std::vector<RobotInfo>();
+            active_robots = std::vector<RobotInfo>();
 
             // decide which player we are
             PLAYER_ID = global_config.player_id;
@@ -98,9 +98,13 @@ namespace module::purpose {
             emit<Task>(std::make_unique<FindPurpose>(), 1);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
             emit<Task>(std::make_unique<FallRecovery>(), 2);
+            // Trigger Find purpose by emitting robocup
+            auto msg = std::make_unique<RoboCup>();
+            msg->current_pose.player_id = PLAYER_ID;
+            emit(msg);
         });
 
-        on<Provide<FindPurpose>>().then([this] () {
+        on<Provide<FindPurpose>(), Trigger<RoboCup>>().then([this] (const RoboCup robocup) {
             // Make task based on configured purpose/soccer position
             switch (cfg.position) {
                 case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
@@ -108,28 +112,21 @@ namespace module::purpose {
                 case Position::DEFENDER: emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
                 case Position::DYNAMIC:
                     // default to defender?
-                    manageActiveRobots(PLAYER_ID);
-                    emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
+                    // if (cfg.position == Position::DYNAMIC && robocup.state == State::UNPENALISED) {
+                    manage_active_robots(robocup.current_pose.player_id);
+                    find_soccer_position(robocup);
+                    break;
                 default: log<NUClear::ERROR>("Invalid robot position");
             }
         });
 
-        on<Provide<FindPurpose>(), Trigger<RoboCup>>().then([this] (const RoboCup robocup) {
-            // Make task based on configured purpose/soccer position
-            // TODO: will still need penalised robots info if leader elec
-            if (cfg.position == Position::DYNAMIC && robocup.state == State::UNPENALISED) {
-                manageActiveRobots(robocup.current_pose.player_id);
-                findSoccerPosition(robocup);
-            }
-        });
-
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
-            // SPC: Need to remove robot from activeRobots
+            // SPC: Need to remove robot from active_robots
             // TODO: keeping robot around for now, might want to keep info, revisit
-            for (auto it = activeRobots.begin(); it != activeRobots.end(); ++it) {
-                if (it->robotId == self_penalisation.robot_id) {
-                    penalisedRobots.push_back(*it);
-                    activeRobots.erase(it);
+            for (auto it = active_robots.begin(); it != active_robots.end(); ++it) {
+                if (it->robot_id == self_penalisation.robot_id) {
+                    penalised_robots.push_back(*it);
+                    active_robots.erase(it);
                     break;
                 }
             }
@@ -144,7 +141,7 @@ namespace module::purpose {
         });
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
-            // TODO: maybe take robot from penalised vector and add robot to activeRobots
+            // TODO: maybe take robot from penalised vector and add robot to active_robots
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
@@ -166,11 +163,11 @@ namespace module::purpose {
             constexpr auto timeout = std::chrono::seconds(10); //TODO: test with faster computer
 
             // remove inactive robots
-            auto it = activeRobots.begin();
-            while (it != activeRobots.end()) {
-                if (it->robotId != PLAYER_ID && now - it->lastHeardFrom > timeout) {
-                    log<NUClear::DEBUG>("remove player ", int(it->robotId));
-                    it = activeRobots.erase(it);
+            auto it = active_robots.begin();
+            while (it != active_robots.end()) {
+                if (it->robot_id != PLAYER_ID && now - it->last_heard_from > timeout) {
+                    log<NUClear::DEBUG>("remove player ", int(it->robot_id));
+                    it = active_robots.erase(it);
                 } else {
                     ++it;
                 }
@@ -179,10 +176,10 @@ namespace module::purpose {
             //TODO: DELETE ME
             // Loop through each robot and print its info
             log<NUClear::DEBUG>("-- PRINT ROBOT INFO --");
-            for (const auto& robot : activeRobots) {
-                log<NUClear::DEBUG>("Robot ID ", int(robot.robotId));
-                if (robot.robotId != PLAYER_ID) {
-                    log<NUClear::DEBUG>("last heard from ", std::chrono::duration_cast<std::chrono::seconds>(now - robot.lastHeardFrom).count());
+            for (const auto& robot : active_robots) {
+                log<NUClear::DEBUG>("Robot ID ", int(robot.robot_id));
+                if (robot.robot_id != PLAYER_ID) {
+                    log<NUClear::DEBUG>("last heard from ", std::chrono::duration_cast<std::chrono::seconds>(now - robot.last_heard_from).count());
                 }
                 log<NUClear::DEBUG>("Position: ", robot.position.toString());
             }
@@ -191,67 +188,67 @@ namespace module::purpose {
         });
     }
 
-    void Soccer::addRobot(RobotInfo newRobot) {
+    void Soccer::add_robot(RobotInfo new_robot) {
         // Find the correct insertion point using std::lower_bound
-        auto insertPos = std::lower_bound(activeRobots.begin(), activeRobots.end(), newRobot,
+        auto insertPos = std::lower_bound(active_robots.begin(), active_robots.end(), new_robot,
             [](const RobotInfo& a, const RobotInfo& b) {
-                return a.robotId < b.robotId;
+                return a.robot_id < b.robot_id;
             });
 
         // Insert the new robot at the found position to maintain order
-        activeRobots.insert(insertPos, newRobot);
+        active_robots.insert(insertPos, new_robot);
     }
 
-    bool Soccer::manageActiveRobots(const uint8_t robotId) {
+    bool Soccer::manage_active_robots(const uint8_t robot_id) {
         auto now = std::chrono::steady_clock::now();
 
-        std::vector<RobotInfo>::iterator it = std::find_if(activeRobots.begin(), activeRobots.end(), [robotId](const RobotInfo& info) {
-            return info.robotId == robotId;
+        std::vector<RobotInfo>::iterator it = std::find_if(active_robots.begin(), active_robots.end(), [robot_id](const RobotInfo& info) {
+            return info.robot_id == robot_id;
         });
 
-        if (it != activeRobots.end()) {
-            // Update existing robot's lastHeardFrom
-            it->lastHeardFrom = now;
+        if (it != active_robots.end()) {
+            // Update existing robot's last_heard_from
+            it->last_heard_from = now;
         } else {
             // Add new robot info
-            RobotInfo newRobot{robotId, now};
-            addRobot(newRobot);
+            RobotInfo new_robot{robot_id, now};
+            add_robot(new_robot);
 
             return true;
         }
         return false;
     };
 
-    uint8_t Soccer::countDefenders() {
-        uint8_t res = std::count_if(activeRobots.begin(), activeRobots.end(),
+    uint8_t Soccer::count_defenders() {
+        uint8_t res = std::count_if(active_robots.begin(), active_robots.end(),
             [](const RobotInfo& robot) { return robot.position.value == Position::DEFENDER; });
         return res;
     }
 
-    void Soccer::findSoccerPosition(const RoboCup& robocup) {
+    void Soccer::find_soccer_position(const RoboCup& robocup) {
         // If I am not the leader, follow leader's message, and store positions
         // check that the leader is actually the expected leader?
 
         // If I am the leader, then decide positions and emit this
-        bool leader = activeRobots.front().robotId == PLAYER_ID;
+        bool leader = active_robots.front().robot_id == PLAYER_ID;
         if (leader) {
             log<NUClear::DEBUG>("I am ze leader");
         }
 
 
-        uint8_t numRobots = activeRobots.size();
-        uint8_t numDefenders = std::ceil(numRobots / 2.0);
-        uint8_t defenderCount = countDefenders();
+        uint8_t num_robots = active_robots.size();
+        uint8_t num_defenders = std::ceil(num_robots / 2.0);
+        uint8_t defenderCount = count_defenders();
 
         // test needed for decisions later
-        if (numDefenders != defenderCount) {
+        if (num_defenders != defenderCount) {
             // Assign roles (temporary logic for simplicity)
             // robocup + position tracker probs needed here later
-            for (size_t i = 0; i < activeRobots.size(); ++i) {
-                activeRobots[i].position = (i < numDefenders) ? Position("DEFENDER") : Position("STRIKER");
+            for (size_t i = 0; i < active_robots.size(); ++i) {
+                active_robots[i].position = (i < num_defenders) ? Position("DEFENDER") : Position("STRIKER");
 
-                if (PLAYER_ID == activeRobots[i].robotId) {
-                    switch (activeRobots[i].position.value) {
+                if (PLAYER_ID == active_robots[i].robot_id) {
+                    switch (active_robots[i].position.value) {
                         case Position::STRIKER: emit<Task>(std::make_unique<Striker>(cfg.force_playing)); break;
                         case Position::DEFENDER: emit<Task>(std::make_unique<Defender>(cfg.force_playing)); break;
                         default: log<NUClear::ERROR>("Invalid robot position");

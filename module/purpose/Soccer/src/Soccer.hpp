@@ -65,6 +65,7 @@ namespace module::purpose {
                 return value;
             }
 
+            // TODO: temp, remove me
             std::string toString() const {
                 switch(value) {
                     case STRIKER: return "STRIKER";
@@ -85,32 +86,32 @@ namespace module::purpose {
         } cfg;
 
         struct RobotInfo {
-            uint8_t robotId;
-            std::chrono::steady_clock::time_point lastHeardFrom;
+            uint8_t robot_id;
+            std::chrono::steady_clock::time_point last_heard_from;
             Position position;
 
             bool operator<(const RobotInfo& other) const {
-                return robotId < other.robotId;
+                return robot_id < other.robot_id;
             }
         };
 
         /// @brief Store and remove active/inactive robots
-        bool manageActiveRobots(const uint8_t robotId);
+        bool manage_active_robots(const uint8_t robot_id);
 
         /// @brief Add RobotInfo ordered by id
-        void addRobot(RobotInfo newRobot);
+        void add_robot(RobotInfo new_robot);
 
         /// @brief Count the number of defenders
-        uint8_t countDefenders();
+        uint8_t count_defenders();
 
         /// @brief Decide the correct soccer position
-        void findSoccerPosition(const message::input::RoboCup& robocup);
+        void find_soccer_position(const message::input::RoboCup& robocup);
 
         /// @brief Store robots that can currently play
-        std::vector<RobotInfo> activeRobots;
+        std::vector<RobotInfo> active_robots;
 
         /// @brief Store penalized robots
-        std::list<RobotInfo> penalisedRobots;
+        std::list<RobotInfo> penalised_robots;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
