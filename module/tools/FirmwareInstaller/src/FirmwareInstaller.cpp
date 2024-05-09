@@ -56,8 +56,8 @@ namespace module::tools {
 
             for (const auto& f : config["firmwares"].config) {
                 std::pair<std::string, std::string> name;
-                name.first  = utility::strutil::toUpper(f["device"].as<std::string>());
-                name.second = utility::strutil::toUpper(f["battery"].as<std::string>());
+                name.first  = utility::strutil::to_upper(f["device"].as<std::string>());
+                name.second = utility::strutil::to_pper(f["battery"].as<std::string>());
                 auto path   = f["path"].as<std::string>();
 
                 Firmware fw;
