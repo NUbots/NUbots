@@ -31,7 +31,7 @@ namespace module::platform::NUSense {
             } break;
             case PAYLOAD: {
                 // Read all the bytes of this packet
-                if (buffer.size() == size + 3 + sizeof(uint32_t)) {
+                if (buffer.size() == size + 3 + sizeof(size)) {
                     // We always go back to initial after a payload
                     state = INITIAL;
 
@@ -40,12 +40,16 @@ namespace module::platform::NUSense {
                     msg->header = {buffer[0], buffer[1], buffer[2]};
                     msg->size   = size;
 
+                    // Accessor variable initialised to 3 bytes of header + 4 bytes of size, since it is uint32_t
                     uint32_t buf_idx = sizeof(msg->header) + sizeof(size);
                     msg->timestamp   = read_le_64(&buffer[buf_idx]);
 
+                    // Add 8 bytes to the accessor variable to account for accessing the message timestamp above
                     buf_idx += sizeof(msg->timestamp);
                     msg->hash = read_le_64(&buffer[buf_idx]);
 
+                    // Add another 8 bytes, updating the accessor variable to account for accessing the message type
+                    // hash
                     buf_idx += sizeof(msg->hash);
                     msg->payload = std::vector<uint8_t>(std::next(buffer.begin(), buf_idx), buffer.end());
 
