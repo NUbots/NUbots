@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -30,7 +30,6 @@
 #include <fmt/format.h>
 #include <fstream>
 #include <mio/mmap.hpp>
-#include <zstr.hpp>
 
 #include "message/reflection.hpp"
 
@@ -38,31 +37,31 @@ namespace utility::nbs {
 
     namespace {
         template <typename T>
-        struct IdReflector;
+        struct SubtypeReflector;
 
         template <>
-        struct IdReflector<void> {  // NOLINT(cppcoreguidelines-special-member-functions)
-            virtual uint32_t id(const uint8_t* payload, uint32_t length) = 0;
-            virtual ~IdReflector()                                       = default;
+        struct SubtypeReflector<void> {  // NOLINT(cppcoreguidelines-special-member-functions)
+            virtual uint32_t subtype(const uint8_t* payload, uint32_t length) = 0;
+            virtual ~SubtypeReflector()                                       = default;
         };
 
         template <typename T>
-        struct IdReflector : public IdReflector<void> {
+        struct SubtypeReflector : public SubtypeReflector<void> {
             template <typename U = T>
-            uint32_t get_id(...) {  // NOLINT(cert-dcl50-cpp) gimme my SFINAE!
+            uint32_t get_subtype(...) {  // NOLINT(cert-dcl50-cpp) gimme my SFINAE!
                 return 0;
             }
 
             template <typename U = T>
-            auto get_id(const uint8_t* payload, uint32_t length) -> decltype(std::declval<U>().id) {
+            auto get_subtype(const uint8_t* payload, uint32_t length) -> decltype(std::declval<U>().id) {
                 typename U::protobuf_type pb;
                 pb.ParseFromArray(payload, length);
                 U msg = pb;
                 return msg.id;
             }
 
-            uint32_t id(const uint8_t* payload, uint32_t length) override {
-                return get_id(payload, length);
+            uint32_t subtype(const uint8_t* payload, uint32_t length) override {
+                return get_subtype(payload, length);
             }
         };
 
@@ -102,10 +101,9 @@ namespace utility::nbs {
 
     }  // namespace
 
-    void build_index(
-        const std::filesystem::path& nbs_path,
-        const std::filesystem::path& idx_path,
-        const std::function<void(const std::filesystem::path&, const uint64_t&, const uint64_t&)>& progress) {
+    void build_index(const std::filesystem::path& nbs_path,
+                     const std::filesystem::path& idx_path,
+                     const bool& show_progress) {
 
         // NBS File Format
         // Name      | Type               |  Description
@@ -120,7 +118,13 @@ namespace utility::nbs {
 
         enum State { INITIAL, HEADER_1, HEADER_2, PAYLOAD } state = INITIAL;
 
-        for (uint64_t p = 0; p < nbs.size();) {
+        std::optional<utility::support::ProgressBar> progress;
+        if (show_progress) {
+            progress = utility::support::ProgressBar();
+        }
+
+        // When looping, we need to at least have enough future data to have a packet and a length
+        for (uint64_t p = 0; (p + 3 + sizeof(uint32_t)) < nbs.size();) {
 
             switch (state) {
                 case INITIAL: state = nbs[p++] == 0xE2 ? HEADER_1 : INITIAL; break;
@@ -135,79 +139,76 @@ namespace utility::nbs {
 
                     // Read the header of the packet
                     uint32_t size = *reinterpret_cast<uint32_t*>(&nbs[p]);
-                    p += sizeof(size);
-                    uint64_t timestamp = *reinterpret_cast<uint64_t*>(&nbs[p]);
-                    p += sizeof(timestamp);
-                    uint64_t hash = *reinterpret_cast<uint64_t*>(&nbs[p]);
-                    p += sizeof(hash);
 
-                    // Payload data
-                    const uint8_t* payload  = &nbs[p];
-                    uint32_t payload_length = size - sizeof(timestamp) - sizeof(hash);
-                    p += payload_length;
+                    // We need to make sure the rest of the message is even in this file
+                    // If not we need to finish here and ignore the rest of the file
+                    // (leaving the half written corrupt message ignored)
+                    if (p + size >= nbs.size()) {
+                        p = nbs.size();
+                        if (show_progress) {
+                            progress.value().update(
+                                p,
+                                nbs.size(),
+                                "B",
+                                fmt::format("Reconstructing Index for {}", nbs_path.filename().string()));
+                        }
+                    }
+                    else {
+                        p += sizeof(size);
+                        uint64_t timestamp = *reinterpret_cast<uint64_t*>(&nbs[p]);
+                        p += sizeof(timestamp);
+                        uint64_t hash = *reinterpret_cast<uint64_t*>(&nbs[p]);
+                        p += sizeof(hash);
 
-                    // Use reflection to extract the id from messages that have them
-                    auto sr     = message::reflection::from_hash<IdReflector>(hash);
-                    uint32_t id = sr->id(payload, payload_length);
+                        // Payload data
+                        const uint8_t* payload  = &nbs[p];
+                        uint32_t payload_length = size - sizeof(timestamp) - sizeof(hash);
+                        p += payload_length;
 
-                    // Use reflection to extract the timestamp from messages that have them or just return the timestamp
-                    // from the nbs file if the message type doesn't have one
-                    auto tr   = message::reflection::from_hash<TimestampReflector>(hash);
-                    timestamp = tr->timestamp(timestamp, payload, payload_length);
+                        // Use reflection to extract the subtype from messages that have them
+                        auto sr          = message::reflection::from_hash<SubtypeReflector>(hash);
+                        uint32_t subtype = sr->subtype(payload, payload_length);
 
-                    // Write the data to the index file
-                    idx.write(reinterpret_cast<char*>(&hash), sizeof(hash));
-                    idx.write(reinterpret_cast<char*>(&id), sizeof(id));
-                    idx.write(reinterpret_cast<char*>(&timestamp), sizeof(timestamp));
-                    idx.write(reinterpret_cast<char*>(&offset), sizeof(offset));
+                        // Use reflection to extract the timestamp from messages that have them or just return the
+                        // timestamp from the nbs file if the message type doesn't have one
+                        auto tr   = message::reflection::from_hash<TimestampReflector>(hash);
+                        timestamp = tr->timestamp(timestamp, payload, payload_length);
 
-                    // We add 3 onto the size field for the length to include the header
-                    uint32_t length = size + 3 + sizeof(uint32_t);
-                    idx.write(reinterpret_cast<char*>(&length), sizeof(length));
+                        // Write the data to the index file
+                        idx.write(reinterpret_cast<char*>(&hash), sizeof(hash));
+                        idx.write(reinterpret_cast<char*>(&subtype), sizeof(subtype));
+                        idx.write(reinterpret_cast<char*>(&timestamp), sizeof(timestamp));
+                        idx.write(reinterpret_cast<char*>(&offset), sizeof(offset));
 
-                    if (progress) {
-                        progress(nbs_path, p, nbs.size());
+                        // We add 3 onto the size field for the length to include the header
+                        uint32_t length = size + 3 + sizeof(uint32_t);
+                        idx.write(reinterpret_cast<char*>(&length), sizeof(length));
+
+                        if (show_progress) {
+                            progress.value().update(
+                                p,
+                                nbs.size(),
+                                "B",
+                                fmt::format("Reconstructing Index for {}", nbs_path.filename().string()));
+                        }
                     }
                 }
             }
         }
-    }
-
-    bool IndexItem::operator<(const IndexItem& them) const {
-        return timestamp < them.timestamp;
-    }
-
-    Index::Index(const std::vector<std::filesystem::path>& paths,
-                 const std::function<void(const std::filesystem::path&, const uint64_t&, const uint64_t&)>& progress) {
-
-        for (size_t i = 0; i < paths.size(); ++i) {
-            const auto& path               = paths[i];
-            std::filesystem::path idx_path = path;
-            idx_path.replace_extension("nbs.idx");
-
-            // If our index file does not exist we need to create it
-            if (!std::filesystem::exists(idx_path)) {
-                build_index(path, idx_path, progress);
-            }
-
-            // Load the index file
-            zstr::ifstream input(idx_path);
-            while (input.good()) {
-                idx.emplace_back();
-                input.read(reinterpret_cast<char*>(&idx.back()), sizeof(IndexItem) - sizeof(IndexItem::fileno));
-                idx.back().fileno = i;
-            }
+        if (show_progress) {
+            progress.value().update(nbs.size(),
+                                    nbs.size(),
+                                    "B",
+                                    fmt::format("Reconstructing Index for {}", nbs_path.filename().string()));
+            progress.value().close();
         }
-
-        // Sort our index
-        std::sort(idx.begin(), idx.end());
     }
 
-    std::vector<IndexItem>::const_iterator Index::begin() const {
+    IndexItemFile* Index::begin() {
         return idx.begin();
     }
 
-    std::vector<IndexItem>::const_iterator Index::end() const {
+    IndexItemFile* Index::end() {
         return idx.end();
     }
 

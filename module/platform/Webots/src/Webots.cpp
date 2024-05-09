@@ -31,8 +31,6 @@
 #include <fmt/format.h>
 #include <string>
 
-#include "clock/clock.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/ServoTarget.hpp"
@@ -291,7 +289,7 @@ namespace module::platform {
 
         on<Configuration>("WebotsCameras").then([this](const Configuration& config) {
             // The camera's name is the filename of the config, with the .yaml stripped off
-            const std::string name = config.fileName.stem();
+            const std::string name = config.file_name.stem();
 
             log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
 
@@ -724,7 +722,7 @@ namespace module::platform {
 
         // Exponential filter to do the smoothing
         rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
-        utility::clock::update_rtf(rtf);
+        NUClear::clock::set_clock(NUClear::clock::now(), rtf);
 
         // Update our current times
         current_sim_time  = sensor_measurements.time;

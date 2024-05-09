@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2021 NUbots
+ * Copyright (c) 2024 NUbots
  *
  * This file is part of the NUbots codebase.
  * See https://github.com/NUbots/NUbots for further info.
@@ -32,6 +32,17 @@
 #include "utility/type_traits/has_id.hpp"
 
 namespace utility::nbs {
+
+    /// @brief Returns the subtype field of data or, if subtype does not exist, 0
+    template <typename T>
+    std::enable_if_t<!utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& /*data*/) {
+        return 0;
+    }
+
+    template <typename T>
+    std::enable_if_t<utility::type_traits::has_id<T>::value, uint32_t> get_subtype(const T& data) {
+        return data.id;
+    }
 
     /// @brief Returns the id field of data or, if id does not exist, 0
     template <typename T>
