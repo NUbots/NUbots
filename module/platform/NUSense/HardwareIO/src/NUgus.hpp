@@ -64,9 +64,9 @@ namespace module::platform::NUSense {
             L_ANKLE_ROLL     = 18,
             HEAD_YAW         = 19,
             HEAD_PITCH       = 20,
-            R_FSR            = 111,
-            L_FSR            = 112,
-            OPENCR           = 200,
+            R_FSR            = 111,  // Not yet implemented
+            L_FSR            = 112,  // Not yet implemented
+            NUSENSE          = 200,
             BROADCAST        = 254
         };
 
@@ -95,7 +95,7 @@ namespace module::platform::NUSense {
                 case ID::HEAD_PITCH: return "HEAD_PITCH";
                 case ID::R_FSR: return "R_FSR";
                 case ID::L_FSR: return "L_FSR";
-                case ID::OPENCR: return "OPENCR";
+                case ID::NUSENSE: return "NUSENSE";
                 case ID::BROADCAST: return "BROADCAST";
                 default: throw std::runtime_error("enum NUgus::ID's value is corrupt, unknown value stored");
             }
