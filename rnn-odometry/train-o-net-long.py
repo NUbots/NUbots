@@ -353,7 +353,7 @@ def main():
     sequence_length = system_sample_rate * 1   # Look back n seconds (system_sample_rate * n). system_sample_rate was roughly calculated at 115/sec
     sequence_stride = 1                         # Shift one sequence_length at a time (rolling window)
     sampling_rate = 1                           # Used for downsampling
-    batch_size = 100                         # Number of samples per gradient update (original: 64, seemed better?: 512)
+    batch_size = 230                         # Number of samples per gradient update (original: 64, seemed better?: 512)
 
     # Sequence lengths (for return sequences)
     # train_seq_length = input_data_train.shape[0]
@@ -421,8 +421,8 @@ def main():
     test_dataset = tf.data.Dataset.zip((test_dataset_features, test_dataset_targets))
 
     # Model parameters
-    learning_rate = 0.000096   # Controls how much to change the model in response to error.
-    epochs = 600             #
+    learning_rate = 0.00096   # Controls how much to change the model in response to error.
+    epochs = 800             #
     # Scheduler function keeps the initial learning rate for the first ten epochs
     # and decreases it exponentially after that. Uncomment and add lr_callback to model.fit callbacks array
     # def scheduler(epoch, lr):
@@ -442,9 +442,10 @@ def main():
     # ** Optimizers **
     # LR schedules
     size_of_dataset = input_data_train.shape[0]
-    decay_to_epoch = 25                                         # Number of epochs for learning rate to decay over before it resets
+    decay_to_epoch = 50                                         # Number of epochs for learning rate to decay over before it resets
     steps_per_epoch = size_of_dataset // batch_size              # Calculate the number of steps per epoch
     decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
+    print(f"Decay to epoch: {decay_to_epoch}")
     print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
     lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.0, alpha=0.000005)
 
@@ -487,11 +488,11 @@ def main():
 
     # Model Layers
     inputs = keras.layers.Input(shape=(sequence_length, input_data_train.shape[1]))
-    dropout = keras.layers.Dropout(rate=0.35)(inputs)
+    dropout = keras.layers.Dropout(rate=0.39)(inputs)
     lstm = keras.layers.LSTM(200, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00039, l2=0.003), return_sequences=True)(dropout)    # 32 originally
     normalise = keras.layers.LayerNormalization()(lstm)
 
-    dropout2 = keras.layers.Dropout(rate=0.32)(normalise)
+    dropout2 = keras.layers.Dropout(rate=0.39)(normalise)
     lstm2 = keras.layers.LSTM(160, kernel_initializer=keras.initializers.GlorotNormal(), kernel_regularizer=keras.regularizers.L1L2(l1=0.00039, l2=0.003), return_sequences=True)(dropout2)    # 32 originally
     normalise2 = keras.layers.LayerNormalization()(lstm2)
 
