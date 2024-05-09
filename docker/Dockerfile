@@ -438,9 +438,10 @@ ARG dialout_gid=20
 # group as docker manages to lose supplementary groups when changing
 # to the nubots user.
 # Also need to add "--group-add dialout" to the docker run command in run.py
+# Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
 RUN groupadd --gid $dialout_gid dialout \
     && groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid nubots -G audio,dialout -m nubots
+    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp -m nubots
 
 USER nubots
 
