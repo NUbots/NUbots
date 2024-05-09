@@ -36,6 +36,7 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/RoboCup.hpp"
+#include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/purpose/Defender.hpp"
@@ -56,6 +57,8 @@ namespace module::purpose {
     using message::input::GameEvents;
     using message::input::RoboCup;
     using message::localisation::ResetFieldLocalisation;
+    using message::localisation::Field;
+    using message::localisation::Ball;
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
     using message::purpose::Defender;
@@ -120,6 +123,27 @@ namespace module::purpose {
             }
         });
 
+        on<Provide<FindPurpose>, Trigger<Ball>, With<Field>>().then([this](const Ball& ball, const Field& field) {
+            if (active_robots.size() == 1) {
+                // Get the current position of the ball on the field
+                Eigen::Isometry3d Hfw = field.Hfw;
+                Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
+
+                log<NUClear::DEBUG>("rBFf.x()", rBFf.x());
+                if (rBFf.x() >= 0.1) {
+                    // Ball is own half, so become Defender.
+                    // TODO: We don't want the robot to stand still if at halfway, add some leeway
+                    log<NUClear::DEBUG>("defender");
+                    emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                }
+                else {
+                    // Ball is in opponent's half, become Striker
+                    log<NUClear::DEBUG>("striker");
+                    emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                }
+            }
+        });
+
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // SPC: Need to remove robot from active_robots
             // TODO: keeping robot around for now, might want to keep info, revisit
@@ -145,6 +169,9 @@ namespace module::purpose {
             // If the robot is unpenalised, stop standing still and find its purpose
             if (self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
+                auto msg = std::make_unique<RoboCup>();
+                msg->current_pose.player_id = PLAYER_ID;
+                emit(msg);
             }
         });
 
@@ -155,6 +182,9 @@ namespace module::purpose {
                 log<NUClear::INFO>("Force playing started.");
                 cfg.force_playing = true;
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
+                auto msg = std::make_unique<RoboCup>();
+                msg->current_pose.player_id = PLAYER_ID;
+                emit(msg);
             }
         });
 
@@ -223,7 +253,7 @@ namespace module::purpose {
         uint8_t res = std::count_if(active_robots.begin(), active_robots.end(),
             [](const RobotInfo& robot) { return robot.position.value == Position::DEFENDER; });
         return res;
-    }
+    };
 
     void Soccer::find_soccer_position(const RoboCup& robocup) {
         // If I am not the leader, follow leader's message, and store positions
@@ -234,7 +264,6 @@ namespace module::purpose {
         if (leader) {
             log<NUClear::DEBUG>("I am ze leader");
         }
-
 
         uint8_t num_robots = active_robots.size();
         uint8_t num_defenders = std::ceil(num_robots / 2.0);
