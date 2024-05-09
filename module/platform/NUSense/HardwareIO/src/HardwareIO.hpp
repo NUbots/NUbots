@@ -61,11 +61,13 @@ namespace module::platform::NUSense {
     private:
         /// @brief Send a TransmitData message containing an nbs packet to StreamReactor so it can write the data to
         /// NUSense.
-        /// @tparam packet A const reference to a protobuf message of type T.
-        ///                This gets serialised and turned to a vector of bytes before sending to NUSense.
+        /// @tparam T is the type of the protobuf message to be serialised. In NUSense's case, we expect this to be
+        /// SubcontrollerServoTargets.
+        /// @param packet A const reference to a protobuf message of type T. This gets serialised and turned to a
+        /// vector of bytes before sending to NUSense.
         template <typename T>
         void send_packet(const T& packet) {
-            // Serialize the packet
+            // Serialise the packet
             auto payload = NUClear::util::serialise::Serialise<T>::serialise(packet);
             // Get the hash of the packet
             uint64_t hash = NUClear::util::serialise::Serialise<T>::hash();

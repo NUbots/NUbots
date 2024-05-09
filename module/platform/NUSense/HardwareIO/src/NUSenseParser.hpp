@@ -17,13 +17,10 @@ namespace module::platform::NUSense {
     };
 
     struct NUSenseParser {
-        /**
-         * Parses bytes from NUSense one byte at a time and returns a NUSenseFrame when a complete frame is read
-         *
-         * @param byte The next byte to parse
-         *
-         * @return A NUSenseFrame if a complete frame has been read, otherwise nullptr
-         */
+
+        /// @brief Parses bytes from NUSense one byte at a time and returns a NUSenseFrame when a complete frame is read
+        /// @param byte The next byte to parse
+        /// @return A NUSenseFrame if a complete frame has been read, otherwise nullptr
         std::unique_ptr<NUSenseFrame> operator()(const uint8_t& byte);
 
     private:
