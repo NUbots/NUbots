@@ -1,0 +1,14 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+# Path to the model weights
+model_path: "coco.onnx"
+
+# NMS threshold for filtering out overlapping bounding boxes
+nms_threshold: 0.5
+
+# NMS confidence (score) threshold for filtering out low confidence detections
+nms_score_threshold: 0.1
+
+# OpenVino device (CPU, GPU)
+device: CPU

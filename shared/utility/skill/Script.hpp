@@ -37,6 +37,7 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/platform/aliases.hpp"
 #include "utility/support/hostname.hpp"
 
 
@@ -115,9 +116,16 @@ namespace utility::skill {
         auto hostname      = utility::support::getHostname();
         auto robot_path    = "scripts/" + hostname + "/" + script;
         auto platform_path = "scripts/" + get_platform(hostname) + "/" + script;
+        auto robot_name    = utility::platform::get_robot_alias(hostname);
+        auto name_path     = "scripts/" + robot_name + "/" + script;
 
-        // Try getting the robot-specific script first
-        if (utility::file::exists(robot_path)) {
+        // If robot name script exists, use it
+        if (!robot_name.empty() && utility::file::exists(name_path)) {
+            NUClear::log<NUClear::INFO>("Parsing name specific script:", script);
+            return YAML::LoadFile(name_path);
+        }
+        // If robot name script doesn't exist, try to use the robot-specific script
+        else if (utility::file::exists(robot_path)) {
             NUClear::log<NUClear::INFO>("Parsing robot specific script:", script);
             return YAML::LoadFile(robot_path);
         }

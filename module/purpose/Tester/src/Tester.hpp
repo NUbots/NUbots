@@ -60,12 +60,18 @@ namespace module::purpose {
             int stand_still_priority = 0;
             /// @brief Priority of Say task
             int say_priority = 0;
-
+            /// @brief Priority of ChatGPT task
+            int chatgpt_priority = 0;
+            /// @brief Priority of AudioGPT task
+            int audiogpt_priority = 0;
             /// @brief Position to walk to when emitting WalkToFieldPosition task
-            Eigen::Vector3d walk_to_field_position_position = Eigen::Vector3d::Zero();
-
+            Eigen::Vector3f walk_to_field_position_position = Eigen::Vector3f::Zero();
             /// @brief Text to say when emitting Say task
             std::string say_text = "";
+            /// @brief Text to prompt ChatGPT with
+            std::string chatgpt_prompt = "";
+            /// @brief Duration to listen for audio when emitting AudioGPT task
+            int audiogpt_listen_duration = 0;
         } cfg;
 
     public:

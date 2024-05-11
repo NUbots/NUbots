@@ -1,0 +1,227 @@
+// MIT License
+//
+// Copyright (c) 2024 NUbots
+//
+// This file is part of the NUbots codebase.
+// See https://github.com/NUbots/NUbots for further info.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+syntax = "proto3";
+
+package message.nbs.player;
+
+import "google/protobuf/timestamp.proto";
+import "message/eye/Rpc.proto";
+message PlaybackState {
+    /// The playback state of the player
+    enum State {
+        UNKNOWN = 0;
+        PAUSED  = 1;
+        PLAYING = 2;
+        ENDED   = 3;
+    }
+
+    /// The ID of the player, unique across all player's in a session
+    uint32 id = 1;
+    /// The name of the player, used as the player's peer name
+    string name = 2;
+    /// The current timestamp of the player
+    google.protobuf.Timestamp timestamp = 3;
+    /// The earliest timestamp across all files in the player's NBS files
+    google.protobuf.Timestamp start = 4;
+    /// The latest timestamp across all files in the player's NBS files
+    google.protobuf.Timestamp end = 5;
+    /// The current playback state of the player
+    State playback_state = 6;
+    /// The playback speed of the player. Used as a power of 2, so 0 is 1x, 1 is 2x, -1 is 0.5x, etc.
+    int32 playback_speed = 7;
+    /// Whether the player restarts when it reaches the end of playback
+    bool playback_repeat = 8;
+    /// Total messages in the player
+    uint32 total_messages = 9;
+    /// The current message index
+    uint32 current_message = 10;
+}
+
+message LoadRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// What to call the loaded player
+    string name = 2;
+    /// The files to load into the . Must be a list of absolute paths to NBS files.
+    repeated string files = 3;
+    /// Message types to playback
+    repeated string messages = 4;
+}
+
+message PlayRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the  to play
+    uint32 id = 2;
+}
+
+message PauseRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the player to pause
+    uint32 id = 2;
+}
+
+enum PlaybackMode {
+    FAST       = 0;  /// Playback as fast as possible
+    REALTIME   = 1;  /// Playback as fast as the messages were recorded
+    SEQUENTIAL = 2;  /// Playback one message at a time, waits for all message sub tasks to complete before continuing
+}
+
+message SetModeRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the player to set the mode of
+    uint32 id = 2;
+    /// The mode to set
+    PlaybackMode mode = 3;
+}
+
+message Finished {}
+
+message SetPlaybackSpeedRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the player to set the playback speed of
+    uint32 id = 2;
+    /// The playback speed to set. Used as a power of 2, so 0 is 1x, 1 is 2x, -1 is 0.5x, etc.
+    int32 playback_speed = 3;
+}
+
+message SetRepeatRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the player to set the repeat state of
+    uint32 id = 2;
+    /// The repeat state to set
+    bool repeat = 3;
+}
+
+message SeekRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the player to seek
+    uint32 id = 2;
+    /// The timestamp to seek to
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+/// A (type, subtype) pair that uniquely identifies a specific type of message
+message NbsTypeSubtype {
+    string type    = 1;
+    uint32 subtype = 2;
+}
+
+message StepTimestampRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the player to step
+    uint32 id = 2;
+    /// The number of steps
+    int32 steps = 3;
+    /// Type and subtype to step
+    NbsTypeSubtype typeSubtype = 4;
+}
+
+message CloseRequest {
+    message Response {
+        /// Metadata for the RPC response
+        eye.RpcResponseMeta rpc = 1;
+    }
+
+    /// Metadata for the RPC request
+    eye.RpcRequestMeta rpc = 1;
+    /// The ID of the player to close
+    uint32 id = 2;
+}
+
+message Closed {
+    enum Cause {
+        UNKNOWN        = 0;
+        CLIENT_REQUEST = 1;
+        FILES_DELETED  = 2;
+    }
+
+    /// The ID of the player that was closed
+    uint32 id = 1;
+    /// Why the player was closed, as an enum
+    Cause cause = 2;
+    /// Why the player was closed, as a human-readable string
+    string reason = 3;
+}
+
+message Reloaded {
+    enum Cause {
+        UNKNOWN       = 0;
+        FILES_UPDATED = 1;
+    }
+
+    /// The ID of the player that was reloaded
+    uint32 id = 1;
+    /// Why the player was reloaded, as an enum
+    Cause cause = 2;
+    /// Why the player was reloaded, as a human-readable string
+    string reason = 3;
+}

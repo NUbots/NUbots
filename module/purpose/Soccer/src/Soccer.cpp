@@ -40,6 +40,7 @@
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/skill/Look.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 
@@ -58,6 +59,7 @@ namespace module::purpose {
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
     using message::purpose::Striker;
+    using message::skill::Look;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
 
@@ -80,6 +82,8 @@ namespace module::purpose {
             emit(std::make_unique<WalkState>(WalkState::State::STOPPED));
             // Idle stand if not doing anything
             emit<Task>(std::make_unique<StandStill>());
+            // Idle look forward if the head isn't doing anything else
+            emit<Task>(std::make_unique<Look>(Eigen::Vector3d::UnitX(), true));
             // This emit starts the tree to play soccer
             emit<Task>(std::make_unique<FindPurpose>(), 1);
             // The robot should always try to recover from falling, if applicable, regardless of purpose
@@ -98,7 +102,7 @@ namespace module::purpose {
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& self_penalisation) {
             // If the robot is penalised, its purpose doesn't matter anymore, it must stand still
-            if (self_penalisation.context == GameEvents::Context::SELF) {
+            if (!cfg.force_playing && self_penalisation.context == GameEvents::Context::SELF) {
                 emit(std::make_unique<ResetWebotsServos>());
                 emit(std::make_unique<Stability>(Stability::UNKNOWN));
                 emit(std::make_unique<ResetFieldLocalisation>());
@@ -108,7 +112,7 @@ namespace module::purpose {
 
         on<Trigger<Unpenalisation>>().then([this](const Unpenalisation& self_unpenalisation) {
             // If the robot is unpenalised, stop standing still and find its purpose
-            if (self_unpenalisation.context == GameEvents::Context::SELF) {
+            if (!cfg.force_playing && self_unpenalisation.context == GameEvents::Context::SELF) {
                 emit<Task>(std::make_unique<FindPurpose>(), 1);
             }
         });
