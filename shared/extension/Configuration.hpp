@@ -353,7 +353,7 @@ namespace NUClear::dsl {
 
                 // Bind our robot name specific config file if it exists
                 const fs::path name_config = fs::path("config") / robot_name / file_name;
-                if (!name_config.empty() && fs::exists(name_config)) {
+                if (!robot_name.empty() && fs::exists(name_config)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, name_config, flags);
                 }
 
