@@ -109,7 +109,7 @@ namespace extension {
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
-            if (fs::exists(fs::path("config") / hostname / file_name)) {
+            if ((platform != hostname) && fs::exists(fs::path("config") / hostname / file_name)) {
                 if (loaded) {
                     config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / hostname / file_name));
                 }
@@ -365,7 +365,7 @@ namespace NUClear::dsl {
 
                 // Bind our robot specific config file if it exists
                 const fs::path platform_config = fs::path("config") / platform / file_name;
-                if (fs::exists(platform_config) && !platform.empty()) {
+                if ((platform != hostname) && fs::exists(platform_config) && !platform.empty()) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platform_config, flags);
                 }
 
