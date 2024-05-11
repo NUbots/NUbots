@@ -7,11 +7,13 @@ from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.preprocessing import MinMaxScaler
 
 # Load data
-test_data = np.load('datasets/input_data_test.npy')
-test_targets = np.load('datasets/input_targets_test.npy')
+test_data = np.load('datasets/input_data_train.npy')
+test_targets = np.load('datasets/input_targets_train.npy')
+# test_data = test_data[:4000]
+# test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20240509-205420')
+model = load_model('models/model-20240511-205248')
 
 # Plot and inspect loaded data
 # num_channels = test_data.shape[1]
