@@ -39,6 +39,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
+#include "message/purpose/PurposeList.hpp"
 
 #include "utility/math/euler.hpp"
 
@@ -55,6 +56,7 @@ namespace module::network {
     using message::localisation::Field;
     using message::skill::Kick;
     using message::support::GlobalConfig;
+    using message::purpose::PurposeList;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -182,8 +184,19 @@ namespace module::network {
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
 
+                // Current purpose (soccer position) of the Robot
+                switch (soccer_position.value) {
+                    case Position::DEFENDER: msg->soccer_position = 0; break;
+                    case Position::STRIKER: msg->soccer_position = 1; break;
+                    default: break;
+                }
+
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
+
+        on<Trigger<PurposeList>>().then([this](const PurposeList& purpose) {
+            soccer_position = purpose.soccer_position == 0 ? Position("STRIKER") : Position("DEFENDER");
+        });
     }
 
 }  // namespace module::network

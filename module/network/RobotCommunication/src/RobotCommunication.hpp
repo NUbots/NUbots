@@ -44,6 +44,32 @@ namespace module::network {
             std::string broadcast_ip = "";
         } cfg;
 
+        /// @brief Potential soccer positions of the robot
+        struct Position {
+            enum Value {
+                DEFENDER,
+                STRIKER
+            };
+
+            Value value = Value::STRIKER;
+
+            Position() = default;
+            Position(std::string const& str) {
+                // clang-format off
+                if (str == "STRIKER") { value = Value::STRIKER; }
+                else if (str == "DEFENDER") { value = Value::DEFENDER; }
+                else { throw std::runtime_error("Invalid robot position"); }
+                // clang-format on
+            }
+
+            operator int() const {
+                return value;
+            }
+        };
+
+        /// @brief purpose of this robot
+        Position soccer_position;
+
         /// @brief Handle for incoming UDP message. This will be bound/unbound during (re)connection
         ReactionHandle listen_handle;
 

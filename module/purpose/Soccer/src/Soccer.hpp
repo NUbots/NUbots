@@ -110,7 +110,7 @@ namespace module::purpose {
         /// @brief Store robots that can currently play
         std::vector<RobotInfo> active_robots;
 
-        /// @brief Store penalized robots
+        /// @brief Store penalised robots
         std::list<RobotInfo> penalised_robots;
 
     public:

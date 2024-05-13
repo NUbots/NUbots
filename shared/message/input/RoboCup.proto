@@ -81,6 +81,12 @@ enum State {
     PENALISED     = 2;
 }
 
+/// The current playing state of the robot
+enum SoccerPosition {
+    DEFENDER = 0;
+    STRIKER  = 1;
+}
+
 message RoboCup {
     /// Timestamp of message creation
     google.protobuf.Timestamp timestamp = 1;
@@ -111,4 +117,7 @@ message RoboCup {
     repeated Robot others = 8;
 
     /// IDs 1-100 are reserved for official use
+
+    /// The robot's purpose
+    SoccerPosition soccer_position = 101;
 }
