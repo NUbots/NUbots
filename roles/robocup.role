@@ -22,7 +22,7 @@ nuclear_role(
   vision::BallDetector
   vision::FieldLineDetector
   # Localisation
-  localisation::FieldLocalisation
+  localisation::FieldLocalisationNLopt
   localisation::BallLocalisation
   # Director
   extension::Director
