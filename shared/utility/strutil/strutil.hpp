@@ -65,12 +65,12 @@ namespace utility::strutil {
      *
      * This function compares the given string `str` with the specified `ending` substring in the vector endings
      * and determines whether `str` ends with `ending`. The comparison is case-sensitive.
+     * http://stackoverflow.com/a/874160/1387006
      *
      * @param str The string to check for the ending substring.
      * @param ending The substring to search for at the end of the string.
      * @return `true` if `str` ends with `ending`, `false` otherwise.
      */
-    // http://stackoverflow.com/a/874160/1387006
     [[nodiscard]] inline bool ends_with(const std::string& str, const std::vector<std::string>& endings) {
 
         for (const auto& ending : endings) {
