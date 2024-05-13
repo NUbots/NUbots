@@ -123,23 +123,31 @@ namespace module::purpose {
             }
         });
 
-        on<Provide<FindPurpose>, Trigger<Ball>, With<Field>>().then([this](const Ball& ball, const Field& field) {
+        on<Provide<FindPurpose>, Every<2, Per<std::chrono::seconds>>, With<Ball>, With<Field>>().then([this](const Ball& ball, const Field& field) {
+            log<NUClear::DEBUG>("every 3 seconds");
             if (active_robots.size() == 1) {
                 // Get the current position of the ball on the field
                 Eigen::Isometry3d Hfw = field.Hfw;
                 Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
 
-                log<NUClear::DEBUG>("rBFf.x()", rBFf.x());
-                if (rBFf.x() >= 0.1) {
+                log<NUClear::DEBUG>("rBFf", rBFf.x());
+                // leeway to prevent kickoff confusion
+                // TODO: store this value, test variation instead?
+                if (rBFf.x() >= 0.2) {
                     // Ball is own half, so become Defender.
-                    // TODO: We don't want the robot to stand still if at halfway, add some leeway
-                    log<NUClear::DEBUG>("defender");
-                    emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                    if (active_robots.front().position.value != Position::DEFENDER) {
+                        emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+                        active_robots.front().position = Position("DEFENDER");
+                        log<NUClear::DEBUG>("last robot made defender");
+                    }
                 }
                 else {
-                    // Ball is in opponent's half, become Striker
-                    log<NUClear::DEBUG>("striker");
-                    emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                    if (active_robots.front().position.value != Position::STRIKER) {
+                        // Ball is in opponent's half, become Striker
+                        emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                        active_robots.front().position = Position("STRIKER");
+                        log<NUClear::DEBUG>("last robot made striker");
+                    }
                 }
             }
         });
@@ -257,7 +265,6 @@ namespace module::purpose {
 
     void Soccer::find_soccer_position(const RoboCup& robocup) {
         // If I am not the leader, follow leader's message, and store positions
-        // check that the leader is actually the expected leader?
 
         // If I am the leader, then decide positions and emit this
         bool leader = active_robots.front().robot_id == PLAYER_ID;
