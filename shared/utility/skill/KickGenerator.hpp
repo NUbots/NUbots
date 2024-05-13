@@ -173,6 +173,14 @@ namespace utility::skill {
             torso_waypoints.push_back(waypoint);
         }
 
+        /**
+         * @brief Clear all waypoints from the foot and torso trajectories.
+         */
+        void clear_waypoints() {
+            foot_waypoints.clear();
+            torso_waypoints.clear();
+        }
+
     private:
         // ******************************** State ********************************
 
