@@ -61,7 +61,7 @@ export class TreeNode extends Component<TreeNodeProps> {
       <ul className={classes}>
         <li>
           <div
-            className={"flex items-center h-[24px] py-[4px] px-[8px] cursor-pointer hover:bg-gray-200"}
+            className={"flex items-center h-[24px] py-[4px] px-[8px] cursor-pointer text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-800"}
             style={headerInlineStyle}
             onClick={this.props.onExpand ? this.onClick : undefined}
             onMouseEnter={this.props.onMouseEnter ? this.onMouseEnter : undefined}
@@ -72,7 +72,7 @@ export class TreeNode extends Component<TreeNodeProps> {
 
             </div>
             <div className={"mr-2"}>
-              <input type="checkbox" ref={this.onRef} onClick={this.onCheckboxClick} onChange={this.onCheckboxChange} />
+              <input type="checkbox" ref={this.onRef} onClick={this.onCheckboxClick} onChange={this.onCheckboxChange} className={"accent-blue-600"}/>
             </div>
 
             <div className={"grow leading-4 min-w-0"}>

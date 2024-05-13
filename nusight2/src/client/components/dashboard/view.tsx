@@ -29,8 +29,8 @@ export class Dashboard extends Component<DashboardProps> {
     const showPanels = model.robots.some((robot) => robot.enabled);
     const Field = this.props.Field;
     return (
-      <div className="flex flex-col w-full bg-gray-100 dark:bg-gray-700 dark:text-white">
-        <div className="bg-gray-200 dark:bg-gray-600">
+      <div className="flex flex-col w-full">
+        <div className="bg-gray-200 dark:bg-gray-850">
           <Menu>
             <ul className="list-none h-full flex items-stretch">
               <li className="flex">
@@ -41,7 +41,7 @@ export class Dashboard extends Component<DashboardProps> {
             </ul>
           </Menu>
         </div>
-        <div className="flex flex-1 flex-col dark:bg-gray-700">
+        <div className="flex flex-1 flex-col bg-gray-300 dark:bg-gray-900">
           <div className="flex-1 relative m-5">
             <Field />
           </div>
@@ -51,7 +51,7 @@ export class Dashboard extends Component<DashboardProps> {
                 const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
-                    <div className="flex-1 mx-2 rounded-lg shadow-md bg-gray-200 dark:bg-gray-600 " key={robot.id}>
+                    <div className="flex-1 mx-2 rounded-lg shadow-md" key={robot.id}>
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}

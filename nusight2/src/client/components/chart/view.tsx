@@ -14,9 +14,11 @@ import { ChartModel } from "./model";
 import { ChartNetwork } from "./network";
 import { TreeLabel } from "./tree_label/view";
 
+type MenuProps = PropsWithChildren & { className?: string };
+
 @observer
 export class ChartView extends Component<{
-  Menu: ComponentType<PropsWithChildren>;
+  Menu: ComponentType<MenuProps>;
   model: ChartModel;
   network: ChartNetwork;
   controller: ChartController;
@@ -29,7 +31,7 @@ export class ChartView extends Component<{
     LineChart,
   }: {
     model: ChartModel;
-    Menu: ComponentType<PropsWithChildren>;
+    Menu: ComponentType<MenuProps>;
     nusightNetwork: NUsightNetwork;
     LineChart: ComponentType<LineChartProps>;
   }): ComponentType {
@@ -48,12 +50,12 @@ export class ChartView extends Component<{
     const { Menu, model, controller, LineChart } = this.props;
     return (
       <div className="flex flex-col w-full">
-        <Menu />
+        <Menu/>
         <div className="flex flex-1">
           <div className="flex-grow flex flex-col">
             <LineChart />
           </div>
-          <div className="w-[400px] border-l border-gray-300">
+          <div className="w-[400px] p-4 border-l border-gray-300 dark:border-gray-800">
             <CheckboxTree
               model={model.tree}
               onCheck={controller.onNodeCheck}

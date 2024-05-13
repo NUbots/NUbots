@@ -76,8 +76,8 @@ export class Select extends React.Component<SelectProps> {
           isFullwidth={true}
           onToggleClick={this.onToggleClick}
         >
-          <div className="bg-gray-200 border border-gray-300 border-md shadow-md">
-            {options.length === 0 && <div className={"p-6 text-center text-gray-500"}>{empty || "No options"}</div>}
+          <div className="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 shadow-md">
+            {options.length === 0 && <div className={"p-6 text-center"}>{empty || "No options"}</div>}
             {options.length > 0 && (
               <div>
                 {options.map((option) => {

@@ -7,7 +7,6 @@ import { RobotModel } from "../robot/model";
 import IconPlug from "./icon_plug";
 import IconRobot from "./icon_robot";
 import { RobotLabel } from "./robot_label/view";
-import style from "./style.module.css";
 
 export type RobotSelectorProps = {
   dropdownMenuPosition?: "left" | "right";
@@ -19,18 +18,17 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props;
 
   const dropdownToggle = (
-    <button className="{style.button}">
-      {/* <IconRobot style={svgStyle} /> */}
-      <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out fill-grey-100 hover:fill-blue-200 dark:fill-white" />
+    <button className="text-gray-900 fill-gray-900 dark:text-gray-100 dark:fill-gray-100 hover:text-blue-600 hover:fill-blue-600">
+      <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out" />
       Select robots
     </button>
   );
   return (
     <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
-      <div className="bg-white rounded-md shadow-md text-black dark:text-white dark:bg-gray-700">
+      <div className="bg-gray-100 shadow-md text-black dark:text-white dark:bg-gray-800">
         {robots.length === 0 && (
-          <div className="bg-gray-200 p-[1em] text-center">
-            <IconPlug className="bg-gray-400 fill-gray-200 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
+          <div className="bg-gray-600 p-[1em] text-center">
+            <IconPlug className="bg-gray-800 fill-gray-200 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
             <div className="text-lg p-1 whitespace-nowrap">No connected robots</div>
             <span className="text-base whitespace-nowrap">Run yarn start:sim to simulate robots</span>
           </div>

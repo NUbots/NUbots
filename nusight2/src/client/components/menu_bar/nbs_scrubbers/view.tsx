@@ -82,13 +82,13 @@ const NbsScrubbers = observer(({ model, controller }: NbsScrubbersProps) => {
   }, []);
 
   return (
-    <div className="divide-y divide-gray-50 border-y border-gray-300 dark:border-gray-700">
+    <div className="shadow">
       {model.scrubberList.map((scrubber) => (
         <NbsScrubberView key={scrubber.id} model={scrubber} controller={controller} />
       ))}
       {model.scrubberList.length === 0 ? (
-        <div className="flex px-2 h-12 items-center bg-gray-200 dark:bg-gray-600">
-          <IconInfo className="text-icon w-6 h-6 mr-2 fill-black dark:fill-white" />
+        <div className="flex px-2 h-12 items-center bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+          <IconInfo className="text-icon w-6 h-6 mr-2 fill-gray-900 dark:fill-gray-100" />
           <span>No scrubbers currently loaded. Click the “Scrub NBS” button to load NBS files for scrubbing.</span>
         </div>
       ) : null}
@@ -115,13 +115,13 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
         onClick={onClick}
       >
         {showScrubbers ? (
-          <IconNbsFilled className="w-7 h-7 mt-1 -ml-[20px] text-blue-200 " />
+          <IconNbsFilled className="w-7 h-7 mt-1 -ml-[20px] text-blue-600 " />
         ) : (
           <IconNbs className="w-7 h-7 mt-1 -ml-[20px]" />
         )}
         <span className="text-[0.7rem]">Scrub NBS</span>
       </button>
-      <button className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:text-blue-200 h-8 rounded" onClick={onToggle}>
+      <button className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:text-blue-600 h-8 rounded" onClick={onToggle}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"

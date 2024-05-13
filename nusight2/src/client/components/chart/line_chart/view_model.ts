@@ -19,8 +19,16 @@ import { TreeData } from "../model";
 
 import { LineChartModel } from "./model";
 
+// const darkModeTextColor = "#000000";
+// const lightModeTextColor = "#edf2f7";
+
+
 export class LineChartViewModel {
-  constructor(private model: LineChartModel) {}
+  // textColor: string;
+
+  constructor(private model: LineChartModel) {
+    // this.textColor = window.matchMedia('(prefers-color-scheme: dark)').matches ? lightModeTextColor : darkModeTextColor;
+  }
 
   static of = createTransformer((model: LineChartModel): LineChartViewModel => {
     return new LineChartViewModel(model);
@@ -110,7 +118,7 @@ export class LineChartViewModel {
             }),
           }),
         );
-
+        // Labels
         lines.push(
           Shape.of({
             geometry: TextGeometry.of({
@@ -123,7 +131,7 @@ export class LineChartViewModel {
             }),
             appearance: BasicAppearance.of({
               fill: {
-                color: "#000000",
+                color: "#888888",
               },
             }),
           }),

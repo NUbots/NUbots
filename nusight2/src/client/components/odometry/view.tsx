@@ -9,7 +9,6 @@ import { RobotSelectorSingle } from "../robot_selector_single/view";
 import { OdometryController } from "./controller";
 import { OdometryModel } from "./model";
 import { OdometryVisualizer } from "./odometry_visualizer/view";
-import styles from "./style.module.css";
 
 @observer
 export class OdometryView extends React.Component<{
@@ -23,9 +22,9 @@ export class OdometryView extends React.Component<{
       Menu,
     } = this.props;
     return (
-      <div className={styles.odometry}>
+      <div className={"flex flex-grow flex-shrink flex-col text-center relative w-full h-full bg-gray-200 dark:bg-gray-850"}>
         <Menu>
-          <div className={styles.selector}>
+          <div className={"h-full flex items-center justify-end"}>
             <RobotSelectorSingle
               autoSelect={true}
               robots={robots}
@@ -35,7 +34,7 @@ export class OdometryView extends React.Component<{
           </div>
         </Menu>
         {selectedRobot && (
-          <div className={styles.content}>
+          <div className={"flex-grow relative"}>
             <OdometryVisualizer model={selectedRobot.visualizerModel} key={selectedRobot.robotModel.id} />
           </div>
         )}

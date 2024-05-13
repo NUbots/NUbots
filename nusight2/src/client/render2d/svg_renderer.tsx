@@ -52,7 +52,7 @@ export const SVGRenderer = (props: RendererProps) => {
   }, [resolution, camera]);
 
   return (
-    <div className={classNames(className, style.container)}>
+    <div className={classNames(className, style.container, "text-blue-200")}>
       <ReactResizeDetector handleWidth handleHeight onResize={onResize} />
       <svg ref={svgElement} className={style.container} {...toSvgEventHandlers(eventHandlers, transforms.svg)}>
         <g transform={toSvgTransform(transforms.world)}>

@@ -46,14 +46,14 @@ export const RobotPanel = (props: RobotPanelProps) => {
   });
   return (
     <div>
-      <header className="bg-gray-500 dark:bg-gray-500 text-white rounded-t-md">
+      <header className="bg-gray-700 dark:bg-gray-800 text-white rounded-t-md">
         <div className="items-center flex text-sm h-7 px-2">
           <span className={connectionStatusClassName} title={props.connected ? "Connected" : "Disconnected"} />
           <span className="flex-1">{props.title}</span>
           {props.batteryValue && <Battery value={props.batteryValue} />}
         </div>
       </header>
-      <div className="text-sm p-2">
+      <div className="text-sm rounded-b-md p-2 bg-gray-200 dark:bg-gray-850">
         <div className="mb-2 pb-3">
           <div className="flex flex-col">
             <span className="flex-1 font-bold">Mode</span>

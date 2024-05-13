@@ -92,7 +92,7 @@ export const FilePicker = observer((props: FilePickerProps) => {
             <div className="flex items-center flex-grow">
               {model.selectedFilesSummary}
               <button
-                className="ml-2 p-1 inline-block rounded-full hover:bg-blue-100 hover:text-black leading-none"
+                className="ml-2 p-1 inline-block rounded-full hover:bg-blue-600 hover:text-black leading-none"
                 title="Clear selection"
                 onClick={() => controller.setSelectedFiles([])}
               >
@@ -165,7 +165,7 @@ const FilePickerNavButton = observer((props: FilePickerNavButtonProps) => {
       className={`px-2 py-1 rounded ${
         disabled
           ? "opacity-40"
-          : "hover:bg-blue-100 focus-visible:bg-blue-100 hover:text-black focus-visible:text-black"
+          : "hover:bg-blue-600 focus-visible:bg-blue-600 hover:text-black focus-visible:text-black"
       }`}
       disabled={disabled}
       onClick={onClick}
@@ -243,7 +243,7 @@ const FilePickerPathSegments = observer((props: FilePickerPathSegmentsProps) => 
           return (
             <div key={segment.path} className="inline-flex items-center flex-shrink-0" data-path-segment>
               <button
-                className="hover:bg-blue-100 hover:text-black inline-flex h-10 px-1 items-center"
+                className="hover:bg-blue-600 hover:text-black inline-flex h-10 px-1 items-center"
                 onClick={() => {
                   controller.changePathWithHistory(segment.path);
                 }}
@@ -306,7 +306,7 @@ const FilePickerPathEditor = observer((props: FilePickerPathEditorProps) => {
         className={`bg-gray-100 rounded-r h-full px-2 ml-0.5 ${
           goButtonDisabled
             ? "opacity-40"
-            : "hover:bg-blue-100 hover:text-black focus-visible:bg-blue-100 focus-visible:text-black"
+            : "hover:bg-blue-600 hover:text-black focus-visible:bg-blue-600 focus-visible:text-black"
         }`}
         title="Go to path entered"
         disabled={goButtonDisabled}
@@ -374,7 +374,7 @@ const FilePickerSidebarGroup = observer((props: FilePickerSidebarGroupProps) => 
               key={path}
               title={path}
               className={`flex text-left items-center px-3 py-1 min-w-0 w-full ${
-                path === props.pickerCurrentPath ? "text-black bg-blue-200" : "hover:text-black hover:bg-blue-100"
+                path === props.pickerCurrentPath ? "text-black bg-blue-600" : "hover:text-black hover:bg-blue-600"
               }`}
               onClick={() => props.onPathChange(path)}
             >
@@ -421,7 +421,7 @@ const FilePickerList = observer((props: FilePickerListProps) => {
         {filePickerListColumns.map(({ label, key }) => (
           <button
             key={key}
-            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-blue-100 hover:text-black ${
+            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-blue-600 hover:text-black ${
               key === "size" ? "justify-end" : ""
             }`}
             onClick={() => controller.changeSort(key)}
@@ -483,7 +483,7 @@ const FilePickerListItems = observer((props: FilePickerListItemsProps) => {
           <button
             key={entry.name}
             className={`grid gap-1 w-full items-center text-left py-2 mt-0.5 outline-0 focus-visible:outline-1 ${
-              entryIsSelected ? "bg-blue-200 text-black" : "hover:bg-blue-100 hover:text-black "
+              entryIsSelected ? "bg-blue-600 text-black" : "hover:bg-blue-600 hover:text-black "
             }`}
             style={{ gridTemplateColumns }}
             data-modal-autofocus={index === 0 ? true : null}
