@@ -2,6 +2,7 @@ var classutility_1_1skill_1_1KickGenerator =
 [
     [ "add_foot_waypoint", "classutility_1_1skill_1_1KickGenerator.html#aa39b74f6d63abccb535877bf41d93d38", null ],
     [ "add_torso_waypoint", "classutility_1_1skill_1_1KickGenerator.html#a483ac63efd7c9ad01cdeed89c9738325", null ],
+    [ "clear_waypoints", "classutility_1_1skill_1_1KickGenerator.html#a2443046e1e9758d331610d7929b40c07", null ],
     [ "generate_trajectories", "classutility_1_1skill_1_1KickGenerator.html#a207e0b4a5bc0e851d020d5de57bd04f4", null ],
     [ "get_duration", "classutility_1_1skill_1_1KickGenerator.html#a847b6bd01e41984041e6ae1863bb5079", null ],
     [ "get_foot_pose", "classutility_1_1skill_1_1KickGenerator.html#acd19026ad0f8655722a4b6fdd59cc31a", null ],

@@ -8,7 +8,7 @@ var classmodule_1_1localisation_1_1FieldLocalisation =
     [ "position_in_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#a356274a0a3eee7cdbd9705948f39ea33", null ],
     [ "setup_fieldline_distance_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#abc278764495056c24aa87ce54561f6da", null ],
     [ "cfg", "classmodule_1_1localisation_1_1FieldLocalisation.html#adf5d1af90cac7a1c998dcaa5f4adbb08", null ],
-    [ "fieldline_distance_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#a943c8351a8f801b991130c4f9361ff4a", null ],
+    [ "fieldline_distance_map", "classmodule_1_1localisation_1_1FieldLocalisation.html#a2ace8e1723306862a0fc1ee557167039", null ],
     [ "filter", "classmodule_1_1localisation_1_1FieldLocalisation.html#abebd3a63aac67d9ac2e272a08e544fef", null ],
     [ "last_time_update_time", "classmodule_1_1localisation_1_1FieldLocalisation.html#a9088430d15da9aa140452f3ae2ff35ba", null ],
     [ "startup_time", "classmodule_1_1localisation_1_1FieldLocalisation.html#a6b219938714c034f0697574533a13585", null ]

@@ -256,18 +256,22 @@ var namespaces_dup =
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
+        [ "FieldLocalisationNLopt", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html", "classmodule_1_1localisation_1_1FieldLocalisationNLopt" ],
         [ "FieldModel", "classmodule_1_1localisation_1_1FieldModel.html", "classmodule_1_1localisation_1_1FieldModel" ],
-        [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
         [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html", "classmodule_1_1localisation_1_1RobotLocalisation" ],
         [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ],
         [ "Ball", "BallLocalisation_8cpp.html#a166ffc812dedb579bbb1dcbf0c921d8a", null ],
         [ "LocalisationRobot", "RobotLocalisation_8cpp.html#a7137bee73270988498c35b99c9007c44", null ],
         [ "LocalisationRobots", "RobotLocalisation_8cpp.html#aba13498fd60767a1850e1db2aaf87ed7", null ],
+        [ "ObjectiveFunction", "FieldLocalisationNLopt_8hpp.html#a82451e4bbd8a3a4823802e6646945052", null ],
         [ "VisionBall", "BallLocalisation_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
         [ "VisionBalls", "BallLocalisation_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ],
         [ "VisionRobot", "RobotLocalisation_8cpp.html#a3f0996cc36d1916267841766556b79fb", null ],
-        [ "VisionRobots", "RobotLocalisation_8cpp.html#a3227cfc5a27f79496dff606608bccaa0", null ]
+        [ "VisionRobots", "RobotLocalisation_8cpp.html#a3227cfc5a27f79496dff606608bccaa0", null ],
+        [ "eigen_objective_wrapper", "FieldLocalisationNLopt_8hpp.html#abbd4794b915645a76862b28d102ce9ba", null ],
+        [ "eigen_to_nlopt", "FieldLocalisationNLopt_8hpp.html#a8afa1eb801f638e4c890f687a71f0c32", null ],
+        [ "nlopt_to_eigen", "FieldLocalisationNLopt_8hpp.html#ad86283b67507ebac4528671874b068eb", null ]
       ] ],
       [ "motion", null, [
         [ "Animator", "classmodule_1_1motion_1_1Animator.html", "classmodule_1_1motion_1_1Animator" ],
@@ -799,8 +803,12 @@ var namespaces_dup =
         [ "uart", "classutility_1_1io_1_1uart.html", "classutility_1_1io_1_1uart" ]
       ] ],
       [ "localisation", null, [
+        [ "Landmark", "structutility_1_1localisation_1_1Landmark.html", "structutility_1_1localisation_1_1Landmark" ],
+        [ "OccupancyMap", "classutility_1_1localisation_1_1OccupancyMap.html", "classutility_1_1localisation_1_1OccupancyMap" ],
         [ "fieldStateToTransform3D", "localisation_2transform_8hpp.html#abb0125f61147f697f00261ee45d95269", null ],
         [ "projectTo2D", "localisation_2transform_8hpp.html#a63c225b1c23698df01c9ebab0ea56e65", null ],
+        [ "setup_field_landmarks", "FieldLineOccupanyMap_8hpp.html#adf48143d376b2e276a5b26837f52aace", null ],
+        [ "setup_fieldline_distance_map", "FieldLineOccupanyMap_8hpp.html#a1b412d29c2e011d40aea878db9513af7", null ],
         [ "transform3DToFieldState", "localisation_2transform_8hpp.html#a2a5f3d2557d8e9a7bf4c8bc0f57b9271", null ]
       ] ],
       [ "math", null, [

@@ -1,0 +1,26 @@
+var structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config =
+[
+    [ "A", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a6e08ec4809c93d7aefdfc919d9b54747", null ],
+    [ "B", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a9c81221c49452df8bca9e66a68183e45", null ],
+    [ "C", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#acf075f6084b8af2bf556948c1ad6f654", null ],
+    [ "change_limit", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8705595937f1a6653520bb4d06a13bd2", null ],
+    [ "field_line_distance_weight", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a83ad66418e7e75a60da171186d77d46c", null ],
+    [ "field_line_intersection_weight", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8e4ba2c9310cc9d312337c4cbf4ac8a5", null ],
+    [ "ftol_rel", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a885cd2105bf9ef4c3f87f336509bce7d", null ],
+    [ "grid_size", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a02b425390e48493f42e672eba70fbee7", null ],
+    [ "initial_hypotheses", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#aaea7ae86d8e9cdc4ae8da7eb6557ebd3", null ],
+    [ "initial_state", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a8146b39a09b6f6025e9d560a58ae463a", null ],
+    [ "maxeval", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ada3d1d390296b78dc421530278ed1313", null ],
+    [ "min_association_distance", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ad95e78889c37d1046a48739dcb5fc7ec", null ],
+    [ "min_field_line_intersections", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ae33dccc610078b9c69675a27e5b02c51", null ],
+    [ "min_field_line_points", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a39f2469ba1fdb2a7dd474f9517b19115", null ],
+    [ "P0", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a96efdd7693b9224d986d2fc3b016b41d", null ],
+    [ "Q", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a619bd8150b1ea6427378191de34e66b7", null ],
+    [ "R", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af49a556ddbcb861d7c72f80da2caca4c", null ],
+    [ "save_map", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#ae8183337d3f7078e13d0fab2b9040108", null ],
+    [ "start_time_delay", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a2614d798724817f579d8854af7a1aa70", null ],
+    [ "starting_side", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af05fc536f295c707122c1f567f7ba1d4", null ],
+    [ "state_change_weight", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a4d73dc8e649957dd7b55bc39d4f997d1", null ],
+    [ "use_ground_truth_localisation", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#af48eb9b6efb78db5298c78077c79e712", null ],
+    [ "xtol_rel", "structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a7a15457bdf13245bd8f816e5a80e836a", null ]
+];

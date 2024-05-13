@@ -130,8 +130,8 @@ var annotated_dup =
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "FieldLocalisation", "classmodule_1_1localisation_1_1FieldLocalisation.html", "classmodule_1_1localisation_1_1FieldLocalisation" ],
+        [ "FieldLocalisationNLopt", "classmodule_1_1localisation_1_1FieldLocalisationNLopt.html", "classmodule_1_1localisation_1_1FieldLocalisationNLopt" ],
         [ "FieldModel", "classmodule_1_1localisation_1_1FieldModel.html", "classmodule_1_1localisation_1_1FieldModel" ],
-        [ "OccupancyMap", "classmodule_1_1localisation_1_1OccupancyMap.html", "classmodule_1_1localisation_1_1OccupancyMap" ],
         [ "RobotLocalisation", "classmodule_1_1localisation_1_1RobotLocalisation.html", "classmodule_1_1localisation_1_1RobotLocalisation" ],
         [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "StartingSide", "structmodule_1_1localisation_1_1StartingSide.html", "structmodule_1_1localisation_1_1StartingSide" ]
@@ -374,6 +374,10 @@ var annotated_dup =
       ] ],
       [ "io", null, [
         [ "uart", "classutility_1_1io_1_1uart.html", "classutility_1_1io_1_1uart" ]
+      ] ],
+      [ "localisation", null, [
+        [ "Landmark", "structutility_1_1localisation_1_1Landmark.html", "structutility_1_1localisation_1_1Landmark" ],
+        [ "OccupancyMap", "classutility_1_1localisation_1_1OccupancyMap.html", "classutility_1_1localisation_1_1OccupancyMap" ]
       ] ],
       [ "math", null, [
         [ "filter", null, [

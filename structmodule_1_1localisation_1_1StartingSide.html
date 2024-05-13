@@ -185,6 +185,28 @@ Public Types</h2></td></tr>
 , <b>EITHER</b> = 3
 , <br />
 &#160;&#160;<b>CUSTOM</b> = 4
+, <b>UNKNOWN</b> = 0
+, <b>LEFT</b> = 1
+, <b>RIGHT</b> = 2
+, <br />
+&#160;&#160;<b>EITHER</b> = 3
+, <b>CUSTOM</b> = 4
+<br />
+ }</td></tr>
+<tr class="separator:ab242f4081ad3ed22c48abd3ed8859a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab242f4081ad3ed22c48abd3ed8859a3d"><td class="memItemLeft" align="right" valign="top"><a id="ab242f4081ad3ed22c48abd3ed8859a3d"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>Value</b> { <br />
+&#160;&#160;<b>UNKNOWN</b> = 0
+, <b>LEFT</b> = 1
+, <b>RIGHT</b> = 2
+, <b>EITHER</b> = 3
+, <br />
+&#160;&#160;<b>CUSTOM</b> = 4
+, <b>UNKNOWN</b> = 0
+, <b>LEFT</b> = 1
+, <b>RIGHT</b> = 2
+, <br />
+&#160;&#160;<b>EITHER</b> = 3
+, <b>CUSTOM</b> = 4
 <br />
  }</td></tr>
 <tr class="separator:ab242f4081ad3ed22c48abd3ed8859a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -194,15 +216,30 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ae0bc23d0cb6aff5e828867a8577129b2"><td class="memItemLeft" align="right" valign="top"><a id="ae0bc23d0cb6aff5e828867a8577129b2"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>StartingSide</b> (int const &amp;v)</td></tr>
 <tr class="separator:ae0bc23d0cb6aff5e828867a8577129b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0bc23d0cb6aff5e828867a8577129b2"><td class="memItemLeft" align="right" valign="top"><a id="ae0bc23d0cb6aff5e828867a8577129b2"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StartingSide</b> (int const &amp;v)</td></tr>
+<tr class="separator:ae0bc23d0cb6aff5e828867a8577129b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad36e4980cf704a25b8c331bb9caad940"><td class="memItemLeft" align="right" valign="top"><a id="ad36e4980cf704a25b8c331bb9caad940"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StartingSide</b> (std::string const &amp;str)</td></tr>
+<tr class="separator:ad36e4980cf704a25b8c331bb9caad940"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad36e4980cf704a25b8c331bb9caad940"><td class="memItemLeft" align="right" valign="top"><a id="ad36e4980cf704a25b8c331bb9caad940"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>StartingSide</b> (std::string const &amp;str)</td></tr>
 <tr class="separator:ad36e4980cf704a25b8c331bb9caad940"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a589224167633c175058dbc8d5c06c4df"><td class="memItemLeft" align="right" valign="top"><a id="a589224167633c175058dbc8d5c06c4df"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>StartingSide</b> (Value const &amp;v)</td></tr>
 <tr class="separator:a589224167633c175058dbc8d5c06c4df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a589224167633c175058dbc8d5c06c4df"><td class="memItemLeft" align="right" valign="top"><a id="a589224167633c175058dbc8d5c06c4df"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>StartingSide</b> (Value const &amp;v)</td></tr>
+<tr class="separator:a589224167633c175058dbc8d5c06c4df"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a57cf27e6370ef76e5ccadaef63fd7c17"><td class="memItemLeft" align="right" valign="top"><a id="a57cf27e6370ef76e5ccadaef63fd7c17"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>operator std::string</b> () const</td></tr>
 <tr class="separator:a57cf27e6370ef76e5ccadaef63fd7c17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a57cf27e6370ef76e5ccadaef63fd7c17"><td class="memItemLeft" align="right" valign="top"><a id="a57cf27e6370ef76e5ccadaef63fd7c17"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>operator std::string</b> () const</td></tr>
+<tr class="separator:a57cf27e6370ef76e5ccadaef63fd7c17"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7080de7747812286f01ba79f089ba5f1"><td class="memItemLeft" align="right" valign="top"><a id="a7080de7747812286f01ba79f089ba5f1"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>operator Value</b> () const</td></tr>
+<tr class="separator:a7080de7747812286f01ba79f089ba5f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7080de7747812286f01ba79f089ba5f1"><td class="memItemLeft" align="right" valign="top"><a id="a7080de7747812286f01ba79f089ba5f1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>operator Value</b> () const</td></tr>
 <tr class="separator:a7080de7747812286f01ba79f089ba5f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -213,8 +250,9 @@ Public Attributes</h2></td></tr>
 Value&#160;</td><td class="memItemRight" valign="bottom"><b>value</b> = Value::UNKNOWN</td></tr>
 <tr class="separator:ae64e4fd3230c3427ba7169a2bfbb92e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<hr/>The documentation for this struct was generated from the following files:<ul>
 <li>module/localisation/FieldLocalisation/src/<a class="el" href="FieldLocalisation_8hpp_source.html">FieldLocalisation.hpp</a></li>
+<li>module/localisation/FieldLocalisationNLopt/src/<a class="el" href="FieldLocalisationNLopt_8hpp_source.html">FieldLocalisationNLopt.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -222,7 +260,7 @@ Value&#160;</td><td class="memItemRight" valign="bottom"><b>value</b> = Value::U
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>localisation</b></li><li class="navelem"><a class="el" href="structmodule_1_1localisation_1_1StartingSide.html">StartingSide</a></li>
-    <li class="footer">Generated on Mon May 13 2024 00:49:16 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Mon May 13 2024 05:15:37 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

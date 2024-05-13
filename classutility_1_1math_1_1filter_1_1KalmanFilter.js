@@ -15,6 +15,7 @@ var classutility_1_1math_1_1filter_1_1KalmanFilter =
     [ "get_state", "classutility_1_1math_1_1filter_1_1KalmanFilter.html#a25a9f5c2a24da5aad77dc728769a0087", null ],
     [ "measure", "classutility_1_1math_1_1filter_1_1KalmanFilter.html#a06169cf7118ac58ecb86caeb5944c279", null ],
     [ "reset", "classutility_1_1math_1_1filter_1_1KalmanFilter.html#a6e5e89688e2473c48e20e892af20f157", null ],
+    [ "set_state", "classutility_1_1math_1_1filter_1_1KalmanFilter.html#ac4a6f637aa504789ce99664a43e09141", null ],
     [ "time", "classutility_1_1math_1_1filter_1_1KalmanFilter.html#ad63b75b44ce88f88b3e02eb17b02bc5a", null ],
     [ "update", "classutility_1_1math_1_1filter_1_1KalmanFilter.html#aee8ef36f51310c6e00e921a75a5637ff", null ],
     [ "zero_order_hold", "classutility_1_1math_1_1filter_1_1KalmanFilter.html#acf3dad1df15678ec9b23b1825f9b26e8", null ],

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['b_73',['B',['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#ad8fc648944e0dd12eaf8d2d1320ee41c',1,'utility::math::filter::KalmanFilter']]],
+  ['b_73',['B',['../classutility_1_1math_1_1filter_1_1KalmanFilter.html#ad8fc648944e0dd12eaf8d2d1320ee41c',1,'utility::math::filter::KalmanFilter::B()'],['../structmodule_1_1localisation_1_1FieldLocalisationNLopt_1_1Config.html#a9c81221c49452df8bca9e66a68183e45',1,'module::localisation::FieldLocalisationNLopt::Config::B()']]],
   ['back_74',['back',['../classmodule_1_1purpose_1_1KeyboardWalk.html#ae51528edde1dfe10f6ebc3e560d60234',1,'module::purpose::KeyboardWalk']]],
   ['balancer_75',['Balancer',['../classutility_1_1motion_1_1Balancer.html',1,'utility::motion']]],
   ['ball_5fangular_5fcov_76',['ball_angular_cov',['../classmodule_1_1vision_1_1BallDetector.html#a07542e3c009cdbda8b747dae65de0443',1,'module::vision::BallDetector']]],
