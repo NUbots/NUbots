@@ -26,14 +26,15 @@ syntax = "proto3";
 
 package message.purpose;
 
-/// The detected purpose of the robot
-enum Purpose {
-    UNKNOWN  = 0;
-    DEFENDER = 1;
-    STRIKER  = 2;
-}
 
 message PurposeList {
+    /// The detected purpose of the robot
+    enum Purpose {
+        UNKNOWN  = 0;
+        DEFENDER = 1;
+        STRIKER  = 2;
+    }
+
     /// The purpose of the robot
     Purpose soccer_position = 1;
 }

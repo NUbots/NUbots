@@ -95,8 +95,8 @@ namespace module::purpose {
             }
         };
 
-        /// @brief Store and remove active/inactive robots
-        bool manage_active_robots(const uint8_t robot_id);
+        /// @brief Add and update active robots
+        void manage_active_robots(const message::input::RoboCup& robocup);
 
         /// @brief Add RobotInfo ordered by id
         void add_robot(RobotInfo new_robot);
@@ -104,8 +104,8 @@ namespace module::purpose {
         /// @brief Count the number of defenders
         uint8_t count_defenders();
 
-        /// @brief Decide the correct soccer position
-        void find_soccer_position(const message::input::RoboCup& robocup);
+        /// @brief Decide the correct soccer positions
+        void find_soccer_positions();
 
         /// @brief Store robots that can currently play
         std::vector<RobotInfo> active_robots;

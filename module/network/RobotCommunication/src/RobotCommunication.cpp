@@ -57,7 +57,6 @@ namespace module::network {
     using message::skill::Kick;
     using message::support::GlobalConfig;
     using message::purpose::PurposeList;
-    using message::purpose::Purpose;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -196,8 +195,16 @@ namespace module::network {
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
 
-        on<Trigger<PurposeList>>().then([this](const PurposeList& purpose) {
-            soccer_position = purpose.soccer_position == Purpose::DEFENDER ? Position("DEFENDER") : Position("STRIKER");
+        on<Trigger<PurposeList>>().then([this](const PurposeList& purpose_list) {
+            log<NUClear::DEBUG>("purpose list", purpose_list.soccer_position);
+
+            int purpose = purpose_list.soccer_position;
+            switch (purpose) {
+                case 0: soccer_position = Position("UNKNOWN"); break;
+                case 1: soccer_position = Position("DEFENDER"); break;
+                case 2: soccer_position = Position("STRIKER"); break;
+                default: soccer_position = Position("UNKNOWN"); break;
+            }
         });
     }
 
