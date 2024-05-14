@@ -40,17 +40,13 @@ namespace utility::platform {
             // Get robot aliases
             YAML::Node config = YAML::LoadFile("config/robot_names.yaml");
 
-            // Create a map to hold the aliases
-            std::map<std::string, std::string> robot_aliases{};
-
-            // Get the "robot_alias" node and iterate over it
+            // Return an alias if it matches the hostname
             for (const auto& node : config["robot_alias"]) {
-                // Get the hostname and name from each node and add them to the map
-                robot_aliases[node["hostname"].as<std::string>()] = node["robot_name"].as<std::string>();
+                if (node["hostname"].as<std::string>() == hostname) {
+                    return node["name"].as<std::string>();
+                }
             }
-
-            // Return the name of the robot or empty if it doesn't exist
-            return robot_aliases.find(hostname) != robot_aliases.end() ? robot_aliases[hostname] : "";
+            return "";
         }
         // If anything went wrong, return empty string
         catch (const std::exception& e) {
