@@ -195,6 +195,12 @@ var hierarchy =
     [ "module::planning::PlanLook::Config", "structmodule_1_1planning_1_1PlanLook_1_1Config.html", null ],
     [ "module::planning::PlanWalkPath::Config", "structmodule_1_1planning_1_1PlanWalkPath_1_1Config.html", null ],
     [ "module::platform::HardwareSimulator::NoiseConfig", "structmodule_1_1platform_1_1HardwareSimulator_1_1NoiseConfig.html", null ],
+    [ "module::platform::NUSense::EmitReflector< T >", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html", null ],
+    [ "module::platform::NUSense::EmitReflector< void >", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html", null ],
+    [ "module::platform::NUSense::HardwareIO::Config", "structmodule_1_1platform_1_1NUSense_1_1HardwareIO_1_1Config.html", null ],
+    [ "module::platform::NUSense::NUgus", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html", null ],
+    [ "module::platform::NUSense::NUSenseFrame", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html", null ],
+    [ "module::platform::NUSense::NUSenseParser", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html", null ],
     [ "module::platform::OpenCR::DynamixelDevice", "classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html", [
       [ "module::platform::OpenCR::DynamixelServo", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html", [
         [ "module::platform::OpenCR::MX106", "structmodule_1_1platform_1_1OpenCR_1_1MX106.html", null ],
@@ -289,6 +295,9 @@ var hierarchy =
     [ "NUClear::dsl::operation::DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", null ],
     [ "NUClear::dsl::operation::DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", null ],
     [ "NUClear::Reactor", null, [
+      [ "utility::reactor::StreamReactor< HardwareIO, NUSenseParser, 5 >", "classutility_1_1reactor_1_1StreamReactor.html", [
+        [ "module::platform::NUSense::HardwareIO", "classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html", null ]
+      ] ],
       [ "extension::behaviour::BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", [
         [ "module::actuation::FootController", "classmodule_1_1actuation_1_1FootController.html", null ],
         [ "module::actuation::Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", null ],

@@ -492,6 +492,16 @@ var namespaces_dup =
         [ "smooth", "FallingRelaxPlanner_8cpp.html#a4c6f0a0466f10006eeb81ee3a9759002", null ]
       ] ],
       [ "platform", null, [
+        [ "NUSense", null, [
+          [ "EmitReflector", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector" ],
+          [ "EmitReflector< void >", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4" ],
+          [ "HardwareIO", "classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html", "classmodule_1_1platform_1_1NUSense_1_1HardwareIO" ],
+          [ "NUgus", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html", "classmodule_1_1platform_1_1NUSense_1_1NUgus" ],
+          [ "NUSenseFrame", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame" ],
+          [ "NUSenseParser", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser" ],
+          [ "read_le_32", "NUSenseParser_8cpp.html#a06d9c47dc10ee3032b15a114a1bc69bc", null ],
+          [ "read_le_64", "NUSenseParser_8cpp.html#af4a89575be25fcd332dec4146ebf1e5f", null ]
+        ] ],
         [ "OpenCR", null, [
           [ "convert", null, [
             [ "acc", "Convert_8cpp.html#af1f2486f3da6dd44e291db3e305b8d49", null ],
@@ -534,14 +544,14 @@ var namespaces_dup =
           [ "OpenCRReadData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRReadData.html", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRReadData" ],
           [ "OpenCRWriteData", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData.html", "structmodule_1_1platform_1_1OpenCR_1_1OpenCRWriteData" ],
           [ "XH540_W270", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270.html", "structmodule_1_1platform_1_1OpenCR_1_1XH540__W270" ],
-          [ "AddressBook", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736", [
-            [ "SERVO_READ_ADDRESS", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736a4f1c21646db56041cb549e99046ccb9a", null ],
-            [ "SERVO_READ", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736a4d98c649812ed9956885d4f3223177ec", null ],
-            [ "SERVO_WRITE_ADDRESS_1", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736ac4e206acd0a6024e5223e23e53e11685", null ],
-            [ "SERVO_WRITE_ADDRESS_2", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736a71768c08b572e094af54591f2d6075d5", null ],
-            [ "SERVO_WRITE_1", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736a8ec06c78b19a71ce2cfc9f9d86defd6a", null ],
-            [ "SERVO_WRITE_2", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736aee68ae72012d61ff2a16d17b7397e88f", null ],
-            [ "FSR_READ", "NUgus_8hpp.html#a758d924e159954e841bef8f806029736a1f83a18570b8b74293b9970d2dbed954", null ]
+          [ "AddressBook", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736", [
+            [ "SERVO_READ_ADDRESS", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a4f1c21646db56041cb549e99046ccb9a", null ],
+            [ "SERVO_READ", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a4d98c649812ed9956885d4f3223177ec", null ],
+            [ "SERVO_WRITE_ADDRESS_1", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736ac4e206acd0a6024e5223e23e53e11685", null ],
+            [ "SERVO_WRITE_ADDRESS_2", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a71768c08b572e094af54591f2d6075d5", null ],
+            [ "SERVO_WRITE_1", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a8ec06c78b19a71ce2cfc9f9d86defd6a", null ],
+            [ "SERVO_WRITE_2", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736aee68ae72012d61ff2a16d17b7397e88f", null ],
+            [ "FSR_READ", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#a758d924e159954e841bef8f806029736a1f83a18570b8b74293b9970d2dbed954", null ]
           ] ],
           [ "Phases", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5d", [
             [ "IDLE", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da75815bad26a6db6f30b95e1fe252fe35", null ],
@@ -551,8 +561,8 @@ var namespaces_dup =
             [ "FINISH", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5daf0f15806f9693e6917234c4bdef14780", null ],
             [ "TIMEOUT", "handle__response_8cpp.html#a8692e909b69dfb973c122ebc6cbc0e5da567bb7d42622ad0d2d636aea2b8152db", null ]
           ] ],
-          [ "__attribute__", "NUgus_8hpp.html#ae7c66eb22e53a1985a8f1c0980ee41ce", null ],
-          [ "__attribute__", "NUgus_8hpp.html#af1e3b905f110d64f603a22e62320282f", null ]
+          [ "__attribute__", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#ae7c66eb22e53a1985a8f1c0980ee41ce", null ],
+          [ "__attribute__", "OpenCR_2HardwareIO_2src_2NUgus_8hpp.html#af1e3b905f110d64f603a22e62320282f", null ]
         ] ],
         [ "HardwareSimulator", "classmodule_1_1platform_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1HardwareSimulator" ],
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ],

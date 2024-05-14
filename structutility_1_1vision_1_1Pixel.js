@@ -8,7 +8,7 @@ var structutility_1_1vision_1_1Pixel =
     [ "a", "structutility_1_1vision_1_1Pixel.html#a6f193b1a98dc1ddc4b64a01e7377060d", null ],
     [ "b", "structutility_1_1vision_1_1Pixel.html#a47ded1626d20115fd84cc0e8c26f464a", null ],
     [ "cb", "structutility_1_1vision_1_1Pixel.html#a07aa97c9a002dd7597c64ceb69cc83b6", null ],
-    [ "components", "structutility_1_1vision_1_1Pixel.html#a9e9cfbf88bbba986c20fd098751f6859", null ],
+    [ "components", "structutility_1_1vision_1_1Pixel.html#a9799609a6a3daadc7c33c5ad25df6f50", null ],
     [ "cr", "structutility_1_1vision_1_1Pixel.html#ac94ea8ed585663c1850829865832fed6", null ],
     [ "g", "structutility_1_1vision_1_1Pixel.html#a042d4052eaa9fff25a605b3cda93a46e", null ],
     [ "r", "structutility_1_1vision_1_1Pixel.html#a7a0bb203b3197818bb4a55b7c512b988", null ],

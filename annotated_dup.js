@@ -197,6 +197,14 @@ var annotated_dup =
         [ "PlanWalkPath", "classmodule_1_1planning_1_1PlanWalkPath.html", "classmodule_1_1planning_1_1PlanWalkPath" ]
       ] ],
       [ "platform", null, [
+        [ "NUSense", null, [
+          [ "EmitReflector", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector.html", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector" ],
+          [ "EmitReflector< void >", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4.html", "structmodule_1_1platform_1_1NUSense_1_1EmitReflector_3_01void_01_4" ],
+          [ "HardwareIO", "classmodule_1_1platform_1_1NUSense_1_1HardwareIO.html", "classmodule_1_1platform_1_1NUSense_1_1HardwareIO" ],
+          [ "NUgus", "classmodule_1_1platform_1_1NUSense_1_1NUgus.html", "classmodule_1_1platform_1_1NUSense_1_1NUgus" ],
+          [ "NUSenseFrame", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame.html", "structmodule_1_1platform_1_1NUSense_1_1NUSenseFrame" ],
+          [ "NUSenseParser", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser.html", "structmodule_1_1platform_1_1NUSense_1_1NUSenseParser" ]
+        ] ],
         [ "OpenCR", null, [
           [ "DynamixelDevice", "classmodule_1_1platform_1_1OpenCR_1_1DynamixelDevice.html", null ],
           [ "DynamixelServo", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo.html", "structmodule_1_1platform_1_1OpenCR_1_1DynamixelServo" ],

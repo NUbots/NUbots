@@ -28,8 +28,10 @@ var namespaceutility_1_1strutil =
       [ "CYAN_BACKGROUND", "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956a9455af1946aea244c3658095b8074828", null ],
       [ "GRAY_BACKGROUND", "namespaceutility_1_1strutil.html#a220f1abab3fd00f600f4918adc360956abdea449d31a3975cf169e2b70a7e8c02", null ]
     ] ],
+    [ "dedent", "namespaceutility_1_1strutil.html#a857db534a558029929db00523f66b1d8", null ],
     [ "endsWith", "namespaceutility_1_1strutil.html#abdfcbe0d6e6ebb07da4a04e0b9f17716", null ],
     [ "endsWith", "namespaceutility_1_1strutil.html#a2a8a9ca3c467257fb88e478213f30e4e", null ],
+    [ "join", "namespaceutility_1_1strutil.html#a4f21337e119ea169f1e9b7bbd394cce1", null ],
     [ "operator<<", "namespaceutility_1_1strutil.html#afeea08f5ddfb3ec4431ad63ecfb46161", null ],
     [ "removeAll", "namespaceutility_1_1strutil.html#a4d580878a1909afcd64c84282ed307fd", null ],
     [ "split", "namespaceutility_1_1strutil.html#a267e7e2c3851f3d3b97184c7111297c8", null ],
