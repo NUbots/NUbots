@@ -79,7 +79,7 @@ namespace module::platform::NUSense {
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             // Use configuration here from file HardwareIO.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            auto device     = config["nusense"]["port"].as<std::string>();
+            auto device     = config["nusense"]["device"].as<std::string>();
             auto baud       = config["nusense"]["baud"].as<int>();
 
             // Tell the stream reactor to connect to the device
