@@ -9,11 +9,16 @@
 namespace module::platform::NUSense {
 
     struct NUSenseFrame {
-        std::array<uint8_t, 3> header{};  //< NBS Header, should be 0xE2, 0x98, 0xA2
-        uint32_t size;                    //< Size of the payload after this field
-        uint64_t timestamp;               //< Timestamp of the message
-        uint64_t hash;                    //< Hash of the message type
-        std::vector<uint8_t> payload{};   //< The payload of the message
+        /// NBS Header, should contain 0xE2, 0x98, 0xA2
+        std::array<uint8_t, 3> header{};
+        /// Size of the payload after this field
+        uint32_t size;
+        /// Timestamp of the message
+        uint64_t timestamp;
+        /// Hash of the message type
+        uint64_t hash;
+        /// The payload of the message
+        std::vector<uint8_t> payload{};
     };
 
     struct NUSenseParser {

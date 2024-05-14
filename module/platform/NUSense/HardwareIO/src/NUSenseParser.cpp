@@ -1,11 +1,18 @@
 #include "NUSenseParser.hpp"
 
 namespace module::platform::NUSense {
-
+    /// @brief  Read a buffer of bytes and convert it to an unsigned 32 bit integer in little endian
+    ///         HwIO uses this to read the size field of the nbs packet sent by NUSense
+    /// @param  ptr Pointer to a buffer of bytes
+    /// @return The unsigned 32 bit number decoded from the buffer of bytes
     uint32_t read_le_32(const uint8_t* ptr) {
         return (uint32_t(ptr[0]) << 0) | (uint32_t(ptr[1]) << 8) | (uint32_t(ptr[2]) << 16) | (uint32_t(ptr[3]) << 24);
     }
 
+    /// @brief  Read a buffer of bytes and convert it to an unsigned 64 bit integer in little endian
+    ///         HwIO uses this to read the message hash and timestamp fields of the nbs packet sent by NUSense
+    /// @param  ptr Pointer to a buffer of bytes
+    /// @return The unsigned 64 bit number decoded from the buffer of bytes
     uint64_t read_le_64(const uint8_t* ptr) {
         return (uint64_t(ptr[0]) << 0) | (uint64_t(ptr[1]) << 8) | (uint64_t(ptr[2]) << 16) | (uint64_t(ptr[3]) << 24)
                | (uint64_t(ptr[4]) << 32) | (uint64_t(ptr[5]) << 40) | (uint64_t(ptr[6]) << 48)
