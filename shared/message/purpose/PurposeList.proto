@@ -26,15 +26,14 @@ syntax = "proto3";
 
 package message.purpose;
 
-import "google/protobuf/timestamp.proto";
-
-/// The detected team of the robot
+/// The detected purpose of the robot
 enum Purpose {
-    DEFENDER = 0;
-    STRIKER  = 1;
+    UNKNOWN  = 0;
+    DEFENDER = 1;
+    STRIKER  = 2;
 }
 
 message PurposeList {
-    /// Timestamp of message creation
-    Purpose soccer_position;
+    /// The purpose of the robot
+    Purpose soccer_position = 1;
 }

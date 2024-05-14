@@ -57,6 +57,7 @@ namespace module::network {
     using message::skill::Kick;
     using message::support::GlobalConfig;
     using message::purpose::PurposeList;
+    using message::purpose::Purpose;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -87,6 +88,7 @@ namespace module::network {
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
+                            log<NUClear::DEBUG>("purpose TEST", incoming_msg.soccer_position);
                             // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
@@ -195,7 +197,7 @@ namespace module::network {
             });
 
         on<Trigger<PurposeList>>().then([this](const PurposeList& purpose) {
-            soccer_position = purpose.soccer_position == 0 ? Position("STRIKER") : Position("DEFENDER");
+            soccer_position = purpose.soccer_position == Purpose::DEFENDER ? Position("DEFENDER") : Position("STRIKER");
         });
     }
 

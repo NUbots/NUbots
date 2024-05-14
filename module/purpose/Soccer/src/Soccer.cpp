@@ -43,6 +43,7 @@
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Striker.hpp"
+#include "message/purpose/PurposeList.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/support/GlobalConfig.hpp"
@@ -65,6 +66,7 @@ namespace module::purpose {
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
     using message::purpose::Striker;
+    using message::purpose::PurposeList;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
     using message::support::GlobalConfig;
@@ -124,31 +126,11 @@ namespace module::purpose {
         });
 
         on<Provide<FindPurpose>, Every<2, Per<std::chrono::seconds>>, With<Ball>, With<Field>>().then([this](const Ball& ball, const Field& field) {
-            log<NUClear::DEBUG>("every 3 seconds");
             if (active_robots.size() == 1) {
-                // Get the current position of the ball on the field
-                Eigen::Isometry3d Hfw = field.Hfw;
-                Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
-
-                log<NUClear::DEBUG>("rBFf", rBFf.x());
-                // leeway to prevent kickoff confusion
-                // TODO: store this value, test variation instead?
-                if (rBFf.x() >= 0.2) {
-                    // Ball is own half, so become Defender.
-                    if (active_robots.front().position.value != Position::DEFENDER) {
-                        emit<Task>(std::make_unique<Defender>(cfg.force_playing));
-                        active_robots.front().position = Position("DEFENDER");
-                        log<NUClear::DEBUG>("last robot made defender");
-                    }
-                }
-                else {
-                    if (active_robots.front().position.value != Position::STRIKER) {
-                        // Ball is in opponent's half, become Striker
-                        emit<Task>(std::make_unique<Striker>(cfg.force_playing));
-                        active_robots.front().position = Position("STRIKER");
-                        log<NUClear::DEBUG>("last robot made striker");
-                    }
-                }
+                emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+                active_robots.front().position = Position("STRIKER");
+                log<NUClear::DEBUG>("last robot made striker");
+                log<NUClear::DEBUG>("every 3 seconds");
             }
         });
 
@@ -293,6 +275,32 @@ namespace module::purpose {
             }
         }
     };
+
+            //     if (active_robots.size() == 1) {
+        //         // Get the current position of the ball on the field
+        //         Eigen::Isometry3d Hfw = field.Hfw;
+        //         Eigen::Vector3d rBFf  = Hfw * ball.rBWw;
+
+        //         log<NUClear::DEBUG>("rBFf", rBFf.x());
+        //         // leeway to prevent kickoff confusion
+        //         // TODO: store this value, test variation instead?
+        //         if (rBFf.x() >= 0.2) {
+        //             // Ball is own half, so become Defender.
+        //             if (active_robots.front().position.value != Position::DEFENDER) {
+        //                 emit<Task>(std::make_unique<Defender>(cfg.force_playing));
+        //                 active_robots.front().position = Position("DEFENDER");
+        //                 log<NUClear::DEBUG>("last robot made defender");
+        //             }
+        //         }
+        //         else {
+        //             if (active_robots.front().position.value != Position::STRIKER) {
+        //                 // Ball is in opponent's half, become Striker
+        //                 emit<Task>(std::make_unique<Striker>(cfg.force_playing));
+        //                 active_robots.front().position = Position("STRIKER");
+        //                 log<NUClear::DEBUG>("last robot made striker");
+        //             }
+        //         }
+        //     }
 
 
 }  // namespace module::purpose
