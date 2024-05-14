@@ -34,7 +34,6 @@ namespace module::platform::NUSense {
 
     class NUgus {
     public:
-        NUgus();
 
         /// @brief The direction (clockwise or anticlockwise) to measure each motor in
         std::array<int8_t, 20> servo_direction{};
