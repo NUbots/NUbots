@@ -39,7 +39,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
-#include "message/purpose/PurposeList.hpp"
+#include "message/purpose/Purposes.hpp"
 
 #include "utility/math/euler.hpp"
 
@@ -56,7 +56,7 @@ namespace module::network {
     using message::localisation::Field;
     using message::skill::Kick;
     using message::support::GlobalConfig;
-    using message::purpose::PurposeList;
+    using message::purpose::Purposes;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -87,7 +87,7 @@ namespace module::network {
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
-                            log<NUClear::DEBUG>("purpose TEST", incoming_msg.soccer_position);
+                            log<NUClear::DEBUG>("purpose TEST", incoming_msg.purposes);
                             // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
@@ -103,6 +103,7 @@ namespace module::network {
            Optional<With<Sensors>>,
            Optional<With<Field>>,
            Optional<With<GameState>>,
+           Optional<With<Purposes>>,
            Optional<With<GlobalConfig>>>()
             .then([this](const std::shared_ptr<const Ball>& loc_ball,
                          const std::shared_ptr<const WalkState>& walk_state,
@@ -110,7 +111,8 @@ namespace module::network {
                          const std::shared_ptr<const Sensors>& sensors,
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
-                         const std::shared_ptr<const GlobalConfig>& config) {
+                         const std::shared_ptr<const GlobalConfig>& config,
+                         const std::shared_ptr<const GlobalConfig>& purposes) {
                 auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
@@ -185,27 +187,12 @@ namespace module::network {
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
 
-                // Current purpose (soccer position) of the Robot
-                switch (soccer_position.value) {
-                    case Position::DEFENDER: msg->soccer_position = 0; break;
-                    case Position::STRIKER: msg->soccer_position = 1; break;
-                    default: break;
-                }
+                // TODO: Current purposes (soccer positions) of the Robots
+
+
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });
-
-        on<Trigger<PurposeList>>().then([this](const PurposeList& purpose_list) {
-            log<NUClear::DEBUG>("purpose list", purpose_list.soccer_position);
-
-            int purpose = purpose_list.soccer_position;
-            switch (purpose) {
-                case 0: soccer_position = Position("UNKNOWN"); break;
-                case 1: soccer_position = Position("DEFENDER"); break;
-                case 2: soccer_position = Position("STRIKER"); break;
-                default: soccer_position = Position("UNKNOWN"); break;
-            }
-        });
     }
 
 }  // namespace module::network

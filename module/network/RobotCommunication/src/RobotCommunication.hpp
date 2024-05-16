@@ -68,7 +68,7 @@ namespace module::network {
         };
 
         /// @brief purpose of this robot
-        Position soccer_position;
+        Position purpose;
 
         /// @brief Handle for incoming UDP message. This will be bound/unbound during (re)connection
         ReactionHandle listen_handle;

@@ -37,6 +37,11 @@ enum Team {
     RED          = 2;
 }
 
+enum Purpose {
+    DEFENDER = 0;
+    STRIKER  = 1;
+}
+
 message Robot {
     /// ID of the robot, 0 if not known
     uint32 player_id = 1;
@@ -81,12 +86,6 @@ enum State {
     PENALISED     = 2;
 }
 
-/// The current playing state of the robot
-enum SoccerPosition {
-    DEFENDER = 0;
-    STRIKER  = 1;
-}
-
 message RoboCup {
     /// Timestamp of message creation
     google.protobuf.Timestamp timestamp = 1;
@@ -118,6 +117,6 @@ message RoboCup {
 
     /// IDs 1-100 are reserved for official use
 
-    /// The robot's purpose
-    SoccerPosition soccer_position = 101;
+    /// The purposes of the robots
+    repeated Purpose purposes = 101;
 }

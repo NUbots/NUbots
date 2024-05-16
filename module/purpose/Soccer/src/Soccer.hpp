@@ -88,7 +88,6 @@ namespace module::purpose {
         struct RobotInfo {
             uint8_t robot_id;
             std::chrono::steady_clock::time_point last_heard_from;
-            Position position;
 
             bool operator<(const RobotInfo& other) const {
                 return robot_id < other.robot_id;
@@ -101,17 +100,23 @@ namespace module::purpose {
         /// @brief Add RobotInfo ordered by id
         void add_robot(RobotInfo new_robot);
 
-        /// @brief Count the number of defenders
-        uint8_t count_defenders();
+        /// @brief Decide the correct soccer positions
+        uint8_t find_striker();
 
         /// @brief Decide the correct soccer positions
-        void find_soccer_positions();
+        void decide_purposes();
+
+        /// @brief emit purpose based on leader's instructions
+        void learn_purpose();
 
         /// @brief Store robots that can currently play
         std::vector<RobotInfo> active_robots;
 
         /// @brief Store penalised robots
         std::list<RobotInfo> penalised_robots;
+
+        /// @brief Store robot positions
+        std::vector<RobotInfo> robot_positions;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.
