@@ -443,9 +443,9 @@ def main():
     # lr_callback = keras.callbacks.LearningRateScheduler(scheduler)
 
     # ** Loss functions **
-    # loss_function = keras.losses.MeanAbsoluteError()
+    loss_function = keras.losses.MeanAbsoluteError()
     # loss_function = keras.losses.MeanSquaredError()
-    loss_function = keras.losses.LogCosh()
+    # loss_function = keras.losses.LogCosh()
     # loss_function = quantile_loss????
     # loss_function = keras.losses.Huber(delta=0.5)
 
@@ -457,7 +457,7 @@ def main():
     decay_over_steps = decay_to_epoch * steps_per_epoch         # Calculate the number of steps to decay over (scheduler takes the values in steps)
     print(f"Decay to epoch: {decay_to_epoch}")
     print(f"Number of steps to decay over before LR resets: {decay_over_steps}")
-    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.0, m_mul=1.1, alpha=0.000001)
+    lr_schedule = keras.optimizers.schedules.CosineDecayRestarts(initial_learning_rate=learning_rate, first_decay_steps=decay_over_steps, t_mul=1.08, m_mul=1, alpha=0.000001)
 
     # standard optimisers
     # optimizer = keras.optimizers.Adam(learning_rate=lr_schedule, beta_1=0.90)

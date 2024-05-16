@@ -13,7 +13,7 @@ test_targets = np.load('datasets/input_targets_train.npy')
 # test_targets = test_targets[:4000]
 
 # Load model
-model = load_model('models/model-20240511-205248')
+model = load_model('models/model-20240516-184618')
 
 # Plot and inspect loaded data
 # num_channels = test_data.shape[1]
