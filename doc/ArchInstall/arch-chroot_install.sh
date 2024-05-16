@@ -184,13 +184,6 @@ systemctl enable systemd-resolved.service
 systemctl enable wpa_supplicant
 systemctl enable wpa_supplicant@${WIFI_INTERFACE}
 
-#####################
-# SERIAL PORT RULES #
-#####################
-cat << EOF > /etc/udev/rules.d/10-nusense.rules
-KERNEL=="ttyACM*", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{manufacturer}=="STMicroelectronics", ATTRS{idProduct}=="5740", ATTRS{idVendor}=="0483", SYMLINK+="nusense", GROUP="uucp", MODE="0666"
-EOF
-
 #############
 # LIBRARIES #
 #############
