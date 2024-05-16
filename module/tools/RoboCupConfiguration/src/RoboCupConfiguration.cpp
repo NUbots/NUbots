@@ -314,12 +314,11 @@ namespace module::tools {
         // Game configuration column
         if (row_selection == 0) {
             ++robot_position;
-            {
-                // Get ready position for this position
-                std::string ready_file = get_config_file(robot_position.get_config_name());
-                YAML::Node config      = YAML::LoadFile(ready_file);
-                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-            }
+
+            // Get ready position for this position
+            std::string ready_file = get_config_file(robot_position.get_config_name());
+            YAML::Node config      = YAML::LoadFile(ready_file);
+            ready_position         = config["ready_position"].as<Eigen::Vector3d>();
         }
     }
 
