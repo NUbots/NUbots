@@ -1,1 +1,1 @@
-KERNEL=="ttyACM*", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{manufacturer}=="STMicroelectronics", ATTRS{idProduct}=="5740", ATTRS{idVendor}=="0483", SYMLINK+="nusense", GROUP="uucp"
+KERNEL=="ttyACM*", SUBSYSTEM=="tty", SUBSYSTEMS=="usb", ATTRS{manufacturer}=="STMicroelectronics", ATTRS{idProduct}=="5740", ATTRS{idVendor}=="0483", SYMLINK+="nusense"
