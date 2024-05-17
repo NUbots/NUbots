@@ -1,0 +1,96 @@
+# Controls the minimum log level that NUClear log will display
+log_level: INFO
+
+battery:
+  charged_voltage: 16.8
+  nominal_voltage: 14.8
+  flat_voltage: 14.0
+
+opencr:
+  device: "/dev/ttyUSB0"
+  baud: 1000000
+  byte_wait: 1200
+  packet_wait: 100000
+  bus_reset_wait_time_us: 0
+
+servos:
+  - # [0]  R_SHOULDER_PITCH
+    direction: -1
+    offset: 0.0
+    simulated: false
+  - # [1]  L_SHOULDER_PITCH
+    direction: 1
+    offset: 0.0
+    simulated: false
+  - # [2]  R_SHOULDER_ROLL
+    direction: -1
+    offset: -pi / 4 + 0.123
+    simulated: false
+  - # [3]  L_SHOULDER_ROLL
+    direction: -1
+    offset: pi / 4
+    simulated: false
+  - # [4]  R_ELBOW
+    direction: -1
+    offset: 0.0
+    simulated: false
+  - # [5]  L_ELBOW
+    direction: 1
+    offset: 0.0
+    simulated: false
+  - # [6]  R_HIP_YAW
+    direction: -1
+    offset: 0.0
+    simulated: false
+  - # [7]  L_HIP_YAW
+    direction: -1
+    offset: 0.0
+    simulated: false
+  - # [8]  R_HIP_ROLL
+    direction: 1
+    offset: 0.0
+    simulated: false
+  - # [9]  L_HIP_ROLL
+    direction: 1
+    offset: 0.0
+    simulated: false
+  - # [10] R_HIP_PITCH
+    direction: 1
+    offset: 0.23
+    simulated: false
+  - # [11] L_HIP_PITCH
+    direction: -1
+    offset: 0.066
+    simulated: false
+  - # [12] R_KNEE
+    direction: -1
+    offset: pi / 4
+    simulated: false
+  - # [13] L_KNEE
+    direction: 1
+    offset: pi / 4
+    simulated: false
+  - # [14] R_ANKLE_PITCH
+    direction: -1
+    offset: 0.0
+    simulated: false
+  - # [15] L_ANKLE_PITCH
+    direction: 1
+    offset: 0.0
+    simulated: false
+  - # [16] R_ANKLE_ROLL
+    direction: -1
+    offset: 0.0
+    simulated: false
+  - # [17] L_ANKLE_ROLL
+    direction: -1
+    offset: 0.0
+    simulated: false
+  - # [18] HEAD_YAW
+    direction: 1
+    offset: 0.02
+    simulated: false
+  - # [19] HEAD_PITCH
+    direction: 1
+    offset: -0.167
+    simulated: false

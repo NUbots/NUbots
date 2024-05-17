@@ -1,15 +1,16 @@
+# This role is similar to keyboard walk where you can manually control the robot with the keyboard. Unlike keyboard
+# walk, this role includes vision and localisation modules. This can be used to move the robot around and test vision
+# and localisation.
 nuclear_role(
-  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
-  # and without it many roles do not run support::SignalCatcher
-  extension::FileWatcher
-  support::logging::FileLogHandler
-  support::logging::ConsoleLogHandler
-  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  actuation::KinematicsConfiguration
-  # Support and Configuration
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First and without it many roles do not run
+  extension::FileWatcher # Watches configuration files for changes
+  support::SignalCatcher # Allows for graceful shutdown
+  support::logging::ConsoleLogHandler # `log()` calls show in the console filtered for log level
+  # Configuration
+  actuation::KinematicsConfiguration # Must go early in the role as other modules depend on it
   support::configuration::GlobalConfig
-  support::configuration::SoccerConfig
-  # NUsight
+  support::configuration::SoccerConfig # Field description
+  # Network
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
@@ -27,9 +28,10 @@ nuclear_role(
   vision::GoalDetector
   vision::BallDetector
   vision::FieldLineDetector
+  vision::Yolo
   # Localisation
   localisation::BallLocalisation
-  localisation::FieldLocalisation
+  localisation::FieldLocalisationNLopt
   # Director
   extension::Director
   # Servos

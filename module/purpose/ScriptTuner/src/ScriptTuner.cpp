@@ -1,20 +1,28 @@
 /*
- * This file is part of the NUbots Codebase.
+ * MIT License
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2023 NUbots
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
 #include "ScriptTuner.hpp"
@@ -46,7 +54,7 @@ namespace module::purpose {
 
     using NUClear::message::CommandLineArguments;
 
-    using message::actuation::LimbsSequence;
+    using message::actuation::BodySequence;
     using message::actuation::ServoTarget;
     using message::actuation::ServoTargets;
     using message::behaviour::state::Stability;
@@ -115,7 +123,7 @@ namespace module::purpose {
 
             Frame::Target target;
             target.id       = id;
-            target.position = utility::platform::getRawServo(target.id, sensors).present_position;
+            target.position = utility::platform::get_raw_servo(target.id, sensors).present_position;
             target.gain     = default_gain;
             target.torque   = 100;
 
@@ -425,8 +433,8 @@ namespace module::purpose {
         // Load the YAML file
         YAML::Node node = YAML::LoadFile(path);
 
-        // Decode the YAML node into a Script<LimbsSequence> object
-        if (!YAML::convert<Script<LimbsSequence>>::decode(node, this->script)) {
+        // Decode the YAML node into a Script<BodySequence> object
+        if (!YAML::convert<Script<BodySequence>>::decode(node, this->script)) {
             throw std::runtime_error("Failed to load script from " + path);
         }
 
@@ -590,7 +598,7 @@ namespace module::purpose {
     }
 
     void ScriptTuner::play_script() {
-        emit<Task>(utility::skill::load_script<LimbsSequence>(script));
+        emit<Task>(utility::skill::load_script<BodySequence>(script));
     }
 
     void ScriptTuner::jump_to_frame() {

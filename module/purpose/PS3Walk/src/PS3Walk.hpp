@@ -1,24 +1,33 @@
 /*
- * This file is part of PS3Walk.
+ * MIT License
  *
- * PS3Walk is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Copyright (c) 2014 NUbots
  *
- * PS3Walk is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
  *
- * You should have received a copy of the GNU General Public License
- * along with PS3Walk.  If not, see <http://www.gnu.org/licenses/>.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2023 NUbots <nubots@nubots.net>
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  */
 
-#ifndef MODULES_PURPOSE_PS3WALK_HPP
-#define MODULES_PURPOSE_PS3WALK_HPP
+#ifndef MODULE_PURPOSE_PS3WALK_HPP
+#define MODULE_PURPOSE_PS3WALK_HPP
 
 
 #include <Eigen/Core>
@@ -26,17 +35,15 @@
 
 #include "Joystick.hpp"
 
-#include "extension/Behaviour.hpp"
-
 namespace module::purpose {
 
-    class PS3Walk : public ::extension::behaviour::BehaviourReactor {
+    class PS3Walk : public NUClear::Reactor {
     public:
         // axes
-        static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
         static constexpr uint AXIS_LEFT_JOYSTICK_VERTICAL    = 1;
-        static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 2;
-        static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 3;
+        static constexpr uint AXIS_LEFT_JOYSTICK_HORIZONTAL  = 0;
+        static constexpr uint AXIS_RIGHT_JOYSTICK_HORIZONTAL = 3;
+        static constexpr uint AXIS_RIGHT_JOYSTICK_VERTICAL   = 4;
         static constexpr uint AXIS_L2                        = 12;
         static constexpr uint AXIS_R2                        = 13;
         static constexpr uint AXIS_ACCEL_Y                   = 23;
@@ -44,34 +51,51 @@ namespace module::purpose {
         static constexpr uint AXIS_ACCEL_Z                   = 25;
 
         // buttons
-        static constexpr uint BUTTON_SELECT         = 0;
-        static constexpr uint BUTTON_LEFT_JOYSTICK  = 1;
-        static constexpr uint BUTTON_RIGHT_JOYSTICK = 2;
-        static constexpr uint BUTTON_START          = 3;
-        static constexpr uint BUTTON_DPAD_UP        = 4;
-        static constexpr uint BUTTON_DPAD_RIGHT     = 5;
-        static constexpr uint BUTTON_DPAD_DOWN      = 6;
-        static constexpr uint BUTTON_DPAD_LEFT      = 7;
-        static constexpr uint BUTTON_L2             = 8;
-        static constexpr uint BUTTON_R2             = 9;
-        static constexpr uint BUTTON_L1             = 10;
-        static constexpr uint BUTTON_R1             = 11;
-        static constexpr uint BUTTON_TRIANGLE       = 12;
-        static constexpr uint BUTTON_CIRCLE         = 13;
-        static constexpr uint BUTTON_CROSS          = 14;
-        static constexpr uint BUTTON_SQUARE         = 15;
+        static constexpr uint BUTTON_SELECT         = 8;
+        static constexpr uint BUTTON_LEFT_JOYSTICK  = 11;
+        static constexpr uint BUTTON_RIGHT_JOYSTICK = 12;
+        static constexpr uint BUTTON_START          = 9;
+        static constexpr uint BUTTON_DPAD_UP        = 13;
+        static constexpr uint BUTTON_DPAD_RIGHT     = 16;
+        static constexpr uint BUTTON_DPAD_DOWN      = 14;
+        static constexpr uint BUTTON_DPAD_LEFT      = 15;
+        static constexpr uint BUTTON_L2             = 6;
+        static constexpr uint BUTTON_R2             = 7;
+        static constexpr uint BUTTON_L1             = 4;
+        static constexpr uint BUTTON_R1             = 5;
+        static constexpr uint BUTTON_TRIANGLE       = 2;
+        static constexpr uint BUTTON_CIRCLE         = 1;
+        static constexpr uint BUTTON_CROSS          = 0;
+        static constexpr uint BUTTON_SQUARE         = 3;
+        static constexpr uint BUTTON_HOME           = 10;
 
         /// @brief Called by the powerplant to build and setup the PS3Walk reactor.
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        /// @brief Stores configuration values
+        struct Config {
+            double maximum_forward_velocity    = 0;
+            double maximum_rotational_velocity = 0;
+        } cfg;
+
+        /// @brief Controls interactions with the PS3 controller
         Joystick joystick;
-        Eigen::Vector2d strafe = Eigen::Vector2d::Zero();
-        float rotationalSpeed  = 0.0f;
-        bool moving            = false;
-        bool headLocked        = false;
-        float headPitch        = 0.0f;
-        float headYaw          = 0.0f;
+
+        /// @brief Stores a vector describing the current direction to walk in.
+        Eigen::Vector3d walk_command = Eigen::Vector3d::Zero();
+
+        /// @brief Stores whether the robot can move or not
+        bool moving = false;
+
+        /// @brief Stores whether the robot will change its head direction or not
+        bool head_locked = false;
+
+        /// @brief stores the head pitch value
+        double head_pitch = 0.0;
+
+        /// @brief stores the head yaw value
+        double head_yaw = 0.0;
     };
 }  // namespace module::purpose
 

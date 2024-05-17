@@ -1,3 +1,29 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2023 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include "HardwareIO.hpp"
 
 #include <fmt/format.h>
@@ -106,12 +132,7 @@ namespace module::platform::OpenCR {
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            // Make sure OpenCR is operating at the correct baud rate (based on config params)
-            if (opencr.connected()) {
-                opencr.close();
-            }
-
-            opencr.open(config["opencr"]["device"], config["opencr"]["baud"]);
+            opencr      = utility::io::uart(config["opencr"]["device"], config["opencr"]["baud"]);
             byte_wait   = config["opencr"]["byte_wait"];
             packet_wait = config["opencr"]["packet_wait"];
 
@@ -210,6 +231,7 @@ namespace module::platform::OpenCR {
 
                         // Stop the model watchdog since we have it now
                         // Start the packet watchdog since the main loop is now starting
+                        model_watchdog.disable();
                         model_watchdog.unbind();
                         log<NUClear::WARN>("Packet watchdog enabled");
                         packet_watchdog.enable();

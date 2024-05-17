@@ -1,21 +1,47 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017 NUbots
+ *
+ * This file is part of the NUbots codebase.
+ * See https://github.com/NUbots/NUbots for further info.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #ifndef UTILITY_IO_UART_HPP
 #define UTILITY_IO_UART_HPP
 
 #include <string>
-#include <unistd.h>
+#include <type_traits>
 
 namespace utility::io {
 
     /**
-     * @brief Class for managing a connection to a serial device
+     * Class for managing a connection to a serial device
      */
     class uart {
     private:
-        std::string device;
+        std::string device{};
         int fd = -1;
 
         /**
-         * @brief Set the baud rate of the device
+         * Set the baud rate of the device
          *
          * @param baud the baud rate to set
          */
@@ -23,17 +49,12 @@ namespace utility::io {
 
     public:
         /**
-         * @brief The type that is read by this device
-         */
-        using char_type = char;
-
-        /**
-         * @brief Construct a new unconnected uart class
+         * Construct a new unconnected uart class
          */
         uart() = default;
 
         /**
-         * @brief Create a new uart class that is connected to the device `device`
+         * Create a new uart class that is connected to the device `device`
          *
          * @param device the file path of the device to connect to
          * @param int the baud rate to connect to
@@ -41,40 +62,44 @@ namespace utility::io {
         uart(const std::string& device, const unsigned int& baud_rate = 57600);
 
         /**
-         * @brief We can't copy these because otherwise we might close the device twice
+         * Move construct a new uart class
+         *
+         * @param other the uart class to move from
          */
+        uart(uart&& other) noexcept;
+
+        /**
+         * Move assign a new uart class
+         *
+         * @param rhs the uart class to move from
+         */
+        uart& operator=(uart&& rhs) noexcept;
+
+        // We can't copy these because otherwise we might close the device twice
         uart(const uart& uart)            = delete;
         uart& operator=(const uart& uart) = delete;
 
         /**
-         * @brief Moving these will call the destructors, closing the fd before trying to use it again
-         * TODO(KipHamiltons) implement an RAII fd utility, which would allow the uarts to be moved without that issue
-         */
-        uart(uart&&)                 = delete;
-        uart& operator=(uart&& uart) = delete;
-
-
-        /**
-         * @brief Destructor, close the device on destruction
+         * Destructor, close the device on destruction
          */
         ~uart();
 
         /**
-         * @brief Get the native file descriptor used by this class. Useful for using in poll or select.
+         * Get the native file descriptor used by this class. Useful for using in poll or select.
          *
          * @return the native file descriptor
          */
         [[nodiscard]] int native_handle() const;
 
         /**
-         * @brief Return true if the connection is valid
+         * Return true if the connection is valid
          *
          * @return true if the uart is connected and working, false otherwise
          */
         [[nodiscard]] bool connected() const;
 
         /**
-         * @brief Read from the device into a buffer
+         * Read from the device into a buffer
          *
          * @param buf buffer to read into
          * @param count the number of bytes to read
@@ -93,12 +118,12 @@ namespace utility::io {
          * @note Implementation in header file to stop the compiler from optimising it away
          */
         template <typename T>
-        ssize_t read(T& data) {
-            return ::read(fd, static_cast<void*>(&data), sizeof(T));
+        ssize_t read(T& data) requires std::is_trivially_copyable_v<T> {
+            return read(static_cast<void*>(&data), sizeof(T));
         }
 
         /**
-         * @brief Write bytes to the uart
+         * Write bytes to the uart
          *
          * @param buf the buffer to write bytes from
          * @param count the number of bytes to write
@@ -117,22 +142,28 @@ namespace utility::io {
          * @note Implementation in header file to stop the compiler from optimising it away
          */
         template <typename T>
-        ssize_t write(const T& data) {
-            return ::write(fd, static_cast<const void*>(&data), sizeof(T));
+        ssize_t write(const T& data) requires std::is_trivially_copyable_v<T> {
+            return write(static_cast<const void*>(&data), sizeof(T));
         }
 
         /**
-         * @brief Open the uart for the given file descriptor. Closes any currently open file.
+         * Read a single character from the uart device, returning -1 if there is no data
          *
-         * @param device the path to the device to open
-         * @param int the baud rate to open with
+         * @return the character read from the device, or -1 if there is no data
          */
-        void open(const std::string& device, const unsigned int& baud_rate = 57600);
+        [[nodiscard]] int get();
 
         /**
-         * @brief Close the open file descriptor then reset fd = -1
+         * Close the open file descriptor then reset fd = -1
          */
         void close();
+
+        /**
+         * @brief Return the number of bytes available for reading
+         *
+         * @return -2 if no current connection, -1 for some other error. Check errno if -1 is returned.
+         */
+        [[nodiscard]] int available() const;
     };
 
 }  // namespace utility::io

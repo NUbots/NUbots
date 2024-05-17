@@ -111,6 +111,15 @@ export class ServoMotorSet {
   }
 }
 
+export class FieldIntersection {
+  @observable type: string;
+  @observable position: Vector3;
+  constructor({ type, position }: { type: string; position: Vector3 }) {
+    this.type = type;
+    this.position = position;
+  }
+}
+
 export class LocalisationRobotModel {
   @observable private model: RobotModel;
   @observable name: string;
@@ -120,7 +129,12 @@ export class LocalisationRobotModel {
   @observable Rwt: Quaternion; // Torso to world rotation.
   @observable motors: ServoMotorSet;
   @observable fieldLinePoints: { rPWw: Vector3[] };
+  @observable particles: { particle: Vector3[] }; // Particle filter particles.
   @observable ball?: { rBWw: Vector3 };
+  @observable fieldIntersections?: FieldIntersection[];
+  // Both bottom and top points of goal are in world space.
+  @observable goals: { points: { bottom: Vector3; top: Vector3 }[] };
+  @observable robots: { id: number; rRWw: Vector3 }[];
 
   constructor({
     model,
@@ -131,7 +145,11 @@ export class LocalisationRobotModel {
     Rwt,
     motors,
     fieldLinePoints,
+    particles,
     ball,
+    fieldIntersections,
+    goals,
+    robots,
   }: {
     model: RobotModel;
     name: string;
@@ -141,7 +159,11 @@ export class LocalisationRobotModel {
     Rwt: Quaternion;
     motors: ServoMotorSet;
     fieldLinePoints: { rPWw: Vector3[] };
+    particles: { particle: Vector3[] };
     ball?: { rBWw: Vector3 };
+    fieldIntersections?: FieldIntersection[];
+    goals: { points: { bottom: Vector3; top: Vector3 }[] };
+    robots: { id: number; rRWw: Vector3 }[];
   }) {
     this.model = model;
     this.name = name;
@@ -151,7 +173,11 @@ export class LocalisationRobotModel {
     this.Rwt = Rwt;
     this.motors = motors;
     this.fieldLinePoints = fieldLinePoints;
+    this.particles = particles;
     this.ball = ball;
+    this.fieldIntersections = fieldIntersections;
+    this.goals = goals;
+    this.robots = robots;
   }
 
   static of = memoize((model: RobotModel): LocalisationRobotModel => {
@@ -163,6 +189,9 @@ export class LocalisationRobotModel {
       Rwt: Quaternion.of(),
       motors: ServoMotorSet.of(),
       fieldLinePoints: { rPWw: [] },
+      particles: { particle: [] },
+      goals: { points: [] },
+      robots: [],
     });
   });
 
@@ -190,5 +219,31 @@ export class LocalisationRobotModel {
   @computed
   get rBFf(): Vector3 | undefined {
     return this.ball?.rBWw.applyMatrix4(this.Hfw);
+  }
+
+  /** Goal positions in field space */
+  @computed
+  get rGFf(): { bottom: Vector3; top: Vector3 }[] {
+    return this.goals?.points.map((pair) => ({
+      bottom: pair?.bottom.applyMatrix4(this.Hfw),
+      top: pair?.top.applyMatrix4(this.Hfw),
+    }));
+  }
+
+  /** Robot positions in field space */
+  @computed
+  get rRFf(): Vector3[] {
+    return this.robots?.map((robot) => robot.rRWw.applyMatrix4(this.Hfw));
+  }
+
+  /** Field intersections in field space */
+  @computed
+  get fieldIntersectionsF(): FieldIntersection[] | undefined {
+    return this.fieldIntersections?.map((intersection) => {
+      return new FieldIntersection({
+        type: intersection.type,
+        position: intersection.position.applyMatrix4(this.Hfw),
+      });
+    });
   }
 }
