@@ -9,10 +9,16 @@
 #include <nuclear>
 
 #include "array_safety.h"
+
+#include "message/input/Image.hpp"
+
+#include "utility/vision/fourcc.hpp"
+
 namespace mju = ::mujoco::sample_util;
 
-
 namespace module::platform {
+
+    struct Render {};
 
     class Mujoco : public NUClear::Reactor {
     private:
@@ -21,6 +27,7 @@ namespace module::platform {
             std::string world_path = "";
         } cfg;
 
+        static constexpr int UPDATE_FREQUENCY = 100;
 
     public:
         /// @brief Called by the powerplant to build and setup the Mujoco reactor.
@@ -30,11 +37,26 @@ namespace module::platform {
         mjModel* m = 0;
         mjData* d  = 0;
 
+        unsigned char* rgb = nullptr;
+        float* depth       = nullptr;
+
+        std::mutex render_mutex;
+
         // MuJoCo visualization
         mjvScene scn;
         mjvCamera cam;
         mjvOption opt;
         mjrContext con;
+        mjrRect viewport;
+        GLFWwindow* window;
+
+        double frametime = 0;
+        int framecount   = 0;
+        double duration  = 5;
+        double fps       = 10;
+        int adddepth     = 1;
+        int W            = 800;
+        int H            = 800;
 
         // load model, init simulation and rendering
         void initMuJoCo(const char* filename) {
@@ -160,7 +182,7 @@ namespace module::platform {
             // create invisible window, single-buffered
             glfwWindowHint(GLFW_VISIBLE, 0);
             glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_FALSE);
-            GLFWwindow* window = glfwCreateWindow(800, 800, "Invisible window", NULL, NULL);
+            window = glfwCreateWindow(400, 400, "Invisible window", NULL, NULL);
             if (!window) {
                 mju_error("Could not create GLFW window");
             }
