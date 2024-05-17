@@ -18,7 +18,10 @@ namespace module::platform {
         });
 
         on<Startup>().then("Start Mujoco", [this] {
+            // init opengl
             initOpenGL();
+
+            // init mujoco
             initMuJoCo(cfg.world_path.c_str());
 
             // set rendering to offscreen buffer
@@ -35,7 +38,7 @@ namespace module::platform {
             // allocate rgb and depth buffers
             rgb   = (unsigned char*) std::malloc(3 * W * H);
             depth = (float*) std::malloc(sizeof(float) * W * H);
-            if (!rgb || !depth) {
+            if (!rgb) {
                 log<NUClear::ERROR>("Could not allocate buffers");
             }
 
@@ -46,29 +49,23 @@ namespace module::platform {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Priority::HIGH, Single>().then(
             "Simulator Update Loop",
             [this] {
-                auto now             = NUClear::clock::now();
                 double next_sim_step = d->time + 1.0 / UPDATE_FREQUENCY;
-                log<NUClear::DEBUG>("Current simulation time", d->time);
-                log<NUClear::DEBUG>("Next simulation step at", next_sim_step);
                 while (d->time < next_sim_step) {
+                    // TODO: ctrl
+
                     // advance simulation
                     mj_step(m, d);
                 }
-                auto end = NUClear::clock::now();
-                // calculate the elapsed time in milliseconds
-                auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - now).count();
-                log<NUClear::DEBUG>("Simulation step took", duration, "ms");
+
+                // TODO: sensors
 
                 // render
                 emit(std::make_unique<Render>());
-
-                // save simulation time
-                frametime = d->time;
             });
 
         on<Trigger<Render>, Single>().then("Render Mujoco", [this] {
             auto now = NUClear::clock::now();
-            std::unique_lock<std::mutex> lock(render_mutex);
+            // std::unique_lock<std::mutex> lock(render_mutex);
             glfwMakeContextCurrent(window);
 
             // update abstract scene
@@ -102,8 +99,6 @@ namespace module::platform {
             std::vector<uint8_t> image_data(rgb, rgb + 3 * W * H);
             image->data.assign(image_data.begin(), image_data.end());
             image->format = utility::vision::fourcc("RGB3");
-            image->Hcw    = Eigen::Isometry3d::Identity();
-            image->id     = 1;
             image->name   = "Mujoco";
             emit(std::move(image));
             auto end      = NUClear::clock::now();
