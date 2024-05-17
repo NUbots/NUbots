@@ -71,7 +71,7 @@ namespace module::localisation {
 
         on<Startup, Trigger<FieldDescription>>().then("Update Field Line Map", [this](const FieldDescription& fd) {
             // Generate the field line distance map
-            setup_fieldline_distance_map(fd);
+            fieldline_distance_map = utility::localisation::setup_fieldline_distance_map(fd, cfg.grid_size);
             if (cfg.save_map) {
                 std::ofstream file("recordings/fieldline_map.csv");
                 file << fieldline_distance_map.get_map();

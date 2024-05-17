@@ -64,6 +64,7 @@ namespace module::skill {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Add kick motion waypoints
+            kick_generator.clear_waypoints();
             for (const auto& foot_waypoint : config["foot_waypoints"].config) {
                 Waypoint<double> waypoint;
                 Eigen::Vector4d frame = foot_waypoint.as<Expression>();

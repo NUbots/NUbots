@@ -38,6 +38,7 @@
 #include "FileWatch.hpp"
 
 #include "utility/file/fileutil.hpp"
+#include "utility/platform/aliases.hpp"
 #include "utility/strutil/strutil.hpp"
 #include "utility/support/network.hpp"
 #include "utility/support/yaml_log_level.hpp"
@@ -53,76 +54,95 @@ namespace extension {
         // Rules:
         // 1) Default config file should define a value for every node.
         // 2) Platform config overrides default config values.
-        // 2) Per-robot config overrides default and platform config values. This file need only override the values
-        // that need to be overriden. 3) Per-binary config overrides per-robot, platform and default config values. This
+        // 3) Per-robot config overrides default and platform config values. This file need only override the values
+        // that need to be overriden.
+        // 4) Per-robot-name config overrides default, platform and per-robot config values. This file need only
+        // override the values that need to be overriden.
+        // 5) Per-binary config overrides per-robot, platform and default config values. This
         // file need only override the values that need to be overriden.
         //
-        // Per-robot, per-platform and per-binary files need not exist.
-        // Per-robot, per-platform and per-binary files can add new nodes to the file, but this is probably unwise.
+        // Per-robot, per-robot-name, per-platform and per-binary files need not exist.
+        // Per-robot, per-robot-name, per-platform and per-binary files can add new nodes to the file, but this is
+        // probably unwise.
         //
         // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher
         // priority tree.
 
-        fs::path fileName{};
+        fs::path file_name{};
         std::string hostname{};
         std::string binary{};
         std::string platform{};
         YAML::Node config{};
 
         Configuration() = default;
-        Configuration(const std::string& fileName,
+        Configuration(const std::string& file_name,
                       const std::string& hostname,
                       const std::string& binary,
                       const std::string& platform,
                       const YAML::Node& config)
-            : fileName(fileName), hostname(hostname), binary(binary), platform(platform), config(config) {}
+            : file_name(file_name), hostname(hostname), binary(binary), platform(platform), config(config) {}
 
         /// @brief Constructor without config node given. The correct config file has to be deduced from the params
-        Configuration(const std::string& fileName,
+        Configuration(const std::string& file_name,
                       const std::string& hostname,
                       const std::string& binary,
                       const std::string& platform)
-            : fileName(fileName), hostname(hostname), binary(binary), platform(platform) {
+            : file_name(file_name), hostname(hostname), binary(binary), platform(platform) {
             bool loaded = false;
 
             // Load the default config file.
-            if (fs::exists(fs::path("config") / fileName)) {
-                config = YAML::LoadFile(fs::path("config") / fileName);
+            if (fs::exists(fs::path("config") / file_name)) {
+                config = YAML::LoadFile(fs::path("config") / file_name);
                 loaded = true;
             }
 
             // If the same file exists in this platform's per-platform config directory then load and merge
-            if (fs::exists(fs::path("config") / platform / fileName) && !platform.empty()) {
+            if (fs::exists(fs::path("config") / platform / file_name) && !platform.empty()) {
                 if (loaded) {
-                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / platform / fileName));
+                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / platform / file_name));
                 }
 
                 else {
-                    config = YAML::LoadFile(fs::path("config") / platform / fileName);
+                    config = YAML::LoadFile(fs::path("config") / platform / file_name);
                     loaded = true;
                 }
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
-            if (fs::exists(fs::path("config") / hostname / fileName)) {
+            if ((platform != hostname) && fs::exists(fs::path("config") / hostname / file_name)) {
                 if (loaded) {
-                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / hostname / fileName));
+                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / hostname / file_name));
                 }
 
                 else {
-                    config = YAML::LoadFile(fs::path("config") / hostname / fileName);
+                    config = YAML::LoadFile(fs::path("config") / hostname / file_name);
                     loaded = true;
                 }
             }
 
+            // If the same file exists in this robot's per-robot-name config directory then load and merge.
+            auto robot_name = utility::platform::get_robot_alias(hostname);
+            if (!robot_name.empty()) {
+                if (fs::exists(fs::path("config") / robot_name / file_name)) {
+                    if (loaded) {
+                        config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / robot_name / file_name));
+                    }
+
+                    else {
+                        config = YAML::LoadFile(fs::path("config") / robot_name / file_name);
+                        loaded = true;
+                    }
+                }
+            }
+
             // If the same file exists in this binary's per-binary config directory then load and merge.
-            if (fs::exists(fs::path("config") / binary / fileName)) {
+            if (fs::exists(fs::path("config") / binary / file_name)) {
                 if (loaded) {
-                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / binary / fileName));
+                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / binary / file_name));
                 }
 
                 else {
-                    config = YAML::LoadFile(fs::path("config") / binary / fileName);
+                    config = YAML::LoadFile(fs::path("config") / binary / file_name);
                 }
             }
         }
@@ -178,7 +198,7 @@ namespace extension {
             return ret;
         }
 
-        static inline std::string getPlatform(const std::string& hostname) {
+        static inline std::string get_platform(const std::string& hostname) {
             // It is assumed that all hostnames are in the format <platform name><robot number>,
             // such that the regular expression
             // [a-z]+[0-9]+?
@@ -198,35 +218,35 @@ namespace extension {
         }
 
         [[nodiscard]] Configuration operator[](const std::string& key) {
-            return Configuration(fileName, hostname, binary, platform, config[key]);
+            return Configuration(file_name, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](const std::string& key) const {
-            return Configuration(fileName, hostname, binary, platform, config[key]);
+            return Configuration(file_name, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](const char* key) {
-            return Configuration(fileName, hostname, binary, platform, config[key]);
+            return Configuration(file_name, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](const char* key) const {
-            return Configuration(fileName, hostname, binary, platform, config[key]);
+            return Configuration(file_name, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](size_t index) {
-            return Configuration(fileName, hostname, binary, platform, config[index]);
+            return Configuration(file_name, hostname, binary, platform, config[index]);
         }
 
         [[nodiscard]] Configuration operator[](size_t index) const {
-            return Configuration(fileName, hostname, binary, platform, config[index]);
+            return Configuration(file_name, hostname, binary, platform, config[index]);
         }
 
         [[nodiscard]] Configuration operator[](int index) {
-            return Configuration(fileName, hostname, binary, platform, config[index]);
+            return Configuration(file_name, hostname, binary, platform, config[index]);
         }
 
         [[nodiscard]] Configuration operator[](int index) const {
-            return Configuration(fileName, hostname, binary, platform, config[index]);
+            return Configuration(file_name, hostname, binary, platform, config[index]);
         }
 
         template <typename T, typename... Args>
@@ -288,9 +308,9 @@ namespace NUClear::dsl {
         template <>
         struct DSLProxy<::extension::Configuration> {
             /// @brief Sets up the NUClear Reaction for Configuration
-            /// @details Sets up a FileWatch on the filename which is passed in
+            /// @details Sets up a FileWatch on the file_name which is passed in
             ///          The config files are FileWatched in order from least specific to most specific:
-            ///          1. default, 2. per-robot, 3. binary
+            ///          1. default, 2. platform, 3. per-robot, 4. per-robot-name, 5. binary
             ///          The later, more specific configs (if they exist) supersede the less specific ones
             ///          If the default config file doesn't exist, we make one
             ///          The flags used during binding tell FileWatch that the config files have been changed or
@@ -298,58 +318,65 @@ namespace NUClear::dsl {
             /// @see FileWatch
             /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
             /// @param reaction The reaction we are binding which will watch the config path(s)
-            /// @param filename The filename of the desired config file
+            /// @param file_name The file_name of the desired config file
             template <typename DSL>
-            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& filename) {
+            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& file_name) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
-                const std::string hostname = utility::support::get_hostname();
-                const std::string platform(::extension::Configuration::getPlatform(hostname));
+                const std::string hostname = utility::support::getHostname();
+                const std::string platform(::extension::Configuration::get_platform(hostname));
+                const std::string robot_name = utility::platform::get_robot_alias(hostname);
 
                 // Check if there is a default config. If there isn't, try to make one
-                const fs::path defaultConfig = fs::path("config") / filename;
-                if (!fs::exists(defaultConfig)) {
-                    NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig.string()
+                const fs::path default_config = fs::path("config") / file_name;
+                if (!fs::exists(default_config)) {
+                    NUClear::log<NUClear::WARN>("Configuration file '" + default_config.string()
                                                 + "' does not exist. Creating it.");
 
                     // Check for a directory.
-                    if (fs::is_directory(defaultConfig)) {
-                        fs::create_directory(defaultConfig);
+                    if (fs::is_directory(default_config)) {
+                        fs::create_directory(default_config);
                     }
 
                     else {
-                        std::ofstream ofs(defaultConfig.string());
+                        std::ofstream ofs(default_config.string());
                         if (!ofs.is_open()) {
-                            throw std::runtime_error("Failed creating file '" + filename.string() + "'.");
+                            throw std::runtime_error("Failed creating file '" + file_name.string() + "'.");
                         }
                         ofs.close();
                     }
                 }
 
                 // Bind our default config file path
-                DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
+                DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, default_config, flags);
 
-                // Bind our robot specific config file if it exists
-                const fs::path robotConfig = fs::path("config") / hostname / filename;
-                if (fs::exists(robotConfig)) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
+                // Bind our robot name specific config file if it exists
+                const fs::path name_config = fs::path("config") / robot_name / file_name;
+                if (!robot_name.empty() && fs::exists(name_config)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, name_config, flags);
                 }
 
                 // Bind our robot specific config file if it exists
-                const fs::path platformConfig = fs::path("config") / platform / filename;
-                if (fs::exists(platformConfig) && !platform.empty()) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformConfig, flags);
+                const fs::path robot_config = fs::path("config") / hostname / file_name;
+                if (fs::exists(robot_config)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robot_config, flags);
+                }
+
+                // Bind our robot specific config file if it exists
+                const fs::path platform_config = fs::path("config") / platform / file_name;
+                if ((platform != hostname) && fs::exists(platform_config) && !platform.empty()) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platform_config, flags);
                 }
 
                 // If there were command line arguments, we can get the binary name, and check for a binary config
                 // If not, we don't bother checking for a binary config to bind
-                const auto binaryName = get_first_command_line_arg();
-                if (!binaryName.empty()) {
-                    fs::path binaryConfig = fs::path("config") / binaryName / filename;
+                const auto binary_name = get_first_command_line_arg();
+                if (!binary_name.empty()) {
+                    fs::path binary_config = fs::path("config") / binary_name / file_name;
                     // Bind our binary specific config file if it exists
-                    if (fs::exists(binaryConfig)) {
-                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
+                    if (fs::exists(binary_config)) {
+                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binary_config, flags);
                     }
                 }
             }
@@ -372,9 +399,10 @@ namespace NUClear::dsl {
                 }
 
                 // Get hostname, platform and binary name to check if this is not a default configuration file
-                const std::string hostname = utility::support::get_hostname();
-                const std::string platform(::extension::Configuration::getPlatform(hostname));
-                const auto binaryName = get_first_command_line_arg();
+                const std::string hostname = utility::support::getHostname();
+                const std::string platform(::extension::Configuration::get_platform(hostname));
+                const auto binary_name       = get_first_command_line_arg();
+                const std::string robot_name = utility::platform::get_robot_alias(hostname);
 
                 // Get the components of the path
                 auto c = utility::strutil::split(watch.path, '/');
@@ -397,8 +425,11 @@ namespace NUClear::dsl {
 
                 // If it's the installation phase, and the path contains anything indicating it is not default config,
                 // then don't let the reaction run
-                if (watch.events == ::extension::FileWatch::Event::NO_OP
-                    && (str_exists(hostname) || str_exists(platform) || str_exists(binaryName))) {
+                bool is_not_default = robot_name.empty()
+                                          ? (str_exists(hostname) || str_exists(platform) || str_exists(binary_name))
+                                          : (str_exists(hostname) || str_exists(platform) || str_exists(binary_name)
+                                             || str_exists(robot_name));
+                if (watch.events == ::extension::FileWatch::Event::NO_OP && is_not_default) {
                     return false;
                 }
                 // Satisfied all the checks, the reaction can run
@@ -420,18 +451,21 @@ namespace NUClear::dsl {
                 // Return our yaml file
                 try {
                     // Get hostname so we can find the correct per-robot config directory.
-                    const std::string hostname = utility::support::get_hostname();
-                    const std::string platform(::extension::Configuration::getPlatform(hostname));
-                    const auto binaryName = get_first_command_line_arg();
+                    const std::string hostname = utility::support::getHostname();
+                    const std::string platform(::extension::Configuration::get_platform(hostname));
+                    const auto binary_name = get_first_command_line_arg();
+                    std::string robot_name = utility::platform::get_robot_alias(hostname);
+                    robot_name             = robot_name.empty() ? hostname : robot_name;
 
                     // Get relative path to config file.
                     const auto components = utility::strutil::split(watch.path, '/');
-                    fs::path relativePath{};
+                    fs::path relative_path{};
                     bool flag = false;
                     for (const auto& component : components) {
                         // Ignore the hostname/binary name if they are present.
-                        if (flag && (component != hostname) && (component != binaryName) && (component != platform)) {
-                            relativePath = relativePath / component;
+                        if (flag && (component != hostname) && (component != binary_name) && (component != platform)
+                            && (component != robot_name)) {
+                            relative_path = relative_path / component;
                         }
 
                         // Want paths relative to the config folder.
@@ -439,7 +473,7 @@ namespace NUClear::dsl {
                             flag = true;
                         }
                     }
-                    return std::make_shared<::extension::Configuration>(relativePath, hostname, binaryName, platform);
+                    return std::make_shared<::extension::Configuration>(relative_path, hostname, binary_name, platform);
                 }
                 catch (const YAML::ParserException& e) {
                     throw std::runtime_error(watch.path + " " + std::string(e.what()));

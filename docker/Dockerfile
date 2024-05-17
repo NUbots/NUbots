@@ -321,7 +321,7 @@ RUN install-from-source https://github.com/libuv/libuv/archive/refs/tags/v1.44.2
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/f6704a1f049c7a30e1b92f4cd70af219d28a4697.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/964efc8c1771c67c417d8e683bd09b24d8e2871b.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
@@ -432,8 +432,17 @@ RUN chmod 440 /etc/sudoers.d/user
 # Create the user, and setup sudo so no password is required
 ARG user_uid=1000
 ARG user_gid=$user_uid
-RUN groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid $user_gid -G audio -m nubots
+ARG dialout_gid=20
+
+# useradd -G is not sufficient to add the nubots user to the dialout
+# group as docker manages to lose supplementary groups when changing
+# to the nubots user.
+# Also need to add "--group-add dialout" to the docker run command in run.py
+# Add user to uucp as well so people can directly test with arch/ubuntu/pop devices
+RUN groupadd --gid $dialout_gid dialout \
+    && groupadd --gid $user_gid nubots \
+    && useradd --uid $user_uid --gid nubots -G audio,dialout,uucp -m nubots
+
 USER nubots
 
 # Without this git gets very angry and confused about the state of the user
