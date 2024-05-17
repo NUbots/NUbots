@@ -1,4 +1,4 @@
 # Controls the minimum log level that NUClear log will display
-log_level: INFO
+log_level: DEBUG
 
-world_path: "models/agility_cassie/scene.xml"
+world_path: "models/nugus/scene.xml"

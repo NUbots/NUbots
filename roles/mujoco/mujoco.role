@@ -4,8 +4,10 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   # Support and Configuration GlobalConfig must go before Webots
   support::configuration::GlobalConfig
-  # Image Handling
-  input::ImageDecompressor
   # Simulator Connection
+  network::NUClearNet
+  network::NetworkForwarder
   platform::Mujoco
+  output::ImageCompressor
+  # support::logging::DataLogging
 )

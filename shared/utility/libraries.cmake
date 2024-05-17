@@ -73,13 +73,13 @@ set(ALIAS_CONFIG
     CACHE INTERNAL "Path to the robot names config file" FORCE
 )
 
-# Copy only .urdf files from the platform models directory to the build directory
-file(GLOB_RECURSE urdf_files "${PROJECT_SOURCE_DIR}/shared/utility/platform/models/*.urdf")
-file(COPY ${urdf_files} DESTINATION "${PROJECT_BINARY_DIR}/models")
+# Copy the entire models directory to the build directory
+file(COPY "${PROJECT_SOURCE_DIR}/shared/utility/platform/models"
+     DESTINATION "${PROJECT_BINARY_DIR}")
 
-# Add the .urdf models to the model files variable for the install script
-file(GLOB_RECURSE models "${PROJECT_BINARY_DIR}/models/*.urdf")
+# Set the MODEL_FILES variable to include all files in the models directory
+file(GLOB_RECURSE all_files "${PROJECT_BINARY_DIR}/models/*")
 set(MODEL_FILES
-    ${models}
-    CACHE INTERNAL "A list of all model .urdf files" FORCE
+    ${all_files}
+    CACHE INTERNAL "A list of all files in the models directory" FORCE
 )
