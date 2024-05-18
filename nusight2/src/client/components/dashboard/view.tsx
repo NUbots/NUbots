@@ -9,6 +9,7 @@ import { DashboardModel } from "./model";
 import { DashboardNetwork } from "./network";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
+import style from "./style.module.css";
 
 export type DashboardProps = {
   controller: DashboardController;
@@ -30,28 +31,26 @@ export class Dashboard extends Component<DashboardProps> {
     const Field = this.props.Field;
     return (
       <div className="flex flex-col w-full">
-        <div className="bg-gray-200 dark:bg-gray-850">
-          <Menu>
-            <ul className="list-none h-full flex items-stretch">
-              <li className="flex">
-                <button className="bg-transparent font-bold p-4 text-md" onClick={this.onToggleOrientationClick}>
-                  Flip Orientation
-                </button>
-              </li>
-            </ul>
-          </Menu>
-        </div>
-        <div className="flex flex-1 flex-col bg-gray-300 dark:bg-gray-900">
-          <div className="flex-1 relative m-5">
+        <Menu>
+          <ul className="list-none m-0 p-0 h-full flex items-stretch">
+            <li className="flex m-0 p-0">
+              <button className="bg-transparent text-black px-4 py-2 text-xs border-transparent cursor-pointer transition-colors duration-300 hover:bg-gray-100 hover:border-gray-200 focus:border-gray-300" onClick={this.onToggleOrientationClick}>
+                Flip Orientation
+              </button>
+            </li>
+          </ul>
+        </Menu>
+        <div className="flex flex-col flex-1">
+          <div className="flex-1 relative">
             <Field />
           </div>
           {showPanels && (
-            <div className="flex m-4">
+            <div className="flex p-2">
               {model.robots.map((robot) => {
                 const model = RobotPanelViewModel.of(robot);
                 return (
                   robot.enabled && (
-                    <div className="flex-1 mx-2 rounded-lg shadow-md" key={robot.id}>
+                    <div className="rounded-sm shadow-md flex-1 ml-2 overflow-hidden first:ml-0" key={robot.id}>
                       <RobotPanel
                         connected={model.connected}
                         batteryValue={model.batteryValue}
@@ -62,7 +61,7 @@ export class Dashboard extends Component<DashboardProps> {
                         penalised={model.penalised}
                         penalty={model.penalty}
                         phase={model.phase}
-                        title={"model.title"}
+                        title={model.title}
                         walkCommand={model.walkCommand}
                       />
                     </div>
