@@ -5,6 +5,7 @@ import { observer } from "mobx-react";
 import { FilePickerController } from "./controller";
 import { FilePickerEntry, FilePickerModel, parsePathSegments } from "./model";
 import { FilePicker } from "./view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 const meta: Meta<typeof FilePicker> = {
   title: "components/FilePicker",
@@ -12,6 +13,7 @@ const meta: Meta<typeof FilePicker> = {
   parameters: {
     layout: "fullscreen",
   },
+  decorators: [ThemeDecorator]
 };
 
 export default meta;

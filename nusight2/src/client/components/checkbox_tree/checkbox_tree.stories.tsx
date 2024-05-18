@@ -2,7 +2,7 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 import { action, computed, observable } from "mobx";
 import { createTransformer } from "mobx-utils";
-import { themeDecorator } from "../storybook_theme_decorator/view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 import { CheckedState, TreeModel, TreeNodeModel } from "./model";
 import { CheckboxTree } from "./view";
@@ -10,7 +10,7 @@ import { CheckboxTree } from "./view";
 const meta: Meta<typeof CheckboxTree> = {
   title: "components/CheckboxTree",
   component: CheckboxTree,
-  decorators: [themeDecorator],
+  decorators: [ThemeDecorator],
 };
 
 export default meta;

@@ -66,8 +66,8 @@ export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProp
   @computed
   private get renderEmpty() {
     return (
-      <div className={"bg-gray-200 p-[1em] text-center"}>
-        <IconPlug className="bg-gray-400 fill-gray-200 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
+      <div className={" p-[1em] text-center"}>
+        <IconPlug className="bg-gray-500 dark:bg-gray-600 fill-gray-200 h-[3em] w-[3em] rounded-full mx-auto mt-[1em] p-[0.8em]" />
         <div className={"text-md py-2 whitespace-nowrap"}>No connected robots</div>
         <span className={"text-sm whitespace-nowrap"}>Run yarn start:sim to simulate robots</span>
       </div>

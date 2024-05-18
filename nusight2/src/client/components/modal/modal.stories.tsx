@@ -2,7 +2,7 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
 import { Modal } from "./view";
-import { themeDecorator } from "../storybook_theme_decorator/view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 const meta: Meta<typeof Modal> = {
   title: "components/Modal",
@@ -12,9 +12,9 @@ const meta: Meta<typeof Modal> = {
   },
   decorators: [
     (story) => {
-      return <div className="min-h-screen p-4">{story()}</div>;
+      return <div className="p-4">{story()}</div>;
     },
-    themeDecorator
+    ThemeDecorator
   ],
 };
 
@@ -25,7 +25,7 @@ type Story = StoryObj<typeof Modal>;
 // TODO: Replace this with the NUsight <Button> component once that gets proper keyboard focus styles
 function Button(props: { onClick?: () => void; children: React.ReactNode }) {
   return (
-    <button className="border rounded px-3 py-1 hover:bg-gray-100 active:bg-gray-300" onClick={props.onClick}>
+    <button className="border border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800 rounded px-3 py-1 hover:bg-gray-300 dark:hover:bg-gray-700" onClick={props.onClick}>
       {props.children}
     </button>
   );

@@ -110,7 +110,7 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
     <div className="flex relative">
       <button
         className={classNames(
-          "inline-flex flex-col items-center justify-center bg-transparent text-black dark:text-white px-3 h-[60px]",
+          "inline-flex flex-col items-center justify-center bg-transparent text-gray-900 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 px-3 h-[60px]",
         )}
         onClick={onClick}
       >
@@ -121,7 +121,7 @@ function NbsScrubbersToggle({ showScrubbers, onClick, onToggle }: NbsScrubbersTo
         )}
         <span className="text-[0.7rem]">Scrub NBS</span>
       </button>
-      <button className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 hover:text-blue-600 h-8 rounded" onClick={onToggle}>
+      <button className="absolute right-0 top-0 mt-1.5 mr-2.5 px-0.5 text-gray-900 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 h-8 rounded" onClick={onToggle}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"

@@ -4,34 +4,25 @@ import { Meta, StoryObj } from "@storybook/react";
 import { Icon, IconProps } from "../icon/view";
 
 import { IconButton, IconButtonProps } from "./view";
-import { themeDecorator } from "../storybook_theme_decorator/view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
+import { useGlobals } from '@storybook/api';
+
 
 const meta: Meta<typeof IconButton> = {
   title: "components/IconButton",
   component: IconButton,
-  decorators: [themeDecorator]
+  decorators: [ThemeDecorator]
 };
 
 export default meta;
 
 type Story = StoryObj<typeof IconButton>;
 
-function LightMode({ children }: { children: React.ReactNode }) {
+function ButtonCard({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative border border-b-0 p-5 rounded-t-lg overflow-hidden max-w-2xl">
-      <span className="absolute top-0 left-0 bg-transparent py-1.5 px-2.5 rounded-br border-r border-b flex">
+    <div className="relative border-2 border-gray-300 dark:border-gray-700 p-5 rounded-lg overflow-hidden max-w-2xl">
+      <span className="absolute top-0 left-0 bg-transparent py-1.5 px-2.5 rounded-br border-r-2 border-b-2 border-gray-300 dark:border-gray-700 flex">
         <Icon size="20">light_mode</Icon>
-      </span>
-      {children}
-    </div>
-  );
-}
-
-function DarkMode({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="dark relative bg-slate-800 p-5 rounded-b-lg overflow-hidden max-w-2xl">
-      <span className="absolute top-0 left-0 bg-slate-700 text-white py-1.5 px-2.5 rounded-br flex">
-        <Icon size="20">dark_mode</Icon>
       </span>
       {children}
     </div>
@@ -102,7 +93,7 @@ export const AllVariants: Story = {
   render: () => {
     return (
       <>
-        <LightMode>
+        <ButtonCard>
           <div className="flex flex-col gap-3">
             <ButtonRow label="Transparent">
               <IconButtons color="transparent" />
@@ -123,30 +114,7 @@ export const AllVariants: Story = {
               <IconButtons color="primary" disabled />
             </ButtonRow>
           </div>
-        </LightMode>
-
-        <DarkMode>
-          <div className="flex flex-col gap-3">
-            <ButtonRow label="Transparent">
-              <IconButtons color="transparent" />
-            </ButtonRow>
-            <ButtonRow label="Transparent, Disabled">
-              <IconButtons color="transparent" disabled />
-            </ButtonRow>
-            <ButtonRow label="Default">
-              <IconButtons color="default" />
-            </ButtonRow>
-            <ButtonRow label="Default, Disabled">
-              <IconButtons color="default" disabled />
-            </ButtonRow>
-            <ButtonRow label="Primary">
-              <IconButtons color="primary" />
-            </ButtonRow>
-            <ButtonRow label="Primary, Disabled">
-              <IconButtons color="primary" disabled />
-            </ButtonRow>
-          </div>
-        </DarkMode>
+        </ButtonCard>
       </>
     );
   },
@@ -158,7 +126,7 @@ export const AllVariantsLarge: Story = {
   render: () => {
     return (
       <>
-        <LightMode>
+        <ButtonCard>
           <div className="flex flex-col gap-3">
             <ButtonRow label="Transparent">
               <IconButtons size="large" color="transparent" />
@@ -179,30 +147,7 @@ export const AllVariantsLarge: Story = {
               <IconButtons size="large" color="primary" disabled />
             </ButtonRow>
           </div>
-        </LightMode>
-
-        <DarkMode>
-          <div className="flex flex-col gap-3">
-            <ButtonRow label="Transparent">
-              <IconButtons size="large" color="transparent" />
-            </ButtonRow>
-            <ButtonRow label="Transparent, Disabled">
-              <IconButtons size="large" color="transparent" disabled />
-            </ButtonRow>
-            <ButtonRow label="Default">
-              <IconButtons size="large" color="default" />
-            </ButtonRow>
-            <ButtonRow label="Default, Disabled">
-              <IconButtons size="large" color="default" disabled />
-            </ButtonRow>
-            <ButtonRow label="Primary">
-              <IconButtons size="large" color="primary" />
-            </ButtonRow>
-            <ButtonRow label="Primary, Disabled">
-              <IconButtons size="large" color="primary" disabled />
-            </ButtonRow>
-          </div>
-        </DarkMode>
+        </ButtonCard>
       </>
     );
   },
@@ -246,16 +191,11 @@ export const Adjustable: StoryObj<React.FunctionComponent<AdjustableStoryProps>>
     return (
       <>
         <p className="text-center mb-3 max-w-2xl">Open the Storybook controls to adjust the buttons.</p>
-        <LightMode>
+        <ButtonCard>
           <div className="flex justify-center">
             <IconButtons {...mainProps} iconProps={iconProps} />
           </div>
-        </LightMode>
-        <DarkMode>
-          <div className="flex justify-center">
-            <IconButtons {...mainProps} iconProps={iconProps} />
-          </div>
-        </DarkMode>
+        </ButtonCard>
       </>
     );
   },

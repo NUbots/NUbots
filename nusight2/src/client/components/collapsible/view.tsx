@@ -17,7 +17,7 @@ export const Collapsible = observer((props: CollapsibleProps) => {
   return (
     <div>
       {header && (
-        <button className={"appearance-none outline-none bg-gray-100 w-full py-[8px] px-[12px] text-left font-inherit hover:bg-gray-200 focus:bg-gray-200"} onClick={onToggle}>
+        <button className={"appearance-none outline-none bg-gray-300 dark:bg-gray-700 w-full py-[8px] px-[12px] text-left font-inherit hover:bg-gray-350 dark:hover:bg-gray-650"} onClick={onToggle}>
           {header}
         </button>
       )}
@@ -34,7 +34,7 @@ export const Collapsible = observer((props: CollapsibleProps) => {
         unmountOnExit
       >
         <div className={"overflow-hidden  transition-all duration-200 ease"}>
-          <div className={classNames("box-border border py-[12px] px-[8px]", className)}>{children}</div>
+          <div className={classNames("box-border border border-gray-300 dark:border-gray-700 py-[12px] px-[8px]", className)}>{children}</div>
         </div>
       </CSSTransition>
     </div>

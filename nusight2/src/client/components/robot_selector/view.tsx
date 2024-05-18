@@ -18,7 +18,7 @@ export const RobotSelector = observer((props: RobotSelectorProps) => {
   const { robots, selectRobot } = props;
 
   const dropdownToggle = (
-    <button className="text-gray-900 fill-gray-900 dark:text-gray-100 dark:fill-gray-100 hover:text-blue-600 hover:fill-blue-600">
+    <button className="text-gray-900 fill-gray-900 dark:text-gray-300 dark:fill-gray-300 hover:text-gray-700 hover:fill-gray-700 dark:hover:text-gray-100 dark:hover:fill-gray-100">
       <IconRobot className="h-9 p-1 w-auto transition-colors duration-75 ease-in-out" />
       Select robots
     </button>

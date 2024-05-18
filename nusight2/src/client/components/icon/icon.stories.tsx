@@ -2,7 +2,7 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
 import { Icon } from "./view";
-import { themeDecorator } from "../storybook_theme_decorator/view";
+import { ThemeDecorator } from "../storybook_theme_decorator/view";
 
 const meta: Meta<typeof Icon> = {
   title: "components/Icon",
@@ -16,7 +16,7 @@ const meta: Meta<typeof Icon> = {
     flip: { control: "inline-radio" },
     rotate: { control: "inline-radio" },
   },
-  decorators: [themeDecorator]
+  decorators: [ThemeDecorator]
 };
 
 export default meta;

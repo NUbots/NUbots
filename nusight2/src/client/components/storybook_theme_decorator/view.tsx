@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const themeDecorator = (Story, context) => {
+export const ThemeDecorator = (Story, context) => {
   context.globals.showThemeButton = true; // Show the theme button when this decorator is used
 
   if (context.globals.theme === 'both') {

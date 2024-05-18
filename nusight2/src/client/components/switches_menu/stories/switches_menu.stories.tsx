@@ -5,12 +5,12 @@ import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { SwitchesMenu, SwitchesMenuOption } from "../view";
-import { themeDecorator } from "../../storybook_theme_decorator/view";
+import { ThemeDecorator } from "../../storybook_theme_decorator/view";
 
 const meta: Meta<typeof SwitchesMenu> = {
   title: "components/SwitchesMenu",
   component: SwitchesMenu,
-  decorators: [(story) => <div style={{ maxWidth: "350px" }}>{story()}</div>, themeDecorator],
+  decorators: [(story) => <div style={{ maxWidth: "350px" }}>{story()}</div>, ThemeDecorator],
 };
 
 export default meta;

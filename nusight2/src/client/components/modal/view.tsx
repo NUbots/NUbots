@@ -49,10 +49,10 @@ export const Modal = (props: ModalProps) => {
       }
     >
       <FocusContainer>
-        <div className="bg-white rounded shadow-lg relative">
+        <div className="bg-gray-100 dark:bg-gray-900 rounded shadow-lg relative">
           {closeWith.closeButton ? (
             <button
-              className="absolute right-0 top-0 p-2 rounded text-icon hover:bg-gray-100 hover:text-black focus:bg-gray-100 focus:text-black"
+              className="absolute right-0 top-0 p-2 rounded text-icon "
               data-id="modal-close-button"
               onClick={props.onClose}
             >

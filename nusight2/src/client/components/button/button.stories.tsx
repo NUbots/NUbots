@@ -1,7 +1,7 @@
 import React from "react";
 import { action } from "@storybook/addon-actions";
 import type { Meta, StoryObj } from "@storybook/react";
-import { themeDecorator } from '../storybook_theme_decorator/view';
+import { ThemeDecorator } from '../storybook_theme_decorator/view';
 
 import { Icon } from "../icon/view";
 
@@ -10,7 +10,7 @@ import { Button } from "./view";
 const meta: Meta<typeof Button> = {
   title: "components/Button",
   component: Button,
-  decorators: [themeDecorator],
+  decorators: [ThemeDecorator],
 };
 
 export default meta;
