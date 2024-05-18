@@ -6,11 +6,12 @@ import { observer } from "mobx-react";
 
 import { RobotModel } from "../../robot/model";
 import { RobotSelectorSingle } from "../view";
+import { themeDecorator } from "../../storybook_theme_decorator/view";
 
 const meta: Meta<typeof RobotSelectorSingle> = {
   title: "components/RobotSelectorSingle",
   component: RobotSelectorSingle,
-  decorators: [(story) => <div style={{ maxWidth: "320px" }}>{story()}</div>],
+  decorators: [(story) => <div style={{ maxWidth: "320px" }}>{story()}</div>, themeDecorator],
 };
 
 export default meta;

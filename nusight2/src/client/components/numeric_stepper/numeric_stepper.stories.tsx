@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
 import { NumericStepper, NumericStepperProps } from "./view";
+import { themeDecorator } from "../storybook_theme_decorator/view";
 
 const meta: Meta<typeof NumericStepper> = {
   title: "components/NumericStepper",
   component: NumericStepper,
+  decorators: [themeDecorator],
 };
 
 export default meta;

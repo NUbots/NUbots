@@ -5,6 +5,7 @@ import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { Collapsible } from "../view";
+import { themeDecorator } from "../../storybook_theme_decorator/view";
 
 const meta: Meta<typeof Collapsible> = {
   title: "components/Collapsible",
@@ -17,6 +18,7 @@ const meta: Meta<typeof Collapsible> = {
         </div>
       );
     },
+    themeDecorator
   ],
 };
 

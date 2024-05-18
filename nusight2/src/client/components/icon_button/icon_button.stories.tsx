@@ -4,10 +4,12 @@ import { Meta, StoryObj } from "@storybook/react";
 import { Icon, IconProps } from "../icon/view";
 
 import { IconButton, IconButtonProps } from "./view";
+import { themeDecorator } from "../storybook_theme_decorator/view";
 
 const meta: Meta<typeof IconButton> = {
   title: "components/IconButton",
   component: IconButton,
+  decorators: [themeDecorator]
 };
 
 export default meta;

@@ -9,6 +9,7 @@ import { SeededRandom } from "../../../../shared/base/random/seeded_random";
 import { RobotNetworkStatsModel } from "../../../network/model";
 import { RobotModel } from "../../robot/model";
 import { RobotSelector } from "../view";
+import { themeDecorator } from "../../storybook_theme_decorator/view";
 
 const actions = {
   selectRobot: action("selectRobot"),
@@ -17,7 +18,7 @@ const actions = {
 const meta: Meta<typeof RobotSelector> = {
   title: "components/RobotSelector",
   component: RobotSelector,
-  decorators: [(story) => <div style={{ maxWidth: "320px" }}>{story()}</div>],
+  decorators: [(story) => <div style={{ maxWidth: "320px" }}>{story()}</div>, themeDecorator],
 };
 
 export default meta;

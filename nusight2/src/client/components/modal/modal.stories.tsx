@@ -2,6 +2,7 @@ import React from "react";
 import { Meta, StoryObj } from "@storybook/react";
 
 import { Modal } from "./view";
+import { themeDecorator } from "../storybook_theme_decorator/view";
 
 const meta: Meta<typeof Modal> = {
   title: "components/Modal",
@@ -13,6 +14,7 @@ const meta: Meta<typeof Modal> = {
     (story) => {
       return <div className="min-h-screen p-4">{story()}</div>;
     },
+    themeDecorator
   ],
 };
 

@@ -68,19 +68,19 @@ const CameraImageViewerMain = observer(
           allowPanAndZoom
         />
         <button
-          className="absolute bg-transparent flex leading-none p-1.5 rounded-sm top-2 left-2 hover:bg-gray-100"
+          className="absolute bg-[rgba(0,0,0,0.6)] rounded-lg flex leading-none p-1.5 top-2 left-2 text-gray-100 hover:text-gray-450"
           onClick={() => props.onSelectCamera(-1)}
         >
           <IconClose className="text-nusight-500 h-8 w-8" />
         </button>
         <button
-          className="absolute bg-transparent flex leading-none p-1.5 rounded-sm top-[50%] left-2 hover:bg-gray-100"
+          className="absolute bg-transparent flex leading-none p-1.5 rounded-sm top-[50%] left-2 hover:text-gray-450 textshadow-lg"
           onClick={props.onPreviousCamera}
         >
           <IconChevronLeft className="text-nusight-500 h-8 w-8" />
         </button>
         <button
-          className="absolute bg-transparent flex leading-none p-1.5 rounded-sm top-[50%] right-2 hover:bg-gray-100"
+          className="absolute bg-transparent flex leading-none p-1.5 rounded-sm top-[50%] right-2 hover:text-gray-450"
           onClick={props.onNextCamera}
         >
           <IconChevronRight className="text-nusight-500 h-8 w-8" />

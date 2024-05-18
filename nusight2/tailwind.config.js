@@ -6,8 +6,8 @@ const colors = require('tailwindcss/colors')
 
 /** @type {import("tailwindcss").Config} */
 const config = {
-  content: ["./index.html", "./src/client/**/*.{js,jsx,ts,tsx}"],
-
+  content: ["./index.html", "./src/client/**/*.{js,jsx,ts,tsx}", ".storybook/**/*.{js,jsx,ts,tsx}"],
+  darkMode: 'class',
 
   theme: {
     colors: {
@@ -45,7 +45,6 @@ const config = {
         850: "#333333ff",
         900: "#262626",
         950: "#171717",
-        1000: "#0a0a0a",
       },
       // gray: {
       //   100: "#fcfcfcff",

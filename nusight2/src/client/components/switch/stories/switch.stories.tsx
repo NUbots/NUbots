@@ -5,10 +5,12 @@ import { action as mobxAction, observable } from "mobx";
 import { observer } from "mobx-react";
 
 import { Switch } from "../view";
+import { themeDecorator } from "../../storybook_theme_decorator/view";
 
 const meta: Meta<typeof Switch> = {
   title: "components/Switch",
   component: Switch,
+  decorators: [themeDecorator],
 };
 
 export default meta;

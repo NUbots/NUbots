@@ -222,7 +222,7 @@ const StatusBar = observer((props: StatusBarProps) => {
   const target =
     props.model.viewMode !== ViewMode.FreeCamera && props.model.target ? props.model.target.name : "No Target";
   return (
-    <div className={"bg-black bg-opacity-30 rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"}>
+    <div className={"bg-[rgba(0,0,0,0.3)] rounded-md text-white p-4 text-center absolute bottom-8 left-8 right-8 text-lg font-bold flex justify-between"}>
       <span className={"text-left w-1/3"}>&#160;</span>
       <span className={"w-1/3"}>{target}</span>
       <span className={"text-right w-1/3"}>{viewModeString(props.model.viewMode)}</span>

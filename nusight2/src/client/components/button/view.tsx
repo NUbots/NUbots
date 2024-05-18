@@ -39,7 +39,7 @@ export class Button extends React.PureComponent<ButtonProps> {
           "inline-flex h-[32px] min-w-[64px] px-[12px] items-center font-inherit rounded-md text-md justify-center border disabled:opacity-50",
           {
             ["bg-blue-600 border-blue-700 text-white " + (disabled ? "" : "hover:bg-blue-700 dark:hover:bg-blue-500")]: type === "primary",
-            ["bg-gray-100 dark:text-gray-300 dark:bg-gray-800 border-gray-350 dark:border-gray-700 " + (disabled ? "" : "hover:bg-gray-250 dark:hover:bg-gray-700")]: type === "normal",
+            ["bg-gray-100 dark:text-gray-300 dark:bg-gray-800 border-gray-350 dark:border-gray-700 " + (disabled ? "" : "hover:bg-gray-250 dark:hover:bg-gray-750")]: type === "normal",
             ["w-full"]: fullwidth,
             ["ml_auto"]: iconAfterAlignedRight,
             ["justify-start"]: textAlign === "left",
