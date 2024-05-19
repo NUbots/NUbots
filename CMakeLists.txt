@@ -78,7 +78,7 @@ if(NOT SUBCONTROLLER)
       CACHE STRING "Choose the subcontroller to build for." FORCE
   )
   # Set the possible values of subcontroller for cmake-gui
-  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR")
+  set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OpenCR" "NUSense")
 endif()
 
 # Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
@@ -151,12 +151,6 @@ option(BUILD_ALL_MODULES "Create a role with all modules included" OFF)
 
 # Include the NUClear roles system
 add_subdirectory(nuclear)
-
-# Setting to use the custom clock with an adaptable rate
-option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
-if(USE_CUSTOM_CLOCK)
-  add_subdirectory(shared/clock)
-endif()
 
 # Add the shared tests. Must happen after adding NUClear so that this variable is cached
 if(BUILD_TESTS)

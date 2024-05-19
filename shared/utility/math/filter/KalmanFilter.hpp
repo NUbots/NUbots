@@ -135,6 +135,11 @@ namespace utility::math::filter {
             return state;
         }
 
+        /// @brief Set the current state estimate
+        void set_state(const StateVec& new_state) {
+            state = new_state;
+        }
+
         /// @brief Get the current covariance
         const StateMat& get_covariance() const {
             return covariance;
