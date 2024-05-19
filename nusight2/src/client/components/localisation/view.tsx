@@ -21,6 +21,7 @@ import { ViewMode } from "./model";
 import { LocalisationNetwork } from "./network";
 import { LocalisationRobotModel } from "./robot_model";
 import { SkyboxView } from "./skybox/view";
+import { Button } from "../button/view";
 
 type LocalisationViewProps = {
   controller: LocalisationController;
@@ -192,11 +193,11 @@ const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
   const { Menu, model } = props;
   return (
     <Menu>
-      <ul className={"flex h-full p-0 m-0"}>
-        <li className={"flex m-0 p-0"}>
-          <button className={"px-7 font-bold cursor-pointer"} onClick={props.onHawkEyeClick}>
+      <ul className={"flex h-full items-center"}>
+        <li className={"flex px-4"}>
+          <Button className={"px-7"} onClick={props.onHawkEyeClick}>
             Hawk Eye
-          </button>
+          </Button>
         </li>
         <MenuItem label="Grid" isVisible={model.gridVisible} onClick={props.toggleGridVisibility} />
         <MenuItem label="Field" isVisible={model.fieldVisible} onClick={props.toggleFieldVisibility} />

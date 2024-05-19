@@ -50,7 +50,7 @@ export class ChartView extends Component<{
     const { Menu, model, controller, LineChart } = this.props;
     return (
       <div className="flex flex-col w-full">
-        <Menu/>
+        <Menu />
         <div className="flex flex-1">
           <div className="flex-grow flex flex-col">
             <LineChart />

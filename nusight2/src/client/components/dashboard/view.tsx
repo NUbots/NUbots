@@ -9,7 +9,7 @@ import { DashboardModel } from "./model";
 import { DashboardNetwork } from "./network";
 import { RobotPanel } from "./robot_panel/view";
 import { RobotPanelViewModel } from "./robot_panel/view_model";
-import style from "./style.module.css";
+import { Button } from "../button/view";
 
 export type DashboardProps = {
   controller: DashboardController;
@@ -32,11 +32,11 @@ export class Dashboard extends Component<DashboardProps> {
     return (
       <div className="flex flex-col w-full">
         <Menu>
-          <ul className="list-none m-0 p-0 h-full flex items-stretch">
-            <li className="flex m-0 p-0">
-              <button className="bg-transparent text-black px-4 py-2 text-xs border-transparent cursor-pointer transition-colors duration-300 hover:bg-gray-100 hover:border-gray-200 focus:border-gray-300" onClick={this.onToggleOrientationClick}>
+          <ul className="list-none h-full flex items-center">
+            <li className="flex px-4">
+              <Button onClick={this.onToggleOrientationClick}>
                 Flip Orientation
-              </button>
+              </Button>
             </li>
           </ul>
         </Menu>
