@@ -212,7 +212,7 @@ $(document).ready(function(){initNavTree('Configuration_8hpp_source.html',''); i
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="preprocessor">#include &quot;utility/file/fileutil.hpp&quot;</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="preprocessor">#include &quot;utility/platform/aliases.hpp&quot;</span></div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;<span class="preprocessor">#include &quot;utility/strutil/strutil.hpp&quot;</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#include &quot;utility/support/hostname.hpp&quot;</span></div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="preprocessor">#include &quot;utility/support/network.hpp&quot;</span></div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="preprocessor">#include &quot;utility/support/yaml_log_level.hpp&quot;</span></div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160; </div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;<span class="keyword">namespace </span>fs = ::std::filesystem;</div>
@@ -496,7 +496,7 @@ $(document).ready(function(){initNavTree('Configuration_8hpp_source.html',''); i
 <div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;                <span class="keyword">auto</span> flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;</div>
 <div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160; </div>
 <div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;                <span class="comment">// Get hostname so we can find the correct per-robot config directory.</span></div>
-<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;                <span class="keyword">const</span> std::string hostname = utility::support::getHostname();</div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;                <span class="keyword">const</span> std::string hostname = utility::support::get_hostname();</div>
 <div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;                <span class="keyword">const</span> std::string platform(::extension::Configuration::get_platform(hostname));</div>
 <div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;                <span class="keyword">const</span> std::string robot_name = utility::platform::get_robot_alias(hostname);</div>
 <div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160; </div>
@@ -571,7 +571,7 @@ $(document).ready(function(){initNavTree('Configuration_8hpp_source.html',''); i
 <div class="line"><a name="l00399"></a><span class="lineno">  399</span>&#160;                }</div>
 <div class="line"><a name="l00400"></a><span class="lineno">  400</span>&#160; </div>
 <div class="line"><a name="l00401"></a><span class="lineno">  401</span>&#160;                <span class="comment">// Get hostname, platform and binary name to check if this is not a default configuration file</span></div>
-<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                <span class="keyword">const</span> std::string hostname = utility::support::getHostname();</div>
+<div class="line"><a name="l00402"></a><span class="lineno">  402</span>&#160;                <span class="keyword">const</span> std::string hostname = utility::support::get_hostname();</div>
 <div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;                <span class="keyword">const</span> std::string platform(::extension::Configuration::get_platform(hostname));</div>
 <div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;                <span class="keyword">const</span> <span class="keyword">auto</span> binary_name       = get_first_command_line_arg();</div>
 <div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;                <span class="keyword">const</span> std::string robot_name = utility::platform::get_robot_alias(hostname);</div>
@@ -623,7 +623,7 @@ $(document).ready(function(){initNavTree('Configuration_8hpp_source.html',''); i
 <div class="line"><a name="l00451"></a><span class="lineno">  451</span>&#160;                <span class="comment">// Return our yaml file</span></div>
 <div class="line"><a name="l00452"></a><span class="lineno">  452</span>&#160;                <span class="keywordflow">try</span> {</div>
 <div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;                    <span class="comment">// Get hostname so we can find the correct per-robot config directory.</span></div>
-<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;                    <span class="keyword">const</span> std::string hostname = utility::support::getHostname();</div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;                    <span class="keyword">const</span> std::string hostname = utility::support::get_hostname();</div>
 <div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;                    <span class="keyword">const</span> std::string platform(::extension::Configuration::get_platform(hostname));</div>
 <div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;                    <span class="keyword">const</span> <span class="keyword">auto</span> binary_name = get_first_command_line_arg();</div>
 <div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;                    std::string robot_name = utility::platform::get_robot_alias(hostname);</div>
@@ -674,7 +674,7 @@ $(document).ready(function(){initNavTree('Configuration_8hpp_source.html',''); i
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_c23e0f9c1b229783d92a813e01cca46a.html">extension</a></li><li class="navelem"><b>Configuration.hpp</b></li>
-    <li class="footer">Generated on Thu May 16 2024 04:09:37 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun May 19 2024 11:51:46 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -300,6 +300,7 @@ var annotated_dup =
         [ "FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
         [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
         [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
+        [ "RoboCupConfiguration", "classmodule_1_1tools_1_1RoboCupConfiguration.html", "classmodule_1_1tools_1_1RoboCupConfiguration" ],
         [ "SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", "classmodule_1_1tools_1_1SystemConfiguration" ]
       ] ],
       [ "vision", null, [
@@ -495,6 +496,7 @@ var annotated_dup =
       ] ]
     ] ],
     [ "YAML", null, [
+      [ "convert< Eigen::Matrix< double, Rows, Cols > >", "structYAML_1_1convert_3_01Eigen_1_1Matrix_3_01double_00_01Rows_00_01Cols_01_4_01_4.html", "structYAML_1_1convert_3_01Eigen_1_1Matrix_3_01double_00_01Rows_00_01Cols_01_4_01_4" ],
       [ "convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4" ],
       [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
       [ "convert<::utility::skill::Frame >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4" ],

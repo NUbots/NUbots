@@ -1,0 +1,404 @@
+<!-- HTML header for doxygen 1.9.3-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "https://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <meta name="generator" content="Doxygen 1.9.1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NUbots: module::tools::RoboCupConfiguration Class Reference</title>
+    <link href="tabs.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="dynsections.js"></script>
+    <!--START doxygen_awesome-->
+    <script type="text/javascript" src="styles/doxygen-awesome-darkmode-toggle.js"></script>
+    <script type="text/javascript">
+      DoxygenAwesomeDarkModeToggle.init();
+    </script>
+    <!--END doxygen_awesome-->
+    <link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="resize.js"></script>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+ <link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+    <link href="doxygen.css" rel="stylesheet" type="text/css" />
+    <link href="doxygen-awesome.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen-awesome-sidebar-only-darkmode-toggle.css" rel="stylesheet" type="text/css"/>
+<link href="custom.css" rel="stylesheet" type="text/css"/>
+  </head>
+  <body>
+    <a href="https://github.com/NUbots/NUbots" class="github-corner" title="View source on GitHub" target="_blank">
+      <svg
+        viewBox="0 0 250 250"
+        width="40"
+        height="40"
+        style="position: absolute; top: 0; border: 0; right: 0; z-index: 99"
+        aria-hidden="true"
+      >
+        <path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path>
+        <path
+          d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2"
+          fill="currentColor"
+          style="transform-origin: 130px 106px"
+          class="octo-arm"
+        ></path>
+        <path
+          d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z"
+          fill="currentColor"
+          class="octo-body"
+        ></path></svg></a
+    ><style>
+      .github-corner:hover .octo-arm {
+        animation: octocat-wave 560ms ease-in-out;
+      }
+      @keyframes octocat-wave {
+        0%,
+        100% {
+          transform: rotate(0);
+        }
+        20%,
+        60% {
+          transform: rotate(-25deg);
+        }
+        40%,
+        80% {
+          transform: rotate(10deg);
+        }
+      }
+      @media (max-width: 500px) {
+        .github-corner:hover .octo-arm {
+          animation: none;
+        }
+        .github-corner .octo-arm {
+          animation: octocat-wave 560ms ease-in-out;
+        }
+      }
+    </style>
+      <div id="top">
+        <!-- do not remove this div, it is closed by doxygen! -->
+        <div id="titlearea">
+          <table cellspacing="0" cellpadding="0">
+            <tbody>
+              <tr id="projectrow">
+                <td id="projectlogo"><img alt="Logo" src="banner.png" /></td>
+                <td id="projectalign">
+                  <div id="projectname">
+                    NUbots
+                  </div>
+                  <div id="projectbrief">NUbots Main Codebase</div>
+                </td>
+              </tr>
+              <!--BEGIN FULL_SIDEBAR-->
+              <tr>
+                <td colspan="2">        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <img id="MSearchSelect" src="search/mag_sel.svg"
+               onmouseover="return searchBox.OnSearchSelectShow()"
+               onmouseout="return searchBox.OnSearchSelectHide()"
+               alt=""/>
+          <input type="text" id="MSearchField" value="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><img id="MSearchCloseImg" border="0" src="search/close.svg" alt=""/></a>
+          </span>
+        </div>
+</td>
+              </tr>
+              <!--END FULL_SIDEBAR-->
+            </tbody>
+          </table>
+        </div>
+        <!-- end header part -->
+      </div>
+    </div>
+  </body>
+</html>
+<!-- Generated by Doxygen 1.9.1 -->
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+var searchBox = new SearchBox("searchBox", "search",false,'Search','.html');
+/* @license-end */
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(function() {
+  initMenu('',true,false,'search.php','Search');
+  $(document).ready(function() { init_search(); });
+});
+/* @license-end */</script>
+<div id="main-nav"></div>
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+/* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
+$(document).ready(function(){initNavTree('classmodule_1_1tools_1_1RoboCupConfiguration.html',''); initResizable(); });
+/* @license-end */
+</script>
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<iframe src="javascript:void(0)" frameborder="0" 
+        name="MSearchResults" id="MSearchResults">
+</iframe>
+</div>
+
+<div class="header">
+  <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
+<a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="classmodule_1_1tools_1_1RoboCupConfiguration-members.html">List of all members</a>  </div>
+  <div class="headertitle">
+<div class="title">module::tools::RoboCupConfiguration Class Reference</div>  </div>
+</div><!--header-->
+<div class="contents">
+<div class="dynheader">
+Inheritance diagram for module::tools::RoboCupConfiguration:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1tools_1_1RoboCupConfiguration__inherit__graph.png" border="0" usemap="#amodule_1_1tools_1_1RoboCupConfiguration_inherit__map" alt="Inheritance graph"/></div>
+<map name="amodule_1_1tools_1_1RoboCupConfiguration_inherit__map" id="amodule_1_1tools_1_1RoboCupConfiguration_inherit__map">
+<area shape="rect" title=" " alt="" coords="5,80,269,107"/>
+<area shape="rect" title=" " alt="" coords="70,5,205,32"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<div class="dynheader">
+Collaboration diagram for module::tools::RoboCupConfiguration:</div>
+<div class="dyncontent">
+<div class="center"><img src="classmodule_1_1tools_1_1RoboCupConfiguration__coll__graph.png" border="0" usemap="#amodule_1_1tools_1_1RoboCupConfiguration_coll__map" alt="Collaboration graph"/></div>
+<map name="amodule_1_1tools_1_1RoboCupConfiguration_coll__map" id="amodule_1_1tools_1_1RoboCupConfiguration_coll__map">
+<area shape="rect" title=" " alt="" coords="53,109,317,136"/>
+<area shape="rect" title=" " alt="" coords="5,13,140,39"/>
+<area shape="rect" href="structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html" title="Smart enum for the robot&#39;s position." alt="" coords="165,5,429,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html">Position</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Smart enum for the robot's position.  <a href="structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a8a1406cc894564c08ba8b84b5197051d"><td class="memItemLeft" align="right" valign="top"><a id="a8a1406cc894564c08ba8b84b5197051d"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a8a1406cc894564c08ba8b84b5197051d">RoboCupConfiguration</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
+<tr class="memdesc:a8a1406cc894564c08ba8b84b5197051d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html">RoboCupConfiguration</a> reactor. <br /></td></tr>
+<tr class="separator:a8a1406cc894564c08ba8b84b5197051d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a2fba8682aa62f6793714a47a9f2520f7"><td class="memItemLeft" align="right" valign="top"><a id="a2fba8682aa62f6793714a47a9f2520f7"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a2fba8682aa62f6793714a47a9f2520f7">configure_network</a> ()</td></tr>
+<tr class="memdesc:a2fba8682aa62f6793714a47a9f2520f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Using the current configuration, sets the network settings. This needs sudo to run, as it edits the network configuration files. set_values() is called first in this function. <br /></td></tr>
+<tr class="separator:a2fba8682aa62f6793714a47a9f2520f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa4b37ae9123408e3088ced66790621ca"><td class="memItemLeft" align="right" valign="top"><a id="aa4b37ae9123408e3088ced66790621ca"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#aa4b37ae9123408e3088ced66790621ca">edit_selection</a> ()</td></tr>
+<tr class="memdesc:aa4b37ae9123408e3088ced66790621ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functionality for the user to edit a field in the display. <br /></td></tr>
+<tr class="separator:aa4b37ae9123408e3088ced66790621ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a068110e852d5a900c79bc0906c3e23ad"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a068110e852d5a900c79bc0906c3e23ad">get_config_file</a> (std::string filename)</td></tr>
+<tr class="memdesc:a068110e852d5a900c79bc0906c3e23ad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the configuration file according to the config system's rules. The order is: robot-name-specific, hostname-specific, platform-specific, and finally the default config.  <a href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a068110e852d5a900c79bc0906c3e23ad">More...</a><br /></td></tr>
+<tr class="separator:a068110e852d5a900c79bc0906c3e23ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07b69b04c725c425740ea64adcb12665"><td class="memItemLeft" align="right" valign="top"><a id="a07b69b04c725c425740ea64adcb12665"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a07b69b04c725c425740ea64adcb12665">get_config_values</a> ()</td></tr>
+<tr class="memdesc:a07b69b04c725c425740ea64adcb12665"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current configurable values to display to the user. <br /></td></tr>
+<tr class="separator:a07b69b04c725c425740ea64adcb12665"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a68910190e5eac9fc7db3dce984eadad6"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a68910190e5eac9fc7db3dce984eadad6">get_platform</a> ()</td></tr>
+<tr class="memdesc:a68910190e5eac9fc7db3dce984eadad6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the platform we are currently running on, eg nugus, docker, webots, from the hostname.  <a href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a68910190e5eac9fc7db3dce984eadad6">More...</a><br /></td></tr>
+<tr class="separator:a68910190e5eac9fc7db3dce984eadad6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1cbd999435abca4067e96b37fbfc08f6"><td class="memItemLeft" align="right" valign="top"><a id="a1cbd999435abca4067e96b37fbfc08f6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a1cbd999435abca4067e96b37fbfc08f6">refresh_view</a> ()</td></tr>
+<tr class="memdesc:a1cbd999435abca4067e96b37fbfc08f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Displays the screen with any updated values to the user. <br /></td></tr>
+<tr class="separator:a1cbd999435abca4067e96b37fbfc08f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab8b3216f2bdaee9d5f113c3e131acbba"><td class="memItemLeft" align="right" valign="top"><a id="ab8b3216f2bdaee9d5f113c3e131acbba"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#ab8b3216f2bdaee9d5f113c3e131acbba">set_config_values</a> ()</td></tr>
+<tr class="memdesc:ab8b3216f2bdaee9d5f113c3e131acbba"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the values set by the user (ie what is shown in the display) to configuration files. <br /></td></tr>
+<tr class="separator:ab8b3216f2bdaee9d5f113c3e131acbba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e8476d897c104031dd930b2954bc8f0"><td class="memItemLeft" align="right" valign="top"><a id="a6e8476d897c104031dd930b2954bc8f0"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a6e8476d897c104031dd930b2954bc8f0">toggle_selection</a> ()</td></tr>
+<tr class="memdesc:a6e8476d897c104031dd930b2954bc8f0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functionality for the user to toggle fields in the display. <br /></td></tr>
+<tr class="separator:a6e8476d897c104031dd930b2954bc8f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53c034144dfee6e2ca4357cef51d9888"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a53c034144dfee6e2ca4357cef51d9888">user_input</a> ()</td></tr>
+<tr class="memdesc:a53c034144dfee6e2ca4357cef51d9888"><td class="mdescLeft">&#160;</td><td class="mdescRight">Used in edit_selection to get user input.  <a href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a53c034144dfee6e2ca4357cef51d9888">More...</a><br /></td></tr>
+<tr class="separator:a53c034144dfee6e2ca4357cef51d9888"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
+Private Attributes</h2></td></tr>
+<tr class="memitem:ad63d6e79cd190773ad83cb52de4af446"><td class="memItemLeft" align="right" valign="top"><a id="ad63d6e79cd190773ad83cb52de4af446"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#ad63d6e79cd190773ad83cb52de4af446">column_selection</a> = 0</td></tr>
+<tr class="memdesc:ad63d6e79cd190773ad83cb52de4af446"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index of the column the user is selecting. <br /></td></tr>
+<tr class="separator:ad63d6e79cd190773ad83cb52de4af446"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1eae40a927bc7cf7010c933c3fb7b499"><td class="memItemLeft" align="right" valign="top"><a id="a1eae40a927bc7cf7010c933c3fb7b499"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a1eae40a927bc7cf7010c933c3fb7b499">hostname</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a1eae40a927bc7cf7010c933c3fb7b499"><td class="mdescLeft">&#160;</td><td class="mdescRight">The hostname of the robot. <br /></td></tr>
+<tr class="separator:a1eae40a927bc7cf7010c933c3fb7b499"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb7f978fcc43688b3bba938a3ab571e2"><td class="memItemLeft" align="right" valign="top"><a id="abb7f978fcc43688b3bba938a3ab571e2"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#abb7f978fcc43688b3bba938a3ab571e2">ip_address</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:abb7f978fcc43688b3bba938a3ab571e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">The IP address of the robot. <br /></td></tr>
+<tr class="separator:abb7f978fcc43688b3bba938a3ab571e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1635a3df0e33c78cbaf97f7efc5e1125"><td class="memItemLeft" align="right" valign="top"><a id="a1635a3df0e33c78cbaf97f7efc5e1125"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a1635a3df0e33c78cbaf97f7efc5e1125">log_message</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a1635a3df0e33c78cbaf97f7efc5e1125"><td class="mdescLeft">&#160;</td><td class="mdescRight">The log message to print to the user at the bottom of the window. <br /></td></tr>
+<tr class="separator:a1635a3df0e33c78cbaf97f7efc5e1125"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c1c6a09aff71ef7eaf295c895c982d8"><td class="memItemLeft" align="right" valign="top"><a id="a4c1c6a09aff71ef7eaf295c895c982d8"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a4c1c6a09aff71ef7eaf295c895c982d8">password</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a4c1c6a09aff71ef7eaf295c895c982d8"><td class="mdescLeft">&#160;</td><td class="mdescRight">The password of the wifi network that the robot is or will be connected to. <br /></td></tr>
+<tr class="separator:a4c1c6a09aff71ef7eaf295c895c982d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a05ecbe1d52668c250262afccbc67d517"><td class="memItemLeft" align="right" valign="top"><a id="a05ecbe1d52668c250262afccbc67d517"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a05ecbe1d52668c250262afccbc67d517">player_id</a> = 0</td></tr>
+<tr class="memdesc:a05ecbe1d52668c250262afccbc67d517"><td class="mdescLeft">&#160;</td><td class="mdescRight">The player ID of the robot. <br /></td></tr>
+<tr class="separator:a05ecbe1d52668c250262afccbc67d517"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7cad54abb12e8eb0c9d4b31e601dc5dd"><td class="memItemLeft" align="right" valign="top"><a id="a7cad54abb12e8eb0c9d4b31e601dc5dd"></a>
+Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a7cad54abb12e8eb0c9d4b31e601dc5dd">ready_position</a> = Eigen::Vector3d::Zero()</td></tr>
+<tr class="memdesc:a7cad54abb12e8eb0c9d4b31e601dc5dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">The position the robot will move to in READY. <br /></td></tr>
+<tr class="separator:a7cad54abb12e8eb0c9d4b31e601dc5dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7397fb0ddd9c861967920ba09e7997d1"><td class="memItemLeft" align="right" valign="top"><a id="a7397fb0ddd9c861967920ba09e7997d1"></a>
+struct <a class="el" href="structmodule_1_1tools_1_1RoboCupConfiguration_1_1Position.html">module::tools::RoboCupConfiguration::Position</a>&#160;</td><td class="memItemRight" valign="bottom"><b>robot_position</b></td></tr>
+<tr class="separator:a7397fb0ddd9c861967920ba09e7997d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a749dd0264aed4339746394a5c5a3365f"><td class="memItemLeft" align="right" valign="top"><a id="a749dd0264aed4339746394a5c5a3365f"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a749dd0264aed4339746394a5c5a3365f">row_selection</a> = 0</td></tr>
+<tr class="memdesc:a749dd0264aed4339746394a5c5a3365f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The index of the item the user is selecting. <br /></td></tr>
+<tr class="separator:a749dd0264aed4339746394a5c5a3365f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f6b8494f9360baffa684ba960adcad0"><td class="memItemLeft" align="right" valign="top"><a id="a2f6b8494f9360baffa684ba960adcad0"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a2f6b8494f9360baffa684ba960adcad0">ssid</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:a2f6b8494f9360baffa684ba960adcad0"><td class="mdescLeft">&#160;</td><td class="mdescRight">The SSID of the wifi network that the robot is or will be connected to. <br /></td></tr>
+<tr class="separator:a2f6b8494f9360baffa684ba960adcad0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6754361cf74cdfbe85f3afbbcd3a1a90"><td class="memItemLeft" align="right" valign="top"><a id="a6754361cf74cdfbe85f3afbbcd3a1a90"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#a6754361cf74cdfbe85f3afbbcd3a1a90">team_id</a> = 0</td></tr>
+<tr class="memdesc:a6754361cf74cdfbe85f3afbbcd3a1a90"><td class="mdescLeft">&#160;</td><td class="mdescRight">The ID that the robot is player for. <br /></td></tr>
+<tr class="separator:a6754361cf74cdfbe85f3afbbcd3a1a90"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae2cf546846460b7b6a8eeb0e943b252"><td class="memItemLeft" align="right" valign="top"><a id="aae2cf546846460b7b6a8eeb0e943b252"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html#aae2cf546846460b7b6a8eeb0e943b252">wifi_interface</a> = &quot;&quot;</td></tr>
+<tr class="memdesc:aae2cf546846460b7b6a8eeb0e943b252"><td class="mdescLeft">&#160;</td><td class="mdescRight">The wifi interface that the robot is connected to. <br /></td></tr>
+<tr class="separator:aae2cf546846460b7b6a8eeb0e943b252"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a068110e852d5a900c79bc0906c3e23ad"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a068110e852d5a900c79bc0906c3e23ad">&#9670;&nbsp;</a></span>get_config_file()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string module::tools::RoboCupConfiguration::get_config_file </td>
+          <td>(</td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>filename</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the configuration file according to the config system's rules. The order is: robot-name-specific, hostname-specific, platform-specific, and finally the default config. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filename</td><td>The config file to find </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The correct config file path according to config rules </dd></dl>
+
+</div>
+</div>
+<a id="a68910190e5eac9fc7db3dce984eadad6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a68910190e5eac9fc7db3dce984eadad6">&#9670;&nbsp;</a></span>get_platform()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string module::tools::RoboCupConfiguration::get_platform </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets the platform we are currently running on, eg nugus, docker, webots, from the hostname. </p>
+<dl class="section return"><dt>Returns</dt><dd>The platform we are currently running on </dd></dl>
+
+</div>
+</div>
+<a id="a53c034144dfee6e2ca4357cef51d9888"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a53c034144dfee6e2ca4357cef51d9888">&#9670;&nbsp;</a></span>user_input()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string module::tools::RoboCupConfiguration::user_input </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Used in edit_selection to get user input. </p>
+<dl class="section return"><dt>Returns</dt><dd>The user input </dd></dl>
+
+</div>
+</div>
+<hr/>The documentation for this class was generated from the following files:<ul>
+<li>module/tools/RoboCupConfiguration/src/<a class="el" href="RoboCupConfiguration_8hpp_source.html">RoboCupConfiguration.hpp</a></li>
+<li>module/tools/RoboCupConfiguration/src/RoboCupConfiguration.cpp</li>
+</ul>
+</div><!-- contents -->
+</div><!-- doc-content -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>tools</b></li><li class="navelem"><a class="el" href="classmodule_1_1tools_1_1RoboCupConfiguration.html">RoboCupConfiguration</a></li>
+    <li class="footer">Generated on Sun May 19 2024 11:51:47 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+  </ul>
+</div>
+</body>
+</html>

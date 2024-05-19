@@ -690,6 +690,7 @@ var namespaces_dup =
         [ "FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
         [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
         [ "NBSPlayback", "classmodule_1_1tools_1_1NBSPlayback.html", "classmodule_1_1tools_1_1NBSPlayback" ],
+        [ "RoboCupConfiguration", "classmodule_1_1tools_1_1RoboCupConfiguration.html", "classmodule_1_1tools_1_1RoboCupConfiguration" ],
         [ "SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", "classmodule_1_1tools_1_1SystemConfiguration" ],
         [ "big_text", "SystemConfiguration_8cpp.html#a04e3ec51060d2852b18d7b7eceed5b9e", null ],
         [ "files_equal", "SystemConfiguration_8cpp.html#a970fd9e148c3ff72e36745b5d4f3344c", null ],
@@ -1055,7 +1056,11 @@ var namespaces_dup =
         [ "ProgressBar", "classutility_1_1support_1_1ProgressBar.html", "classutility_1_1support_1_1ProgressBar" ],
         [ "ProgressBarState", "structutility_1_1support_1_1ProgressBarState.html", null ],
         [ "duration_format", "ProgressBar_8cpp.html#a59ebcbb561e8769499753467f224fe19", null ],
-        [ "getHostname", "hostname_8hpp.html#a9b905b5490689fec174458fe8a37d905", null ],
+        [ "get_hostname", "network_8hpp.html#a9747f835b9bf26fa23c46b137bb775da", null ],
+        [ "get_ip_address", "network_8hpp.html#a43f2054af7d1e3b4f58f648e888b989f", null ],
+        [ "get_ssid", "network_8hpp.html#a9e56d92ed7b66e319a4bfd9fe25416f5", null ],
+        [ "get_wifi_password", "network_8hpp.html#af062baa868838ebb92725074b3ccc00d", null ],
+        [ "get_wireless_interface", "network_8hpp.html#aa91897017bac3831b266391039ff9112", null ],
         [ "parse_math_string", "math__string_8hpp.html#aaf19de1dcdb45570182a2ed76db18c87", null ],
         [ "parse_to_double", "math__string_8cpp.html#a1811b8e9d6f01973a61e1198954dc72e", null ],
         [ "resolve_expression", "yaml__expression_8hpp.html#acacd392c1f93317cba47c512ea523d2d", null ],
@@ -1159,6 +1164,7 @@ var namespaces_dup =
       ] ]
     ] ],
     [ "YAML", null, [
+      [ "convert< Eigen::Matrix< double, Rows, Cols > >", "structYAML_1_1convert_3_01Eigen_1_1Matrix_3_01double_00_01Rows_00_01Cols_01_4_01_4.html", "structYAML_1_1convert_3_01Eigen_1_1Matrix_3_01double_00_01Rows_00_01Cols_01_4_01_4" ],
       [ "convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4" ],
       [ "convert<::NUClear::LogLevel >", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html", "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4" ],
       [ "convert<::utility::skill::Frame >", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1utility_1_1skill_1_1Frame_01_4" ],

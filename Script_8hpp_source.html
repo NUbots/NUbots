@@ -210,7 +210,7 @@ $(document).ready(function(){initNavTree('Script_8hpp_source.html',''); initResi
 <div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/file/fileutil.hpp&quot;</span></div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#include &quot;utility/input/ServoID.hpp&quot;</span></div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;<span class="preprocessor">#include &quot;utility/platform/aliases.hpp&quot;</span></div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="preprocessor">#include &quot;utility/support/hostname.hpp&quot;</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="preprocessor">#include &quot;utility/support/network.hpp&quot;</span></div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;<span class="comment">/**</span></div>
@@ -285,7 +285,7 @@ $(document).ready(function(){initNavTree('Script_8hpp_source.html',''); initResi
 <div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="comment">    /// @throws Runtime error when the script doesn&#39;t exist.</span></div>
 <div class="line"><a name="l00114"></a><span class="lineno"><a class="line" href="namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8">  114</a></span>&#160;<span class="comment"></span>    <span class="keyword">static</span> YAML::Node <a class="code" href="namespaceutility_1_1skill.html#a165293156a62b9e4bb7899e5364d7cd8">load</a>(<span class="keyword">const</span> std::string&amp; script) {</div>
 <div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;        <span class="comment">// Set paths to the script files.</span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        <span class="keyword">auto</span> hostname      = utility::support::getHostname();</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;        <span class="keyword">auto</span> hostname      = utility::support::get_hostname();</div>
 <div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;        <span class="keyword">auto</span> robot_path    = <span class="stringliteral">&quot;scripts/&quot;</span> + hostname + <span class="stringliteral">&quot;/&quot;</span> + script;</div>
 <div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;        <span class="keyword">auto</span> platform_path = <span class="stringliteral">&quot;scripts/&quot;</span> + <a class="code" href="namespaceutility_1_1skill.html#aca73f6cdfa73f7e519dd35b0e8acf3a5">get_platform</a>(hostname) + <span class="stringliteral">&quot;/&quot;</span> + script;</div>
 <div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;        <span class="keyword">auto</span> robot_name    = utility::platform::get_robot_alias(hostname);</div>
@@ -586,7 +586,7 @@ $(document).ready(function(){initNavTree('Script_8hpp_source.html',''); initResi
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_e74f07e607724dbb2b9c42172be2da51.html">skill</a></li><li class="navelem"><b>Script.hpp</b></li>
-    <li class="footer">Generated on Thu May 16 2024 04:09:37 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Sun May 19 2024 11:51:46 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
