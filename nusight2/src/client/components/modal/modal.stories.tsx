@@ -58,7 +58,7 @@ export const Default: Story = {
             <div className="max-w-xl p-8">
               <h1 className="text-xl font-bold -mt-2 mb-3">Default Modal</h1>
               <a
-                className="text-nusight-500 hover:underline focus:underline"
+                className="text-blue-600 dark:text-blue-500 hover:underline focus:underline"
                 href="https://google.com"
                 target="_blank"
                 rel="noopener noreferrer"

@@ -62,7 +62,7 @@ export const FilePicker = observer((props: FilePickerProps) => {
         onClose([]);
       }}
     >
-      <div className="file-picker max-w-[100vw] w-[900px] flex flex-col h-max text-left p-4">
+      <div className="file-picker max-w-[100vw] w-[900px] flex flex-col h-max text-left">
         {/* Title */}
         <div className="text-base font-semibold px-4 py-4 leading-none">{title}</div>
 
@@ -162,11 +162,10 @@ const FilePickerNavButton = observer((props: FilePickerNavButtonProps) => {
   const { Icon, disabled, onClick } = props;
   return (
     <button
-      className={`px-2 py-1 rounded ${
-        disabled
-          ? "opacity-40"
-          : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 dark:focus-visible:bg-gray-700"
-      }`}
+      className={`px-2 py-1 rounded ${disabled
+        ? "opacity-40"
+        : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 dark:focus-visible:bg-gray-700"
+        }`}
       disabled={disabled}
       onClick={onClick}
     >
@@ -303,11 +302,10 @@ const FilePickerPathEditor = observer((props: FilePickerPathEditorProps) => {
       />
       <button
         data-id="filepicker-go-button"
-        className={` rounded-lg h-full px-2 ml-0.5 ${
-          goButtonDisabled
-            ? "opacity-40"
-            : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 focus-visible:text-black"
-        }`}
+        className={` rounded-lg h-full px-2 ml-0.5 ${goButtonDisabled
+          ? "opacity-40"
+          : "hover:bg-gray-250 dark:hover:bg-gray-700 focus-visible:bg-gray-250 focus-visible:text-black"
+          }`}
         title="Go to path entered"
         disabled={goButtonDisabled}
         onClick={() => {
@@ -359,6 +357,26 @@ type FilePickerSidebarGroupProps = {
 };
 
 /**
+ * Expands a given path to its absolute path.
+ * For `~`, it expands to the home directory
+ * For `.`, it expands to the current working directory.
+ */
+const expandPath = (p: string) => {
+  const homeDir = "/home/nubots"; // Replace with the actual user's home directory in your application
+  const cwd = "/home/nubots/NUbots/nusight2"; // Replace with the actual current working directory in your application
+
+  if (p.startsWith('~')) {
+    return homeDir + p.slice(1);
+  } else if (p === '.') {
+    return cwd;
+  } else if (p.startsWith('./')) {
+    return cwd + p.slice(1);
+  } else {
+    return p;
+  }
+};
+
+/**
  * Displays a group of paths in the sidebar with a header.
  */
 const FilePickerSidebarGroup = observer((props: FilePickerSidebarGroupProps) => {
@@ -369,13 +387,14 @@ const FilePickerSidebarGroup = observer((props: FilePickerSidebarGroupProps) => 
         <div className="px-3 text-gray-500">{props.emptyMessage}</div>
       ) : (
         props.path.map(({ path, name }) => {
+          const expandedPath = expandPath(path);
+          const isActive = expandPath(props.pickerCurrentPath) === expandedPath;
+
           return (
             <button
               key={path}
               title={path}
-              className={`flex text-left items-center px-3 py-1 min-w-0 w-full ${
-                path === props.pickerCurrentPath ? "bg-gray-250 dark:bg-gray-700" : "hover:bg-gray-250 dark:hover:bg-gray-700"
-              }`}
+              className={`flex text-left items-center px-3 py-1 min-w-0 w-full ${isActive ? "bg-gray-250 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700" : "hover:bg-gray-250 dark:hover:bg-gray-800"}`}
               onClick={() => props.onPathChange(path)}
             >
               <IconFolder className="w-4 h-4 mr-2 shrink-0" /> <span className="truncate flex-grow w-0">{name}</span>
@@ -386,7 +405,6 @@ const FilePickerSidebarGroup = observer((props: FilePickerSidebarGroupProps) => 
     </div>
   );
 });
-
 type FilePickerListProps = {
   model: FilePickerModel;
   controller: FilePickerController;
@@ -421,9 +439,8 @@ const FilePickerList = observer((props: FilePickerListProps) => {
         {filePickerListColumns.map(({ label, key }) => (
           <button
             key={key}
-            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-gray-250 hover:text-black ${
-              key === "size" ? "justify-end" : ""
-            }`}
+            className={`inline-flex items-center pt-1 pb-1 px-3 font-semibold cursor-pointer select-none hover:bg-gray-250 hover:text-black ${key === "size" ? "justify-end" : ""
+              }`}
             onClick={() => controller.changeSort(key)}
           >
             {label}
@@ -482,9 +499,8 @@ const FilePickerListItems = observer((props: FilePickerListItemsProps) => {
         return (
           <button
             key={entry.name}
-            className={`grid gap-1 w-full items-center text-left py-2 mt-0.5 outline-0 focus-visible:outline-1 ${
-              entryIsSelected ? "hover:bg-gray-250 dark:hover:bg-gray-700" : "hover:bg-gray-250 dark:hover:bg-gray-700"
-            }`}
+            className={`grid gap-1 w-full items-center text-left py-2 mt-0.5 outline-0 focus-visible:outline-1 ${entryIsSelected ? "hover:bg-gray-250 dark:hover:bg-gray-700" : "hover:bg-gray-250 dark:hover:bg-gray-700"
+              }`}
             style={{ gridTemplateColumns }}
             data-modal-autofocus={index === 0 ? true : null}
             onClick={(event) => {

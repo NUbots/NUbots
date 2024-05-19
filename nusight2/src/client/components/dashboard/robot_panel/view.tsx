@@ -31,18 +31,18 @@ export const RobotPanel = (props: RobotPanelProps) => {
   });
   const cameraClassName = classNames({
     "items-center flex justify-around": true,
-    ["text-warning"]: props.lastCameraImage === "warning",
-    ["text-danger"]: props.lastCameraImage === "danger",
+    ["text-orange-400"]: props.lastCameraImage === "warning",
+    ["text-red"]: props.lastCameraImage === "danger",
   });
   const ballClassName = classNames({
     "items-center flex justify-around": true,
-    ["text-warning"]: props.lastSeenBall === "warning",
-    ["text-danger"]: props.lastSeenBall === "danger",
+    ["text-orange-400"]: props.lastSeenBall === "warning",
+    ["text-red"]: props.lastSeenBall === "danger",
   });
   const goalClassName = classNames({
     "items-center flex justify-around h-6 w-6": true,
-    ["fill-warning"]: props.lastSeenGoal === "warning",
-    ["fill-danger"]: props.lastSeenGoal === "danger",
+    ["fill-orange-400"]: props.lastSeenGoal === "warning",
+    ["fill-red"]: props.lastSeenGoal === "danger",
   });
   return (
     <div>

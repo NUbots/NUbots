@@ -6,6 +6,7 @@ import { FilePickerController } from "./controller";
 import { FilePickerEntry, FilePickerModel, parsePathSegments } from "./model";
 import { FilePicker } from "./view";
 import { ThemeDecorator } from "../storybook_theme_decorator/view";
+import { Button } from "../button/view";
 
 const meta: Meta<typeof FilePicker> = {
   title: "components/FilePicker",
@@ -75,9 +76,9 @@ export const Default: Story = {
 
     const Story = observer(() => (
       <div className="p-4">
-        <button className="border rounded px-3 py-1 hover:bg-gray-100 active:bg-gray-300" onClick={controller.toggle}>
+        <Button className="border rounded px-3 py-1" onClick={controller.toggle}>
           Open file picker
-        </button>
+        </Button>
 
         {model.isShown ? (
           <FilePicker

@@ -119,7 +119,7 @@ const IconButton = observer(({ onClick, className, title, toggled, disabled, chi
     className={classNames(
       "inline-flex w-8 h-8 items-center justify-center rounded hover:bg-white focus:bg-white active:bg-gray-200",
       {
-        "bg-white text-nusight-500": toggled,
+        "bg-white text-blue-600": toggled,
         "bg-gray-100 text-icon": !toggled,
       },
       className,
