@@ -321,6 +321,52 @@ namespace YAML {
             return true;
         }
     };
+
+    template <int Rows, int Cols>
+    struct convert<Eigen::Matrix<double, Rows, Cols>> {
+        static Node encode(const Eigen::Matrix<double, Rows, Cols>& rhs) {
+            Node node;
+            if (Cols == 1) {
+                for (int i = 0; i < Rows; ++i) {
+                    node.push_back(rhs(i, 0));
+                }
+            }
+            else {
+                for (int i = 0; i < Rows; ++i) {
+                    Node row;
+                    for (int j = 0; j < Cols; ++j) {
+                        row.push_back(rhs(i, j));
+                    }
+                    node.push_back(row);
+                }
+            }
+            return node;
+        }
+
+        static bool decode(const Node& node, Eigen::Matrix<double, Rows, Cols>& rhs) {
+            if (!node.IsSequence() || node.size() != Rows) {
+                return false;
+            }
+
+            if (Cols == 1) {
+                for (int i = 0; i < Rows; ++i) {
+                    rhs(i, 0) = node[i].as<double>();
+                }
+            }
+            else {
+                for (int i = 0; i < Rows; ++i) {
+                    if (!node[i].IsSequence() || node[i].size() != Cols) {
+                        return false;
+                    }
+                    for (int j = 0; j < Cols; ++j) {
+                        rhs(i, j) = node[i][j].as<double>();
+                    }
+                }
+            }
+            return true;
+        }
+    };
+
 }  // namespace YAML
 
 #endif

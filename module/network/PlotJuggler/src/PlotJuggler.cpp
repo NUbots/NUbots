@@ -35,7 +35,7 @@
 #include "message/eye/DataPoint.hpp"
 
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 
 namespace module::network {
 
@@ -51,7 +51,7 @@ namespace module::network {
 
             send_address = cfg["udp_server"]["ip_address"].as<std::string>();
             send_port    = cfg["udp_server"]["port"].as<int>();
-            hostname     = utility::support::getHostname();
+            hostname     = utility::support::get_hostname();
 
             bool forward_datapoints = cfg["forward_datapoints"].as<bool>();
             forwarder_reaction.enable(forward_datapoints);
