@@ -141,19 +141,16 @@ namespace module::skill {
                 last_update_time = NUClear::clock::now();
 
 
-                // Update the walk engine and emit the stability state
-                switch (
-                    walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase).value) {
-                    case WalkState::State::WALKING:
-                    case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
-                    case WalkState::State::STOPPED:
-                        // Only update stability if we aren't falling/fallen
-                        if (stability >= Stability::DYNAMIC) {
-                            emit(std::make_unique<Stability>(Stability::STANDING));
-                        }
-                        break;
-                    case WalkState::State::UNKNOWN:
-                    default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                // Update the walk engine and emit the stability state, only if not falling/fallen
+                if (stability >= Stability::DYNAMIC) {
+                    switch (walk_generator.update(time_delta, walk_task.velocity_target, sensors.planted_foot_phase)
+                                .value) {
+                        case WalkState::State::WALKING:
+                        case WalkState::State::STOPPING: emit(std::make_unique<Stability>(Stability::DYNAMIC)); break;
+                        case WalkState::State::STOPPED: emit(std::make_unique<Stability>(Stability::STANDING)); break;
+                        case WalkState::State::UNKNOWN:
+                        default: NUClear::log<NUClear::WARN>("Unknown state."); break;
+                    }
                 }
 
                 // Compute the goal position time
