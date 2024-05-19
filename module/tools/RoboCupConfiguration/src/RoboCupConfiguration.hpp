@@ -137,7 +137,7 @@ namespace module::tools {
         std::string get_platform();
 
         /// @brief Gets the configuration file according to the config system's rules.
-        /// The order is: hostname-specific, platform-specific, and finally the default config.
+        /// The order is: robot-name-specific, hostname-specific, platform-specific, and finally the default config.
         /// @param filename The config file to find
         /// @return The correct config file path according to config rules
         std::string get_config_file(std::string filename);

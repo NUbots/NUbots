@@ -37,6 +37,7 @@ extern "C" {
 #undef OK
 }
 
+#include "utility/platform/aliases.hpp"
 #include "utility/support/network.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -351,12 +352,11 @@ namespace module::tools {
         switch (row_selection) {
             case 0:  // robot_position
                 robot_position = user_input();
-                {
-                    // Get ready position for this position
-                    std::string ready_file = get_config_file(robot_position.get_config_name());
-                    YAML::Node config      = YAML::LoadFile(ready_file);
-                    ready_position         = config["ready_position"].as<Eigen::Vector3d>();
-                }
+
+                // Get ready position for this position
+                std::string ready_file = get_config_file(robot_position.get_config_name());
+                YAML::Node config      = YAML::LoadFile(ready_file);
+                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
                 break;
             case 1:  // ready position
                 std::stringstream ss(user_input());
@@ -404,7 +404,12 @@ namespace module::tools {
     }
 
     std::string RoboCupConfiguration::get_config_file(std::string filename) {
-        // First check hostname-specific
+        // First check name-specific config
+        std::string robot_name = utility::platform::get_robot_alias(hostname);
+        if (!robot_name.empty() && std::filesystem::exists(fmt::format("config/{}/{}", robot_name, filename))) {
+            return fmt::format("config/{}/{}", robot_name, filename);
+        }
+        // Next check hostname-specific
         if (std::filesystem::exists(fmt::format("config/{}/{}", hostname, filename))) {
             return fmt::format("config/{}/{}", hostname, filename);
         }
