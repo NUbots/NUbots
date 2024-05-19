@@ -36,6 +36,8 @@
 
 namespace module::purpose {
 
+    using message::input::RoboCup;
+
     class Soccer : public ::extension::behaviour::BehaviourReactor {
     private:
         uint PLAYER_ID;
@@ -88,6 +90,7 @@ namespace module::purpose {
         struct RobotInfo {
             uint8_t robot_id;
             std::chrono::steady_clock::time_point last_heard_from;
+            Position position;
 
             bool operator<(const RobotInfo& other) const {
                 return robot_id < other.robot_id;
@@ -95,7 +98,7 @@ namespace module::purpose {
         };
 
         /// @brief Add and update active robots
-        void manage_active_robots(const message::input::RoboCup& robocup);
+        void manage_active_robots(const RoboCup& robocup);
 
         /// @brief Add RobotInfo ordered by id
         void add_robot(RobotInfo new_robot);
@@ -107,16 +110,13 @@ namespace module::purpose {
         void decide_purposes();
 
         /// @brief emit purpose based on leader's instructions
-        void learn_purpose();
+        void learn_purpose(const RoboCup& robocup);
 
         /// @brief Store robots that can currently play
         std::vector<RobotInfo> active_robots;
 
         /// @brief Store penalised robots
         std::list<RobotInfo> penalised_robots;
-
-        /// @brief Store robot positions
-        std::vector<RobotInfo> robot_positions;
 
     public:
         /// @brief Called by the powerplant to build and setup the Soccer reactor.

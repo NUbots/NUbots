@@ -87,7 +87,7 @@ namespace module::network {
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
-                            log<NUClear::DEBUG>("purpose TEST", incoming_msg.purposes);
+                            // log<NUClear::DEBUG>("purpose TEST", incoming_msg.purposes);
                             // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
@@ -111,8 +111,8 @@ namespace module::network {
                          const std::shared_ptr<const Sensors>& sensors,
                          const std::shared_ptr<const Field>& field,
                          const std::shared_ptr<const GameState>& game_state,
-                         const std::shared_ptr<const GlobalConfig>& config,
-                         const std::shared_ptr<const GlobalConfig>& purposes) {
+                         const std::shared_ptr<const Purposes>& purposes,
+                         const std::shared_ptr<const GlobalConfig>& config) {
                 auto msg = std::make_unique<RoboCup>();
 
                 // Timestamp
