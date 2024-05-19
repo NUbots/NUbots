@@ -90,7 +90,6 @@ namespace module::purpose {
         struct RobotInfo {
             uint8_t robot_id;
             std::chrono::steady_clock::time_point last_heard_from;
-            Position position;
 
             bool operator<(const RobotInfo& other) const {
                 return robot_id < other.robot_id;

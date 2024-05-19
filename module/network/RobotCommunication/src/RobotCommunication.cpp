@@ -39,7 +39,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/skill/Kick.hpp"
 #include "message/support/GlobalConfig.hpp"
-#include "message/purpose/Purposes.hpp"
+#include "message/input/Purposes.hpp"
 
 #include "utility/math/euler.hpp"
 
@@ -52,11 +52,12 @@ namespace module::network {
     using message::input::GameState;
     using message::input::RoboCup;
     using message::input::Sensors;
+    using message::input::Purposes;
+    using message::input::SoccerPosition;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::skill::Kick;
     using message::support::GlobalConfig;
-    using message::purpose::Purposes;
     using utility::math::euler::mat_to_rpy_intrinsic;
 
     RobotCommunication::RobotCommunication(std::unique_ptr<NUClear::Environment> environment)
@@ -87,7 +88,16 @@ namespace module::network {
                         on<UDP::Broadcast, Single>(cfg.receive_port).then([this, &global_config](const UDP::Packet& p) {
                             const std::vector<unsigned char>& payload = p.payload;
                             RoboCup incoming_msg = NUClear::util::serialise::Serialise<RoboCup>::deserialise(payload);
-                            // log<NUClear::DEBUG>("purpose TEST", incoming_msg.purposes);
+
+                            for (const auto& purpose : incoming_msg.purposes) {
+                                if (purpose == SoccerPosition::DEFENDER) {
+                                    log<NUClear::DEBUG>("purpose TEST DEFENDER");
+                                }
+                                else if (purpose == SoccerPosition::STRIKER) {
+                                    log<NUClear::DEBUG>("purpose TEST STRIKER");
+                                }
+                            }
+
                             // filter out own messages
                             if (global_config.player_id != incoming_msg.current_pose.player_id) {
                                 emit(std::make_unique<RoboCup>(std::move(incoming_msg)));
@@ -187,9 +197,10 @@ namespace module::network {
 
                 // TODO: Robots. Where the robot thinks the other robots are. This doesn't exist yet.
 
-                // TODO: Current purposes (soccer positions) of the Robots
-
-
+                // Current purposes (soccer positions) of the Robots
+                if (purposes) {
+                    msg->purposes = *purposes;
+                }
 
                 emit<Scope::UDP>(msg, cfg.broadcast_ip, cfg.send_port);
             });

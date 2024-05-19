@@ -36,6 +36,7 @@
 #include "message/behaviour/state/WalkState.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/RoboCup.hpp"
+#include "message/input/Purposes.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -43,7 +44,6 @@
 #include "message/purpose/FindPurpose.hpp"
 #include "message/purpose/Goalie.hpp"
 #include "message/purpose/Striker.hpp"
-#include "message/purpose/Purposes.hpp"
 #include "message/strategy/FallRecovery.hpp"
 #include "message/strategy/StandStill.hpp"
 #include "message/support/GlobalConfig.hpp"
@@ -57,6 +57,8 @@ namespace module::purpose {
     using message::behaviour::state::WalkState;
     using message::input::GameEvents;
     using message::input::RoboCup;
+    using message::input::Purposes;
+    using message::input::SoccerPosition;
     using message::localisation::ResetFieldLocalisation;
     using message::localisation::Field;
     using message::localisation::Ball;
@@ -66,8 +68,6 @@ namespace module::purpose {
     using message::purpose::FindPurpose;
     using message::purpose::Goalie;
     using message::purpose::Striker;
-    using message::purpose::Purposes;
-    using message::purpose::SoccerPosition;
     using message::strategy::FallRecovery;
     using message::strategy::StandStill;
     using message::support::GlobalConfig;
@@ -225,7 +225,10 @@ namespace module::purpose {
             // Add their robot info
             RobotInfo new_robot{incoming_robot_id, now};
             add_robot(new_robot);
+
+
             bool self_is_leader = active_robots.front().robot_id == PLAYER_ID;
+            // a robot may emit leader positions thinking it is leader, so filter out here
             bool other_is_leader = active_robots.front().robot_id == incoming_robot_id;
 
             if (self_is_leader) {
@@ -274,7 +277,6 @@ namespace module::purpose {
 
     // TODO: listen to soccer positions if they are the leader
     void Soccer::learn_purpose(const RoboCup& robocup) {
-
     }
 
 

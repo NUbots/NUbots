@@ -24,21 +24,20 @@
 // SOFTWARE.
 syntax = "proto3";
 
-package message.purpose;
+package message.input;
 
 /// The detected purpose of the robot
 enum SoccerPosition {
-    UNKNOWN  = 0;
-    DEFENDER = 1;
-    STRIKER  = 2;
-}
-
-message Purpose {
-    uint32 player_id = 1;
-    SoccerPosition purpose = 2;
+    DEFENDER = 0;
+    STRIKER  = 1;
 }
 
 message Purposes {
+    message Purpose {
+        uint32 player_id = 1;
+        SoccerPosition purpose = 2;
+    }
+
     // List of robot positions
     repeated Purpose purposes = 1;
 }
