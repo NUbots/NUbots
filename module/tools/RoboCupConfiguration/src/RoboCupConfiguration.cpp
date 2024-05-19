@@ -350,13 +350,14 @@ namespace module::tools {
         }
         // Game configuration column
         switch (row_selection) {
-            case 0:  // robot_position
+            case 0:  // robot position
                 robot_position = user_input();
-
-                // Get ready position for this position
-                std::string ready_file = get_config_file(robot_position.get_config_name());
-                YAML::Node config      = YAML::LoadFile(ready_file);
-                ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+                {
+                    // Get ready position for this position
+                    std::string ready_file = get_config_file(robot_position.get_config_name());
+                    YAML::Node config      = YAML::LoadFile(ready_file);
+                    ready_position         = config["ready_position"].as<Eigen::Vector3d>();
+                }
                 break;
             case 1:  // ready position
                 std::stringstream ss(user_input());
