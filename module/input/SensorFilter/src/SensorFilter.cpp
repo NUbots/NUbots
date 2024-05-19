@@ -32,6 +32,7 @@ namespace module::input {
     using extension::Configuration;
 
     using message::actuation::BodySide;
+    using message::behaviour::state::Stability;
     using message::localisation::ResetFieldLocalisation;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonLeftUp;
@@ -96,11 +97,14 @@ namespace module::input {
             emit(std::make_unique<WalkState>(message::behaviour::state::WalkState::State::UNKNOWN,
                                              Eigen::Vector3d::Zero(),
                                              message::behaviour::state::WalkState::Phase::DOUBLE));
+            emit(std::make_unique<Stability>(Stability::UNKNOWN));
         });
 
-        on<Trigger<RawSensors>, Optional<With<Sensors>>, Single, Priority::HIGH>().then(
+        on<Trigger<RawSensors>, Optional<With<Sensors>>, With<Stability>, Single, Priority::HIGH>().then(
             "Main Sensors Loop",
-            [this](const RawSensors& raw_sensors, const std::shared_ptr<const Sensors>& previous_sensors) {
+            [this](const RawSensors& raw_sensors,
+                   const std::shared_ptr<const Sensors>& previous_sensors,
+                   const Stability& stability) {
                 auto sensors = std::make_unique<Sensors>();
 
                 // Raw sensors (Accelerometer, Gyroscope, etc.)
@@ -110,7 +114,7 @@ namespace module::input {
                 update_kinematics(sensors, raw_sensors);
 
                 // Odometry (Htw and Hrw)
-                update_odometry(sensors, previous_sensors, raw_sensors);
+                update_odometry(sensors, previous_sensors, raw_sensors, stability);
 
                 // Graph debug information
                 if (log_level <= NUClear::DEBUG) {
@@ -334,7 +338,8 @@ namespace module::input {
 
     void SensorFilter::update_odometry(std::unique_ptr<Sensors>& sensors,
                                        const std::shared_ptr<const Sensors>& previous_sensors,
-                                       const RawSensors& raw_sensors) {
+                                       const RawSensors& raw_sensors,
+                                       const Stability& stability) {
         if (!cfg.use_ground_truth) {
             // Compute time since last update
             const double dt = std::max(
@@ -390,8 +395,12 @@ namespace module::input {
             // Construct robot {r} to world {w} space transform (just x-y translation and yaw rotation)
             Eigen::Isometry3d Hwr = Eigen::Isometry3d::Identity();
             Hwr.linear()          = Eigen::AngleAxisd(rpy_anchor.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
-            Hwr.translation()     = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
-            sensors->Hrw          = Hwr.inverse();
+
+            bool fallen = stability == Stability::FALLEN || stability == Stability::FALLING;
+            if (!fallen) {
+                Hwr.translation() = Eigen::Vector3d(Hwt_anchor.translation().x(), Hwt_anchor.translation().y(), 0.0);
+            }
+            sensors->Hrw = Hwr.inverse();
 
             // Low pass filter for torso y velocity
             double y_current     = Hwt.translation().y();
