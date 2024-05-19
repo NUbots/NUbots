@@ -38,7 +38,7 @@
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/platform/aliases.hpp"
-#include "utility/support/hostname.hpp"
+#include "utility/support/network.hpp"
 
 
 /**

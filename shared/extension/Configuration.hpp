@@ -324,7 +324,7 @@ namespace NUClear::dsl {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
-                const std::string hostname = utility::support::getHostname();
+                const std::string hostname = utility::support::get_hostname();
                 const std::string platform(::extension::Configuration::get_platform(hostname));
                 const std::string robot_name = utility::platform::get_robot_alias(hostname);
 
@@ -399,7 +399,7 @@ namespace NUClear::dsl {
                 }
 
                 // Get hostname, platform and binary name to check if this is not a default configuration file
-                const std::string hostname = utility::support::getHostname();
+                const std::string hostname = utility::support::get_hostname();
                 const std::string platform(::extension::Configuration::get_platform(hostname));
                 const auto binary_name       = get_first_command_line_arg();
                 const std::string robot_name = utility::platform::get_robot_alias(hostname);
@@ -451,7 +451,7 @@ namespace NUClear::dsl {
                 // Return our yaml file
                 try {
                     // Get hostname so we can find the correct per-robot config directory.
-                    const std::string hostname = utility::support::getHostname();
+                    const std::string hostname = utility::support::get_hostname();
                     const std::string platform(::extension::Configuration::get_platform(hostname));
                     const auto binary_name = get_first_command_line_arg();
                     std::string robot_name = utility::platform::get_robot_alias(hostname);
