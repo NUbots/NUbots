@@ -38,7 +38,7 @@ export const WithOptinos: Story = {
 export const DropdownRight: Story = {
   name: "dropdown right",
   render: () => {
-    const style = { backgroundColor: "#eee", display: "flex", justifyContent: "flex-end" };
+    const style = { display: "flex", justifyContent: "flex-end" };
     return (
       <div style={style}>
         <SwitchesMenu options={getOptions()} dropdownMenuPosition="right" />

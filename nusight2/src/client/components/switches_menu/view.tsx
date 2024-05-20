@@ -28,8 +28,8 @@ export const SwitchesMenu = observer((props: SwitchesMenuProps) => {
   return (
     <div>
       <EnhancedDropdown dropdownToggle={dropdownToggle} dropdownPosition={props.dropdownMenuPosition}>
-        <div className={"bg-gray-100 dark:bg-gray-800 shadow-md"}>
-          {options.length === 0 && <div className={"bg-"}>No options</div>}
+        <div className={"bg-gray-100 dark:bg-gray-800 shadow-md rounded-md"}>
+          {options.length === 0 && <div className={"bg-300 dark:bg-gray-700 p-4 rounded-md"}>No options</div>}
           {options.map((option) => {
             return (
               <label key={option.label} className={"items-center flex justify-between p-6 hover:bg-gray-300 dark:hover:bg-gray-700"}>
