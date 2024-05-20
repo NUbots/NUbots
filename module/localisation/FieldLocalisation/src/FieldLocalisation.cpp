@@ -112,7 +112,7 @@ namespace module::localisation {
             [this](const FieldLines& field_lines, const Stability& stability, const RawSensors& raw_sensors) {
                 auto time_since_startup =
                     std::chrono::duration_cast<std::chrono::seconds>(NUClear::clock::now() - startup_time).count();
-                bool fallen = stability == Stability::FALLEN || stability == Stability::FALLING;
+                bool fallen = stability <= Stability::FALLING;
 
                 // Emit field message using ground truth if available
                 if (cfg.use_ground_truth_localisation) {

@@ -370,7 +370,7 @@ namespace module::input {
         mahony_filter.set_state(rpy_intrinsic_to_mat(Eigen::Vector3d(rpy_mahony.x(), rpy_mahony.y(), 0.0)));
 
         // If fallen, calculate roll and pitch but keep yaw and position still
-        if (stability == Stability::FALLEN || stability == Stability::FALLING) {
+        if (stability <= Stability::FALLING) {
             // Get torso to world
             Eigen::Isometry3d Hwt =
                 previous_sensors == nullptr ? Eigen::Isometry3d::Identity() : previous_sensors->Htw.inverse();
