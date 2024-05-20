@@ -53,7 +53,7 @@ export const RobotPanel = (props: RobotPanelProps) => {
           {props.batteryValue && <Battery value={props.batteryValue} />}
         </div>
       </header>
-      <div className="text-sm rounded-b-md p-2 bg-gray-200 dark:bg-gray-850">
+      <div className="text-sm rounded-b-md p-2 bg-gray-100 dark:bg-gray-850">
         <div className="mb-2 pb-3">
           <div className="flex flex-col">
             <span className="flex-1 font-bold">Mode</span>

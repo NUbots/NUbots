@@ -41,7 +41,7 @@ export const MenuBar = ({
   NbsScrubbersToggle: ComponentType;
 }) => {
   return (
-    <div className="flex flex-col bg-gray-200 dark:bg-gray-850 text-gray-900 dark:text-gray-100">
+    <div className="flex flex-col bg-gray-250 dark:bg-gray-850 text-gray-900 dark:text-gray-100">
       <div className="flex h-[60px] space-x-10 my-2 mx-2">
         <div className="flex-1">{children}</div>
         <div>
