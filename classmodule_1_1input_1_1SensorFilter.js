@@ -5,7 +5,7 @@ var classmodule_1_1input_1_1SensorFilter =
     [ "debug_sensor_filter", "classmodule_1_1input_1_1SensorFilter.html#a1f6427a590ebfd1bcf5dbaca17b31096", null ],
     [ "detect_button_press", "classmodule_1_1input_1_1SensorFilter.html#ac4789707f822dcd67eaaca831e9607cc", null ],
     [ "update_kinematics", "classmodule_1_1input_1_1SensorFilter.html#a108c8864395b9e74cb4d888497ccecfc", null ],
-    [ "update_odometry", "classmodule_1_1input_1_1SensorFilter.html#a4c96803f0ba75c98ab077979ab02dc2f", null ],
+    [ "update_odometry", "classmodule_1_1input_1_1SensorFilter.html#ad7473897b2f15bc99992b5722465da73", null ],
     [ "update_raw_sensors", "classmodule_1_1input_1_1SensorFilter.html#a23d293bdd9daafc76437a515f76e63ba", null ],
     [ "bias_mahony", "classmodule_1_1input_1_1SensorFilter.html#a40d778195ecb3ad9ea971332caaef6f0", null ],
     [ "cfg", "classmodule_1_1input_1_1SensorFilter.html#a7ce23c53225aa0b67e82cc7de8974aa5", null ],
