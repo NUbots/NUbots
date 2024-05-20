@@ -41,7 +41,7 @@ export class Button extends React.PureComponent<ButtonProps> {
             ["bg-blue-600 border-blue-700 text-white " + (disabled ? "" : "hover:bg-blue-700 dark:hover:bg-blue-500")]:
               type === "primary",
             ["bg-gray-100 dark:text-gray-300 dark:bg-gray-800 border-gray-350 dark:border-gray-700 " +
-            (disabled ? "" : "hover:bg-gray-250 dark:hover:bg-gray-750")]: type === "normal",
+              (disabled ? "" : "hover:bg-gray-250 dark:hover:bg-gray-750")]: type === "normal",
             ["w-full"]: fullwidth,
             ["ml_auto"]: iconAfterAlignedRight,
             ["justify-start"]: textAlign === "left",
@@ -50,12 +50,12 @@ export class Button extends React.PureComponent<ButtonProps> {
           className,
         )}
       >
-        {iconBefore && <span className={style.iconBefore}>{iconBefore}</span>}
+        {iconBefore && <span className={"leading-[0] mr-2"}>{iconBefore}</span>}
         {children}
         {iconAfter && (
           <span
-            className={classNames(style.iconAfter, {
-              [style.iconAfterAlignedRight]: iconAfterAlignedRight,
+            className={classNames("leading-[0] mr-2", {
+              ["ml-auto"]: iconAfterAlignedRight,
             })}
           >
             {iconAfter}
